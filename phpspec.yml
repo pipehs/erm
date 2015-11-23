@@ -1,0 +1,5 @@
+suites:
+    main:
+        namespace: Ermtool
+        psr4_prefix: Ermtool
+        src_path: app
