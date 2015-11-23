@@ -197,9 +197,33 @@ Route::put('categorias_objetivos.update.{id}', [
 	'as' => 'categorias_objetivos.update', 'uses' => 'CategoriasObjetivosController@update'
 ]);
 
-Route::resource('riesgos','RiesgosController');
+//Rutas para CRUD + bloquear Riesgos tipo//
 
-Route::get('riesgos.create','RiesgosController@create');
+Route::resource('riesgostipo','RiesgosTipoController');
+
+Route::get('riesgostipo.create', [
+	'as' => 'riesgostipo.create', 'uses' => 'RiesgosTipoController@create'
+]);
+
+Route::get('riesgostipo.edit.{id}', [
+	'as' => 'riesgostipo.edit', 'uses' => 'RiesgosTipoController@edit'
+]);
+
+Route::get('riesgostipo.bloquear.{id}', [
+	'as' => 'riesgostipo.bloquear', 'uses' => 'RiesgosTipoController@bloquear'
+]);
+
+Route::get('riesgostipo.verbloqueados', [
+	'as' => 'riesgostipo.verbloqueados', 'uses' => 'RiesgosTipoController@index'
+]);
+
+Route::get('riesgostipo.desbloquear.{id}', [
+	'as' => 'riesgostipo.desbloquear', 'uses' => 'RiesgosTipoController@desbloquear'
+]);
+
+Route::put('riesgostipo.update.{id}', [
+	'as' => 'riesgostipo.update', 'uses' => 'RiesgosTipoController@update'
+]);
 
 //Rutas para CRUD + bloquear Stakeholders//
 
@@ -229,6 +253,62 @@ Route::put('stakeholders.update.{id}', [
 	'as' => 'stakeholders.update', 'uses' => 'StakeholdersController@update'
 ]);
 
+//Rutas para CRUD + bloquear Causas//
+
+Route::resource('causas','CausasController');
+
+Route::get('causas.create', [
+	'as' => 'causas.create', 'uses' => 'CausasController@create'
+]);
+
+Route::get('causas.edit.{id}', [
+	'as' => 'causas.edit', 'uses' => 'CausasController@edit'
+]);
+
+Route::get('causas.bloquear.{id}', [
+	'as' => 'causas.bloquear', 'uses' => 'CausasController@bloquear'
+]);
+
+Route::get('causas.verbloqueados', [
+	'as' => 'causas.verbloqueados', 'uses' => 'CausasController@index'
+]);
+
+Route::get('causas.desbloquear.{id}', [
+	'as' => 'causas.desbloquear', 'uses' => 'CausasController@desbloquear'
+]);
+
+Route::put('causas.update.{id}', [
+	'as' => 'causas.update', 'uses' => 'CausasController@update'
+]);
+
+//Rutas para CRUD + bloquear Causas//
+
+Route::resource('efectos','EfectosController');
+
+Route::get('efectos.create', [
+	'as' => 'efectos.create', 'uses' => 'EfectosController@create'
+]);
+
+Route::get('efectos.edit.{id}', [
+	'as' => 'efectos.edit', 'uses' => 'EfectosController@edit'
+]);
+
+Route::get('efectos.bloquear.{id}', [
+	'as' => 'efectos.bloquear', 'uses' => 'EfectosController@bloquear'
+]);
+
+Route::get('efectos.verbloqueados', [
+	'as' => 'efectos.verbloqueados', 'uses' => 'EfectosController@index'
+]);
+
+Route::get('efectos.desbloquear.{id}', [
+	'as' => 'efectos.desbloquear', 'uses' => 'EfectosController@desbloquear'
+]);
+
+Route::put('efectos.update.{id}', [
+	'as' => 'efectos.update', 'uses' => 'EfectosController@update'
+]);
+
 // ---- FIN RUTAS PARA GESTIÓN DE DATOS MAESTROS---- //
 
 // ----RUTAS PARA IDENTIFICACIÓN DE EVENTOS DE RIESGO---- //
@@ -240,6 +320,14 @@ Route::post('encuesta.store','EncuestasController@store');
 Route::resource('enviar_encuesta','EncuestasController@enviar');
 
 // ----FIN RUTAS PARA IDENTIFICACIÓN DE EVENTOS DE RIESGO---- //
+
+// ---- RUTAS PARA IDENTIFICACIÓN DE RIESGO ---- //
+
+Route::resource('riesgos','RiesgosController');
+
+Route::get('riesgos.create', [
+	'as' => 'riesgos.create', 'uses' => 'RiesgosController@create'
+]);
 
 // ----Rutas para reportes básicos---- //
 

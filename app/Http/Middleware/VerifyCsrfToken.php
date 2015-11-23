@@ -35,7 +35,8 @@ class VerifyCsrfToken extends BaseVerifier
         'procesos',
         'categorias_riesgos',
         'categorias_objetivos',
-        'stakeholders'
+        'stakeholders',
+        'riesgostipo'
     ];
 
 }

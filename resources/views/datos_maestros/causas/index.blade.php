@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Riesgos Tipo')
+@section('title', 'Causas')
 
 @stop
 
@@ -11,7 +11,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Datos Maestros</a></li>
-			<li><a href="riesgostipo">Riesgos Tipo</a></li>
+			<li><a href="causas">Causas</a></li>
 		</ol>
 	</div>
 </div>
@@ -21,7 +21,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-ticket"></i>
-					<span>Riesgos Tipo</span>
+					<span>Causas</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -44,46 +44,40 @@
 			</div>
 		@endif
 
-		{!! link_to_route('riesgostipo.create', $title = 'Agregar Riesgo', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
+		<p>En esta secci&oacute;n podr&aacute; agregar, ver, editar o bloquear causas gen&eacute;ricas para los futuros riesgos identificados o riesgos tipo.</p>
+
+		{!! link_to_route('causas.create', $title = 'Agregar Causa', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 
 	@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
-		{!! link_to_route('riesgostipo.index', $title = 'Ver Desbloqueados', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
+		{!! link_to_route('causas.index', $title = 'Ver Desbloqueados', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
 	@else
-		{!! link_to_route('riesgostipo.index', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
+		{!! link_to_route('causas.index', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
 	@endif
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable">
 	<thead>
 	<th>Nombre</th>
 	<th>Descripci&oacute;n</th>
-	<th>Categor&iacute;a</th>
 	<th>Fecha Creaci&oacute;n</th>
-	<th>Fecha Expiraci&oacute;n</th>
-	<th>Causa</th>
-	<th>Efecto</th>
 	<th>Acci&oacute;n</th>
 	<th>Acci&oacute;n</th>
 	</thead>
-	@foreach ($riesgos as $riesgo)
+	@foreach ($causas as $causa)
 		<tr>
-		<td>{{ $riesgo['nombre'] }}</td>
-		<td>{{ $riesgo['descripcion'] }}</td>
-		<td>{{ $riesgo['categoria'] }}</td>
-		<td>{{ $riesgo['fecha_creacion'] }}</td>
-		<td>{{ $riesgo['fecha_exp'] }}</td>
-		<td>{{ $riesgo['causa'] }}</td>
-		<td>{{ $riesgo['efecto'] }}</td>
+		<td>{{ $causa['nombre'] }}</td>
+		<td>{{ $causa['descripcion'] }}</td>
+		<td>{{ $causa['fecha_creacion'] }}</td>
 		<td><div>
-			@if ($riesgo['estado'] == 0)
-	            {!! link_to_route('riesgostipo.edit', $title = 'Editar', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-success']) !!}
+			@if ($causa['estado'] == 0)
+	            {!! link_to_route('causas.edit', $title = 'Editar', $parameters = $causa['id'], $attributes = ['class'=>'btn btn-success']) !!}
 	        @else
-	        	{!! link_to_route('riesgostipo.desbloquear', $title = 'Desbloquear', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-success']) !!}
+	        	{!! link_to_route('causas.desbloquear', $title = 'Desbloquear', $parameters = $causa['id'], $attributes = ['class'=>'btn btn-success']) !!}
 	        @endif
 	        </div><!-- /btn-group --></td>
 		<td><div>
-			@if ($riesgo['estado'] == 0)
-	            {!! link_to_route('riesgostipo.bloquear', $title = 'Bloquear', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+			@if ($causa['estado'] == 0)
+	            {!! link_to_route('causas.bloquear', $title = 'Bloquear', $parameters = $causa['id'], $attributes = ['class'=>'btn btn-danger']) !!}
 	        @else
-	        	{!! link_to_route('riesgostipo.bloquear', $title = 'Eliminar', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	        	{!! link_to_route('causas.bloquear', $title = 'Eliminar', $parameters = $causa['id'], $attributes = ['class'=>'btn btn-danger']) !!}
 	        @endif
 	        </div><!-- /btn-group -->
 	    </td>

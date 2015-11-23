@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Agregar Riesgo')
+@section('title', 'Modificar Riesgo')
 
 @stop
 
@@ -12,7 +12,7 @@
 		<ol class="breadcrumb">
 			<li>{!!Html::link('#','Datos Maestros')!!}</li>
 			<li>{!!Html::link('riesgostipo','Riesgos Tipo')!!}</li>
-			<li>{!!Html::link('riesgostipo.create','Agregar Riesgo')!!}</li>
+			<li>{!!Html::link('riesgostipo.edit','Modificar Riesgo')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -22,7 +22,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-folder"></i>
-					<span>Agregar Riesgo</span>
+					<span>Modificar Riesgo</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -39,7 +39,7 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos del riesgo.
-				{!!Form::open(['route'=>'riesgostipo.store','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::model($riesgo,['route'=>['riesgostipo.update',$riesgo->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
 					@include('datos_maestros.riesgos_tipo.form')
 				{!!Form::close()!!}
 

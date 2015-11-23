@@ -9,4 +9,9 @@ class Risk_category extends Model
     protected $fillable = ['nombre','descripcion','fecha_creacion','fecha_exp','risk_category_id','estado'];
     //eliminamos created_at y updated_at
     public $timestamps = false;
+
+    public function risks()
+    {
+    	return $this->hasMany('Ermtool\Risk');
+    }
 }

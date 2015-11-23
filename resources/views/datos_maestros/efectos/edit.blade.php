@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Agregar Riesgo')
+@section('title', 'Agregar Efecto')
 
 @stop
 
@@ -10,9 +10,9 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('#','Datos Maestros')!!}</li>
-			<li>{!!Html::link('riesgostipo','Riesgos Tipo')!!}</li>
-			<li>{!!Html::link('riesgostipo.create','Agregar Riesgo')!!}</li>
+			<li><a href="#">Datos Maestros</a></li>
+			<li><a href="efectos">Efectos</a></li>
+			<li><a href="efectos/edit">Modificar Efecto</a></li>
 		</ol>
 	</div>
 </div>
@@ -21,8 +21,8 @@
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
-					<i class="fa fa-folder"></i>
-					<span>Agregar Riesgo</span>
+					<i class="fa fa-ticket"></i>
+					<span>Modificar Efecto</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -38,13 +38,12 @@
 				<div class="no-move"></div>
 			</div>
 			<div class="box-content">
-			Ingrese los datos del riesgo.
-				{!!Form::open(['route'=>'riesgostipo.store','method'=>'POST','class'=>'form-horizontal'])!!}
-					@include('datos_maestros.riesgos_tipo.form')
-				{!!Form::close()!!}
-
+			Modifique los datos que desee del efecto gen&eacute;rico.
+			{!!Form::model($efecto,['route'=>['efectos.update',$efecto->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				@include('datos_maestros.efectos.form')
+			{!!Form::close()!!}
 				<center>
-				{!!Form::open(['url'=>'riesgostipo','method'=>'GET'])!!}
+				{!!Form::open(['url'=>'efectos','method'=>'GET'])!!}
 					{!!Form::submit('Volver', ['class'=>'btn btn-danger'])!!}
 				{!!Form::close()!!}
 				<center>
@@ -52,19 +51,12 @@
 		</div>
 	</div>
 </div>
+@stop
+
+@section('scripts')
+
 <script>
 $(document).ready(function() {
-
-	$("#agregar_causa").click(function() {
-		$("#causa").empty();
-		$("#causa").append('<div class="form-group">{!!Form::label("Causa",null,["class"=>"col-sm-4 control-label"])!!}<div class="col-sm-3">{!!Form::textarea("causa_nueva",null,["class"=>"form-control","rows"=>"3","cols"=>"4","required"=>"true"])!!}</div></div>');
-		});
-
-	$("#agregar_efecto").click(function() {
-		$("#efecto").empty();
-		$("#efecto").append('<div class="form-group">{!!Form::label("Efecto",null,["class"=>"col-sm-4 control-label"])!!}<div class="col-sm-3">{!!Form::textarea("efecto_nuevo",null,["class"=>"form-control","rows"=>"3","cols"=>"4","required"=>"true"])!!}</div></div>');
-		});
-
 	// Add slider for change test input length
 	FormLayoutExampleInputLength($( ".slider-style" ));
 	// Initialize datepicker
@@ -83,4 +75,3 @@ $(document).ready(function() {
 });
 </script>
 @stop
-

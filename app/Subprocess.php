@@ -22,4 +22,9 @@ class Subprocess extends Model
     	return $this->belongsTo('Ermtool\Process');
     }
 
+    public function risks()
+    {
+        return $this->belongsToMany('Ermtool\Risk');
+    }
+
 }
