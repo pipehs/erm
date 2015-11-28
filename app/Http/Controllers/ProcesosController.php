@@ -130,12 +130,20 @@ class ProcesosController extends Controller
             $fecha_exp = NULL;
         }
 
+        //vemos si tiene proceso dependiente
+        if ($request['process_id'] != "")
+        {
+            $process_id = $request['process_id'];
+        }
+        else
+            $process_id = NULL;
+
         \Ermtool\Process::create([
             'nombre' => $request['nombre'],
             'descripcion' => $request['descripcion'],
             'fecha_creacion' => $fecha_creacion,
             'fecha_exp' => $fecha_exp,
-            'process_id' => $request['process_id'],
+            'process_id' => $process_id,
             ]);
 
         Session::flash('message','Proceso agregado correctamente');

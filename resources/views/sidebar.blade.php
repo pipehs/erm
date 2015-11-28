@@ -39,6 +39,32 @@
 				<li><a href="riesgos"><i class="fa fa-hand-o-right"></i>Identificar Riesgo</a></li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle">
+						<i class="fa fa-list-alt"></i>
+						<span class="hidden-xs">Evaluaci&oacute;n de Riesgos</span>
+					</a>
+					<ul class="dropdown-menu">
+						<li>{!!HTML::link('evaluacion','Creaci&oacute;n de encuestas de evaluación')!!}</li>
+						<li>{!!HTML::link('#','Env&iacute;o de encuestas')!!}</li>
+						<li>{!!HTML::link('#','Ver resultados de evaluaci&oacute;n')!!}</li>
+					</ul>
+				</li>
+
+				<li><a href="#"><i class="fa fa-folder-open"></i>Gesti&oacute;n de Controles</a></li>
+
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle">
+						<i class="fa fa-pencil"></i>
+						<span class="hidden-xs">Auditor&iacute;a de Controles</span>
+					</a>
+					<ul class="dropdown-menu">
+						<li>{!!HTML::link('#','Plan de auditor&ia')!!}</li>
+						<li>{!!HTML::link('#','Revisar plan de auditor&iacute;a')!!}</li>
+						<li>{!!HTML::link('#','Observaciones')!!}</li>
+					</ul>
+				</li>
+
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle">
 						<i class="fa fa-bar-chart-o"></i>
 						<span class="hidden-xs">Reportes B&aacute;sicos</span>
 					</a>

@@ -35,13 +35,9 @@
 					<div class="form-group">
 						{!!Form::label('Proceso Involucrado',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::select('process_id', 
-							array('' => '- Seleccione -',
-								  '1' => 'Proceso 1',
-					 	  		  '2' => 'Proceso 2',
-					 	  		  '3' => 'Proceso 3'),
+							{!!Form::select('process_id',$procesos,
 							 	   null, 
-							 	   ['id' => 'el2', 'class' => 'form-control','required'=>'true'])!!}
+							 	   ['id' => 'el2', 'class' => 'form-control','required'=>'true','placeholder'=>'-Seleccione-'])!!}
 						</div>
 					</div>
 

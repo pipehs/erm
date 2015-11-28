@@ -281,7 +281,7 @@ Route::put('causas.update.{id}', [
 	'as' => 'causas.update', 'uses' => 'CausasController@update'
 ]);
 
-//Rutas para CRUD + bloquear Causas//
+//Rutas para CRUD + bloquear Efectos//
 
 Route::resource('efectos','EfectosController');
 
@@ -328,6 +328,14 @@ Route::resource('riesgos','RiesgosController');
 Route::get('riesgos.create', [
 	'as' => 'riesgos.create', 'uses' => 'RiesgosController@create'
 ]);
+
+// ---- FIN RUTAS PARA IDENTIFICACIÓN DE RIESGO ---- //
+
+// ---- RUTAS PARA EVALUACIÓN DE RIESGOS ---- //
+
+Route::resource('evaluacion','EvaluacionRiesgosController');
+
+Route::post('evaluacion.store','EvaluacionRiesgosController@store');
 
 // ----Rutas para reportes básicos---- //
 

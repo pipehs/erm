@@ -116,6 +116,7 @@ class ObjetivosController extends Controller
             'fecha_exp' => $fecha_exp,
             'objective_category_id' => $categoria,
             'organization_id' => $request['organizacion'],
+            'estado' => 0,
             ]);
 
         Session::flash('message','Objetivo corporativo agregado correctamente');

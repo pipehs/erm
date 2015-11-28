@@ -34,4 +34,9 @@ class Risk extends Model
     {
         return $this->belongsToMany('Ermtool\Objective');
     }
+
+    public function evaluations()
+    {
+        return $this->belongsToMany('Ermtool\Evaluation');
+    }
 }

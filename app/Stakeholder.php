@@ -14,5 +14,10 @@ class Stakeholder extends Model
     {
     	return $this->belongsTo('Ermtool\Organization');
     }
+
+    public function evaluations()
+    {
+    	return $this->belongsTo('Ermtool\Evaluation','evaluation_risk_stakeholder','evaluation_id','stakeholder_id');
+    }
 }
  

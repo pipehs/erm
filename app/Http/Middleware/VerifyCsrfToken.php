@@ -33,10 +33,15 @@ class VerifyCsrfToken extends BaseVerifier
         'organization',
         'organization.update',
         'procesos',
+        'subprocesos',
         'categorias_riesgos',
         'categorias_objetivos',
         'stakeholders',
-        'riesgostipo'
+        'riesgostipo',
+        'causas',
+        'efectos',
+        'riesgos',
+        'evaluacion'
     ];
 
 }

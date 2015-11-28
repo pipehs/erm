@@ -32,17 +32,6 @@ class OrganizationController extends Controller
         // ---recorremos todas las organizaciones para asignar formato de datos correspondientes--- //
         foreach ($organizations as $organizaciones)
         {
-            /*
-            //damos formato a organización dependiente (entregamos nombre según id)
-            if ($organizaciones['organization_id'] != NULL)
-            {
-                $org_dependiente = \Ermtool\Organization::find($organizaciones['organization_id']);
-                $org_nombre = $org_dependiente['nombre'];
-            }
-            else 
-                $org_nombre = "No";
-
-            */
             //buscamos organizaciones que dependen de ésta
             $organizaciones_dependientes = \Ermtool\Organization::all()->where('organization_id',$organizaciones['id']);
             

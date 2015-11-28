@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Categor&iacute;as de Riesgos')
+@section('title', 'Identificaci&oacute;n de eventos de riesgo')
 
 @stop
 
