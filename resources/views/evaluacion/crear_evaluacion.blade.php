@@ -103,6 +103,8 @@ Recuerde que los niveles de criticidad y probabilidad (deben ser iguales) para c
 		</div>
 	</div>
 </div>
+@stop
+@section('scripts')
 <script>
 // Run Datables plugin and create 3 variants of settings
 function AllTables(){

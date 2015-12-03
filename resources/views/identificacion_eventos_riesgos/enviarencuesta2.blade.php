@@ -39,21 +39,19 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
  
-	@if ($tipo == 1)
+	@if ($tipo == 0)
 		Seleccione los destinatarios manualmente a trav&eacute;s de la siguiente lista.
-	@elseif ($tipo == 2)
+	@elseif ($tipo == 1)
 		Seleccione la organizaci&oacute;n a la que desea enviar la encuesta.
+	@elseif ($tipo == 2)
+		Seleccione el cargo de los usuarios a los que desea enviar la encuesta.
+	@endif
 
 		<div class="form-group">
 
-							{!!Form::select('organizacion', 
-							array('' => '- Seleccione -',
-								  '1' => 'Organización 1',
-					 	  		  '2' => 'Organización 2',
-					 	  		  '3' => 'Organización 3'),
+							{!!Form::select('destinatarios',$dest,
 							 	   null, 
-							 	   ['id' => 'el2'])!!}
-
+							 	   ['id' => 'el2','multiple'=>'true',])!!}
 		</div>
 
 		<div class="form-group">
@@ -62,9 +60,6 @@
 				{!!Form::submit('Enviar', ['class'=>'btn btn-primary'])!!}
 			</div>
 		</div>
-	@elseif ($tipo == 3)
-		Seleccione el cargo de los usuarios a los que desea enviar la encuesta.
-	@endif
 
 	
 
@@ -93,8 +88,12 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-			@if ($encuesta == 1)
-				<b>Nombre:  Encuesta 1</b><br><br>
+			
+				<b>Nombre:  {{ $encuesta['nombre']}}</b><br><br>
+
+
+			
+
 				<p>1. ¿Considera que ejemplo es un riesgo? </p>
 				<p>
 				<div class="radio-inline">
@@ -147,11 +146,7 @@
 				<p>
 				<textarea class="form-control" name="" rows="4" cols="50"></textarea>
 				</p>
-			@elseif($encuesta == 2)
-				<b>Nombre: Encuesta 2</b>
-			@elseif($encuesta == 3)
-				<b>Nombre: Encuesta 3</b>
-			@endif
+
 
 
 

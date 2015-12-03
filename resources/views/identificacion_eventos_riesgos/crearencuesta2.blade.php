@@ -51,9 +51,9 @@
 						<div class="col-sm-3">
 							<select id="select<?php echo $i ?>" required="true" name="tipo_respuesta{{ $i }}">
 								<option selected="selected" value="">- Seleccione tipo de respuesta -</option>
-								<option value="1">Texto</option>
-								<option value="2">Radio</option>
-								<option value="3">Checkbox</option>
+								<option value="0">Texto</option>
+								<option value="1">Radio</option>
+								<option value="2">Checkbox</option>
 							</select>
 						</div>
 					</div>
@@ -65,9 +65,11 @@
 @endfor
 
 				<!-- Enviamos cantidad de preguntas -->
-				<input type="hidden" name="contpreguntas" value="{{ $cont }}">
+				{!!Form::hidden('contpreguntas',$cont)!!}
 				<!-- Enviamos nombre de encuesta -->
-				<input type="hidden" name="nombre" value="{{ $_POST['nombre'] }}">
+				{!!Form::hidden('nombre',$_POST['nombre'])!!}
+				<!-- Enviamos id de encuesta -->
+				{!!Form::hidden('poll_id',$poll_id)!!}
 				<center>
 					<div class="form-group">
 						{!!Form::submit("Crear encuesta", ["class"=>"btn btn-primary","name"=>"agregar"])!!}	
@@ -176,7 +178,7 @@ $(document).ready(function() {
 		//primero vaciamos las respuestas
 			$("#respuestas{{$i}}").empty();
 
-			if ($("#select{{$i}}").val() != 1)
+			if ($("#select{{$i}}").val() != 0)
 			{
 				$("#respuestas{{$i}}").append('<div class="form-group"><label class="col-sm-4 control-label"></label><div class="col-sm-3"><input type="text" class="form-control" name="pregunta{{$i}}_alternativa1" required="true" placeholder="Alternativa 1">');
 				$("#respuestas{{$i}}").append('<div class="form-group"><label class="col-sm-4 control-label"></label><div class="col-sm-3"><input type="text" class="form-control" name="pregunta{{$i}}_alternativa2" required="true" placeholder="Alternativa 2">');

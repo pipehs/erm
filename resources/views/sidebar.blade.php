@@ -44,8 +44,9 @@
 					</a>
 					<ul class="dropdown-menu">
 						<li>{!!HTML::link('evaluacion','Creaci&oacute;n de encuestas de evaluación')!!}</li>
-						<li>{!!HTML::link('#','Env&iacute;o de encuestas')!!}</li>
+						<li>{!!HTML::link('evaluacion.encuestas','Encuestas agregadas')!!}</li>
 						<li>{!!HTML::link('#','Ver resultados de evaluaci&oacute;n')!!}</li>
+						<li>{!!link_to_route('evaluacion.encuesta', $title = 'Ver', $parameters = 1, $attributes = NULL)!!}</li>
 					</ul>
 				</li>
 

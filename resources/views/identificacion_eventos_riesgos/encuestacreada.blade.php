@@ -52,13 +52,13 @@
 	<br><br>
 	<p><b>{{ $i }}.- {{ $post['pregunta'.$i] }}</b></p>
 
-	@if ($_POST['tipo_respuesta'.$i] == 1)
+	@if ($_POST['tipo_respuesta'.$i] == 0)
 
 			<div class="col-sm-6">
                 <input type="text" class="form-control" placeholder="Ingrese respuesta" />
             </div>
 
-	@elseif ($_POST['tipo_respuesta'.$i] == 2)
+	@elseif ($_POST['tipo_respuesta'.$i] == 1)
 		<?php $j = 1; ?>
 		
 		@while(isset($_POST['pregunta'.$i.'_alternativa'.$j]) AND $_POST['pregunta'.$i.'_alternativa'.$j] != "")
@@ -71,7 +71,7 @@
 			<?php $j++; ?>
 		@endwhile
 
-	@elseif ($_POST['tipo_respuesta'.$i] == 3)
+	@elseif ($_POST['tipo_respuesta'.$i] == 2)
 		<?php $j = 1; ?>
 	
 		@while(isset($_POST['pregunta'.$i.'_alternativa'.$j]) AND $_POST['pregunta'.$i.'_alternativa'.$j] != "")

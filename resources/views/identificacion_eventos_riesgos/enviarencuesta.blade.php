@@ -44,13 +44,10 @@ En esta secci&oacute;n podr&aacute; enviar encuestas previamente creadas.
 <div class="row form-group">
 	{!!Form::label('Seleccione una encuesta',null,['class'=>'col-sm-4 control-label'])!!}
 	<div class="col-sm-4">
-		{!!Form::select('encuesta', 
-							array('' => '- Seleccione una encuesta -',
-								  '1' => 'Encuesta 1',
-							 	  '2' => 'Encuesta 2',
-							 	  '3' => 'Encuesta 3'),
+		{!!Form::select('encuesta',$polls,
 							 	   null,
 							 	   ['required' => 'true',
+							 	   	'placeholder' => '- Seleccione -',
 							 	   	'id' => 'el2'])
 						!!}
 	</div>
@@ -61,9 +58,9 @@ En esta secci&oacute;n podr&aacute; enviar encuestas previamente creadas.
 	<div class="col-sm-4">
 		{!!Form::select('destinatarios', 
 							array('' => '- Seleccione una opci&oacute;n -',
-								  '1' => 'Seleccionar stakeholders manualmente',
-							 	  '2' => 'Enviar por organizaci&oacute;n',
-							 	  '3' => 'Enviar por cargo'),
+								  '0' => 'Seleccionar stakeholders manualmente',
+							 	  '1' => 'Enviar por organizaci&oacute;n',
+							 	  '2' => 'Enviar por tipo de stakeholder'),
 							 	   null,
 							 	   ['required' => 'true',
 							 	   	'id' => 'el3'])

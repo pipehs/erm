@@ -317,7 +317,7 @@ Route::resource('crear_encuesta','EncuestasController@index');
 
 Route::post('encuesta.store','EncuestasController@store');
 
-Route::resource('enviar_encuesta','EncuestasController@enviar');
+Route::get('enviar_encuesta','EncuestasController@enviar');
 
 // ----FIN RUTAS PARA IDENTIFICACIÓN DE EVENTOS DE RIESGO---- //
 
@@ -336,6 +336,34 @@ Route::get('riesgos.create', [
 Route::resource('evaluacion','EvaluacionRiesgosController');
 
 Route::post('evaluacion.store','EvaluacionRiesgosController@store');
+
+Route::get('evaluacion.encuestas', [
+	'as' => 'evaluacion.encuestas', 'uses' => 'EvaluacionRiesgosController@encuestas'
+]);
+
+Route::get('evaluacion.show.{id}', [
+	'as' => 'evaluacion.show', 'uses' => 'EvaluacionRiesgosController@show'
+]);
+
+Route::get('evaluacion.ver.{id}', [
+	'as' => 'evaluacion.ver', 'uses' => 'EvaluacionRiesgosController@show'
+]);
+
+Route::get('evaluacion.enviar.{id}', [
+	'as' => 'evaluacion.enviar', 'uses' => 'EvaluacionRiesgosController@enviar'
+]);
+
+Route::get('evaluacion.encuesta.{id}', [
+	'as' => 'evaluacion.encuesta', 'uses' => 'EvaluacionRiesgosController@generarEncuesta'
+]);
+
+Route::get('evaluacion.guardarEvaluacion.{id}', [
+	'as' => 'evaluacion.guardarEvaluacion', 'uses' => 'EvaluacionRiesgosController@guardarEvaluacion'
+]);
+
+Route::post('evaluacion.enviarCorreo', [
+	'as' => 'evaluacion.enviarCorreo', 'uses' => 'EvaluacionRiesgosController@enviarCorreo'
+]);
 
 // ----Rutas para reportes básicos---- //
 

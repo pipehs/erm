@@ -5,11 +5,26 @@ namespace Ermtool\Http\Controllers;
 use Illuminate\Http\Request;
 use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
+use Mail;
 use Session;
 use Redirect;
+use DB;
 
 class EvaluacionRiesgosController extends Controller
 {
+    public function mensaje($id)
+    {
+            //Mensaje predeterminado al enviar encuestas
+        $mensaje = "Estimado Usuario.
+
+                    Le enviamos la siguiente encuesta para la evaluación de riesgos. Ud deberá asignar un valor de probabilidad y criticidad para cada uno de los riesgos asociados a la encuesta. Para responderla deberá acceder al siguiente link.
+
+                    http://erm.local/public/evaluacion.encuesta.{$id}
+
+                    Saludos cordiales,
+                    Administrador.";
+        return $mensaje;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -80,15 +95,38 @@ class EvaluacionRiesgosController extends Controller
 
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    //Función que mostrará lista de encuestas agregadas
+    public function encuestas()
+    {
+        $encuestas = \Ermtool\Evaluation::all();
+        return view('evaluacion.encuestas',['encuestas'=>$encuestas]);
+    }
+
     public function show($id)
     {
-        //
+        $encuesta = \Ermtool\Evaluation::find($id);
+
+        $risks = array();
+        $i = 0;
+        //obtenemos riesgos
+        foreach ($encuesta->risks as $risk)
+        {
+            $risks[$i] = array('risk_id'=>$risk['id'],
+                                'nombre'=>$risk['nombre']);
+            $i += 1;
+        }
+
+        return view('evaluacion.show',['encuesta'=>$encuesta,'riesgos'=>$risks]);
+    }
+
+    public function enviar($id)
+    {
+        //Se debe inicializar en caso de que no haya sido ingresado ningún stakeholder aun
+        //$stakeholders = \Ermtool\Stakeholder::lists('CONCAT(nombre, " ", apellidos)','id');
+        $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(nombre, " ", apellidos) AS full_name'))
+        ->orderBy('nombre')
+        ->lists('full_name', 'id');
+        return view('evaluacion.enviar',['encuesta_id'=>$id,'stakeholders'=>$stakeholders,'mensaje'=>$this->mensaje($id)]);
     }
 
     /**
@@ -112,6 +150,59 @@ class EvaluacionRiesgosController extends Controller
     public function update(Request $request, $id)
     {
         //
+    }
+
+    //función que generará la encuesta para que el usuario pueda responderla
+    public function generarEncuesta($id)
+    {
+        $encuesta = \Ermtool\Evaluation::find($id);
+        $riesgos = array();
+        $i = 0;
+        foreach ($encuesta->risks as $risk)
+        {
+             $riesgos[$i] = array('risk_id'=>$risk['id'],
+                                'nombre'=>$risk['nombre']);
+            $i += 1; 
+        }
+
+        return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos]);
+    }
+
+    //Función para enviar correo con link a la encuesta
+    public function enviarCorreo(Request $request)
+    {
+        //guardamos en un array todos los correos de los stakeholders
+        $correos = array();
+        $stakeholders = array();
+        $i = 0;
+        foreach ($request['stakeholder_id'] as $stakeholder_id)
+        {
+            $stakeholders[$i] = \Ermtool\Stakeholder::find($stakeholder_id);
+            $correos[$i] = $stakeholders[$i]->correo;
+            $i += 1;
+        }
+
+        Mail::send('envio_mail',$request->all(), 
+            function ($msj) use ($correos)
+            {
+                $msj->subject('Encuesta evaluación de Riesgos');
+                //Seleccionamos correos de stakeholders
+                $i = 0; //verifica si se debe ingresar to o cc
+                foreach ($correos as $correo)
+                {
+                    if ($i == 0)
+                    {
+                        $msj->to($correo);
+                        $i += 1;
+                    }
+                    else
+                        $msj->cc($correo);
+                }
+            }
+        );
+
+        Session::flash('message','Encuesta enviada correctamente');
+                return Redirect::to('/evaluacion.encuestas');
     }
 
     /**
