@@ -38,7 +38,8 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
- 
+{!!Form::open(['route'=>'identificacion.enviarCorreo','method'=>'POST','class'=>'form-horizontal'])!!}
+
 	@if ($tipo == 0)
 		Seleccione los destinatarios manualmente a trav&eacute;s de la siguiente lista.
 	@elseif ($tipo == 1)
@@ -49,9 +50,21 @@
 
 		<div class="form-group">
 
-							{!!Form::select('destinatarios',$dest,
+							{!!Form::select('stakeholder_id[]',$dest,
 							 	   null, 
 							 	   ['id' => 'el2','multiple'=>'true',])!!}
+		</div>
+
+		<div class="row form-group">
+				<small>
+				{!!Form::label('Si desea puede cambiar el mensaje predeterminado
+				(no cambie el link de la encuesta)',
+				null,['class'=>'col-sm-4 control-label'])!!}
+				<div class="col-sm-8">
+					{!!Form::textarea('mensaje',
+					$mensaje,['class'=>'form-control','rows'=>'5','cols'=>'8',
+					'required'=>'true'])!!}
+				</div>
 		</div>
 
 		<div class="form-group">
@@ -91,65 +104,48 @@
 			
 				<b>Nombre:  {{ $encuesta['nombre']}}</b><br><br>
 
+			<?php $i = 1; //contador de preguntas ?>
+			@foreach ($preguntas as $pregunta)
 
-			
+				<p>{{$i}}. {{ $pregunta->pregunta }} </p>
 
-				<p>1. ¿Considera que ejemplo es un riesgo? </p>
+				@if ($pregunta->tipo_respuestas == 1) <!-- verificamos si es radio -->
+					<p>
+					@foreach ($respuestas as $respuesta) <!-- recorremos todas las respuestas para ver si corresponden a la pregunta -->
+						@if ($respuesta['question_id'] == $pregunta->id) <!-- Si la respuesta pertenece a la pregunta -->
+								<div class="radio-inline">
+									<label>
+										<input type="radio" name="{{ $pregunta->id }}"> {{ $respuesta['respuesta'] }}
+										<i class="fa fa-circle-o"></i>
+									</label>
+								</div>
+						@endif
+					@endforeach
+					</p>
+
+				@elseif ($pregunta->tipo_respuestas == 2) <!-- verificamos si es checkbox -->
+					<p>
+					@foreach ($respuestas as $respuesta) <!-- recorremos todas las respuestas para ver si corresponden a la pregunta -->
+						@if ($respuesta['question_id'] == $pregunta->id) <!-- Si la respuesta pertenece a la pregunta -->
+							<div class="checkbox-inline">
+								<label>
+									<input type="checkbox" name="{{ $pregunta->id }}">
+									<i class="fa fa-square-o"></i> {{ $respuesta['respuesta'] }}
+								</label>
+							</div>
+						@endif
+					@endforeach
+					</p>
+				@elseif ($pregunta->tipo_respuestas == 0) <!-- verificamos si es text -->
 				<p>
-				<div class="radio-inline">
-					<label>
-						<input type="radio" name="radio-inline" checked> Si
-						<i class="fa fa-circle-o"></i>
-					</label>
-				</div>
-				<div class="radio-inline">
-					<label>
-						<input type="radio" name="radio-inline" checked> No
-						<i class="fa fa-circle-o"></i>
-					</label>
-				</div>
-				<div class="radio-inline">
-					<label>
-						<input type="radio" name="radio-inline" checked> Quizás
-						<i class="fa fa-circle-o"></i>
-					</label>
-				</div>
+				<textarea class="form-control" name="{{ $pregunta->id }}" rows="4" cols="50"></textarea>
 				</p>
-				<p>2. Seleccione sus colores favoritos</p>
-				<p>
-				<div class="checkbox-inline">
-					<label>
-						<input type="checkbox" checked>
-						<i class="fa fa-square-o"></i> Rojo
-					</label>
-				</div>
-				<div class="checkbox-inline">
-					<label>
-						<input type="checkbox">
-						<i class="fa fa-square-o"></i> Verde
-					</label>
-				</div>
-				<div class="checkbox-inline">
-					<label>
-						<input type="checkbox">
-						<i class="fa fa-square-o"></i> Amarillo
-					</label>
-				</div>
-				<div class="checkbox-inline">
-					<label>
-						<input type="checkbox">
-						<i class="fa fa-square-o"></i> Azul
-					</label>
-				</div>
-				</p>
-				<p>3. Ingrese su opinión sobre esta encuesta</p>
-				<p>
-				<textarea class="form-control" name="" rows="4" cols="50"></textarea>
-				</p>
+				@endif
 
+				<?php $i += 1; ?> 
+			@endforeach
 
-
-
+{!!Form::close()!!}
 			</div>
 		</div>
 	</div>
@@ -185,26 +181,6 @@ $(document).ready(function() {
 	LoadSelect2Script(Select2Test);
 	// Add Drag-n-Drop feature
 	WinMove();
-/*
-	$("#el3").change(function(){
-	//primero vaciamos las preguntas
-		$("#seleccion").empty();
-
-		if ($("#el3").val() == 1)
-		{
-			$("#seleccion").append('<b>Seleccione manualmente</b>');
-			$("#seleccion").append('<div class="row form-group"><select </div>');
-		}
-		else if ($("#el3").val() == 2)
-		{
-			$("#seleccion").append('<b>Seleccione organizaci&oacute;n</b>');
-		}
-		else if ($("#el3").val() == 3)
-		{
-			$("#seleccion").append('<b>Seleccione cargo</b>');
-		}
-    });
- */
 });
 </script>
 

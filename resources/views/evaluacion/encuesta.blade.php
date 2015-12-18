@@ -15,7 +15,7 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-xs-12 col-sm-6">
+	<div class="col-xs-12 col-sm-8">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -37,17 +37,36 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
 
+			@if(Session::has('message'))
+				<div class="alert alert-danger alert-dismissible" role="alert">
+					{{ Session::get('message') }}
+				</div>
+			@endif
+
 			<h4><center>{{ $encuesta['descripcion'] }}</center></h4>
 
 			{!!Form::open(['route'=>'evaluacion.guardarEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
 
+			<div class="form-group">
+				<small>
+			    {!!Form::label('Ingrese su Rut (sin dígito verificador)',null,['class'=>'col-sm-4 control-label'])!!}
+				<div class="col-sm-3">
+					{!!Form::text('rut',null,
+					['class'=>'form-control','required'=>'true','input maxlength'=>'8'])!!}
+				</div>
+				</small>
+			</div>
+
+			<p>Por cada riesgo identificado, señale un nivel de probabilidad y criticidad del mismo. </p>
+
 			@foreach($riesgos as $riesgo)
+				{!!Form::hidden('riesgos_id[]',$riesgo['risk_id'])!!}
 				<b>- {{ $riesgo['nombre'] }}:</b><br><br>
 				Probabilidad:<br>
 				@for($i=1; $i<=$encuesta['max_niveles']; $i++)
 				<div class="radio-inline">
 					<label>
-						<input type="radio" name="proba_{{$riesgo['risk_id']}}"> {{ $i }}
+						<input type="radio" name="proba_{{$riesgo['risk_id']}}" required="true" value="{{ $i }}"> {{ $i }}
 						<i class="fa fa-circle-o"></i>
 					</label>
 				</div>
@@ -57,7 +76,7 @@
 				@for($i=1; $i<=$encuesta['max_niveles']; $i++)
 				<div class="radio-inline">
 					<label>
-						<input type="radio" name="criticidad_{{$riesgo['risk_id']}}"> {{ $i }}
+						<input type="radio" name="criticidad_{{$riesgo['risk_id']}}" required="true" value="{{ $i }}"> {{ $i }}
 						<i class="fa fa-circle-o"></i>
 					</label>
 				</div>
@@ -65,6 +84,7 @@
 				<hr>
 			@endforeach
 
+			{!!Form::hidden('evaluation_id',$encuesta['id'])!!}
 			<div class="row form-group">
 				<center>
 					{!!Form::submit('Enviar Respuestas', ['class'=>'btn btn-primary'])!!}

@@ -53,13 +53,13 @@
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2">
 					<thead>
 						<tr>
-							<th><small>Nombre</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th><small>Organizaciones</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th><small>Proceso involucrado</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th><small>Subproceso</small><label><input type="text" placeholder="Filtrar" /></label></th>
 							<th><small>Descripci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
 							<th><small>Fecha Creaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
 							<th><small>Fecha Expiraci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Proceso involucrado</small><label><input type="text" placeholder="Filtrar" /></label></th>
 							<th><small>Subprocesos Dependientes</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Organizaciones</small><label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Acci&oacute;n</th>
 							<th>Acci&oacute;n</th>
 						</tr>
@@ -68,22 +68,22 @@
 	<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 	@foreach ($subprocesos as $subproceso)
 		<tr>
-		<td>{{ $subproceso['nombre'] }}</td>
-		<td>{{ $subproceso['descripcion'] }}</td>
-		<td>{{ $subproceso['fecha_creacion'] }}</td>
-		<td>{{ $subproceso['fecha_exp'] }}</td>
-		<td>{{ $subproceso['proceso_relacionado'] }}</td>
-		<td><ul style="none">
-		@foreach ($sub_dependientes as $subprocesos)
-			@if ($subprocesos['subprocess_id'] == $subproceso['id'])
-				<li>{{ $subprocesos['nombre'] }}</li>
-			@endif
-		@endforeach
-		</ul></td>
 		<td><ul>
 		@foreach ($organizaciones as $organizacion)
 			@if ($organizacion['subprocess_id'] == $subproceso['id'])
 				<li>{{ $organizacion['nombre'] }}</li>
+			@endif
+		@endforeach
+		</ul></td>
+		<td>{{ $subproceso['proceso_relacionado'] }}</td>
+		<td>{{ $subproceso['nombre'] }}</td>
+		<td>{{ $subproceso['descripcion'] }}</td>
+		<td>{{ $subproceso['fecha_creacion'] }}</td>
+		<td>{{ $subproceso['fecha_exp'] }}</td>
+		<td><ul style="none">
+		@foreach ($sub_dependientes as $subprocesos)
+			@if ($subprocesos['subprocess_id'] == $subproceso['id'])
+				<li>{{ $subprocesos['nombre'] }}</li>
 			@endif
 		@endforeach
 		</ul></td>
@@ -110,25 +110,4 @@
 		</div>
 	</div>
 </div>
-<script>
-// Run Datables plugin and create 3 variants of settings
-function AllTables(){
-	TestTable1();
-	TestTable2();
-	TestTable3();
-	LoadSelect2Script(MakeSelect2);
-}
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
-}
-$(document).ready(function() {
-	// Load Datatables and run plugin on tables 
-	LoadDataTablesScripts(AllTables);
-	// Add Drag-n-Drop feature
-	WinMove();
-});
-</script>
 @stop

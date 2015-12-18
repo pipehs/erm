@@ -7,6 +7,7 @@ use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
+use DB;
 
 class ProcesosController extends Controller
 {
@@ -28,31 +29,42 @@ class ProcesosController extends Controller
             $procesos = \Ermtool\Process::all()->where('estado',0); //select procesos desbloqueados
         }
         $i = 0;
+        $j = 0; //contador de subprocesos
+        $k = 0; //contador de organizaciones
+
         // ---recorremos todas los procesos para asignar formato de datos correspondientes--- //
         $organizaciones = array(); //en este array almacenaremos todas las organizaciones que están relacionadas con un proceso
         $subprocesos = array(); //en este array almacenraemos todos los subprocesos relacionados a un proceso
 
         foreach ($procesos as $process)
         {
-           //primero obtenemos subprocesos relacionados
+
+            //obtenemos todas las organizaciones a las que pertenece cada subproceso relacionado
+            $orgs = DB::select('SELECT organizations.id, organizations.nombre
+                                FROM organizations
+                                WHERE organizations.id IN (SELECT DISTINCT organization_subprocess.organization_id
+                                    FROM organization_subprocess
+                                WHERE organization_subprocess.subprocess_id IN (SELECT subprocesses.id
+                                    FROM subprocesses WHERE process_id = '.$process["id"].'))');
+
+            foreach ($orgs as $organization)
+            {
+                $organizaciones[$k] = array('proceso_id'=>$process['id'],
+                                            'id'=>$organization->id,
+                                            'nombre'=>$organization->nombre);
+
+                $k += 1;
+            }
+
+
+           //obtenemos subprocesos relacionados
             $subprocesses = \Ermtool\Process::find($process['id'])->subprocesses;
-            $j = 0; //contador de subprocesos
+            
+             
 
             foreach ($subprocesses as $subprocess)
             {
-                //ahora obtenemos todas las organizaciones a las que pertenece cada subproceso relacionado
-                $orgs = \Ermtool\Subprocess::find($subprocess['id'])->organizations;
-                $k = 0; //contador de organizaciones
-
-                foreach ($orgs as $organization)
-                {
-                    $organizaciones[$k] = array('proceso_id'=>$process['id'],
-                                                'id'=>$organization['id'],
-                                                'nombre'=>$organization['nombre']);
-
-                    $k += 1;
-                }
-
+               
                 $subprocesos[$j] = array('proceso_id'=>$process['id'],
                                         'id'=>$subprocess['id'],
                                         'nombre'=>$subprocess['nombre']);
@@ -60,36 +72,42 @@ class ProcesosController extends Controller
                 $j += 1;
 
             }
-            
 
+            //ordenamos fecha de creación
+            $fecha = explode('-',$process['fecha_creacion']);
+            $fecha = $fecha[2].'-'.$fecha[1].'-'.$fecha[0]; 
 
             //damos formato a fecha expiración
             if ($process['fecha_exp'] == NULL OR $process['fecha_exp'] == "0000-00-00")
             {
                 $fecha_exp = "Ninguna";
             }
-            else 
-                $fecha_exp = $process['fecha_exp'];
+            else
+            { 
+                $fecha_exp = explode('-',$process['fecha_exp']);
+                $fecha_exp = $fecha_exp[2].'-'.$fecha_exp[1].'-'.$fecha_exp[0]; 
+            }
 
             //damos formato si depende de otro proceso
             if ($process['process_id'] == NULL)
             {
-                $proceso_dependiente = "No";
+                $proceso_dependiente['nombre'] = "No";
+                $proceso_dependiente['id'] = NULL;
             }
             else
-                $proceso_dependiente = \Ermtool\Process::find($process['process_id'])->value('nombre');
-
-
+                $proceso_dependiente = \Ermtool\Process::find($process['process_id']);
 
             $proceso[$i] = array('id'=>$process['id'],
                                 'nombre'=>$process['nombre'],
                                 'descripcion'=>$process['descripcion'],
-                                'fecha_creacion'=>$process['fecha_creacion'],
+                                'fecha_creacion'=>$fecha,
                                 'fecha_exp'=>$fecha_exp,
-                                'proceso_dependiente'=>$proceso_dependiente,
+                                'proceso_dependiente'=>$proceso_dependiente['nombre'],
+                                'proceso_dependiente_id'=>$proceso_dependiente['id'],
                                 'estado'=>$process['estado']);
             $i += 1;
         }
+
 
         return view('datos_maestros.procesos.index',['procesos'=>$proceso,'subprocesos'=>$subprocesos,'organizaciones'=>$organizaciones]);    
     }

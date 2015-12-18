@@ -105,25 +105,30 @@ class RiesgosController extends Controller
      */
     public function create()
     {
-
+        //categorias de riesgo
         $categorias = \Ermtool\Risk_Category::where('estado',0)->lists('nombre','id');
 
+        //causas preingresadas
         $causas = \Ermtool\Cause::where('estado',0)->lists('nombre','id');
 
+        //efectos preingresados
         $efectos = \Ermtool\Effect::where('estado',0)->lists('nombre','id');
+
+        //riesgos tipo
+        $riesgos_tipo = \Ermtool\Risk::where('estado',0)->where('tipo2',0)->lists('nombre','id');
 
         if(isset($_GET['P']))
         {
             $subprocesos = \Ermtool\Subprocess::where('estado',0)->lists('nombre','id');
             return view('riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                    'efectos'=>$efectos,'subprocesos'=>$subprocesos]);
+                    'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo]);
         }
 
         else if (isset($_GET['N']))
         {
             $objetivos = \Ermtool\Objective::where('estado',0)->lists('nombre','id');
             return view('riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                    'efectos'=>$efectos,'objetivos'=>$objetivos]);
+                    'efectos'=>$efectos,'objetivos'=>$objetivos,'riesgos_tipo'=>$riesgos_tipo]);
         }
 
         
@@ -137,52 +142,102 @@ class RiesgosController extends Controller
      */
     public function store(Request $request)
     {
-         //obtenemos orden correcto de fecha creación
-        $fecha = explode("/",$request['fecha_creacion']);
-        $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-
-        //obtenemos orden correcto de fecha expiración
-        if ($request['fecha_exp'] != "")
-        {
-            $fecha = explode("/",$request['fecha_exp']);
-            $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-        else
-        {
-            $fecha_exp = NULL;
-        }
-        
-        if ($request['cause_id'] == NULL)
-            $causa = NULL;
-        else
-            $causa = $request['cause_id'];
-
-        if ($request['effect_id'] == NULL)
-            $efecto = NULL;
-        else
-            $efecto = $request['effect_id'];
-
         //vemos si es de proceso o de negocio
-        if (isset($request['subprocess_id']))
+            if (isset($request['subprocess_id']))
+            {
+                $tipo = 0;
+            }
+            else if (isset($request['objective_id']))
+            {
+                $tipo = 1;
+            }
+
+        //Verificamos si se ingreso un riesgo tipo
+        if ($request['riesgo_tipo'] != "")
         {
-            $tipo = 0;
-        }
-        else if (isset($request['objective_id']))
-        {
-            $tipo = 1;
+            $new_risk = \Ermtool\Risk::find($request['riesgo_tipo']);
+
+            //creamos nuevo riesgo con los mismos datos
+            \Ermtool\Risk::create([
+                'nombre'=>$new_risk->nombre,
+                'descripcion'=>$new_risk->descripcion,
+                'tipo'=>$tipo,
+                'tipo2'=>1,
+                'fecha_creacion'=>$new_risk->fecha_creacion,
+                'fecha_exp'=>$new_risk->fecha_exp,
+                'risk_category_id'=>$new_risk->risk_category_id,
+                'cause_id'=>$new_risk->cause_id,
+                'effect_id'=>$new_risk->effect_id,
+                ]);
         }
 
-        \Ermtool\Risk::create([
-            'nombre'=>$request['nombre'],
-            'descripcion'=>$request['descripcion'],
-            'tipo'=>$tipo,
-            'tipo2'=>1,
-            'fecha_creacion'=>$fecha_creacion,
-            'fecha_exp'=>$fecha_exp,
-            'risk_category_id'=>$request['risk_category_id'],
-            'cause_id'=>$causa,
-            'effect_id'=>$efecto,
-            ]);
+        else
+        {
+             //obtenemos orden correcto de fecha creación
+            $fecha = explode("/",$request['fecha_creacion']);
+            $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
+
+            //obtenemos orden correcto de fecha expiración
+            if ($request['fecha_exp'] != "")
+            {
+                $fecha = explode("/",$request['fecha_exp']);
+                $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
+            }
+            else
+            {
+                $fecha_exp = NULL;
+            }
+            
+             //vemos si se agrego alguna causa nueva
+            if (isset($request['causa_nueva']))
+            {
+                \Ermtool\Cause::create([
+                    'nombre'=>$request['causa_nueva'],
+                    'fecha_creacion'=>date('Y-m-d'),
+                ]);
+
+                //obtenemos id de causa recien agregada
+                $causa = \Ermtool\Cause::max('id');
+            }
+            else
+            {
+                if ($request['cause_id'] == NULL)
+                    $causa = NULL;
+                else
+                    $causa = $request['cause_id'];
+            }
+
+            //vemos si se agrego algún efecto nuevo
+            if (isset($request['efecto_nuevo']))
+            {
+                \Ermtool\Effect::create([
+                    'nombre'=>$request['efecto_nuevo'],
+                    'fecha_creacion'=>date('Y-m-d'),
+                    ]);
+
+                //obtenemos id de efecto agregado
+                $efecto = \Ermtool\Effect::max('id');
+            }
+            else
+            {
+                if ($request['effect_id'] == NULL)
+                    $efecto = NULL;
+                else
+                    $efecto = $request['effect_id'];
+            }
+
+            \Ermtool\Risk::create([
+                'nombre'=>$request['nombre'],
+                'descripcion'=>$request['descripcion'],
+                'tipo'=>$tipo,
+                'tipo2'=>1,
+                'fecha_creacion'=>$fecha_creacion,
+                'fecha_exp'=>$fecha_exp,
+                'risk_category_id'=>$request['risk_category_id'],
+                'cause_id'=>$causa,
+                'effect_id'=>$efecto,
+                ]);
+        }
 
         //agregamos en tabla risk_subprocess o objective_risk
         //obtenemos id de riesgo recien ingresado

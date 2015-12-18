@@ -12,7 +12,7 @@ class Stakeholder extends Model
 
     public function organizations()
     {
-    	return $this->belongsTo('Ermtool\Organization');
+    	return $this->belongsToMany('Ermtool\Organization');
     }
 
     public function evaluations()

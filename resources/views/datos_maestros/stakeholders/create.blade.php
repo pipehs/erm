@@ -52,23 +52,5 @@
 		</div>
 	</div>
 </div>
-<script>
-$(document).ready(function() {
-	// Add slider for change test input length
-	FormLayoutExampleInputLength($( ".slider-style" ));
-	// Initialize datepicker
-	$('#input_date').datepicker({setDate: new Date()});
-	// Initialize datepicker
-	// Load Timepicker plugin
-	LoadTimePickerScript(DemoTimePicker);
-	// Add tooltip to form-controls
-	$('.form-control').tooltip();
-	LoadSelect2Script(DemoSelect2);
-	// Load example of form validation
-	LoadBootstrapValidatorScript(DemoFormValidator);
-	// Add Drag-n-Drop feature
-	WinMove();
-});
-</script>
 @stop
 

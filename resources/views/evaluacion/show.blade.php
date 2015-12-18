@@ -39,6 +39,11 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
 
+			@if(Session::has('message'))
+			<div class="alert alert-success alert-dismissible" role="alert">
+				{{ Session::get('message') }}
+			</div>
+			@endif
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
 			<tr>
 			<th width="50%">Descripci&oacute;n</th>

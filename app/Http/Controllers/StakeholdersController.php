@@ -7,6 +7,7 @@ use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
+use DB;
 
 class StakeholdersController extends Controller
 {
@@ -28,10 +29,22 @@ class StakeholdersController extends Controller
         }
 
         $i = 0;
-
+        $j = 0; //contador de organizaciones relacionadas 
         // ---recorremos todas los stakeholders para asignar formato de datos correspondientes--- //
         foreach ($stakeholders as $persona)
         {
+            //ahora obtenemos todas las organizaciones a las que pertenece cada persona
+            $orgs = \Ermtool\Stakeholder::find($persona['id'])->organizations;
+
+            foreach ($orgs as $organization)
+            {
+                 $organizaciones[$j] = array('stakeholder_id'=>$persona['id'],
+                                             'id'=>$organization['id'],
+                                             'nombre'=>$organization['nombre']);
+
+                 $j += 1;
+            }
+
             if ($persona['cargo'] == NULL)
                 $cargo = "No especificado";
             else
@@ -47,11 +60,10 @@ class StakeholdersController extends Controller
                                 'fecha_creacion'=>$persona['fecha_creacion'],
                                 'cargo'=>$cargo,
                                 'correo'=>$persona['correo'],
-                                'organization'=>$org['nombre'],
                                 'estado'=>$persona['estado']);
             $i += 1;
         }
-        return view('datos_maestros.stakeholders.index',['stakeholders'=>$stakeholder]); 
+        return view('datos_maestros.stakeholders.index',['stakeholders'=>$stakeholder,'organizaciones'=>$organizaciones]); 
     }
 
     /**
@@ -88,9 +100,17 @@ class StakeholdersController extends Controller
             'fecha_creacion' => $fecha_creacion,
             'tipo' => $request['tipo'],
             'cargo' => $request['cargo'],
-            'correo' => $request['correo'],
-            'organization_id' => $request['organization_id']
+            'correo' => $request['correo']
             ]);
+
+        //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
+        foreach($request['organization_id'] as $organization_id)
+        {
+            DB::table('organization_stakeholder')->insert([
+                'organization_id'=>$organization_id,
+                'stakeholder_id'=>$request['id']
+                ]);
+        }
 
             Session::flash('message','Stakeholder agregado correctamente');
 
@@ -151,9 +171,20 @@ class StakeholdersController extends Controller
             $stakeholder->tipo = $request['tipo'];
             $stakeholder->cargo = $request['cargo'];
             $stakeholder->correo = $request['correo'];
-            $stakeholder->organization_id = $request['organization_id'];
     
             $stakeholder->save();
+
+            //primero que todo, eliminaremos las organizaciones anteriores del stakeholder para evitar repeticiones
+            DB::table('organization_stakeholder')->where('stakeholder_id',$id)->delete();
+
+            //ahora, agregamos posibles nuevas relaciones
+            foreach($request['organization_id'] as $organization_id)
+            {
+                DB::table('organization_stakeholder')->insert([
+                    'organization_id'=>$organization_id,
+                    'stakeholder_id'=>$id
+                    ]);
+            }
 
             Session::flash('message','Stakeholder actualizado correctamente');
 

@@ -50,16 +50,4 @@
 	</div>
 </div>
 @stop
-@section('scripts')
-<script>
-$(document).ready(function() {
-	// Initialize datepicker
-	$('#input_date').datepicker({setDate: new Date()});
-	// Initialize datepicker
-	$('#input_date2').datepicker({setDate: new Date()});
-	// Add Drag-n-Drop feature
-	WinMove();
-});
-</script>
-@stop
 

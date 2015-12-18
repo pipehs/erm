@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Agregar Organizaci&oacute;n')
+@section('title', 'Agregar Subproceso')
 
 @stop
 
@@ -57,6 +57,12 @@
 
 @section('scripts')
 <script>
+// Run Select2 on element
+function Select2Test(){
+	$("#el2").select2();
+	$("#el3").select2();
+}
+
 function MakeSelect2(){
 	$('select').select2();
 	$('.dataTables_filter').each(function(){
@@ -64,6 +70,8 @@ function MakeSelect2(){
 	});
 }
 $(document).ready(function() {
+	// Load script of Select2 and run this
+	LoadSelect2Script(Select2Test);
 	// Add slider for change test input length
 	FormLayoutExampleInputLength($( ".slider-style" ));
 	// Initialize datepicker
@@ -74,7 +82,6 @@ $(document).ready(function() {
 	LoadTimePickerScript(DemoTimePicker);
 	// Add tooltip to form-controls
 	$('.form-control').tooltip();
-	LoadSelect2Script(DemoSelect2);
 	// Load example of form validation
 	LoadBootstrapValidatorScript(DemoFormValidator);
 	// Add Drag-n-Drop feature

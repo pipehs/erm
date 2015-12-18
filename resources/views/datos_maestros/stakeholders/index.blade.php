@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Riesgos Tipo')
+@section('title', 'Stakeholders')
 
 @stop
 
@@ -52,15 +52,15 @@
 		{!! link_to_route('stakeholders.verbloqueados', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
 	@endif
 
-	<table class="table table-bordered table-striped table-hover table-heading table-datatable">
+	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 	<thead>
-	<th>Rut</th>
+	<th width="8%">Rut</th>
 	<th>Nombre</th>
 	<th>Apellidos</th>
 	<th>Tipo</th>
 	<th>Fecha Agregado</th>
 	<th>Correo Electr&oacute;nico</th>
-	<th>Organizaci&oacute;n</th>
+	<th>Organizacion(es)</th>
 	<th>Cargo</th>
 	<th>Acci&oacute;n</th>
 	<th>Acci&oacute;n</th>
@@ -68,15 +68,21 @@
 
 	@foreach($stakeholders as $stakeholder)
 		<tr>
-			<td><small>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
-			<td><small>{{ $stakeholder['nombre'] }}</small></td>
-			<td><small>{{ $stakeholder['apellidos']}}</small></td>
-			<td><small>{{ $stakeholder['tipo'] }}</small></td>
-			<td><small>{{ $stakeholder['fecha_creacion'] }}</small></td>
-			<td><small>{{ $stakeholder['correo'] }}</small></td>
-			<td><small>{{ $stakeholder['organization'] }}</small></td>
-			<td><small>{{ $stakeholder['cargo'] }}</small></td>
-			<td>
+			<td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
+			<td>{{ $stakeholder['nombre'] }}</small></td>
+			<td>{{ $stakeholder['apellidos']}}</small></td>
+			<td>{{ $stakeholder['tipo'] }}</small></td>
+			<td>{{ $stakeholder['fecha_creacion'] }}</small></td>
+			<td>{{ $stakeholder['correo'] }}</small></td>
+			<td><ul>
+			@foreach ($organizaciones as $organizacion)
+				@if ($organizacion['stakeholder_id'] == $stakeholder['id'])
+					<li>{{ $organizacion['nombre'] }}</li>
+				@endif
+			@endforeach
+			</ul></small></td>
+			<td>{{ $stakeholder['cargo'] }}</small></td>
+			<td> 
 			<div>
 			@if ($stakeholder['estado'] == 0)
 	            {!! link_to_route('stakeholders.edit', $title = 'Editar', $parameters = $stakeholder['id'], $attributes = ['class'=>'btn btn-success']) !!}

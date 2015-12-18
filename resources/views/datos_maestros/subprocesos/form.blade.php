@@ -23,13 +23,12 @@
 							{!!Form::text('fecha_exp',null,['class'=>'form-control','id'=>'input_date2'])!!}
 						</div>
 					</div>
-						{!!Form::label('Seleccione organizaciones involucradas 
-						(para seleccionar m&aacute;s de una presione ctrl + click)',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="row form-group">
 						<div class="col-sm-3">
 							{!!Form::select('organization_id[]',$organizaciones,
 							 	   null, 
-							 	   ['id' => 'el2', 'class' => 'form-control','multiple'=>'true','required'=>'true'])!!}
+							 	   ['id' => 'el2','multiple'=>'true','required'=>'true'])!!}
 						</div>
 					</div>
 					<div class="form-group">
@@ -37,7 +36,7 @@
 						<div class="col-sm-3">
 							{!!Form::select('process_id',$procesos,
 							 	   null, 
-							 	   ['id' => 'el2', 'class' => 'form-control','required'=>'true','placeholder'=>'-Seleccione-'])!!}
+							 	   ['id' => 'el2','required'=>'true','placeholder'=>'-Seleccione-'])!!}
 						</div>
 					</div>
 
@@ -46,7 +45,7 @@
 						<div class="col-sm-3">
 							{!!Form::select('subprocess_id',$subprocesos,
 							 	   null, 
-							 	   ['id' => 'el2', 'class' => 'form-control','placeholder'=>'No'])!!}
+							 	   ['id' => 'el2','placeholder'=>'No'])!!}
 						</div>
 					</div>
 					

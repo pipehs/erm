@@ -28,7 +28,7 @@
 		<div class="col-sm-3">
 			{!!Form::select('process_id',$procesos, 
 			 	   null, 
-			 	   ['id' => 'el2', 'class' => 'form-control','placeholder'=>'No'])!!}
+			 	   ['id' => 'el2','placeholder'=>'No'])!!}
 		</div>
 	</div>
 					

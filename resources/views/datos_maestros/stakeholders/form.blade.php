@@ -8,7 +8,7 @@
 						<div class="col-sm-1">
 						{!!Form::select('dv',array('0','1','2','3','4','5','6','7','8','9','k'), 
 					 	   null, 
-					 	   ['id' => 'el2', 'class' => 'form-control','placeholder'=>'-',$required,$disabled])!!}
+					 	   ['id' => 'el2','placeholder'=>'-',$required,$disabled])!!}
 						</div>
 					</div>
 
@@ -49,12 +49,12 @@
 							{!!Form::text('cargo',null,['class'=>'form-control'])!!}
 						</div>
 					</div>
-					<div class="form-group">
-						{!!Form::label('Organizaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="row form-group">
 						<div class="col-sm-3">
-						{!!Form::select('organization_id',$organizations, 
+						{!!Form::select('organization_id[]',$organizations, 
 					 	   null, 
-					 	   ['id' => 'el2', 'class' => 'form-control','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+					 	   ['id' => 'el3','multiple'=>'true','required'=>'true'])!!}
 						</div>
 					</div>
 					<div class="form-group">

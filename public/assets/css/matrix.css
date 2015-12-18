@@ -1,0 +1,67 @@
+/* HeatMap */
+.matrix{
+width:500px;height:300px;
+background-color:#0ccc16;
+filter:progid:DXImageTransform.Microsoft.gradient(GradientType=1,startColorstr=#0ccc16, endColorstr=#c2f01d);
+background-image:-moz-linear-gradient(left bottom, #0ccc16 9%, #c2f01d 35%,#f20505 90%);
+background-image:linear-gradient(left bottom, #0ccc16 9%, #c2f01d 35%,#f20505 90%);
+background-image:-webkit-linear-gradient(left bottom, #0ccc16 9%, #c2f01d 35%,#f20505 90%);
+background-image:-o-linear-gradient(left bottom, #0ccc16 9%, #c2f01d 35%,#f20505 90%);
+background-image:-ms-linear-gradient(left bottom, #0ccc16 9%, #c2f01d 35%,#f20505 90%);
+ background-image:-webkit-gradient(linear, left bottom, right top, color-stop(9%,#0ccc16), color-stop(35%,#c2f01d),color-stop(90%,#f20505));
+
+/*sombra */
+    -webkit-box-shadow: 7px 7px 5px 0px rgba(50, 50, 50, 0.75);
+	-moz-box-shadow:    7px 7px 5px 0px rgba(50, 50, 50, 0.75);
+	box-shadow:         7px 7px 5px 0px rgba(50, 50, 50, 0.75);
+}
+
+
+/*Circulo para heatmap*/
+.circulo {
+     width: 25px;
+     height: 25px;
+     -moz-border-radius: 50%;
+     -webkit-border-radius: 50%;
+     border-radius: 50%;
+     background: #000;
+     margin-top: center;
+    margin-right: center;
+
+     /*formato de texto interior */
+    color: #ffffff;
+    display: inline-block;
+    font-weight: bold;
+    line-height: 1.8em;
+    text-align: center;
+
+    /*sombra */
+    -webkit-box-shadow: 3px 3px 1px 0px rgba(50, 50, 50, 0.75);
+	-moz-box-shadow:    3px 3px 1px 0px rgba(50, 50, 50, 0.75);
+	box-shadow:         3px 3px 1px 0px rgba(50, 50, 50, 0.75);
+}
+
+/*Circulo pequeñopara heatmap*/
+.circulo-small {
+     width: 15px;
+     height: 15px;
+     -moz-border-radius: 50%;
+     -webkit-border-radius: 50%;
+     border-radius: 50%;
+     background: #000;
+     margin-top: center;
+    margin-right: center;
+
+     /*formato de texto interior */
+    color: #ffffff;
+    display: inline-block;
+    font-weight: bold;
+    line-height: 1.4em;
+    font-size: 10px;
+    text-align: center;
+
+    /*sombra */
+    -webkit-box-shadow: 3px 3px 1px 0px rgba(50, 50, 50, 0.75);
+	-moz-box-shadow:    3px 3px 1px 0px rgba(50, 50, 50, 0.75);
+	box-shadow:         3px 3px 1px 0px rgba(50, 50, 50, 0.75);
+}

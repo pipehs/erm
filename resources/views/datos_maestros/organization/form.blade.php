@@ -22,16 +22,14 @@
 						<div class="col-sm-3">
 							{!!Form::text('fecha_exp',null,['class'=>'form-control','id'=>'input_date2'])!!}
 						</div>
-					</div>
-
-					
+					</div>	
 
 					<div class="form-group">
 						{!!Form::label('¿Depende de otra organizaci&oacute;n?',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 						{!!Form::select('organization_id',$organizations, 
 					 	   null, 
-					 	   ['id' => 'el2', 'class' => 'form-control','placeholder'=>'No'])!!}
+					 	   ['id' => 'el2','placeholder'=>'No'])!!}
 						</div>
 					</div>
 

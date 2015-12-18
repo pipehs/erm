@@ -27,10 +27,6 @@ class ControlesController extends Controller
     {
         //
     }
-    public function heatmap()
-    {
-        return view('controles.heatmap'); 
-    }
 
     /**
      * Store a newly created resource in storage.

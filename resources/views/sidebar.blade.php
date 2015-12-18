@@ -14,11 +14,11 @@
 					</a>
 					<ul class="dropdown-menu">
 						<li>{!!HTML::link('organization','Organizaciones')!!}</li>
+						<li>{!!HTML::link('categorias_objetivos','Categor&iacute;as de Objetivos')!!}</li>
 						<li>{!!HTML::link('objetivos','Objetivos Corporativos')!!}</li>
 						<li>{!!HTML::link('procesos','Procesos')!!}</li>
 						<li>{!!HTML::link('subprocesos','Subprocesos')!!}</li>
 						<li>{!!HTML::link('categorias_riesgos','Categor&iacute;as de Riesgos')!!}</li>
-						<li>{!!HTML::link('categorias_objetivos','Categor&iacute;as de Objetivos')!!}</li>
 						<li>{!!HTML::link('riesgostipo','Riesgos Tipo')!!}</li>
 						<li>{!!HTML::link('stakeholders','Stakeholders')!!}</li>
 						<li>{!!HTML::link('causas','Causas')!!}</li>
@@ -43,10 +43,8 @@
 						<span class="hidden-xs">Evaluaci&oacute;n de Riesgos</span>
 					</a>
 					<ul class="dropdown-menu">
-						<li>{!!HTML::link('evaluacion','Creaci&oacute;n de encuestas de evaluación')!!}</li>
+						<li><a class="ajax-link" href="evaluacion">Creacion de encuestas de evaluacion</a></li>
 						<li>{!!HTML::link('evaluacion.encuestas','Encuestas agregadas')!!}</li>
-						<li>{!!HTML::link('#','Ver resultados de evaluaci&oacute;n')!!}</li>
-						<li>{!!link_to_route('evaluacion.encuesta', $title = 'Ver', $parameters = 1, $attributes = NULL)!!}</li>
 					</ul>
 				</li>
 
@@ -58,7 +56,7 @@
 						<span class="hidden-xs">Auditor&iacute;a de Controles</span>
 					</a>
 					<ul class="dropdown-menu">
-						<li>{!!HTML::link('#','Plan de auditor&ia')!!}</li>
+						<li>{!!HTML::link('#','Plan de auditor&iacute;a')!!}</li>
 						<li>{!!HTML::link('#','Revisar plan de auditor&iacute;a')!!}</li>
 						<li>{!!HTML::link('#','Observaciones')!!}</li>
 					</ul>
@@ -73,7 +71,7 @@
 						<li>{!!HTML::link('heatmap','Ver Mapa de Calor')!!}</li>
 						<li>{!!HTML::link('#','Ver Matrices de Control')!!}</li>
 						<li>{!!HTML::link('#','Ver Planes de Acci&oacute;n')!!}</li>
-						<li>{!!HTML::link('#','Revisi&oacute;n de Encuestas')!!}</li>
+						<li>{!!HTML::link('encuestas','Revisi&oacute;n de Encuestas')!!}</li>
 					</ul>
 				</li>
 			</ul>

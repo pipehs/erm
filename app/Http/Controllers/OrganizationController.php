@@ -214,9 +214,9 @@ class OrganizationController extends Controller
         }
 
         //vemos si tiene organización padre
-        if($request['organizacion_padre'] != "")
+        if($request['organization_id'] != "")
         {
-            $organizacion_padre = $request['organizacion_padre'];
+            $organizacion_padre = $request['organization_id'];
         }
         else
         {

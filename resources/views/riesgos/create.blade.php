@@ -51,25 +51,73 @@
 		</div>
 	</div>
 </div>
-<script>
-$(document).ready(function() {
+@stop
 
-	// Add slider for change test input length
-	FormLayoutExampleInputLength($( ".slider-style" ));
-	// Initialize datepicker
-	$('#input_date').datepicker({setDate: new Date()});
-	// Initialize datepicker
-	$('#input_date2').datepicker({setDate: new Date()});
-	// Load Timepicker plugin
-	LoadTimePickerScript(DemoTimePicker);
-	// Add tooltip to form-controls
-	$('.form-control').tooltip();
-	LoadSelect2Script(DemoSelect2);
-	// Load example of form validation
-	LoadBootstrapValidatorScript(DemoFormValidator);
-	// Add Drag-n-Drop feature
-	WinMove();
-});
+@section('scripts2')
+<script>
+//bloqueamos opciones de llenado si es que se esta ingresando un riesgo tipo
+	$("#riesgo_tipo").change(function() {
+
+			if ($("#riesgo_tipo").val() != "")
+			{
+				$("#nombre").prop("disabled",true);
+				$("#nombre").removeAttr("required");
+
+				$("#descripcion").prop("disabled",true);
+				$("#descripcion").removeAttr("required");
+
+				$("#categoria").prop("disabled",true);
+				$("#categoria").removeAttr("required");
+
+				$("#input_date").prop("disabled",true);
+				$("#input_date").removeAttr("required");
+
+				$("#input_date2").prop("disabled",true);
+				$("#input_date2").removeAttr("required");
+
+				$("#cause_id").prop("disabled",true);
+				$("#cause_id").removeAttr("required");
+
+				$("#effect_id").prop("disabled",true);
+				$("#effect_id").removeAttr("required");
+			}
+
+			else
+			{
+				$("#nombre").prop("disabled",false);
+				$("#nombre").prop("required",true);
+
+				$("#descripcion").prop("disabled",false);
+				$("#descripcion").prop("required",true);
+
+				$("#categoria").prop("disabled",false);
+				$("#categoria").prop("required",true);
+
+				$("#input_date").prop("disabled",false);
+				$("#input_date").prop("required",true);
+
+				$("#input_date2").prop("disabled",false);
+				$("#input_date2").prop("required",true);
+
+				$("#cause_id").prop("disabled",false);
+				$("#cause_id").prop("required",true);
+
+				$("#effect_id").prop("disabled",false);
+				$("#effect_id").prop("required",true);
+			}
+			
+	    });
+
+	$("#agregar_causa").click(function() {
+		$("#causa").empty();
+		$("#causa").append('<div class="form-group">{!!Form::label("Causa",null,["class"=>"col-sm-4 control-label"])!!}<div class="col-sm-3">{!!Form::textarea("causa_nueva",null,["class"=>"form-control","rows"=>"3","cols"=>"4","required"=>"true"])!!}</div></div>');
+		});
+
+	$("#agregar_efecto").click(function() {
+		$("#efecto").empty();
+		$("#efecto").append('<div class="form-group">{!!Form::label("Efecto",null,["class"=>"col-sm-4 control-label"])!!}<div class="col-sm-3">{!!Form::textarea("efecto_nuevo",null,["class"=>"form-control","rows"=>"3","cols"=>"4","required"=>"true"])!!}</div></div>');
+		});
+
 </script>
 @stop
 

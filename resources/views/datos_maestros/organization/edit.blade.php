@@ -44,33 +44,10 @@
 				{!!Form::close()!!}
 
 				<center>
-				{!!Form::open(['url'=>'organization','method'=>'GET'])!!}
-					{!!Form::submit('Volver', ['class'=>'btn btn-danger'])!!}
-				{!!Form::close()!!}
+				{!! link_to_route('organization.index', $title = 'Volver', $parameters = NULL, $attributes = ['class'=>'btn btn-danger']) !!}
 				<center>
 			</div>
 		</div>
 	</div>
 </div>
-@stop
-@section('scripts')
-<script>
-$(document).ready(function() {
-	// Add slider for change test input length
-	FormLayoutExampleInputLength($( ".slider-style" ));
-	// Initialize datepicker
-	$('#input_date').datepicker({setDate: new Date()});
-	// Initialize datepicker
-	$('#input_date2').datepicker({setDate: new Date()});
-	// Load Timepicker plugin
-	LoadTimePickerScript(DemoTimePicker);
-	// Add tooltip to form-controls
-	$('.form-control').tooltip();
-	LoadSelect2Script(DemoSelect2);
-	// Load example of form validation
-	LoadBootstrapValidatorScript(DemoFormValidator);
-	// Add Drag-n-Drop feature
-	WinMove();
-});
-</script>
 @stop

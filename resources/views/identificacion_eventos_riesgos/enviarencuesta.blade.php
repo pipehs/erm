@@ -38,6 +38,12 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
 
+		@if(Session::has('message'))
+			<div class="alert alert-success alert-dismissible" role="alert">
+			{{ Session::get('message') }}
+			</div>
+		@endif
+
 En esta secci&oacute;n podr&aacute; enviar encuestas previamente creadas.
 
 {!!Form::open(['url'=>'enviar_encuesta','method'=>'GET','class'=>'form-horizontal'])!!}
@@ -104,26 +110,6 @@ $(document).ready(function() {
 	LoadSelect2Script(Select2Test);
 	// Add Drag-n-Drop feature
 	WinMove();
-/*
-	$("#el3").change(function(){
-	//primero vaciamos las preguntas
-		$("#seleccion").empty();
-
-		if ($("#el3").val() == 1)
-		{
-			$("#seleccion").append('<b>Seleccione manualmente</b>');
-			$("#seleccion").append('<div class="row form-group"><select </div>');
-		}
-		else if ($("#el3").val() == 2)
-		{
-			$("#seleccion").append('<b>Seleccione organizaci&oacute;n</b>');
-		}
-		else if ($("#el3").val() == 3)
-		{
-			$("#seleccion").append('<b>Seleccione cargo</b>');
-		}
-    });
- */
 });
 </script>
 

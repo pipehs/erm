@@ -52,7 +52,7 @@
 		{!! link_to_route('riesgos.create', $title = 'Agregar Riesgo de Negocio', $parameters = 'N', $attributes = ['class'=>'btn btn-success']) !!}
 		</center>
 	
-	<table class="table table-bordered table-striped table-hover table-heading table-datatable">
+	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 	<thead>
 	<th>Nombre</th>
 	<th>Descripci&oacute;n</th>

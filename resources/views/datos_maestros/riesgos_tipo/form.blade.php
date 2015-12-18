@@ -16,7 +16,7 @@
 						<div class="col-sm-3">
 							{!!Form::select('risk_category_id',$categorias,
 							 	   null, 
-							 	   ['id' => 'el2', 'class' => 'form-control','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+							 	   ['id' => 'el2','required'=>'true','placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
 					<div class="form-group">
@@ -37,7 +37,7 @@
 							<div class="col-sm-3">
 								{!!Form::select('cause_id',$causas,
 								 	   null, 
-								 	   ['id' => 'el2', 'class' => 'form-control','placeholder'=>'No especifica'])!!}
+								 	   ['id' => 'el2','placeholder'=>'No especifica'])!!}
 							</div>
 							<a href="#" id="agregar_causa">Agregar Nueva Causa</a> <br>
 						</div>
@@ -48,7 +48,7 @@
 							<div class="col-sm-3">
 								{!!Form::select('effect_id',$efectos,
 								 	   null, 
-								 	   ['id' => 'el2', 'class' => 'form-control','placeholder'=>'No especifica'])!!}
+								 	   ['id' => 'el2','placeholder'=>'No especifica'])!!}
 							</div>
 							<a href="#" id="agregar_efecto">Agregar Nuevo Efecto</a> <br>
 						</div>

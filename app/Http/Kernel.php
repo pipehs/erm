@@ -17,7 +17,8 @@ class Kernel extends HttpKernel
         \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
         \Illuminate\Session\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-        \Ermtool\Http\Middleware\VerifyCsrfToken::class,
+        //comment out to avoid CSRF Token mismatch error
+        //\Ermtool\Http\Middleware\VerifyCsrfToken::class,
     ];
 
     /**
@@ -30,5 +31,7 @@ class Kernel extends HttpKernel
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'guest' => \Ermtool\Http\Middleware\RedirectIfAuthenticated::class,
         'cors' => \Ermtool\Http\Middleware\Cors::class,
+        'api' => \Ermtool\Http\Middleware\ApiMiddleware::class,
+        'csrf' => \Ermtool\Http\Middleware\VerifyCsrfToken::class // add it as a middleware route 
     ];
 }

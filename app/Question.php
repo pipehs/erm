@@ -20,4 +20,9 @@ class Question extends Model
     {
     	return $this->hasMany('Ermtool\Posible_answer');
     }
+
+    public function answers()
+    {
+        return $this->hasMany('Ermtool\Answer');
+    }
 }

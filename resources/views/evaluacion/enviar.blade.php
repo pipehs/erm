@@ -41,14 +41,12 @@
 
 			{!!Form::open(['route'=>'evaluacion.enviarCorreo','method'=>'POST','class'=>'form-horizontal'])!!}
 
-				{!!Form::label('Seleccione stakeholders 
-						(para seleccionar m&aacute;s de una presione ctrl + click)',null,['class'=>'col-sm-4 control-label'])!!}
+				{!!Form::label('Seleccione stakeholders',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="row form-group">
 						<div class="col-sm-6">
 							{!!Form::select('stakeholder_id[]',$stakeholders,
 							 	   null, 
-							 	   ['id' => 'el2', 'class' => 'form-control','multiple'=>'true',
-							 	   'required'=>'true','placeholder'=>'- Seleccione -'])!!}
+							 	   ['id' => 'el2','multiple'=>'true','required'=>'true'])!!}
 						</div>
 					</div>
 
@@ -83,39 +81,4 @@
 	</div>
 </div>
 @stop
-@section('scripts')
-<script>
-// Run Datables plugin and create 3 variants of settings
-function AllTables(){
-	TestTable1();
-	TestTable2();
-	TestTable3();
-	LoadSelect2Script(MakeSelect);
-}
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
-}
-$(document).ready(function() {
-	// Add slider for change test input length
-	FormLayoutExampleInputLength($( ".slider-style" ));
-	// Initialize datepicker
-	$('#input_date').datepicker({setDate: new Date()});
-	// Initialize datepicker
-	$('#input_date2').datepicker({setDate: new Date()});
-	// Load Timepicker plugin
-	LoadTimePickerScript(DemoTimePicker);
-	// Add tooltip to form-controls
-	$('.form-control').tooltip();
-	LoadSelect2Script(DemoSelect2);
-	// Load example of form validation
-	LoadBootstrapValidatorScript(DemoFormValidator);
-	// Add Drag-n-Drop feature
-	WinMove();
 
-});
-</script>
-
-@stop

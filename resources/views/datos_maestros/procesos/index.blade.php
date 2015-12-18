@@ -50,16 +50,16 @@
 	@else
 		{!! link_to_route('procesos.verbloqueados', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
 	@endif
-	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2">
+	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px" >
 					<thead>
 						<tr>
-							<th><small>Nombre</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Descripci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Fecha Creaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Fecha Expiraci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>¿Depende de otro proceso?</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Subprocesos</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Organizaciones</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Organizaciones</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Proceso</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Subprocesos</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Descripci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Fecha Creaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Fecha Expiraci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>¿Depende de otro proceso?</small><label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Acci&oacute;n</th>
 							<th>Acci&oacute;n</th>
 						</tr>
@@ -68,11 +68,19 @@
 	<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 	@foreach ($procesos as $proceso)
 		<tr>
+		<td><ul>
+		<?php $cont = 0; //contador para verificar si hay organizaciones ?>
+		@foreach ($organizaciones as $organizacion)
+			@if ($organizacion['proceso_id'] == $proceso['id'] || $organizacion['proceso_id'] == $proceso['proceso_dependiente_id'])
+				<li>{{ $organizacion['nombre'] }}</li>
+				<?php $cont += 1;  //contador para verificar si hay organizaciones ?>
+			@endif
+		@endforeach
+		@if ($cont == 0)
+				No hay organización relacionada
+		@endif
+		</ul></td>
 		<td>{{ $proceso['nombre'] }}</td>
-		<td>{{ $proceso['descripcion'] }}</td>
-		<td>{{ $proceso['fecha_creacion'] }}</td>
-		<td>{{ $proceso['fecha_exp'] }}</td>
-		<td>{{ $proceso['proceso_dependiente'] }}</td>
 		<td><ul style="none">
 		@foreach ($subprocesos as $subproceso)
 			@if ($subproceso['proceso_id'] == $proceso['id'])
@@ -80,13 +88,10 @@
 			@endif
 		@endforeach
 		</ul></td>
-		<td><ul>
-		@foreach ($organizaciones as $organizacion)
-			@if ($organizacion['proceso_id'] == $proceso['id'])
-				<li>{{ $organizacion['nombre'] }}</li>
-			@endif
-		@endforeach
-		</ul></td>
+		<td>{{ $proceso['descripcion'] }}</td>
+		<td>{{ $proceso['fecha_creacion'] }}</td>
+		<td>{{ $proceso['fecha_exp'] }}</td>
+		<td>{{ $proceso['proceso_dependiente'] }}</td>
 		<td><div>
 			@if ($proceso['estado'] == 0)
 	            {!! link_to_route('procesos.edit', $title = 'Editar', $parameters = $proceso['id'], $attributes = ['class'=>'btn btn-success']) !!}
@@ -110,25 +115,4 @@
 		</div>
 	</div>
 </div>
-<script>
-// Run Datables plugin and create 3 variants of settings
-function AllTables(){
-	TestTable1();
-	TestTable2();
-	TestTable3();
-	LoadSelect2Script(MakeSelect2);
-}
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
-}
-$(document).ready(function() {
-	// Load Datatables and run plugin on tables 
-	LoadDataTablesScripts(AllTables);
-	// Add Drag-n-Drop feature
-	WinMove();
-});
-</script>
 @stop

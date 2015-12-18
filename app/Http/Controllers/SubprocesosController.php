@@ -29,6 +29,8 @@ class SubprocesosController extends Controller
             $subprocesos = \Ermtool\Subprocess::all()->where('estado',0); //select subprocesos desbloqueados
         }
         $i = 0;
+        $j = 0; //contador de organizaciones relacionadas 
+        $k = 0; //contador de subprocesos relacionados
         // ---recorremos todas los procesos para asignar formato de datos correspondientes--- //
         $organizaciones = array(); //en este array almacenaremos todas las organizaciones que están relacionadas con un proceso
         $sub_dependientes = array();
@@ -37,7 +39,6 @@ class SubprocesosController extends Controller
 
             //ahora obtenemos todas las organizaciones a las que pertenece cada subproceso
             $orgs = \Ermtool\Subprocess::find($subprocess['id'])->organizations;
-            $j = 0; //contador de organizaciones
 
             foreach ($orgs as $organization)
             {
@@ -50,7 +51,7 @@ class SubprocesosController extends Controller
         
             $subprocesos_dependientes = \Ermtool\Subprocess::all()->where('subprocess_id',$subprocess['id']);
             
-            $k = 0;
+            
             foreach ($subprocesos_dependientes as $hijos)
             {
                 $sub_dependientes[$k] = array('subprocess_id'=>$subprocess['id'],

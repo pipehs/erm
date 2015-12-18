@@ -13,6 +13,11 @@ class Poll extends Model
 
     public function questions()
     {
-    	$this->hasMany('Ermtool\Question');
+    	return $this->hasMany('Ermtool\Question');
+    }
+
+    public function answers()
+    {
+    	return $this->hasManyThrough('Ermtool\Answer','Ermtool\Question');
     }
 }

@@ -82,15 +82,7 @@ Recuerde que los niveles de criticidad y probabilidad (deben ser iguales) para c
 						null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::select('risk_id[]',$riesgos,null, 
-							 	   ['id' => 'el2', 'class' => 'form-control','required'=>'true','multiple'=>'true'])!!}
-						</div>
-					</div>
-
-					<div class="form-group">
-						{!!Form::label('Ingrese nivel de probabilidad y criticidad',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-							{!!Form::number('niveles',null,
-							['class'=>'form-control','id'=>'cantidad_preguntas','required'=>'true','min'=>'1'])!!}
+							 	   ['id' => 'el2','required'=>'true','multiple'=>'true'])!!}
 						</div>
 					</div>
 

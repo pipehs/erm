@@ -313,11 +313,27 @@ Route::put('efectos.update.{id}', [
 
 // ----RUTAS PARA IDENTIFICACIÓN DE EVENTOS DE RIESGO---- //
 
-Route::resource('crear_encuesta','EncuestasController@index');
+Route::resource('crear_encuesta','EncuestasController@create');
 
 Route::post('encuesta.store','EncuestasController@store');
 
 Route::get('enviar_encuesta','EncuestasController@enviar');
+
+Route::post('identificacion.enviarCorreo', [
+	'as' => 'identificacion.enviarCorreo', 'uses' => 'EncuestasController@enviarCorreo'
+]);
+
+Route::get('identificacion.encuesta.{id}', [
+	'as' => 'identificacion.encuesta', 'uses' => 'EncuestasController@generarEncuesta'
+]);
+
+Route::post('identificacion.guardarEvaluacion.{id}', [
+	'as' => 'identificacion.guardarEvaluacion', 'uses' => 'EncuestasController@guardarEvaluacion'
+]);
+
+Route::post('identificacion.encuestaRespondida', [
+	'as' => 'identificacion.encuestaRespondida', 'uses' => 'EncuestasController@encuestaRespondida'
+]);
 
 // ----FIN RUTAS PARA IDENTIFICACIÓN DE EVENTOS DE RIESGO---- //
 
@@ -357,7 +373,7 @@ Route::get('evaluacion.encuesta.{id}', [
 	'as' => 'evaluacion.encuesta', 'uses' => 'EvaluacionRiesgosController@generarEncuesta'
 ]);
 
-Route::get('evaluacion.guardarEvaluacion.{id}', [
+Route::post('evaluacion.guardarEvaluacion.{id}', [
 	'as' => 'evaluacion.guardarEvaluacion', 'uses' => 'EvaluacionRiesgosController@guardarEvaluacion'
 ]);
 
@@ -367,10 +383,27 @@ Route::post('evaluacion.enviarCorreo', [
 
 // ----Rutas para reportes básicos---- //
 
-Route::resource('heatmap','ControlesController@heatmap');
+Route::get('heatmap', [
+	'as' =>'heatmap', 'uses' => 'EvaluacionRiesgosController@listHeatmap']);
+
+Route::post('heatmap.{id}', [
+	'as' => 'heatmap2', 'uses' => 'EvaluacionRiesgosController@generarHeatmap'
+]);
+
+Route::get('encuestas', [
+	'as' => 'encuestas', 'uses' => 'EncuestasController@verEncuestas']);
+
+Route::get('encuestas.show.{id}', [
+	'as' => 'encuestas.show', 'uses' => 'EncuestasController@show']);
+
+
 // ---- Rutas adicionales del framework ----//
+
+/*
 Route::get('breweries', ['middleware' => 'cors', function()
 {
     return \Response::json(\App\Brewery::with('beers', 'geocode')->paginate(10), 200);
 }]);
+
+*/
 

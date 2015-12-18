@@ -30,6 +30,6 @@ class Organization extends Model
 
     public function stakeholders()
     {
-        return $this->hasMany('Ermtool\Stakeholder');
+        return $this->belongsToMany('Ermtool\Stakeholder');
     }
 }
