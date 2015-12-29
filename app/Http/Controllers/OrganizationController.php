@@ -7,6 +7,7 @@ use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
+use DateTime;
 
 class OrganizationController extends Controller
 {
@@ -20,11 +21,11 @@ class OrganizationController extends Controller
         $organization = array();
         if (isset($_GET['verbloqueados']))
         {
-            $organizations = \Ermtool\Organization::all()->where('estado',1); //select organizaciones bloqueadas  
+            $organizations = \Ermtool\Organization::all()->where('status',1); //select organizaciones bloqueadas  
         }
         else
         {
-            $organizations = \Ermtool\Organization::all()->where('estado',0); //select organizaciones desbloqueadas
+            $organizations = \Ermtool\Organization::all()->where('status',0); //select organizaciones desbloqueadas
         }
 
         $org_dependientes = array();
@@ -40,33 +41,57 @@ class OrganizationController extends Controller
             {
                 $org_dependientes[$j] = array('organization_id'=>$organizaciones['id'],
                                              'id'=>$hijos['id'],
-                                             'nombre'=>$hijos['nombre']);
+                                             'nombre'=>$hijos['name']);
                 $j += 1;
             }
 
             //damos formato a fecha expiración
-            if ($organizaciones['fecha_exp'] == NULL OR $organizaciones['fecha_exp'] == "0000-00-00")
+            if ($organizaciones['expiration_date'] == NULL OR $organizaciones['expiration_date'] == "0000-00-00")
             {
-                $fecha_expiracion = "Ninguna";
+                $fecha_exp = "Ninguna";
             }
             else 
-                $fecha_expiracion = $organizaciones['fecha_exp'];
+            {
+                $expiration_date = new DateTime($organizaciones['expiration_date']);
+                $fecha_exp = date_format($expiration_date, 'd-m-Y');
+                $fecha_exp .= " a las ".date_format($expiration_date,"H:i:s");
+            }
 
             //damos formato a servicios compartidos
-            if ($organizaciones['serv_compartidos'] == 0)
+            if ($organizaciones['shared_services'] == 0)
             {
                 $serv_compartidos = "No";
             }
             else
                 $serv_compartidos = "Si";
 
+            //damos formato a fecha creación
+            if ($organizaciones['created_at'] != NULL)
+            {
+                $fecha_creacion = date_format($organizaciones['created_at'],"d-m-Y");
+                $fecha_creacion .= " a las ".date_format($organizaciones['created_at'],"H:i:s");
+            }
+            else
+                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+
+            //damos formato a fecha de actualización 
+            if ($organizaciones['updated_at'] != NULL)
+            {
+                $fecha_act = date_format($organizaciones['updated_at'],"d-m-Y");
+                $fecha_act .= " a las ".date_format($organizaciones['updated_at'],"H:i:s");
+            }
+            else
+                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
+            
+
             $organization[$i] = array('id'=>$organizaciones['id'],
-                                'nombre'=>$organizaciones['nombre'],
-                                'descripcion'=>$organizaciones['descripcion'],
-                                'fecha_creacion'=>$organizaciones['fecha_creacion'],
-                                'fecha_exp'=>$fecha_expiracion,
+                                'nombre'=>$organizaciones['name'],
+                                'descripcion'=>$organizaciones['description'],
+                                'fecha_creacion'=>$fecha_creacion,
+                                'fecha_act'=>$fecha_act,
+                                'fecha_exp'=>$fecha_exp,
                                 'serv_compartidos'=>$serv_compartidos,
-                                'estado'=>$organizaciones['estado']);
+                                'estado'=>$organizaciones['status']);
             $i += 1;
         }
 
@@ -80,7 +105,7 @@ class OrganizationController extends Controller
      */
     public function create()
     {
-        $organizations = \Ermtool\Organization::where('estado',0)->where('organization_id',NULL)->lists('nombre','id');
+        $organizations = \Ermtool\Organization::where('status',0)->where('organization_id',NULL)->lists('name','id');
         return view('datos_maestros.organization.create',['organizations'=>$organizations]);
     }
 
@@ -92,14 +117,10 @@ class OrganizationController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha creación
-        $fecha = explode("/",$request['fecha_creacion']);
-        $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-
         //obtenemos orden correcto de fecha expiración
-        if ($request['fecha_exp'] != "")
+        if ($request['expiration_date'] != "")
         {
-            $fecha = explode("/",$request['fecha_exp']);
+            $fecha = explode("/",$request['expiration_date']);
             $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
         }
         else
@@ -118,11 +139,10 @@ class OrganizationController extends Controller
         }
 
         \Ermtool\Organization::create([
-            'nombre' => $request['nombre'],
-            'descripcion' => $request['descripcion'],
-            'fecha_creacion' => $fecha_creacion,
-            'fecha_exp' => $fecha_exp,
-            'serv_compartidos' => $request['serv_compartidos'],
+            'name' => $request['name'],
+            'description' => $request['description'],
+            'expiration_date' => $fecha_exp,
+            'shared_services' => $request['shared_services'],
             'organization_id' => $organizacion_padre,
             ]);
 
@@ -151,7 +171,7 @@ class OrganizationController extends Controller
      */
     public function edit($id)
     {
-        $organizations = \Ermtool\Organization::where('id','<>',$id)->where('estado',0)->where('organization_id',NULL)->lists('nombre','id');
+        $organizations = \Ermtool\Organization::where('id','<>',$id)->where('status',0)->where('organization_id',NULL)->lists('name','id');
         $org = \Ermtool\Organization::find($id);
         return view('datos_maestros.organization.edit',['organizations'=>$organizations,'organization'=>$org]);
     }
@@ -160,7 +180,7 @@ class OrganizationController extends Controller
     public function bloquear($id)
     {
         $organization = \Ermtool\Organization::find($id);
-        $organization->estado = 1;
+        $organization->status = 1;
         $organization->save();
 
         Session::flash('message','Organizaci&oacute;n bloqueada correctamente');
@@ -171,7 +191,7 @@ class OrganizationController extends Controller
     public function desbloquear($id)
     {
         $organization = \Ermtool\Organization::find($id);
-        $organization->estado = 0;
+        $organization->status = 0;
         $organization->save();
 
         Session::flash('message','Organizaci&oacute;n desbloqueada correctamente');
@@ -189,22 +209,15 @@ class OrganizationController extends Controller
     public function update(Request $request, $id)
     {
         $organization = \Ermtool\Organization::find($id);
-        $fecha_creacion = $organization->fecha_creacion;
+        $fecha_creacion = $organization->created_at;
         $fecha_exp = NULL;
 
-        if (strpos($request['fecha_creacion'],'/')) //primero verificamos que la fecha no se encuentre ya en el orden correcto
-        {
-            //obtenemos orden correcto de fecha creación
-            $fecha = explode("/",$request['fecha_creacion']);
-            $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-
-        if (strpos($request['fecha_exp'],'/')) //lo mismo para fecha de expiración
+        if (strpos($request['expiration_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
         {
             //obtenemos orden correcto de fecha expiración
-            if ($request['fecha_exp'] != "" OR $request['fecha_exp'] != "0000-00-00")
+            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
             {
-                $fecha = explode("/",$request['fecha_exp']);
+                $fecha = explode("/",$request['expiration_date']);
                 $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
             }
             else
@@ -223,11 +236,10 @@ class OrganizationController extends Controller
             $organizacion_padre = NULL;
         }
 
-        $organization->nombre = $request['nombre'];
-        $organization->descripcion = $request['descripcion'];
-        $organization->fecha_creacion = $fecha_creacion;
-        $organization->fecha_exp = $fecha_exp;
-        $organization->serv_compartidos = $request['serv_compartidos'];
+        $organization->name = $request['name'];
+        $organization->description = $request['description'];
+        $organization->expiration_date = $fecha_exp;
+        $organization->shared_services = $request['shared_services'];
         $organization->organization_id = $organizacion_padre;
 
         $organization->save();

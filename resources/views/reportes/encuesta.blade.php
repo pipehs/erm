@@ -53,13 +53,13 @@
 					<td>Rut: </td><td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
 					</tr>
 					<tr>
-					<td>Nombre: </td><td>{{ $stakeholder['nombre']}} {{ $stakeholder['apellidos'] }}</td>
+					<td>Nombre: </td><td>{{ $stakeholder['name']}} {{ $stakeholder['surnames'] }}</td>
 					</tr>
 					<tr>
-					<td>Rol: </td><td>{{ $stakeholder['tipo'] }}</td>
+					<td>Rol: </td><td>{{ $stakeholder['role'] }}</td>
 					</tr>
 					<tr>
-					<td>Correo: </td><td>{{ $stakeholder['correo'] }}</td>
+					<td>Correo: </td><td>{{ $stakeholder['mail'] }}</td>
 					</tr>
 					</table>
 				</div>
@@ -68,13 +68,13 @@
 		<?php $i = 1; //número de preguntas ?>
 
 		@foreach ($questions as $question)
-			<b>	{{ $i }}.- {{ $question->pregunta }} </b>
+			<b>	{{ $i }}.- {{ $question->question }} </b>
 				<ul>
 			@foreach ($answers as $answers2)
 				<!-- vemos en todas las respuestas si corresponden a la pregunta, si es asi la mostramos -->
 				@foreach ($answers2 as $answer)
 					@if ($answer->question_id == $question->id)
-						<li>{{ $answer->respuesta }}</li>
+						<li>{{ $answer->answer }}</li>
 					@endif
 				@endforeach
 			@endforeach

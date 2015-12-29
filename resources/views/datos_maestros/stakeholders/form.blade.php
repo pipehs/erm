@@ -15,38 +15,32 @@
 					<div class="form-group">
 						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::text('nombre',null,['class'=>'form-control','required'=>'true'])!!}
+							{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
 						{!!Form::label('Apellidos',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::text('apellidos',null,['class'=>'form-control','required'=>'true'])!!}
-						</div>
-					</div>
-					<div class="form-group">
-						{!!Form::label('Fecha Agregado',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-							{!!Form::text('fecha_creacion',null,['class'=>'form-control','id'=>'input_date','required'=>'true'])!!}
+							{!!Form::text('surnames',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 					<div class="form-group">
 						{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::text('tipo',null,['class'=>'form-control','required'=>'true'])!!}
+							{!!Form::text('role',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 					<div class="form-group">
 						{!!Form::label('Correo Electr&oacute;nico',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::email('correo',null,['class'=>'form-control','required'=>'true'])!!}
+							{!!Form::email('mail',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 					<div class="form-group">
 						{!!Form::label('Cargo (opcional)',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::text('cargo',null,['class'=>'form-control'])!!}
+							{!!Form::text('position',null,['class'=>'form-control'])!!}
 						</div>
 					</div>
 					{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}

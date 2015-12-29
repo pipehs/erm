@@ -8,6 +8,7 @@ use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
 use DB;
+use DateTime;
 
 class ProcesosController extends Controller
 {
@@ -22,11 +23,11 @@ class ProcesosController extends Controller
 
         if(isset($_GET['verbloqueados']))
         {
-            $procesos = \Ermtool\Process::all()->where('estado',1); //select procesos bloqueados 
+            $procesos = \Ermtool\Process::all()->where('status',1); //select procesos bloqueados 
         }
         else
         {
-            $procesos = \Ermtool\Process::all()->where('estado',0); //select procesos desbloqueados
+            $procesos = \Ermtool\Process::all()->where('status',0); //select procesos desbloqueados
         }
         $i = 0;
         $j = 0; //contador de subprocesos
@@ -40,7 +41,7 @@ class ProcesosController extends Controller
         {
 
             //obtenemos todas las organizaciones a las que pertenece cada subproceso relacionado
-            $orgs = DB::select('SELECT organizations.id, organizations.nombre
+            $orgs = DB::select('SELECT organizations.id, organizations.name
                                 FROM organizations
                                 WHERE organizations.id IN (SELECT DISTINCT organization_subprocess.organization_id
                                     FROM organization_subprocess
@@ -51,7 +52,7 @@ class ProcesosController extends Controller
             {
                 $organizaciones[$k] = array('proceso_id'=>$process['id'],
                                             'id'=>$organization->id,
-                                            'nombre'=>$organization->nombre);
+                                            'nombre'=>$organization->name);
 
                 $k += 1;
             }
@@ -59,52 +60,70 @@ class ProcesosController extends Controller
 
            //obtenemos subprocesos relacionados
             $subprocesses = \Ermtool\Process::find($process['id'])->subprocesses;
-            
-             
 
             foreach ($subprocesses as $subprocess)
             {
                
                 $subprocesos[$j] = array('proceso_id'=>$process['id'],
                                         'id'=>$subprocess['id'],
-                                        'nombre'=>$subprocess['nombre']);
+                                        'nombre'=>$subprocess['name']);
 
                 $j += 1;
 
             }
 
-            //ordenamos fecha de creación
-            $fecha = explode('-',$process['fecha_creacion']);
-            $fecha = $fecha[2].'-'.$fecha[1].'-'.$fecha[0]; 
+            //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
+            if ($process['created_at'] == NULL OR $process['created_at'] == "0000-00-00" OR $process['created_at'] == "")
+            {
+                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+            }
+
+            else
+            {
+                $fecha_creacion = date_format($process['created_at'],"d-m-Y");
+                $fecha_creacion .= " a las ".date_format($process['created_at'],"H:i:s");
+            }
 
             //damos formato a fecha expiración
-            if ($process['fecha_exp'] == NULL OR $process['fecha_exp'] == "0000-00-00")
+            if ($process['expiration_date'] == NULL OR $process['expiration_date'] == "0000-00-00")
             {
                 $fecha_exp = "Ninguna";
             }
             else
             { 
-                $fecha_exp = explode('-',$process['fecha_exp']);
-                $fecha_exp = $fecha_exp[2].'-'.$fecha_exp[1].'-'.$fecha_exp[0]; 
+                $expiration_date = new DateTime($process['expiration_date']);
+                $fecha_exp = date_format($expiration_date, 'd-m-Y');
+                $fecha_exp .= " a las ".date_format($expiration_date,"H:i:s");
             }
+
+            //damos formato a fecha de actualización 
+            if ($process['updated_at'] != NULL)
+            {
+                $fecha_act = date_format($process['updated_at'],"d-m-Y");
+                $fecha_act .= " a las ".date_format($process['updated_at'],"H:i:s");
+            }
+
+            else
+                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
 
             //damos formato si depende de otro proceso
             if ($process['process_id'] == NULL)
             {
-                $proceso_dependiente['nombre'] = "No";
+                $proceso_dependiente['name'] = "No";
                 $proceso_dependiente['id'] = NULL;
             }
             else
                 $proceso_dependiente = \Ermtool\Process::find($process['process_id']);
 
             $proceso[$i] = array('id'=>$process['id'],
-                                'nombre'=>$process['nombre'],
-                                'descripcion'=>$process['descripcion'],
-                                'fecha_creacion'=>$fecha,
+                                'nombre'=>$process['name'],
+                                'descripcion'=>$process['description'],
+                                'fecha_creacion'=>$fecha_creacion,
+                                'fecha_act'=>$fecha_act,
                                 'fecha_exp'=>$fecha_exp,
-                                'proceso_dependiente'=>$proceso_dependiente['nombre'],
+                                'proceso_dependiente'=>$proceso_dependiente['name'],
                                 'proceso_dependiente_id'=>$proceso_dependiente['id'],
-                                'estado'=>$process['estado']);
+                                'estado'=>$process['status']);
             $i += 1;
         }
 
@@ -120,7 +139,7 @@ class ProcesosController extends Controller
     public function create()
     {
         //Seleccionamos procesos que pueden ser padres
-        $procesos = \Ermtool\Process::all()->where('process_id',NULL)->lists('nombre','id');
+        $procesos = \Ermtool\Process::where('process_id',NULL)->lists('name','id');
 
         return view('datos_maestros.procesos.create',['procesos'=>$procesos]);
     }
@@ -133,14 +152,10 @@ class ProcesosController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha creación
-        $fecha = explode("/",$request['fecha_creacion']);
-        $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-
         //obtenemos orden correcto de fecha expiración
-        if ($request['fecha_exp'] != "")
+        if ($request['expiration_date'] != "")
         {
-            $fecha = explode("/",$request['fecha_exp']);
+            $fecha = explode("/",$request['expiration_date']);
             $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
         }
         else
@@ -157,10 +172,9 @@ class ProcesosController extends Controller
             $process_id = NULL;
 
         \Ermtool\Process::create([
-            'nombre' => $request['nombre'],
-            'descripcion' => $request['descripcion'],
-            'fecha_creacion' => $fecha_creacion,
-            'fecha_exp' => $fecha_exp,
+            'name' => $request['name'],
+            'description' => $request['description'],
+            'expiration_date' => $fecha_exp,
             'process_id' => $process_id,
             ]);
 
@@ -189,14 +203,14 @@ class ProcesosController extends Controller
     public function edit($id)
     {
         $proceso = \Ermtool\Process::find($id);
-        $combobox = \Ermtool\Process::where('id','<>',$id)->lists('nombre','id');
+        $combobox = \Ermtool\Process::where('id','<>',$id)->lists('name','id');
         return view('datos_maestros.procesos.edit',['proceso'=>$proceso,'procesos'=>$combobox]);
     }
 
     public function bloquear($id)
     {
         $proceso = \Ermtool\Process::find($id);
-        $proceso->estado = 1;
+        $proceso->status = 1;
         $proceso->save();
 
         Session::flash('message','Proceso bloqueado correctamente');
@@ -207,7 +221,7 @@ class ProcesosController extends Controller
     public function desbloquear($id)
     {
         $proceso = \Ermtool\Process::find($id);
-        $proceso->estado = 0;
+        $proceso->status = 0;
         $proceso->save();
 
         Session::flash('message','Proceso desbloqueado correctamente');
@@ -225,22 +239,14 @@ class ProcesosController extends Controller
     public function update(Request $request, $id)
     {
         $proceso = \Ermtool\Process::find($id);
-        $fecha_creacion = $proceso->fecha_creacion; //Se debe obtener fecha de creación por si no fue modificada
         $fecha_exp = NULL;
 
-        if (strpos($request['fecha_creacion'],'/')) //primero verificamos que la fecha no se encuentre ya en el orden correcto
-        {
-            //obtenemos orden correcto de fecha creación
-            $fecha = explode("/",$request['fecha_creacion']);
-            $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-
-        if (strpos($request['fecha_exp'],'/')) //lo mismo para fecha de expiración
+        if (strpos($request['expiration_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
         {
             //obtenemos orden correcto de fecha expiración
-            if ($request['fecha_exp'] != "" OR $request['fecha_exp'] != "0000-00-00")
+            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
             {
-                $fecha = explode("/",$request['fecha_exp']);
+                $fecha = explode("/",$request['expiration_date']);
                 $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
             }
             else
@@ -259,10 +265,9 @@ class ProcesosController extends Controller
             $process_id = NULL;
         }
 
-        $proceso->nombre = $request['nombre'];
-        $proceso->descripcion = $request['descripcion'];
-        $proceso->fecha_creacion = $fecha_creacion;
-        $proceso->fecha_exp = $fecha_exp;
+        $proceso->name = $request['name'];
+        $proceso->description = $request['description'];
+        $proceso->expiration_date = $fecha_exp;
         $proceso->process_id = $process_id;
 
         $proceso->save();

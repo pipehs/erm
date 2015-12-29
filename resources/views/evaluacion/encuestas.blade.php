@@ -54,7 +54,7 @@
 
 				@foreach ($encuestas as $encuesta)
 					<tr>
-					<td>{{ $encuesta['nombre'] }}</td>
+					<td>{{ $encuesta['name'] }}</td>
 					<td>
 					 {!! link_to_route('evaluacion.show', $title = 'Ver', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-success']) !!}
 					 </td>

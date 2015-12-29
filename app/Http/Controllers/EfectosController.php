@@ -21,11 +21,11 @@ class EfectosController extends Controller
         $efectos = array();
         if (isset($_GET['verbloqueados']))
         {
-            $efectos2 = \Ermtool\Effect::all()->where('estado',1); //select efectos bloqueados  
+            $efectos2 = \Ermtool\Effect::all()->where('status',1); //select efectos bloqueados  
         }
         else
         {
-            $efectos2 = \Ermtool\Effect::all()->where('estado',0); //select efectos desbloqueados
+            $efectos2 = \Ermtool\Effect::all()->where('status',0); //select efectos desbloqueados
         }
 
         $i = 0;
@@ -33,12 +33,30 @@ class EfectosController extends Controller
         // ---recorremos todas las efectos para asignar formato de datos correspondientes--- //
         foreach ($efectos2 as $efecto)
         {
+            //damos formato a fecha de creación
+            if ($efecto['created_at'] != NULL)
+            {
+                $fecha_creacion = date_format($efecto['created_at'],"d-m-Y");
+                $fecha_creacion .= " a las ".date_format($efecto['created_at'],"H:i:s");
+            }
+            else
+                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+
+            //damos formato a fecha de actualización
+            if ($efecto['updated_at'] != NULL)
+            {
+                $fecha_act = date_format($efecto['updated_at'],"d-m-Y");
+                $fecha_act .= " a las ".date_format($efecto['updated_at'],"H:i:s");
+            }
+            else
+                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
 
             $efectos[$i] = array('id'=>$efecto['id'],
-                                'nombre'=>$efecto['nombre'],
-                                'descripcion'=>$efecto['descripcion'],
-                                'fecha_creacion'=>$efecto['fecha_creacion'],
-                                'estado'=>$efecto['estado']);
+                                'nombre'=>$efecto['name'],
+                                'descripcion'=>$efecto['description'],
+                                'fecha_creacion'=>$fecha_creacion,
+                                'fecha_act'=>$fecha_act,
+                                'estado'=>$efecto['status']);
             $i += 1;
         }
         return view('datos_maestros.efectos.index',['efectos'=>$efectos]);
@@ -62,14 +80,9 @@ class EfectosController extends Controller
      */
     public function store(Request $request)
     {
-         //obtenemos orden correcto de fecha creación
-        $fecha = explode("/",$request['fecha_creacion']);
-        $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-
         \Ermtool\Effect::create([
-            'nombre' => $request['nombre'],
-            'descripcion' => $request['descripcion'],
-            'fecha_creacion' => $fecha_creacion,
+            'name' => $request['name'],
+            'description' => $request['description'],
             ]);
 
             Session::flash('message','Efecto agregado correctamente');
@@ -100,18 +113,9 @@ class EfectosController extends Controller
     public function update(Request $request, $id)
     {
         $efecto = \Ermtool\Effect::find($id);
-        $fecha_creacion = $efecto->fecha_creacion; //Se debe obtener fecha de creación por si no fue modificada
 
-        if (strpos($request['fecha_creacion'],'/')) //primero verificamos que la fecha no se encuentre ya en el orden correcto
-        {
-            //obtenemos orden correcto de fecha creación
-            $fecha = explode("/",$request['fecha_creacion']);
-            $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-
-        $efecto->nombre = $request['nombre'];
-        $efecto->descripcion = $request['descripcion'];
-        $efecto->fecha_creacion = $fecha_creacion;
+        $efecto->name = $request['name'];
+        $efecto->description = $request['description'];
 
         $efecto->save();
 
@@ -123,7 +127,7 @@ class EfectosController extends Controller
     public function bloquear($id)
     {
         $efecto = \Ermtool\Effect::find($id);
-        $efecto->estado = 1;
+        $efecto->status = 1;
         $efecto->save();
 
         Session::flash('message','Efecto bloqueado correctamente');
@@ -134,7 +138,7 @@ class EfectosController extends Controller
     public function desbloquear($id)
     {
         $efecto = \Ermtool\Effect::find($id);
-        $efecto->estado = 0;
+        $efecto->status = 0;
         $efecto->save();
 
         Session::flash('message','Efecto desbloqueado correctamente');

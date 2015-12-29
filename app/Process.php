@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Process extends Model
 {
-    protected $fillable = ['nombre','descripcion','fecha_creacion','fecha_exp','process_id','estado'];
+    protected $fillable = ['name','description','expiration_date','process_id','status'];
 
     //eliminamos created_at y updated_at
-    public $timestamps = false;
+    //public $timestamps = false;
 
     public function subprocesses()
     {

@@ -6,6 +6,7 @@ use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
+use DateTime;
 
 class CategoriasRiesgosController extends Controller
 {
@@ -19,11 +20,11 @@ class CategoriasRiesgosController extends Controller
         $risk_category = array();
         if (isset($_GET['verbloqueados']))
         {
-            $risk_categories = \Ermtool\Risk_category::all()->where('estado',1); //select categorias bloqueadas  
+            $risk_categories = \Ermtool\Risk_category::all()->where('status',1); //select categorias bloqueadas  
         }
         else
         {
-            $risk_categories = \Ermtool\Risk_category::all()->where('estado',0); //select categorias desbloqueadas
+            $risk_categories = \Ermtool\Risk_category::all()->where('status',0); //select categorias desbloqueadas
         }
 
         $i = 0;
@@ -40,24 +41,39 @@ class CategoriasRiesgosController extends Controller
             {
                 $categorias_dependientes[$j] = array('risk_category_id'=>$category['id'],
                                              'id'=>$hijos['id'],
-                                             'nombre'=>$hijos['nombre']);
+                                             'nombre'=>$hijos['name']);
                 $j += 1;
             }
 
+            //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
+            if ($category['created_at'] == NULL OR $category['created_at'] == "0000-00-00" OR $category['created_at'] == "")
+            {
+                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+            }
+            else
+            {
+                $fecha_creacion = date_format($category['created_at'],"d-m-Y");
+                $fecha_creacion .= " a las ".date_format($category['created_at'],"H:i:s");
+            }
+
              //damos formato a fecha expiración
-            if ($category['fecha_exp'] == NULL OR $category['fecha_exp'] == "0000-00-00")
+            if ($category['expiration_date'] == NULL OR $category['expiration_date'] == "0000-00-00")
             {
                 $fecha_exp = "Ninguna";
             }
             else 
-                $fecha_exp = $category['fecha_exp'];
+            {
+                $expiration_date = new DateTime($category['expiration_date']);
+                $fecha_exp = date_format($expiration_date, 'd-m-Y');
+                $fecha_exp .= " a las ".date_format($expiration_date,"H:i:s");
+            }
 
             $risk_category[$i] = array('id'=>$category['id'],
-                                'nombre'=>$category['nombre'],
-                                'descripcion'=>$category['descripcion'],
-                                'fecha_creacion'=>$category['fecha_creacion'],
+                                'nombre'=>$category['name'],
+                                'descripcion'=>$category['description'],
+                                'fecha_creacion'=>$fecha_creacion,
                                 'fecha_exp'=>$fecha_exp,
-                                'estado'=>$category['estado']);
+                                'estado'=>$category['status']);
             $i += 1;
         }
 
@@ -72,7 +88,7 @@ class CategoriasRiesgosController extends Controller
     public function create()
     {
         //Seleccionamos categorías que pueden ser padres
-        $categorias = \Ermtool\Risk_category::where('risk_category_id',NULL)->where('estado',0)->lists('nombre','id');
+        $categorias = \Ermtool\Risk_category::where('risk_category_id',NULL)->where('status',0)->lists('name','id');
         return view('datos_maestros.categorias_riesgos.create',['categorias'=>$categorias]);
     }
 
@@ -84,14 +100,10 @@ class CategoriasRiesgosController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha creación
-        $fecha = explode("/",$request['fecha_creacion']);
-        $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-
         //obtenemos orden correcto de fecha expiración
-        if ($request['fecha_exp'] != "")
+        if ($request['expiration_date'] != "")
         {
-            $fecha = explode("/",$request['fecha_exp']);
+            $fecha = explode("/",$request['expiration_date']);
             $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
         }
         else
@@ -109,9 +121,8 @@ class CategoriasRiesgosController extends Controller
         }
 
         \Ermtool\Risk_category::create([
-            'nombre' => $request['nombre'],
-            'descripcion' => $request['descripcion'],
-            'fecha_creacion' => $fecha_creacion,
+            'name' => $request['name'],
+            'description' => $request['description'],
             'fecha_exp' => $fecha_exp,
             'risk_category_id' => $risk_category_id,
             ]);
@@ -144,9 +155,9 @@ class CategoriasRiesgosController extends Controller
 
         //Seleccionamos categorias que pueden ser padres
         $categorias = \Ermtool\Risk_category::where('risk_category_id',NULL)
-                                            ->where('estado',0)
+                                            ->where('status',0)
                                             ->where('id','<>',$id)
-                                            ->lists('nombre','id');
+                                            ->lists('name','id');
 
         return view('datos_maestros.categorias_riesgos.edit',['risk_category'=>$risk_category,
             'categorias'=>$categorias]);
@@ -162,22 +173,14 @@ class CategoriasRiesgosController extends Controller
     public function update(Request $request, $id)
     {
         $risk_category = \Ermtool\Risk_category::find($id);
-        $fecha_creacion = $risk_category->fecha_creacion; //Se debe obtener fecha de creación por si no fue modificada
         $fecha_exp = NULL;
 
-        if (strpos($request['fecha_creacion'],'/')) //primero verificamos que la fecha no se encuentre ya en el orden correcto
-        {
-            //obtenemos orden correcto de fecha creación
-            $fecha = explode("/",$request['fecha_creacion']);
-            $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-
-        if (strpos($request['fecha_exp'],'/')) //lo mismo para fecha de expiración
+        if (strpos($request['expiration_date'],'/')) //lo mismo para fecha de expiración
         {
             //obtenemos orden correcto de fecha expiración
-            if ($request['fecha_exp'] != "" OR $request['fecha_exp'] != "0000-00-00")
+            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
             {
-                $fecha = explode("/",$request['fecha_exp']);
+                $fecha = explode("/",$request['expiration_date']);
                 $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
             }
             else
@@ -196,10 +199,9 @@ class CategoriasRiesgosController extends Controller
             $risk_category_id = NULL;
         }
 
-        $risk_category->nombre = $request['nombre'];
-        $risk_category->descripcion = $request['descripcion'];
-        $risk_category->fecha_creacion = $fecha_creacion;
-        $risk_category->fecha_exp = $fecha_exp;
+        $risk_category->name = $request['name'];
+        $risk_category->description = $request['description'];
+        $risk_category->expiration_date = $fecha_exp;
         $risk_category->risk_category_id = $risk_category_id;
 
         $risk_category->save();
@@ -212,7 +214,7 @@ class CategoriasRiesgosController extends Controller
     public function bloquear($id)
     {
         $risk_category = \Ermtool\Risk_category::find($id);
-        $risk_category->estado = 1;
+        $risk_category->status = 1;
         $risk_category->save();
 
         Session::flash('message','Categor&iacute;a de riesgo bloqueada correctamente');
@@ -223,7 +225,7 @@ class CategoriasRiesgosController extends Controller
     public function desbloquear($id)
     {
         $risk_category = \Ermtool\Risk_category::find($id);
-        $risk_category->estado = 0;
+        $risk_category->status = 0;
         $risk_category->save();
 
         Session::flash('message','Categor&iacute;a de riesgo desbloqueada correctamente');

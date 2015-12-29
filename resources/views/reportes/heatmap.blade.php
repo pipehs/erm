@@ -80,48 +80,48 @@
 -->
       @else
 
-      <div class="row">
-         <p><b> Nombre:</b> {{ $nombre }} .</p>
-         <p><b> Descripci&oacute;n:</b> {{ $descripcion }}.</p>
-          <center>
-          
-            <div class="col-sm-1">
-                <div style="width: 5px; word-wrap: break-word; text-align: center">Criticidad</div>
-            </div>
-            <div class="col-sm-6">
-                <table class="matrix" border="1">
-
-                <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
-                @for ($i=0; $i<5; $i++)
-
-                  <tr style="height: 20%; ">
-                  @for ($j=1; $j<=5; $j++)
-                      <td id="{{(5-$i)}}_{{($j)}}" style="width: 20%; text-align: center;"></td>
-                  @endfor
-                  </tr>
-                  
-                @endfor
-
-              </table>
-              <br>
-              <div style="letter-spacing:5px; text-align: center">Probabilidad</div>
-              </center>
+        <div class="row">
+           <p><b> Nombre:</b> {{ $nombre }}.</p>
+           <p><b> Descripci&oacute;n:</b> {{ $descripcion }}.</p>
+            <center>
             
-              
-            <div class="col-sm-4">
-              <div id="leyendas"> </div>
-            </div>
+              <div class="col-sm-1">
+                  <div style="width: 5px; word-wrap: break-word; text-align: center">Impacto</div>
+              </div>
+              <div class="col-sm-6">
+                  <table class="matrix" border="1">
 
-          </div>
-          <br>
-          <hr>
-          <br>
-          
-              {!! link_to_route('heatmap', $title = 'Volver', $parameters = NULL,
-               $attributes = ['class'=>'btn btn-success'])!!}
-          <center>
+                  <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
+                  @for ($i=0; $i<5; $i++)
+
+                    <tr style="height: 20%; ">
+                    @for ($j=1; $j<=5; $j++)
+                        <td id="{{(5-$i)}}_{{($j)}}" style="width: 20%; text-align: center;"></td>
+                    @endfor
+                    </tr>
+                    
+                  @endfor
+
+                </table>
+                <br>
+                <div style="letter-spacing:5px; text-align: center">Probabilidad</div>
+                </center>
+              
+                
+              <div class="col-sm-4">
+                <div id="leyendas"> </div>
+              </div>
+
+            </div>
+            <br>
+            <hr>
+            <br>
+            
+                {!! link_to_route('heatmap', $title = 'Volver', $parameters = NULL,
+                 $attributes = ['class'=>'btn btn-success'])!!}
+            <center>
       @endif
-			</div>
+			   </div>
 		</div>
 	</div>
 </div>
@@ -138,13 +138,13 @@
               @for ($j=0; $j < 5; $j++)
                   @if (intval($prom_criticidad[$k]) == (5-$i))
                       @if (intval($prom_proba[$k]) == (5-$j))
-                         $('#{{(5-$i)}}_{{(5-$j)}}').append("<span class='circulo' title='{{ $riesgos[$k] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Criticidad: {{ number_format($prom_criticidad[$k],1) }}'>{{ $cont }}</span>");
+                         $('#{{(5-$i)}}_{{(5-$j)}}').append("<span class='circulo' title='{{ $riesgos[$k]['name'] }} - {{ $riesgos[$k]['subobj'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad[$k],1) }}'>{{ $cont }}</span>");
 
-                         $('#leyendas').append("<p><small><span class='circulo-small'>{{ $cont }}</span> : {{ $riesgos[$k] }}")
+                         $('#leyendas').append("<p><small><span class='circulo-small'>{{ $cont }}</span> : {{ $riesgos[$k]['name'] }} - {{ $riesgos[$k]['subobj'] }}")
                        /*
-                        $('#{{(5-$i)}}_{{(5-$j)}}').append("<img src='assets/img/circulo.png' height='20px' width='20px' title='{{ $riesgos[$k] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Criticidad: {{ number_format($prom_criticidad[$k],1) }}'>");
+                        $('#{{(5-$i)}}_{{(5-$j)}}').append("<img src='assets/img/circulo.png' height='20px' width='20px' title='{{ $riesgos[$k]['name'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Criticidad: {{ number_format($prom_criticidad[$k],1) }}'>");
                      
-                        $('#{{(5-$i)}}_{{(5-$j)}}').append("<li><b>{{ $riesgos[$k] }}</b></li>");
+                        $('#{{(5-$i)}}_{{(5-$j)}}').append("<li><b>{{ $riesgos[$k]['name'] }}</b></li>");
                         $('#{{(5-$i)}}_{{(5-$j)}}').append("Probabilidad: {{ number_format($prom_proba[$k],'1') }}<br>");
                         $('#{{(5-$i)}}_{{(5-$j)}}').append("Criticidad: {{ number_format($prom_criticidad[$k],'1') }}");
                         */

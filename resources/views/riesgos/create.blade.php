@@ -56,34 +56,65 @@
 @section('scripts2')
 <script>
 //bloqueamos opciones de llenado si es que se esta ingresando un riesgo tipo
-	$("#riesgo_tipo").change(function() {
+	$("#risk_id").change(function() {
 
-			if ($("#riesgo_tipo").val() != "")
+			if ($("#risk_id").val() != "")
 			{
-				$("#nombre").prop("disabled",true);
-				$("#nombre").removeAttr("required");
+				$.get('riesgos.setriesgotipo.'+$("#risk_id").val(), function (result) {
+						
+						//alert(result);
+						//parseamos datos obtenidos
+						var datos = JSON.parse(result);
+						//alert(datos.name);
 
-				$("#descripcion").prop("disabled",true);
-				$("#descripcion").removeAttr("required");
+						//seteamos datos
+						$("#nombre").val(datos.name);
+						$("#descripcion").val(datos.description);
+						$("#categoria").val(datos.risk_category_id); 
+						$("#categoria").change(); //cambiamos texto que muestra select
+						$("#input_date2").val(datos.expiration_date);
+						$("#cause_id").val(datos.cause_id);
+						$("#cause_id").change();
+						$("#effect_id").val(datos.effect_id);
+						$("#effect_id").change();
 
-				$("#categoria").prop("disabled",true);
-				$("#categoria").removeAttr("required");
+				/*	Dejaremos que el usuario decida si quiere modificar algun dato de riesgo tipo
+						//bloqueamos datos
+						$("#nombre").prop("disabled",true);
+						$("#nombre").prop("required",false);
 
-				$("#input_date").prop("disabled",true);
-				$("#input_date").removeAttr("required");
+						$("#descripcion").prop("disabled",true);
+						$("#descripcion").prop("required",false);
 
-				$("#input_date2").prop("disabled",true);
-				$("#input_date2").removeAttr("required");
+						$("#categoria").prop("disabled",true);
+						$("#categoria").prop("required",false);
 
-				$("#cause_id").prop("disabled",true);
-				$("#cause_id").removeAttr("required");
 
-				$("#effect_id").prop("disabled",true);
-				$("#effect_id").removeAttr("required");
+						$("#input_date2").prop("disabled",true);
+						$("#input_date2").prop("required",false);
+
+						$("#cause_id").prop("disabled",true);
+						$("#cause_id").prop("required",false);
+
+						$("#effect_id").prop("disabled",true);
+						$("#effect_id").prop("required",false);
+				*/
+				});
 			}
 
 			else
 			{
+				//REseteamos datos
+						$("#nombre").val("");
+						$("#descripcion").val("");
+						$("#categoria").val(""); 
+						$("#categoria").change(); //cambiamos texto que muestra select
+						$("#input_date2").val("");
+						$("#cause_id").val("");
+						$("#cause_id").change();
+						$("#effect_id").val("");
+						$("#effect_id").change();
+			/*	Dejaremos que el usuario decida si quiere modificar algun dato de riesgo tipo
 				$("#nombre").prop("disabled",false);
 				$("#nombre").prop("required",true);
 
@@ -93,8 +124,6 @@
 				$("#categoria").prop("disabled",false);
 				$("#categoria").prop("required",true);
 
-				$("#input_date").prop("disabled",false);
-				$("#input_date").prop("required",true);
 
 				$("#input_date2").prop("disabled",false);
 				$("#input_date2").prop("required",true);
@@ -104,6 +133,7 @@
 
 				$("#effect_id").prop("disabled",false);
 				$("#effect_id").prop("required",true);
+			*/
 			}
 			
 	    });

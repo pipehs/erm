@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Objective_category extends Model
 {
-    protected $fillable = ['nombre','descripcion','fecha_creacion','fecha_exp','estado'];
+    protected $fillable = ['name','description','expiration_date','status'];
     //eliminamos created_at y updated_at
-    public $timestamps = false;
+    //public $timestamps = false;
 }

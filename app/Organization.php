@@ -7,14 +7,14 @@ use DB;
 
 class Organization extends Model
 {
-    protected $fillable = ['nombre','descripcion','fecha_creacion','fecha_exp','serv_compartidos','organization_id','estado'];
+    protected $fillable = ['name','description','expiration_date','shared_services','organization_id','status'];
 
     //eliminamos created_at y updated_at
-    public $timestamps = false;
+    //public $timestamps = false;
 
-    public static function nombre($organization_id)
+    public static function name($organization_id)
     {
-    	$res = DB::table('organizations')->where('id', $organization_id)->value('nombre');
+    	$res = DB::table('organizations')->where('id', $organization_id)->value('name');
     	return $res;
     }
 

@@ -60,15 +60,15 @@
 			<?php $i = 1; //contador de preguntas ?>
 			@foreach ($preguntas as $pregunta)
 				{!!Form::hidden('pregunta_id[]',$pregunta->id)!!}
-				<p><b>{{$i}}. {{ $pregunta->pregunta }} </b></p>
+				<p><b>{{$i}}. {{ $pregunta->question }} </b></p>
 
-				@if ($pregunta->tipo_respuestas == 1) <!-- verificamos si es radio -->
+				@if ($pregunta->answers_type == 1) <!-- verificamos si es radio -->
 					<p>
 					@foreach ($respuestas as $respuesta) <!-- recorremos todas las respuestas para ver si corresponden a la pregunta -->
 						@if ($respuesta['question_id'] == $pregunta->id) <!-- Si la respuesta pertenece a la pregunta -->
 								<div class="radio-inline">
 									<label>
-										<input type="radio" required="true" name="respuesta{{ $pregunta->id }}" value="{{$respuesta['id']}}"> {{ $respuesta['respuesta'] }}
+										<input type="radio" required="true" name="respuesta{{ $pregunta->id }}" value="{{$respuesta['id']}}"> {{ $respuesta['answer'] }}
 										<i class="fa fa-circle-o"></i>
 									</label>
 								</div>
@@ -76,20 +76,20 @@
 					@endforeach
 					</p>
 
-				@elseif ($pregunta->tipo_respuestas == 2) <!-- verificamos si es checkbox -->
+				@elseif ($pregunta->answers_type == 2) <!-- verificamos si es checkbox -->
 					<p>
 					@foreach ($respuestas as $respuesta) <!-- recorremos todas las respuestas para ver si corresponden a la pregunta -->
 						@if ($respuesta['question_id'] == $pregunta->id) <!-- Si la respuesta pertenece a la pregunta -->
 							<div class="checkbox">
 								<label>
 									<input type="checkbox" name="respuesta{{ $pregunta->id }}[]" value="{{$respuesta['id']}}">
-									<i class="fa fa-square-o"></i> {{ $respuesta['respuesta'] }}
+									<i class="fa fa-square-o"></i> {{ $respuesta['answer'] }}
 								</label>
 							</div>
 						@endif
 					@endforeach
 					</p>
-				@elseif ($pregunta->tipo_respuestas == 0) <!-- verificamos si es text -->
+				@elseif ($pregunta->answers_type == 0) <!-- verificamos si es text -->
 				<p>
 				<textarea class="form-control" name="respuesta{{ $pregunta->id }}" required="true" rows="4" cols="50"></textarea>
 				</p>

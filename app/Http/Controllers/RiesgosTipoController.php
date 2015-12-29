@@ -20,11 +20,11 @@ class RiesgosTipoController extends Controller
         $riesgostipo = array();
         if (isset($_GET['verbloqueados']))
         {
-            $riesgostipo2 = \Ermtool\Risk::all()->where('tipo2',0)->where('estado',1); //select riesgos tipo bloqueados  
+            $riesgostipo2 = \Ermtool\Risk::all()->where('type2',0)->where('status',1); //select riesgos tipo bloqueados  
         }
         else
         {
-            $riesgostipo2 = \Ermtool\Risk::all()->where('tipo2',0)->where('estado',0); //select riesgos tipo desbloqueados
+            $riesgostipo2 = \Ermtool\Risk::all()->where('type2',0)->where('status',0); //select riesgos tipo desbloqueados
         }
 
         $i = 0;
@@ -33,12 +33,34 @@ class RiesgosTipoController extends Controller
         foreach ($riesgostipo2 as $riesgo)
         {
             //damos formato a fecha expiración
-            if ($riesgo['fecha_exp'] == NULL OR $riesgo['fecha_exp'] == "0000-00-00")
+            if ($riesgo['expiration_date'] == NULL OR $riesgo['expiration_date'] == "0000-00-00")
             {
                 $fecha_exp = "Ninguna";
             }
             else 
-                $fecha_exp = $riesgo['fecha_exp'];
+            {
+                $expiration_date = new DateTime($riesgo['expiration_date']);
+                $fecha_exp = date_format($expiration_date, 'd-m-Y');
+                $fecha_exp .= " a las ".date_format($expiration_date,"H:i:s");
+            }
+
+             //damos formato a fecha creación
+            if ($riesgo['created_at'] != NULL)
+            {
+                $fecha_creacion = date_format($riesgo['created_at'],"d-m-Y");
+                $fecha_creacion .= " a las ".date_format($riesgo['created_at'],"H:i:s");
+            }
+            else
+                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+
+            //damos formato a fecha de actualización 
+            if ($riesgo['updated_at'] != NULL)
+            {
+                $fecha_act = date_format($riesgo['updated_at'],"d-m-Y");
+                $fecha_act .= " a las ".date_format($riesgo['updated_at'],"H:i:s");
+            }
+            else
+                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
 
             //obtenemos categoría de riesgo
             $categoria = \Ermtool\Risk_Category::find($riesgo['risk_category_id']);
@@ -60,14 +82,15 @@ class RiesgosTipoController extends Controller
                 $efecto['nombre'] = "No especificado";
 
             $riesgostipo[$i] = array('id'=>$riesgo['id'],
-                                'nombre'=>$riesgo['nombre'],
-                                'descripcion'=>$riesgo['descripcion'],
-                                'fecha_creacion'=>$riesgo['fecha_creacion'],
+                                'nombre'=>$riesgo['name'],
+                                'descripcion'=>$riesgo['description'],
+                                'fecha_creacion'=>$fecha_creacion,
+                                'fecha_act'=>$fecha_act,
                                 'fecha_exp'=>$fecha_exp,
-                                'causa'=>$causa['nombre'],
-                                'efecto'=>$efecto['nombre'],
-                                'categoria'=>$categoria['nombre'],
-                                'estado'=>$riesgo['estado']);
+                                'causa'=>$causa['name'],
+                                'efecto'=>$efecto['name'],
+                                'categoria'=>$categoria['name'],
+                                'estado'=>$riesgo['status']);
             $i += 1;
         }
         return view('datos_maestros.riesgos_tipo.index',['riesgos'=>$riesgostipo]); 
@@ -80,9 +103,9 @@ class RiesgosTipoController extends Controller
      */
     public function create()
     {
-        $categorias = \Ermtool\Risk_Category::where('estado',0)->lists('nombre','id');
-        $causas = \Ermtool\Cause::where('estado',0)->lists('nombre','id');
-        $efectos = \Ermtool\Effect::where('estado',0)->lists('nombre','id');
+        $categorias = \Ermtool\Risk_Category::where('status',0)->lists('name','id');
+        $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
+        $efectos = \Ermtool\Effect::where('status',0)->lists('name','id');
         return view('datos_maestros.riesgos_tipo.create',
                     ['categorias'=>$categorias,'causas'=>$causas,'efectos'=>$efectos]);
     }
@@ -95,14 +118,10 @@ class RiesgosTipoController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha creación
-        $fecha = explode("/",$request['fecha_creacion']);
-        $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-
         //obtenemos orden correcto de fecha expiración
-        if ($request['fecha_exp'] != "")
+        if ($request['expiration_date'] != "")
         {
-            $fecha = explode("/",$request['fecha_exp']);
+            $fecha = explode("/",$request['expiration_date']);
             $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
         }
         else
@@ -114,8 +133,7 @@ class RiesgosTipoController extends Controller
         if (isset($request['causa_nueva']))
         {
             \Ermtool\Cause::create([
-                'nombre'=>$request['causa_nueva'],
-                'fecha_creacion'=>date('Y-m-d'),
+                'name'=>$request['causa_nueva']
             ]);
 
             //obtenemos id de causa recien agregada
@@ -133,8 +151,7 @@ class RiesgosTipoController extends Controller
         if (isset($request['efecto_nuevo']))
         {
             \Ermtool\Effect::create([
-                'nombre'=>$request['efecto_nuevo'],
-                'fecha_creacion'=>date('Y-m-d'),
+                'name'=>$request['efecto_nuevo']
                 ]);
 
             //obtenemos id de efecto agregado
@@ -149,11 +166,10 @@ class RiesgosTipoController extends Controller
         }
 
         \Ermtool\Risk::create([
-            'nombre'=>$request['nombre'],
-            'descripcion'=>$request['descripcion'],
-            'tipo2'=>0,
-            'fecha_creacion'=>$fecha_creacion,
-            'fecha_exp'=>$fecha_exp,
+            'name'=>$request['name'],
+            'description'=>$request['description'],
+            'type2'=>0,
+            'expiration_date'=>$fecha_exp,
             'risk_category_id'=>$request['risk_category_id'],
             'cause_id'=>$causa,
             'effect_id'=>$efecto,
@@ -174,9 +190,9 @@ class RiesgosTipoController extends Controller
     public function edit($id)
     {
         $riesgo = \Ermtool\Risk::find($id);
-        $categorias = \Ermtool\Risk_Category::where('estado',0)->lists('nombre','id');
-        $causas = \Ermtool\Cause::where('estado',0)->lists('nombre','id');
-        $efectos = \Ermtool\Effect::where('estado',0)->lists('nombre','id');
+        $categorias = \Ermtool\Risk_Category::where('status',0)->lists('name','id');
+        $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
+        $efectos = \Ermtool\Effect::where('status',0)->lists('name','id');
         return view('datos_maestros.riesgos_tipo.edit',['riesgo'=>$riesgo,
                     'categorias'=>$categorias,'causas'=>$causas,'efectos'=>$efectos]);
     }
@@ -191,22 +207,14 @@ class RiesgosTipoController extends Controller
     public function update(Request $request, $id)
     {
         $riesgo = \Ermtool\Risk::find($id);
-        $fecha_creacion = $riesgo->fecha_creacion; //Se debe obtener fecha de creación por si no fue modificada
         $fecha_exp = NULL;
 
-        if (strpos($request['fecha_creacion'],'/')) //primero verificamos que la fecha no se encuentre ya en el orden correcto
-        {
-            //obtenemos orden correcto de fecha creación
-            $fecha = explode("/",$request['fecha_creacion']);
-            $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-
-        if (strpos($request['fecha_exp'],'/')) //lo mismo para fecha de expiración
+        if (strpos($request['expiration_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
         {
             //obtenemos orden correcto de fecha expiración
-            if ($request['fecha_exp'] != "" OR $request['fecha_exp'] != "0000-00-00")
+            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
             {
-                $fecha = explode("/",$request['fecha_exp']);
+                $fecha = explode("/",$request['expiration_date']);
                 $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
             }
             else
@@ -219,8 +227,7 @@ class RiesgosTipoController extends Controller
         if (isset($request['causa_nueva']))
         {
             \Ermtool\Cause::create([
-                'nombre'=>$request['causa_nueva'],
-                'fecha_creacion'=>date('Y-m-d'),
+                'name'=>$request['causa_nueva']
             ]);
 
             //obtenemos id de causa recien agregada
@@ -238,8 +245,7 @@ class RiesgosTipoController extends Controller
         if (isset($request['efecto_nuevo']))
         {
             \Ermtool\Effect::create([
-                'nombre'=>$request['efecto_nuevo'],
-                'fecha_creacion'=>date('Y-m-d'),
+                'name'=>$request['efecto_nuevo']
                 ]);
 
             //obtenemos id de efecto agregado
@@ -253,10 +259,9 @@ class RiesgosTipoController extends Controller
                 $efecto = $request['effect_id'];
         }
 
-        $riesgo->nombre = $request['nombre'];
-        $riesgo->descripcion = $request['descripcion'];
-        $riesgo->fecha_creacion = $fecha_creacion;
-        $riesgo->fecha_exp = $fecha_exp;
+        $riesgo->name = $request['name'];
+        $riesgo->description = $request['description'];
+        $riesgo->expiration_date = $fecha_exp;
         $riesgo->risk_category_id = $request['risk_category_id'];
         $riesgo->cause_id = $causa;
         $riesgo->effect_id = $efecto;
@@ -271,7 +276,7 @@ class RiesgosTipoController extends Controller
     public function bloquear($id)
     {
         $riesgo = \Ermtool\Risk::find($id);
-        $riesgo->estado = 1;
+        $riesgo->status = 1;
         $riesgo->save();
 
         Session::flash('message','Riesgo tipo bloqueado correctamente');
@@ -282,7 +287,7 @@ class RiesgosTipoController extends Controller
     public function desbloquear($id)
     {
         $riesgo = \Ermtool\Risk::find($id);
-        $riesgo->estado = 0;
+        $riesgo->status = 0;
         $riesgo->save();
 
         Session::flash('message','Riesgo tipo desbloqueado correctamente');

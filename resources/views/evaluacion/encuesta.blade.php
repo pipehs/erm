@@ -57,26 +57,27 @@
 				</small>
 			</div>
 
-			<p>Por cada riesgo identificado, señale un nivel de probabilidad y criticidad del mismo. </p>
+			<p>Por cada riesgo identificado, señale un nivel de probabilidad e impacto del mismo. </p>
 
 			@foreach($riesgos as $riesgo)
-				{!!Form::hidden('riesgos_id[]',$riesgo['risk_id'])!!}
-				<b>- {{ $riesgo['nombre'] }}:</b><br><br>
+
+				{!!Form::hidden('evaluation_risk_id[]',$riesgo['evaluation_risk_id'])!!}
+				<b>- {{ $riesgo['risk_name'] }} - {{ $riesgo['subobj'] }}:</b><br><br>
 				Probabilidad:<br>
-				@for($i=1; $i<=$encuesta['max_niveles']; $i++)
+				@for($i=1; $i<=5; $i++)
 				<div class="radio-inline">
 					<label>
-						<input type="radio" name="proba_{{$riesgo['risk_id']}}" required="true" value="{{ $i }}"> {{ $i }}
+						<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }}
 						<i class="fa fa-circle-o"></i>
 					</label>
 				</div>
 				@endfor
 				<br><br>
-				Criticidad:<br>
-				@for($i=1; $i<=$encuesta['max_niveles']; $i++)
+				Impacto:<br>
+				@for($i=1; $i<=5; $i++)
 				<div class="radio-inline">
 					<label>
-						<input type="radio" name="criticidad_{{$riesgo['risk_id']}}" required="true" value="{{ $i }}"> {{ $i }}
+						<input type="radio" name="criticidad_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }}
 						<i class="fa fa-circle-o"></i>
 					</label>
 				</div>

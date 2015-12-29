@@ -58,6 +58,7 @@
 							<th>Subprocesos</small><label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Descripci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Fecha Creaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Fecha Actualizaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Fecha Expiraci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>¿Depende de otro proceso?</small><label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Acci&oacute;n</th>
@@ -65,7 +66,7 @@
 						</tr>
 					</thead>
 	<tr style="display:none;">
-	<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+	<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 	@foreach ($procesos as $proceso)
 		<tr>
 		<td><ul>
@@ -90,6 +91,7 @@
 		</ul></td>
 		<td>{{ $proceso['descripcion'] }}</td>
 		<td>{{ $proceso['fecha_creacion'] }}</td>
+		<td>{{ $proceso['fecha_act'] }}</td>
 		<td>{{ $proceso['fecha_exp'] }}</td>
 		<td>{{ $proceso['proceso_dependiente'] }}</td>
 		<td><div>

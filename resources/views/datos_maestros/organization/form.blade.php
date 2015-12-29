@@ -1,26 +1,20 @@
 					<div class="form-group">
 						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::text('nombre',null,['class'=>'form-control','required'=>'true'])!!}
+							{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
 						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::textarea('descripcion',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
-						</div>
-					</div>
-					<div class="form-group">
-						{!!Form::label('Fecha Creaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-							{!!Form::text('fecha_creacion',null,['class'=>'form-control','id'=>'input_date','required'=>'true'])!!}
+							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
 					<div class="form-group">
 						{!!Form::label('Fecha Expiraci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::text('fecha_exp',null,['class'=>'form-control','id'=>'input_date2'])!!}
+							{!!Form::text('expiration_date',null,['class'=>'form-control','id'=>'input_date2'])!!}
 						</div>
 					</div>	
 
@@ -38,13 +32,13 @@
 						<div class="col-sm-3">
 							<div class="radio-inline">
 								<label>
-								{!!Form::radio('serv_compartidos',0,true)!!}  No
+								{!!Form::radio('shared_services',0,true)!!}  No
 								<i class="fa fa-circle-o"></i>
 								</label>
 							</div>
 							<div class="radio-inline">
 								<label>
-								{!!Form::radio('serv_compartidos',1)!!}  Si
+								{!!Form::radio('shared_services',1)!!}  Si
 								<i class="fa fa-circle-o"></i>
 								</label>
 							</div>

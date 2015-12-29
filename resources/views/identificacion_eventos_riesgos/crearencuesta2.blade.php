@@ -128,6 +128,8 @@
 	</p>
 	</div>
 </div>
+@stop
+@section('scripts2')
 <script>
 // Run Datables plugin and create 3 variants of settings
 function AllTables(){
@@ -167,7 +169,6 @@ function MakeSelect2(){
          return this;
   }
 
-$(document).ready(function() {
 	// Load Datatables and run plugin on tables 
 	LoadDataTablesScripts(AllTables);
 	// Add Drag-n-Drop feature
@@ -190,8 +191,6 @@ $(document).ready(function() {
 
 @endfor
 
-
-});
 </script>
 
 @stop

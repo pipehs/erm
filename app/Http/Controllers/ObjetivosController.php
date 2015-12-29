@@ -7,6 +7,7 @@ use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
+use dateTime;
 
 class ObjetivosController extends Controller
 {
@@ -17,27 +18,48 @@ class ObjetivosController extends Controller
      */
     public function index()
     {
+        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id'); //select organizaciones desbloqueadas en lista para select
 
-        $organizations = \Ermtool\Organization::all()->where('estado',0); //select organizaciones desbloqueadas
-        $combobox = $organizations->lists('nombre','id'); //guardamos array con lista de nombre de organizaciones + id
 
         if (isset($_GET['organizacion'])) //se seleccionó la organización para ver objetivos
         {
             $objetivos = \Ermtool\Objective::all()->where('organization_id',(int)$_GET['organizacion'])
-                                                ->where('estado',0);
-            $nombre_organizacion = \Ermtool\Organization::nombre($_GET['organizacion']);
+                                                ->where('status',0);
+            $nombre_organizacion = \Ermtool\Organization::name($_GET['organizacion']);
             $i=0; //para saber si hay objetivos
             $objectives = array(); //almacenará los objetivos con el formato correcto de sus atributos
             foreach ($objetivos as $objetivo)
             {
                 $i = $i+1;
                  //damos formato a fecha expiración
-                if ($objetivo['fecha_exp'] == NULL OR $objetivo['fecha_exp'] == "0000-00-00")
+                if ($objetivo['expiration_date'] == NULL OR $objetivo['expiration_date'] == "0000-00-00")
                 {
-                    $fecha_expiracion = "Ninguna";
+                    $fecha_exp = "Ninguna";
                 }
                 else 
-                    $fecha_expiracion = $objetivo['fecha_exp'];
+                {
+                    $expiration_date = new DateTime($objetivo['expiration_date']);
+                    $fecha_exp = date_format($expiration_date, 'd-m-Y');
+                    $fecha_exp .= " a las ".date_format($expiration_date,"H:i:s");
+                }
+
+                //damos formato a fecha creación
+                if ($objetivo['created_at'] != NULL)
+                {
+                    $fecha_creacion = date_format($objetivo['created_at'],"d-m-Y");
+                    $fecha_creacion .= " a las ".date_format($objetivo['created_at'],"H:i:s");
+                }
+                else
+                    $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+
+                //damos formato a fecha de actualización 
+                if ($objetivo['updated_at'] != NULL)
+                {
+                    $fecha_act = date_format($objetivo['updated_at'],"d-m-Y");
+                    $fecha_act .= " a las ".date_format($objetivo['updated_at'],"H:i:s");
+                }
+                else
+                    $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
 
                 //damos formato a categoría de objetivo
                 if ($objetivo['objective_category_id'] == NULL)
@@ -45,23 +67,24 @@ class ObjetivosController extends Controller
                     $categoria = "Ninguna";
                 }
                 else
-                    $categoria = \Ermtool\Objective_category::where('id',$objetivo['objective_category_id'])->value('nombre');
+                    $categoria = \Ermtool\Objective_category::where('id',$objetivo['objective_category_id'])->value('name');
 
                 $objectives[$i] = array('id'=>$objetivo['id'],
-                                'nombre'=>$objetivo['nombre'],
-                                'descripcion'=>$objetivo['descripcion'],
-                                'fecha_creacion'=>$objetivo['fecha_creacion'],
-                                'fecha_exp'=>$fecha_expiracion,
+                                'nombre'=>$objetivo['name'],
+                                'descripcion'=>$objetivo['description'],
+                                'fecha_creacion'=>$fecha_creacion,
+                                'fecha_act'=>$fecha_act,
+                                'fecha_exp'=>$fecha_exp,
                                 'categoria'=>$categoria,
-                                'estado'=>$objetivo['estado']);
+                                'estado'=>$objetivo['status']);
                 $i += 1;
 
             }
-            return view('datos_maestros.objetivos.index',['organizations'=>$combobox,'objetivos'=>$objectives,'nombre_organizacion'=>$nombre_organizacion,'probador' => $i]);
+            return view('datos_maestros.objetivos.index',['organizations'=>$organizations,'objetivos'=>$objectives,'nombre_organizacion'=>$nombre_organizacion,'probador' => $i]);
         }
         else
         {
-            return view('datos_maestros.objetivos.index',['organizations'=>$combobox]);
+            return view('datos_maestros.objetivos.index',['organizations'=>$organizations]);
         }
 
     }
@@ -73,9 +96,8 @@ class ObjetivosController extends Controller
      */
     public function create()
     {
-        $categorias = \Ermtool\Objective_category::where('estado',0);
-        $combobox = $categorias->lists('nombre','id');
-        return view('datos_maestros.objetivos.create',['categorias'=>$combobox]);
+        $categorias = \Ermtool\Objective_category::where('status',0)->lists('name','id');
+        return view('datos_maestros.objetivos.create',['categorias'=>$categorias]);
     }
 
     /**
@@ -86,14 +108,10 @@ class ObjetivosController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha creación
-        $fecha = explode("/",$request['fecha_creacion']);
-        $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-
         //obtenemos orden correcto de fecha expiración
-        if ($request['fecha_exp'] != "")
+        if ($request['expiration_date'] != "")
         {
-            $fecha = explode("/",$request['fecha_exp']);
+            $fecha = explode("/",$request['expiration_date']);
             $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
         }
         else
@@ -110,13 +128,12 @@ class ObjetivosController extends Controller
             $categoria = NULL;
         }
         \Ermtool\Objective::create([
-            'nombre' => $request['nombre'],
-            'descripcion' => $request['descripcion'],
-            'fecha_creacion' => $fecha_creacion,
+            'name' => $request['name'],
+            'description' => $request['description'],
             'fecha_exp' => $fecha_exp,
             'objective_category_id' => $categoria,
-            'organization_id' => $request['organizacion'],
-            'estado' => 0,
+            'organization_id' => $request['organization_id'],
+            'status' => 0,
             ]);
 
         Session::flash('message','Objetivo corporativo agregado correctamente');
@@ -143,16 +160,15 @@ class ObjetivosController extends Controller
      */
     public function edit($id)
     {
-        $categorias = \Ermtool\Objective_category::where('estado',0);
+        $categorias = \Ermtool\Objective_category::where('status',0)->lists('name','id');
         $objetivo = \Ermtool\Objective::find($id);
-        $combobox = $categorias->lists('nombre','id');
-        return view('datos_maestros.objetivos.edit',['categorias'=>$combobox,'objetivo'=>$objetivo]);
+        return view('datos_maestros.objetivos.edit',['categorias'=>$categorias,'objetivo'=>$objetivo]);
     }
 
     public function bloquear($id)
     {
         $objetivo = \Ermtool\Objective::find($id);
-        $objetivo->estado = 1;
+        $objetivo->status = 1;
         $objetivo->save();
 
         Session::flash('message','Objetivo bloqueado correctamente');
@@ -163,7 +179,7 @@ class ObjetivosController extends Controller
     public function desbloquear($id)
     {
         $objetivo = \Ermtool\Objective::find($id);
-        $objetivo->estado = 0;
+        $objetivo->status = 0;
         $objetivo->save();
 
         Session::flash('message','Objetivo desbloqueado correctamente');
@@ -176,10 +192,10 @@ class ObjetivosController extends Controller
         $combobox = \Ermtool\Organization::where('estado',0)
                                         ->lists('nombre','id'); //guardamos array con lista de nombre de organizaciones + id
 
-        $nombre_organizacion = \Ermtool\Organization::nombre($id_organizacion);
+        $nombre_organizacion = \Ermtool\Organization::name($id_organizacion);
 
         $objective = array();
-        $objetivos = \Ermtool\Objective::all()->where('estado',1)
+        $objetivos = \Ermtool\Objective::all()->where('status',1)
                                             ->where('organization_id',(int)$id_organizacion); //select objetivos bloqueadas
 
         $i = 0;
@@ -189,13 +205,13 @@ class ObjetivosController extends Controller
             //damos formato a categoria de objetivo
             if ($objetivo['objective_category_id'] != NULL)
             {
-                $categoria = \Ermtool\Objective_category::find($objetivo['objective_category_id'])->value('nombre');
+                $categoria = \Ermtool\Objective_category::find($objetivo['objective_category_id'])->value('name');
             }
             else 
                 $categoria = "ninguna";
 
             //damos formato a fecha expiración
-            if ($objetivo['fecha_exp'] == NULL OR $objetivo['fecha_exp'] == "0000-00-00")
+            if ($objetivo['expiration_date'] == NULL OR $objetivo['expiration_date'] == "0000-00-00")
             {
                 $fecha_exp = "Ninguna";
             }
@@ -203,12 +219,12 @@ class ObjetivosController extends Controller
                 $fecha_exp = $objetivo['fecha_exp'];
 
             $objective[$i] = array('id'=>$objetivo['id'],
-                                'nombre'=>$objetivo['nombre'],
-                                'descripcion'=>$objetivo['descripcion'],
-                                'fecha_creacion'=>$objetivo['fecha_creacion'],
+                                'nombre'=>$objetivo['name'],
+                                'descripcion'=>$objetivo['description'],
+                                'fecha_creacion'=>$objetivo['created_at'],
                                 'fecha_exp'=>$fecha_exp,
                                 'categoria'=>$categoria,
-                                'estado'=>$objetivo['estado']);
+                                'estado'=>$objetivo['status']);
             $i += 1;
         }
 
@@ -224,22 +240,15 @@ class ObjetivosController extends Controller
     public function update(Request $request, $id)
     {
         $objetivo = \Ermtool\Objective::find($id);
-        $fecha_creacion = $objetivo->fecha_creacion; //Se debe obtener fecha de creación por si no fue modificada
+        $fecha_creacion = $objetivo->created_at; //Se debe obtener fecha de creación por si no fue modificada
         $fecha_exp = NULL;
 
-        if (strpos($request['fecha_creacion'],'/')) //primero verificamos que la fecha no se encuentre ya en el orden correcto
-        {
-            //obtenemos orden correcto de fecha creación
-            $fecha = explode("/",$request['fecha_creacion']);
-            $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-
-        if (strpos($request['fecha_exp'],'/')) //lo mismo para fecha de expiración
+        if (strpos($request['expiration_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
         {
             //obtenemos orden correcto de fecha expiración
-            if ($request['fecha_exp'] != "" OR $request['fecha_exp'] != "0000-00-00")
+            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
             {
-                $fecha = explode("/",$request['fecha_exp']);
+                $fecha = explode("/",$request['expiration_date']);
                 $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
             }
             else
@@ -258,10 +267,9 @@ class ObjetivosController extends Controller
             $categoria = NULL;
         }
 
-        $objetivo->nombre = $request['nombre'];
-        $objetivo->descripcion = $request['descripcion'];
-        $objetivo->fecha_creacion = $fecha_creacion;
-        $objetivo->fecha_exp = $fecha_exp;
+        $objetivo->name = $request['name'];
+        $objetivo->description = $request['description'];
+        $objetivo->expiration_date = $fecha_exp;
         $objetivo->objective_category_id = $categoria;
 
         $objetivo->save();

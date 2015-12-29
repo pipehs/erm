@@ -79,13 +79,24 @@
 		@if ($probador !== 0) {{-- Si es que existe algún objetivo creado, probador no será cero --}}
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 				<thead>
-				<th>Nombre</th><th>Descripci&oacute;n</th><th>Fecha Creaci&oacute;n</th><th>Fecha Expiraci&oacute;n</th><th>Categor&iacute;a</th><th>Acci&oacute;n</th><th>Acci&oacute;n</th>
+				<th>Nombre</th>
+				<th>Descripci&oacute;n</th>
+				<th>Fecha Creaci&oacute;n</th>
+				<th>Fecha Actualizaci&oacute;n</th>
+				<th>Fecha Expiraci&oacute;n</th>
+				<th>Categor&iacute;a</th>
+				<th>Acci&oacute;n</th>
+				<th>Acci&oacute;n</th>
 				</thead>
 
 				@foreach ($objetivos as $objetivo)
 					<tr>
-					<td>{{$objetivo['nombre']}}</td><td>{{$objetivo['descripcion']}}</td><td>{{$objetivo['fecha_creacion']}}</td>
-					<td>{{$objetivo['fecha_exp']}}</td><td>{{$objetivo['categoria']}}</td>
+					<td>{{$objetivo['nombre']}}</td>
+					<td>{{$objetivo['descripcion']}}</td>
+					<td>{{$objetivo['fecha_creacion']}}</td>
+					<td>{{$objetivo['fecha_act']}}</td>
+					<td>{{$objetivo['fecha_exp']}}</td>
+					<td>{{$objetivo['categoria']}}</td>
 					<td>
 						<div>
 						@if ($objetivo['estado'] == 0)

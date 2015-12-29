@@ -58,6 +58,7 @@
 	<th>Nombre</th>
 	<th>Descripci&oacute;n</th>
 	<th>Fecha Creaci&oacute;n</th>
+	<th>Fecha Actualizado</th>
 	<th>Acci&oacute;n</th>
 	<th>Acci&oacute;n</th>
 	</thead>
@@ -66,6 +67,7 @@
 		<td>{{ $efecto['nombre'] }}</td>
 		<td>{{ $efecto['descripcion'] }}</td>
 		<td>{{ $efecto['fecha_creacion'] }}</td>
+		<td>{{ $efecto['fecha_act'] }}</td>
 		<td><div>
 			@if ($efecto['estado'] == 0)
 	            {!! link_to_route('efectos.edit', $title = 'Editar', $parameters = $efecto['id'], $attributes = ['class'=>'btn btn-success']) !!}

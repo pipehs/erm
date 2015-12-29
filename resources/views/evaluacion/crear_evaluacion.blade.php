@@ -64,12 +64,6 @@ Recuerde que los niveles de criticidad y probabilidad (deben ser iguales) para c
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Fecha Creaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-							{!!Form::text('fecha_creacion',null,['class'=>'form-control','id'=>'input_date','required'=>'true'])!!}
-						</div>
-					</div>
-					<div class="form-group">
 						{!!Form::label('Fecha Expiraci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::text('fecha_expiracion',null,['class'=>'form-control','id'=>'input_date2'])!!}
@@ -77,12 +71,20 @@ Recuerde que los niveles de criticidad y probabilidad (deben ser iguales) para c
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Seleccione riesgos para la encuesta 
-						(para seleccionar m&aacute;s de una presione ctrl + click)',
+						{!!Form::label('Seleccione riesgos de subprocesos',
 						null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::select('risk_id[]',$riesgos,null, 
-							 	   ['id' => 'el2','required'=>'true','multiple'=>'true'])!!}
+							{!!Form::select('risk_subprocess_id[]',$riesgos_sub,null, 
+							 	   ['id' => 'el2','multiple'=>'true'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
+						{!!Form::label('Seleccione riesgos de negocio',
+						null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::select('objective_risk_id[]',$riesgos_obj,null, 
+							 	   ['id' => 'el2','multiple'=>'true'])!!}
 						</div>
 					</div>
 

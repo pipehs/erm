@@ -57,6 +57,7 @@
 	<th>Nombre</th>
 	<th>Descripci&oacute;n</th>
 	<th>Fecha Creaci&oacute;n</th>
+	<th>Fecha Actualizaci&oacute;n</th>
 	<th>Fecha Expiraci&oacute;n</th>
 	<th>Acci&oacute;n</th>
 	<th>Acci&oacute;n</th>
@@ -66,6 +67,7 @@
 		<td>{{$objective_category['nombre']}}</td>
 		<td>{{$objective_category['descripcion']}}</td>
 		<td>{{$objective_category['fecha_creacion']}}</td>
+		<td>{{$objective_category['fecha_act']}}</td>
 		<td>{{$objective_category['fecha_exp']}}</td>
 		<td>
 			<div>

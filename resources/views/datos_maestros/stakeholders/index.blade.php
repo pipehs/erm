@@ -59,6 +59,7 @@
 	<th>Apellidos</th>
 	<th>Tipo</th>
 	<th>Fecha Agregado</th>
+	<th>Fecha Actualizado</th>
 	<th>Correo Electr&oacute;nico</th>
 	<th>Organizacion(es)</th>
 	<th>Cargo</th>
@@ -69,11 +70,12 @@
 	@foreach($stakeholders as $stakeholder)
 		<tr>
 			<td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
-			<td>{{ $stakeholder['nombre'] }}</small></td>
-			<td>{{ $stakeholder['apellidos']}}</small></td>
-			<td>{{ $stakeholder['tipo'] }}</small></td>
-			<td>{{ $stakeholder['fecha_creacion'] }}</small></td>
-			<td>{{ $stakeholder['correo'] }}</small></td>
+			<td>{{ $stakeholder['nombre'] }}</td>
+			<td>{{ $stakeholder['apellidos']}}</td>
+			<td>{{ $stakeholder['tipo'] }}</td>
+			<td>{{ $stakeholder['fecha_creacion'] }}></td>
+			<td>{{ $stakeholder['fecha_act'] }}</td>
+			<td>{{ $stakeholder['correo'] }}</td>
 			<td><ul>
 			@foreach ($organizaciones as $organizacion)
 				@if ($organizacion['stakeholder_id'] == $stakeholder['id'])
@@ -81,7 +83,7 @@
 				@endif
 			@endforeach
 			</ul></small></td>
-			<td>{{ $stakeholder['cargo'] }}</small></td>
+			<td>{{ $stakeholder['cargo'] }}</td>
 			<td> 
 			<div>
 			@if ($stakeholder['estado'] == 0)

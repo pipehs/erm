@@ -50,22 +50,23 @@
 	@else
 		{!! link_to_route('subprocesos.verbloqueados', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
 	@endif
-	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2">
+	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size: 11px;">
 					<thead>
 						<tr>
-							<th><small>Organizaciones</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Proceso involucrado</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Subproceso</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Descripci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Fecha Creaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Fecha Expiraci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th><small>Subprocesos Dependientes</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Organizaciones</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Proceso involucrado</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Subproceso</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Descripci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Fecha Creaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Fecha Actualizaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Fecha Expiraci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Subprocesos Dependientes</small><label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Acci&oacute;n</th>
 							<th>Acci&oacute;n</th>
 						</tr>
 					</thead>
 	<tr style="display:none;">
-	<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+	<td></td><td></td><td></td><td><td></td></td><td></td><td></td><td></td><td></td><td></td></tr>
 	@foreach ($subprocesos as $subproceso)
 		<tr>
 		<td><ul>
@@ -79,6 +80,7 @@
 		<td>{{ $subproceso['nombre'] }}</td>
 		<td>{{ $subproceso['descripcion'] }}</td>
 		<td>{{ $subproceso['fecha_creacion'] }}</td>
+		<td>{{ $subproceso['fecha_act'] }}</td>
 		<td>{{ $subproceso['fecha_exp'] }}</td>
 		<td><ul style="none">
 		@foreach ($sub_dependientes as $subprocesos)

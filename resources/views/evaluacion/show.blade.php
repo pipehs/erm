@@ -22,7 +22,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-check"></i>
-					<span>Encuesta: {{ $encuesta['nombre'] }}</span>
+					<span>Encuesta: {{ $encuesta['name'] }}</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -47,29 +47,25 @@
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
 			<tr>
 			<th width="50%">Descripci&oacute;n</th>
-			<td>{{ $encuesta['descripcion'] }}</td>
+			<td>{{ $encuesta['description'] }}</td>
 			</tr>
 			<tr>
 			<th>Fecha Creaci&oacute;n</th>
-			<td>{{ $encuesta['fecha_creacion'] }}</td>
+			<td>{{ $encuesta['created_at'] }}</td>
 			</tr>
 			<tr>
 			<th>Fecha Expiraci&oacute;n</th>
-			@if ($encuesta['fecha_exp'] == "")
+			@if ($encuesta['expiration_date'] == "")
 				<td>Ninguna</td>
 			@else
-				<td>{{ $encuesta['fecha_exp'] }}</td>
+				<td>{{ $encuesta['expiration_date'] }}</td>
 			@endif
-			</tr>
-			<tr>
-			<th>Niveles Criticidad y Probabilidad</th>
-			<td>{{ $encuesta['max_niveles'] }} nivel(es)</td>
 			</tr>
 			<tr>
 			<th>Riesgos Relacionados</th>
 			<td><ul>
 					@foreach ($riesgos as $riesgo)
-						<li>{{ $riesgo['nombre'] }}</li>
+						<li>{{ $riesgo['risk_name'] }} - {{ $riesgo['subobj'] }}</li>
 					@endforeach
 					</ul>					
 				</td>

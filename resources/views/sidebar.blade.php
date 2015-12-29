@@ -43,7 +43,7 @@
 						<span class="hidden-xs">Evaluaci&oacute;n de Riesgos</span>
 					</a>
 					<ul class="dropdown-menu">
-						<li><a class="ajax-link" href="evaluacion">Creacion de encuestas de evaluacion</a></li>
+						<li>{!!HTML::link('evaluacion','Crear Encuesta de Evaluaci&oacute;n')!!}</li>
 						<li>{!!HTML::link('evaluacion.encuestas','Encuestas agregadas')!!}</li>
 					</ul>
 				</li>

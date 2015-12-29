@@ -59,6 +59,7 @@
 	<th>Tipo</th>
 	<th>Categor&iacute;a</th>
 	<th>Fecha Creaci&oacute;n</th>
+	<th>Fecha Actualizaci&oacute;n</th>
 	<th>Fecha Expiraci&oacute;n</th>
 	<th>Subprocesos u Objetivos Relacionados</th>
 	<th>Causa</th>
@@ -71,12 +72,17 @@
 		<td>{{ $riesgo['tipo'] }}</td>
 		<td>{{ $riesgo['categoria'] }}</td>
 		<td>{{ $riesgo['fecha_creacion'] }}</td>
+		<td>{{ $riesgo['fecha_act'] }}</td>
 		<td>{{ $riesgo['fecha_exp'] }}</td>
 		<td>
 		<ul>
 		@foreach($relacionados as $subonegocio)
 			@if ($subonegocio['risk_id'] == $riesgo['id'])
-				<li>{{ $subonegocio['nombre'] }}</li>
+				@if ($subonegocio['org_name'] != "")
+						<li>{{ $subonegocio['nombre'] }} - {{ $subonegocio['org_name'] }}</li>
+				@else
+						<li>{{ $subonegocio['nombre'] }}</li>
+				@endif
 			@endif
 		@endforeach
 		</ul>	
@@ -91,26 +97,6 @@
 		</div>
 	</div>
 </div>
-<script>
-// Run Datables plugin and create 3 variants of settings
-function AllTables(){
-	TestTable1();
-	TestTable2();
-	TestTable3();
-	LoadSelect2Script(MakeSelect2);
-}
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
-}
-$(document).ready(function() {
-	// Load Datatables and run plugin on tables 
-	LoadDataTablesScripts(AllTables);
-	// Add Drag-n-Drop feature
-	WinMove();
-});
-</script>
 @stop
+
 

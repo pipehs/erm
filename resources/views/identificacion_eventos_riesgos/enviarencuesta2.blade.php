@@ -107,9 +107,9 @@
 			<?php $i = 1; //contador de preguntas ?>
 			@foreach ($preguntas as $pregunta)
 
-				<p>{{$i}}. {{ $pregunta->pregunta }} </p>
+				<p>{{$i}}. {{ $pregunta->question }} </p>
 
-				@if ($pregunta->tipo_respuestas == 1) <!-- verificamos si es radio -->
+				@if ($pregunta->answers_type == 1) <!-- verificamos si es radio -->
 					<p>
 					@foreach ($respuestas as $respuesta) <!-- recorremos todas las respuestas para ver si corresponden a la pregunta -->
 						@if ($respuesta['question_id'] == $pregunta->id) <!-- Si la respuesta pertenece a la pregunta -->
@@ -123,7 +123,7 @@
 					@endforeach
 					</p>
 
-				@elseif ($pregunta->tipo_respuestas == 2) <!-- verificamos si es checkbox -->
+				@elseif ($pregunta->answers_type == 2) <!-- verificamos si es checkbox -->
 					<p>
 					@foreach ($respuestas as $respuesta) <!-- recorremos todas las respuestas para ver si corresponden a la pregunta -->
 						@if ($respuesta['question_id'] == $pregunta->id) <!-- Si la respuesta pertenece a la pregunta -->
@@ -136,7 +136,7 @@
 						@endif
 					@endforeach
 					</p>
-				@elseif ($pregunta->tipo_respuestas == 0) <!-- verificamos si es text -->
+				@elseif ($pregunta->answers_type == 0) <!-- verificamos si es text -->
 				<p>
 				<textarea class="form-control" name="{{ $pregunta->id }}" rows="4" cols="50"></textarea>
 				</p>

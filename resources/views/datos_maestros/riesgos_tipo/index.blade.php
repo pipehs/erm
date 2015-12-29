@@ -57,6 +57,7 @@
 	<th>Descripci&oacute;n</th>
 	<th>Categor&iacute;a</th>
 	<th>Fecha Creaci&oacute;n</th>
+	<th>Fecha Actualizaci&oacute;n</th>
 	<th>Fecha Expiraci&oacute;n</th>
 	<th>Causa</th>
 	<th>Efecto</th>
@@ -69,6 +70,7 @@
 		<td>{{ $riesgo['descripcion'] }}</td>
 		<td>{{ $riesgo['categoria'] }}</td>
 		<td>{{ $riesgo['fecha_creacion'] }}</td>
+		<td>{{ $riesgo['fecha_act'] }}</td>
 		<td>{{ $riesgo['fecha_exp'] }}</td>
 		<td>{{ $riesgo['causa'] }}</td>
 		<td>{{ $riesgo['efecto'] }}</td>

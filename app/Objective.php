@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Objective extends Model
 {
-    protected $fillable = ['nombre','descripcion','fecha_creacion','fecha_exp','organization_id','objectives_category_id','estado'];
+    protected $fillable = ['name','description','expiration_date','organization_id','objective_category_id','status'];
 
     //eliminamos created_at y updated_at
-    public $timestamps = false;
+    //public $timestamps = false;
 
 
     public function risks()

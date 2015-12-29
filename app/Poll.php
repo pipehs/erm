@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Poll extends Model
 {
-    protected $fillable = ['nombre','fecha_creacion'];
+    protected $fillable = ['name','expiration_date'];
 
     //eliminamos created_at y updated_at
-    public $timestamps = false;
+    //public $timestamps = false;
 
     public function questions()
     {

@@ -21,11 +21,11 @@ class CausasController extends Controller
         $causas = array();
         if (isset($_GET['verbloqueados']))
         {
-            $causas2 = \Ermtool\Cause::all()->where('estado',1); //select causas bloqueadas  
+            $causas2 = \Ermtool\Cause::all()->where('status',1); //select causas bloqueadas  
         }
         else
         {
-            $causas2 = \Ermtool\Cause::all()->where('estado',0); //select causas desbloqueadas
+            $causas2 = \Ermtool\Cause::all()->where('status',0); //select causas desbloqueadas
         }
 
         $i = 0;
@@ -33,12 +33,30 @@ class CausasController extends Controller
         // ---recorremos todas las causas para asignar formato de datos correspondientes--- //
         foreach ($causas2 as $causa)
         {
+            //damos formato a fecha de creación
+            if ($causa['created_at'] != NULL)
+            {
+                $fecha_creacion = date_format($causa['created_at'],"d-m-Y");
+                $fecha_creacion .= " a las ".date_format($causa['created_at'],"H:i:s");
+            }
+            else
+                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+
+            //damos formato a fecha de actualización
+            if ($causa['updated_at'] != NULL)
+            {
+                $fecha_act = date_format($causa['updated_at'],"d-m-Y");
+                $fecha_act .= " a las ".date_format($causa['updated_at'],"H:i:s");
+            }
+            else
+                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
 
             $causas[$i] = array('id'=>$causa['id'],
-                                'nombre'=>$causa['nombre'],
-                                'descripcion'=>$causa['descripcion'],
-                                'fecha_creacion'=>$causa['fecha_creacion'],
-                                'estado'=>$causa['estado']);
+                                'nombre'=>$causa['name'],
+                                'descripcion'=>$causa['description'],
+                                'fecha_creacion'=>$fecha_creacion,
+                                'fecha_act'=>$fecha_act,
+                                'estado'=>$causa['status']);
             $i += 1;
         }
         return view('datos_maestros.causas.index',['causas'=>$causas]);
@@ -62,14 +80,9 @@ class CausasController extends Controller
      */
     public function store(Request $request)
     {
-         //obtenemos orden correcto de fecha creación
-        $fecha = explode("/",$request['fecha_creacion']);
-        $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-
         \Ermtool\Cause::create([
-            'nombre' => $request['nombre'],
-            'descripcion' => $request['descripcion'],
-            'fecha_creacion' => $fecha_creacion,
+            'name' => $request['name'],
+            'description' => $request['description'],
             ]);
 
             Session::flash('message','Causa agregada correctamente');
@@ -100,18 +113,9 @@ class CausasController extends Controller
     public function update(Request $request, $id)
     {
         $causa = \Ermtool\Cause::find($id);
-        $fecha_creacion = $causa->fecha_creacion; //Se debe obtener fecha de creación por si no fue modificada
 
-        if (strpos($request['fecha_creacion'],'/')) //primero verificamos que la fecha no se encuentre ya en el orden correcto
-        {
-            //obtenemos orden correcto de fecha creación
-            $fecha = explode("/",$request['fecha_creacion']);
-            $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-
-        $causa->nombre = $request['nombre'];
-        $causa->descripcion = $request['descripcion'];
-        $causa->fecha_creacion = $fecha_creacion;
+        $causa->name = $request['name'];
+        $causa->description = $request['description'];
 
         $causa->save();
 
@@ -123,7 +127,7 @@ class CausasController extends Controller
     public function bloquear($id)
     {
         $causa = \Ermtool\Cause::find($id);
-        $causa->estado = 1;
+        $causa->status = 1;
         $causa->save();
 
         Session::flash('message','Causa bloqueada correctamente');
@@ -134,7 +138,7 @@ class CausasController extends Controller
     public function desbloquear($id)
     {
         $causa = \Ermtool\Cause::find($id);
-        $causa->estado = 0;
+        $causa->status = 0;
         $causa->save();
 
         Session::flash('message','Causa desbloqueada correctamente');

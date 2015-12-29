@@ -13,18 +13,14 @@
 //Route::post('posts/store-new-post', 'PostsController@store');
 //Route::post('posts/{slug}', 'PostsController@update');
 
-Route::get('/', 
-function()
-	{
-		return view('home');
-	}
+Route::get('/', [
+	'as' => '/', 'uses' => 'HomeController@index'
+]
 );
 
-Route::get('home', 
-function()
-	{
-		return view('home');
-	}
+Route::get('home',[
+	'as' => '/', 'uses' => 'HomeController@index'
+]
 );
 
 // ----RUTAS PARA GESTIÓN DE DATOS MAESTROS---- //
@@ -343,6 +339,10 @@ Route::resource('riesgos','RiesgosController');
 
 Route::get('riesgos.create', [
 	'as' => 'riesgos.create', 'uses' => 'RiesgosController@create'
+]);
+
+Route::get('riesgos.setriesgotipo.{id}', [
+	'as' => 'riesgos.setriesgotipo', 'uses' => 'RiesgosController@setRiesgoTipo'
 ]);
 
 // ---- FIN RUTAS PARA IDENTIFICACIÓN DE RIESGO ---- //

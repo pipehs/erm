@@ -58,6 +58,7 @@
 	<th>Nombre</th>
 	<th>Descripci&oacute;n</th>
 	<th>Fecha Creaci&oacute;n</th>
+	<th>Fecha de Actualizaci&oacute;n</th>
 	<th>Acci&oacute;n</th>
 	<th>Acci&oacute;n</th>
 	</thead>
@@ -66,6 +67,7 @@
 		<td>{{ $causa['nombre'] }}</td>
 		<td>{{ $causa['descripcion'] }}</td>
 		<td>{{ $causa['fecha_creacion'] }}</td>
+		<td>{{ $causa['fecha_act'] }}</td>
 		<td><div>
 			@if ($causa['estado'] == 0)
 	            {!! link_to_route('causas.edit', $title = 'Editar', $parameters = $causa['id'], $attributes = ['class'=>'btn btn-success']) !!}

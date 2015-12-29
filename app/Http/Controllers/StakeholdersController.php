@@ -19,13 +19,15 @@ class StakeholdersController extends Controller
     public function index()
     {
         $stakeholder = array();
+        $organizaciones = array(); //definimos por si no hay
+        
         if (isset($_GET['verbloqueados']))
         {
-            $stakeholders = \Ermtool\Stakeholder::all()->where('estado',1); //select stakeholders bloqueadas  
+            $stakeholders = \Ermtool\Stakeholder::all()->where('status',1); //select stakeholders bloqueadas  
         }
         else
         {
-            $stakeholders = \Ermtool\Stakeholder::all()->where('estado',0); //select stakeholders desbloqueadas
+            $stakeholders = \Ermtool\Stakeholder::all()->where('status',0); //select stakeholders desbloqueadas
         }
 
         $i = 0;
@@ -35,32 +37,53 @@ class StakeholdersController extends Controller
         {
             //ahora obtenemos todas las organizaciones a las que pertenece cada persona
             $orgs = \Ermtool\Stakeholder::find($persona['id'])->organizations;
+           
 
             foreach ($orgs as $organization)
             {
                  $organizaciones[$j] = array('stakeholder_id'=>$persona['id'],
                                              'id'=>$organization['id'],
-                                             'nombre'=>$organization['nombre']);
+                                             'nombre'=>$organization['name']);
 
                  $j += 1;
             }
 
-            if ($persona['cargo'] == NULL)
+            if ($persona['position'] == NULL)
                 $cargo = "No especificado";
             else
-                $cargo = $persona['cargo'];
+                $cargo = $persona['position'];
+
+             //damos formato a fecha creación
+            if ($persona['created_at'] != NULL)
+            {
+                $fecha_creacion = date_format($persona['created_at'],"d-m-Y");
+                $fecha_creacion .= " a las ".date_format($persona['created_at'],"H:i:s");
+            }
+            else
+                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+
+            //damos formato a fecha de actualización 
+            if ($persona['updated_at'] != NULL)
+            {
+                $fecha_act = date_format($persona['updated_at'],"d-m-Y");
+                $fecha_act .= " a las ".date_format($persona['updated_at'],"H:i:s");
+            }
+
+            else
+                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
 
             $org = \Ermtool\Organization::find($persona['organization_id']);
 
             $stakeholder[$i] = array('id'=>$persona['id'],
                                 'dv'=>$persona['dv'],
-                                'nombre'=>$persona['nombre'],
-                                'apellidos'=>$persona['apellidos'],
-                                'tipo'=>$persona['tipo'],
-                                'fecha_creacion'=>$persona['fecha_creacion'],
+                                'nombre'=>$persona['name'],
+                                'apellidos'=>$persona['surnames'],
+                                'tipo'=>$persona['role'],
+                                'fecha_creacion'=>$fecha_creacion,
+                                'fecha_act'=>$fecha_act,
                                 'cargo'=>$cargo,
-                                'correo'=>$persona['correo'],
-                                'estado'=>$persona['estado']);
+                                'correo'=>$persona['mail'],
+                                'estado'=>$persona['status']);
             $i += 1;
         }
         return view('datos_maestros.stakeholders.index',['stakeholders'=>$stakeholder,'organizaciones'=>$organizaciones]); 
@@ -73,7 +96,7 @@ class StakeholdersController extends Controller
      */
     public function create()
     {
-        $organizations = \Ermtool\Organization::where('estado',0)->lists('nombre','id');
+        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
         //si es create, campo rut estara desbloqueado
         $required = 'required';
         $disabled = "";
@@ -88,19 +111,14 @@ class StakeholdersController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha creación
-        $fecha = explode("/",$request['fecha_creacion']);
-        $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-       
         \Ermtool\Stakeholder::create([
             'id' => $request['id'],
             'dv' => $request['dv'],
-            'nombre' => $request['nombre'],
-            'apellidos' => $request['apellidos'],
-            'fecha_creacion' => $fecha_creacion,
-            'tipo' => $request['tipo'],
-            'cargo' => $request['cargo'],
-            'correo' => $request['correo']
+            'name' => $request['name'],
+            'surnames' => $request['surnames'],
+            'role' => $request['role'],
+            'position' => $request['position'],
+            'mail' => $request['mail']
             ]);
 
         //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
@@ -137,7 +155,7 @@ class StakeholdersController extends Controller
     public function edit($id)
     {
         $stakeholder = \Ermtool\Stakeholder::find($id);
-        $organizations = \Ermtool\Organization::where('estado',0)->lists('nombre','id');
+        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
         //si es edit, campo rut estara bloqueado y no habrá required
         $disabled = 'disabled';
         return view('datos_maestros.stakeholders.edit',
@@ -154,23 +172,12 @@ class StakeholdersController extends Controller
     public function update(Request $request, $id)
     {
         $stakeholder = \Ermtool\Stakeholder::find($id);
-        $fecha_creacion = $stakeholder->fecha_creacion; //Se debe obtener fecha de creación por si no fue modificada
-        $fecha_exp = NULL;
 
-        if (strpos($request['fecha_creacion'],'/')) //primero verificamos que la fecha no se encuentre ya en el orden correcto
-        {
-            //obtenemos orden correcto de fecha creación
-            $fecha = explode("/",$request['fecha_creacion']);
-            $fecha_creacion = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-       
-
-            $stakeholder->nombre = $request['nombre'];
-            $stakeholder->apellidos = $request['apellidos'];
-            $stakeholder->fecha_creacion = $fecha_creacion;
-            $stakeholder->tipo = $request['tipo'];
-            $stakeholder->cargo = $request['cargo'];
-            $stakeholder->correo = $request['correo'];
+            $stakeholder->name = $request['name'];
+            $stakeholder->surnames = $request['surnames'];
+            $stakeholder->role = $request['role'];
+            $stakeholder->position = $request['position'];
+            $stakeholder->mail = $request['mail'];
     
             $stakeholder->save();
 
@@ -194,7 +201,7 @@ class StakeholdersController extends Controller
     public function bloquear($id)
     {
         $stakeholder = \Ermtool\Stakeholder::find($id);
-        $stakeholder->estado = 1;
+        $stakeholder->status = 1;
         $stakeholder->save();
 
         Session::flash('message','Stakeholder bloqueado correctamente');
@@ -205,7 +212,7 @@ class StakeholdersController extends Controller
     public function desbloquear($id)
     {
         $stakeholder = \Ermtool\Stakeholder::find($id);
-        $stakeholder->estado = 0;
+        $stakeholder->status = 0;
         $stakeholder->save();
 
         Session::flash('message','Stakeholder desbloqueado correctamente');

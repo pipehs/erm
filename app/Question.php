@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Question extends Model
 {
-    protected $fillable = ['pregunta','tipo_respuestas','poll_id'];
+    protected $fillable = ['question','answers_type','poll_id'];
 
     //eliminamos created_at y updated_at
     public $timestamps = false;

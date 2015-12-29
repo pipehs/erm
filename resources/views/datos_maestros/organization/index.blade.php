@@ -77,6 +77,7 @@
 	<th>Nombre</th>
 	<th>Descripci&oacute;n</th>
 	<th>Fecha Creaci&oacute;n</th>
+	<th>Fecha Actualizado</th>
 	<th>Fecha Expiraci&oacute;n</th>
 	<th>Org. de servicios compartidos</th>
 	<th>Organizaciones dependientes</th>
@@ -89,6 +90,7 @@
 		<td>{{$organization['nombre']}}</td>
 		<td>{{$organization['descripcion']}}</td>
 		<td>{{$organization['fecha_creacion']}}</td>
+		<td>{{$organization['fecha_act']}}
 		<td>{{$organization['fecha_exp']}}</td>
 		<td>{{$organization['serv_compartidos']}}</td>
 		<td>

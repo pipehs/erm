@@ -46,17 +46,17 @@ class EncuestasController extends Controller
             if ($request['destinatarios'] == 0) //Se asignaran los destinatarios manualmente
             {
                 //seleccionamos lista de stakeholders
-                 $dest = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(nombre, " ", apellidos) AS full_name'))
-                                                        ->orderBy('nombre')
+                 $dest = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+                                                        ->orderBy('name')
                                                         ->lists('full_name', 'id');
             }
             else if ($request['destinatarios'] == 1) //Se enviará por organizacion
             {
-                $dest = \Ermtool\Organization::lists('nombre','id');
+                $dest = \Ermtool\Organization::lists('name','id');
             }
             else if ($request['destinatarios'] == 2) //Se enviará por tipo / rol
             {
-                $dest = DB::table('stakeholders')->distinct('tipo')->lists('tipo','tipo');
+                $dest = DB::table('stakeholders')->distinct('role')->lists('role','role');
             }
 
             $encuesta = \Ermtool\Poll::find($request['encuesta']);
@@ -68,14 +68,14 @@ class EncuestasController extends Controller
             $i = 0; //contador de respuestas
             foreach ($preguntas as $pregunta)
             {
-                if ($pregunta->tipo_respuestas != 0) //pregunta tiene alguna posible answer
+                if ($pregunta->answers_type != 0) //pregunta tiene alguna posible answer
                 {
                     $posible_answers = DB::table('posible_answers')->where('question_id',$pregunta->id)->get();
 
                     foreach ($posible_answers as $posible_answer)
                     {
                         $answers[$i] = array('id'=>$posible_answer->id,
-                                            'respuesta'=>$posible_answer->respuesta,
+                                            'respuesta'=>$posible_answer->answer,
                                             'question_id'=>$posible_answer->question_id);
                         $i += 1;
                     }
@@ -88,13 +88,13 @@ class EncuestasController extends Controller
         }
         else if (isset($_GET['volver']))
         {
-            $polls = \Ermtool\Poll::lists('nombre','id');
+            $polls = \Ermtool\Poll::lists('name','id');
 
             return view('identificacion_eventos_riesgos.enviarencuesta',['polls'=>$polls]);
         }
         else
         {
-            $polls = \Ermtool\Poll::lists('nombre','id');
+            $polls = \Ermtool\Poll::lists('name','id');
             return view('identificacion_eventos_riesgos.enviarencuesta',['polls'=>$polls]);
         }
     }
@@ -104,8 +104,7 @@ class EncuestasController extends Controller
         if (isset($_POST['agregar'])) //se agregaron las preguntas, ahora se deben agregar las respuestas
         {
             \Ermtool\Poll::create([
-                'nombre'=>$_POST['nombre'],
-                'fecha_creacion'=>date('Y-m-d'),
+                'name'=>$_POST['nombre'],
                 ]);
             $cont = $_POST['cantidad_preguntas'];
 
@@ -133,8 +132,8 @@ class EncuestasController extends Controller
         for ($i=1; $i<=$cont; $i++)
         {
             \Ermtool\Question::create([
-                'pregunta'=>$request['pregunta'.$i],
-                'tipo_respuestas'=>$request['tipo_respuesta'.$i],
+                'question'=>$request['pregunta'.$i],
+                'answers_type'=>$request['tipo_respuesta'.$i],
                 'poll_id'=>$request['poll_id'],
                 ]);
 
@@ -148,7 +147,7 @@ class EncuestasController extends Controller
                 while (isset($_POST['pregunta'.$i.'_alternativa'.$j])) //mientras hayan alternativas para la pregunta
                 {
                     \Ermtool\Posible_answer::create([
-                        'respuesta'=>$request['pregunta'.$i.'_alternativa'.$j],
+                        'answer'=>$request['pregunta'.$i.'_alternativa'.$j],
                         'question_id'=>$question_id,
                         ]);
                     $j += 1;
@@ -173,14 +172,14 @@ class EncuestasController extends Controller
         $i = 0; //contador de respuestas
         foreach ($preguntas as $pregunta)
         {
-            if ($pregunta->tipo_respuestas != 0) //pregunta tiene alguna posible answer
+            if ($pregunta->answers_type != 0) //pregunta tiene alguna posible answer
             {
                 $posible_answers = DB::table('posible_answers')->where('question_id',$pregunta->id)->get();
 
                 foreach ($posible_answers as $posible_answer)
                 {
                     $answers[$i] = array('id'=>$posible_answer->id,
-                                        'respuesta'=>$posible_answer->respuesta,
+                                        'answer'=>$posible_answer->answer,
                                         'question_id'=>$posible_answer->question_id);
                     $i += 1;
                 }
@@ -201,7 +200,7 @@ class EncuestasController extends Controller
         foreach ($request['stakeholder_id'] as $stakeholder_id)
         {
             $stakeholders[$i] = \Ermtool\Stakeholder::find($stakeholder_id);
-            $correos[$i] = $stakeholders[$i]->correo;
+            $correos[$i] = $stakeholders[$i]->mail;
             $i += 1;
         }
 
@@ -243,11 +242,11 @@ class EncuestasController extends Controller
                     foreach ($_POST['respuesta'.$pregunta_id] as $respuesta)
                     {
                         //obtenemos valor de la respuesta -> de la tabla posible_answers
-                        $resp = DB::table('posible_answers')->where('id',$respuesta)->value('respuesta');
+                        $resp = DB::table('posible_answers')->where('id',$respuesta)->value('answer');
                         
                         //agregamos respuesta
                         \Ermtool\Answer::create([
-                                        'respuesta'=>$resp,
+                                        'answer'=>$resp,
                                         'question_id'=>$pregunta_id,
                                         'stakeholder_id'=>$request['id'],
                                         ]);
@@ -256,19 +255,35 @@ class EncuestasController extends Controller
                 else
                 {
                     //obtenemos valor de la respuesta -> de la tabla posible_answers
-                        $resp = DB::table('posible_answers')->where('id',$_POST['respuesta'.$pregunta_id])->value('respuesta');
+                        $resp = DB::table('posible_answers')->where('id',$_POST['respuesta'.$pregunta_id])->value('answer');
                         
+                    //vemos si es radio button (debería existir $resp)
+                    if ($resp)
+                    {
                         //agregamos respuesta
                         \Ermtool\Answer::create([
-                                        'respuesta'=>$resp,
+                                        'answer'=>$resp,
                                         'question_id'=>$pregunta_id,
                                         'stakeholder_id'=>$request['id'],
                                         ]);
+                    }
+                    else //es texto
+                    {
+                        //agregamos respuesta
+                        \Ermtool\Answer::create([
+                                        'answer'=>$_POST['respuesta'.$pregunta_id],
+                                        'question_id'=>$pregunta_id,
+                                        'stakeholder_id'=>$request['id'],
+                                        ]);
+                    }
                 }
             }
 
             echo "Encuesta agregada con éxito";
             ///////////////////// MEJORAR MENSAJE ////////////////////////
+
+            Session::flash('message','Respuestas enviadas correctamente');
+            return view('evaluacion.encuestaresp');
         }
         else
         {
@@ -279,7 +294,8 @@ class EncuestasController extends Controller
 
     public function encuestaRespondida()
     {
-
+        Session::flash('message','El rut ingresado no se encuentra en nuestra base de datos');
+                return Redirect::to('identificacion.encuesta.'.$request["encuesta_id"]);
     }
 
     //función para ver las respuestas enviadas a las encuestas
@@ -316,7 +332,7 @@ class EncuestasController extends Controller
         }
         else
         {
-            $polls = \Ermtool\Poll::lists('nombre','id');
+            $polls = \Ermtool\Poll::lists('name','id');
             return view('reportes.encuestas',['polls'=>$polls]);    
         }
         
@@ -337,7 +353,7 @@ class EncuestasController extends Controller
         $stakeholder = \Ermtool\Stakeholder::find($_GET['stakeholder_id']);
 
         //nombre de encuesta
-        $encuesta = \Ermtool\Poll::where('id',$id)->value('nombre');
+        $encuesta = \Ermtool\Poll::where('id',$id)->value('name');
 
         $answers = array();
         $i = 0;
