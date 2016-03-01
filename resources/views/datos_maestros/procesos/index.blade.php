@@ -82,13 +82,19 @@
 		@endif
 		</ul></td>
 		<td>{{ $proceso['nombre'] }}</td>
-		<td><ul style="none">
-		@foreach ($subprocesos as $subproceso)
-			@if ($subproceso['proceso_id'] == $proceso['id'])
-				<li>{{ $subproceso['nombre'] }}</li>
-			@endif
-		@endforeach
-		</ul></td>
+		<td>
+		@if ($subprocesos != NULL)
+			<ul style="none">
+			@foreach ($subprocesos as $subproceso)
+				@if ($subproceso['proceso_id'] == $proceso['id'])
+					<li>{{ $subproceso['nombre'] }}</li>
+				@endif
+			@endforeach
+			</ul>
+		@else
+			Aun no hay subprocesos relacionados
+		@endif
+		</td>
 		<td>{{ $proceso['descripcion'] }}</td>
 		<td>{{ $proceso['fecha_creacion'] }}</td>
 		<td>{{ $proceso['fecha_act'] }}</td>
@@ -103,9 +109,8 @@
 	        </div><!-- /btn-group --></td>
 		<td><div>
 			@if ($proceso['estado'] == 0)
-	            {!! link_to_route('procesos.bloquear', $title = 'Bloquear', $parameters = $proceso['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	           <button class="btn btn-danger" onclick="bloquear({{ $proceso['id'] }},'{{ $proceso['nombre'] }}','procesos','el proceso')">Bloquear</button>
 	        @else
-	        	{!! link_to_route('procesos.bloquear', $title = 'Eliminar', $parameters = $proceso['id'], $attributes = ['class'=>'btn btn-danger']) !!}
 	        @endif
 	        </div><!-- /btn-group -->
 	    </td>

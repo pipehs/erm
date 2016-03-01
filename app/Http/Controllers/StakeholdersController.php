@@ -18,8 +18,10 @@ class StakeholdersController extends Controller
      */
     public function index()
     {
+        //definimos por si no hay
         $stakeholder = array();
-        $organizaciones = array(); //definimos por si no hay
+        $organizaciones = array(); 
+        $roles = array(); 
         
         if (isset($_GET['verbloqueados']))
         {
@@ -32,6 +34,7 @@ class StakeholdersController extends Controller
 
         $i = 0;
         $j = 0; //contador de organizaciones relacionadas 
+        $k = 0; //contador de roles
         // ---recorremos todas los stakeholders para asignar formato de datos correspondientes--- //
         foreach ($stakeholders as $persona)
         {
@@ -46,6 +49,19 @@ class StakeholdersController extends Controller
                                              'nombre'=>$organization['name']);
 
                  $j += 1;
+            }
+
+            //obtenemos todos los roles a los que pertenece una persona
+            $roles_temp = \Ermtool\Stakeholder::find($persona['id'])->roles;
+           
+
+            foreach ($roles_temp as $role)
+            {
+                 $roles[$k] = array('stakeholder_id'=>$persona['id'],
+                                             'id'=>$role['id'],
+                                             'nombre'=>$role['name']);
+
+                 $k += 1;
             }
 
             if ($persona['position'] == NULL)
@@ -72,13 +88,10 @@ class StakeholdersController extends Controller
             else
                 $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
 
-            $org = \Ermtool\Organization::find($persona['organization_id']);
-
             $stakeholder[$i] = array('id'=>$persona['id'],
                                 'dv'=>$persona['dv'],
                                 'nombre'=>$persona['name'],
                                 'apellidos'=>$persona['surnames'],
-                                'tipo'=>$persona['role'],
                                 'fecha_creacion'=>$fecha_creacion,
                                 'fecha_act'=>$fecha_act,
                                 'cargo'=>$cargo,
@@ -86,7 +99,8 @@ class StakeholdersController extends Controller
                                 'estado'=>$persona['status']);
             $i += 1;
         }
-        return view('datos_maestros.stakeholders.index',['stakeholders'=>$stakeholder,'organizaciones'=>$organizaciones]); 
+        return view('datos_maestros.stakeholders.index',['stakeholders'=>$stakeholder,
+                                            'organizaciones'=>$organizaciones,'roles'=>$roles]); 
     }
 
     /**
@@ -97,10 +111,12 @@ class StakeholdersController extends Controller
     public function create()
     {
         $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+        $roles = \Ermtool\Role::all()->lists('name','id');
         //si es create, campo rut estara desbloqueado
         $required = 'required';
         $disabled = "";
-        return view('datos_maestros.stakeholders.create',['organizations'=>$organizations,'disabled'=>$disabled,'required'=>$required]);
+        return view('datos_maestros.stakeholders.create',['organizations'=>$organizations,'disabled'=>$disabled,
+                                                            'required'=>$required,'roles'=>$roles]);
     }
 
     /**
@@ -116,7 +132,6 @@ class StakeholdersController extends Controller
             'dv' => $request['dv'],
             'name' => $request['name'],
             'surnames' => $request['surnames'],
-            'role' => $request['role'],
             'position' => $request['position'],
             'mail' => $request['mail']
             ]);
@@ -129,6 +144,34 @@ class StakeholdersController extends Controller
                 'stakeholder_id'=>$request['id']
                 ]);
         }
+
+        //INSERTAMOS ROLES
+            //primero verificamos si es que se está agregando un nuevo rol
+            if (isset($request['rol_nuevo']))
+            {
+                $role = \Ermtool\Role::create([
+                    'name' => $request['rol_nuevo'],
+                    'status' => 0
+                ]);
+
+                //insertamos relación
+                DB::table('role_stakeholder')->insert([
+                        'stakeholder_id' => $request['id'],
+                        'role_id' => $role->id
+                        ]);
+            }
+
+            else //se están seleccionando roles existentes
+            {
+                foreach ($request['role_id'] as $role_id) //insertamos cada rol seleccionado
+                {
+                    DB::table('role_stakeholder')->insert([
+                        'stakeholder_id' => $request['id'],
+                        'role_id' => $role_id
+                        ]);
+                }
+            }
+
 
             Session::flash('message','Stakeholder agregado correctamente');
 
@@ -156,10 +199,14 @@ class StakeholdersController extends Controller
     {
         $stakeholder = \Ermtool\Stakeholder::find($id);
         $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+        $roles = \Ermtool\Role::all()->lists('name','id');
+
+        $i = 0;
+
         //si es edit, campo rut estara bloqueado y no habrá required
         $disabled = 'disabled';
-        return view('datos_maestros.stakeholders.edit',
-            ['stakeholder'=>$stakeholder,'organizations'=>$organizations,'disabled'=>$disabled,'required'=>'']);
+        return view('datos_maestros.stakeholders.edit',['stakeholder'=>$stakeholder,'organizations'=>$organizations,
+                                                            'disabled'=>$disabled,'required'=>'','roles'=>$roles]);
     }
 
     /**
@@ -175,7 +222,6 @@ class StakeholdersController extends Controller
 
             $stakeholder->name = $request['name'];
             $stakeholder->surnames = $request['surnames'];
-            $stakeholder->role = $request['role'];
             $stakeholder->position = $request['position'];
             $stakeholder->mail = $request['mail'];
     
@@ -192,6 +238,19 @@ class StakeholdersController extends Controller
                     'stakeholder_id'=>$id
                     ]);
             }
+
+            //nuevamente eliminaremos los roles anteriores del stakeholder para evitar repeticiones
+            DB::table('role_stakeholder')->where('stakeholder_id',$id)->delete();
+
+            //ahora, agregamos posibles nuevas relaciones
+            foreach($request['role_id'] as $role_id)
+            {
+                DB::table('role_stakeholder')->insert([
+                    'role_id'=>$role_id,
+                    'stakeholder_id'=>$id
+                    ]);
+            }
+
 
             Session::flash('message','Stakeholder actualizado correctamente');
 
@@ -217,7 +276,7 @@ class StakeholdersController extends Controller
 
         Session::flash('message','Stakeholder desbloqueado correctamente');
 
-        return Redirect::to('/categorias_objetivos');
+        return Redirect::to('/stakeholders');
     }
 
     /**

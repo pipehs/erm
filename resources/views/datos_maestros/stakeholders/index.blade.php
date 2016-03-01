@@ -72,7 +72,13 @@
 			<td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
 			<td>{{ $stakeholder['nombre'] }}</td>
 			<td>{{ $stakeholder['apellidos']}}</td>
-			<td>{{ $stakeholder['tipo'] }}</td>
+			<td><ul>
+			@foreach ($roles as $role)
+				@if ($role['stakeholder_id'] == $stakeholder['id'])
+					<li>{{ $role['nombre'] }}</li>
+				@endif
+			@endforeach
+			</ul></td>
 			<td>{{ $stakeholder['fecha_creacion'] }}></td>
 			<td>{{ $stakeholder['fecha_act'] }}</td>
 			<td>{{ $stakeholder['correo'] }}</td>
@@ -82,7 +88,7 @@
 					<li>{{ $organizacion['nombre'] }}</li>
 				@endif
 			@endforeach
-			</ul></small></td>
+			</ul></td>
 			<td>{{ $stakeholder['cargo'] }}</td>
 			<td> 
 			<div>
@@ -96,9 +102,9 @@
 		<td>
 			<div>
 			@if ($stakeholder['estado'] == 0)
-	            {!! link_to_route('stakeholders.bloquear', $title = 'Bloquear', $parameters = $stakeholder['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	             <button class="btn btn-danger" onclick="bloquear({{ $stakeholder['id'] }},'{{ $stakeholder['nombre']." ".$stakeholder['apellidos'] }}','stakeholders','el usuario')">Bloquear</button>
 	        @else
-	        	{!! link_to_route('stakeholders.bloquear', $title = 'Eliminar', $parameters = $stakeholder['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	        	
 	        @endif
 	        </div><!-- /btn-group -->
 		</td>
@@ -110,26 +116,5 @@
 		</div>
 	</div>
 </div>
-<script>
-// Run Datables plugin and create 3 variants of settings
-function AllTables(){
-	TestTable1();
-	TestTable2();
-	TestTable3();
-	LoadSelect2Script(MakeSelect2);
-}
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
-}
-$(document).ready(function() {
-	// Load Datatables and run plugin on tables 
-	LoadDataTablesScripts(AllTables);
-	// Add Drag-n-Drop feature
-	WinMove();
-});
-</script>
 @stop
 

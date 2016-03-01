@@ -80,6 +80,7 @@ class CausasController extends Controller
      */
     public function store(Request $request)
     {
+        
         \Ermtool\Cause::create([
             'name' => $request['name'],
             'description' => $request['description'],

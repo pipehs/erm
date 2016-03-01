@@ -123,7 +123,7 @@ class CategoriasRiesgosController extends Controller
         \Ermtool\Risk_category::create([
             'name' => $request['name'],
             'description' => $request['description'],
-            'fecha_exp' => $fecha_exp,
+            'expiration_date' => $fecha_exp,
             'risk_category_id' => $risk_category_id,
             ]);
 

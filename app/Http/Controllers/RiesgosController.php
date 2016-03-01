@@ -274,6 +274,7 @@ class RiesgosController extends Controller
                 'risk_category_id'=>$request['risk_category_id'],
                 'cause_id'=>$causa,
                 'effect_id'=>$efecto,
+                'expected_loss'=>$request['expected_loss'],
                 ]);
 
         //agregamos en tabla risk_subprocess o objective_risk
@@ -328,8 +329,24 @@ class RiesgosController extends Controller
      */
     public function edit($id)
     {
-        return $id;
+        //categorias de riesgo
+        $categorias = \Ermtool\Risk_Category::where('status',0)->lists('name','id');
+
+        //causas preingresadas
+        $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
+
+        //efectos preingresados
+        $efectos = \Ermtool\Effect::where('status',0)->lists('name','id');
+
+        //riesgos tipo
+        $riesgos_tipo = \Ermtool\Risk::where('status',0)->where('type2',0)->lists('name','id');
+
+        $risk = \Ermtool\Risk::find($id);
+        return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
+                                    'categorias'=>$categorias,'efectos'=>$efectos]);
     }
+
+
 
     /**
      * Update the specified resource in storage.
@@ -340,7 +357,245 @@ class RiesgosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $riesgo = \Ermtool\Risk::find($id);
+        $fecha_exp = NULL;
+
+        if (strpos($request['expiration_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
+        {
+            //obtenemos orden correcto de fecha expiración
+            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
+            {
+                $fecha = explode("/",$request['expiration_date']);
+                $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
+            }
+            else
+            {
+                $fecha_exp = NULL;
+            }
+        }
+        else
+            $fecha_exp = $request['expiration_date'];
+            
+             //vemos si se agrego alguna causa nueva
+            if (isset($request['causa_nueva']))
+            {
+                \Ermtool\Cause::create([
+                    'name'=>$request['causa_nueva']
+                ]);
+
+                //obtenemos id de causa recien agregada
+                $causa = \Ermtool\Cause::max('id');
+            }
+            //agregamos la causa previamente creada, o en su defecto NULL
+            else
+            {
+                if ($request['cause_id'] == NULL)
+                    $causa = NULL;
+                else
+                    $causa = $request['cause_id'];
+            }
+
+            //vemos si se agrego algún efecto nuevo
+            if (isset($request['efecto_nuevo']))
+            {
+                \Ermtool\Effect::create([
+                    'name'=>$request['efecto_nuevo']
+                    ]);
+
+                //obtenemos id de efecto agregado
+                $efecto = \Ermtool\Effect::max('id');
+            }
+            //agregamos efecto previamente creado, o en su defecto NULL
+            else
+            {
+                if ($request['effect_id'] == NULL)
+                    $efecto = NULL;
+                else
+                    $efecto = $request['effect_id'];
+            }
+
+        $riesgo->name = $request['name'];
+        $riesgo->description = $request['description'];
+        $riesgo->expiration_date = $fecha_exp;
+        $riesgo->type2 = 1;
+        $riesgo->risk_category_id = $request['risk_category_id'];
+        $riesgo->cause_id = $causa;
+        $riesgo->effect_id = $efecto;
+        $riesgo->expected_loss = $request['expected_loss'];
+
+        $riesgo->save();
+
+        Session::flash('message','Riesgo actualizado correctamente');
+
+        return Redirect::to('/riesgos');
+    }
+
+    //matriz de riesgos
+    public function matrices()
+    {
+        return view('reportes.matriz_riesgos');
+    }
+
+    public function generarMatriz($value)
+    {
+        $i = 0; //contador de controles/subprocesos o controles/objetivos
+        $datos = array();
+
+        if ($value == 0) //Se generará la matriz de controles de procesos
+        {
+
+            //---------- OBS: EXISTE PROBLEMA SI ES QUE EL RIESGO NO CONTIENE CAUSA Y EFECTO --------//
+            $risks = DB::table('risk_subprocess')
+                                ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                                ->join('processes','subprocesses.process_id','=','processes.id')
+                                ->join('risks','risks.id','=','risk_subprocess.risk_id')
+                                ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
+                                ->join('causes','causes.id','=','risks.cause_id')
+                                ->join('effects','effects.id','=','risks.effect_id')
+                                ->where('risks.type2','=',1)
+                                ->select('risks.*',
+                                        'subprocesses.name as subprocess_name',
+                                        'processes.name as process_name',
+                                        'risk_categories.name as risk_category_name',
+                                        'causes.name as cause_name',
+                                        'effects.name as effect_name')
+                                ->get();
+        }
+
+        else if ($value == 1) //Se generará matriz para riesgos de negocio
+        {
+            $risks = DB::table('objective_risk')
+                                ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                                ->join('risks','risks.id','=','objective_risk.risk_id')
+                                ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
+                                ->join('organizations','organizations.id','=','objectives.organization_id')
+                                ->join('causes','causes.id','=','risks.cause_id')
+                                ->join('effects','effects.id','=','risks.effect_id')
+                                ->where('risks.type2','=',1)
+                                ->select('risks.*',
+                                        'objectives.name as objective_name',
+                                        'organizations.name as organization_name',
+                                        'risk_categories.name as risk_category_name',
+                                        'causes.name as cause_name',
+                                         'effects.name as effect_name')
+                                ->get();
+        }
+
+        foreach ($risks as $risk)
+        {
+                $controles = NULL;
+                // -- seteamos datos --//
+                if ($value == 0) //controles para riesgos de proceso
+                {
+                    //obtenemos controles
+                    $controls = DB::table('controls')
+                                    ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                                    ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                                    ->join('risks','risks.id','=','risk_subprocess.risk_id')
+                                    ->where('risks.id','=',$risk->id)
+                                    ->select('controls.name')
+                                    ->get();
+                }               
+                else if ($value == 1)
+                {
+                    //obtenemos controles
+                    $controls = DB::table('controls')
+                                    ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
+                                    ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                                    ->join('risks','risks.id','=','objective_risk.risk_id')
+                                    ->where('risks.id','=',$risk->id)
+                                    ->select('controls.name')
+                                    ->get();
+                }
+
+                //seteamos controles
+                if ($controls == NULL)
+                {
+                    $controles = "No se han especificado controles";
+                }
+                else
+                {
+                    foreach ($controls as $control)
+                    {
+                        $controles .= '<li>'.$control->name.'</li>';
+                    }
+                }
+                /* IMPORTANTE!!!
+                    Los nombres de las variables serán guardados en español para mostrarlos
+                    en el archivo excel que será exportado
+                */
+                //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
+                if ($risk->created_at == NULL OR $risk->created_at == "0000-00-00" OR $risk->created_at == "")
+                {
+                    $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                }
+
+                else
+                {
+                    //primero sacamos la hora
+                    $fecha_temp1 = explode(' ',$risk->created_at);
+
+                    //sacamos solo fecha y ordenamos
+                    $fecha_temp2 = explode('-',$fecha_temp1[0]);
+
+                    //ponemos fecha
+                    $fecha_creacion = $fecha_temp2[2].'-'.$fecha_temp2[1].'-'.$fecha_temp2[0].' a las '.$fecha_temp1[1];
+                }
+
+                //damos formato a fecha expiración
+                if ($risk->expiration_date == NULL OR $risk->expiration_date == "0000-00-00")
+                {
+                    $expiration_date = "Ninguna";
+                }
+                else
+                { 
+                    //sacamos solo fecha y ordenamos
+                    $fecha_temp1 = explode('-',$risk->expiration_date);
+                    $expiration_date = $fecha_temp1[2].'-'.$fecha_temp1[1].'-'.$fecha_temp1[0];
+                }
+
+                //Seteamos datos
+                if ($value == 0) //guardamos datos de controles de procesos
+                {
+                    $datos[$i] = [//'id' => $control->id,
+                                'Proceso' => $risk->process_name,
+                                'Subproceso' => $risk->subprocess_name,
+                                'Riesgo' => $risk->name,
+                                'Descripción' => $risk->description,
+                                'Controles' => $controles,
+                                'Fecha_creación' => $fecha_creacion,
+                                'Fecha_expiración' => $expiration_date,
+                                'Categoría' => $risk->risk_category_name,
+                                'Pérdida_esperada' => $risk->expected_loss,
+                                'Causas' => $risk->cause_name,
+                                'Efectos' => $risk->effect_name];
+                    $i += 1;
+                }
+
+                else if ($value == 1) //guardamos datos de controles de negocio
+                {
+                    $datos[$i] = [//'id' => $control->id,
+                                'Organización' => $risk->organization_name,
+                                'Objetivo' => $risk->objective_name,
+                                'Riesgo' => $risk->name,
+                                'Descripción' => $risk->description,
+                                'Controles' => $controles,
+                                'Fecha_creación' => $fecha_creacion,
+                                'Fecha_expiración' => $expiration_date,
+                                'Categoría' => $risk->risk_category_name,              
+                                'Pérdida_esperada' => $risk->expected_loss,
+                                'Causas' => $risk->cause_name,
+                                'Efectos' => $risk->effect_name];
+                    $i += 1;
+                }
+        }
+
+        if (strstr($_SERVER["REQUEST_URI"],'genexcel')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
+        {
+            return $datos;
+        }
+        else
+            return json_encode($datos);
     }
 
     /**

@@ -29,7 +29,7 @@
  	{!!Html::style('assets/css/style.css')!!}
  	{!!Html::style('assets/plugins/select2/select2.css')!!}
  	{!!Html::style('assets/plugins/sweetalert-master/dist/sweetalert.css')!!}
- 	{!!Html::style('assets/plugins/sweetalert-master/themes/twitter.css')!!}
+ 	{!!Html::style('assets/plugins/sweetalert-master/themes/twitter/twitter.css')!!}
 
  	{!!Html::style('assets/css/imprimir.css',['media'=>'print'])!!}	
 
@@ -72,7 +72,7 @@
 	{!!Html::script('http://code.highcharts.com/modules/heatmap.js')!!}
 	{!!Html::script('http://code.highcharts.com/modules/exporting.js')!!}
 
-	{!!Html::script('http//code.jquery.com/jquery-1.10.2.js')!!}
+	{!!Html::script('http://code.jquery.com/jquery-1.10.2.js')!!}
 	{!!Html::script('http://code.jquery.com/ui/1.11.4/jquery-ui.js')!!}
 
 	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}

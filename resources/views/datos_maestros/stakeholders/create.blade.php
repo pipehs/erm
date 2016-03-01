@@ -54,3 +54,12 @@
 </div>
 @stop
 
+@section('scripts2')
+<script>
+	$("#agregar_rol").click(function() {
+		$("#rol").empty();
+		$("#rol").append('<div class="form-group">{!!Form::label("Tipo",null,["class"=>"col-sm-4 control-label"])!!}<div class="col-sm-3">{!!Form::text("rol_nuevo",null,["class"=>"form-control","required"=>"true"])!!}</div></div>');
+
+	});
+</script>
+@stop

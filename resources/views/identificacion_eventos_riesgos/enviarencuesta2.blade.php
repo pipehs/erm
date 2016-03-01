@@ -45,7 +45,7 @@
 	@elseif ($tipo == 1)
 		Seleccione la organizaci&oacute;n a la que desea enviar la encuesta.
 	@elseif ($tipo == 2)
-		Seleccione el cargo de los usuarios a los que desea enviar la encuesta.
+		Seleccione el rol de los usuarios a los que desea enviar la encuesta.
 	@endif
 
 		<div class="form-group">
@@ -70,6 +70,7 @@
 		<div class="form-group">
 			Haga click para enviar correo con link a encuesta
 			<div class="col-sm-3">
+				{!!Form::hidden('tipo',$tipo)!!}
 				{!!Form::submit('Enviar', ['class'=>'btn btn-primary'])!!}
 			</div>
 		</div>
@@ -102,7 +103,7 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
 			
-				<b>Nombre:  {{ $encuesta['nombre']}}</b><br><br>
+				<b>Nombre:  {{ $encuesta['name']}}</b><br><br>
 
 			<?php $i = 1; //contador de preguntas ?>
 			@foreach ($preguntas as $pregunta)

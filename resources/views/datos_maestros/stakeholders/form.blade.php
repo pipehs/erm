@@ -1,4 +1,3 @@
-
 					<div class="form-group">
 			            {!!Form::label('Rut',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-2">
@@ -25,10 +24,15 @@
 							{!!Form::text('surnames',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
-					<div class="form-group">
-						{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-							{!!Form::text('role',null,['class'=>'form-control','required'=>'true'])!!}
+					<div id="rol">
+						<div class="form-group">
+							{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
+							<div class="col-sm-3">
+								{!!Form::select('role_id[]',$roles, 
+							 	   null, 
+							 	   ['id' => 'el3','multiple'=>'true','required'=>'true'])!!}
+							</div>
+							<a href="#" id="agregar_rol">Agregar nuevo tipo</a> <br>
 						</div>
 					</div>
 					<div class="form-group">
@@ -43,8 +47,8 @@
 							{!!Form::text('position',null,['class'=>'form-control'])!!}
 						</div>
 					</div>
-					{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}
-					<div class="row form-group">
+					<div class="form-group">
+						{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 						{!!Form::select('organization_id[]',$organizations, 
 					 	   null, 

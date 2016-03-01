@@ -11,8 +11,8 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li>{!!Html::link('#','Datos Maestros')!!}</li>
-			<li>{!!Html::link('riesgostipo','Riesgos Tipo')!!}</li>
-			<li>{!!Html::link('riesgostipo.edit','Modificar Riesgo')!!}</li>
+			<li>{!!Html::link('riskstype','Riesgos Tipo')!!}</li>
+			<li>{!!Html::link('riskstype.edit','Modificar Riesgo')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -39,12 +39,12 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos del riesgo.
-				{!!Form::model($riesgo,['route'=>['riesgostipo.update',$riesgo->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::model($riesgo,['route'=>['riskstype.update',$riesgo->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
 					@include('datos_maestros.riesgos_tipo.form')
 				{!!Form::close()!!}
 
 				<center>
-				{!!Form::open(['url'=>'riesgostipo','method'=>'GET'])!!}
+				{!!Form::open(['url'=>'riskstype','method'=>'GET'])!!}
 					{!!Form::submit('Volver', ['class'=>'btn btn-danger'])!!}
 				{!!Form::close()!!}
 				<center>

@@ -21,7 +21,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-ticket"></i>
-					<span>Categor&iacute;s de Objetivos</span>
+					<span>Categor&iacute;as de Objetivos</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -81,9 +81,9 @@
 		<td>
 			<div>
 			@if ($objective_category['estado'] == 0)
-	            {!! link_to_route('categorias_objetivos.bloquear', $title = 'Bloquear', $parameters = $objective_category['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	            <button class="btn btn-danger" onclick="bloquear({{ $objective_category['id'] }},'{{ $objective_category['nombre'] }}','categorias_objetivos','la categoría de objetivo')">Bloquear</button>
 	        @else
-	        	{!! link_to_route('categorias_objetivos.bloquear', $title = 'Eliminar', $parameters = $objective_category['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	       
 	        @endif
 	        </div><!-- /btn-group -->
 		</td>

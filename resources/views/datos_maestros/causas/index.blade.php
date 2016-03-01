@@ -65,7 +65,13 @@
 	@foreach ($causas as $causa)
 		<tr>
 		<td>{{ $causa['nombre'] }}</td>
-		<td>{{ $causa['descripcion'] }}</td>
+		<td>
+		@if ($causa['descripcion'] == NULL)
+			Ninguna
+		@else
+			{{ $causa['descripcion'] }}
+		@endif
+		</td>
 		<td>{{ $causa['fecha_creacion'] }}</td>
 		<td>{{ $causa['fecha_act'] }}</td>
 		<td><div>
@@ -77,9 +83,9 @@
 	        </div><!-- /btn-group --></td>
 		<td><div>
 			@if ($causa['estado'] == 0)
-	            {!! link_to_route('causas.bloquear', $title = 'Bloquear', $parameters = $causa['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	             <button class="btn btn-danger" onclick="bloquear({{ $causa['id'] }},'{{ $causa['nombre'] }}','causas','la causa')">Bloquear</button>
 	        @else
-	        	{!! link_to_route('causas.bloquear', $title = 'Eliminar', $parameters = $causa['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	        	
 	        @endif
 	        </div><!-- /btn-group -->
 	    </td>

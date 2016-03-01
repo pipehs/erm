@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Agregar Organizaci&oacute;n')
+@section('title', 'Modificar Subproceso')
 
 @stop
 
@@ -12,7 +12,7 @@
 		<ol class="breadcrumb">
 			<li><a href="#">Datos Maestros</a></li>
 			<li><a href="subprocesos">Subprocesos</a></li>
-			<li><a href="subprocesos/create">Agregar Subprocesos</a></li>
+			<li><a href="subprocesos/edit">Modificar Subprocesos</a></li>
 		</ol>
 	</div>
 </div>
@@ -22,7 +22,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-file-o"></i>
-					<span>Agregar Subproceso</span>
+					<span>Modificar Subproceso</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">

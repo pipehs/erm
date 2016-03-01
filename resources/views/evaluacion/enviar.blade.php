@@ -73,7 +73,7 @@
 
 			<div>
 			<center>
-				{!! link_to_route('evaluacion.encuestas', $title = 'Volver', $parameters = NULL,
+				{!! link_to_route('evaluacion_encuestas', $title = 'Volver', $parameters = NULL,
 				 $attributes = ['class'=>'btn btn-success'])!!}
 			<center>
 			</div>

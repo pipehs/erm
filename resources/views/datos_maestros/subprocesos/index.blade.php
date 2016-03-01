@@ -83,11 +83,15 @@
 		<td>{{ $subproceso['fecha_act'] }}</td>
 		<td>{{ $subproceso['fecha_exp'] }}</td>
 		<td><ul style="none">
-		@foreach ($sub_dependientes as $subprocesos)
-			@if ($subprocesos['subprocess_id'] == $subproceso['id'])
-				<li>{{ $subprocesos['nombre'] }}</li>
-			@endif
-		@endforeach
+		@if ($sub_dependientes == NULL)
+			Ninguno
+		@else
+			@foreach ($sub_dependientes as $subprocesos)
+				@if ($subprocesos['subprocess_id'] == $subproceso['id'])
+					<li>{{ $subprocesos['nombre'] }}</li>
+				@endif
+			@endforeach
+		@endif
 		</ul></td>
 		<td><div>
 			@if ($subproceso['estado'] == 0)
@@ -98,9 +102,9 @@
 	        </div><!-- /btn-group --></td>
 		<td><div>
 			@if ($subproceso['estado'] == 0)
-	            {!! link_to_route('subprocesos.bloquear', $title = 'Bloquear', $parameters = $subproceso['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	            <button class="btn btn-danger" onclick="bloquear({{ $subproceso['id'] }},'{{ $subproceso['nombre'] }}','subprocesos','el subproceso')">Bloquear</button>
 	        @else
-	        	{!! link_to_route('subprocesos.bloquear', $title = 'Eliminar', $parameters = $subproceso['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	      
 	        @endif
 	        </div><!-- /btn-group -->
 	    </td>

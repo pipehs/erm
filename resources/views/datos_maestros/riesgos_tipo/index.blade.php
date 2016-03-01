@@ -11,7 +11,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Datos Maestros</a></li>
-			<li><a href="riesgostipo">Riesgos Tipo</a></li>
+			<li><a href="riskstype">Riesgos Tipo</a></li>
 		</ol>
 	</div>
 </div>
@@ -44,12 +44,12 @@
 			</div>
 		@endif
 
-		{!! link_to_route('riesgostipo.create', $title = 'Agregar Riesgo', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
+		{!! link_to_route('riskstype.create', $title = 'Agregar Riesgo', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 
 	@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
-		{!! link_to_route('riesgostipo.index', $title = 'Ver Desbloqueados', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
+		{!! link_to_route('riskstype.index', $title = 'Ver Desbloqueados', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
 	@else
-		{!! link_to_route('riesgostipo.index', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
+		{!! link_to_route('riskstype.index', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
 	@endif
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 	<thead>
@@ -76,16 +76,16 @@
 		<td>{{ $riesgo['efecto'] }}</td>
 		<td><div>
 			@if ($riesgo['estado'] == 0)
-	            {!! link_to_route('riesgostipo.edit', $title = 'Editar', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-success']) !!}
+	            {!! link_to_route('riskstype.edit', $title = 'Editar', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-success']) !!}
 	        @else
-	        	{!! link_to_route('riesgostipo.desbloquear', $title = 'Desbloquear', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-success']) !!}
+	        	{!! link_to_route('riskstype.desbloquear', $title = 'Desbloquear', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-success']) !!}
 	        @endif
 	        </div><!-- /btn-group --></td>
 		<td><div>
 			@if ($riesgo['estado'] == 0)
-	            {!! link_to_route('riesgostipo.bloquear', $title = 'Bloquear', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	             <button class="btn btn-danger" onclick="bloquear({{ $riesgo['id'] }},'{{ $riesgo['nombre'] }}','risktype','el riesgo tipo')">Bloquear</button>
 	        @else
-	        	{!! link_to_route('riesgostipo.bloquear', $title = 'Eliminar', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	    
 	        @endif
 	        </div><!-- /btn-group -->
 	    </td>

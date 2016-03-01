@@ -11,7 +11,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Evaluaci&oacute;n de Riesgos</a></li>
-			<li><a href="evaluacion.encuestas">Encuestas</a></li>
+			<li><a href="evaluacion_encuestas">Encuestas</a></li>
 		</ol>
 	</div>
 </div>
@@ -48,18 +48,22 @@
 		<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="margin: 0 auto;">
 			<thead>
 			<th>Nombre</th>
-			<th>Acci&oacute;n</th>
-			<th>Acci&oacute;n</th>
+			<th>Ver</th>
+			<th>Enviar</th>
+			<th>Consolidar</th>
 			</thead>
 
 				@foreach ($encuestas as $encuesta)
 					<tr>
 					<td>{{ $encuesta['name'] }}</td>
 					<td>
-					 {!! link_to_route('evaluacion.show', $title = 'Ver', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-success']) !!}
+					 {!! link_to_route('evaluacion_encuestas.show', $title = 'Ver', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-success']) !!}
 					 </td>
 					<td>
-					{!! link_to_route('evaluacion.enviar', $title = 'Enviar', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-primary']) !!}
+					{!! link_to_route('evaluacion_encuestas.enviar', $title = 'Enviar', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-primary']) !!}
+					</td>
+					<td>
+					{!! link_to_route('evaluacion_encuestas.consolidar', $title = 'Consolidar', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-danger']) !!}
 					</td>
 					 </tr>
 				@endforeach
@@ -67,39 +71,4 @@
 		</div>
 	</div>
 </div>
-@stop
-@section('scripts')
-<script>
-// Run Datables plugin and create 3 variants of settings
-function AllTables(){
-	TestTable1();
-	TestTable2();
-	TestTable3();
-	LoadSelect2Script(MakeSelect);
-}
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
-}
-$(document).ready(function() {
-	// Add slider for change test input length
-	FormLayoutExampleInputLength($( ".slider-style" ));
-	// Initialize datepicker
-	$('#input_date').datepicker({setDate: new Date()});
-	// Initialize datepicker
-	$('#input_date2').datepicker({setDate: new Date()});
-	// Load Timepicker plugin
-	LoadTimePickerScript(DemoTimePicker);
-	// Add tooltip to form-controls
-	$('.form-control').tooltip();
-	LoadSelect2Script(DemoSelect2);
-	// Load example of form validation
-	LoadBootstrapValidatorScript(DemoFormValidator);
-	// Add Drag-n-Drop feature
-	WinMove();
-
-});
-</script>
 @stop

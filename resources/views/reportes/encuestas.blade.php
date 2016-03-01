@@ -44,7 +44,7 @@
 			</div>
 		@endif
 
-<p>En esta secci&oacute;n podr&aacute; ver las respuestas a las encuestas de evaluaci&oacute;n de riesgos.</p>
+<p>En esta secci&oacute;n podr&aacute; ver las respuestas a las encuestas de identificaci&oacute;n de eventos de riesgos.</p>
 
 @if (isset($polls))
 
@@ -74,7 +74,7 @@
 		@foreach ($stakeholders as $stakeholder)
 			<tr>
 				<td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
-				<td>{{ $stakeholder['nombre'] }} {{ $stakeholder['apellidos'] }}</td>
+				<td>{{ $stakeholder['name'] }} {{ $stakeholder['surnames'] }}</td>
 
 				<td>{!! link_to_route('encuestas.show', $title = 'Ver',
 				 $parameters = ['poll_id'=>$poll_id,'stakeholder_id'=>$stakeholder['id']],

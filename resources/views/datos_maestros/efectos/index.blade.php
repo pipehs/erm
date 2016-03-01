@@ -65,7 +65,13 @@
 	@foreach ($efectos as $efecto)
 		<tr>
 		<td>{{ $efecto['nombre'] }}</td>
-		<td>{{ $efecto['descripcion'] }}</td>
+		<td>
+		@if ($efecto['descripcion'] == NULL)
+			Ninguna
+		@else
+			{{ $efecto['descripcion'] }}
+		@endif
+		</td>
 		<td>{{ $efecto['fecha_creacion'] }}</td>
 		<td>{{ $efecto['fecha_act'] }}</td>
 		<td><div>
@@ -77,9 +83,9 @@
 	        </div><!-- /btn-group --></td>
 		<td><div>
 			@if ($efecto['estado'] == 0)
-	            {!! link_to_route('efectos.bloquear', $title = 'Bloquear', $parameters = $efecto['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	             <button class="btn btn-danger" onclick="bloquear({{ $efecto['id'] }},'{{ $efecto['nombre'] }}','efectos','el efecto')">Bloquear</button>
 	        @else
-	        	{!! link_to_route('efectos.bloquear', $title = 'Eliminar', $parameters = $efecto['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	        	
 	        @endif
 	        </div><!-- /btn-group -->
 	    </td>

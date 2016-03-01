@@ -48,7 +48,19 @@
                   <div style="width: 5px; word-wrap: break-word; text-align: center">Impacto</div>
               </div>
               <div class="col-sm-6">
-                  <table class="matrix" border="1">
+              <table style="text-align: center; font-weight: bold;">
+              <tr>
+                <td width="15%" bgcolor="#CCCCCC">
+                  <table height="295px" width="100%" border="1">
+                    <tr><td>5<br>Cr&iacute;tico</td></tr>
+                    <tr><td>4<br>Alto</td></tr>
+                    <tr><td>3<br>Moderado</td></tr>
+                    <tr><td>2<br>Bajo</td></tr>
+                    <tr><td>1<br>Menor</td></tr>
+                  </table>
+                </td>
+                <td width="85%">
+                  <table class="heatmap1" border="1">
 
                   <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
                   @for ($i=0; $i<5; $i++)
@@ -62,6 +74,21 @@
                   @endfor
 
                 </table>
+                </td>
+              </tr>
+              <tr>
+              <td width="15%"></td>
+              <td width="85%" bgcolor="#CCCCCC">
+                  <table height="50px" width="100%" border="1">
+                      <td width="20%">1<br>Remoto</td>
+                      <td width="20%">2<br>No probable</td>
+                      <td width="20%">3<br>Probable</td>
+                      <td width="20%">4<br>Altamente probable</td>
+                      <td width="20%">5<br>Esperado</td>
+                  </table>
+              </td>
+              </tr>
+              </table>
                 <br>
                 <div style="letter-spacing:5px; text-align: center">Probabilidad</div>
                 </center>

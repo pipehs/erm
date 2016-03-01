@@ -54,6 +54,12 @@
 							{!!Form::text('expiration_date',null,['class'=>'form-control','id'=>'input_date2'])!!}
 						</div>
 					</div>
+					<div class="form-group">
+						{!!Form::label('P&eacute;rdida esperada',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::number('expected_loss',null,['id'=>'expected_loss','class'=>'form-control','required'=>'true'])!!}
+						</div>
+					</div>
 					<div id="causa">
 						<div class="form-group">
 							{!!Form::label('Causa ',null,['class'=>'col-sm-4 control-label'])!!}

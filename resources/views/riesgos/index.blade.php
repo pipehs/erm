@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Riesgos Tipo')
+@section('title', 'Riesgos')
 
 @stop
 
@@ -64,6 +64,7 @@
 	<th>Subprocesos u Objetivos Relacionados</th>
 	<th>Causa</th>
 	<th>Efecto</th>
+	<th>Editar</th>
 	</thead>
 	@foreach ($riesgos as $riesgo)
 		<tr>
@@ -89,6 +90,7 @@
 		</td>
 		<td>{{ $riesgo['causa'] }}</td>
 		<td>{{ $riesgo['efecto'] }}</td>
+		<td>{!! link_to_route('riesgos.edit', $title = 'Editar', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
 		</tr>
 	@endforeach
 	</table>

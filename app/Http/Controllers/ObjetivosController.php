@@ -130,7 +130,7 @@ class ObjetivosController extends Controller
         \Ermtool\Objective::create([
             'name' => $request['name'],
             'description' => $request['description'],
-            'fecha_exp' => $fecha_exp,
+            'expiration_date' => $fecha_exp,
             'objective_category_id' => $categoria,
             'organization_id' => $request['organization_id'],
             'status' => 0,
@@ -189,8 +189,8 @@ class ObjetivosController extends Controller
 
     public function verbloqueados($id_organizacion)
     {
-        $combobox = \Ermtool\Organization::where('estado',0)
-                                        ->lists('nombre','id'); //guardamos array con lista de nombre de organizaciones + id
+        $combobox = \Ermtool\Organization::where('status',0)
+                                        ->lists('name','id'); //guardamos array con lista de nombre de organizaciones + id
 
         $nombre_organizacion = \Ermtool\Organization::name($id_organizacion);
 
@@ -222,6 +222,7 @@ class ObjetivosController extends Controller
                                 'nombre'=>$objetivo['name'],
                                 'descripcion'=>$objetivo['description'],
                                 'fecha_creacion'=>$objetivo['created_at'],
+                                'fecha_act'=>$objetivo['updated_at'],
                                 'fecha_exp'=>$fecha_exp,
                                 'categoria'=>$categoria,
                                 'estado'=>$objetivo['status']);

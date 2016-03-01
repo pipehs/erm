@@ -56,7 +56,12 @@
 					<td>Nombre: </td><td>{{ $stakeholder['name']}} {{ $stakeholder['surnames'] }}</td>
 					</tr>
 					<tr>
-					<td>Rol: </td><td>{{ $stakeholder['role'] }}</td>
+					<td>Rol(es): </td>
+					<td><ul>
+					@foreach ($roles as $role)
+						<li>{{ $role['name'] }}</li>
+					@endforeach
+					</ul></td>
 					</tr>
 					<tr>
 					<td>Correo: </td><td>{{ $stakeholder['mail'] }}</td>

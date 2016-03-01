@@ -62,7 +62,7 @@
 			@foreach($riesgos as $riesgo)
 
 				{!!Form::hidden('evaluation_risk_id[]',$riesgo['evaluation_risk_id'])!!}
-				<b>- {{ $riesgo['risk_name'] }} - {{ $riesgo['subobj'] }}:</b><br><br>
+				<b>- {{ $riesgo['risk_name'] }} - {{ $riesgo['subobj'] }} - {{ $riesgo['orgproc'] }}:</b><br><br>
 				Probabilidad:<br>
 				@for($i=1; $i<=5; $i++)
 				<div class="radio-inline">

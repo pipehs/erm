@@ -12,7 +12,7 @@
 		<ol class="breadcrumb">
 			<li>{!!Html::link('#','Datos Maestros')!!}</li>
 			<li>{!!Html::link('procesos','Procesos')!!}</li>
-			<li>{!!Html::link('procesos.edit','Editar Procesos')!!}</li>
+			<li>{!!Html::link('procesos.edit','Editar Proceso')!!}</li>
 		</ol>
 	</div>
 </div>

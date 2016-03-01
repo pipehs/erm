@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Risk extends Model
 {
    	protected $fillable = ['name','type','type2','description','expiration_date',
-                            'status','risk_category_id','cause_id','effect_id'];
+                            'status','risk_category_id','cause_id','effect_id','expected_loss'];
 
     //eliminamos created_at y updated_at
     //public $timestamps = false;

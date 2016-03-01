@@ -18,6 +18,36 @@ function Select2Test(){
 	$("#el3").select2();
 }
 
+//función para bloquear o desbloquear (primeramente para datos maestros)
+function bloquear(id,name,kind,type)
+{
+	swal({   title: "Atención!",
+		   text: "Esta seguro de bloquear "+type+" "+name+"?",
+		   type: "warning",   
+		   showCancelButton: true,   
+		   confirmButtonColor: "#31B404",   
+		   confirmButtonText: "Bloquear",
+		   cancelButtonText: "Cancelar",   
+		   closeOnConfirm: false }, 
+		   function(){
+		   		$.get(kind+'.bloquear.'+id, function (result) {
+		   			swal({   title: "",
+		   			   text: ""+type+" "+name+" fue bloqueado(a) con éxito ",
+		   			   type: "success",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Aceptar",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	location.reload();
+		   			   });
+
+		   			});
+		   		 
+		   	});
+	//confirm("Esta seguro de bloquear "+type+" "+name+"?")
+}
+
 $(document).ready(function() {
 	// Load Datatables and run plugin on tables 
 	LoadDataTablesScripts(AllTables);
@@ -27,7 +57,7 @@ $(document).ready(function() {
 	FormLayoutExampleInputLength($( ".slider-style" ));
 	// Initialize datepicker
 	$('#input_date').datepicker({setDate: new Date()});
-	// Initialize datepicker
+	// Initialize datepicker 2
 	$('#input_date2').datepicker({setDate: new Date()});
 	// Load Timepicker plugin
 	LoadTimePickerScript(DemoTimePicker);

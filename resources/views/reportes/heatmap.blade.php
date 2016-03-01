@@ -37,6 +37,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
+
       <p>En esta secci&oacute;n podr&aacute; ver los riesgos asociados a alguna encuesta de evaluaci&oacute;n o a alguna organizaci&oacute;n en particular. </p>
       @if (!isset($riesgos))
             {!!Form::open(['route'=>'heatmap2','method'=>'POST','class'=>'form-horizontal'])!!}
@@ -60,12 +61,31 @@
             </div>
 
             <div class="form-group" id="org" style="display: none;">
-                {!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
-                <div class="col-sm-3">
-                  {!!Form::select('organization_id',$organizaciones, 
-                       null, 
-                       ['id' => 'org2','placeholder'=>'- Seleccione -'])!!}
+                <div class="row">
+                  {!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
+                  <div class="col-sm-3">
+                    {!!Form::select('organization_id',$organizaciones, 
+                         null, 
+                         ['id' => 'org2','placeholder'=>'- Seleccione -'])!!}
+                  </div>
                 </div>
+                <div class="row">
+                  <div class="form-group">
+                    {!!Form::label('Seleccione mes Y año (si desea ver heatmap de todo un año el mes debe quedar en blanco)',
+                    null,['class'=>'col-sm-4 control-label'])!!}
+                    <div class="col-sm-2">
+                      {!!Form::number('ano',null,
+                      ['id'=>'ano','class'=>'form-control','input maxlength'=>'4',
+                       'placeholder'=>'AAAA','min'=>'2015'])!!}
+                    </div>
+                    <div class="col-sm-2">
+                    {!!Form::number('mes',null,
+                      ['class'=>'form-control','input maxlength'=>'2',
+                       'placeholder'=>'MM','min'=>'01','max'=>'12'])!!}
+                    </div>
+                  </div>
+                </div>
+
             </div>
 
               <div class="form-group">
@@ -86,10 +106,22 @@
             <center>
             
               <div class="col-sm-1">
-                  <div style="width: 5px; word-wrap: break-word; text-align: center">Impacto</div>
+                  <div style="width: 1px; word-wrap: break-word; text-align: center">Impacto</div>
               </div>
-              <div class="col-sm-6">
-                  <table class="matrix" border="1">
+              <div class="col-sm-5">
+              <table style="text-align: center; font-weight: bold;">
+              <tr>
+                <td width="15%" bgcolor="#CCCCCC">
+                  <table height="395px" width="100%" border="1">
+                    <tr><td>5<br>Cr&iacute;tico</td></tr>
+                    <tr><td>4<br>Alto</td></tr>
+                    <tr><td>3<br>Moderado</td></tr>
+                    <tr><td>2<br>Bajo</td></tr>
+                    <tr><td>1<br>Menor</td></tr>
+                  </table>
+                </td>
+                <td width="85%">
+                  <table class="heatmap1" border="1">
 
                   <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
                   @for ($i=0; $i<5; $i++)
@@ -103,12 +135,27 @@
                   @endfor
 
                 </table>
+                </td>
+              </tr>
+              <tr>
+              <td width="15%"></td>
+              <td width="85%" bgcolor="#CCCCCC">
+                  <table height="50px" width="100%" border="1">
+                      <td width="20%">1<br>Remoto</td>
+                      <td width="20%">2<br>No probable</td>
+                      <td width="20%">3<br>Probable</td>
+                      <td width="20%">4<br>Altamente probable</td>
+                      <td width="20%">5<br>Esperado</td>
+                  </table>
+              </td>
+              </tr>
+              </table>
                 <br>
                 <div style="letter-spacing:5px; text-align: center">Probabilidad</div>
                 </center>
               
-                
-              <div class="col-sm-4">
+              
+              <div class="col-sm-5">
                 <div id="leyendas"> </div>
               </div>
 
@@ -138,9 +185,9 @@
               @for ($j=0; $j < 5; $j++)
                   @if (intval($prom_criticidad[$k]) == (5-$i))
                       @if (intval($prom_proba[$k]) == (5-$j))
-                         $('#{{(5-$i)}}_{{(5-$j)}}').append("<span class='circulo' title='{{ $riesgos[$k]['name'] }} - {{ $riesgos[$k]['subobj'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad[$k],1) }}'>{{ $cont }}</span>");
+                         $('#{{(5-$i)}}_{{(5-$j)}}').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad[$k],1) }}'>{{ $cont }}</span>");
 
-                         $('#leyendas').append("<p><small><span class='circulo-small'>{{ $cont }}</span> : {{ $riesgos[$k]['name'] }} - {{ $riesgos[$k]['subobj'] }}")
+                         $('#leyendas').append("<p><ul><li><small><span class='circulo-small'>{{ $cont }}</span> : <b>Riesgo:</b> {{ $riesgos[$k]['name'] }}</li><li><b>Objetivo afectado: </b> {{ $riesgos[$k]['subobj'] }}</li></ul>")
                        /*
                         $('#{{(5-$i)}}_{{(5-$j)}}').append("<img src='assets/img/circulo.png' height='20px' width='20px' title='{{ $riesgos[$k]['name'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Criticidad: {{ number_format($prom_criticidad[$k],1) }}'>");
                      
@@ -162,18 +209,22 @@
 
     $( "#tipo" ).change(function() {
       
+        //Se seleccionó heatmap por organización
         if ($("#tipo").val() == 1)
         {
           $("#org").removeAttr("style").show();
           $("#org2").attr("required","required");
+          $("#ano").attr("required","required");
           $("#eval").removeAttr("style").hide();
           $("#eval2").removeAttr("required");
         }
 
+        //Se seleccionó heatmap por encuesta de evaluación
         else if ($("#tipo").val() == 2)
         {
           $("#org").removeAttr("style").hide();
           $("#org2").removeAttr("required");
+          $("#ano").removeAttr("required");
           $("#eval").removeAttr("style").show();
           $("#eval2").attr("required","required");
         }

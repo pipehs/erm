@@ -21,7 +21,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-ticket"></i>
-					<span>Categor&iacute;s de Riesgos</span>
+					<span>Categor&iacute;as de Riesgos</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -70,11 +70,16 @@
 		<td>{{$risk_category['fecha_exp']}}</td>
 		<td>
 		<ul>
-		@foreach ($categorias_dependientes as $categorias)
-			@if ($categorias['risk_category_id'] == $risk_category['id'])
-				<li>{{ $categorias['nombre'] }}</li>
-			@endif
-		@endforeach</td>
+		@if ($categorias_dependientes != NULL)
+			@foreach ($categorias_dependientes as $categorias)
+				@if ($categorias['risk_category_id'] == $risk_category['id'])
+					<li>{{ $categorias['nombre'] }}</li>
+				@endif
+			@endforeach
+		@else
+			<li>Ninguna </li>
+		@endif
+		</td>
 		<ul>
 		<td>
 			<div>
@@ -88,9 +93,9 @@
 		<td>
 			<div>
 			@if ($risk_category['estado'] == 0)
-	            {!! link_to_route('categorias_riesgos.bloquear', $title = 'Bloquear', $parameters = $risk_category['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	            <button class="btn btn-danger" onclick="bloquear({{ $risk_category['id'] }},'{{ $risk_category['nombre'] }}','categorias_riesgos','la categoría de riesgo')">Bloquear</button>
 	        @else
-	        	{!! link_to_route('categorias_riesgos.bloquear', $title = 'Eliminar', $parameters = $risk_category['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	        	
 	        @endif
 	        </div><!-- /btn-group -->
 		</td>

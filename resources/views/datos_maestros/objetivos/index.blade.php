@@ -109,9 +109,9 @@
 					<td>
 						<div>
 						@if ($objetivo['estado'] == 0)
-				            {!! link_to_route('objetivos.bloquear', $title = 'Bloquear', $parameters = $objetivo['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+				            <button class="btn btn-danger" onclick="bloquear({{ $objetivo['id'] }},'{{ $objetivo['nombre'] }}','objetivos','el objetivo')">Bloquear</button>
 				        @else
-				        	{!! link_to_route('objetivos.bloquear', $title = 'Eliminar', $parameters = $objetivo['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+				    
 				        @endif
 				        </div><!-- /btn-group -->
 					</td>

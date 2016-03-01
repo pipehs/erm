@@ -20,6 +20,12 @@ class HomeController extends Controller
 
         //obtenemos id de última evaluación
         $id_eval = DB::table('evaluations')->max('id');
+        //seteamos datos en NULL por si no existe evaluación
+        $nombre = NULL;
+        $descripcion = NULL;
+        $riesgos = NULL;
+        $prom_proba = NULL;
+        $prom_criticidad = NULL;
 
         //---- consulta multiples join para obtener las respuestas relacionada a la encuesta ----// 
         $evaluations = DB::table('evaluation_risk')

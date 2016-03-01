@@ -95,11 +95,16 @@
 		<td>{{$organization['serv_compartidos']}}</td>
 		<td>
 		<ul>
-		@foreach ($org_dependientes as $organizaciones)
-			@if ($organizaciones['organization_id'] == $organization['id'])
-				<li>{{ $organizaciones['nombre'] }}</li>
-			@endif
-		@endforeach</td>
+		@if ($org_dependientes == NULL)
+			Ninguna
+		@else
+			@foreach ($org_dependientes as $organizaciones)
+				@if ($organizaciones['organization_id'] == $organization['id'])
+					<li>{{ $organizaciones['nombre'] }}</li>
+				@endif
+			@endforeach
+		@endif
+		</td>
 		<ul>
 		<td>
 			<div>
@@ -113,9 +118,9 @@
 		<td>
 			<div>
 			@if ($organization['estado'] == 0)
-	            {!! link_to_route('organization.bloquear', $title = 'Bloquear', $parameters = $organization['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+				<button class="btn btn-danger" onclick="bloquear({{ $organization['id'] }},'{{ $organization['nombre'] }}','organization','la organización')">Bloquear</button>
 	        @else
-	        	{!! link_to_route('organization.bloquear', $title = 'Eliminar', $parameters = $organization['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+	        	
 	        @endif
 	        </div><!-- /btn-group -->
 		</td>
@@ -127,35 +132,5 @@
 		</div>
 	</div>
 </div>
-<!--
-<script>
-function bloquear(id)
-      {
-        swal({
-           title: "Entrega de bank!",
-          text: "Te hemos enviado una entrega de bank inicial de monto: $ " +  + ", favor confirma esta transacción y acredítala subiendo un pantallazo de la transferencia recibida en tu software",
-          type: "success",   showCancelButton: true,
-          confirmButtonColor: "#04B431",
-          confirmButtonText: "Aceptar",
-          cancelButtonText: "Rechazar",
-          closeOnConfirm: false,
-          closeOnCancel: false },
-
-        function(isConfirm)
-        {
-            if (isConfirm) 
-            {
-              {{ redirect()->route('organization.bloquear',[]) }}
-
-            }
-            else 
-            {
-                return location.href = "";
-            }
-        
-        });
-      }
-</script>
--->
 @stop
 

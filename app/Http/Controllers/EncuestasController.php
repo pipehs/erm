@@ -56,7 +56,7 @@ class EncuestasController extends Controller
             }
             else if ($request['destinatarios'] == 2) //Se enviará por tipo / rol
             {
-                $dest = DB::table('stakeholders')->distinct('role')->lists('role','role');
+                $dest = \Ermtool\Role::lists('name','id');
             }
 
             $encuesta = \Ermtool\Poll::find($request['encuesta']);
@@ -197,11 +197,53 @@ class EncuestasController extends Controller
         $correos = array();
         $stakeholders = array();
         $i = 0;
-        foreach ($request['stakeholder_id'] as $stakeholder_id)
+        //OBS: STAKEHOLDER_ID[] PUEDE SER STAKEHOLDERS, ORGANIZACIONES O TIPO DE STAKEHOLDERS
+        if ($request['tipo'] == 0) //Se asignaron stakeholders manualmente
         {
-            $stakeholders[$i] = \Ermtool\Stakeholder::find($stakeholder_id);
-            $correos[$i] = $stakeholders[$i]->mail;
-            $i += 1;
+            foreach ($request['stakeholder_id'] as $stakeholder_id)
+            {
+                $stakeholder = \Ermtool\Stakeholder::find($stakeholder_id);
+                $correos[$i] = $stakeholder->mail;
+                $i += 1;
+            }
+        }
+        else if ($request['tipo'] == 1) //Se asignaron stakeholders por organización
+        {
+            foreach ($request['stakeholder_id'] as $stakeholder_id)
+            {
+                //obteneos los id de stakeholders de la organizacion
+                $stakeholders = DB::table('organization_stakeholder')
+                                    ->where('organization_id',$stakeholder_id)
+                                    ->select('stakeholder_id as id')->get();
+
+                //para cada stakeholder de la organización
+                foreach ($stakeholders as $stakeholder)
+                {
+                    //obtenemos datos de stakeholder
+                    $stakeholder = \Ermtool\Stakeholder::find($stakeholder->id);
+                    $correos[$i] = $stakeholder->mail;
+                    $i += 1;
+                }
+            }
+        }
+        else if ($request['tipo'] == 2) //Se asignaron stakeholders por rol
+        {
+            foreach ($request['stakeholder_id'] as $stakeholder_id) //para cada id de rol
+            {
+                //obtenemos los id de stakeholders del rol seleccionado
+                $stakeholders = DB::table('role_stakeholder')
+                                    ->where('role_id',$stakeholder_id)
+                                    ->select('stakeholder_id as id')->get();
+
+                //para cada stakeholder con el rol seleccionado
+                foreach ($stakeholders as $stakeholder)
+                {
+                    //obtenemos datos de stakeholder
+                    $stakeholder = \Ermtool\Stakeholder::find($stakeholder->id);
+                    $correos[$i] = $stakeholder->mail;
+                    $i += 1;
+                }
+            }
         }
 
         Mail::send('envio_mail',$request->all(), 
@@ -352,6 +394,9 @@ class EncuestasController extends Controller
         //obtenemos stakeholder para luego mostrar sus datos
         $stakeholder = \Ermtool\Stakeholder::find($_GET['stakeholder_id']);
 
+        //obtenemos rol o roles del stakeholder
+        $roles = \Ermtool\Stakeholder::find($_GET['stakeholder_id'])->roles;
+
         //nombre de encuesta
         $encuesta = \Ermtool\Poll::where('id',$id)->value('name');
 
@@ -368,7 +413,8 @@ class EncuestasController extends Controller
         }
 
         return view('reportes.encuesta',['questions'=>$questions,'answers'=>$answers,
-                                        'stakeholder'=>$stakeholder,'encuesta'=>$encuesta]);
+                                        'stakeholder'=>$stakeholder,'encuesta'=>$encuesta,
+                                        'roles'=>$roles]);
     }
 
     /**
