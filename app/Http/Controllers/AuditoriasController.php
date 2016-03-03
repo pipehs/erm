@@ -901,6 +901,14 @@ class AuditoriasController extends Controller
         return view('auditorias.pruebas',['audit_plans' => $audit_plans]);
     }
 
+    //función para revisar las notas agregadas por el auditor jefe
+    public function notas()
+    {
+        $audit_plans = \Ermtool\Audit_plan::lists('name','id');
+
+        return view('auditorias.notas',['audit_plans' => $audit_plans]);
+    }
+
     //función que obtiene objetivos y riesgos de objetivos a través de JsON para la creación de un plan de pruebas
     public function getObjetivos($org)
     {
@@ -1619,7 +1627,8 @@ class AuditoriasController extends Controller
         $i = 0;
         $notes = DB::table('notes')
                     ->where('notes.audit_audit_plan_audit_test_id','=',$id)
-                    ->select('notes.id','notes.name','notes.description','notes.created_at','notes.status')
+                    ->select('notes.id','notes.name','notes.description','notes.created_at','notes.status',
+                             'notes.audit_audit_plan_audit_test_id as test_id')
                     ->get();
 
         if (empty($notes))
@@ -1646,7 +1655,9 @@ class AuditoriasController extends Controller
                     'name' => $note->name,
                     'description' => $note->description,
                     'created_at' => $fecha_creacion,
-                    'status' => $estado
+                    'status' => $estado,
+                    'status_origin' => $note->status,
+                    'test_id' => $note->test_id
                     ];
 
                 $i += 1;

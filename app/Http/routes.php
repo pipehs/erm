@@ -542,6 +542,15 @@ Route::post('agregar_ejecucion', [
 Route::get('supervisar', [
 	'as' => 'supervisar', 'uses' => 'AuditoriasController@supervisar']);
 
+Route::get('supervisar', [
+	'as' => 'supervisar', 'uses' => 'AuditoriasController@supervisar']);
+
+Route::get('notas', [
+	'as' => 'notas', 'uses' => 'AuditoriasController@notas']);
+
+Route::post('responder_nota', [	
+	'as' => 'responder_nota', 'uses' => 'AuditoriasController@responderNota']);
+
 Route::post('agregar_supervision', [
 	'as' => 'agregar_supervision', 'uses' => 'AuditoriasController@storeSupervision']);
 

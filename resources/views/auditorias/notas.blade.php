@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Auditor&iacute;as - Supervisi&oacute;n de auditor&iacute;as')
+@section('title', 'Auditor&iacute;as - Revisi&oacute;n de notas')
 
 @stop
 
@@ -11,7 +11,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="auditorias">Auditor&iacute;as</a></li>
-			<li><a href="supervisar">Supervisi&oacute;n de auditor&iacute;as</a></li>
+			<li><a href="notas">Revisi&oacute;n de notas</a></li>
 		</ol>
 	</div>
 </div>
@@ -21,7 +21,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-table"></i>
-					<span>Supervisi&oacute;n de auditor&iacute;as</span>
+					<span>Revisi&oacute;n de notas</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -37,7 +37,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-	      	<p>En esta secci&oacute;n podr&aacute; supervisar los pruebas de auditor&iacute;a generadas anteriormente.</p>
+	      	<p>En esta secci&oacute;n podr&aacute; revisar las notas y evidencias agregadas para cada auditor&iacute;a del sistema</p>
 
 				@if(Session::has('message'))
 					<div class="alert alert-success alert-dismissible" role="alert">
@@ -52,7 +52,7 @@
 
 				<div id="cargando"><br></div>
 
-				{!!Form::open(['route'=>'agregar_supervision','method'=>'POST','class'=>'form-horizontal','id'=>'form'])!!}
+				{!!Form::open(['route'=>'responder_nota','method'=>'POST','class'=>'form-horizontal','id'=>'form'])!!}
 	      			<div class="form-group">
 						{!!Form::label('Plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
@@ -130,7 +130,6 @@ $("#audit").change(function() {
 
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
-							var cont = 1; //contador de pruebas
 							activities_id = []; //array con id de actividades para guardar en PHP 
 							tests_id = []; //array con id de pruebas para guardar en PHP
 							//seteamos datos en select de auditorías
@@ -138,64 +137,47 @@ $("#audit").change(function() {
 
 								tests_id.push(this.id);
 								var audit_test = '<h4><b>' + this.name +'</b></h4>';
-								audit_test += '<b>Debilidades encontradas</b><hr>';
-								$(this.issues).each( function(i,issue) {
-									audit_test += '<li>Clasificación: '+issue.classification+'</li>';
-									audit_test += '<li>Nombre: '+issue.name+'</li>';
-									audit_test += '<li>Descripción: '+issue.description+'</li>';
-									audit_test += '<li>Recomendaciones: '+issue.recommendations+'</li><hr>';
-
-								})
-								
+							
 								audit_test += '<div style="cursor:hand" id="btn_notas_'+this.id+'" onclick="notas('+this.id+')" class="btn btn-success">Notas</div> ';
 
-								$("#audit_tests").append(audit_test);
-
-								$("#audit_tests").append('<div id="notas_'+this.id+'" style="display: none;"></div>');
-								//agregamos las actividades con sus estados y posibles resultados
-								var actividades = '<div id="activities_'+this.id+'">';
-								actividades += '<table class="table table-bordered table-striped table-hover table-heading table-datatable">';
-								actividades += '<thead><th>Actividad</th><th>Estado</th><th>Resultado</th></thead>';
-								$(this.activities).each( function(i, activity) {
-									activities_id.push(this.id);
-									actividades += '<tr><td>'+activity.name+'</td>';
-
-									//estado de actividades
-									if (activity.status == 0)
-									{
-										actividades += '<td>Abierta</td>';
-									}
-									else if (activity.status == 1)
-									{
-										actividades += '<td>En ejecución</td>';
-									}
-									else if (activity.status == 2)
-									{
-										actividades += '<td>Cerrada</td>';
-									}
+								//obtenemos notas
+								$.get('auditorias.get_notes.'+this.id, function (result) {
 									
-									//resultado de actividades
-									actividades += '<td>'+activity.result+'</td>';
+									//agregamos div de texto siguiente
+									cantidad_notas = '<div id="mensaje" style="clear: left;">';
 
+									if (result == "null") //no existen notas
+									{
+										cantidad_notas += 'No existen notas para esta prueba';
+									}
+
+									else
+									{
+										cont = 0; //contador de notas
+										cont2 = 0; //contador de notas abiertas
+										//parseamos datos obtenidos
+										var datos = JSON.parse(result);
+										//seteamos datos en select de auditorías
+										
+										$(datos).each( function() {
+											cont = cont+1;
+
+											if (this.status_origin == 0)
+											{	
+												cont2 = cont2 +1;	
+											}
+										});			
+										
+										cantidad_notas = 'Existen '+cont2+' notas abiertas (de un total de '+cont+' notas)';
+									}
+									$("#audit_tests").append(audit_test);
+									$("#audit_tests").append(cantidad_notas);
 								});
 
-								$('#audit_tests').append(actividades);
-
-								//cont = cont+1;
+								$("#audit_tests").append('<div id="notas_'+this.id+'" style="display: none;"></div>');
 
 							});
-
-							//agregamos id de activities
-							//input_actividades = '<input type="hidden" value="'+activities_id+'" name="id_activities[]">';
-
-							//agregamos id de pruebas
-							//input_pruebas = '<input type="hidden" value="'+tests_id+'" name="tests_id[]">';
-
-							//$('#audit_tests').append(input_actividades);
-							//$('#audit_tests').append(input_pruebas);
-	
 					});
-
 			}
 			else
 			{
@@ -211,14 +193,9 @@ function notas(id)
 	//$("#btn_notas_"+id).
 	$("#notas_"+id).empty();
 	$.get('auditorias.get_notes.'+id, function (result) {
-
-			var resultado = '<div style="cursor:hand" id="crear_nota_'+id+'" onclick="crear_nota('+id+')" class="btn btn-primary">Agregar nota</div><br>';
 			
-			//agregamos div para formulario de creación de nota
-			resultado += '<div id="nueva_nota_'+id+'"  style="display: none; float: left;"><br><br></div>';
-
 			//agregamos div de texto siguiente
-			resultado += '<div id="mensaje" style="clear: left;">';
+			var resultado = '<div id="mensaje" style="clear: left;">';
 
 			if (result == "null") //no existen notas
 			{
@@ -237,12 +214,19 @@ function notas(id)
 					resultado += '<b>Nombre: '+this.name+'</b><br>';
 					resultado += 'Fecha creación: '+this.created_at+'<br>';
 					resultado += 'Estado: '+this.status+'<br>'
-					resultado += '<h4>Nota: '+this.description+'</h4><hr>';
+					resultado += '<h4>Nota: '+this.description+'</h4>';
+
+					resultado += '<div style="cursor:hand" id="responder_nota_'+this.id+'" onclick="responder_nota('+this.id+','+this.test_id+')" class="btn btn-primary">Responder</div><hr><br>';
+
+					//agregamos div para formulario de creación de nota
+					resultado += '<div id="nueva_nota_'+this.id+'"  style="display: none; clear: left;"><br><br></div>';
 				});			
 				
 			}
 
-			resultado += '<div style="cursor:hand" onclick="ocultar_notas('+id+')"><font color="CornflowerBlue"><u>Ocultar</u></font></div><hr><br>';
+
+
+			resultado += '<div style="cursor:hand" onclick="ocultar_notas('+id+')"><font color="CornflowerBlue"><u>Ocultar</u></font></div><hr>';
 			$("#notas_"+id).append(resultado).show(500);
 			
 		});
@@ -258,22 +242,21 @@ function ocultar_notas(id)
 	$("#notas_"+id).hide(500);
 }
 
-//crea una nota para la prueba de audit_audit_plan_audit_test_id = id
-function crear_nota(id)
+//crea una respuesta para la nota de id = id (prueba id es para bloquear div)
+function responder_nota(id,id_prueba)
 {
-	$("#crear_nota_"+id).empty();
-	$("#crear_nota_"+id).append('<div style="cursor:hand" id="crear_nota_'+id+'" onclick="ocultar_notas('+id+')">Ocultar</div>');
+	$("#responder_nota_"+id).empty();
+	$("#responder_nota_"+id).append('<div style="cursor:hand" id="responder_nota_'+id+'" onclick="ocultar_notas('+id_prueba+')">Ocultar</div>');
 	//vaciamos por si existe ya algún formulario
 	$("#nueva_nota_"+id).empty();
 	var nota = '<div class="form-group col-sm-12">';
 	//agregamos atributo hidden que señalará que se está guardando una nota y otro para identificar el id de la prueba
 	nota += '<input type="hidden" name="test_id" value="'+id+'">';
 	nota += '<input type="hidden" name="type" value="0">'; //0 identifica nueva nota;
-	nota += '<input type="text" name="name_'+id+'" class="form-control" placeholder="Nombre de la nota" required></div>';
 	nota += '<div class="form-group col-sm-12">';
-	nota += '<textarea name="description_'+id+'" rows="3" cols="4" class="form-control" placeholder="Nota" required></textarea></div>';
+	nota += '<textarea name="description_'+id+'" rows="3" cols="4" class="form-control" placeholder="Ingrese comentarios y cargue evidencia (de existir)" required></textarea></div>';
 	nota += '<div class="form-group col-sm-12">';
-	nota += '<input type="file" name="evidencia_'+id+'"></div>';
+	nota += '<input type="file" id="input-1" name="evidencia_'+id+'"></div>';
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<button class="btn btn-success">Guardar</button></div><hr><br>';
 	$("#nueva_nota_"+id).append(nota);

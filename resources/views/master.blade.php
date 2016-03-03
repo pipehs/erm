@@ -30,6 +30,8 @@
  	{!!Html::style('assets/plugins/select2/select2.css')!!}
  	{!!Html::style('assets/plugins/sweetalert-master/dist/sweetalert.css')!!}
  	{!!Html::style('assets/plugins/sweetalert-master/themes/twitter/twitter.css')!!}
+ 	{!!Html::style('assets/css/fileinput.css')!!}
+ 	{!!Html::style('assets/css/fileinput.min.css')!!}
 
  	{!!Html::style('assets/css/imprimir.css',['media'=>'print'])!!}	
 
@@ -67,6 +69,9 @@
 	{!!Html::script('assets/plugins/tinymce/jquery.tinymce.min.js')!!}
 	{!!Html::script('assets/js/devoops.js')!!}
 	{!!Html::script('assets/js/scripts.js')!!}
+
+	{!!Html::script('assets/js/fileinput.js')!!}
+	{!!Html::script('assets/js/fileinput.min.js')!!}
 
 	{!!Html::script('http://code.highcharts.com/highcharts.js')!!}
 	{!!Html::script('http://code.highcharts.com/modules/heatmap.js')!!}
