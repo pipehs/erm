@@ -608,9 +608,17 @@ Route::get('auditorias.get_issue.{id}', [
 Route::get('auditorias.get_notes.{id}', [
 	'as' => 'auditorias.get_notes', 'uses' => 'AuditoriasController@getNotes']);
 
+//ruta para obtener archivo de evidencias
+Route::get('auditorias.get_file.{archivo}', [
+	'as' => 'auditorias.get_file', 'uses' => 'AuditoriasController@getFile']);
+
 //ruta para obtener notas de una prueba de auditoría
-Route::post('auditorias.guardar_nota', [
+Route::get('auditorias.guardar_nota', [
 	'as' => 'auditorias.guardar_nota', 'uses' => 'AuditoriasController@storeNote']);
+
+//ruta para obtener notas de una prueba de auditoría
+Route::get('auditorias.close_note.{id}', [
+	'as' => 'auditorias.close_note', 'uses' => 'AuditoriasController@closeNote']);
 
 
 // ---- Rutas adicionales del framework ----//

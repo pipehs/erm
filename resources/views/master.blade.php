@@ -82,6 +82,11 @@
 
 	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}
 
+	{!!Html::script('http://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css')}
+	{!!Html::script('http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js')}
+	
+
+
 <style>
 #container {
     min-width: 300px;

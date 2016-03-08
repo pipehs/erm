@@ -52,7 +52,8 @@
 
 				<div id="cargando"><br></div>
 
-				{!!Form::open(['route'=>'responder_nota','method'=>'POST','class'=>'form-horizontal','id'=>'form'])!!}
+				{!!Form::open(['route'=>'responder_nota','method'=>'POST','class'=>'form-horizontal','id'=>'form',
+				'enctype'=>'multipart/form-data'])!!}
 	      			<div class="form-group">
 						{!!Form::label('Plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
@@ -216,10 +217,14 @@ function notas(id)
 					resultado += 'Estado: '+this.status+'<br>'
 					resultado += '<h4>Nota: '+this.description+'</h4>';
 
-					resultado += '<div style="cursor:hand" id="responder_nota_'+this.id+'" onclick="responder_nota('+this.id+','+this.test_id+')" class="btn btn-primary">Responder</div><hr><br>';
+					if (this.status_origin == 0)
+					{
+						resultado += '<div style="cursor:hand" id="responder_nota_'+this.id+'" onclick="responder_nota('+this.id+','+this.test_id+')" class="btn btn-primary">Responder</div>';
+						//agregamos div para formulario de creación de nota
+						resultado += '<div id="respuesta_nota_'+this.id+'"  style="display: none; clear: left;"><br><br></div>';
+					}
 
-					//agregamos div para formulario de creación de nota
-					resultado += '<div id="nueva_nota_'+this.id+'"  style="display: none; clear: left;"><br><br></div>';
+					resultado += '<hr><br>';
 				});			
 				
 			}
@@ -245,22 +250,24 @@ function ocultar_notas(id)
 //crea una respuesta para la nota de id = id (prueba id es para bloquear div)
 function responder_nota(id,id_prueba)
 {
+	//borramos si es que hay alguna nota de respuesta
+	$("#respuesta_nota_"+id).empty();
 	$("#responder_nota_"+id).empty();
 	$("#responder_nota_"+id).append('<div style="cursor:hand" id="responder_nota_'+id+'" onclick="ocultar_notas('+id_prueba+')">Ocultar</div>');
 	//vaciamos por si existe ya algún formulario
 	$("#nueva_nota_"+id).empty();
 	var nota = '<div class="form-group col-sm-12">';
 	//agregamos atributo hidden que señalará que se está guardando una nota y otro para identificar el id de la prueba
-	nota += '<input type="hidden" name="test_id" value="'+id+'">';
-	nota += '<input type="hidden" name="type" value="0">'; //0 identifica nueva nota;
+	nota += '<input type="hidden" name="note_id" value="'+id+'">';
 	nota += '<div class="form-group col-sm-12">';
-	nota += '<textarea name="description_'+id+'" rows="3" cols="4" class="form-control" placeholder="Ingrese comentarios y cargue evidencia (de existir)" required></textarea></div>';
+	nota += '<textarea name="answer_'+id+'" rows="3" cols="4" class="form-control" placeholder="Ingrese comentarios" required></textarea></div>';
 	nota += '<div class="form-group col-sm-12">';
-	nota += '<input type="file" id="input-1" name="evidencia_'+id+'"></div>';
+	nota += '<label class="control-label">Cargar evidencia (opcional)</label>';
+	nota += '<input type="file" id="input-1a" name="evidencia_'+id+'" class="file" data-show-preview="false"></div>';
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<button class="btn btn-success">Guardar</button></div><hr><br>';
-	$("#nueva_nota_"+id).append(nota);
-	$("#nueva_nota_"+id).show(500);
+	$("#respuesta_nota_"+id).append(nota);
+	$("#respuesta_nota_"+id).show(500);
 
 }
 

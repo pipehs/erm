@@ -230,7 +230,7 @@
 							//seteamos datos en select de riesgos / objetivos
 							$(datos).each( function() {
 								$("#objective_risk_id").append('<option value="' + this.id + '">' + this.name +'</option>');
-								$("#riesgos").append('<tr><td>' + this.name + '</td><td>' + this.avg_probability + '</td><td>' + this.avg_impact + '</td></tr>');
+								$("#riesgos").append('<tr><td>' + this.name + '</td><td>' +this.proba_def + ' (' + this.avg_probability + ')</td><td>' + this.impact_def + ' (' + this.avg_impact + ')</td></tr>');
 							});
 					});
 
@@ -245,7 +245,7 @@
 							//seteamos datos en select de riesgos / objetivos
 							$(datos).each( function() {
 								$("#risk_subprocess_id").append('<option value="' + this.id + '">' + this.name +'</option>');
-								$("#riesgos").append('<tr><td>' + this.name + '</td><td>' + this.avg_probability + '</td><td>' + this.avg_impact + '</td></tr>');
+								$("#riesgos").append('<tr><td>' + this.name + '</td><td>' + this.proba_def + ' (' + this.avg_probability + ')</td><td>' + this.impact_def + ' (' + this.avg_impact + ')</td></tr>');
 							});
 					});
 

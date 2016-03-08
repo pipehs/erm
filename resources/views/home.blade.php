@@ -44,14 +44,14 @@
            <p><b> Descripci&oacute;n:</b> {{ $descripcion }}.</p>
             <center>
             
-              <div class="col-sm-1">
-                  <div style="width: 5px; word-wrap: break-word; text-align: center">Impacto</div>
+               <div class="col-sm-1">
+                  <div style="width: 1px; word-wrap: break-word; text-align: center">Impacto</div>
               </div>
-              <div class="col-sm-6">
+              <div class="col-sm-5">
               <table style="text-align: center; font-weight: bold;">
               <tr>
                 <td width="15%" bgcolor="#CCCCCC">
-                  <table height="295px" width="100%" border="1">
+                  <table height="395px" width="100%" border="1">
                     <tr><td>5<br>Cr&iacute;tico</td></tr>
                     <tr><td>4<br>Alto</td></tr>
                     <tr><td>3<br>Moderado</td></tr>
@@ -93,8 +93,8 @@
                 <div style="letter-spacing:5px; text-align: center">Probabilidad</div>
                 </center>
               
-                
-              <div class="col-sm-4">
+              
+              <div class="col-sm-5">
                 <div id="leyendas"> </div>
               </div>
      </div>

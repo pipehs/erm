@@ -9,6 +9,7 @@ use DB;
 use Redirect;
 use Session;
 use dateTime;
+use Storage;
 
 class AuditoriasController extends Controller
 {
@@ -333,9 +334,7 @@ class AuditoriasController extends Controller
         //print_r($_POST);
 
         //primero vemos si se está agregando una nota o una evidencia
-
-        if ($request['type'] == 0) //Se está agregando una nota
-        {
+        
             $res = DB::table('notes')
                     ->insertGetId([
                         'name' => $request['name_'.$request['test_id']],
@@ -346,6 +345,17 @@ class AuditoriasController extends Controller
                         'status' => 0
                         ]);
         
+            //guardamos archivo de evidencia (si es que hay)
+            if($request->file('evidencia_'.$request['test_id']) != NULL)
+            {
+                //separamos nombre archivo extension
+                $file = explode('.',$request->file('evidencia_'.$request['test_id'])->getClientOriginalName());
+
+                Storage::put(
+                    'evidencias_notas/'. $file[0] . "___" . $res . "." . $file[1],
+                    file_get_contents($request->file('evidencia_'.$request['test_id'])->getRealPath())
+                );
+            }
 
             if ($res)
             {
@@ -360,8 +370,7 @@ class AuditoriasController extends Controller
 
                 return Redirect::to('/supervisar');
             }   
-
-        }
+        
     }
     //Antes de almacenar un plan de auditoría, se deben ingresar los datos necesarios
     //para crear un auditoría perteneciente a dicho plan (audit_audit_plan)
@@ -909,6 +918,49 @@ class AuditoriasController extends Controller
         return view('auditorias.notas',['audit_plans' => $audit_plans]);
     }
 
+    //función para responder una nota por parte de un auditori
+    public function responderNota(Request $request)
+    {
+        //print_r($_POST);
+
+        $id = $request['note_id'];
+
+        //insertamos y obtenemos id para verificar que se guarde
+        $res = DB::table('notes_answers')
+                ->insertGetId([
+                        'answer' => $request['answer_'.$id],
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                        'note_id' => $id 
+                    ]);
+
+        //guardamos archivo de evidencia (si es que hay)
+        if($request->file('evidencia_'.$id) != NULL)
+        {
+            //separamos nombre archivo extension
+            $file = explode('.',$request->file('evidencia_'.$id)->getClientOriginalName());
+
+            Storage::put(
+                'evidencias_resp_notas/'. $file[0] . "___" . $res . "." . $file[1],
+                file_get_contents($request->file('evidencia_'.$id)->getRealPath())
+            );
+        }
+
+        if ($res)
+        {
+            Session::flash('message','Respuesta agregada correctamente');
+
+            return Redirect::to('/notas');
+        }
+
+        else
+        {
+            Session::flash('error','Problema al agregar la nota. Intentelo nuevamente y si el problema persiste, contactese con el administrador del sistema.');
+
+            return Redirect::to('/notas');
+        }  
+    }
+
     //función que obtiene objetivos y riesgos de objetivos a través de JsON para la creación de un plan de pruebas
     public function getObjetivos($org)
     {
@@ -962,10 +1014,58 @@ class AuditoriasController extends Controller
                             ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
                             ->get();
 
+            //seteamos por si no hay evaluación
+            $avg_probability = "Falta Eval.";
+            $avg_impact = "Falta Eval.";
+            $proba_def = "";
+            $impact_def = "";
+
             foreach ($evaluations as $evaluation)
             {
+                //seteamos nombres de probabilidad e impacto
+
+                switch ($evaluation->avg_probability)
+                {
+                    case 1:
+                        $proba = 'Muy poco probable';
+                        break;
+                    case 2:
+                        $proba = 'Poco probable';
+                        break;
+                    case 3:
+                        $proba = 'Intermedio';
+                        break;
+                    case 4:
+                        $proba = 'Probable';
+                        break;
+                    case 5:
+                        $proba = 'Muy probable';
+                        break;
+                }
+
+                switch ($evaluation->avg_impact)
+                {
+                    case 1:
+                        $impact = 'Muy poco impacto';
+                        break;
+                    case 2:
+                        $impact = 'Poco impacto';
+                        break;
+                    case 3:
+                        $impact = 'Intermedio';
+                        break;
+                    case 4:
+                        $impact = 'Alto impacto';
+                        break;
+                    case 5:
+                        $impact = 'Muy alto impacto';
+                        break;
+                }
+
                 $avg_probability = $evaluation->avg_probability;
                 $avg_impact = $evaluation->avg_impact;
+                $impact_def = $impact;
+                $proba_def = $proba;
             }
 
             $results[$i] = [
@@ -973,6 +1073,8 @@ class AuditoriasController extends Controller
                          'id' => $risk->riskid,
                          'avg_probability' => $avg_probability,
                          'avg_impact' => $avg_impact,
+                         'proba_def' => $proba_def,
+                         'impact_def' => $impact_def
                         ];
             $i += 1;
         }
@@ -1018,18 +1120,63 @@ class AuditoriasController extends Controller
             //seteamos por si no hay evaluación
             $avg_probability = "Falta Eval.";
             $avg_impact = "Falta Eval.";
-            
+            $proba_def = "";
+            $impact_def = "";
+
             foreach ($evaluations as $evaluation)
             {
+            //seteamos nombres de probabilidad e impacto
+
+                switch ($evaluation->avg_probability)
+                {
+                    case 1:
+                        $proba = 'Muy poco probable';
+                        break;
+                    case 2:
+                        $proba = 'Poco probable';
+                        break;
+                    case 3:
+                        $proba = 'Intermedio';
+                        break;
+                    case 4:
+                        $proba = 'Probable';
+                        break;
+                    case 5:
+                        $proba = 'Muy probable';
+                        break;
+                }
+
+                switch ($evaluation->avg_impact)
+                {
+                    case 1:
+                        $impact = 'Muy poco impacto';
+                        break;
+                    case 2:
+                        $impact = 'Poco impacto';
+                        break;
+                    case 3:
+                        $impact = 'Intermedio';
+                        break;
+                    case 4:
+                        $impact = 'Alto impacto';
+                        break;
+                    case 5:
+                        $impact = 'Muy alto impacto';
+                        break;
+                }
+
                 $avg_probability = $evaluation->avg_probability;
                 $avg_impact = $evaluation->avg_impact;
+                $impact_def = $impact;
+                $proba_def = $proba;
             }
-
             $results[$i] = [
                         'name' => $risk->name,
                          'id' => $risk->riskid,
                          'avg_probability' => $avg_probability,
                          'avg_impact' => $avg_impact,
+                         'proba_def' => $proba_def,
+                         'impact_def' => $impact_def,
                         ];
             $i += 1;
         }
@@ -1620,7 +1767,7 @@ class AuditoriasController extends Controller
         return json_encode($results);
     }
 
-    //obtiene notas asociadas a una plan auditoria + auditoria
+    //obtiene notas asociadas a una prueba de auditoría
     public function getNotes($id)
     {
         $results = array();
@@ -1648,6 +1795,41 @@ class AuditoriasController extends Controller
                     $estado = 'Cerrada';
                 }
 
+                //obtenemos respuestas a la nota (si es que existen)
+                $answers_notes = DB::table('notes_answers')
+                            ->where('note_id',$note->id)
+                            ->select('notes_answers.id','notes_answers.answer','notes_answers.created_at','notes_answers.updated_at')
+                            ->get();
+
+                if (empty($answers_notes))
+                {
+                    $answers = NULL;
+                }
+                else
+                {
+                    $j = 0; //contador de respuestas para las notas
+                    //seteamos cada respuesta de la nota
+                    foreach ($answers_notes as $ans)
+                    {
+                        //obtenemos evidencias de la respuesta (si es que existen)
+                        $evidences = $this->getEvidences(1,$ans->id);
+
+                        $answers[$j] = [
+                                'id' => $ans->id,
+                                'answer' => $ans->answer,
+                                'created_at' => $ans->created_at,
+                                'updated_at' => $ans->updated_at,
+                                'ans_evidences' => $evidences,
+                        ];
+
+                        $j += 1;
+                    }
+
+                    
+                }
+                //obtenemos evidencias de la nota (si es que existe)
+                $evidences = $this->getEvidences(0,$note->id);
+
                 $fecha_creacion = date('d-m-Y',strtotime($note->created_at));
                 $fecha_creacion .= ' a las '.date('H:i:s',strtotime($note->created_at));
                 $results[$i] = [
@@ -1657,7 +1839,9 @@ class AuditoriasController extends Controller
                     'created_at' => $fecha_creacion,
                     'status' => $estado,
                     'status_origin' => $note->status,
-                    'test_id' => $note->test_id
+                    'test_id' => $note->test_id,
+                    'answers' => $answers,
+                    'evidences' => $evidences
                     ];
 
                 $i += 1;
@@ -1666,6 +1850,83 @@ class AuditoriasController extends Controller
         
 
         return json_encode($results);
+    }
+
+    public function getFile($archivo)
+    {
+        $public_path = public_path();
+        $url = 'C:virtualhost\\erm\\storage\\app\\evidencias_notas\\'.$archivo;
+        //verificamos si el archivo existe y lo retornamos
+        return response()->download($url);
+        //if (Storage::exists($archivo))
+        //{
+            //return response()->download($url);
+        //    echo "hola";
+        //}
+        //si no se encuentra lanzamos un error 404.
+        //abort(404);
+    }
+
+    //función interna que obtiene los archivos subidos si es que hay
+    public function getEvidences($kind,$id)
+    {
+        $public_path = public_path();
+        if ($kind == 0) //se están solicitando evidencias de una nota
+        {
+            //seleccionamos carpeta de notas
+            $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_notas';
+        }
+        else if ($kind == 1) //se están solicitando respuestas a evidencias de una nota
+        {
+            //seleccionamos carpeta de respuestas evidencias
+            $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_resp_notas';
+        }
+
+        $archivos = scandir($carpeta);
+
+        foreach ($archivos as $archivo)
+        {
+                        
+                //dividimos archivos para buscar id
+                if (strpos($archivo,'___'))
+                {   
+                    $j = 0;
+                    $temp = explode('___',$archivo);
+
+                    //sacamos extensión del archivo
+                    $temp2 = explode('.',$temp[1]);
+
+                    if ($temp2[0] == $id)
+                    {
+                        $evidences[$j] = [
+                            'note_id' => $id,
+                            'url' => $archivo,
+                        ];
+
+                        $j += 1;
+                    }
+                }
+                else
+                    $evidences = NULL;                      
+        }
+
+        return $evidences;
+    }
+
+    public function closeNote($id)
+    {
+        $res = 0;
+
+        DB::table('notes')
+            ->where('id','=',$id)
+            ->update([
+                'status' => 1,
+                'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+
+        $res = 1;
+
+        return $res;
     }
 
 }

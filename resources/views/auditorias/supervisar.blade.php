@@ -52,7 +52,8 @@
 
 				<div id="cargando"><br></div>
 
-				{!!Form::open(['route'=>'agregar_supervision','method'=>'POST','class'=>'form-horizontal','id'=>'form'])!!}
+				{!!Form::open(['route'=>'agregar_supervision','method'=>'POST','class'=>'form-horizontal','id'=>'form',
+				'enctype'=>'multipart/form-data'])!!}
 	      			<div class="form-group">
 						{!!Form::label('Plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
@@ -147,6 +148,8 @@ $("#audit").change(function() {
 
 								})
 								
+								audit_test += '<div id="nota_cerrada_'+this.id+'"></div>';
+
 								audit_test += '<div style="cursor:hand" id="btn_notas_'+this.id+'" onclick="notas('+this.id+')" class="btn btn-success">Notas</div> ';
 
 								$("#audit_tests").append(audit_test);
@@ -237,7 +240,54 @@ function notas(id)
 					resultado += '<b>Nombre: '+this.name+'</b><br>';
 					resultado += 'Fecha creación: '+this.created_at+'<br>';
 					resultado += 'Estado: '+this.status+'<br>'
-					resultado += '<h4>Nota: '+this.description+'</h4><hr>';
+					resultado += '<h4>Nota: '+this.description+'</h4>';
+
+					//agregamos evidencias
+					if (this.evidences == null)
+					{
+						resultado += '<font color="red">Esta nota no tiene evidencias agregadas</font><br>';
+					}
+
+					else
+					{
+
+						$(this.evidences).each( function(i,evidence) {
+							resultado += '<div style="cursor:hand" id="descargar_'+id+'" onclick="descargar(0,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia</u></font></div><br>';
+						});
+					}
+
+					if (this.answers == null)
+					{
+						resultado += '<div class="alert alert-danger alert-dismissible" role="alert">'
+						resultado += 'Esta nota aun no tiene respuestas</div>';
+					}
+					else
+					{
+						$(this.answers).each( function(i,answer) {
+							resultado += '<div class="alert alert-success alert-dismissible" role="alert">'
+							resultado += '<b><u>Respuesta de auditor: </u></b><br>';
+							resultado += '<font color="black	">'+answer.answer+'</font><br>';
+							
+
+							if (answer.ans_evidences != null)
+							{
+								$(answer.ans_evidences).each( function(i,evidence) {
+									resultado += '<div style="cursor:hand" id="descargar_'+id+'" onclick="descargar(1,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia de respuesta</u></font></div><br>';
+								});
+							}
+
+							resultado += 'Enviada el: '+answer.created_at+'</div>';
+
+						});
+
+						if (this.status_origin == 0)
+						{
+							resultado += '<div style="cursor:hand" id="cerrar_nota_'+this.id+'" onclick="cerrar_nota('+this.id+','+id+')" class="btn btn-default">Cerrar nota</div><br>';
+						}
+					}
+
+					resultado += '<hr style="border-style: inset; border-width: 1px;">';
+
 				});			
 				
 			}
@@ -273,11 +323,50 @@ function crear_nota(id)
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<textarea name="description_'+id+'" rows="3" cols="4" class="form-control" placeholder="Nota" required></textarea></div>';
 	nota += '<div class="form-group col-sm-12">';
+	nota += '<label class="control-label">Cargar evidencia (opcional)</label>';
 	nota += '<input type="file" name="evidencia_'+id+'"></div>';
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<button class="btn btn-success">Guardar</button></div><hr><br>';
 	$("#nueva_nota_"+id).append(nota);
 	$("#nueva_nota_"+id).show(500);
+
+}
+
+function descargar(tipo,archivo)
+{
+	//window.open = ('../storage/app/evidencias_notas/'+archivo,'_blank');
+	if (tipo == 0) //evidencia de nota
+	{
+		var win = window.open('../storage/app/evidencias_notas/'+archivo, '_blank');
+	 	win.focus();
+	}
+	else if (tipo == 1) //evidencia de respuesta
+	{
+		var win = window.open('../storage/app/evidencias_resp_notas/'+archivo, '_blank');
+	 	win.focus();
+	}
+}
+
+function cerrar_nota(id,note_id)
+{
+	$.get('auditorias.close_note.'+id, function (result) {
+		//parseamos datos obtenidos
+		var datos = JSON.parse(result);
+
+		if (datos == 1) //la nota se cerro
+		{
+			$("#notas_"+note_id).hide(500);
+
+			var res = '<div class="alert alert-success alert-dismissible" role="alert">'
+			res += 'Nota cerrada exitosamente';
+			$("#nota_cerrada_"+note_id).append(res);
+
+			//movemos pantalla a mensaje de nota cerrada
+			$('html,body').animate({
+			    scrollTop: $("#nota_cerrada_"+note_id).offset().top -100
+			}, 1000);
+		}
+	});
 
 }
 
