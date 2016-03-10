@@ -299,7 +299,7 @@
 					//insertamos los campos necesarios para la información de cada una de las auditorías seleccionad iys
 					$('#auditorias > option:selected').each( function () {
 						
-						$('#info_auditorias').append('<b><font color="red">Ingrese informaci&oacute;n para ' + $(this).text() + '</b></br>');
+						$('#info_auditorias').append('<div id="titulo_'+ $(this).val() +'"><b><font color="red">Ingrese informaci&oacute;n para ' + $(this).text() + '</b></div></br>');
 						
 						//riesgos de negocio
 						var objective_risk_options = null;
@@ -347,7 +347,7 @@
 	//función para agregar una nueva auditoría
 	$("#agregar_auditoria").click(function() {
 		
-		$('#info_new_auditorias').append('<b><font color="red">Ingrese informaci&oacute;n para la nueva auditor&iacute;a '+cont+'</b></br>');
+		$('#info_new_auditorias').append('<div id="titulo_'+cont+'"><b><font color="red">Ingrese informaci&oacute;n para la nueva auditor&iacute;a '+cont+'</b></div></br>');
 		
 		//-- Info de nueva auditoría --//
 
@@ -393,6 +393,11 @@
 						$('#info_new_auditorias').append('<label for="audit_new'+cont+'_final_date" class="col-sm-4 control-label">Fecha final</label>');
 						$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_final_date" class="form-control" required="required"></div>');
 						$('#info_new_auditorias').append('</br></br>');
+
+						//movemos pantalla a nueva auditoría
+						$('html,body').animate({
+						    scrollTop: $("#titulo_"+cont).offset().top
+						}, 900);
 
 						cont = cont + 1;
 	});

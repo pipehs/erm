@@ -961,6 +961,18 @@ class AuditoriasController extends Controller
         }  
     }
 
+    public function actionPlans()
+    {
+        $audit_plans = \Ermtool\Audit_plan::lists('name','id');
+        return view('auditorias.planes_accion',['audit_plans' => $audit_plans]);
+    }
+
+    public function storePlan(Request $request)
+    {
+        print_r($_POST);
+    }
+
+
     //función que obtiene objetivos y riesgos de objetivos a través de JsON para la creación de un plan de pruebas
     public function getObjetivos($org)
     {
@@ -1320,7 +1332,7 @@ class AuditoriasController extends Controller
             $issues = DB::table('issues')
                             ->join('audit_audit_plan_audit_test','audit_audit_plan_audit_test.id','=','issues.audit_audit_plan_audit_test_id')
                             ->where('audit_audit_plan_audit_test.id','=',$test->id)
-                            ->select('issues.name','issues.description','issues.classification','issues.recommendations')
+                            ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
                             ->get();
 
             $debilidades = array();
@@ -1341,6 +1353,7 @@ class AuditoriasController extends Controller
                 }
 
                 $debilidades[$i] = [
+                    'id' => $issue->id,
                     'name' => $issue->name,
                     'description' => $issue->description,
                     'classification' => $class,

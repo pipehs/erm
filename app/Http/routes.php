@@ -554,6 +554,12 @@ Route::post('responder_nota', [
 Route::post('agregar_supervision', [
 	'as' => 'agregar_supervision', 'uses' => 'AuditoriasController@storeSupervision']);
 
+Route::get('planes_accion', [
+	'as' => 'planes_accion', 'uses' => 'AuditoriasController@actionPlans']);
+
+Route::post('agregar_plan', [
+	'as' => 'agregar_plan', 'uses' => 'AuditoriasController@storePlan']);
+
 //ruta para obtener datos de plan de auditoría anterior 
 Route::get('auditorias.get_audit_plan.{org}', [
 	'as' => 'auditorias.get_audit_plan', 'uses' => 'AuditoriasController@getAuditPlan']);

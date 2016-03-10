@@ -7,20 +7,6 @@
 						</div>
 					</div>
 
-
-					<div class="form-group">
-						<center><a href="#" id="agregar_auditoria">Agregar Nueva Auditor&iacute;a</a></center> <br>
-						{!!Form::label('Auditor&iacute;as a realizar',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-8">
-							{!!Form::select('audits[]',$audits,null,
-													['multiple'=>'true','id'=>'auditorias'])!!}
-						</div>
-					</div>
-
-					<div id="info_auditorias"></div>
-
-					<div id="info_new_auditorias"></div>
-
 					<b><font color="blue">Ingrese informaci&oacute;n para el plan de auditor&iacute;a</font></b></br>
 
 					<div class="form-group">
@@ -129,6 +115,25 @@
 							{!!Form::text('rules',null,['class'=>'form-control'])!!}
 						</div>
 					</div>
+
+					<b><font color="blue">Ingrese informaci&oacute;n para cada auditor&iacute;a del plan</font></b></br>
+
+					<div class="form-group">
+						<center>
+							<div style="cursor:hand" id="agregar_auditoria">
+								<font color="CornflowerBlue"><u>Agregar Nueva Auditor&iacute;a</u></font>
+							</div>
+						</center> <br>
+						{!!Form::label('Auditor&iacute;as a realizar',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-8">
+							{!!Form::select('audits[]',$audits,null,
+													['multiple'=>'true','id'=>'auditorias'])!!}
+						</div>
+					</div>
+
+					<div id="info_auditorias"></div>
+
+					<div id="info_new_auditorias"></div>
 
 					<div class="form-group">
 						<center>

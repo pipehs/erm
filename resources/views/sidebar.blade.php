@@ -65,6 +65,7 @@
 						<li><a href="ejecutar_pruebas" class="{{ activeMenu('ejecutar_pruebas') }}">Ejecutar plan de <br>auditor&iacute;a</a></li>
 						<li><a href="supervisar" class="{{ activeMenu('supervisar') }}">Supervisar planes de <br>auditor&iacute;a</a></li>
 						<li><a href="notas" class="{{ activeMenu('notas') }}">Revisi&oacute;n de notas</a></li>
+						<li><a href="planes_accion" class="{{ activeMenu('plan_accion') }}">Planes de acci&oacute;n</a></li>
 					</ul>
 				</li>
 
