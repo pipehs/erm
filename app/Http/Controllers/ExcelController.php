@@ -8,6 +8,7 @@ use Ermtool\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 use Ermtool\Http\Controllers\ControlesController as Controles; //Para poder generar matriz de control y exportarla
 use Ermtool\Http\Controllers\RiesgosController as Riesgos; //Para poder generar matriz de riesgo y exportarla
+use Ermtool\Http\Controllers\AuditoriasController as Auditorias;
 
 class ExcelController extends Controller
 {
@@ -151,7 +152,46 @@ class ExcelController extends Controller
 
             })->export('xlsx');
         }
-
  
+    }
+
+    public function generarExcelPlan($org)
+    {
+        //generamos variable global para usarla en la función excel
+        global $id;
+
+        $id = $org;
+
+        Excel::create('Reporte de planes de acción '.date("d-m-Y"), function($excel) {
+
+                // título excel
+                $excel->setTitle('Planes de acción');
+
+                //creador y compañia
+                $excel->setCreator('Administrador B-GRC')
+                      ->setCompany('B-GRC - IXUS Consulting');
+
+                //descripción
+                $excel->setDescription('Reporte con planes de acción para la organización seleccionada');
+
+                $excel->sheet('Planes', function($sheet) {
+                    $auditoria = new Auditorias;
+                    $datos = $auditoria->generarReportePlanes($GLOBALS['id']);
+
+                    //$datos2 = json_decode($datos);
+                    $sheet->fromArray($datos);
+
+                    //editamos formato de salida de celdas
+                    $sheet->cells('A1:K1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                });
+
+            })->export('xlsx');
     }
 }

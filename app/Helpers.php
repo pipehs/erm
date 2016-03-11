@@ -103,7 +103,7 @@ function dropDown3()
 //dropdown de reportes básicos
 function dropDown4()
 {
-	$uri = array('heatmap','matrices','matriz_riesgos','encuestas');
+	$uri = array('heatmap','matrices','matriz_riesgos','encuestas','reporte_planes');
 
 	foreach ($uri as $uri)
 	{
@@ -155,7 +155,7 @@ function dropDown5()
 function dropDown6()
 {
 	$uri = array('auditorias','plan_auditoria','nuevo_plan','plan','ver_plan','crear_pruebas','pruebas','ejecutar_pruebas',
-				'supervisar','notas','plan_accion');
+				'supervisar','notas','planes_accion');
 
 	foreach ($uri as $uri)
 	{

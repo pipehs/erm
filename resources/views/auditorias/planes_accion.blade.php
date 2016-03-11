@@ -37,7 +37,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-	      	<p>En esta secci&oacute;n podr&aacute; agregar planes de acci&oacute;n .</p>
+	      	<p>En esta secci&oacute;n podr&aacute; agregar planes de acci&oacute;n. Agregue s&oacute;lo un plan de acci&oacute;n a la vez.</p>
 
 				@if(Session::has('message'))
 					<div class="alert alert-success alert-dismissible" role="alert">
@@ -268,8 +268,7 @@ function ocultar_creacion(id)
 	$("#btn_crear_"+id).empty();
 	$("#btn_crear_"+id).attr('onclick','crear_plan('+id+')');
 	$("#btn_crear_"+id).append('Agregar plan de acción');
-
-	$("#nuevo_plan_"+id).empty().delay(5000);
+	$("#nuevo_plan_"+id).empty();
 }
 //crea un plan de acción para el issue de id = id
 function crear_plan(id)
@@ -277,22 +276,65 @@ function crear_plan(id)
 	$("#btn_crear_"+id).empty();
 	$("#btn_crear_"+id).attr('onclick','ocultar_creacion('+id+')');
 	$("#btn_crear_"+id).append('Ocultar');
-	$("#nuevo_plan_"+id).empty();
 	//vaciamos por si existe ya algún formulario
 	$("#nuevo_plan_"+id).empty();
-	var plan = '<div class="form-group col-sm-12">';
-	//agregamos atributo hidden que señalará que se está guardando una nota y otro para identificar el id de la prueba
-	plan += '<input type="hidden" name="test_id" value="'+id+'">';
-	plan += '<input type="hidden" name="type" value="0">'; //0 identifica nuevo plan;
-	plan += '<div class="form-group col-sm-12">';
-	plan += '<textarea name="description_'+id+'" rows="3" cols="4" class="form-control" placeholder="describa el plan de acción" required></textarea></div>';
-	plan += '<div class="form-group col-sm-6">';
-	plan += '<label class="control-label">Ingrese fecha de término del plan de acción</label>';
-	plan += '<input type="date" class="form-control" name="final_date_'+id+'"></div>';
-	plan += '<div class="form-group col-sm-12">';
-	plan += '<button class="btn btn-success">Guardar</button></div><hr><br>';
-	$("#nuevo_plan_"+id).append(plan);
-	$("#nuevo_plan_"+id).show(500);
+
+	//obtenemos datos de algun plan existente
+	$.get('auditorias.get_action_plan.'+id, function (result) {
+		if (result == "null") //no existen notas
+		{
+			var plan = '<div class="form-group col-sm-12">';
+			//agregamos atributo hidden que señalará que se está guardando una nota y otro para identificar el id de la prueba
+			plan += '<input type="hidden" name="issue_id" value="'+id+'">';
+			plan += '<div class="form-group col-sm-12">';
+			plan += '<textarea name="description_'+id+'" rows="3" cols="4" class="form-control" placeholder="Describa el plan de acción" required></textarea></div>';
+
+			plan += '<label class="control-label">Responsable</label>';
+			plan += '<select class="form-control" name="responsable_'+id+'" required>';
+			plan += '<option value="" disabled selected >- Seleccione -</option>'
+			@foreach ($stakeholders as $stakeholder)
+				plan += '<option value={{ $stakeholder["id"] }}>{{ $stakeholder["name"] }}</option>';
+			@endforeach
+
+			plan += '</select>';
+
+			plan += '<label class="control-label">Ingrese fecha de término del plan de acción</label>';
+			plan += '<input type="date" class="form-control" name="final_date_'+id+'"></div>';
+			plan += '<div class="form-group col-sm-12">';
+			plan += '<button class="btn btn-success" name="guardar_'+id+'">Guardar</button></div><hr><br>';
+			$("#nuevo_plan_"+id).append(plan);
+			$("#nuevo_plan_"+id).show(500);
+		}
+
+		else
+		{
+			//parseamos datos obtenidos
+			var datos = JSON.parse(result);
+				
+			$(datos).each( function() {
+				var plan = '<h4><b>Ya existe plan de acción.</b></h4>';
+				plan += 'Los datos del plan son los siguientes: <br>';
+				plan += '<div class="form-group col-sm-12">';
+				//agregamos atributo hidden que señalará que se está guardando una nota y otro para identificar el id de la prueba
+				plan += '<input type="hidden" name="issue_id" value="'+id+'">';
+				plan += '<div class="form-group col-sm-12">';
+				plan += '<textarea name="description_'+id+'" disabled rows="3" cols="4" class="form-control" placeholder="'+this.description+'"></textarea></div>';
+
+				plan += '<label class="control-label">Responsable</label>';
+				plan += '<input type="text" value="'+this.stakeholder+'" class="form-control" disabled>';
+
+				plan += '<label class="control-label">Ingrese fecha de término del plan de acción</label>';
+				plan += '<input type="date" class="form-control" name="final_date_'+id+'" disabled value="'+this.final_date+'"></div>';
+				plan += '<hr><br>';
+				$("#nuevo_plan_"+id).append(plan);
+				$("#nuevo_plan_"+id).show(500);
+
+
+			});
+		}
+	});
+
+	
 }
 function ocultar_notas(id)
 {

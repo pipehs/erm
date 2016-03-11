@@ -964,12 +964,128 @@ class AuditoriasController extends Controller
     public function actionPlans()
     {
         $audit_plans = \Ermtool\Audit_plan::lists('name','id');
-        return view('auditorias.planes_accion',['audit_plans' => $audit_plans]);
+        //$stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+        //->orderBy('name')
+        //->lists('full_name', 'id');
+
+        $stakes = DB::table('stakeholders')->select('id','name','surnames')->get();
+        $i = 0;
+        foreach ($stakes as $stake)
+        {
+            $stakeholders[$i] = [
+                'id' => $stake->id,
+                'name' => $stake->name.' '.$stake->surnames,
+            ];
+
+            $i += 1;
+        }
+
+        return view('auditorias.planes_accion',['audit_plans' => $audit_plans,'stakeholders' => $stakeholders]);
     }
 
     public function storePlan(Request $request)
     {
-        print_r($_POST);
+        //print_r($_POST);
+
+        //id del issue que se está agregando
+        $id = $request['issue_id'];
+
+        $new_id = DB::table('action_plans')
+                        ->insertGetId([
+                                'issue_id' => $id,
+                                'stakeholder_id' => $request['responsable_'.$id],
+                                'description' => $request['description_'.$id],
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
+                                'final_date' => $request['final_date_'.$id],
+                                'status' => 0
+                            ]);
+
+        if ($new_id)
+        {
+            Session::flash('message','Plan de acción agregado correctamente');
+
+            return Redirect::to('/planes_accion');
+        }
+        else
+        {
+            Session::flash('error','Problema al agregar plan de acción. Intentelo nuevamente y si el problema persiste, contactese con el administrador del sistema.');
+
+            return Redirect::to('/planes_accion');
+        }
+
+    }
+
+    //función para reporte de planes de acción
+    public function actionPlansReport()
+    {
+        $organizations = \Ermtool\Organization::lists('name','id');
+
+        return view('reportes.planes_accion',['organizations' => $organizations]);
+    }
+
+    public function generarReportePlanes($org)
+    {
+        $results = array();
+        $i = 0;
+        //obtenemos datos de plan de auditoría, auditoría, issue y plan de acción
+        $action_plans = DB::table('action_plans')
+            ->join('issues','issues.id','=','action_plans.issue_id')
+            ->join('audit_audit_plan_audit_test','audit_audit_plan_audit_test.id','=','issues.audit_audit_plan_audit_test_id')
+            ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_test.audit_audit_plan_id')
+            ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+            ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+            ->where('audit_plans.organization_id','=',(int)$org)
+            ->select('audit_plans.name as audit_plan_name',
+                     'audits.name as audit_name',
+                     'issues.name as issue_name',
+                     'action_plans.description',
+                     'action_plans.final_date',
+                     'action_plans.created_at',
+                     'action_plans.status')
+            ->get();
+
+        foreach ($action_plans as $action_plan)
+        {
+            $fecha_creacion = date('d-m-Y',strtotime($action_plan->created_at));
+            $fecha_creacion .= ' a las '.date('H:i:s',strtotime($action_plan->created_at));
+
+            //¡¡¡¡¡¡¡¡¡corregir problema del año 2038!!!!!!!!!!!! //
+            $fecha_final = date('d-m-Y',strtotime($action_plan->final_date));
+            $fecha_final .= ' a las 00:00:00';
+
+            if ($action_plan->status == 0)
+            {
+                $estado = 'Abierto';
+            }
+            else if ($action_plan->status == 1)
+            {
+                $estado = 'Cerrado';
+            }
+            else
+            {
+                $estado = 'Error al obtener estado';
+            }
+
+            $results[$i] = [
+                        'Plan_de_auditoría' => $action_plan->audit_plan_name,
+                        'Auditoría' => $action_plan->audit_name,
+                        'Debilidad' => $action_plan->issue_name,
+                        'Plan_de_acción' => $action_plan->description,
+                        'Estado' => $estado,
+                        'Fecha_creación' => $fecha_creacion,
+                        'Fecha_final' => $fecha_final,
+            ];
+
+            $i += 1;
+        }
+
+        if (strstr($_SERVER["REQUEST_URI"],'genexcelplan')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
+        {
+            return $results;
+        }
+        else
+            return json_encode($results);
     }
 
 
@@ -1864,7 +1980,39 @@ class AuditoriasController extends Controller
 
         return json_encode($results);
     }
+    //obtiene plan de acción para una debilidad dada
+    public function getActionPlan($id)
+    {
+        $results = array();
+        //obtenemos action plan
+        $action_plan = DB::table('action_plans')
+                    ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
+                    ->where('issue_id','=',$id)
+                    ->select('action_plans.id','action_plans.description',
+                            'action_plans.final_date','stakeholders.name as name','stakeholders.surnames as surnames')
+                    ->get();
 
+        if ($action_plan == NULL)
+        {
+            $results = NULL;
+        }
+
+        else
+        {
+            foreach ($action_plan as $ap) //aunque solo existirá uno
+            {
+                $results = [
+                    'id' => $ap->id,
+                    'description' => $ap->description,
+                    'final_date' => $ap->final_date,
+                    'stakeholder' => $ap->name.' '.$ap->surnames,
+                ];
+            }
+        }
+        
+        return json_encode($results);
+    }
+/*
     public function getFile($archivo)
     {
         $public_path = public_path();
@@ -1879,7 +2027,7 @@ class AuditoriasController extends Controller
         //si no se encuentra lanzamos un error 404.
         //abort(404);
     }
-
+*/
     //función interna que obtiene los archivos subidos si es que hay
     public function getEvidences($kind,$id)
     {
@@ -1941,5 +2089,7 @@ class AuditoriasController extends Controller
 
         return $res;
     }
+
+
 
 }

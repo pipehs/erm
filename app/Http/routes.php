@@ -444,16 +444,6 @@ Route::put('controles.update.{id}', [
 	'as' => 'controles.update', 'uses' => 'ControlesController@update'
 ]);
 
-//ruta para seleccionar a través de JSON los controles de negocio o de procesos en campo select
-Route::get('controles.subneg.{value}', [
-	'as' => 'controles.subneg', 'uses' => 'ControlesController@subneg'
-]);
-
-Route::get('controles.edit.{id}', [
-	'as' =>'controles.edit', 'uses' => 'ControlesController@edit']);
-
-Route::get('controles.docs.{id}', [
-	'as' =>'controles.docs', 'uses' => 'ControlesController@docs']);
 
 // ----Rutas para reportes básicos---- //
 
@@ -476,19 +466,9 @@ Route::get('matrices', [
 Route::get('matriz_riesgos', [
 	'as' => 'matriz_riesgos', 'uses' => 'RiesgosController@matrices']);
 
-//ruta para generar matriz de riesgos a través de JSON
-Route::get('genmatrizriesgos.{value}', [
-	'as' => 'genmatrizriesgos', 'uses' => 'RiesgosController@generarMatriz']);
+Route::get('reporte_planes', [
+	'as' => 'reporte_planes', 'uses' => 'AuditoriasController@actionPlansReport']);
 
-//ruta para generar matriz a través de JSON
-Route::get('genmatriz.{value}', [
-	'as' => 'genmatriz', 'uses' => 'ControlesController@generarMatriz']);
-
-
-//------ Rutas para trabajar con Excel ------//
-
-Route::get('genexcel.{value}', [
-	'as' => 'genexcel', 'uses' => 'ExcelController@generarExcel']);
 
 //------ Rutas para auditoría de riesgos ------//
 
@@ -560,6 +540,41 @@ Route::get('planes_accion', [
 Route::post('agregar_plan', [
 	'as' => 'agregar_plan', 'uses' => 'AuditoriasController@storePlan']);
 
+
+//------ Rutas para trabajar con Excel ------//
+
+Route::get('genexcel.{value}', [
+	'as' => 'genexcel', 'uses' => 'ExcelController@generarExcel']);
+
+Route::get('genexcelplan.{org}', [
+	'as' => 'genexcelplan', 'uses' => 'ExcelController@generarExcelPlan']);
+
+
+//------ RUTAS PARA ENLACES A TRAVÉS DE JSON --------//
+
+//ruta para seleccionar a través de JSON los controles de negocio o de procesos en campo select
+Route::get('controles.subneg.{value}', [
+	'as' => 'controles.subneg', 'uses' => 'ControlesController@subneg'
+]);
+
+Route::get('controles.edit.{id}', [
+	'as' =>'controles.edit', 'uses' => 'ControlesController@edit']);
+
+Route::get('controles.docs.{id}', [
+	'as' =>'controles.docs', 'uses' => 'ControlesController@docs']);
+
+//ruta para generar matriz de riesgos a través de JSON
+Route::get('genmatrizriesgos.{value}', [
+	'as' => 'genmatrizriesgos', 'uses' => 'RiesgosController@generarMatriz']);
+
+//ruta para generar matriz de control a través de JSON
+Route::get('genmatriz.{value}', [
+	'as' => 'genmatriz', 'uses' => 'ControlesController@generarMatriz']);
+
+//ruta para generar reporte de planes de acción
+Route::get('genplanes_accion.{org}', [
+	'as' => 'genplanes_accion', 'uses' => 'AuditoriasController@generarReportePlanes']);
+
 //ruta para obtener datos de plan de auditoría anterior 
 Route::get('auditorias.get_audit_plan.{org}', [
 	'as' => 'auditorias.get_audit_plan', 'uses' => 'AuditoriasController@getAuditPlan']);
@@ -613,6 +628,10 @@ Route::get('auditorias.get_issue.{id}', [
 //ruta para obtener notas de una prueba de auditoría
 Route::get('auditorias.get_notes.{id}', [
 	'as' => 'auditorias.get_notes', 'uses' => 'AuditoriasController@getNotes']);
+
+//ruta para obtener plan de acción existente
+Route::get('auditorias.get_action_plan.{id}', [
+	'as' => 'auditorias.get_action_plan', 'uses' => 'AuditoriasController@getActionPlan']);
 
 //ruta para obtener archivo de evidencias
 Route::get('auditorias.get_file.{archivo}', [

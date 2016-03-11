@@ -65,7 +65,7 @@
 						<li><a href="ejecutar_pruebas" class="{{ activeMenu('ejecutar_pruebas') }}">Ejecutar plan de <br>auditor&iacute;a</a></li>
 						<li><a href="supervisar" class="{{ activeMenu('supervisar') }}">Supervisar planes de <br>auditor&iacute;a</a></li>
 						<li><a href="notas" class="{{ activeMenu('notas') }}">Revisi&oacute;n de notas</a></li>
-						<li><a href="planes_accion" class="{{ activeMenu('plan_accion') }}">Planes de acci&oacute;n</a></li>
+						<li><a href="planes_accion" class="{{ activeMenu('planes_accion') }}">Planes de acci&oacute;n</a></li>
 					</ul>
 				</li>
 
@@ -78,7 +78,7 @@
 						<li>{!!HTML::link('heatmap','Mapa de Calor',['class'=>activeMenu('heatmap')])!!}</li>
 						<li>{!!HTML::link('matrices','Matriz de Control',['class'=>activeMenu('matrices')])!!}</li>
 						<li>{!!HTML::link('matriz_riesgos','Matriz de Riesgos',['class'=>activeMenu('matriz_riesgos')])!!}</li>
-						<li>{!!HTML::link('#','Ver Planes de Acci&oacute;n')!!}</li>
+						<li>{!!HTML::link('reporte_planes','Planes de Acci&oacute;n',['class'=>activeMenu('reporte_planes')])!!}</li>
 						<li>{!!HTML::link('encuestas','Revisi&oacute;n de Encuestas',['class'=>activeMenu('encuestas')])!!}</li>
 					</ul>
 				</li>
