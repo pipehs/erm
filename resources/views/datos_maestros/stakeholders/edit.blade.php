@@ -10,9 +10,9 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('#','Datos Maestros')!!}</li>
-			<li>{!!Html::link('stakeholders','Stakeholders')!!}</li>
-			<li>{!!Html::link('stakeholders.edit','Modificar Stakeholders')!!}</li>
+			<li><a href="#">Datos Maestros</a></li>
+			<li><a href="stakeholders">Stakeholders</a></li>
+			<li><a href="stakeholders.edit.{{ $stakeholder['id'] }}">Modificar Stakeholder</a></li>
 		</ol>
 	</div>
 </div>

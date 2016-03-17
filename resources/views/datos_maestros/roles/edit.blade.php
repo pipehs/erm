@@ -10,9 +10,9 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('#','Datos Maestros')!!}</li>
-			<li>{!!Html::link('roles','Roles')!!}</li>
-			<li>{!!Html::link('roles.edit','Modificar Rol')!!}</li>
+			<li><a href="#">Datos Maestros</a></li>
+			<li><a href="roles">Roles</a></li>
+			<li><a href="roles.edit.{{ $rol['id'] }}">Modificar Rol</a></li>
 		</ol>
 	</div>
 </div>

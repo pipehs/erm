@@ -44,6 +44,10 @@
 				{{ Session::get('message') }}
 			</div>
 			@endif
+
+			{!! link_to_route('plan_auditoria.edit', $title = 'Editar', $parameters = $plan_auditoria['id'],
+				 $attributes = ['class'=>'btn btn-success'])!!}
+
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
 			<tr>
 			<th>Auditor&iacute;a(s)</th>
@@ -125,7 +129,7 @@
 
 			<center>
 				{!! link_to_route('plan_auditoria', $title = 'Volver', $parameters = NULL,
-				 $attributes = ['class'=>'btn btn-success'])!!}
+				 $attributes = ['class'=>'btn btn-danger'])!!}
 			<center>
 			</div>
 		</div>

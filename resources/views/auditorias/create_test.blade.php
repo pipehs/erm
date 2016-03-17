@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Agregar pruebas de auditor&iacute;a')
+@section('title', 'Agregar programa de auditor&iacute;a')
 
 @stop
 
@@ -11,7 +11,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li>{!!Html::link('#','Auditor&iacute;as')!!}</li>
-			<li>{!!Html::link('crear_pruebas','Agregar pruebas de auditor&iacute;as')!!}</li>
+			<li>{!!Html::link('crear_pruebas','Agregar programa de auditor&iacute;a')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -21,7 +21,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Agregar Pruebas de Auditor&iacute;as</span>
+					<span>Agregar Programa de Auditor&iacute;a</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -110,13 +110,21 @@
 						</div>
 					</div>
 
+					<div class="form-group">
+						{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::select('stakeholder_id',$stakeholders,null,['required'=>'true',
+							'placeholder'=>'- Seleccione -','id'=>'stakeholder','class'=>'first-disabled'])!!}
+						</div>
+					</div>
+
 			<div id="super_activities">
 					<center>
-					<div style="cursor:hand; margin:auto; " id="agregar_actividad"><font color="CornflowerBlue"><u>Agregar m&aacute;s actividades</u></font></div>
+					<div style="cursor:hand; margin:auto; " id="agregar_actividad"><font color="CornflowerBlue"><u>Agregar m&aacute;s pruebas</u></font></div>
 					</center>
 					<div class="form-group">
 					<div id="activities">
-								{!!Form::label('Actividad 1',null,['class'=>'col-sm-4 control-label'])!!}
+								{!!Form::label('Prueba 1',null,['class'=>'col-sm-4 control-label'])!!}
 								<div class="col-sm-4">
 									{!!Form::text('activity_1',null,['id'=>'activity_1','class'=>'form-control',
 																'required'=>'true'])!!}
@@ -161,7 +169,7 @@
 
 				<center>
 					{!! link_to_route('plan_auditoria', $title = 'Volver', $parameters = NULL,
-                 		$attributes = ['class'=>'btn btn-success'])!!}
+                 		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 			</div>
 		</div>
@@ -226,7 +234,7 @@ $("#kind").change(function() {
 
 				$("#activities").empty();
 				$("#agregar_actividad").show();
-				$("#activities").append('<div class="form-group"><label for="Actividad 1" class="col-sm-4 control-label">Actividad 1</label><div class="col-sm-4"><input id="activity_1" class="form-control" required="true" name="activity_1" type="text"></div></div>');
+				$("#activities").append('<div class="form-group"><label for="Prueba 1" class="col-sm-4 control-label">Prueba 1</label><div class="col-sm-4"><input id="activity_1" class="form-control" required="true" name="activity_1" type="text"></div></div>');
 
 				$("audit_test_id").val("");
 
@@ -305,7 +313,7 @@ $("#agregar_actividad").click(function() {
 
 			//nombre
 			$('#new_actividades').append('<div class="form-group">');
-			$('#new_actividades').append('<label for="activity_'+cont+'" class="col-sm-4 control-label">Actividad '+cont+'</label>');
+			$('#new_actividades').append('<label for="activity_'+cont+'" class="col-sm-4 control-label">Prueba '+cont+'</label>');
 			$('#new_actividades').append('<div class="col-sm-4"><input type="text" name="activity_'+cont+'" class="form-control"></div></div></br>');
 
 			cont = cont + 1;

@@ -290,4 +290,23 @@ class ObjetivosController extends Controller
     {
         //
     }
+
+    //obtiene objetivos de una organización
+    public function getObjectives($org)
+    {
+        $results = array();
+        //obtenemos objetivos
+        $objectives = \Ermtool\Objective::all()->where('status',0)
+                                            ->where('organization_id',(int)$org);
+
+        foreach ($objectives as $objective)
+        {
+            $results = [
+                'id' => $objective->id,
+                'name' => $objective->name,
+            ];
+        }
+        
+        return json_encode($results);
+    }
 }

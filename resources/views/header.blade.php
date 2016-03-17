@@ -26,7 +26,7 @@
 	<div class="container-fluid expanded-panel">
 		<div class="row">
 			<div id="logo" class="col-xs-12 col-sm-2">
-				<a href="">ERM</a>
+				<a href="">B-GRC</a>
 			</div>
 			<div id="top-panel" class="col-xs-12 col-sm-10">
 				<div class="row">
@@ -34,10 +34,10 @@
 						<a href="#" class="show-sidebar">
 						  <i class="fa fa-bars"></i>
 						</a>
-						<div id="search">
+						<!--<div id="search">
 							<input type="text" placeholder="search"/>
 							<i class="fa fa-search"></i>
-						</div>
+						</div>-->
 					</div>
 					<div class="col-xs-4 col-sm-8 top-panel-right">
 						

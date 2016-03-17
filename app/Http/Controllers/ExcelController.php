@@ -182,7 +182,47 @@ class ExcelController extends Controller
                     $sheet->fromArray($datos);
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:K1', function($cells) {
+                    $sheet->cells('A1:G1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                });
+
+            })->export('xlsx');
+    }
+
+    public function generarExcelAudit($org)
+    {
+        //generamos variable global para usarla en la función excel
+        global $id;
+
+        $id = $org;
+
+        Excel::create('Reporte de auditorías '.date("d-m-Y"), function($excel) {
+
+                // título excel
+                $excel->setTitle('Auditorías');
+
+                //creador y compañia
+                $excel->setCreator('Administrador B-GRC')
+                      ->setCompany('B-GRC - IXUS Consulting');
+
+                //descripción
+                $excel->setDescription('Reporte con auditorías para la organización seleccionada');
+
+                $excel->sheet('Auditorías', function($sheet) {
+                    $auditoria = new Auditorias;
+                    $datos = $auditoria->generarReporteAuditorias($GLOBALS['id']);
+
+                    //$datos2 = json_decode($datos);
+                    $sheet->fromArray($datos);
+
+                    //editamos formato de salida de celdas
+                    $sheet->cells('A1:L1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');

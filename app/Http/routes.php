@@ -469,6 +469,9 @@ Route::get('matriz_riesgos', [
 Route::get('reporte_planes', [
 	'as' => 'reporte_planes', 'uses' => 'AuditoriasController@actionPlansReport']);
 
+Route::get('reporte_auditorias', [
+	'as' => 'reporte_auditorias', 'uses' => 'AuditoriasController@auditsReport']);
+
 
 //------ Rutas para auditoría de riesgos ------//
 
@@ -480,6 +483,13 @@ Route::get('plan_auditoria.create', [
 
 Route::post('plan_auditoria.create2', [
 	'as' =>'plan_auditoria.create2', 'uses' => 'AuditoriasController@datosAuditoria']);
+
+Route::get('plan_auditoria.edit.{id}', [
+	'as' =>'plan_auditoria.edit', 'uses' => 'AuditoriasController@edit']);
+
+Route::put('auditorias.update.{id}', [
+	'as' => 'auditorias.update', 'uses' => 'AuditoriasController@update'
+]);
 
 Route::post('agregar_plan.{id}', [
 	'as' => 'agregar_plan', 'uses' => 'AuditoriasController@store'
@@ -537,8 +547,8 @@ Route::post('agregar_supervision', [
 Route::get('planes_accion', [
 	'as' => 'planes_accion', 'uses' => 'AuditoriasController@actionPlans']);
 
-Route::post('agregar_plan', [
-	'as' => 'agregar_plan', 'uses' => 'AuditoriasController@storePlan']);
+Route::post('agregar_plan2', [
+	'as' => 'agregar_plan2', 'uses' => 'AuditoriasController@storePlan']);
 
 
 //------ Rutas para trabajar con Excel ------//
@@ -548,6 +558,9 @@ Route::get('genexcel.{value}', [
 
 Route::get('genexcelplan.{org}', [
 	'as' => 'genexcelplan', 'uses' => 'ExcelController@generarExcelPlan']);
+
+Route::get('genexcelaudit.{org}', [
+	'as' => 'genexcelaudit', 'uses' => 'ExcelController@generarExcelAudit']);
 
 
 //------ RUTAS PARA ENLACES A TRAVÉS DE JSON --------//
@@ -574,6 +587,10 @@ Route::get('genmatriz.{value}', [
 //ruta para generar reporte de planes de acción
 Route::get('genplanes_accion.{org}', [
 	'as' => 'genplanes_accion', 'uses' => 'AuditoriasController@generarReportePlanes']);
+
+//ruta para generar reporte de auditorías
+Route::get('genaudit_report.{org}', [
+	'as' => 'genaudit_report', 'uses' => 'AuditoriasController@generarReporteAuditorias']);
 
 //ruta para obtener datos de plan de auditoría anterior 
 Route::get('auditorias.get_audit_plan.{org}', [
@@ -644,6 +661,14 @@ Route::get('auditorias.guardar_nota', [
 //ruta para obtener notas de una prueba de auditoría
 Route::get('auditorias.close_note.{id}', [
 	'as' => 'auditorias.close_note', 'uses' => 'AuditoriasController@closeNote']);
+
+//ruta para obtener procesos de una organizacion
+Route::get('get_processes.{id}', [
+	'as' => 'get_processes', 'uses' => 'ProcesosController@getProcesses']);
+
+//ruta para obtener procesos de una organizacion
+Route::get('get_objectives.{id}', [
+	'as' => 'get_objectives', 'uses' => 'ObjetivosController@getObjectives']);
 
 
 // ---- Rutas adicionales del framework ----//

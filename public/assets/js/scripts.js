@@ -68,4 +68,6 @@ $(document).ready(function() {
 	// Add Drag-n-Drop feature
 	WinMove();
 
+	$( "first-disabled option:first-child").attr("disabled", "disabled");
+
 });

@@ -12,7 +12,7 @@
 		<ol class="breadcrumb">
 			<li><a href="#">Datos Maestros</a></li>
 			<li><a href="organization">Organizaciones</a></li>
-			<li><a href="organization/{{ $organization['id'] }}/edit">Editar Organizaci&oacute;n</a></li>
+			<li><a href="organization.edit.{{ $organization['id'] }}">Editar Organizaci&oacute;n</a></li>
 		</ol>
 	</div>
 </div>

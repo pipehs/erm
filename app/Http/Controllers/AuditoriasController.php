@@ -125,9 +125,6 @@ class AuditoriasController extends Controller
                                 ->select('risk_subprocess.id AS riskid','risks.name')
                                 ->lists('risks.name','riskid');
 
-        //obtenemos riesgos de negocio
-
-
         return view('auditorias.create',['stakeholders'=>$stakeholders,'organizations'=>$organizations,
                                         'audits'=>$audits,'risk_subprocess'=>$risk_subprocess]);
     }
@@ -139,9 +136,15 @@ class AuditoriasController extends Controller
 
         $audit_tests = \Ermtool\Audit_test::lists('name','id');
 
+         //obtenemos lista de stakeholders
+        $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+        ->orderBy('name')
+        ->lists('full_name', 'id');
+
         //echo $audit_tests;
 
-        return view('auditorias.create_test',['audit_plans'=>$audit_plans,'audit_tests'=>$audit_tests]);     
+        return view('auditorias.create_test',['audit_plans'=>$audit_plans,'audit_tests'=>$audit_tests,
+                                                'stakeholders' => $stakeholders]);     
     }
 
     public function createAuditoria()
@@ -151,76 +154,80 @@ class AuditoriasController extends Controller
 
     public function storePrueba(Request $request)
     {
-        //print_r($_POST);
-
-        //si es que no tiene valor kind, significa que es una prueba nueva
-        if ($request['kind'] == "")
+        
+        //creamos una transacción para cumplir con atomicidad
+        DB::transaction(function()
         {
-            $audit_test = DB::table('audit_tests')
-                                ->insertGetId([
-                                    'name' => $request['name'],
-                                    'description' => $request['description'],
-                                    'type' => $request['type'],
+            //si es que no tiene valor kind, significa que es una prueba nueva
+            if ($_POST['kind'] == "")
+            {
+                $audit_test = DB::table('audit_tests')
+                                    ->insertGetId([
+                                        'name' => $_POST['name'],
+                                        'description' => $_POST['description'],
+                                        'type' => $_POST['type'],
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s'),
+                                        ]);
+            }
+            else
+            {
+                $audit_test = \Ermtool\Audit_test::find($_POST['audit_test_id'])->value('id');            
+            }
+
+                //insertamos en audit_audit_plan_audit_test
+                $audit_audit_plan_audit_test = DB::table('audit_audit_plan_audit_test')
+                            ->insertGetId([
+                                    'audit_test_id' => $audit_test,
+                                    'audit_audit_plan_id' => $_POST['audit'],
+                                    'results' => 2,
                                     'created_at' => date('Y-m-d H:i:s'),
                                     'updated_at' => date('Y-m-d H:i:s'),
-                                    ]);
-        }
-        else
-        {
-            $audit_test = \Ermtool\Audit_test::find($request['audit_test_id'])->value('id');            
-        }
+                                    'stakeholder_id' => $_POST['stakeholder_id']
+                                ]);
 
-            //insertamos en audit_audit_plan_audit_test
-            $audit_audit_plan_audit_test = DB::table('audit_audit_plan_audit_test')
-                        ->insertGetId([
-                                'audit_test_id' => $audit_test,
-                                'audit_audit_plan_id' => $request['audit'],
-                                'results' => 2,
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s'),
+                //insertamos controles de proceso (si es que hay)
+                if (isset($_POST['control_subprocess_id']))
+                {
+                    foreach ($_POST['control_subprocess_id'] as $control_sub_id)
+                    {
+                    DB::table('audit_control_risk')
+                        ->insert([
+                            'control_id' => $control_sub_id,
+                            'audit_audit_plan_audit_test_id' => $audit_audit_plan_audit_test
                             ]);
-
-            //insertamos controles de proceso (si es que hay)
-            if (isset($request['control_subprocess_id']))
-            {
-                foreach ($request['control_subprocess_id'] as $control_sub_id)
-                {
-                DB::table('audit_control_risk')
-                    ->insert([
-                        'control_id' => $control_sub_id,
-                        'audit_audit_plan_audit_test_id' => $audit_audit_plan_audit_test
-                        ]);
+                    }
                 }
-            }
-            
-            //insertamos controles de negocio (si es que hay)
-            if (isset($request['control_objective_id']))
-            {
-                foreach ($request['control_objective_id'] as $control_obj_id)
+                
+                //insertamos controles de negocio (si es que hay)
+                if (isset($_POST['control_objective_id']))
                 {
-                DB::table('audit_control_risk')
-                    ->insert([
-                        'control_id' => $control_obj_id,
-                        'audit_audit_plan_audit_test_id' => $audit_audit_plan_audit_test
-                        ]);
+                    foreach ($_POST['control_objective_id'] as $control_obj_id)
+                    {
+                    DB::table('audit_control_risk')
+                        ->insert([
+                            'control_id' => $control_obj_id,
+                            'audit_audit_plan_audit_test_id' => $audit_audit_plan_audit_test
+                            ]);
+                    }
                 }
-            }
 
-            $i = 1; //contador de actividades
-            //insertamos cada una de las actividades
-            while (isset($request['activity_'.$i]))
-            {
-                DB::table('activities')
-                    ->insert([
-                        'name' => $request['activity_'.$i],
-                        'results' => 0,
-                        'audit_audit_plan_audit_test_id' => $audit_audit_plan_audit_test,
-                        'status' => 0
-                        ]);
-                $i += 1;    
-            }
+                $i = 1; //contador de actividades
+                //insertamos cada una de las actividades
+                while (isset($_POST['activity_'.$i]))
+                {
+                    DB::table('activities')
+                        ->insert([
+                            'name' => $_POST['activity_'.$i],
+                            'results' => 0,
+                            'audit_audit_plan_audit_test_id' => $audit_audit_plan_audit_test,
+                            'status' => 0
+                            ]);
+                    $i += 1;    
+                }
 
-        Session::flash('message','Prueba de auditor&iacute;a creada correctamente');
+            Session::flash('message','Programa de auditor&iacute;a creado correctamente');
+        });
         return Redirect::to('/crear_pruebas');
         
     }
@@ -510,179 +517,354 @@ class AuditoriasController extends Controller
 
         //print_r($_POST);
 
-        //damos formato a fecha de inicio
-        $fecha = explode("/",$request['initial_date']);
-        $fecha_inicio = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-
-        //damos formato a fecha de término
-        $fecha = explode("/",$request['final_date']);
-        $fecha_termino = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-
-        //insertamos plan y obtenemos ID
-        $audit_plan_id = DB::table('audit_plans')->insertGetId([
-                'name'=>$request['name'],
-                'description'=>$request['description'],
-                'objectives'=>$request['objectives'],
-                'scopes'=>$request['scopes'],
-                'status'=>0,
-                'resources'=>$request['resources'],
-                'methodology'=>$request['methodology'],
-                'initial_date'=>$fecha_inicio,
-                'final_date'=>$fecha_termino,
-                'created_at'=>date('Y-m-d H:i:s'),
-                'updated_at'=>date('Y-m-d H:i:s'),
-                'rules'=>$request['rules'],
-                'organization_id'=>$request['organization_id']
-                ]);
-
-        //insertamos en audit_plan_stakeholder primero al encargado del plan y luego al equipo
-                DB::table('audit_plan_stakeholder')
-                    ->insert([
-                        'role' => 0,
-                        'audit_plan_id' => $audit_plan_id,
-                        'stakeholder_id' => $request['stakeholder_id']
-                        ]);
-
-        //ahora insertamos equipo de stakeholders (si es que hay)
-        if (isset($request['stakeholder_team']))
+        //Mantenemos atomicidad y consistencia
+        DB::transaction(function()
         {
-            foreach ($request['stakeholder_team'] as $stakes)
-            {
-                DB::table('audit_plan_stakeholder')
+            //damos formato a fecha de inicio
+            $fecha = explode("/",$_POST['initial_date']);
+            $fecha_inicio = $fecha[2]."-".$fecha[0]."-".$fecha[1];
+
+            //damos formato a fecha de término
+            $fecha = explode("/",$_POST['final_date']);
+            $fecha_termino = $fecha[2]."-".$fecha[0]."-".$fecha[1];
+
+            //insertamos plan y obtenemos ID
+            $audit_plan_id = DB::table('audit_plans')->insertGetId([
+                    'name'=>$_POST['name'],
+                    'description'=>$_POST['description'],
+                    'objectives'=>$_POST['objectives'],
+                    'scopes'=>$_POST['scopes'],
+                    'status'=>0,
+                    'resources'=>$_POST['resources'],
+                    'methodology'=>$_POST['methodology'],
+                    'initial_date'=>$fecha_inicio,
+                    'final_date'=>$fecha_termino,
+                    'created_at'=>date('Y-m-d H:i:s'),
+                    'updated_at'=>date('Y-m-d H:i:s'),
+                    'rules'=>$_POST['rules'],
+                    'estimated_HH'=>$_POST['HH_plan'],
+                    'organization_id'=>$_POST['organization_id']
+                    ]);
+
+            //insertamos en audit_plan_stakeholder primero al encargado del plan y luego al equipo
+                    DB::table('audit_plan_stakeholder')
                         ->insert([
-                            'role' => 1,
+                            'role' => 0,
                             'audit_plan_id' => $audit_plan_id,
-                            'stakeholder_id' => $stakes
+                            'stakeholder_id' => $_POST['stakeholder_id']
                             ]);
-            }
-        }
 
-         //insertamos riesgos del negocio (si es que existen)
-        if (isset($request['objective_risk_id']))
-        {
-            foreach ($request['objective_risk_id'] as $objective_risk)
+            //ahora insertamos equipo de stakeholders (si es que hay)
+            if (isset($_POST['stakeholder_team']))
             {
-                    DB::table('audit_plan_risk')
-                        ->insert([
-                            'audit_plan_id' => $audit_plan_id,
-                            'objective_risk_id' => $objective_risk
-                            ]);
-            }
-        }
-        //insertamos riesgos de proceso (si es que existen)
-        if (isset($request['risk_subprocess_id']))
-        {
-            foreach ($request['risk_subprocess_id'] as $risk_subprocess)
-            {
-                    DB::table('audit_plan_risk')
-                        ->insert([
-                            'audit_plan_id' => $audit_plan_id,
-                            'risk_subprocess_id' => $risk_subprocess
-                            ]);
-            }
-        }
-
-        //ahora guardamos auditorías que no son nuevas
-
-        //insertamos cada auditoria (de universo de auditorias) en audit_audit_plan
-        $i = 1;
-        if (isset($request['audits']))
-        {
-            foreach ($request['audits'] as $audit)
-            {
-                //insertamos y obtenemos id para ingresarlo en audit_risk y otros
-                $audit_audit_plan_id = DB::table('audit_audit_plan')
-                            ->insertGetId([
+                foreach ($_POST['stakeholder_team'] as $stakes)
+                {
+                    DB::table('audit_plan_stakeholder')
+                            ->insert([
+                                'role' => 1,
                                 'audit_plan_id' => $audit_plan_id,
-                                'audit_id' => $audit,
-                                'initial_date' => $request['audit_'.$audit.'_initial_date'],
-                                'final_date' => $request['audit_'.$audit.'_final_date'],
-                                'resources' => $request['audit_'.$audit.'_resources']
+                                'stakeholder_id' => $stakes
                                 ]);
-                
-                //insertamos riesgos de negocio de la auditoría
-                if (isset($request['audit_'.$audit.'_objective_risks']))
-                {
-                    foreach ($request['audit_'.$audit.'_objective_risks'] as $audit_objective_risk)
-                    {
-                        //insertamos audit risks
-                        DB::table('audit_risk')
-                            ->insert([
-                                    'audit_audit_plan_id' => $audit_audit_plan_id,
-                                    'objective_risk_id' => $audit_objective_risk
-                                ]);
-                    }
                 }
+            }
 
-                //insertamos riesgos de proceso de la auditoría
-                if (isset($request['audit_'.$audit.'_risk_subprocess']))
+            if ($_POST['type'] == 0) //se agrego auditoría de procesos
+            {
+                //primero, obtenemos riesgos asociados a cada proceso (si es que hay)
+                if (isset($_POST['processes_id']))
                 {
-                    foreach ($request['audit_'.$audit.'_risk_subprocess'] as $audit_risk_subprocess)
+                    foreach ($_POST['processes_id'] as $process_id)
                     {
-                        //insertamos audit risks
-                        DB::table('audit_risk')
-                            ->insert([
-                                    'audit_audit_plan_id' => $audit_audit_plan_id,
-                                    'risk_subprocess_id' => $audit_risk_subprocess
-                                ]);
+                        //obtenemos subprocesses_risks
+                        $risks = DB::table('subprocesses')
+                                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                                        ->where('subprocesses.process_id','=',$process_id)
+                                        ->select('risk_subprocess.id')
+                                        ->get();
+
+                        foreach ($risks as $risk)
+                        {
+                            //insertamos cada riesgo de subproceso
+                            DB::table('audit_plan_risk')
+                                ->insert([
+                                    'audit_plan_id' => $audit_plan_id,
+                                    'risk_subprocess_id' => $risk->id
+                                    ]);
+                        }
                     }
                 }
             }
 
-            //ahora guardamos auditorías nuevas
-            $i = 1; //contador para auditorías nuevas
-            while (isset($request['audit_new'.$i.'_name']))
+            else if ($_POST['type'] == 1) //se agregó auditoría de negocios
             {
-                //primero insertamos en tabla audits y obtenemos id
-                $audit_id = DB::table('audits')
-                            ->insertGetId([
-                                'name' => $request['audit_new'.$i.'_name'],
-                                'description' => $request['audit_new'.$i.'_description'],
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s')
-                                ]);
-
-                //ahora insertamos en audit_audit_plan
-                $audit_audit_plan_id = DB::table('audit_audit_plan')
-                            ->insertGetId([
-                                'audit_plan_id' => $audit_plan_id,
-                                'audit_id' => $audit_id,
-                                'initial_date' => $request['audit_new'.$i.'_initial_date'],
-                                'final_date' => $request['audit_new'.$i.'_final_date'],
-                                'resources' => $request['audit_new'.$i.'_resources']
-                                ]);
-
-                //insertamos riesgos de negocio (de haber)
-               if (isset($request['audit_new'.$i.'_objective_risks']))
-               {
-                    foreach ($request['audit_new'.$i.'_objective_risks'] as $objective_risk)
+                //obtenemos riesgo asociado a cada objetivo (si es que hay)
+                if (isset($_POST['objectives_id']))
+                {
+                    foreach ($_POST['objectives_id'] as $objective_id)
                     {
-                        DB::table('audit_risk')
-                            ->insert([
-                                    'audit_audit_plan_id' => $audit_audit_plan_id,
+                        //obtenemos objective_risks
+                        $risks = DB::table('objectives')
+                                ->join('objective_risk','objective_risk.objective_id','=',$objective_id)
+                                ->select('objective_risk.id')
+                                ->get();
+
+                        foreach ($risks as $risk)
+                        {
+                            //insertamos cada riesgo de subproceso
+                            DB::table('audit_plan_risk')
+                                ->insert([
+                                    'audit_plan_id' => $audit_plan_id,
+                                    'objective_risk_id' => $risk->id
+                                    ]);
+                        }
+                    }
+                }
+            }
+
+            else if ($_POST['type'] == 2)
+            {
+                //insertamos riesgos del negocio (si es que existen)
+                if (isset($_POST['objective_risk_id']))
+                {
+                    foreach ($_POST['objective_risk_id'] as $objective_risk)
+                    {
+                            DB::table('audit_plan_risk')
+                                ->insert([
+                                    'audit_plan_id' => $audit_plan_id,
                                     'objective_risk_id' => $objective_risk
-                                ]);
+                                    ]);
                     }
-               }
-
-               //insertamos nuevo riesgo de proceso (de haber)
-               if (isset($request['audit_new'.$i.'_objective_risks']))
-               {
-                    foreach ($request['audit_new'.$i.'_risk_subprocess'] as $risk_subprocess)
+                }
+                //insertamos riesgos de proceso (si es que existen)
+                if (isset($_POST['risk_subprocess_id']))
+                {
+                    foreach ($_POST['risk_subprocess_id'] as $risk_subprocess)
                     {
-                        DB::table('audit_risk')
-                            ->insert([
-                                    'audit_audit_plan_id' => $audit_audit_plan_id,
+                            DB::table('audit_plan_risk')
+                                ->insert([
+                                    'audit_plan_id' => $audit_plan_id,
                                     'risk_subprocess_id' => $risk_subprocess
-                                ]);
+                                    ]);
                     }
-               }
-
-               $i += 1;
+                }
             }
-        }
 
-        Session::flash('message','Plan de auditor&iacute;a generado correctamente');
+            //ahora guardamos auditorías que no son nuevas
+
+            //insertamos cada auditoria (de universo de auditorias) en audit_audit_plan
+            $i = 1;
+            if (isset($_POST['audits']))
+            {
+                foreach ($_POST['audits'] as $audit)
+                {
+                    //insertamos y obtenemos id para ingresarlo en audit_risk y otros
+                    $audit_audit_plan_id = DB::table('audit_audit_plan')
+                                ->insertGetId([
+                                    'audit_plan_id' => $audit_plan_id,
+                                    'audit_id' => $audit,
+                                    'initial_date' => $_POST['audit_'.$audit.'_initial_date'],
+                                    'final_date' => $_POST['audit_'.$audit.'_final_date'],
+                                    'resources' => $_POST['audit_'.$audit.'_resources'],
+                                    'estimated_HH' => $_POST['audit_'.$audit.'_HH']
+                                    ]);
+                    
+                    if ($_POST['type'] == 0) //se agrego auditoría de procesos
+                    {
+                        //primero, obtenemos riesgos asociados a cada proceso (si es que hay)
+                        if (isset($_POST['audit_'.$audit.'_processes']))
+                        {
+                            foreach ($_POST['audit_'.$audit.'_processes'] as $process_id)
+                            {
+                                //obtenemos subprocesses_risks
+                                $risks = DB::table('subprocesses')
+                                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                                        ->where('subprocesses.process_id','=',$process_id)
+                                        ->select('risk_subprocess.id')
+                                        ->get();
+
+                                foreach ($risks as $risk)
+                                {
+                                    //insertamos cada riesgo de subproceso
+                                    DB::table('audit_plan_risk')
+                                        ->insert([
+                                            'audit_plan_id' => $audit_plan_id,
+                                            'risk_subprocess_id' => $risk->id
+                                            ]);
+                                }
+                            }
+                        }
+                    }
+
+                    else if ($_POST['type'] == 1) //se agregó auditoría de negocios
+                    {
+                        //obtenemos riesgo asociado a cada objetivo (si es que hay)
+                        if (isset($_POST['audit_'.$audit.'_objectives']))
+                        {
+                            foreach ($_POST['audit_'.$audit.'_objectives'] as $objective_id)
+                            {
+                                //obtenemos objective_risks
+                                $risks = DB::table('objectives')
+                                        ->join('objective_risk','objective_risk.objective_id','=',$objective_id)
+                                        ->select('objective_risk.id')
+                                        ->get();
+
+                                foreach ($risks as $risk)
+                                {
+                                    //insertamos cada riesgo de subproceso
+                                    DB::table('audit_plan_risk')
+                                        ->insert([
+                                            'audit_plan_id' => $audit_plan_id,
+                                            'objective_risk_id' => $risk->id
+                                            ]);
+                                }
+                            }
+                        }
+                    }
+
+                    else if ($_POST['type'] == 2)
+                    {
+                        //insertamos riesgos de negocio de la auditoría
+                        if (isset($_POST['audit_'.$audit.'_objective_risks']))
+                        {
+                            foreach ($_POST['audit_'.$audit.'_objective_risks'] as $audit_objective_risk)
+                            {
+                                //insertamos audit risks
+                                DB::table('audit_risk')
+                                    ->insert([
+                                            'audit_audit_plan_id' => $audit_audit_plan_id,
+                                            'objective_risk_id' => $audit_objective_risk
+                                        ]);
+                            }
+                        }
+
+                        //insertamos riesgos de proceso de la auditoría
+                        if (isset($_POST['audit_'.$audit.'_risk_subprocesses']))
+                        {
+                            foreach ($_POST['audit_'.$audit.'_risk_subprocesses'] as $audit_risk_subprocess)
+                            {
+                                //insertamos audit risks
+                                DB::table('audit_risk')
+                                    ->insert([
+                                            'audit_audit_plan_id' => $audit_audit_plan_id,
+                                            'risk_subprocess_id' => $audit_risk_subprocess
+                                        ]);
+                            }
+                        }
+                    }
+                }
+
+                //ahora guardamos auditorías nuevas
+                $i = 1; //contador para auditorías nuevas
+                while (isset($_POST['audit_new'.$i.'_name']))
+                {
+                    //primero insertamos en tabla audits y obtenemos id
+                    $audit_id = DB::table('audits')
+                                ->insertGetId([
+                                    'name' => $_POST['audit_new'.$i.'_name'],
+                                    'description' => $_POST['audit_new'.$i.'_description'],
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                    ]);
+
+                    //ahora insertamos en audit_audit_plan
+                    $audit_audit_plan_id = DB::table('audit_audit_plan')
+                                ->insertGetId([
+                                    'audit_plan_id' => $audit_plan_id,
+                                    'audit_id' => $audit_id,
+                                    'initial_date' => $_POST['audit_new'.$i.'_initial_date'],
+                                    'final_date' => $_POST['audit_new'.$i.'_final_date'],
+                                    'resources' => $_POST['audit_new'.$i.'_resources'],
+                                    'estimated_HH' => $_POST['audit_new'.$i.'_HH']
+                                    ]);
+
+                    if ($_POST['type'] == 0) //se agrego auditoría de procesos
+                    {
+                        //primero, obtenemos riesgos asociados a cada proceso (si es que hay)
+                        if (isset($_POST['audit_new'.$i.'_processes']))
+                        {
+                            foreach ($_POST['audit_new'.$i.'_processes'] as $process_id)
+                            {
+                                //obtenemos subprocesses_risks
+                                $risks = DB::table('subprocesses')
+                                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                                        ->where('subprocesses.process_id','=',$process_id)
+                                        ->select('risk_subprocess.id')
+                                        ->get();
+
+                                foreach ($risks as $risk)
+                                {
+                                    //insertamos cada riesgo de subproceso
+                                    DB::table('audit_plan_risk')
+                                        ->insert([
+                                            'audit_plan_id' => $audit_plan_id,
+                                            'risk_subprocess_id' => $risk->id
+                                            ]);
+                                }
+                            }
+                        }
+                    }
+
+                    else if ($_POST['type'] == 1) //se agregó auditoría de negocios
+                    {
+                        //obtenemos riesgo asociado a cada objetivo (si es que hay)
+                        if (isset($_POST['audit_new'.$i.'_objectives']))
+                        {
+                            foreach ($_POST['audit_new'.$i.'_objectives'] as $objective_id)
+                            {
+                                //obtenemos objective_risks
+                                $risks = DB::table('objectives')
+                                        ->join('objective_risk','objective_risk.objective_id','=',$objective_id)
+                                        ->select('objective_risk.id')
+                                        ->get();
+
+                                foreach ($risks as $risk)
+                                {
+                                    //insertamos cada riesgo de subproceso
+                                    DB::table('audit_plan_risk')
+                                        ->insert([
+                                            'audit_plan_id' => $audit_plan_id,
+                                            'objective_risk_id' => $risk->id
+                                            ]);
+                                }
+                            }
+                        }
+                    }
+
+                    else if ($_POST['type'] == 2)
+                    {
+                         //insertamos riesgos de negocio (de haber)
+                           if (isset($_POST['audit_new'.$i.'_objective_risks']))
+                           {
+                                foreach ($_POST['audit_new'.$i.'_objective_risks'] as $objective_risk)
+                                {
+                                    DB::table('audit_risk')
+                                        ->insert([
+                                                'audit_audit_plan_id' => $audit_audit_plan_id,
+                                                'objective_risk_id' => $objective_risk
+                                            ]);
+                                }
+                           }
+
+                           //insertamos nuevo riesgo de proceso (de haber)
+                           if (isset($_POST['audit_new'.$i.'_risk_subprocesses']))
+                           {
+                                foreach ($_POST['audit_new'.$i.'_risk_subprocesses'] as $risk_subprocess)
+                                {
+                                    DB::table('audit_risk')
+                                        ->insert([
+                                                'audit_audit_plan_id' => $audit_audit_plan_id,
+                                                'risk_subprocess_id' => $risk_subprocess
+                                            ]);
+                                }
+                           }
+                    }           
+
+                   $i += 1;
+                }
+            }
+
+            Session::flash('message','Plan de auditor&iacute;a generado correctamente');
+        });
 
         return Redirect::to('/plan_auditoria');
 
@@ -807,6 +989,7 @@ class AuditoriasController extends Controller
             //$risks = DB::table('audit_plan_risk')
 
             $plan_auditoria = [
+                            'id' => $plan['id'],
                             'name' => $plan['name'],
                             'description' => $plan['description'],
                             'objectives' => $plan['objectives'],
@@ -876,7 +1059,96 @@ class AuditoriasController extends Controller
      */
     public function edit($id)
     {
-        //
+        $riesgos_proc = array();
+        $riesgos_neg = array();
+        $audits_selected = array();
+         //obtenemos lista de stakeholders
+        $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+        ->orderBy('name')
+        ->lists('full_name', 'id');
+
+        //obtenemos lista de organizaciones
+        $organizations = \Ermtool\Organization::lists('name','id');
+
+        //obtenemos universo de auditorias
+        $audits = \Ermtool\Audit::lists('name','id');
+
+        //obtenemos universo de auditorías seleccionadas
+        $auditorias = DB::table('audit_audit_plan')
+                    ->where('audit_plan_id','=',$id)
+                    ->select('audit_audit_plan.audit_id as id')
+                    ->get();
+
+        //cada una de las auditorías pertenecientes al plan
+        $i = 0;
+        foreach ($auditorias as $audit)
+        {
+            $audits_selected[$i] = $audit->id;
+            $i += 1;
+        }
+
+        //obtenemos riesgos de procesos que ya fueron seleccionados
+        $riesgos_selected = DB::table('audit_plan_risk')
+                                ->join('risk_subprocess','risk_subprocess.id','=','audit_plan_risk.risk_subprocess_id')
+                                ->join('risks','risks.id','=','risk_subprocess.risk_id')
+                                ->where('audit_plan_risk.audit_plan_id','=',$id)
+                                ->whereNotNull('audit_plan_risk.risk_subprocess_id')
+                                ->select('risk_subprocess.id')
+                                ->get();
+        $i = 0;
+        foreach ($riesgos_selected as $risk)
+        {
+            $riesgos_proc[$i] = $risk->id;
+            $i += 1;
+        }
+
+        //obtenemos riesgos de negocio que ya fueron seleccionados
+        $riesgos_selected = DB::table('audit_plan_risk')
+                                ->join('objective_risk','objective_risk.id','=','audit_plan_risk.objective_risk_id')
+                                ->join('risks','risks.id','=','objective_risk.risk_id')
+                                ->where('audit_plan_risk.audit_plan_id','=',$id)
+                                ->whereNotNull('audit_plan_risk.objective_risk_id')
+                                ->select('objective_risk.id')
+                                ->get();
+        $i = 0;
+        foreach ($riesgos_selected as $risk)
+        {
+            $riesgos_neg[$i] = $risk->id;
+            $i += 1;
+        }
+
+
+        //obtenemos stakeholder responsable
+        $stakeholder1 = DB::table('audit_plan_stakeholder')
+                        ->where('audit_plan_id','=',$id)
+                        ->where('role','=',0)
+                        ->select('stakeholder_id')
+                        ->first();
+
+        //obtenemos equipo de auditores
+        $stakeholders2 = DB::table('audit_plan_stakeholder')
+                            ->where('audit_plan_id','=',$id)
+                            ->where('role','=',1)
+                            ->select('stakeholder_id')
+                            ->get();
+        $i = 0;
+        foreach ($stakeholders2 as $stakeholder)
+        {
+            $stakeholder_team[$i] = $stakeholder->stakeholder_id;
+            $i += 1;
+        }
+
+
+        //enviamos id de org seleccionada
+        $idorg = $id;
+
+        $audit_plan = \Ermtool\Audit_plan::find($id);
+
+        return view('auditorias.edit',['stakeholders'=>$stakeholders,'organizations'=>$organizations,
+                                        'audits'=>$audits,'riesgos_neg' => json_encode($riesgos_neg),
+                                        'riesgos_proc'=>json_encode($riesgos_proc),'audits_selected'=>json_encode($audits_selected),
+                                        'stakeholder' => $stakeholder1, 'stakeholder_team' => json_encode($stakeholder_team),
+                                        'id'=>$idorg,'audit_plan'=>$audit_plan]);
     }
 
     /**
@@ -886,9 +1158,229 @@ class AuditoriasController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $idtemp)
     {
-        //
+        //print_r($_POST);
+        global $id;
+        $id = $idtemp;
+
+        //creamos una transacción para cumplir con atomicidad
+        DB::transaction(function()
+        {
+                if (strpos($_POST['initial_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
+                {
+                    //damos formato a fecha de inicio
+                    $fecha = explode("/",$_POST['initial_date']);
+                    $fecha_inicio = $fecha[2]."-".$fecha[0]."-".$fecha[1];
+                }
+                else
+                    $fecha_inicio = $_POST['initial_date'];
+
+                if (strpos($_POST['final_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
+                {
+                    //damos formato a fecha de término
+                    $fecha = explode("/",$request['final_date']);
+                    $fecha_termino = $fecha[2]."-".$fecha[0]."-".$fecha[1];
+                }
+                else
+                    $fecha_termino = $_POST['final_date'];
+
+                //actualizamos plan
+                DB::table('audit_plans')
+                        ->where('id','=',$GLOBALS['id'])
+                        ->update([
+                        'name'=>$_POST['name'],
+                        'description'=>$_POST['description'],
+                        'objectives'=>$_POST['objectives'],
+                        'scopes'=>$_POST['scopes'],
+                        'status'=>0,
+                        'resources'=>$_POST['resources'],
+                        'methodology'=>$_POST['methodology'],
+                        'initial_date'=>$fecha_inicio,
+                        'final_date'=>$fecha_termino,
+                        'updated_at'=>date('Y-m-d H:i:s'),
+                        'rules'=>$_POST['rules'],
+                        'organization_id'=>$_POST['organization_id']
+                        ]);
+
+                //primero actuakizamos stakeholder responsable
+                $resp = DB::table('audit_plan_stakeholder')
+                        ->where('audit_plan_id','=',$GLOBALS['id'])
+                        ->where('role','=',0)
+                        ->update([
+                            'stakeholder_id' => $_POST['stakeholder_id']
+                            ]);
+
+                
+
+                //ahora actualizamos equipo de stakeholders (si es que hay)
+                if (isset($request['stakeholder_team']))
+                {   
+                    //eliminamos antiguos stakeholders del plan (que su rol sea 1)
+                    DB::table('audit_plan_stakeholder')
+                    ->where('audit_plan_id',$GLOBALS['id'])
+                    ->where('role','=',1)
+                    ->delete();
+
+                    //ahora agregamos cada uno
+                    foreach ($_POST['stakeholder_team'] as $stakes)
+                    {
+                        DB::table('audit_plan_stakeholder')
+                                ->insert([
+                                    'role' => 1,
+                                    'audit_plan_id' => $GLOBALS['id'],
+                                    'stakeholder_id' => $stakes
+                                    ]);
+                    }
+                }
+
+                 //actualizamos riesgos del negocio (si es que existen)
+                if (isset($_POST['objective_risk_id']))
+                {
+                    //eliminamos antiguos si es que existen
+                    DB::table('audit_plan_risk')
+                    ->where('audit_plan_id',$GLOBALS['id'])
+                    ->whereNotNull('objective_risk_id')
+                    ->delete();
+
+                    foreach ($_POST['objective_risk_id'] as $objective_risk)
+                    {
+                            DB::table('audit_plan_risk')
+                                ->insert([
+                                    'audit_plan_id' => $GLOBALS['id'],
+                                    'objective_risk_id' => $objective_risk
+                                    ]);
+                    }
+                }
+
+                //actualizamos riesgos de proceso (si es que existen)
+                if (isset($_POST['risk_subprocess_id']))
+                {
+                    //eliminamos antiguos si es que existen
+                    DB::table('audit_plan_risk')
+                    ->where('audit_plan_id',$GLOBALS['id'])
+                    ->whereNotNull('risk_subprocess_id')
+                    ->delete();
+
+                    foreach ($_POST['risk_subprocess_id'] as $risk_subprocess)
+                    {
+                            DB::table('audit_plan_risk')
+                                ->insert([
+                                    'audit_plan_id' => $GLOBALS['id'],
+                                    'risk_subprocess_id' => $risk_subprocess
+                                    ]);
+                    }
+                }
+
+    /* PRIMERO DEBO HACER MODIFICABLE LAS AUDITORÍAS DEL PLAN 
+                //ahora guardamos auditorías que no son nuevas
+
+                //insertamos cada auditoria (de universo de auditorias) en audit_audit_plan
+                $i = 1;
+                if (isset($request['audits']))
+                {
+                    foreach ($request['audits'] as $audit)
+                    {
+                        //insertamos y obtenemos id para ingresarlo en audit_risk y otros
+                        $audit_audit_plan_id = DB::table('audit_audit_plan')
+                                    ->insertGetId([
+                                        'audit_plan_id' => $audit_plan_id,
+                                        'audit_id' => $audit,
+                                        'initial_date' => $request['audit_'.$audit.'_initial_date'],
+                                        'final_date' => $request['audit_'.$audit.'_final_date'],
+                                        'resources' => $request['audit_'.$audit.'_resources']
+                                        ]);
+                        
+                        //insertamos riesgos de negocio de la auditoría
+                        if (isset($request['audit_'.$audit.'_objective_risks']))
+                        {
+                            foreach ($request['audit_'.$audit.'_objective_risks'] as $audit_objective_risk)
+                            {
+                                //insertamos audit risks
+                                DB::table('audit_risk')
+                                    ->insert([
+                                            'audit_audit_plan_id' => $audit_audit_plan_id,
+                                            'objective_risk_id' => $audit_objective_risk
+                                        ]);
+                            }
+                        }
+
+                        //insertamos riesgos de proceso de la auditoría
+                        if (isset($request['audit_'.$audit.'_risk_subprocess']))
+                        {
+                            foreach ($request['audit_'.$audit.'_risk_subprocess'] as $audit_risk_subprocess)
+                            {
+                                //insertamos audit risks
+                                DB::table('audit_risk')
+                                    ->insert([
+                                            'audit_audit_plan_id' => $audit_audit_plan_id,
+                                            'risk_subprocess_id' => $audit_risk_subprocess
+                                        ]);
+                            }
+                        }
+                    }
+*/
+                    //ahora guardamos auditorías nuevas
+                    $i = 1; //contador para auditorías nuevas
+                    while (isset($_POST['audit_new'.$i.'_name']))
+                    {
+                        //primero insertamos en tabla audits y obtenemos id
+                        $audit_id = DB::table('audits')
+                                    ->insertGetId([
+                                        'name' => $_POST['audit_new'.$i.'_name'],
+                                        'description' => $_POST['audit_new'.$i.'_description'],
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s')
+                                        ]);
+
+                        //ahora insertamos en audit_audit_plan
+                        $audit_audit_plan_id = DB::table('audit_audit_plan')
+                                    ->insertGetId([
+                                        'audit_plan_id' => $GLOBALS['id'],
+                                        'audit_id' => $audit_id,
+                                        'initial_date' => $_POST['audit_new'.$i.'_initial_date'],
+                                        'final_date' => $_POST['audit_new'.$i.'_final_date'],
+                                        'resources' => $_POST['audit_new'.$i.'_resources']
+                                        ]);
+
+                        //insertamos riesgos de negocio (de haber)
+                       if (isset($_POST['audit_new'.$i.'_objective_risks']))
+                       {
+                            foreach ($_POST['audit_new'.$i.'_objective_risks'] as $objective_risk)
+                            {
+                                DB::table('audit_risk')
+                                    ->insert([
+                                            'audit_audit_plan_id' => $audit_audit_plan_id,
+                                            'objective_risk_id' => $objective_risk
+                                        ]);
+                            }
+                       }
+
+                       //insertamos nuevo riesgo de proceso (de haber)
+                       if (isset($_POST['audit_new'.$i.'_objective_risks']))
+                       {
+                            foreach ($_POST['audit_new'.$i.'_risk_subprocess'] as $risk_subprocess)
+                            {
+                                DB::table('audit_risk')
+                                    ->insert([
+                                            'audit_audit_plan_id' => $audit_audit_plan_id,
+                                            'risk_subprocess_id' => $risk_subprocess
+                                        ]);
+                            }
+                       }
+
+                       $i += 1;
+                    }
+// DEBO AGREGAR MODIFICACIÓN A AUDITORIAS ANTIGUAS                }
+
+                Session::flash('message','Plan de auditor&iacute;a actualizado correctamente');
+
+                
+
+
+        });
+
+        return Redirect::to('/plan_auditoria');
     }
 
     /**
@@ -1024,6 +1516,15 @@ class AuditoriasController extends Controller
         return view('reportes.planes_accion',['organizations' => $organizations]);
     }
 
+    //función para reporte de auditorías
+    public function auditsReport()
+    {
+        $organizations = \Ermtool\Organization::lists('name','id');
+
+        return view('reportes.auditorias',['organizations' => $organizations]);
+    }
+
+
     public function generarReportePlanes($org)
     {
         $results = array();
@@ -1081,6 +1582,98 @@ class AuditoriasController extends Controller
         }
 
         if (strstr($_SERVER["REQUEST_URI"],'genexcelplan')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
+        {
+            return $results;
+        }
+        else
+            return json_encode($results);
+    }
+
+    //reporte de auditorías
+    public function generarReporteAuditorias($org)
+    {
+        $results = array();
+        $i = 0;
+        
+        //obtenemos datos de auditoria, (plan audit + audit + audit_risk + process + risk + issues + action_plans)
+        //OBS: primero obtendremos auditorías de proceso
+        $audits = DB::table('audit_plans')
+                    ->join('audit_audit_plan','audit_audit_plan.audit_plan_id','=','audit_plans.id')
+                    ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                    ->join('audit_risk','audit_risk.audit_audit_plan_id','=','audit_audit_plan.id')
+                    ->join('risk_subprocess','risk_subprocess.id','=','audit_risk.risk_subprocess_id')
+                    ->join('risks','risks.id','=','risk_subprocess.risk_id')
+                    ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                    ->join('processes','processes.id','=','subprocesses.process_id')
+                    ->join('audit_audit_plan_audit_test','audit_audit_plan_audit_test.audit_audit_plan_id','=','audit_audit_plan.id')
+                    ->join('issues','issues.audit_audit_plan_audit_test_id','=','audit_audit_plan_audit_test.id')
+                    ->join('action_plans','action_plans.issue_id','=','issues.id')
+                    ->whereNotNull('audit_risk.risk_subprocess_id')
+                    ->where('audit_plans.organization_id','=',(int)$org)
+                    ->select('audit_plans.name as audit_plan_name',
+                             'audits.name as audit_name',
+                             'audits.description as audit_description',
+                             'audit_audit_plan.initial_date as initial_date',
+                             'audit_audit_plan.final_date as final_date',
+                             'processes.name as process_name',
+                             'risks.name as risk_name',
+                             'issues.name as issue_name',
+                             'issues.recommendations as issue_recommendation',
+                             'action_plans.description as action_plan',
+                             'action_plans.status as action_plan_status',
+                             'action_plans.final_date as action_plan_final_date')
+                    ->get();
+
+        $type = 'Auditoría de procesos';
+
+        foreach ($audits as $audit)
+        {
+            if ($audit->issue_recommendation == "")
+            {
+                $recommendation = 'No se agregaron recomendaciones';
+            }
+            else
+                $recommendation = $audit->issue_recommendation;
+
+            $fecha_inicial = date('d-m-Y',strtotime($audit->initial_date));
+
+            //¡¡¡¡¡¡¡¡¡corregir problema del año 2038!!!!!!!!!!!! //
+            $fecha_final = date('d-m-Y',strtotime($audit->final_date));
+
+            if ($audit->action_plan_status == 0)
+            {
+                $estado_plan = 'Abierto';
+            }
+            else if ($audit->action_plan_status == 1)
+            {
+                $estado_plan = 'Cerrado';
+            }
+            else
+            {
+                $estado_plan = 'Error al obtener estado';
+            }
+
+            $fecha_final_plan = date('d-m-Y',strtotime($audit->action_plan_final_date));
+
+            $results[$i] = [
+                        'Plan_de_auditoría' => $audit->audit_plan_name,
+                        'Auditoría' => $audit->audit_name,
+                        'Descripción_auditoría' => $audit->audit_description,
+                        'Fecha_inicio' => $fecha_inicial,
+                        'Fecha_fin' => $fecha_final,
+                        'Proceso_Objetivo' => $audit->process_name,
+                        'Riesgo' => $audit->risk_name,
+                        'Hallazgo' => $audit->issue_name,
+                        'Recomendación' => $recommendation,
+                        'Plan_de_acción' => $audit->action_plan,
+                        'Estado' => $estado_plan,
+                        'Fecha_final_plan' => $fecha_final_plan,
+            ];
+
+            $i += 1;
+        }
+
+        if (strstr($_SERVER["REQUEST_URI"],'genexcelaudit')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
         {
             return $results;
         }

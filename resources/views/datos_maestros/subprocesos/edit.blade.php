@@ -12,7 +12,7 @@
 		<ol class="breadcrumb">
 			<li><a href="#">Datos Maestros</a></li>
 			<li><a href="subprocesos">Subprocesos</a></li>
-			<li><a href="subprocesos/edit">Modificar Subprocesos</a></li>
+			<li><a href="subprocesos.edit.{{ $subproceso['id'] }}">Modificar Subprocesos</a></li>
 		</ol>
 	</div>
 </div>

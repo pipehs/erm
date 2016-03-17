@@ -10,7 +10,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="auditorias">Auditor&iacute;as</a></li>
+			<li><a href="plan_auditoria">Auditor&iacute;as</a></li>
 			<li><a href="pruebas">Pruebas de auditor&iacute;as</a></li>
 		</ol>
 	</div>

@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Agregar Riesgo')
+@section('title', 'Editar Riesgo')
 
 @stop
 
@@ -10,8 +10,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('riesgos','Identificaci&oacute;n de Riesgos')!!}</li>
-			<li>{!!Html::link('riesgos.create','Modificar Riesgo')!!}</li>
+			<li><a href="riesgos">Identificaci&oacute;n de Riesgos</a></li>
+			<li><a href="riesgos.edit.{{ $risk['id'] }}">Editar Riesgo</a></li>
 		</ol>
 	</div>
 </div>
@@ -105,15 +105,15 @@
 			else
 			{
 				//REseteamos datos
-						$("#nombre").val("");
-						$("#descripcion").val("");
-						$("#categoria").val(""); 
-						$("#categoria").change(); //cambiamos texto que muestra select
-						$("#input_date2").val("");
-						$("#cause_id").val("");
-						$("#cause_id").change();
-						$("#effect_id").val("");
-						$("#effect_id").change();
+				$("#nombre").val("");
+				$("#descripcion").val("");
+				$("#categoria").val(""); 
+				$("#categoria").change(); //cambiamos texto que muestra select
+				$("#input_date2").val("");
+				$("#cause_id").val("");
+				$("#cause_id").change();
+				$("#effect_id").val("");
+				$("#effect_id").change();
 			/*	Dejaremos que el usuario decida si quiere modificar algun dato de riesgo tipo
 				$("#nombre").prop("disabled",false);
 				$("#nombre").prop("required",true);

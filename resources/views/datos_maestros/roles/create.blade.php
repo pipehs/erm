@@ -11,7 +11,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li>{!!Html::link('#','Datos Maestros')!!}</li>
-			<li>{!!Html::link('roles','Stakeholders')!!}</li>
+			<li>{!!Html::link('roles','Roles')!!}</li>
 			<li>{!!Html::link('roles.create','Agregar Rol')!!}</li>
 		</ol>
 	</div>

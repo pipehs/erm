@@ -12,7 +12,7 @@
 		<ol class="breadcrumb">
 			<li><a href="#">Datos Maestros</a></li>
 			<li><a href="efectos">Efectos</a></li>
-			<li><a href="efectos/edit">Modificar Efecto</a></li>
+			<li><a href="efectos.edit.{{ $efecto['id'] }}">Modificar Efecto</a></li>
 		</ol>
 	</div>
 </div>

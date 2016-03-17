@@ -12,7 +12,7 @@
 		<ol class="breadcrumb">
 			<li><a href="#">Datos Maestros</a></li>
 			<li><a href="causas">Causas</a></li>
-			<li><a href="causas/edit">Modificar Causa</a></li>
+			<li><a href="causas.edit.{{ $causa['id'] }}">Modificar Causa</a></li>
 		</ol>
 	</div>
 </div>

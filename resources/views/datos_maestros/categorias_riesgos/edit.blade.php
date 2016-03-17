@@ -12,7 +12,7 @@
 		<ol class="breadcrumb">
 			<li><a href="#">Datos Maestros</a></li>
 			<li><a href="categorias_riesgos">Categor&iacute;as de Riesgos</a></li>
-			<li><a href="categorias_riesgos/create">Agregar Categor&iacute;a</a></li>
+			<li><a href="categorias_riesgos.edit.{{ $risk_category['id'] }}">Editar Categor&iacute;a</a></li>
 		</ol>
 	</div>
 </div>

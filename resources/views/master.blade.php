@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>ERM - @yield('title')</title>
+	<title>B-GRC - @yield('title')</title>
 	<meta charset="utf-8">
 	<meta name="description" content="Sistema de gestión de riesgos">
-	<meta name="author" content="ERM">
+	<meta name="author" content="IXUS IT Solutions">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<style type="text/css">
