@@ -53,8 +53,24 @@
 				<br>
 				<br>
 				<hr>
-				<table id="auditorias" class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="display:none; font-size:11px">
-				</table>
+				<div id="auditorias" style="display:none;">
+					<table class="table table-bordered table-striped table-hover table-heading table-datatable auditorias2" id="datatable-2" style="font-size:11px">
+					<thead>
+					<th>Plan de auditoría<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Auditoría<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Descripción auditoría<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Fecha inicio<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Fecha fin<label><input type='text' placeholder='Filtrar' /></label></th>";
+					<th>Proceso / Objetivo<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Riesgo<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Hallazgo<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Recomendación<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Plan de acción<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Estado plan de acción<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Fecha final plan acción<label><input type='text' placeholder='Filtrar' /></label></th>
+					</thead>
+
+				</div>
 		
 				<div id="boton_exportar">
 				</div>
@@ -81,15 +97,10 @@
 					$("#auditorias").removeAttr("style").show();
 
 					//Seteamos cabecera
-					var table_head = "<thead>";
-					table_head += "<th>Plan de auditoría</th><th>Auditoría</th><th>Descripción auditoría</th>";
-					table_head += "<th>Fecha inicio</th><th>Fecha fin</th><th>Proceso / Objetivo</th>";
-					table_head += "<th>Riesgo</th><th>Hallazgo</th><th>Recomendación</th><th>Plan de acción</th>";
-					table_head += "<th>Estado plan de acción</th><th>Fecha final plan acción</th>";
-					table_head += "</thead>";
+					
 
 					//Añadimos la imagen de carga en el contenedor
-					$('#auditorias').html('<div><center><img src="../public/assets/img/loading.gif"/></center></div>');
+					$('#auditorias').append('<div><center><img src="../public/assets/img/loading.gif"/></center></div>');
 					//generamos matriz a través de JSON y PHP
 
 					
@@ -97,7 +108,7 @@
 					$.get('genaudit_report.'+$("#organization").val(), function (result) {
 
 							//con la función html se BORRAN los datos existentes anteriormente (de existir)
-							$("#auditorias").html(table_head);
+							//$("#auditorias").html(table_head);
 							
 
 							var table_row ="";
@@ -116,7 +127,8 @@
 								table_row += this.Plan_de_acción + '</td><td>' + this.Estado + '</td><td>' + this.Fecha_final_plan + '</td></tr>';
 							});
 
-							$("#auditorias").append(table_row);
+							$(".auditorias2").append(table_row);
+							$(".auditorias2").append('</table>');
 					});
 
 					var value = $("#organization").val();

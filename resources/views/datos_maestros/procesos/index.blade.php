@@ -53,14 +53,14 @@
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px" >
 					<thead>
 						<tr>
-							<th>Organizaciones</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Proceso</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Subprocesos</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Descripci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Fecha Creaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Fecha Actualizaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Fecha Expiraci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>¿Depende de otro proceso?</small><label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Organizaciones<label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Proceso<label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Subprocesos<label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Fecha Creaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Fecha Actualizaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+							<th>¿Depende de otro proceso?<label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Acci&oacute;n</th>
 							<th>Acci&oacute;n</th>
 						</tr>

@@ -41,7 +41,7 @@
       <p>En esta secci&oacute;n podr&aacute; ver los riesgos asociados a alguna encuesta de evaluaci&oacute;n o a alguna organizaci&oacute;n en particular. </p>
       @if (!isset($riesgos))
             {!!Form::open(['route'=>'heatmap2','method'=>'POST','class'=>'form-horizontal'])!!}
-				   	
+				   	<!--
             <div class="form-group">
                 {!!Form::label('Seleccione tipo',null,['class'=>'col-sm-4 control-label'])!!}
                 <div class="col-sm-3">
@@ -58,17 +58,30 @@
                        null, 
                        ['id' => 'eval2','placeholder'=>'- Seleccione -'])!!}
                 </div>
-            </div>
+            </div>-->
 
-            <div class="form-group" id="org" style="display: none;">
+            <div class="form-group">
                 <div class="row">
                   {!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
                   <div class="col-sm-3">
                     {!!Form::select('organization_id',$organizaciones, 
                          null, 
-                         ['id' => 'org2','placeholder'=>'- Seleccione -'])!!}
+                         ['id' => 'org','placeholder'=>'- Seleccione -'])!!}
                   </div>
                 </div>
+            </div>
+
+            <div class="form-group" id="tipo" style="display: none;">
+                <div class="row">
+                  {!!Form::label('Seleccione tipo de heatmap',null,['class'=>'col-sm-4 control-label'])!!}
+                  <div class="col-sm-3">
+                    {!!Form::select('kind',(['0'=>'Riesgos de proceso','1'=>'Riesgos de negocio']), 
+                         null, 
+                         ['id' => 'kind','placeholder'=>'- Seleccione -'])!!}
+                  </div>
+                </div>
+            </div>
+
                 <div class="row">
                   <div class="form-group">
                     {!!Form::label('Seleccione mes Y año (si desea ver heatmap de todo un año el mes debe quedar en blanco)',
@@ -78,7 +91,7 @@
                       ['id'=>'ano','class'=>'form-control','input maxlength'=>'4',
                        'placeholder'=>'AAAA','min'=>'2015'])!!}
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-1">
                     {!!Form::number('mes',null,
                       ['class'=>'form-control','input maxlength'=>'2',
                        'placeholder'=>'MM','min'=>'01','max'=>'12'])!!}
@@ -187,14 +200,20 @@
                       @if (intval($prom_proba[$k]) == (5-$j))
                          $('#{{(5-$i)}}_{{(5-$j)}}').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad[$k],1) }}'>{{ $cont }}</span>");
 
-                         $('#leyendas').append("<p><ul><li><small><span class='circulo-small'>{{ $cont }}</span> : <b>Riesgo:</b> {{ $riesgos[$k]['name'] }}</li><li><b>Objetivo afectado: </b> {{ $riesgos[$k]['subobj'] }}</li></ul>")
-                       /*
-                        $('#{{(5-$i)}}_{{(5-$j)}}').append("<img src='assets/img/circulo.png' height='20px' width='20px' title='{{ $riesgos[$k]['name'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Criticidad: {{ number_format($prom_criticidad[$k],1) }}'>");
-                     
-                        $('#{{(5-$i)}}_{{(5-$j)}}').append("<li><b>{{ $riesgos[$k]['name'] }}</b></li>");
-                        $('#{{(5-$i)}}_{{(5-$j)}}').append("Probabilidad: {{ number_format($prom_proba[$k],'1') }}<br>");
-                        $('#{{(5-$i)}}_{{(5-$j)}}').append("Criticidad: {{ number_format($prom_criticidad[$k],'1') }}");
-                        */
+                         var leyendas = "<p><ul><li><small><span class='circulo-small'>{{ $cont }}</span> : <b>Riesgo:</b>";
+                         leyendas += "{{ $riesgos[$k]['name'] }}</li>";
+
+                         if ({{ $kind }} == 0)
+                         {
+                            leyendas += "<li><b>Subproceso afectado: </b> {{ $riesgos[$k]['subobj'] }}</li>";
+                         }
+                         else
+                         {
+                            leyendas += "<li><b>Objetivo afectado: </b> {{ $riesgos[$k]['subobj'] }}</li>";
+                         }
+
+                         leyendas += "</ul>";
+                         $('#leyendas').append(leyendas);
 
                         <?php $cont += 1; ?>
                       @endif
@@ -206,7 +225,7 @@
   @endif
 
     $( document ).tooltip();
-
+/*
     $( "#tipo" ).change(function() {
       
         //Se seleccionó heatmap por organización
@@ -229,6 +248,12 @@
           $("#eval2").attr("required","required");
         }
   });
+ */
+
+ $("#org").change(function() {
+    $("#tipo").show(500);
+ });
+
 
 
 </script>

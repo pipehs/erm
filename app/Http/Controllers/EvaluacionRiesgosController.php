@@ -443,10 +443,16 @@ class EvaluacionRiesgosController extends Controller
 
     public function generarHeatmap($evaluation_id)
     {
+        //print_r($_POST);
         //Nombre y descripción de la encuesta u organización
         $nombre = "";
         $descripcion = "";
-
+        $prom_proba = array();
+        $prom_criticidad = array();
+        $riesgo_temp = array();
+        $riesgos = array();
+        $i = 0;
+        /* POR AHORA NO SE VERÁ HEATMAP POR ENCUESTA DE EVALUACIÓN --> PROBABLEMENTE NO ES NECESARIO
         if ($_POST['evaluation_id'] != "") //se seleccionó ver mapa para encuesta específica
         {
             //---- consulta multiples join para obtener las respuestas relacionada a la encuesta ----// 
@@ -466,7 +472,8 @@ class EvaluacionRiesgosController extends Controller
         }
 
         else if ($_POST['organization_id'] != "") //se seleccionó ver heatmap por organización
-        {
+        { */
+
             $ano = $_POST['ano'];
 
             if ($_POST['mes'] == NULL)
@@ -486,8 +493,79 @@ class EvaluacionRiesgosController extends Controller
                  $nombre = $datos->name;
                  $descripcion = $datos->description;
             }
+            if ($_POST['kind'] == 0)
+            {
+                 //---- consulta multiples join para obtener los objetivos evaluados relacionados a la organización ----// 
+                $evaluations = DB::table('evaluation_risk')
+                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                ->join('risk_subprocess','risk_subprocess.id','=','evaluation_risk.risk_subprocess_id')
+                                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                                ->whereNotNull('evaluation_risk.risk_subprocess_id')
+                                ->where('organization_subprocess.organization_id','=',$_POST['organization_id'])
+                                ->where('evaluations.consolidation','=',1)
+                                ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
+                                ->select('evaluation_risk.risk_subprocess_id as risk_id')
+                                ->groupBy('risk_id')->get();
 
-             //---- consulta multiples join para obtener los objetivos evaluados relacionados a la organización ----// 
+                foreach ($evaluations as $evaluation)
+                {
+                /* Volvemos a verificar si se está viendo por organización o por encuesta, ya que si se está viendo por
+                organización las variables risk_subprocess_id y risk_id no existirán (no son necesarias), y en vez de mostrar
+                el nombre de la organización se mostrará el nombre del objetivo. Además en caso de ser por organización las
+                consultas son distintas */
+                /* NO SE UTILIZARÁ POR AHORA
+                if ($_POST['organization_id'] != "")
+                {
+                    /*Para cada riesgo evaluado, identificaremos promedio de probabilidad y de criticidad.
+                     Para esto, primero buscaremos la última consolidación realizada en el periodo ingresado, y luego 
+                     tomaremos los atributos avg_probability y avg_impact de la última consolidación realizada para
+                     los riesgos */
+                    //volvemos a verificar tipo para consultas
+                
+                    $updated_at = DB::table('evaluation_risk')
+                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                ->where('evaluation_risk.risk_subprocess_id',$evaluation->risk_id)
+                                ->where('evaluations.consolidation','=',1)
+                                ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
+                                ->max('evaluations.updated_at');
+
+                    //obtenemos promedio de probabilidad e impacto
+                    $proba_impacto= DB::table('evaluation_risk')
+                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                ->where('evaluations.updated_at','=',$updated_at)
+                                ->where('evaluation_risk.risk_subprocess_id',$evaluation->risk_id)
+                                ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                                ->get();
+
+                    //guardamos proba en $prom_proba
+                    foreach ($proba_impacto as $probaimp)
+                    {
+                        $prom_proba[$i] = $probaimp->avg_probability;
+                        $prom_criticidad[$i] = $probaimp->avg_impact;
+                    }
+
+                    //obtenemos nombre del riesgo y lo guardamos en array de riesgo junto al nombre de organización
+                        $riesgo_temp = DB::table('risk_subprocess')
+                                        ->where('risk_subprocess.id','=',$evaluation->risk_id)
+                                        ->join('risks','risks.id','=','risk_subprocess.risk_id')
+                                        ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                                        ->select('risks.name as name','risks.description as description',
+                                                 'subprocesses.name as subobj')
+                                        ->get();
+
+                    foreach ($riesgo_temp as $temp) //el riesgo recién obtenido es almacenado en riesgos
+                    {
+                        $riesgos[$i] = array('name' => $temp->name,
+                                            'subobj' => $temp->subobj,
+                                            'description' => $temp->description);
+                    }
+
+                    $i += 1;
+                }
+            }
+            else if ($_POST['kind'] == 1) //evaluaciones de riesgos de negocio
+            {
+                //---- consulta multiples join para obtener los objetivos evaluados relacionados a la organización ----// 
                 $evaluations = DB::table('evaluation_risk')
                                 ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                                 ->join('objective_risk','objective_risk.id','=','evaluation_risk.objective_risk_id')
@@ -496,61 +574,54 @@ class EvaluacionRiesgosController extends Controller
                                 ->where('organizations.id','=',$_POST['organization_id'])
                                 ->where('evaluations.consolidation','=',1)
                                 ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
-                                ->select('evaluation_risk.objective_risk_id')
-                                ->groupBy('evaluation_risk.objective_risk_id')->get();
-                        
-        }
+                                ->select('evaluation_risk.objective_risk_id as risk_id')
+                                ->groupBy('risk_id')->get();
 
-        $prom_proba = array();
-        $prom_criticidad = array();
-        $riesgos = array();
-        $i = 0;
-
-        foreach ($evaluations as $evaluation)
-        {
-            /* Volvemos a verificar si se está viendo por organización o por encuesta, ya que si se está viendo por
-            organización las variables risk_subprocess_id y risk_id no existirán (no son necesarias), y en vez de mostrar
-            el nombre de la organización se mostrará el nombre del objetivo. Además en caso de ser por organización las
-            consultas son distintas */
-
-            if ($_POST['organization_id'] != "")
-            {
-                /*Para cada riesgo evaluado, identificaremos promedio de probabilidad y de criticidad.
-                 Para esto, primero buscaremos la última consolidación realizada en el periodo ingresado, y luego 
-                 tomaremos los atributos avg_probability y avg_impact de la última consolidación realizada para
-                 los riesgos */
-
-                $updated_at = DB::table('evaluation_risk')
-                            ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                            ->where('evaluation_risk.objective_risk_id',$evaluation->objective_risk_id)
-                            ->where('evaluations.consolidation','=',1)
-                            ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
-                            ->max('evaluations.updated_at');
-
-                //obtenemos promedio de probabilidad e impacto
-                $proba_impacto= DB::table('evaluation_risk')
-                            ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                            ->where('evaluations.updated_at','=',$updated_at)
-                            ->where('evaluation_risk.objective_risk_id',$evaluation->objective_risk_id)
-                            ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
-                            ->get();
-
-                //guardamos proba en $prom_proba
-                foreach ($proba_impacto as $probaimp)
+                //print_r($evaluations);                     
+    //   }
+                foreach ($evaluations as $evaluation)
                 {
-                    $prom_proba[$i] = $probaimp->avg_probability;
-                    $prom_criticidad[$i] = $probaimp->avg_impact;
-                }
+                    $updated_at = DB::table('evaluation_risk')
+                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                ->where('evaluation_risk.objective_risk_id',$evaluation->risk_id)
+                                ->where('evaluations.consolidation','=',1)
+                                ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
+                                ->max('evaluations.updated_at');
 
-                //obtenemos nombre del riesgo y lo guardamos en array de riesgo junto al nombre de organización
+                    //obtenemos promedio de probabilidad e impacto
+                    $proba_impacto= DB::table('evaluation_risk')
+                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                ->where('evaluations.updated_at','=',$updated_at)
+                                ->where('evaluation_risk.objective_risk_id',$evaluation->risk_id)
+                                ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                                ->get();
+
+                    //guardamos proba en $prom_proba
+                    foreach ($proba_impacto as $probaimp)
+                    {
+                        $prom_proba[$i] = $probaimp->avg_probability;
+                        $prom_criticidad[$i] = $probaimp->avg_impact;
+                    }
+
+                    //obtenemos nombre del riesgo y lo guardamos en array de riesgo junto al nombre de organización
                     $riesgo_temp = DB::table('objective_risk')
-                                    ->where('objective_risk.id','=',$evaluation->objective_risk_id)
+                                    ->where('objective_risk.id','=',$evaluation->risk_id)
                                     ->join('risks','risks.id','=','objective_risk.risk_id')
                                     ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                    ->join('organizations','organizations.id','=','objectives.organization_id')
-                                    ->select('risks.name as name','risks.description as description','objectives.name as subobj')->get();      
-            }
+                                    ->select('risks.name as name','risks.description as description','objectives.name as subobj')
+                                    ->get();
 
+                    foreach ($riesgo_temp as $temp) //el riesgo recién obtenido es almacenado en riesgos
+                    {
+                        $riesgos[$i] = array('name' => $temp->name,
+                                            'subobj' => $temp->subobj,
+                                            'description' => $temp->description);
+                    }
+
+                    $i += 1;
+                }      
+            }
+        /*
             if ($_POST['evaluation_id'] != "")
             {
 
@@ -594,22 +665,16 @@ class EvaluacionRiesgosController extends Controller
                     //aun no se soluciona para riesgos generales
                     $riesgo_temp = array();
                 }
-            }
+            } */
 
-            foreach ($riesgo_temp as $temp) //el riesgo recién obtenido es almacenado en riesgos
-            {
-                $riesgos[$i] = array('name' => $temp->name,
-                                    'subobj' => $temp->subobj,
-                                    'description' => $temp->description);
-            }
-
-            $i += 1;            
-        }
+                        
+       // }
 
         //retornamos la misma vista con datos
         return view('reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
                                         'riesgos'=>$riesgos,'prom_proba'=>$prom_proba,
-                                        'prom_criticidad'=>$prom_criticidad]);
+                                        'prom_criticidad'=>$prom_criticidad,
+                                        'kind' => $_POST['kind']]);
     }
 
 
