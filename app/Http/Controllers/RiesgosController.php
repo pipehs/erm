@@ -433,15 +433,11 @@ class RiesgosController extends Controller
                                 ->join('processes','subprocesses.process_id','=','processes.id')
                                 ->join('risks','risks.id','=','risk_subprocess.risk_id')
                                 ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
-                                ->join('causes','causes.id','=','risks.cause_id')
-                                ->join('effects','effects.id','=','risks.effect_id')
                                 ->where('risks.type2','=',1)
                                 ->select('risks.*',
                                         'subprocesses.name as subprocess_name',
                                         'processes.name as process_name',
-                                        'risk_categories.name as risk_category_name',
-                                        'causes.name as cause_name',
-                                        'effects.name as effect_name')
+                                        'risk_categories.name as risk_category_name')
                                 ->get();
         }
 
@@ -452,22 +448,55 @@ class RiesgosController extends Controller
                                 ->join('risks','risks.id','=','objective_risk.risk_id')
                                 ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
                                 ->join('organizations','organizations.id','=','objectives.organization_id')
-                                ->join('causes','causes.id','=','risks.cause_id')
-                                ->join('effects','effects.id','=','risks.effect_id')
                                 ->where('risks.type2','=',1)
                                 ->select('risks.*',
                                         'objectives.name as objective_name',
                                         'organizations.name as organization_name',
-                                        'risk_categories.name as risk_category_name',
-                                        'causes.name as cause_name',
-                                         'effects.name as effect_name')
+                                        'risk_categories.name as risk_category_name')
                                 ->get();
         }
 
         foreach ($risks as $risk)
         {
                 $controles = NULL;
+                $causas = NULL;
+                $efectos = NULL;
                 // -- seteamos datos --//
+                //seteamos causa y efecto
+                if ($risk->cause_id != NULL)
+                {
+                    $causes = DB::table('causes')
+                            ->where('causes.id','=',$risk->cause_id)
+                            ->select('causes.name')
+                            ->get();
+
+                    foreach ($causes as $cause)
+                    {
+                        $causas .= '<li>'.$cause->name.'</li>';
+                    }
+                }
+                else
+                {
+                    $causas = "No tiene causa definida";
+                }
+
+                if ($risk->effect_id != NULL)
+                {
+                    $effects = DB::table('effects')
+                            ->where('effects.id','=',$risk->cause_id)
+                            ->select('effects.name')
+                            ->get();
+
+                    foreach ($effects as $effect)
+                    {
+                        $efectos .= '<li>'.$cause->name.'</li>';
+                    }
+                }
+                else
+                {
+                    $efectos = "No tiene causa definida";
+                }
+
                 if ($value == 0) //controles para riesgos de proceso
                 {
                     //obtenemos controles
@@ -550,8 +579,8 @@ class RiesgosController extends Controller
                                 'Fecha_expiración' => $expiration_date,
                                 'Categoría' => $risk->risk_category_name,
                                 'Pérdida_esperada' => $risk->expected_loss,
-                                'Causas' => $risk->cause_name,
-                                'Efectos' => $risk->effect_name];
+                                'Causas' => $causas,
+                                'Efectos' => $efectos];
                     $i += 1;
                 }
 

@@ -211,7 +211,7 @@ class ProcesosController extends Controller
             $proceso->save();
 
             Session::flash('message','Proceso bloqueado correctamente');
-        }
+        });
 
         return Redirect::to('/procesos');
     }

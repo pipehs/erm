@@ -54,10 +54,10 @@
 		{!! link_to_route('roles.verbloqueados', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
 	@endif
 
-	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 	<thead>
-	<th>Nombre Rol</th>
-	<th>Cantidad de usuarios</th>
+	<th>Nombre Rol<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th>Cantidad de usuarios<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Acci&oacute;n</th>
 	<th>Acci&oacute;n</th>
 	</thead>

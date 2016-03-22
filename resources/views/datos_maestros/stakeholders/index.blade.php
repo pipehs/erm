@@ -52,17 +52,17 @@
 		{!! link_to_route('stakeholders.verbloqueados', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
 	@endif
 
-	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 	<thead>
-	<th width="8%">Rut</th>
-	<th>Nombre</th>
-	<th>Apellidos</th>
-	<th>Tipo</th>
-	<th>Fecha Agregado</th>
-	<th>Fecha Actualizado</th>
-	<th>Correo Electr&oacute;nico</th>
-	<th>Organizacion(es)</th>
-	<th>Cargo</th>
+	<th width="8%">Rut<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th>Nombre<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th>Apellidos<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th>Tipo<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th>Fecha Agregado<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th>Fecha Actualizado<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th>Correo Electr&oacute;nico<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th>Organizacion(es)<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th>Cargo<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Acci&oacute;n</th>
 	<th>Acci&oacute;n</th>
 	</thead>

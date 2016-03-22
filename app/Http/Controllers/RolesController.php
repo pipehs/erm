@@ -89,7 +89,8 @@ class RolesController extends Controller
     public function store(Request $request)
     {
         \Ermtool\Role::create([
-            'name' => $request['name']
+            'name' => $request['name'],
+            'status' => 0
             ]);
 
             Session::flash('message','Rol agregado correctamente');

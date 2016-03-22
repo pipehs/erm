@@ -152,7 +152,7 @@ class StakeholdersController extends Controller
                 if (isset($_POST['rol_nuevo']))
                 {
                     $role = \Ermtool\Role::create([
-                        'name' => $request['rol_nuevo'],
+                        'name' => $_POST['rol_nuevo'],
                         'status' => 0
                     ]);
 

@@ -72,15 +72,15 @@
 			{!!Form::close()!!}
 -->	
 
-	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-1" style="font-size:11px">
 	<thead>
-	<th>Nombre</th>
-	<th>Descripci&oacute;n</th>
-	<th>Fecha Creaci&oacute;n</th>
-	<th>Fecha Actualizado</th>
-	<th>Fecha Expiraci&oacute;n</th>
-	<th>Org. de servicios compartidos</th>
-	<th>Organizaciones dependientes</th>
+	<th>Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th width="20%">Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Fecha Creaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Fecha Actualizado<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Org. de servicios compartidos<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Organizaciones dependientes<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th>Acci&oacute;n</th>
 	<th>Acci&oacute;n</th>
 	</thead>
