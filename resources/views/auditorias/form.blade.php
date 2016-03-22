@@ -145,7 +145,7 @@
 					<div class="form-group">
 						{!!Form::label('Fecha Inicio',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::text('initial_date',null,['class'=>'form-control','id'=>'input_date2'
+							{!!Form::date('initial_date',null,['class'=>'form-control'
 																,'required'=>'true'])!!}
 						</div>
 					</div>
@@ -153,7 +153,7 @@
 					<div class="form-group">
 						{!!Form::label('Fecha t&eacute;rmino',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::text('final_date',null,['class'=>'form-control','id'=>'input_date'
+							{!!Form::date('final_date',null,['class'=>'form-control'
 															,'required'=>'true'])!!}
 						</div>
 					</div>

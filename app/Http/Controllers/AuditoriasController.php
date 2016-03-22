@@ -520,13 +520,6 @@ class AuditoriasController extends Controller
         //Mantenemos atomicidad y consistencia
         DB::transaction(function()
         {
-            //damos formato a fecha de inicio
-            $fecha = explode("/",$_POST['initial_date']);
-            $fecha_inicio = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-
-            //damos formato a fecha de término
-            $fecha = explode("/",$_POST['final_date']);
-            $fecha_termino = $fecha[2]."-".$fecha[0]."-".$fecha[1];
 
             //insertamos plan y obtenemos ID
             $audit_plan_id = DB::table('audit_plans')->insertGetId([
@@ -537,8 +530,8 @@ class AuditoriasController extends Controller
                     'status'=>0,
                     'resources'=>$_POST['resources'],
                     'methodology'=>$_POST['methodology'],
-                    'initial_date'=>$fecha_inicio,
-                    'final_date'=>$fecha_termino,
+                    'initial_date'=>$_POST['initial_date'],
+                    'final_date'=>$_POST['final_date'],
                     'created_at'=>date('Y-m-d H:i:s'),
                     'updated_at'=>date('Y-m-d H:i:s'),
                     'rules'=>$_POST['rules'],
