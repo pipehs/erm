@@ -66,6 +66,10 @@
 
 @section('scripts2')
 <script>
+
+	$(document).ready(function () {
+		$("#subneg").change();
+	})
 //bloqueamos opciones de llenado si es que se esta ingresando un riesgo tipo
 	$("#subneg").change(function() {
 

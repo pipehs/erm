@@ -127,53 +127,56 @@ class StakeholdersController extends Controller
      */
     public function store(Request $request)
     {
-        \Ermtool\Stakeholder::create([
-            'id' => $request['id'],
-            'dv' => $request['dv'],
-            'name' => $request['name'],
-            'surnames' => $request['surnames'],
-            'position' => $request['position'],
-            'mail' => $request['mail']
-            ]);
-
-        //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
-        foreach($request['organization_id'] as $organization_id)
+        DB::transaction(function()
         {
-            DB::table('organization_stakeholder')->insert([
-                'organization_id'=>$organization_id,
-                'stakeholder_id'=>$request['id']
+            \Ermtool\Stakeholder::create([
+                'id' => $_POST['id'],
+                'dv' => $_POST['dv'],
+                'name' => $_POST['name'],
+                'surnames' => $_POST['surnames'],
+                'position' => $_POST['position'],
+                'mail' => $_POST['mail']
                 ]);
-        }
 
-        //INSERTAMOS ROLES
-            //primero verificamos si es que se está agregando un nuevo rol
-            if (isset($request['rol_nuevo']))
+            //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
+            foreach($_POST['organization_id'] as $organization_id)
             {
-                $role = \Ermtool\Role::create([
-                    'name' => $request['rol_nuevo'],
-                    'status' => 0
-                ]);
-
-                //insertamos relación
-                DB::table('role_stakeholder')->insert([
-                        'stakeholder_id' => $request['id'],
-                        'role_id' => $role->id
-                        ]);
+                DB::table('organization_stakeholder')->insert([
+                    'organization_id'=>$organization_id,
+                    'stakeholder_id'=>$_POST['id']
+                    ]);
             }
 
-            else //se están seleccionando roles existentes
-            {
-                foreach ($request['role_id'] as $role_id) //insertamos cada rol seleccionado
+            //INSERTAMOS ROLES
+                //primero verificamos si es que se está agregando un nuevo rol
+                if (isset($_POST['rol_nuevo']))
                 {
+                    $role = \Ermtool\Role::create([
+                        'name' => $request['rol_nuevo'],
+                        'status' => 0
+                    ]);
+
+                    //insertamos relación
                     DB::table('role_stakeholder')->insert([
-                        'stakeholder_id' => $request['id'],
-                        'role_id' => $role_id
-                        ]);
+                            'stakeholder_id' => $_POST['id'],
+                            'role_id' => $role->id
+                            ]);
                 }
-            }
+
+                else //se están seleccionando roles existentes
+                {
+                    foreach ($_POST['role_id'] as $role_id) //insertamos cada rol seleccionado
+                    {
+                        DB::table('role_stakeholder')->insert([
+                            'stakeholder_id' => $_POST['id'],
+                            'role_id' => $role_id
+                            ]);
+                    }
+                }
 
 
-            Session::flash('message','Stakeholder agregado correctamente');
+                Session::flash('message','Stakeholder agregado correctamente');
+        });
 
             return Redirect::to('/stakeholders');
     }
@@ -218,64 +221,76 @@ class StakeholdersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $stakeholder = \Ermtool\Stakeholder::find($id);
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
+        {
+            $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
 
-            $stakeholder->name = $request['name'];
-            $stakeholder->surnames = $request['surnames'];
-            $stakeholder->position = $request['position'];
-            $stakeholder->mail = $request['mail'];
+            $stakeholder->name = $_POST['name'];
+            $stakeholder->surnames = $_POST['surnames'];
+            $stakeholder->position = $_POST['position'];
+            $stakeholder->mail = $_POST['mail'];
     
             $stakeholder->save();
 
             //primero que todo, eliminaremos las organizaciones anteriores del stakeholder para evitar repeticiones
-            DB::table('organization_stakeholder')->where('stakeholder_id',$id)->delete();
+            DB::table('organization_stakeholder')->where('stakeholder_id',$GLOBALS['id1'])->delete();
 
             //ahora, agregamos posibles nuevas relaciones
-            foreach($request['organization_id'] as $organization_id)
+            foreach($_POST['organization_id'] as $organization_id)
             {
                 DB::table('organization_stakeholder')->insert([
                     'organization_id'=>$organization_id,
-                    'stakeholder_id'=>$id
+                    'stakeholder_id'=>$GLOBALS['id1']
                     ]);
             }
 
             //nuevamente eliminaremos los roles anteriores del stakeholder para evitar repeticiones
-            DB::table('role_stakeholder')->where('stakeholder_id',$id)->delete();
+            DB::table('role_stakeholder')->where('stakeholder_id',$GLOBALS['id1'])->delete();
 
             //ahora, agregamos posibles nuevas relaciones
             foreach($request['role_id'] as $role_id)
             {
                 DB::table('role_stakeholder')->insert([
                     'role_id'=>$role_id,
-                    'stakeholder_id'=>$id
+                    'stakeholder_id'=>$GLOBALS['id1']
                     ]);
             }
 
 
             Session::flash('message','Stakeholder actualizado correctamente');
-
+        });
             return Redirect::to('/stakeholders');
     }
 
     public function bloquear($id)
     {
-        $stakeholder = \Ermtool\Stakeholder::find($id);
-        $stakeholder->status = 1;
-        $stakeholder->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
+        {
+            $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
+            $stakeholder->status = 1;
+            $stakeholder->save();
 
-        Session::flash('message','Stakeholder bloqueado correctamente');
-
+            Session::flash('message','Stakeholder bloqueado correctamente');
+        });
         return Redirect::to('/stakeholders');
     }
 
     public function desbloquear($id)
     {
-        $stakeholder = \Ermtool\Stakeholder::find($id);
-        $stakeholder->status = 0;
-        $stakeholder->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
+        {
+            $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
+            $stakeholder->status = 0;
+            $stakeholder->save();
 
-        Session::flash('message','Stakeholder desbloqueado correctamente');
-
+            Session::flash('message','Stakeholder desbloqueado correctamente');
+        });
         return Redirect::to('/stakeholders');
     }
 

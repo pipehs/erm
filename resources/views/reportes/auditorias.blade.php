@@ -54,22 +54,7 @@
 				<br>
 				<hr>
 				<div id="auditorias" style="display:none;">
-					<table class="table table-bordered table-striped table-hover table-heading table-datatable auditorias2" id="datatable-2" style="font-size:11px">
-					<thead>
-					<th>Plan de auditoría<label><input type='text' placeholder='Filtrar' /></label></th>
-					<th>Auditoría<label><input type='text' placeholder='Filtrar' /></label></th>
-					<th>Descripción auditoría<label><input type='text' placeholder='Filtrar' /></label></th>
-					<th>Fecha inicio<label><input type='text' placeholder='Filtrar' /></label></th>
-					<th>Fecha fin<label><input type='text' placeholder='Filtrar' /></label></th>";
-					<th>Proceso / Objetivo<label><input type='text' placeholder='Filtrar' /></label></th>
-					<th>Riesgo<label><input type='text' placeholder='Filtrar' /></label></th>
-					<th>Hallazgo<label><input type='text' placeholder='Filtrar' /></label></th>
-					<th>Recomendación<label><input type='text' placeholder='Filtrar' /></label></th>
-					<th>Plan de acción<label><input type='text' placeholder='Filtrar' /></label></th>
-					<th>Estado plan de acción<label><input type='text' placeholder='Filtrar' /></label></th>
-					<th>Fecha final plan acción<label><input type='text' placeholder='Filtrar' /></label></th>
-					</thead>
-
+					
 				</div>
 		
 				<div id="boton_exportar">
@@ -97,10 +82,24 @@
 					$("#auditorias").removeAttr("style").show();
 
 					//Seteamos cabecera
-					
+					var table_row = '<table class="table table-bordered table-striped table-hover table-heading table-datatable auditorias2" id="datatable-2" style="font-size:11px">';
+					table_row += "<thead>";
+					table_row += "<th>Plan de auditoría<label><input type='text' placeholder='Filtrar' /></label></th>";
+					table_row += "<th>Auditoría<label><input type='text' placeholder='Filtrar' /></label></th>";
+					table_row += "<th>Descripción auditoría<label><input type='text' placeholder='Filtrar' /></label></th>";
+					table_row += "<th>Fecha inicio<label><input type='text' placeholder='Filtrar' /></label></th>";
+					table_row += "<th>Fecha fin<label><input type='text' placeholder='Filtrar' /></label></th>";
+					table_row += "<th>Proceso / Objetivo<label><input type='text' placeholder='Filtrar' /></label></th>";
+					table_row += "<th>Riesgo<label><input type='text' placeholder='Filtrar' /></label></th>";
+					table_row += "<th>Hallazgo<label><input type='text' placeholder='Filtrar' /></label></th>";
+					table_row += "<th>Recomendación<label><input type='text' placeholder='Filtrar' /></label></th>";
+					table_row += "<th>Plan de acción<label><input type='text' placeholder='Filtrar' /></label></th>";
+					table_row += "<th>Estado plan de acción<label><input type='text' placeholder='Filtrar' /></label></th>";
+					table_row += "<th>Fecha final plan acción<label><input type='text' placeholder='Filtrar' /></label></th>";
+					table_row += "</thead>";
 
 					//Añadimos la imagen de carga en el contenedor
-					$('#auditorias').append('<div><center><img src="../public/assets/img/loading.gif"/></center></div>');
+					$('#auditorias').html('<div><center><img src="../public/assets/img/loading.gif"/></center></div>');
 					//generamos matriz a través de JSON y PHP
 
 					
@@ -111,7 +110,7 @@
 							//$("#auditorias").html(table_head);
 							
 
-							var table_row ="";
+							//var table_row ="";
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
 
@@ -126,9 +125,8 @@
 								table_row += '</td><td>' + this.Hallazgo + '</td><td>' + this.Recomendación + '</td><td>';
 								table_row += this.Plan_de_acción + '</td><td>' + this.Estado + '</td><td>' + this.Fecha_final_plan + '</td></tr>';
 							});
-
-							$(".auditorias2").append(table_row);
-							$(".auditorias2").append('</table>');
+							$("#auditorias").empty();
+							$("#auditorias").append(table_row);
 					});
 
 					var value = $("#organization").val();

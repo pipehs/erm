@@ -83,7 +83,7 @@
 	        </div><!-- /btn-group --></td>
 		<td><div>
 			@if ($riesgo['estado'] == 0)
-	             <button class="btn btn-danger" onclick="bloquear({{ $riesgo['id'] }},'{{ $riesgo['nombre'] }}','risktype','el riesgo tipo')">Bloquear</button>
+	             <button class="btn btn-danger" onclick="bloquear({{ $riesgo['id'] }},'{{ $riesgo['nombre'] }}','riskstype','el riesgo tipo')">Bloquear</button>
 	        @else
 	    
 	        @endif

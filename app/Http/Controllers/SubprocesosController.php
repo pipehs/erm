@@ -132,47 +132,38 @@ class SubprocesosController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha expiración
-        if ($request['expiration_date'] != "")
+        DB::transaction(function()
         {
-            $fecha = explode("/",$request['expiration_date']);
-            $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-        else
-        {
-            $fecha_exp = NULL;
-        }
-
-        if($request['subprocess_id'] == NULL)
-        {
-            $subprocess_id = NULL;
-        }
-        else
-        {
-            $subprocess_id = $request['subprocess_id'];
-        }
-
-        \Ermtool\Subprocess::create([
-            'name' => $request['name'],
-            'description' => $request['description'],
-            'expiration_date' => $fecha_exp,
-            'process_id' => $request['process_id'],
-            'subprocess_id' => $subprocess_id,
-            ]);
-
-        //agregamos la relación a cada organización
-            // primero obtenemos subproceso que acabamos de agregar   
-            $subprocess = \Ermtool\Subprocess::max('id');
-
-            foreach ($request['organization_id'] as $organization_id)
+            if($_POST['subprocess_id'] == NULL)
             {
-                $organization = \Ermtool\Organization::find($organization_id);
-                //agregamos la relación (para agregar en atributos)
-                $organization->subprocesses()->attach($subprocess);
+                $subprocess_id = NULL;
+            }
+            else
+            {
+                $subprocess_id = $_POST['subprocess_id'];
             }
 
-            Session::flash('message','Subproceso agregado correctamente');
+            $new_subprocess = \Ermtool\Subprocess::create([
+                'name' => $_POST['name'],
+                'description' => $_POST['description'],
+                'expiration_date' => $_POST['expiration_date'],
+                'process_id' => $_POST['process_id'],
+                'subprocess_id' => $subprocess_id,
+                ]);
 
+            //agregamos la relación a cada organización
+                // primero obtenemos subproceso que acabamos de agregar   
+                $subprocess = $new_subprocess->id;
+
+                foreach ($_POST['organization_id'] as $organization_id)
+                {
+                    $organization = \Ermtool\Organization::find($organization_id);
+                    //agregamos la relación (para agregar en atributos)
+                    $organization->subprocesses()->attach($subprocess);
+                }
+
+                Session::flash('message','Subproceso agregado correctamente');
+        });
             return Redirect::to('/subprocesos');
     }
 
@@ -216,82 +207,80 @@ class SubprocesosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $subproceso = \Ermtool\Subprocess::find($id);
-        $fecha_exp = NULL;
-
-        if (strpos($request['expiration_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
         {
-            //obtenemos orden correcto de fecha expiración
-            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
+            $subproceso = \Ermtool\Subprocess::find($GLOBALS['id1']);
+
+            //vemos si tiene subproceso padre
+            if($_POST['subprocess_id'] != "")
             {
-                $fecha = explode("/",$request['expiration_date']);
-                $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
+                $subprocess_id = $_POST['subprocess_id'];
             }
             else
             {
-                $fecha_exp = NULL;
+                $subprocess_id = NULL;
             }
-        }
 
-        //vemos si tiene subproceso padre
-        if($request['subprocess_id'] != "")
-        {
-            $subprocess_id = $request['subprocess_id'];
-        }
-        else
-        {
-            $subprocess_id = NULL;
-        }
+            $subproceso->name = $_POST['name'];
+            $subproceso->description = $_POST['description'];
+            $subproceso->expiration_date = $_POST['expiration_date'];
+            $subproceso->process_id = $_POST['process_id'];
+            $subproceso->subprocess_id = $subprocess_id;
 
-        $subproceso->name = $request['name'];
-        $subproceso->description = $request['description'];
-        $subproceso->expiration_date = $fecha_exp;
-        $subproceso->process_id = $request['process_id'];
-        $subproceso->subprocess_id = $subprocess_id;
+            //deberemos quitar las relaciones, y luego agregar las nuevas para este subproceso
+            //primero eliminaremos todas las relaciones de organizaciones con subprocesos donde el subproceso sea el que se está editando
+            $org_sub = DB::table('organization_subprocess')->where('subprocess_id',$GLOBALS['id1'])->lists('organization_id');
 
-        //deberemos quitar las relaciones, y luego agregar las nuevas para este subproceso
-        //primero eliminaremos todas las relaciones de organizaciones con subprocesos donde el subproceso sea el que se está editando
-        $org_sub = DB::table('organization_subprocess')->where('subprocess_id',$id)->lists('organization_id');
+            foreach ($org_sub as $organization_id)
+            {
+                $subproceso->organizations()->detach($organization_id);
+            }
 
-        foreach ($org_sub as $organization_id)
-        {
-            $subproceso->organizations()->detach($organization_id);
-        }
+            //ahora agregamos las relaciones con las nuevas organizaciones
+            foreach ($_POST['organization_id'] as $organization_id)
+            {
+                $organization = \Ermtool\Organization::find($organization_id);
+                //agregamos la relación (para agregar en atributos)
+                   $organization->subprocesses()->attach($GLOBALS['id1']);
+            }
 
-        //ahora agregamos las relaciones con las nuevas organizaciones
-        foreach ($request['organization_id'] as $organization_id)
-        {
-            $organization = \Ermtool\Organization::find($organization_id);
-            //agregamos la relación (para agregar en atributos)
-               $organization->subprocesses()->attach($id);
-        }
+            $subproceso->save();
 
-        $subproceso->save();
-
-        Session::flash('message','Subproceso actualizado correctamente');
+            Session::flash('message','Subproceso actualizado correctamente');
+        });
 
         return Redirect::to('/subprocesos');
     }
 
     public function bloquear($id)
     {
-        $subproceso = \Ermtool\Subprocess::find($id);
-        $subproceso->status = 1;
-        $subproceso->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
+        {
+            $subproceso = \Ermtool\Subprocess::find($GLOBALS['id1']);
+            $subproceso->status = 1;
+            $subproceso->save();
 
-        Session::flash('message','Subproceso bloqueado correctamente');
-
+            Session::flash('message','Subproceso bloqueado correctamente');
+        });
         return Redirect::to('/subprocesos');
     }
 
     public function desbloquear($id)
     {
-        $subproceso = \Ermtool\Subprocess::find($id);
-        $subproceso->status = 0;
-        $subproceso->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
+        {
+            $subproceso = \Ermtool\Subprocess::find($GLOBALS['id1']);
+            $subproceso->status = 0;
+            $subproceso->save();
 
-        Session::flash('message','Subproceso desbloqueado correctamente');
-
+            Session::flash('message','Subproceso desbloqueado correctamente');
+        });
         return Redirect::to('/subprocesos');
     }
 

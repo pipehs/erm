@@ -88,7 +88,7 @@
 					table_head += "<th>Subproceso(s)</th><th>Nombre Riesgo</th><th>Descripci&oacute;n Control</th>";
 					table_head += "<th>Control(es)</th>";
 					table_head += "<th>Fecha creaci&oacute;n</th><th>Fecha expiraci&oacute;n</th><th>Categor&iacute;as</th>";
-					table_head += "<th>Causa(s)</th><th>Efecto(s)</th>";
+					table_head += "<th>Causa(s)</th><th>Efecto(s)</th><th>Pérdida esperada</th>";
 					table_head += "</thead>";
 
 					//Añadimos la imagen de carga en el contenedor

@@ -48,7 +48,7 @@
 				</div>
 			@endif
 
-			Ingrese la informaci&oacute;n asociada al nuevo control
+			Ingrese la informaci&oacute;n que desea modificar del control.
 				{!!Form::model($control,['route'=>['controles.update',$control->id],'method'=>'PUT','class'=>'form-horizontal',
 				'enctype'=>'multipart/form-data'])!!}
 					@include('controles.form')
@@ -66,14 +66,12 @@
 
 @section('scripts2')
 <script>
-//bloqueamos opciones de llenado si es que se esta ingresando un riesgo tipo
-	$("#subneg").change(function() {
 
-			if ($("#subneg").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
-			{
-				if ($("#subneg").val() == 0) //Se seleccionó Riesgos / Procesos
-				{
-					$.get('controles.subneg.'+$("#subneg").val(), function (result) {
+$(document).ready(function() {
+
+	if ({{ $control->type2 }} == 0) //control de proceso
+	{
+			$.get('controles.subneg.'+$("#subneg").val(), function (result) {
 
 							$("#procesos").removeAttr("style").show(); //hacemos visible riesgos / procesos
 							$("#negocios").removeAttr("style").hide(); //ocultamos riesgos / objetivos
@@ -88,12 +86,19 @@
 							$(datos).each( function() {
 								$("#select_procesos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.subprocess_name +'</option>');
 							});
-					});
-				}
 
-				else if ($("#subneg").val() == 1) //Se seleccionó Riesgos / Objetivos
-				{
-					$.get('controles.subneg.'+$("#subneg").val(), function (result) {
+				//riesgos seleccionados
+				var risks = JSON.parse('{{ $risks_selected }}');
+				$(risks).each( function() {
+					$("#select_procesos option[value='" + this + "']").attr("selected",true);
+					$("#select_procesos").change();
+				});
+
+			});
+	}
+	else if ({{ $control->type2 }} == 1) //riesgos de negocio
+	{
+			$.get('controles.subneg.'+$("#subneg").val(), function (result) {
 
 							$("#negocios").removeAttr("style").show(); //hacemos visible riesgos / objetivos
 							$("#procesos").removeAttr("style").hide(); //ocultamos riesgos / procesos
@@ -108,26 +113,17 @@
 							$(datos).each( function() {
 								$("#select_objetivos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.objective_name +' - ' + this.organization_name + '<option>');
 							});
-					});
-				}
-				
-			}
+			});
 
-			else
-			{
-				//REseteamos datos
-						$("#nombre").val("");
-						$("#descripcion").val("");
-						$("#categoria").val(""); 
-						$("#categoria").change(); //cambiamos texto que muestra select
-						$("#input_date2").val("");
-						$("#cause_id").val("");
-						$("#cause_id").change();
-						$("#effect_id").val("");
-						$("#effect_id").change();
-			}
-			
-	    });
+			//riesgos seleccionados
+			var risks = JSON.parse('{{ $risks_selected }}');
+			$(risks).each( function() {
+				$("#select_objetivos option[value='" + this + "']").attr("selected",true);
+				$("#select_objetivos").change();
+			});
+	}
+});
+
 
 </script>
 @stop

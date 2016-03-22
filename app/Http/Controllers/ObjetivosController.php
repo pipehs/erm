@@ -8,6 +8,7 @@ use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
 use dateTime;
+use DB;
 
 class ObjetivosController extends Controller
 {
@@ -108,36 +109,28 @@ class ObjetivosController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha expiración
-        if ($request['expiration_date'] != "")
+        DB::transaction(function() 
         {
-            $fecha = explode("/",$request['expiration_date']);
-            $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-        else
-        {
-            $fecha_exp = NULL;
-        }
-        //si es que se agrego categoría de objetivo
-        if ($request['objective_category_id'])
-        {
-            $categoria = $request['objective_category_id'];
-        }
-        else
-        {
-            $categoria = NULL;
-        }
-        \Ermtool\Objective::create([
-            'name' => $request['name'],
-            'description' => $request['description'],
-            'expiration_date' => $fecha_exp,
-            'objective_category_id' => $categoria,
-            'organization_id' => $request['organization_id'],
-            'status' => 0,
-            ]);
+            //si es que se agrego categoría de objetivo
+            if ($request['objective_category_id'])
+            {
+                $categoria = $_POST['objective_category_id'];
+            }
+            else
+            {
+                $categoria = NULL;
+            }
+            \Ermtool\Objective::create([
+                'name' => $_POST['name'],
+                'description' => $_POST['description'],
+                'expiration_date' => $_POST['expiration_date'],
+                'objective_category_id' => $categoria,
+                'organization_id' => $_POST['organization_id'],
+                'status' => 0,
+                ]);
 
-        Session::flash('message','Objetivo corporativo agregado correctamente');
-
+            Session::flash('message','Objetivo corporativo agregado correctamente');
+        });
         return Redirect::to('/objetivos');
     }
 
@@ -167,24 +160,36 @@ class ObjetivosController extends Controller
 
     public function bloquear($id)
     {
-        $objetivo = \Ermtool\Objective::find($id);
-        $objetivo->status = 1;
-        $objetivo->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function() 
+        {
+            $objetivo = \Ermtool\Objective::find($GLOBALS['id1']);
+            $objetivo->status = 1;
+            $objetivo->save();
 
-        Session::flash('message','Objetivo bloqueado correctamente');
+            Session::flash('message','Objetivo bloqueado correctamente');
+        });
 
         return Redirect::to('/objetivos');
     }
 
     public function desbloquear($id)
     {
-        $objetivo = \Ermtool\Objective::find($id);
-        $objetivo->status = 0;
-        $objetivo->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function() 
+        {
+            $objetivo = \Ermtool\Objective::find($GLOBALS['id1']);
+            $objetivo->status = 0;
+            $objetivo->save();
 
-        Session::flash('message','Objetivo desbloqueado correctamente');
+            Session::flash('message','Objetivo desbloqueado correctamente');
+        });
 
-        return Redirect::to('/objetivos');
+        //obtenemos org
+            $id_org = \Ermtool\Objective::where('id',$id)->value('organization_id');
+        return Redirect::to('/objetivos?organizacion='.$id_org);
     }
 
     public function verbloqueados($id_organizacion)
@@ -240,42 +245,33 @@ class ObjetivosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $objetivo = \Ermtool\Objective::find($id);
-        $fecha_creacion = $objetivo->created_at; //Se debe obtener fecha de creación por si no fue modificada
-        $fecha_exp = NULL;
-
-        if (strpos($request['expiration_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function() 
         {
-            //obtenemos orden correcto de fecha expiración
-            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
+            $objetivo = \Ermtool\Objective::find($GLOBALS['id1']);
+            $fecha_creacion = $objetivo->created_at; //Se debe obtener fecha de creación por si no fue modificada
+            $fecha_exp = NULL;
+
+            //vemos si tiene categoría
+            if($_POST['objective_category_id'] != "")
             {
-                $fecha = explode("/",$request['expiration_date']);
-                $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
+                $categoria = $_POST['objective_category_id'];
             }
             else
             {
-                $fecha_exp = NULL;
+                $categoria = NULL;
             }
-        }
 
-        //vemos si tiene categoría
-        if($request['objective_category_id'] != "")
-        {
-            $categoria = $request['objective_category_id'];
-        }
-        else
-        {
-            $categoria = NULL;
-        }
+            $objetivo->name = $_POST['name'];
+            $objetivo->description = $_POST['description'];
+            $objetivo->expiration_date = $_POST['expiration_date'];
+            $objetivo->objective_category_id = $categoria;
 
-        $objetivo->name = $request['name'];
-        $objetivo->description = $request['description'];
-        $objetivo->expiration_date = $fecha_exp;
-        $objetivo->objective_category_id = $categoria;
+            $objetivo->save();
 
-        $objetivo->save();
-
-        Session::flash('message','Objetivo actualizado correctamente');
+            Session::flash('message','Objetivo actualizado correctamente');
+        });
 
         return Redirect::to('/objetivos');
     }

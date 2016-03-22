@@ -98,6 +98,8 @@
 				Preventivo
 			@elseif ($control['purpose'] == 1)
 				Detectivo
+			@elseif ($control['purpose'] == 2)
+				Correctivo
 			@else
 				Error al ingresar prop&oacute;sito
 			@endif

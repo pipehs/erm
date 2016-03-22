@@ -7,6 +7,7 @@ use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
 use DateTime;
+use DB;
 
 class CategoriasRiesgosController extends Controller
 {
@@ -100,34 +101,27 @@ class CategoriasRiesgosController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha expiración
-        if ($request['expiration_date'] != "")
+        DB::transaction(function()
         {
-            $fecha = explode("/",$request['expiration_date']);
-            $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-        else
-        {
-            $fecha_exp = NULL;
-        }
 
-        if ($request['risk_category_id'] == NULL)
-        {
-            $risk_category_id = NULL;
-        }
-        else
-        {
-            $risk_category_id = $request['risk_category_id'];
-        }
+            if ($_POST['risk_category_id'] == NULL)
+            {
+                $risk_category_id = NULL;
+            }
+            else
+            {
+                $risk_category_id = $_POST['risk_category_id'];
+            }
 
-        \Ermtool\Risk_category::create([
-            'name' => $request['name'],
-            'description' => $request['description'],
-            'expiration_date' => $fecha_exp,
-            'risk_category_id' => $risk_category_id,
-            ]);
+            \Ermtool\Risk_category::create([
+                'name' => $_POST['name'],
+                'description' => $_POST['description'],
+                'expiration_date' => $_POST['expiration_date'],
+                'risk_category_id' => $risk_category_id,
+                ]);
 
-            Session::flash('message','Categor&iacute;a agregada correctamente');
+                Session::flash('message','Categor&iacute;a agregada correctamente');
+        });
 
             return Redirect::to('/categorias_riesgos');
     }
@@ -172,64 +166,63 @@ class CategoriasRiesgosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $risk_category = \Ermtool\Risk_category::find($id);
-        $fecha_exp = NULL;
-
-        if (strpos($request['expiration_date'],'/')) //lo mismo para fecha de expiración
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
         {
-            //obtenemos orden correcto de fecha expiración
-            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
+            $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
+            $fecha_exp = NULL;
+
+            //vemos si tiene categoría padre
+            if($_POST['risk_category_id'] != "")
             {
-                $fecha = explode("/",$request['expiration_date']);
-                $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
+                $risk_category_id = $_POST['risk_category_id'];
             }
             else
             {
-                $fecha_exp = NULL;
+                $risk_category_id = NULL;
             }
-        }
 
-        //vemos si tiene categoría padre
-        if($request['risk_category_id'] != "")
-        {
-            $risk_category_id = $request['risk_category_id'];
-        }
-        else
-        {
-            $risk_category_id = NULL;
-        }
+            $risk_category->name = $_POST['name'];
+            $risk_category->description = $_POST['description'];
+            $risk_category->expiration_date = $_POST['expiration_date'];
+            $risk_category->risk_category_id = $risk_category_id;
 
-        $risk_category->name = $request['name'];
-        $risk_category->description = $request['description'];
-        $risk_category->expiration_date = $fecha_exp;
-        $risk_category->risk_category_id = $risk_category_id;
+            $risk_category->save();
 
-        $risk_category->save();
-
-        Session::flash('message','Categor&iacute;a de riesgo actualizada correctamente');
+            Session::flash('message','Categor&iacute;a de riesgo actualizada correctamente');
+        });
 
         return Redirect::to('/categorias_riesgos');
     }
 
     public function bloquear($id)
     {
-        $risk_category = \Ermtool\Risk_category::find($id);
-        $risk_category->status = 1;
-        $risk_category->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
+        {
+            $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
+            $risk_category->status = 1;
+            $risk_category->save();
 
-        Session::flash('message','Categor&iacute;a de riesgo bloqueada correctamente');
-
+            Session::flash('message','Categor&iacute;a de riesgo bloqueada correctamente');
+        });
         return Redirect::to('/categorias_riesgos');
     }
 
     public function desbloquear($id)
     {
-        $risk_category = \Ermtool\Risk_category::find($id);
-        $risk_category->status = 0;
-        $risk_category->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
+        {
+            $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
+            $risk_category->status = 0;
+            $risk_category->save();
 
-        Session::flash('message','Categor&iacute;a de riesgo desbloqueada correctamente');
-
+            Session::flash('message','Categor&iacute;a de riesgo desbloqueada correctamente');
+        });
         return Redirect::to('/categorias_riesgos');
     }
 

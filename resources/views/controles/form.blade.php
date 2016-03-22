@@ -54,7 +54,7 @@
 						{!!Form::label('Periodicidad',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('periodicity',['0'=>'Diario','1'=>'Semanal','2'=>'Mensual',
-													'3'=>'Semestral','4'=>'Anual'],null,
+													'3'=>'Semestral','4'=>'Anual','5'=>'Cada vez que ocurra'],null,
 													['placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
@@ -62,7 +62,7 @@
 					<div class="form-group">
 						{!!Form::label('Prop&oacute;sito',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::select('purpose',['0'=>'Preventivo','1'=>'Detectivo'],null,
+							{!!Form::select('purpose',['0'=>'Preventivo','1'=>'Detectivo','2'=>'Correctivo'],null,
 													['placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>

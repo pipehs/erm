@@ -8,6 +8,7 @@ use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
 use DateTime;
+use DB;
 
 class CategoriasObjetivosController extends Controller
 {
@@ -96,24 +97,17 @@ class CategoriasObjetivosController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha expiración
-        if ($request['expiration_date'] != "")
-        {
-            $fecha = explode("/",$request['expiration_date']);
-            $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-        else
-        {
-            $fecha_exp = NULL;
-        }
+        DB::transactions(function() {
 
-        \Ermtool\Objective_category::create([
-            'name' => $request['name'],
-            'description' => $request['description'],
-            'expiration_date' => $fecha_exp,
-            ]);
+            \Ermtool\Objective_category::create([
+                'name' => $_POST['name'],
+                'description' => $_POST['description'],
+                'expiration_date' => $_POST['expiration_date'],
+                ]);
 
-            Session::flash('message','Categor&iacute;a agregada correctamente');
+                Session::flash('message','Categor&iacute;a agregada correctamente');
+
+        });
 
             return Redirect::to('/categorias_objetivos');
     }
@@ -140,54 +134,49 @@ class CategoriasObjetivosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $objective_category = \Ermtool\Objective_category::find($id);
-        $fecha_creacion = $objective_category->created_at; //Se debe obtener fecha de creación por si no fue modificada
-        $fecha_exp = NULL;
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function() {
+            $objective_category = \Ermtool\Objective_category::find($GLOBALS['id1']);
+            $fecha_creacion = $objective_category->created_at; //Se debe obtener fecha de creación por si no fue modificada
 
-        if (strpos($request['expiration_date'],'/')) //lo mismo para fecha de expiración
-        {
-            //obtenemos orden correcto de fecha expiración
-            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
-            {
-                $fecha = explode("/",$request['expiration_date']);
-                $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-            }
-            else
-            {
-                $fecha_exp = NULL;
-            }
-        }
+            $objective_category->name = $_POST['name'];
+            $objective_category->description = $_POST['description'];
+            $objective_category->expiration_date = $_POST['expiration_date'];
 
-        $objective_category->name = $request['name'];
-        $objective_category->description = $request['description'];
-        $objective_category->expiration_date = $fecha_exp;
+            $objective_category->save();
 
-        $objective_category->save();
-
-        Session::flash('message','Categor&iacute;a de objetivo actualizada correctamente');
+            Session::flash('message','Categor&iacute;a de objetivo actualizada correctamente');
+        });
 
         return Redirect::to('/categorias_objetivos');
     }
 
     public function bloquear($id)
     {
-        $objective_category = \Ermtool\Objective_category::find($id);
-        $objective_category->status = 1;
-        $objective_category->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function() {
+            $objective_category = \Ermtool\Objective_category::find($GLOBALS['id1']);
+            $objective_category->status = 1;
+            $objective_category->save();
 
-        Session::flash('message','Categor&iacute;a de objetivo bloqueada correctamente');
-
+            Session::flash('message','Categor&iacute;a de objetivo bloqueada correctamente');
+        });
         return Redirect::to('/categorias_objetivos');
     }
 
     public function desbloquear($id)
     {
-        $objective_category = \Ermtool\Objective_category::find($id);
-        $objective_category->status = 0;
-        $objective_category->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function() {
+            $objective_category = \Ermtool\Objective_category::find($GLOBALS['id1']);
+            $objective_category->status = 0;
+            $objective_category->save();
 
-        Session::flash('message','Categor&iacute;a de objetivo desbloqueada correctamente');
-
+            Session::flash('message','Categor&iacute;a de objetivo desbloqueada correctamente');
+        });
         return Redirect::to('/categorias_objetivos');
     }
 

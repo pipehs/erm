@@ -157,68 +157,75 @@ class ControlesController extends Controller
             'type' => 'required|digits:1',
             'periodicity' => 'required',
             'purpose' => 'required',
-            'evidence' => 'required',
         ]);
 
         //print_r($_POST);
+        //guardamos variable global de evidencia
+        global $evidence;
+        $evidence = $request->file('evidence_doc');
 
-        if ($request['stakeholder_id'] == NULL)
-            $stakeholder = NULL;
-        else
-            $stakeholder = $request['stakeholder_id'];
-
-        //insertamos control y obtenemos ID
-        $control_id = DB::table('controls')->insertGetId([
-                'name'=>$request['name'],
-                'description'=>$request['description'],
-                'type'=>$request['type'],
-                'type2'=>$request['subneg'],
-                'evidence'=>$request['evidence'],
-                'periodicity'=>$request['periodicity'],
-                'purpose'=>$request['purpose'],
-                'stakeholder_id'=>$stakeholder,
-                'created_at'=>date('Y-m-d H:i:s'),
-                'updated_at'=>date('Y-m-d H:i:s'),
-                'expected_cost'=>$request['expected_cost']
-                ]);
-
-        //insertamos en control_risk_subprocess o control_objective_risk
-        if ($request['subneg'] == 0) //es control de proceso
+        //creamos una transacción para cumplir con atomicidad
+        DB::transaction(function()
         {
-            foreach ($request['select_procesos'] as $subproceso)
-            {
-                DB::table('control_risk_subprocess')
-                    ->insert([
-                        'risk_subprocess_id' => $subproceso,
-                        'control_id' => $control_id
+
+                if ($_POST['stakeholder_id'] == NULL)
+                    $stakeholder = NULL;
+                else
+                    $stakeholder = $_POST['stakeholder_id'];
+
+                //insertamos control y obtenemos ID
+                $control_id = DB::table('controls')->insertGetId([
+                        'name'=>$_POST['name'],
+                        'description'=>$_POST['description'],
+                        'type'=>$_POST['type'],
+                        'type2'=>$_POST['subneg'],
+                        'evidence'=>$_POST['evidence'],
+                        'periodicity'=>$_POST['periodicity'],
+                        'purpose'=>$_POST['purpose'],
+                        'stakeholder_id'=>$stakeholder,
+                        'created_at'=>date('Y-m-d H:i:s'),
+                        'updated_at'=>date('Y-m-d H:i:s'),
+                        'expected_cost'=>$_POST['expected_cost']
                         ]);
-            }
-        }
-        else if ($request['subneg'] == 1) //es control de objetivo
-        {
-            foreach ($request['select_objetivos'] as $objetivo)
-            {
-                DB::table('control_objective_risk')
-                    ->insert([
-                        'objective_risk_id' => $objetivo,
-                        'control_id' => $control_id
-                        ]);
-            }
-        }
 
-        //guardamos archivo de evidencia (si es que hay)
-        if($request->file('evidence_doc') != NULL)
-        {
-            //separamos nombre archivo extension
-            $file = explode('.',$request->file('evidence_doc')->getClientOriginalName());
+                //insertamos en control_risk_subprocess o control_objective_risk
+                if ($_POST['subneg'] == 0) //es control de proceso
+                {
+                    foreach ($_POST['select_procesos'] as $subproceso)
+                    {
+                        DB::table('control_risk_subprocess')
+                            ->insert([
+                                'risk_subprocess_id' => $subproceso,
+                                'control_id' => $control_id
+                                ]);
+                    }
+                }
+                else if ($_POST['subneg'] == 1) //es control de objetivo
+                {
+                    foreach ($_POST['select_objetivos'] as $objetivo)
+                    {
+                        DB::table('control_objective_risk')
+                            ->insert([
+                                'objective_risk_id' => $objetivo,
+                                'control_id' => $control_id
+                                ]);
+                    }
+                }
 
-            Storage::put(
-                'controles/'. $file[0] . "___" . $control_id . "." . $file[1],
-                file_get_contents($request->file('evidence_doc')->getRealPath())
-            );
-        }
+                //guardamos archivo de evidencia (si es que hay)
+                if($GLOBALS['evidence'] != NULL)
+                {
+                    //separamos nombre archivo extension
+                    $file = explode('.',$GLOBALS['evidence']->getClientOriginalName());
 
-        Session::flash('message','Control agregado correctamente');
+                    Storage::put(
+                        'controles/'. $file[0] . "___" . $control_id . "." . $file[1],
+                        file_get_contents($GLOBALS['evidence']->getRealPath())
+                    );
+                }
+
+                Session::flash('message','Control agregado correctamente');
+        });
 
         return Redirect::to('/controles');
 
@@ -243,11 +250,40 @@ class ControlesController extends Controller
      */
     public function edit($id)
     {
+        $risks_selected = array(); //array de riesgos seleccionados previamente
         $control = \Ermtool\Control::find($id);
         $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
         ->orderBy('name')
         ->lists('full_name', 'id');
-        return view('controles.edit',['control'=>$control,'stakeholders'=>$stakeholders]);
+
+        //seleccionamos riesgos de proceso u objetivo que fueron seleccionados previamente (según corresponda)
+        if ($control->type2 == 0)
+        {
+            //seleccionamos riesgos de proceso seleccionados previamente
+            $risks = DB::table('control_risk_subprocess')
+                        ->where('control_risk_subprocess.control_id','=',$control->id)
+                        ->select('risk_subprocess_id as id')
+                        ->get();
+        }
+        else if ($control->type2 == 1)
+        {
+            //seleccionamos riesgo de negocio
+            $risks = DB::table('control_objective_risk')
+                        ->where('control_objective_risk.control_id','=',$control->id)
+                        ->select('objective_risk_id as id')
+                        ->get();
+        }
+
+        $i = 0;
+        foreach ($risks as $risk)
+        {
+            $risks_selected[$i] = $risk->id;
+            $i += 1;
+        }
+       
+        return view('controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,
+                    'risks_selected'=>json_encode($risks_selected)
+                    ]);
     }
 
     /**
@@ -259,37 +295,79 @@ class ControlesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $control = \Ermtool\Control::find($id);
-
-        if ($request['stakeholder_id'] == NULL)
-            $stakeholder = NULL;
-        else
-            $stakeholder = $request['stakeholder_id'];
-
-        //guardamos archivo de evidencia (si es que hay)
-        if($request->file('evidence_doc') != NULL)
+        global $id1;
+        $id1 = $id;
+        global $evidence;
+        $evidence = $request->file('evidence_doc');
+        DB::transaction(function() 
         {
-            //separamos nombre archivo extension
-            $file = explode('.',$request->file('evidence_doc')->getClientOriginalName());
+            $control = \Ermtool\Control::find($GLOBALS['id1']);
 
-            Storage::put(
-                'controles/'. $file[0] . "___" . $id . "." . $file[1],
-                file_get_contents($request->file('evidence_doc')->getRealPath())
-            );
-        }
+            if ($_POST['stakeholder_id'] == NULL)
+                $stakeholder = NULL;
+            else
+                $stakeholder = $_POST['stakeholder_id'];
 
-        $control->name = $request['name'];
-        $control->description = $request['description'];
-        $control->type = $request['type'];
-        $control->evidence = $request['evidence'];
-        $control->periodicity = $request['periodicity'];
-        $control->purpose = $request['purpose'];
-        $control->stakeholder_id = $stakeholder;
-        $control->expected_cost = $request['expected_cost'];
+            //guardamos archivo de evidencia (si es que hay)
+            if($GLOBALS['evidence'] != NULL)
+            {
+                //separamos nombre archivo extension
+                $file = explode('.',$GLOBALS['evidence']->getClientOriginalName());
 
-        $control->save();
+                Storage::put(
+                    'controles/'. $file[0] . "___" . $control->id . "." . $file[1],
+                    file_get_contents($GLOBALS['evidence']->getRealPath())
+                );
+            }
 
-        Session::flash('message','Control actualizado correctamente');
+            $control->name = $_POST['name'];
+            $control->description = $_POST['description'];
+            $control->type = $_POST['type'];
+            $control->evidence = $_POST['evidence'];
+            $control->periodicity = $_POST['periodicity'];
+            $control->purpose = $_POST['purpose'];
+            $control->stakeholder_id = $stakeholder;
+            $control->expected_cost = $_POST['expected_cost'];
+
+            $control->save();
+
+            //guardamos riesgos de proceso o de negocio
+            if (isset($_POST['select_procesos']))
+            {
+                //primero eliminamos los riesgos antiguos para no repetir
+                DB::table('control_risk_subprocess')
+                    ->where('control_id','=',$control->id)
+                    ->delete();
+
+                //ahora insertamos
+                foreach ($_POST['select_procesos'] as $subproceso)
+                {
+                    DB::table('control_risk_subprocess')
+                        ->insert([
+                            'risk_subprocess_id' => $subproceso,
+                            'control_id' => $control->id
+                            ]);
+                }
+            }
+            else if (isset($_POST['select_objetivos']))
+            {
+                //primero eliminamos los riesgos antiguos para no repetir
+                DB::table('control_objective_risk')
+                    ->where('control_id','=',$control->id)
+                    ->delete();
+
+                foreach ($_POST['select_objetivos'] as $objetivo)
+                {
+                    DB::table('control_objective_risk')
+                        ->insert([
+                            'objective_risk_id' => $objetivo,
+                            'control_id' => $control->id
+                            ]);
+                }
+            }
+
+            Session::flash('message','Control actualizado correctamente');
+        });
 
         return Redirect::to('/controles');
     }
@@ -475,15 +553,19 @@ class ControlesController extends Controller
                         break;
                     case 4:
                         $periodicity = "Anual";
+                    case 5:
+                        $periodicity = "Cada vez que ocurra";
                 }
 
-                //Seteamos purpose. 0=Preventivo, 1=Detectivo
+                //Seteamos purpose. 0=Preventivo, 1=Detectivo, 2=Correctivo
                 switch ($control->purpose)
                 {
                     case 0:
                         $purpose = "Preventivo";
                     case 1:
                         $purpose = "Detectivo";
+                    case 2:
+                        $purpose = "Correctivo";
                 }
 
                 //Seteamos responsable del control

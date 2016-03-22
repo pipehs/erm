@@ -8,6 +8,7 @@ use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
 use DateTime;
+use DB;
 
 class OrganizationController extends Controller
 {
@@ -117,36 +118,28 @@ class OrganizationController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha expiración
-        if ($request['expiration_date'] != "")
+        DB::transaction(function()
         {
-            $fecha = explode("/",$request['expiration_date']);
-            $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-        else
-        {
-            $fecha_exp = NULL;
-        }
+            //vemos si tiene organización padre
+            if($_POST['organization_id'] != "")
+            {
+                $organizacion_padre = $_POST['organization_id'];
+            }
+            else
+            {
+                $organizacion_padre = NULL;
+            }
 
-        //vemos si tiene organización padre
-        if($request['organization_id'] != "")
-        {
-            $organizacion_padre = $request['organization_id'];
-        }
-        else
-        {
-            $organizacion_padre = NULL;
-        }
+            \Ermtool\Organization::create([
+                'name' => $_POST['name'],
+                'description' => $_POST['description'],
+                'expiration_date' => $_POST['expiration_date'],
+                'shared_services' => $_POST['shared_services'],
+                'organization_id' => $organizacion_padre,
+                ]);
 
-        \Ermtool\Organization::create([
-            'name' => $request['name'],
-            'description' => $request['description'],
-            'expiration_date' => $fecha_exp,
-            'shared_services' => $request['shared_services'],
-            'organization_id' => $organizacion_padre,
-            ]);
-
-        Session::flash('message','Organizaci&oacute;n creada correctamente');
+            Session::flash('message','Organizaci&oacute;n creada correctamente');
+        });
 
         return Redirect::to('/organization');
 
@@ -179,23 +172,31 @@ class OrganizationController extends Controller
 
     public function bloquear($id)
     {
-        $organization = \Ermtool\Organization::find($id);
-        $organization->status = 1;
-        $organization->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function() 
+        {
+            $organization = \Ermtool\Organization::find($GLOBALS['id1']);
+            $organization->status = 1;
+            $organization->save();
 
-        Session::flash('message','Organizaci&oacute;n bloqueada correctamente');
-
+            Session::flash('message','Organizaci&oacute;n bloqueada correctamente');
+        });
         return Redirect::to('/organization');
     }
 
     public function desbloquear($id)
     {
-        $organization = \Ermtool\Organization::find($id);
-        $organization->status = 0;
-        $organization->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function() 
+        {
+            $organization = \Ermtool\Organization::find($GLOBALS['id1']);
+            $organization->status = 0;
+            $organization->save();
 
-        Session::flash('message','Organizaci&oacute;n desbloqueada correctamente');
-
+            Session::flash('message','Organizaci&oacute;n desbloqueada correctamente');
+        });
         return Redirect::to('/organization');
     }
 
@@ -208,43 +209,35 @@ class OrganizationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $organization = \Ermtool\Organization::find($id);
-        $fecha_creacion = $organization->created_at;
-        $fecha_exp = NULL;
-
-        if (strpos($request['expiration_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
+        //hacemos variable id como variable global
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
         {
-            //obtenemos orden correcto de fecha expiración
-            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
+            $organization = \Ermtool\Organization::find($GLOBALS['id1']);
+            $fecha_creacion = $organization->created_at;
+            $fecha_exp = NULL;
+
+            //vemos si tiene organización padre
+            if($_POST['organization_id'] != "")
             {
-                $fecha = explode("/",$request['expiration_date']);
-                $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
+                $organizacion_padre = $_POST['organization_id'];
             }
             else
             {
-                $fecha_exp = NULL;
+                $organizacion_padre = NULL;
             }
-        }
 
-        //vemos si tiene organización padre
-        if($request['organization_id'] != "")
-        {
-            $organizacion_padre = $request['organization_id'];
-        }
-        else
-        {
-            $organizacion_padre = NULL;
-        }
+            $organization->name = $_POST['name'];
+            $organization->description = $_POST['description'];
+            $organization->expiration_date = $_POST['expiration_date'];
+            $organization->shared_services = $_POST['shared_services'];
+            $organization->organization_id = $organizacion_padre;
 
-        $organization->name = $request['name'];
-        $organization->description = $request['description'];
-        $organization->expiration_date = $fecha_exp;
-        $organization->shared_services = $request['shared_services'];
-        $organization->organization_id = $organizacion_padre;
+            $organization->save();
 
-        $organization->save();
-
-        Session::flash('message','Organizaci&oacute;n actualizada correctamente');
+            Session::flash('message','Organizaci&oacute;n actualizada correctamente');
+        });
 
         return Redirect::to('/organization');
     }

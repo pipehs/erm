@@ -7,6 +7,8 @@ use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
+use DB;
+use DateTime;
 
 class RiesgosTipoController extends Controller
 {
@@ -118,66 +120,57 @@ class RiesgosTipoController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha expiración
-        if ($request['expiration_date'] != "")
+        DB::transaction(function()
         {
-            $fecha = explode("/",$request['expiration_date']);
-            $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-        else
-        {
-            $fecha_exp = NULL;
-        }
-
-        //vemos si se agrego alguna causa nueva
-        if (isset($request['causa_nueva']))
-        {
-            \Ermtool\Cause::create([
-                'name'=>$request['causa_nueva']
-            ]);
-
-            //obtenemos id de causa recien agregada
-            $causa = \Ermtool\Cause::max('id');
-        }
-        else
-        {
-            if ($request['cause_id'] == NULL)
-                $causa = NULL;
-            else
-                $causa = $request['cause_id'];
-        }
-
-        //vemos si se agrego algún efecto nuevo
-        if (isset($request['efecto_nuevo']))
-        {
-            \Ermtool\Effect::create([
-                'name'=>$request['efecto_nuevo']
+            //vemos si se agrego alguna causa nueva
+            if (isset($_POST['causa_nueva']))
+            {
+                $new_causa = \Ermtool\Cause::create([
+                    'name'=>$_POST['causa_nueva']
                 ]);
 
-            //obtenemos id de efecto agregado
-            $efecto = \Ermtool\Effect::max('id');
-        }
-        else
-        {
-            if ($request['effect_id'] == NULL)
-                $efecto = NULL;
+                //guardamos id de causa recien agregada
+                $causa = $new_causa->id;
+            }
             else
-                $efecto = $request['effect_id'];
-        }
+            {
+                if ($_POST['cause_id'] == NULL)
+                    $causa = NULL;
+                else
+                    $causa = $_POST['cause_id'];
+            }
 
-        \Ermtool\Risk::create([
-            'name'=>$request['name'],
-            'description'=>$request['description'],
-            'type2'=>0,
-            'expiration_date'=>$fecha_exp,
-            'risk_category_id'=>$request['risk_category_id'],
-            'cause_id'=>$causa,
-            'effect_id'=>$efecto,
-            ]);
+            //vemos si se agrego algún efecto nuevo
+            if (isset($_POST['efecto_nuevo']))
+            {
+                $new_effect = \Ermtool\Effect::create([
+                    'name'=>$_POST['efecto_nuevo']
+                    ]);
 
-        Session::flash('message','Riesgo tipo agregado correctamente');
+                //obtenemos id de efecto agregado
+                $efecto = $new_effect->id;
+            }
+            else
+            {
+                if ($_POST['effect_id'] == NULL)
+                    $efecto = NULL;
+                else
+                    $efecto = $_POST['effect_id'];
+            }
 
-        return Redirect::to('/riesgostipo');
+            \Ermtool\Risk::create([
+                'name'=>$_POST['name'],
+                'description'=>$_POST['description'],
+                'type2'=>0,
+                'expiration_date'=>$_POST['expiration_date'],
+                'risk_category_id'=>$_POST['risk_category_id'],
+                'cause_id'=>$causa,
+                'effect_id'=>$efecto,
+                ]);
+
+            Session::flash('message','Riesgo tipo agregado correctamente');
+        });
+        return Redirect::to('/riskstype');
 
     }
 
@@ -206,93 +199,92 @@ class RiesgosTipoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $riesgo = \Ermtool\Risk::find($id);
-        $fecha_exp = NULL;
-
-        if (strpos($request['expiration_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
         {
-            //obtenemos orden correcto de fecha expiración
-            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
+            $riesgo = \Ermtool\Risk::find($GLOBALS['id1']);
+
+            //vemos si se agrego alguna causa nueva
+            if (isset($_POST['causa_nueva']))
             {
-                $fecha = explode("/",$request['expiration_date']);
-                $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-            }
-            else
-            {
-                $fecha_exp = NULL;
-            }
-        }
-
-        //vemos si se agrego alguna causa nueva
-        if (isset($request['causa_nueva']))
-        {
-            \Ermtool\Cause::create([
-                'name'=>$request['causa_nueva']
-            ]);
-
-            //obtenemos id de causa recien agregada
-            $causa = \Ermtool\Cause::max('id');
-        }
-        else
-        {
-            if ($request['cause_id'] == NULL)
-                $causa = NULL;
-            else
-                $causa = $request['cause_id'];
-        }
-
-        //vemos si se agrego algún efecto nuevo
-        if (isset($request['efecto_nuevo']))
-        {
-            \Ermtool\Effect::create([
-                'name'=>$request['efecto_nuevo']
+                $new_causa = \Ermtool\Cause::create([
+                    'name'=>$request['causa_nueva']
                 ]);
 
-            //obtenemos id de efecto agregado
-            $efecto = \Ermtool\Effect::max('id');
-        }
-        else
-        {
-            if ($request['effect_id'] == NULL)
-                $efecto = NULL;
+                //obtenemos id de causa recien agregada
+                $causa = $new_causa->id;
+            }
             else
-                $efecto = $request['effect_id'];
-        }
+            {
+                if ($request['cause_id'] == NULL)
+                    $causa = NULL;
+                else
+                    $causa = $request['cause_id'];
+            }
 
-        $riesgo->name = $request['name'];
-        $riesgo->description = $request['description'];
-        $riesgo->expiration_date = $fecha_exp;
-        $riesgo->risk_category_id = $request['risk_category_id'];
-        $riesgo->cause_id = $causa;
-        $riesgo->effect_id = $efecto;
+            //vemos si se agrego algún efecto nuevo
+            if (isset($_POST['efecto_nuevo']))
+            {
+                $new_effect = \Ermtool\Effect::create([
+                    'name'=>$request['efecto_nuevo']
+                    ]);
 
-        $riesgo->save();
+                //obtenemos id de efecto agregado
+                $efecto = $new_effect->id;
+            }
+            else
+            {
+                if ($_POST['effect_id'] == NULL)
+                    $efecto = NULL;
+                else
+                    $efecto = $_POST['effect_id'];
+            }
 
-        Session::flash('message','Riesgo tipo actualizado correctamente');
+            $riesgo->name = $_POST['name'];
+            $riesgo->description = $_POST['description'];
+            $riesgo->expiration_date = $_POST['expiration_date'];
+            $riesgo->risk_category_id = $_POST['risk_category_id'];
+            $riesgo->cause_id = $causa;
+            $riesgo->effect_id = $efecto;
 
-        return Redirect::to('/riesgostipo');
+            $riesgo->save();
+
+            Session::flash('message','Riesgo tipo actualizado correctamente');
+        });
+
+        return Redirect::to('/riskstype');
     }
 
     public function bloquear($id)
     {
-        $riesgo = \Ermtool\Risk::find($id);
-        $riesgo->status = 1;
-        $riesgo->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
+        {
+            $riesgo = \Ermtool\Risk::find($GLOBALS['id1']);
+            $riesgo->status = 1;
+            $riesgo->save();
 
-        Session::flash('message','Riesgo tipo bloqueado correctamente');
-
-        return Redirect::to('/riesgostipo');
+            Session::flash('message','Riesgo tipo bloqueado correctamente');
+        });
+        return Redirect::to('/riskstype');
     }
 
     public function desbloquear($id)
     {
-        $riesgo = \Ermtool\Risk::find($id);
-        $riesgo->status = 0;
-        $riesgo->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
+        {
+            $riesgo = \Ermtool\Risk::find($GLOBALS['id1']);
+            $riesgo->status = 0;
+            $riesgo->save();
 
-        Session::flash('message','Riesgo tipo desbloqueado correctamente');
+            Session::flash('message','Riesgo tipo desbloqueado correctamente');
+        });
 
-        return Redirect::to('/riesgostipo');
+        return Redirect::to('/riskstype');
     }
 
     /**

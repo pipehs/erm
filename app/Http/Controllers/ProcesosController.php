@@ -152,33 +152,26 @@ class ProcesosController extends Controller
      */
     public function store(Request $request)
     {
-        //obtenemos orden correcto de fecha expiración
-        if ($request['expiration_date'] != "")
-        {
-            $fecha = explode("/",$request['expiration_date']);
-            $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-        }
-        else
-        {
-            $fecha_exp = NULL;
-        }
 
-        //vemos si tiene proceso dependiente
-        if ($request['process_id'] != "")
+        DB::transaction(function()
         {
-            $process_id = $request['process_id'];
-        }
-        else
-            $process_id = NULL;
+            //vemos si tiene proceso dependiente
+            if ($_POST['process_id'] != "")
+            {
+                $process_id = $_POST['process_id'];
+            }
+            else
+                $process_id = NULL;
 
-        \Ermtool\Process::create([
-            'name' => $request['name'],
-            'description' => $request['description'],
-            'expiration_date' => $fecha_exp,
-            'process_id' => $process_id,
-            ]);
+            \Ermtool\Process::create([
+                'name' => $_POST['name'],
+                'description' => $_POST['description'],
+                'expiration_date' => $_POST['expiration_date'],
+                'process_id' => $process_id,
+                ]);
 
-        Session::flash('message','Proceso agregado correctamente');
+            Session::flash('message','Proceso agregado correctamente');
+        });
 
         return Redirect::to('/procesos');
     }
@@ -209,23 +202,32 @@ class ProcesosController extends Controller
 
     public function bloquear($id)
     {
-        $proceso = \Ermtool\Process::find($id);
-        $proceso->status = 1;
-        $proceso->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
+        {
+            $proceso = \Ermtool\Process::find($GLOBALS['id1']);
+            $proceso->status = 1;
+            $proceso->save();
 
-        Session::flash('message','Proceso bloqueado correctamente');
+            Session::flash('message','Proceso bloqueado correctamente');
+        }
 
         return Redirect::to('/procesos');
     }
 
     public function desbloquear($id)
     {
-        $proceso = \Ermtool\Process::find($id);
-        $proceso->status = 0;
-        $proceso->save();
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
+        {
+            $proceso = \Ermtool\Process::find($GLOBALS['id1']);
+            $proceso->status = 0;
+            $proceso->save();
 
-        Session::flash('message','Proceso desbloqueado correctamente');
-
+            Session::flash('message','Proceso desbloqueado correctamente');
+        });
         return Redirect::to('/procesos');
     }
 
@@ -238,42 +240,32 @@ class ProcesosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $proceso = \Ermtool\Process::find($id);
-        $fecha_exp = NULL;
-
-        if (strpos($request['expiration_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
+        global $id1;
+        $id1 = $id;
+        DB::transaction(function()
         {
-            //obtenemos orden correcto de fecha expiración
-            if ($request['expiration_date'] != "" OR $request['expiration_date'] != "0000-00-00")
+            $proceso = \Ermtool\Process::find($GLOBALS['id1']);
+            $fecha_exp = NULL;
+
+            //vemos si tiene proceso padre
+            if($_POST['process_id'] != "")
             {
-                $fecha = explode("/",$request['expiration_date']);
-                $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
+                $process_id = $_POST['process_id'];
             }
             else
             {
-                $fecha_exp = NULL;
+                $process_id = NULL;
             }
-        }
 
-        //vemos si tiene proceso padre
-        if($request['process_id'] != "")
-        {
-            $process_id = $request['process_id'];
-        }
-        else
-        {
-            $process_id = NULL;
-        }
+            $proceso->name = $_POST['name'];
+            $proceso->description = $_POST['description'];
+            $proceso->expiration_date = $_POST['expiration_date'];
+            $proceso->process_id = $process_id;
 
-        $proceso->name = $request['name'];
-        $proceso->description = $request['description'];
-        $proceso->expiration_date = $fecha_exp;
-        $proceso->process_id = $process_id;
+            $proceso->save();
 
-        $proceso->save();
-
-        Session::flash('message','Proceso actualizado correctamente');
-
+            Session::flash('message','Proceso actualizado correctamente');
+        });
         return Redirect::to('/procesos');
     }
 
