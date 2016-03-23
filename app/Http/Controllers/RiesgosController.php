@@ -596,8 +596,8 @@ class RiesgosController extends Controller
                                 'Fecha_expiración' => $expiration_date,
                                 'Categoría' => $risk->risk_category_name,              
                                 'Pérdida_esperada' => $risk->expected_loss,
-                                'Causas' => $risk->cause_name,
-                                'Efectos' => $risk->effect_name];
+                                'Causas' => $causas,
+                                'Efectos' => $efectos];
                     $i += 1;
                 }
         }

@@ -107,10 +107,10 @@ class AuditoriasController extends Controller
     //Creación de plan de auditoría
     public function create()
     {
-        //obtenemos lista de stakeholders
-        $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-        ->orderBy('name')
-        ->lists('full_name', 'id');
+        //obtenemos lista de stakeholders (LOS OBTENDREMOS SEGÚN ORGANIZACIÓN)
+        //$stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+        //->orderBy('name')
+        //->lists('full_name', 'id');
 
         //obtenemos lista de organizaciones
         $organizations = \Ermtool\Organization::lists('name','id');
@@ -125,7 +125,7 @@ class AuditoriasController extends Controller
                                 ->select('risk_subprocess.id AS riskid','risks.name')
                                 ->lists('risks.name','riskid');
 
-        return view('auditorias.create',['stakeholders'=>$stakeholders,'organizations'=>$organizations,
+        return view('auditorias.create',[/*'stakeholders'=>$stakeholders,*/'organizations'=>$organizations,
                                         'audits'=>$audits,'risk_subprocess'=>$risk_subprocess]);
     }
 
@@ -515,8 +515,8 @@ class AuditoriasController extends Controller
     public function store(Request $request)
     {
 
-        //print_r($_POST);
-
+        print_r($_POST);
+        
         //Mantenemos atomicidad y consistencia
         DB::transaction(function()
         {
@@ -560,7 +560,7 @@ class AuditoriasController extends Controller
                                 ]);
                 }
             }
-
+            
             if ($_POST['type'] == 0) //se agrego auditoría de procesos
             {
                 //primero, obtenemos riesgos asociados a cada proceso (si es que hay)
@@ -642,7 +642,7 @@ class AuditoriasController extends Controller
                 }
             }
 
-            //ahora guardamos auditorías que no son nuevas
+            //ahora guardamos auditorías que no son nuevas (si es que hay)
 
             //insertamos cada auditoria (de universo de auditorias) en audit_audit_plan
             $i = 1;
@@ -678,9 +678,9 @@ class AuditoriasController extends Controller
                                 foreach ($risks as $risk)
                                 {
                                     //insertamos cada riesgo de subproceso
-                                    DB::table('audit_plan_risk')
+                                    DB::table('audit_risk')
                                         ->insert([
-                                            'audit_plan_id' => $audit_plan_id,
+                                            'audit_audit_plan_id' => $audit_audit_plan_id,
                                             'risk_subprocess_id' => $risk->id
                                             ]);
                                 }
@@ -704,9 +704,9 @@ class AuditoriasController extends Controller
                                 foreach ($risks as $risk)
                                 {
                                     //insertamos cada riesgo de subproceso
-                                    DB::table('audit_plan_risk')
+                                    DB::table('audit_risk')
                                         ->insert([
-                                            'audit_plan_id' => $audit_plan_id,
+                                            'audit_audit_plan_id' => $audit_audit_plan_id,
                                             'objective_risk_id' => $risk->id
                                             ]);
                                 }
@@ -745,9 +745,12 @@ class AuditoriasController extends Controller
                         }
                     }
                 }
+            } //fin isset($_POST['audits'])
 
-                //ahora guardamos auditorías nuevas
-                $i = 1; //contador para auditorías nuevas
+            //ahora guardamos auditorías nuevas (si es que hay)
+            $i = 1; //contador para auditorías nuevas
+            if(isset($_POST['audit_new'.$i.'_name']))
+            {   
                 while (isset($_POST['audit_new'.$i.'_name']))
                 {
                     //primero insertamos en tabla audits y obtenemos id
@@ -758,7 +761,13 @@ class AuditoriasController extends Controller
                                     'created_at' => date('Y-m-d H:i:s'),
                                     'updated_at' => date('Y-m-d H:i:s')
                                     ]);
-
+                    //no están obligatorias las HH
+                    if (isset($_POST['audit_new'.$i.'_HH']))
+                    {
+                        $HH = $_POST['audit_new'.$i.'_HH'];
+                    }
+                    else
+                        $HH = NULL;
                     //ahora insertamos en audit_audit_plan
                     $audit_audit_plan_id = DB::table('audit_audit_plan')
                                 ->insertGetId([
@@ -767,7 +776,7 @@ class AuditoriasController extends Controller
                                     'initial_date' => $_POST['audit_new'.$i.'_initial_date'],
                                     'final_date' => $_POST['audit_new'.$i.'_final_date'],
                                     'resources' => $_POST['audit_new'.$i.'_resources'],
-                                    'estimated_HH' => $_POST['audit_new'.$i.'_HH']
+                                    'estimated_HH' => $HH
                                     ]);
 
                     if ($_POST['type'] == 0) //se agrego auditoría de procesos
@@ -787,9 +796,9 @@ class AuditoriasController extends Controller
                                 foreach ($risks as $risk)
                                 {
                                     //insertamos cada riesgo de subproceso
-                                    DB::table('audit_plan_risk')
+                                    DB::table('audit_risk')
                                         ->insert([
-                                            'audit_plan_id' => $audit_plan_id,
+                                            'audit_audit_plan_id' => $audit_audit_plan_id,
                                             'risk_subprocess_id' => $risk->id
                                             ]);
                                 }
@@ -813,9 +822,9 @@ class AuditoriasController extends Controller
                                 foreach ($risks as $risk)
                                 {
                                     //insertamos cada riesgo de subproceso
-                                    DB::table('audit_plan_risk')
+                                    DB::table('audit_audit_plan_risk')
                                         ->insert([
-                                            'audit_plan_id' => $audit_plan_id,
+                                            'audit_audit_plan_id' => $audit_audit_plan_id,
                                             'objective_risk_id' => $risk->id
                                             ]);
                                 }
@@ -854,12 +863,12 @@ class AuditoriasController extends Controller
 
                    $i += 1;
                 }
-            }
+            } //fin isset($_POST['audit_new'.$i.'_name']))
 
             Session::flash('message','Plan de auditor&iacute;a generado correctamente');
         });
 
-        return Redirect::to('/plan_auditoria');
+        return Redirect::to('/plan_auditoria'); 
 
     }
 
@@ -1055,6 +1064,7 @@ class AuditoriasController extends Controller
         $riesgos_proc = array();
         $riesgos_neg = array();
         $audits_selected = array();
+        $stakeholder_team = array();
          //obtenemos lista de stakeholders
         $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
         ->orderBy('name')
@@ -2675,7 +2685,5 @@ class AuditoriasController extends Controller
 
         return $res;
     }
-
-
 
 }

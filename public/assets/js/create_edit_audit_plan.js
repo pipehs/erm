@@ -3,7 +3,9 @@
 
 			if ($("#orgs").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 			{
+					$("#guardar").prop("disabled",false);
 					$("#stakeholder").val("");
+					$("#stakeholder_id").empty(); //vaciamos lista de stakeholders para que no se repitan
 
 					//Añadimos la imagen de carga en el contenedor
 					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
@@ -131,6 +133,17 @@
 								$("#riesgos").append('<tr><td>' + this.name + '</td><td>' + this.proba_def + ' (' + this.avg_probability + ')</td><td>' + this.impact_def + ' (' + this.avg_impact + ')</td></tr>');
 							});
 					});
+
+
+					//obtenemos stakeholders de la organización
+					$.get('get_stakeholders.'+$("#orgs").val(), function (result) {
+							//parseamos datos obtenidos
+							var datos = JSON.parse(result);
+							//seteamos datos en select de riesgos / objetivos
+							$(datos).each( function() {
+								$("#stakeholder_id").append('<option value="' + this.rut + '">' + this.fullname +'</option>');
+							});
+					});
 			}
 
 			else
@@ -145,6 +158,7 @@
 				$("#riesgos").change();
 				$("#auditorias").empty();
 				$("#auditorias").change();
+				$("#guardar").prop("disabled",true);
 			}
 			
 	    });
@@ -240,180 +254,201 @@ function horas(horas)
 //por el momento no se podrán editar los datos de las auditorías ya creadas
 var pathname = window.location.pathname;
 
-if (pathname.indexOf("edit") == -1)
-{
-		//función para agregar info de auditorías existentes
-		$("#auditorias").change(function() {
-				if ($('#auditorias').val() != null)
-				{
-					$('#info_auditorias').empty();
 
-					//insertamos los campos necesarios para la información de cada una de las auditorías seleccionadas
-					$('#auditorias > option:selected').each( function () {
-						
-						$('#info_auditorias').append('<div id="titulo_'+ $(this).val() +'"><b><font color="red">Ingrese informaci&oacute;n para ' + $(this).text() + '</b></div></br>');
-						
-						if (tipo == 0) //auditoría de procesos
+
+
+	if (pathname.indexOf("edit") == -1)
+	{
+			//función para agregar info de auditorías existentes
+			$("#auditorias").change(function() 
+			{
+					if ($("#orgs").val() != "" && $('input:radio').prop("checked"))//si es que hay una organización seleccionada y tipo de audit
+					{
+						if ($('#auditorias').val() != null)
 						{
-							//riesgos de negocio
-							var processes_options = null;
-							$('#processes_id option:selected').each( function () {
-								processes_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
-							});
-							$('#info_auditorias').append('<div class="form-group">');
-							$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_processes" class="col-sm-4 control-label">Procesos (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_' + $(this).val() + '_processes[]">' + processes_options + '</select></div></div></br>');
-						}
+							$('#info_auditorias').empty();
 
-						else if (tipo == 1) //auditoría de negocios
+							//insertamos los campos necesarios para la información de cada una de las auditorías seleccionadas
+							$('#auditorias > option:selected').each( function () {
+								
+								$('#info_auditorias').append('<div id="titulo_'+ $(this).val() +'"><b><font color="red">Ingrese informaci&oacute;n para ' + $(this).text() + '</b></div></br>');
+								
+								if (tipo == 0) //auditoría de procesos
+								{
+									//riesgos de negocio
+									var processes_options = null;
+									$('#processes_id option:selected').each( function () {
+										processes_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
+									});
+									$('#info_auditorias').append('<div class="form-group">');
+									$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_processes" class="col-sm-4 control-label">Procesos (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_' + $(this).val() + '_processes[]">' + processes_options + '</select></div></div></br>');
+								}
+
+								else if (tipo == 1) //auditoría de negocios
+								{
+									//riesgos de negocio
+									var objectives_options = null;
+									$('#objectives_id option:selected').each( function () {
+										processes_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
+									});
+									$('#info_auditorias').append('<div class="form-group">');
+									$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_objectives" class="col-sm-4 control-label">Objetivos (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_' + $(this).val() + '_objectives[]">' + objectives_options + '</select></div></div></br>');
+								}
+								else if (tipo == 2) //auditoría de riesgos
+								{
+									//riesgos de negocio
+									var objective_risk_options = null;
+									$('#objective_risk_id option:selected').each( function () {
+										objective_risk_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
+									})
+									$('#info_auditorias').append('<div class="form-group">');
+									$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_objective_risks" class="col-sm-4 control-label">Riesgos de negocio (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_' + $(this).val() + '_objective_risks[]">' + objective_risk_options + '</select></div></div></br>');
+
+									//riesgos de proceso
+									var risk_subprocess_options = null;
+									$('#risk_subprocess_id option:selected').each( function () {
+										risk_subprocess_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
+									})
+									$('#info_auditorias').append('<div class="form-group">');
+									$('#info_auditorias').append('<label for="Riesgos de proceso (ctrl + click para seleccionar varios)" class="col-sm-4 control-label">Riesgos de proceso (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_' + $(this).val() + '_risk_subprocess[]">' + risk_subprocess_options + '</select></div></div>');
+								}
+									
+								$('#info_auditorias').append('</br></br>');
+								//recursos
+								$('#info_auditorias').append('<div class="form-group">');
+								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_resources" class="col-sm-4 control-label">Recursos</label>');
+								$('#info_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_' + $(this).val() + '_resources" class="form-control" ></div>');
+
+								//HH
+								$('#info_auditorias').append('<div class="form-group">');
+								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_HH"  class="col-sm-4 control-label">Horas-Hombre de auditoría</label>');
+								$('#info_auditorias').append('<div class="col-sm-8"><input type="number" min="0" onchange="horas(this.value)" name="audit_' + $(this).val() + '_HH" class="form-control" ></div>');
+
+								//fecha inicio
+								$('#info_auditorias').append('<div class="form-group">');
+								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_initial_date" class="col-sm-4 control-label">Fecha de inicio</label>');
+								$('#info_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_' + $(this).val() + '_initial_date" class="form-control" required="required"></div>');
+
+
+								//fecha fin
+								$('#info_auditorias').append('<div class="form-group">');
+								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_final_date" class="col-sm-4 control-label">Fecha final</label>');
+								$('#info_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_' + $(this).val() + '_final_date" class="form-control" required="required"></div>');
+								$('#info_auditorias').append('</br></br>');
+
+							})				
+						}
+						else
 						{
-							//riesgos de negocio
-							var objectives_options = null;
-							$('#objectives_id option:selected').each( function () {
-								processes_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
-							});
-							$('#info_auditorias').append('<div class="form-group">');
-							$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_objectives" class="col-sm-4 control-label">Objetivos (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_' + $(this).val() + '_objectives[]">' + objectives_options + '</select></div></div></br>');
+							$('#info_auditorias').empty();
 						}
-						else if (tipo == 2) //auditoría de riesgos
-						{
-							//riesgos de negocio
-							var objective_risk_options = null;
-							$('#objective_risk_id option:selected').each( function () {
-								objective_risk_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
-							})
-							$('#info_auditorias').append('<div class="form-group">');
-							$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_objective_risks" class="col-sm-4 control-label">Riesgos de negocio (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_' + $(this).val() + '_objective_risks[]">' + objective_risk_options + '</select></div></div></br>');
+					}
+					else
+					{
+						swal("Error","Primero debe seleccionar la organización y tipo de auditoría","error");
+						$("#auditorias").prop("disabled",true);
 
-							//riesgos de proceso
-							var risk_subprocess_options = null;
-							$('#risk_subprocess_id option:selected').each( function () {
-								risk_subprocess_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
-							})
-							$('#info_auditorias').append('<div class="form-group">');
-							$('#info_auditorias').append('<label for="Riesgos de proceso (ctrl + click para seleccionar varios)" class="col-sm-4 control-label">Riesgos de proceso (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_' + $(this).val() + '_risk_subprocess[]">' + risk_subprocess_options + '</select></div></div>');
-						}
-							
-						$('#info_auditorias').append('</br></br>');
-						//recursos
-						$('#info_auditorias').append('<div class="form-group">');
-						$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_resources" class="col-sm-4 control-label">Recursos</label>');
-						$('#info_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_' + $(this).val() + '_resources" class="form-control" ></div>');
+					}
+			});	
+	}
+		var cont = 1; //contador para nuevas auditorías
+		//función para agregar una nueva auditoría
+		$("#agregar_auditoria").click(function() {
+			
+			if ($("#orgs").val() != "" && $('input:radio').prop("checked")) //si es que hay una organización seleccionada y esta chequeado tipo de audit
+			{
+				$('#info_new_auditorias').append('<div id="titulo_'+cont+'"><b><font color="red">Ingrese informaci&oacute;n para la nueva auditor&iacute;a '+cont+'</b></div></br>');
+				
+				//-- Info de nueva auditoría --//
 
-						//HH
-						$('#info_auditorias').append('<div class="form-group">');
-						$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_HH"  class="col-sm-4 control-label">Horas-Hombre de auditoría</label>');
-						$('#info_auditorias').append('<div class="col-sm-8"><input type="number" min="0" onchange="horas(this.value)" name="audit_' + $(this).val() + '_HH" class="form-control" ></div>');
+				//nombre
+								$('#info_new_auditorias').append('<div class="form-group">');
+								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_name" class="col-sm-4 control-label">Nombre</label>');
+								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_new'+cont+'_name" class="form-control"></div>');
 
-						//fecha inicio
-						$('#info_auditorias').append('<div class="form-group">');
-						$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_initial_date" class="col-sm-4 control-label">Fecha de inicio</label>');
-						$('#info_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_' + $(this).val() + '_initial_date" class="form-control" required="required"></div>');
+								//descripción
+								$('#info_new_auditorias').append('<div class="form-group">');
+								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_description" class="col-sm-4 control-label">Descripci&oacute;n</label>');
+								$('#info_new_auditorias').append('<div class="col-sm-8"><textarea rows="3" cols="4" name="audit_new'+cont+'_description" class="form-control"></textarea></div>');
+								
 
+								if (tipo == 0) //auditoría de procesos
+								{
+									//riesgos de negocio
+									var processes_options = null;
+									$('#processes_id option:selected').each( function () {
+										processes_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
+									});
+									$('#info_new_auditorias').append('<div class="form-group">');
+									$('#info_new_auditorias').append('<label for="audit_new' + cont + '_processes" class="col-sm-4 control-label">Procesos (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_new' + cont + '_processes[]">' + processes_options + '</select></div></div></br>');
+								}
 
-						//fecha fin
-						$('#info_auditorias').append('<div class="form-group">');
-						$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_final_date" class="col-sm-4 control-label">Fecha final</label>');
-						$('#info_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_' + $(this).val() + '_final_date" class="form-control" required="required"></div>');
-						$('#info_auditorias').append('</br></br>');
+								else if (tipo == 1) //auditoría de negocios
+								{
+									//riesgos de negocio
+									var objectives_options = null;
+									$('#objectives_id option:selected').each( function () {
+										processes_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
+									});
+									$('#info_new_auditorias').append('<div class="form-group">');
+									$('#info_new_auditorias').append('<label for="audit_new' + cont + '_objectives" class="col-sm-4 control-label">Objetivos (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_new' + cont + '_objectives[]">' + objectives_options + '</select></div></div></br>');
+								}
+								else if (tipo == 2) //auditoría de riesgos
+								{
+									//riesgos de negocio
+									var objective_risk_options = null;
+									$('#objective_risk_id option:selected').each( function () {
+										objective_risk_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
+									})
+									$('#info_new_auditorias').append('<div class="form-group">');
+									$('#info_new_auditorias').append('<label for="audit_new'+cont+'_objective_risks" class="col-sm-4 control-label">Riesgos de negocio (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" required="required" name="audit_new'+cont+'_objective_risks[]">' + objective_risk_options + '</select></div></div></br>');
 
-					})				
-				}
-				else
-				{
-					$('#info_auditorias').empty();
-				}
-		});	
-}
-	var cont = 1; //contador para nuevas auditorías
-	//función para agregar una nueva auditoría
-	$("#agregar_auditoria").click(function() {
-		
-		$('#info_new_auditorias').append('<div id="titulo_'+cont+'"><b><font color="red">Ingrese informaci&oacute;n para la nueva auditor&iacute;a '+cont+'</b></div></br>');
-		
-		//-- Info de nueva auditoría --//
+									//riesgos de proceso
+									var risk_subprocess_options = null;
+									$('#risk_subprocess_id option:selected').each( function () {
+										risk_subprocess_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
+									})
+									$('#info_new_auditorias').append('<div class="form-group">');
+									$('#info_new_auditorias').append('<label for="Riesgos de proceso (ctrl + click para seleccionar varios)" class="col-sm-4 control-label">Riesgos de proceso (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" required="required" name="audit_new'+cont+'_risk_subprocesses[]">' + risk_subprocess_options + '</select></div></div>');
+								}
+								
+								$('#info_new_auditorias').append('</br></br>');
 
-		//nombre
-						$('#info_new_auditorias').append('<div class="form-group">');
-						$('#info_new_auditorias').append('<label for="audit_new'+cont+'_name" class="col-sm-4 control-label">Nombre</label>');
-						$('#info_new_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_new'+cont+'_name" class="form-control"></div>');
+								//recursos
+								$('#info_new_auditorias').append('<div class="form-group">');
+								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_resources" class="col-sm-4 control-label">Recursos</label>');
+								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_new'+cont+'_resources" class="form-control" required="required" ></div>');
 
-						//descripción
-						$('#info_new_auditorias').append('<div class="form-group">');
-						$('#info_new_auditorias').append('<label for="audit_new'+cont+'_description" class="col-sm-4 control-label">Descripci&oacute;n</label>');
-						$('#info_new_auditorias').append('<div class="col-sm-8"><textarea rows="3" cols="4" name="audit_new'+cont+'_description" class="form-control"></textarea></div>');
-						
+								//HH
+								$('#info_new_auditorias').append('<div class="form-group">');
+								$('#info_new_auditorias').append('<label for="audit_new' + cont + '_HH"  class="col-sm-4 control-label">Horas-Hombre de auditoría</label>');
+								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="number" min="0" onchange="horas(this.value)" name="audit_new' + cont + '_HH" class="form-control" ></div>');
 
-						if (tipo == 0) //auditoría de procesos
-						{
-							//riesgos de negocio
-							var processes_options = null;
-							$('#processes_id option:selected').each( function () {
-								processes_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
-							});
-							$('#info_auditorias').append('<div class="form-group">');
-							$('#info_auditorias').append('<label for="audit_new' + cont + '_processes" class="col-sm-4 control-label">Procesos (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_new' + cont + '_processes[]">' + processes_options + '</select></div></div></br>');
-						}
-
-						else if (tipo == 1) //auditoría de negocios
-						{
-							//riesgos de negocio
-							var objectives_options = null;
-							$('#objectives_id option:selected').each( function () {
-								processes_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
-							});
-							$('#info_auditorias').append('<div class="form-group">');
-							$('#info_auditorias').append('<label for="audit_new' + cont + '_objectives" class="col-sm-4 control-label">Objetivos (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_new' + cont + '_objectives[]">' + objectives_options + '</select></div></div></br>');
-						}
-						else if (tipo == 2) //auditoría de riesgos
-						{
-							//riesgos de negocio
-							var objective_risk_options = null;
-							$('#objective_risk_id option:selected').each( function () {
-								objective_risk_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
-							})
-							$('#info_new_auditorias').append('<div class="form-group">');
-							$('#info_new_auditorias').append('<label for="audit_new'+cont+'_objective_risks" class="col-sm-4 control-label">Riesgos de negocio (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" required="required" name="audit_new'+cont+'_objective_risks[]">' + objective_risk_options + '</select></div></div></br>');
-
-							//riesgos de proceso
-							var risk_subprocess_options = null;
-							$('#risk_subprocess_id option:selected').each( function () {
-								risk_subprocess_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
-							})
-							$('#info_new_auditorias').append('<div class="form-group">');
-							$('#info_new_auditorias').append('<label for="Riesgos de proceso (ctrl + click para seleccionar varios)" class="col-sm-4 control-label">Riesgos de proceso (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" required="required" name="audit_new'+cont+'_risk_subprocesses[]">' + risk_subprocess_options + '</select></div></div>');
-						}
-						
-						$('#info_new_auditorias').append('</br></br>');
-
-						//recursos
-						$('#info_new_auditorias').append('<div class="form-group">');
-						$('#info_new_auditorias').append('<label for="audit_new'+cont+'_resources" class="col-sm-4 control-label">Recursos</label>');
-						$('#info_new_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_new'+cont+'_resources" class="form-control" required="required" ></div>');
-
-						//HH
-						$('#info_auditorias').append('<div class="form-group">');
-						$('#info_auditorias').append('<label for="audit_new' + cont + '_HH"  class="col-sm-4 control-label">Horas-Hombre de auditoría</label>');
-						$('#info_auditorias').append('<div class="col-sm-8"><input type="number" min="0" onchange="horas(this.value)" name="audit_new' + cont + '_HH" class="form-control" ></div>');
-
-						//fecha inicio
-						$('#info_new_auditorias').append('<div class="form-group">');
-						$('#info_new_auditorias').append('<label for="audit_new'+cont+'_initial_date" class="col-sm-4 control-label">Fecha de inicio</label>');
-						$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_initial_date" class="form-control" required="required"></div>');
+								//fecha inicio
+								$('#info_new_auditorias').append('<div class="form-group">');
+								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_initial_date" class="col-sm-4 control-label">Fecha de inicio</label>');
+								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_initial_date" class="form-control" required="required"></div>');
 
 
-						//fecha fin
-						$('#info_new_auditorias').append('<div class="form-group">');
-						$('#info_new_auditorias').append('<label for="audit_new'+cont+'_final_date" class="col-sm-4 control-label">Fecha final</label>');
-						$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_final_date" class="form-control" required="required"></div>');
-						$('#info_new_auditorias').append('</br></br>');
+								//fecha fin
+								$('#info_new_auditorias').append('<div class="form-group">');
+								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_final_date" class="col-sm-4 control-label">Fecha final</label>');
+								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_final_date" class="form-control" required="required"></div>');
+								$('#info_new_auditorias').append('</br></br>');
 
-						//movemos pantalla a nueva auditoría
-						$('html,body').animate({
-						    scrollTop: $("#titulo_"+cont).offset().top
-						}, 900);
+								//movemos pantalla a nueva auditoría
+								$('html,body').animate({
+								    scrollTop: $("#titulo_"+cont).offset().top
+								}, 900);
 
-						cont = cont + 1;
-	});
+								cont = cont + 1;
+			}
+			else
+			{
+				swal("Error","Primero debe seleccionar la organización y tipo de auditoría","error");
+			}
+		});
+
 
 
 	//función que define que tipo de auditoría se aplicará
@@ -422,6 +457,8 @@ if (pathname.indexOf("edit") == -1)
 		tipo = value; //para utilizar al agregar auditorías
 		if ($("#orgs").val() != "") //Si es que organización se cambió a un valor válido (para poder obtener riesgos o procesos)
 		{
+			$("#auditorias").prop("disabled",false);
+
 			if (value == 0) //auditoría de procesos
 			{
 				$.get('get_processes.'+$("#orgs").val(), function (result) {
@@ -477,6 +514,12 @@ if (pathname.indexOf("edit") == -1)
 				$("#objectives_id").change();
 				$("#processes_id").change();
 			}
+		}
+		else
+		{
+			swal("Error","Primero debe seleccionar la organización","error");
+
+			  $('input:radio').attr("checked",false);
 		}
 	}
 

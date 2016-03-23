@@ -277,6 +277,10 @@ Route::put('stakeholders.update.{id}', [
 	'as' => 'stakeholders.update', 'uses' => 'StakeholdersController@update'
 ]);
 
+Route::get('get_stakeholders.{org}', [
+	'as' => 'get_stakeholders', 'uses' => 'StakeholdersController@getStakeholders'
+]);
+
 //Rutas para CRUD + bloquear Causas//
 
 Route::resource('causas','CausasController');

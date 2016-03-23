@@ -72,30 +72,45 @@
 			</tr>
 			<tr>
 			<th>Objetivos Relacionados</th>
-			<td><ul>
+			<td>
+			@if($objetivos != NULL)
+					<ul>
 					@foreach ($objetivos as $obj)
 						<li>{{ $obj }}</li>
 					@endforeach
-					</ul>					
-				</td>
+					</ul>
+			@else
+				No tiene
+			@endif					
+			</td>
 			</tr>
 			<tr>
 			<th>Riesgos de negocio</th>
-			<td><ul>
+			<td>
+			@if($riesgos_neg != NULL)	
+					<ul>
 					@foreach ($riesgos_neg as $risk)
 						<li>{{ $risk }}</li>
 					@endforeach
-					</ul>					
-				</td>
+					</ul>
+			@else
+				No tiene
+			@endif					
+			</td>
 			</tr>
 			<tr>
 			<th>Riesgos de proceso</th>
-			<td><ul>
+			<td>
+			@if($riesgos_proc != NULL)
+					<ul>
 					@foreach ($riesgos_proc as $risk)
 						<li>{{ $risk }}</li>
 					@endforeach
-					</ul>					
-				</td>
+					</ul>
+			@else
+				No tiene
+			@endif					
+			</td>
 			</tr>
 			<tr>
 			<th>Alcances</th>

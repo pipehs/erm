@@ -304,4 +304,24 @@ class StakeholdersController extends Controller
     {
         //
     }
+
+    //obtiene stakeholders pertenecientes a una organización
+    public function getStakeholders($org)
+    {
+        $results = array();
+
+        $stakeholders = \Ermtool\Organization::find($org)->stakeholders;
+
+        $i = 0;
+        foreach ($stakeholders as $stake)
+        {
+            $results[$i] = [
+                    'rut' => $stake['id'],
+                    'fullname' => $stake['name'].' '.$stake['surnames']
+            ];
+            $i += 1;
+        }
+
+        return json_encode($results);
+    }
 }

@@ -12,19 +12,19 @@
 						<div class="col-sm-8">
 							<div class="radio">
 								<label>
-									<input type="radio" onchange="kind(this.value)" name="type" value="0">Auditor&iacute;a de Procesos
+									<input type="radio" onchange="kind(this.value)" name="type" id="type" value="0">Auditor&iacute;a de Procesos
 									<i class="fa fa-circle-o small"></i>
 								</label>
 							</div>
 							<div class="radio">
 								<label>
-									<input type="radio" onchange="kind(this.value)" name="type" value="1">Auditor&iacute;a de Negocios
+									<input type="radio" onchange="kind(this.value)" name="type" id="type" value="1">Auditor&iacute;a de Negocios
 									<i class="fa fa-circle-o small"></i>
 								</label>
 							</div>
 							<div class="radio">
 								<label>
-									<input type="radio" onchange="kind(this.value)" name="type" value="2">Auditor&iacute;a de Riesgos
+									<input type="radio" onchange="kind(this.value)" name="type" id="type" value="2">Auditor&iacute;a de Riesgos
 									<i class="fa fa-circle-o small"></i>
 								</label>
 							</div>
@@ -119,9 +119,9 @@
 					<div class="form-group">
 						{!!Form::label('Auditor responsable',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::select('stakeholder_id',$stakeholders,null,
-													['placeholder'=>'- Seleccione -',
-													'required'=>'true','id'=>'stakeholder'])!!}
+							<select name="stakeholder_id" id="stakeholder_id">
+								<!-- Aquí se mostrarán todos los stakeholders de la organización seleccionada -->
+							</select>
 						</div>
 					</div>
 
@@ -179,7 +179,7 @@
 						{!!Form::label('Auditor&iacute;as a realizar',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::select('audits[]',$audits,null,
-													['multiple'=>'true','id'=>'auditorias'])!!}
+													['multiple'=>'true','id'=>'auditorias','disabled'=>'true'])!!}
 						</div>
 					</div>
 
@@ -189,6 +189,6 @@
 
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Continuar', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'guardar','disabled'=>'true'])!!}
 						</center>
 					</div>
