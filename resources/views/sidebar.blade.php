@@ -76,10 +76,10 @@
 					</a>
 					<ul class="dropdown-menu" style="{{ dropDown4() }}">
 						<li>{!!HTML::link('heatmap','Mapa de Calor',['class'=>activeMenu('heatmap')])!!}</li>
-						<li>{!!HTML::link('matrices','Matriz de Control',['class'=>activeMenu('matrices')])!!}</li>
 						<li>{!!HTML::link('matriz_riesgos','Matriz de Riesgos',['class'=>activeMenu('matriz_riesgos')])!!}</li>
+						<li>{!!HTML::link('matrices','Matriz de Control',['class'=>activeMenu('matrices')])!!}</li>
+						<li>{!!HTML::link('reporte_hallazgos','Hallazgos',['class'=>activeMenu('hallazgos')])!!}</li>
 						<li>{!!HTML::link('reporte_planes','Planes de Acci&oacute;n',['class'=>activeMenu('reporte_planes')])!!}</li>
-						<li>{!!HTML::link('reporte_auditorias','Auditor&iacute;as',['class'=>activeMenu('reporte_auditorias')])!!}</li>
 						<li>{!!HTML::link('encuestas','Revisi&oacute;n de Encuestas',['class'=>activeMenu('encuestas')])!!}</li>
 					</ul>
 				</li>

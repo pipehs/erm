@@ -52,7 +52,7 @@
 
 				<div id="cargando"><br></div>
 
-				{!!Form::open(['route'=>'agregar_plan','method'=>'POST','class'=>'form-horizontal','id'=>'form',
+				{!!Form::open(['route'=>'agregar_plan2','method'=>'POST','class'=>'form-horizontal','id'=>'form',
 				'enctype'=>'multipart/form-data'])!!}
 	      			<div class="form-group">
 						{!!Form::label('Plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}

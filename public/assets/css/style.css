@@ -479,6 +479,8 @@ a.show-sidebar:hover {
   background-image:     -ms-linear-gradient(top, #f0f0f0, #dfdfdf);
   background-image:      -o-linear-gradient(top, #f0f0f0, #dfdfdf);
   background-image:         linear-gradient(to bottom, #f0f0f0, #dfdfdf);
+  text-align:center;
+  vertical-align: middle;
 }
 table.no-border-bottom tr:last-child td {
   border-bottom:0;
@@ -490,6 +492,8 @@ table.no-border-bottom tr:last-child td {
   clear: both;
   max-width: inherit;
   margin-bottom: 0;
+  text-align:center;
+  vertical-align: middle;
 }
 .table-datatable *, .table-datatable :after, .table-datatable :before {
   margin: 0;
@@ -497,6 +501,8 @@ table.no-border-bottom tr:last-child td {
   -webkit-box-sizing: content-box;
   box-sizing: content-box;
   -moz-box-sizing: content-box;
+  text-align:center;
+  vertical-align: middle;
 }
 .table-datatable label {
   position: relative;
@@ -2360,3 +2366,4 @@ td.beauty-hover {
     display: none;
   }
 }
+

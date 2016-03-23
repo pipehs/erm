@@ -45,7 +45,7 @@
 				<div class="form-group">
 							{!!Form::label('Seleccione tipo',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-3">
-								{!!Form::select('type',['0'=>'Matriz para riesgos de procesos','1'=>'Matriz para riesgos de negocio'],
+								{!!Form::select('type',['0'=>'Matriz para controles de procesos','1'=>'Matriz para controles de negocio'],
 								 	   null, 
 								 	   ['id' => 'type','placeholder'=>'- Seleccione -'])!!}
 							</div>
@@ -86,9 +86,9 @@
 
 					//Seteamos cabecera
 					var table_head = "<thead>";
-					table_head += "<th>Nombre Control</th><th>Descripci&oacute;n Control</th><th>Riesgo(s) / Subproceso(s)</th>";
-					table_head += "<th>Tipo</th><th>Periodicidad</th><th>Propósito</th><th>Responsable</th><th>Evidencia</th><th>Costo esperado</th>";
-					table_head += "</thead>";
+					table_head += "<th>ID Control</th><th>Descripci&oacute;n Control</th><th>Responsable</th>";
+					table_head += "<th>Tipo</th><th>Periodicidad</th><th>Propósito</th><th>Costo control</th><th>Evidencia</th><th>Evidencia</th>";
+					table_head += "<th>Riesgo(s) / Subproceso(s)</th></thead>";
 
 					//Añadimos la imagen de carga en el contenedor
 					$('#matrizcontrol').html('<div><center><img src="../public/assets/img/loading.gif"/></center></div>');
@@ -110,9 +110,9 @@
 							$(datos).each( function() {	
 								
 								table_row += '<tr><td>' + this.Control + '</td><td>' + this.Descripción + '</td><td>';
-								table_row += this.Riesgo_Subproceso_Organización + '</td><td>' + this.Tipo + '</td><td>' + this.Periodicidad +'</td>';
-								table_row += '<td>' + this.Propósito + '</td><td>' + this.Stakeholder + '</td><td>' + this.Evidencia +'</td>';
-								table_row += '<td>' + this.Costo_esperado + '</td></tr>';
+								table_row += this.Responsable + '</td><td>' + this.Tipo + '</td><td>' + this.Periodicidad +'</td>';
+								table_row += '<td>' + this.Propósito + '</td><td>' + this.Propósito + '</td><td>' + this.Costo_control +'</td>';
+								table_row += '<td>' + this.Evidencia + '</td><td>' + this.Riesgo_Subproceso_Organización +'</td></tr>';
 							});
 
 							$("#matrizcontrol").append(table_row);
@@ -127,9 +127,9 @@
 
 					//Seteamos cabecera
 					var table_head = "<thead>";
-					table_head += "<th>Nombre Control</th><th>Descripci&oacute;n Control</th><th>Riesgo(s) / Objetivos(s) / Organizaci&oacute;n</th>";
-					table_head += "<th>Tipo</th><th>Periodicidad</th><th>Propósito</th><th>Responsable</th><th>Evidencia</th><th>Costo esperado</th>";
-					table_head += "</thead>";
+					table_head += "<th>ID Control</th><th>Descripci&oacute;n Control</th><th>Responsable</th>";
+					table_head += "<th>Tipo</th><th>Periodicidad</th><th>Propósito</th><th>Costo control</th><th>Evidencia</th>";
+					table_head += "<th>Riesgo(s) / Objetivos(s) / Organizaci&oacute;n</th></thead>";
 
 					$('#matrizcontrol').html('<div><center><img src="../public/assets/img/loading.gif"/></center></div>');
 					//generamos matriz a través de JSON y PHP

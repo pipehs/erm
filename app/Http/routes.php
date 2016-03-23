@@ -473,8 +473,8 @@ Route::get('matriz_riesgos', [
 Route::get('reporte_planes', [
 	'as' => 'reporte_planes', 'uses' => 'AuditoriasController@actionPlansReport']);
 
-Route::get('reporte_auditorias', [
-	'as' => 'reporte_auditorias', 'uses' => 'AuditoriasController@auditsReport']);
+Route::get('reporte_hallazgos', [
+	'as' => 'reporte_hallazgos', 'uses' => 'AuditoriasController@issuesReport']);
 
 
 //------ Rutas para auditoría de riesgos ------//
@@ -563,8 +563,8 @@ Route::get('genexcel.{value}', [
 Route::get('genexcelplan.{org}', [
 	'as' => 'genexcelplan', 'uses' => 'ExcelController@generarExcelPlan']);
 
-Route::get('genexcelaudit.{org}', [
-	'as' => 'genexcelaudit', 'uses' => 'ExcelController@generarExcelAudit']);
+Route::get('genexcelissues.{type}', [
+	'as' => 'genexcelissues', 'uses' => 'ExcelController@generarExcelIssue']);
 
 
 //------ RUTAS PARA ENLACES A TRAVÉS DE JSON --------//
@@ -592,9 +592,9 @@ Route::get('genmatriz.{value}', [
 Route::get('genplanes_accion.{org}', [
 	'as' => 'genplanes_accion', 'uses' => 'AuditoriasController@generarReportePlanes']);
 
-//ruta para generar reporte de auditorías
-Route::get('genaudit_report.{org}', [
-	'as' => 'genaudit_report', 'uses' => 'AuditoriasController@generarReporteAuditorias']);
+//ruta para generar reporte de hallazgos
+Route::get('genissues_report.{org}', [
+	'as' => 'genissues_report', 'uses' => 'AuditoriasController@generarReporteIssues']);
 
 //ruta para obtener datos de plan de auditoría anterior 
 Route::get('auditorias.get_audit_plan.{org}', [

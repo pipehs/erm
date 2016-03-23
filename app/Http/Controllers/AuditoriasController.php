@@ -2686,4 +2686,148 @@ class AuditoriasController extends Controller
         return $res;
     }
 
+    //función para reporte de hallazgos
+    public function issuesReport()
+    {
+        $organizations = \Ermtool\Organization::lists('name','id');
+
+        return view('reportes.hallazgos',['organizations' => $organizations]);
+    }
+
+    //reporte de auditorías
+    public function generarReporteIssues($tipo)
+    {
+        $results = array();
+        $i = 0;
+        
+        if ($tipo == 0)
+        {
+            //obtenemos todos los datos necesarios de issues (primero de procesos)
+            $issues = DB::table('issues')
+                        ->join('action_plans','action_plans.issue_id','=','issues.id')
+                        ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
+                        ->join('audit_audit_plan_audit_test','audit_audit_plan_audit_test.id','=','issues.audit_audit_plan_audit_test_id')
+                        ->join('audit_control_risk','audit_control_risk.audit_audit_plan_audit_test_id','=','audit_audit_plan_audit_test.id')
+                        ->join('controls','controls.id','=','audit_control_risk.control_id')
+                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                        ->join('risks','risks.id','=','risk_subprocess.risk_id')
+                        ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                        ->join('processes','processes.id','=','subprocesses.process_id')
+                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_test.audit_audit_plan_id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                        ->select('issues.name','issues.description','issues.recommendations',
+                                 'processes.name as process_name',
+                                 'risks.name as risk_name',
+                                 'action_plans.description as action_plan',
+                                 'action_plans.final_date',
+                                 'audits.name as audit_name',
+                                 'audit_plans.name as audit_plan_name',
+                                 'stakeholders.name as stakeholder_name',
+                                 'stakeholders.surnames as stakeholder_surnames',
+                                 'controls.name as control_name')
+                        ->get();
+            
+
+            $type = 'Hallazgos de procesos';
+
+            foreach ($issues as $issue)
+            {
+                if ($issue->recommendations == "")
+                {
+                    $recommendation = 'No se agregaron recomendaciones';
+                }
+                else
+                    $recommendation = $issue->recommendations;
+                //¡¡¡¡¡¡¡¡¡corregir problema del año 2038!!!!!!!!!!!! //
+                $fecha_final = date('d-m-Y',strtotime($issue->final_date));
+
+                $results[$i] = [
+                            'Hallazgo' => $issue->name,
+                            'Descripción' => $issue->description,
+                            'Riesgo' => $issue->risk_name,
+                            'Control' => $issue->control_name,
+                            'Proceso' => $issue->process_name,
+                            'Recomendación' => $recommendation,
+                            'Plan_de_acción' => $issue->action_plan,
+                            'Responsable_plan' => $issue->stakeholder_name.' '.$issue->stakeholder_surnames,
+                            'Fecha_final_plan' => $fecha_final,
+                            'Auditoría' => $issue->audit_name,
+                            'Plan_de_auditoría' => $issue->audit_plan_name,
+                        
+                ];
+
+                $i += 1;
+            }
+        }
+
+        else if ($tipo == 2)
+        {
+            //obtenemos todos los datos necesarios de issues (primero de procesos)
+            $issues = DB::table('issues')
+                        ->join('action_plans','action_plans.issue_id','=','issues.id')
+                        ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
+                        ->join('audit_audit_plan_audit_test','audit_audit_plan_audit_test.id','=','issues.audit_audit_plan_audit_test_id')
+                        ->join('audit_control_risk','audit_control_risk.audit_audit_plan_audit_test_id','=','audit_audit_plan_audit_test.id')
+                        ->join('controls','controls.id','=','audit_control_risk.control_id')
+                        ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
+                        ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                        ->join('risks','risks.id','=','objective_risk.risk_id')
+                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_test.audit_audit_plan_id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                        ->select('issues.name','issues.description','issues.recommendations',
+                                 'objectives.name as objective_name',
+                                 'risks.name as risk_name',
+                                 'action_plans.description as action_plan',
+                                 'action_plans.final_date',
+                                 'audits.name as audit_name',
+                                 'audit_plans.name as audit_plan_name',
+                                 'stakeholders.name as stakeholder_name',
+                                 'stakeholders.surnames as stakeholder_surnames',
+                                 'controls.name as control_name')
+                        ->get();
+            
+
+            $type = 'Hallazgos de objetivos';
+
+            foreach ($issues as $issue)
+            {
+                if ($issue->recommendations == "")
+                {
+                    $recommendation = 'No se agregaron recomendaciones';
+                }
+                else
+                    $recommendation = $issue->recommendations;
+                //¡¡¡¡¡¡¡¡¡corregir problema del año 2038!!!!!!!!!!!! //
+                $fecha_final = date('d-m-Y',strtotime($issue->final_date));
+
+                $results[$i] = [
+                            'Hallazgo' => $issue->name,
+                            'Descripción' => $issue->description,
+                            'Riesgo' => $issue->risk_name,
+                            'Control' => $issue->control_name,
+                            'Objetivo' => $issue->objective_name,
+                            'Recomendación' => $recommendation,
+                            'Plan_de_acción' => $issue->action_plan,
+                            'Responsable_plan' => $issue->stakeholder_name.' '.$issue->stakeholder_surnames,
+                            'Fecha_final_plan' => $fecha_final,
+                            'Auditoría' => $issue->audit_name,
+                            'Plan_de_auditoría' => $issue->audit_plan_name,
+                        
+                ];
+
+                $i += 1;
+            }
+        }
+
+        if (strstr($_SERVER["REQUEST_URI"],'genexcelissues')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
+        {
+            return $results;
+        }
+        else
+            return json_encode($results);
+    }
 }

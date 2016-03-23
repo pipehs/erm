@@ -599,7 +599,7 @@ class ControlesController extends Controller
                                     'Propósito' => $purpose,
                                     'Stakeholder' => $stakeholder2,
                                     'Evidencia' => $control->evidence,
-                                    'Costo esperado' => $control->expected_cost];
+                                    'Costo control' => $control->expected_cost];
                         $i += 1;
                     }
 
@@ -616,7 +616,7 @@ class ControlesController extends Controller
                                     'Propósito' => $purpose,
                                     'Stakeholder' => $stakeholder2,
                                     'Evidencia' => $control->evidence,
-                                    'Costo esperado' => $control->expected_cost];
+                                    'Costo control' => $control->expected_cost];
                         $i += 1;
                     }
                 }
@@ -655,7 +655,7 @@ class ControlesController extends Controller
                                         'Propósito' => $purpose,
                                         'Stakeholder' => $stakeholder2,
                                         'Evidencia' => $control->evidence,
-                                        'Costo_esperado' => $control->expected_cost];
+                                        'Costo_control' => $control->expected_cost];
                             $i += 1;
                         }
                     }
@@ -693,7 +693,7 @@ class ControlesController extends Controller
                                         'Propósito' => $purpose,
                                         'Stakeholder' => $stakeholder2,
                                         'Evidencia' => $control->evidence,
-                                        'Costo_esperado' => $control->expected_cost];
+                                        'Costo_control' => $control->expected_cost];
                             $i += 1;
                         }
                     }

@@ -5,7 +5,6 @@
 @stop
 
 @section('content')
-
 <!-- header menu de arbol -->
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
@@ -53,7 +52,7 @@
 				<br>
 				<br>
 				<hr>
-				<table id="matrizriesgos" class="table table-bordered table-striped table-hover table-heading table-datatable" style="display: none;">
+				<table id="matrizriesgos" class="table table-bordered table-striped table-hover table-heading table-datatable matrices" style="display: none;">
 				</table>
 		
 				<div id="boton_exportar">
@@ -85,10 +84,9 @@
 					//Seteamos cabecera
 					var table_head = "<thead>";
 					table_head += "<th>Proceso</th>";
-					table_head += "<th>Subproceso(s)</th><th>Nombre Riesgo</th><th>Descripci&oacute;n Control</th>";
-					table_head += "<th>Control(es)</th>";
-					table_head += "<th>Fecha creaci&oacute;n</th><th>Fecha expiraci&oacute;n</th><th>Categor&iacute;as</th>";
-					table_head += "<th>Causa(s)</th><th>Efecto(s)</th><th>Pérdida esperada</th>";
+					table_head += "<th >Subproceso(s)</th><th>ID Riesgo</th><th>Descripci&oacute;n Riesgo</th><th>Categoría</th>";
+					table_head += "<th>Causa</th><th>Efecto</th><th>Pérdida esperada</th>Impacto<th>Probabilidad</th>";
+					table_head += "<th>Impacto</th><th>Score</th><th>Fecha identificaci&oacute;n</th><th>Fecha expiraci&oacute;n</th>";
 					table_head += "</thead>";
 
 					//Añadimos la imagen de carga en el contenedor
@@ -109,10 +107,9 @@
 							$(datos).each( function() {	
 								
 								table_row += '<tr><td>' + this.Proceso + '</td><td>' + this.Subproceso + '</td><td>' + this.Riesgo +'</td>';
-								table_row += '<td>' + this.Descripción + '</td><td>' + this.Controles + '</td><td>' + this.Fecha_creación +'</td>';
-								table_row += '<td>' + this.Fecha_expiración + '</td><td>' + this.Categoría + '</td><td>' + this.Causas +'</td>';
-								table_row += '<td>' + this.Efectos +'</td>';
-								table_row += '<td>' + this.Pérdida_esperada + '</td></tr>';
+								table_row += '<td>' + this.Descripción + '</td>' + this.Categoría + '<td>' + this.Causas + '</td><td>' + this.Efectos +'</td>';
+								table_row += '<td>' + this.Pérdida_esperada + '</td><td>' + this.Probabilidad + '</td><td>' + this.Impacto +'</td>';
+								table_row += '<td>' + this.Score +'</td><td>' + this.Fecha_identificación + '</td><td>' + this.Fecha_expiración + '</td></tr>';
 							});
 
 							$("#matrizriesgos").append(table_row);
@@ -127,9 +124,9 @@
 
 					//Seteamos cabecera
 					var table_head = "<thead>";
-					table_head += "<th>Organizaci&oacute;n</th><th>Objetivo</th><th>Riesgo</th><th>Descripci&oacute;n</th>";
-					table_head += "<th>Controles</th><th>Fecha Creaci&oacute;n</th><th>Fecha Expiraci&oacute;n</th><th>Categor&iacute;a</th>";
-					table_head += "<th>Causa(s)</th><th>Efecto(s)</th><th>Pérdida esperada</th></thead>";
+					table_head += "<th>Organizaci&oacute;n</th><th>Objetivo</th><th>ID Riesgo</th>";
+					table_head += "<th width='35%'>Descripción</th><th>Categoría</th><th>Causa(s)</th><th>Efecto(s)</th>";
+					table_head += "<th>Pérdida esperada</th><th>Impacto</th><th>Probabilidad</th><th>Score</th><th>Controles</th></thead>";
 
 					$('#matrizriesgos').html('<div><center><img src="../public/assets/img/loading.gif"/></center></div>');
 					//generamos matriz a través de JSON y PHP
@@ -147,9 +144,9 @@
 							$(datos).each( function() {	
 								
 								table_row += '<tr><td>' + this.Organización + '</td><td>' + this.Objetivo + '</td><td>' + this.Riesgo +'</td>';
-								table_row += '<td>' + this.Descripción + '</td><td>' + this.Controles + '</td><td>' + this.Fecha_creación +'</td>';
-								table_row += '<td>' + this.Fecha_expiración + '</td><td>' + this.Categoría + '</td><td>' + this.Causas +'</td><td>' + this.Efectos + '</td>';
-								table_row += '<td>' + this.Pérdida_esperada + '</td></tr>';
+								table_row += '<td>' + this.Descripción + '</td><td>' + this.Categoría + '</td><td>' + this.Causas +'</td>';
+								table_row += '<td>' + this.Efectos + '</td><td>' + this.Pérdida_esperada + '</td><td>' + this.Impacto +'</td><td>' + this.Probabilidad + '</td>';
+								table_row += '<td>' + this.Score + '</td><td>' + this.Controles + '</td></tr>';
 							});
 
 							$("#matrizriesgos").append(table_row);

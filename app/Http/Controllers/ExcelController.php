@@ -37,7 +37,7 @@ class ExcelController extends Controller
                     $sheet->fromArray($datos);
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:K1', function($cells) {
+                    $sheet->cells('A1:N1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');
@@ -72,7 +72,7 @@ class ExcelController extends Controller
                     $sheet->setAutoFilter();
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:K1', function($cells) {
+                    $sheet->cells('A1:N1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');
@@ -106,7 +106,7 @@ class ExcelController extends Controller
                     $sheet->fromArray($datos);
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:K1', function($cells) {
+                    $sheet->cells('A1:N1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');
@@ -140,7 +140,7 @@ class ExcelController extends Controller
                     $sheet->fromArray($datos);
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:K1', function($cells) {
+                    $sheet->cells('A1:N1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');
@@ -195,28 +195,28 @@ class ExcelController extends Controller
             })->export('xlsx');
     }
 
-    public function generarExcelAudit($org)
+    public function generarExcelIssue($type)
     {
         //generamos variable global para usarla en la función excel
         global $id;
 
-        $id = $org;
+        $id = $type;
 
-        Excel::create('Reporte de auditorías '.date("d-m-Y"), function($excel) {
+        Excel::create('Reporte de hallazgos '.date("d-m-Y"), function($excel) {
 
                 // título excel
-                $excel->setTitle('Auditorías');
+                $excel->setTitle('Hallazgos');
 
                 //creador y compañia
                 $excel->setCreator('Administrador B-GRC')
                       ->setCompany('B-GRC - IXUS Consulting');
 
                 //descripción
-                $excel->setDescription('Reporte con auditorías para la organización seleccionada');
+                $excel->setDescription('Reporte de hallazgos');
 
                 $excel->sheet('Auditorías', function($sheet) {
                     $auditoria = new Auditorias;
-                    $datos = $auditoria->generarReporteAuditorias($GLOBALS['id']);
+                    $datos = $auditoria->generarReporteIssues($GLOBALS['id']);
 
                     //$datos2 = json_decode($datos);
                     $sheet->fromArray($datos);

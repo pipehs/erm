@@ -437,7 +437,8 @@ class RiesgosController extends Controller
                                 ->select('risks.*',
                                         'subprocesses.name as subprocess_name',
                                         'processes.name as process_name',
-                                        'risk_categories.name as risk_category_name')
+                                        'risk_categories.name as risk_category_name',
+                                        'risk_subprocess.id as risk_subprocess_id')
                                 ->get();
         }
 
@@ -452,7 +453,8 @@ class RiesgosController extends Controller
                                 ->select('risks.*',
                                         'objectives.name as objective_name',
                                         'organizations.name as organization_name',
-                                        'risk_categories.name as risk_category_name')
+                                        'risk_categories.name as risk_category_name',
+                                        'objective_risk.id as objective_risk_id')
                                 ->get();
         }
 
@@ -461,6 +463,9 @@ class RiesgosController extends Controller
                 $controles = NULL;
                 $causas = NULL;
                 $efectos = NULL;
+                $probabilidad = "No tiene evaluación";
+                $impacto = "No tiene evaluación";
+                $score = "No tiene evaluación";
                 // -- seteamos datos --//
                 //seteamos causa y efecto
                 if ($risk->cause_id != NULL)
@@ -497,8 +502,33 @@ class RiesgosController extends Controller
                     $efectos = "No tiene causa definida";
                 }
 
-                if ($value == 0) //controles para riesgos de proceso
+                
+
+                if ($value == 0) //controles y eval para riesgos de proceso
                 {
+                    //primero obtenemos maxima fecha de evaluacion para el riesgo
+                    $fecha = DB::table('evaluation_risk')
+                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->where('evaluation_risk.risk_subprocess_id','=',$risk->risk_subprocess_id)
+                                    ->max('evaluations.updated_at');
+
+                    //obtenemos proba, impacto y score
+                    $eval_risk = DB::table('evaluation_risk')
+                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->where('evaluation_risk.risk_subprocess_id','=',$risk->risk_subprocess_id)
+                                    ->where('evaluations.updated_at','=',$fecha)
+                                    ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                                    ->get();
+
+                    foreach ($eval_risk as $eval)
+                    {
+                        if ($eval->avg_probability != NULL AND $eval->avg_impact != NULL)
+                        {
+                            $impacto = $eval->avg_impact;
+                            $probabilidad = $eval->avg_probability;
+                            $score = $impacto * $probabilidad;
+                        }
+                    }
                     //obtenemos controles
                     $controls = DB::table('controls')
                                     ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
@@ -508,8 +538,29 @@ class RiesgosController extends Controller
                                     ->select('controls.name')
                                     ->get();
                 }               
-                else if ($value == 1)
+                else if ($value == 1) //controles y eval para riesgos de negocio
                 {
+                    //primero obtenemos maxima fecha de evaluacion para el riesgo
+                    $fecha = DB::table('evaluation_risk')
+                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->where('evaluation_risk.objective_risk_id','=',$risk->objective_risk_id)
+                                    ->max('evaluations.updated_at');
+
+                    //obtenemos proba, impacto y score
+                    $eval_risk = DB::table('evaluation_risk')
+                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->where('evaluation_risk.objective_risk_id','=',$risk->objective_risk_id)
+                                    ->where('evaluations.updated_at','=',$fecha)
+                                    ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                                    ->get();
+
+                    foreach ($eval_risk as $eval)
+                    {
+                        $impacto = $eval->avg_impact;
+                        $probabilidad = $eval->avg_probability;
+                        $score = $impacto * $probabilidad;
+                    }
+
                     //obtenemos controles
                     $controls = DB::table('controls')
                                     ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
@@ -567,7 +618,7 @@ class RiesgosController extends Controller
                 }
 
                 //Seteamos datos
-                if ($value == 0) //guardamos datos de controles de procesos
+                if ($value == 0) //guardamos datos de riesgos de procesos
                 {
                     $datos[$i] = [//'id' => $control->id,
                                 'Proceso' => $risk->process_name,
@@ -575,16 +626,19 @@ class RiesgosController extends Controller
                                 'Riesgo' => $risk->name,
                                 'Descripción' => $risk->description,
                                 'Controles' => $controles,
-                                'Fecha_creación' => $fecha_creacion,
+                                'Fecha_identificación' => $fecha_creacion,
                                 'Fecha_expiración' => $expiration_date,
                                 'Categoría' => $risk->risk_category_name,
                                 'Pérdida_esperada' => $risk->expected_loss,
                                 'Causas' => $causas,
-                                'Efectos' => $efectos];
+                                'Efectos' => $efectos,
+                                'Probabilidad' => $probabilidad,
+                                'Impacto' => $impacto,
+                                'Score' => $score];
                     $i += 1;
                 }
 
-                else if ($value == 1) //guardamos datos de controles de negocio
+                else if ($value == 1) //guardamos datos de riesgos de negocio
                 {
                     $datos[$i] = [//'id' => $control->id,
                                 'Organización' => $risk->organization_name,
@@ -592,12 +646,15 @@ class RiesgosController extends Controller
                                 'Riesgo' => $risk->name,
                                 'Descripción' => $risk->description,
                                 'Controles' => $controles,
-                                'Fecha_creación' => $fecha_creacion,
+                                'Fecha_identificación' => $fecha_creacion,
                                 'Fecha_expiración' => $expiration_date,
                                 'Categoría' => $risk->risk_category_name,              
                                 'Pérdida_esperada' => $risk->expected_loss,
                                 'Causas' => $causas,
-                                'Efectos' => $efectos];
+                                'Efectos' => $efectos,
+                                'Probabilidad' => $probabilidad,
+                                'Impacto' => $impacto,
+                                'Score' => $score];
                     $i += 1;
                 }
         }

@@ -164,18 +164,18 @@
 	    });
 		
 		//función que determina auditor responsable y equipo de auditores seleccionables
-		$("#stakeholder").change(function() {
+		$("#stakeholder_id").change(function() {
 
-			if ($("#stakeholder").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
+			if ($("#stakeholder_id").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 			{
+				$("#stakeholder_team").empty();
+				$("#stakeholder_team").change();
 				//Añadimos la imagen de carga en el contenedor
 					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
 
 				//se obtienen stakeholders (menos el auditor jefe)
 					$.get('auditorias.stakeholders.'+$("#stakeholder").val(), function (result) {
 							$("#cargando").html('<br>');
-							$("#stakeholder_team").empty();
-							$("#stakeholder_team").change();
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
 
@@ -188,8 +188,6 @@
 			}
 			else
 			{
-				$("#stakeholder").change();
-
 				$("#stakeholder_team").empty();
 				$("#stakeholder_team").change();
 			}
