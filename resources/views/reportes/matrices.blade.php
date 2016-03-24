@@ -87,7 +87,7 @@
 					//Seteamos cabecera
 					var table_head = "<thead>";
 					table_head += "<th>ID Control</th><th>Descripci&oacute;n Control</th><th>Responsable</th>";
-					table_head += "<th>Tipo</th><th>Periodicidad</th><th>Propósito</th><th>Costo control</th><th>Evidencia</th><th>Evidencia</th>";
+					table_head += "<th>Tipo</th><th>Periodicidad</th><th>Propósito</th><th>Costo control</th><th>Evidencia</th>";
 					table_head += "<th>Riesgo(s) / Subproceso(s)</th></thead>";
 
 					//Añadimos la imagen de carga en el contenedor
@@ -111,7 +111,7 @@
 								
 								table_row += '<tr><td>' + this.Control + '</td><td>' + this.Descripción + '</td><td>';
 								table_row += this.Responsable + '</td><td>' + this.Tipo + '</td><td>' + this.Periodicidad +'</td>';
-								table_row += '<td>' + this.Propósito + '</td><td>' + this.Propósito + '</td><td>' + this.Costo_control +'</td>';
+								table_row += '<td>' + this.Propósito + '</td><td>' + this.Costo_control +'</td>';
 								table_row += '<td>' + this.Evidencia + '</td><td>' + this.Riesgo_Subproceso_Organización +'</td></tr>';
 							});
 
@@ -149,8 +149,8 @@
 								
 								table_row += '<tr><td>' + this.Control + '</td><td>' + this.Descripción + '</td><td>';
 								table_row += this.Riesgo_Objetivo_Organización + '</td><td>' + this.Tipo + '</td><td>' + this.Periodicidad +'</td>';
-								table_row += '<td>' + this.Propósito + '</td><td>' + this.Stakeholder + '</td><td>' + this.Evidencia +'</td>';
-								table_row += '<td>' + this.Costo_esperado + '</td></tr>';
+								table_row += '<td>' + this.Propósito + '</td><td>' + this.Responsable + '</td><td>' + this.Evidencia +'</td>';
+								table_row += '<td>' + this.Costo_esperado + '</td><td>' + this.Riesgo_Objetivo_Organización + '</td></tr>';
 							});
 
 							$("#matrizcontrol").append(table_row);

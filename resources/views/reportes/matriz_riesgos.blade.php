@@ -86,7 +86,7 @@
 					table_head += "<th>Proceso</th>";
 					table_head += "<th >Subproceso(s)</th><th>ID Riesgo</th><th>Descripci&oacute;n Riesgo</th><th>Categoría</th>";
 					table_head += "<th>Causa</th><th>Efecto</th><th>Pérdida esperada</th>Impacto<th>Probabilidad</th>";
-					table_head += "<th>Impacto</th><th>Score</th><th>Fecha identificaci&oacute;n</th><th>Fecha expiraci&oacute;n</th>";
+					table_head += "<th>Impacto</th><th>Score</th><th>Fecha identificaci&oacute;n</th><th>Fecha expiraci&oacute;n</th><th>Control</th>";
 					table_head += "</thead>";
 
 					//Añadimos la imagen de carga en el contenedor
@@ -107,9 +107,9 @@
 							$(datos).each( function() {	
 								
 								table_row += '<tr><td>' + this.Proceso + '</td><td>' + this.Subproceso + '</td><td>' + this.Riesgo +'</td>';
-								table_row += '<td>' + this.Descripción + '</td>' + this.Categoría + '<td>' + this.Causas + '</td><td>' + this.Efectos +'</td>';
+								table_row += '<td>' + this.Descripción + '</td><td>' + this.Categoría + '<td>' + this.Causas + '</td><td>' + this.Efectos +'</td>';
 								table_row += '<td>' + this.Pérdida_esperada + '</td><td>' + this.Probabilidad + '</td><td>' + this.Impacto +'</td>';
-								table_row += '<td>' + this.Score +'</td><td>' + this.Fecha_identificación + '</td><td>' + this.Fecha_expiración + '</td></tr>';
+								table_row += '<td>' + this.Score +'</td><td>' + this.Fecha_identificación + '</td><td>' + this.Fecha_expiración + '</td><td>' + this.Controles +'</tr>';
 							});
 
 							$("#matrizriesgos").append(table_row);

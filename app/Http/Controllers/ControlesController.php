@@ -590,16 +590,16 @@ class ControlesController extends Controller
                     {
                         $datos[$i] = [//'id' => $control->id,
                                     'Control' => $control->name,
-                                    'Descripción' => $control->description,
-                                    'Riesgo' => $control->risk_name,
-                                    'Subproceso' => $control->subprocess_name,
-                                    'Organización' => $control->organization_name,
+                                    'Descripción' => $control->description,    
+                                    'Responsable' => $stakeholder2,
                                     'Tipo' => $type,
                                     'Periodicidad' => $periodicity,
                                     'Propósito' => $purpose,
-                                    'Stakeholder' => $stakeholder2,
+                                    'Costo control' => $control->expected_cost,
                                     'Evidencia' => $control->evidence,
-                                    'Costo control' => $control->expected_cost];
+                                    'Riesgo' => $control->risk_name,
+                                    'Subproceso' => $control->subprocess_name,
+                                    'Organización' => $control->organization_name];
                         $i += 1;
                     }
 
@@ -608,15 +608,15 @@ class ControlesController extends Controller
                         $datos[$i] = [//'id' => $control->id,
                                     'Control' => $control->name,
                                     'Descripción' => $control->description,
-                                    'Riesgo' => $control->risk_name,
-                                    'Objetivo' => $control->objective_name,
-                                    'Organización' => $control->organization_name,
+                                    'Responsable' => $stakeholder2,
                                     'Tipo' => $type,
                                     'Periodicidad' => $periodicity,
                                     'Propósito' => $purpose,
-                                    'Stakeholder' => $stakeholder2,
+                                    'Costo control' => $control->expected_cost,
                                     'Evidencia' => $control->evidence,
-                                    'Costo control' => $control->expected_cost];
+                                    'Riesgo' => $control->risk_name,
+                                    'Objetivo' => $control->objective_name,
+                                    'Organización' => $control->organization_name,];
                         $i += 1;
                     }
                 }
@@ -653,7 +653,7 @@ class ControlesController extends Controller
                                         'Tipo' => $type,
                                         'Periodicidad' => $periodicity,
                                         'Propósito' => $purpose,
-                                        'Stakeholder' => $stakeholder2,
+                                        'Responsable' => $stakeholder2,
                                         'Evidencia' => $control->evidence,
                                         'Costo_control' => $control->expected_cost];
                             $i += 1;
@@ -691,7 +691,7 @@ class ControlesController extends Controller
                                         'Tipo' => $type,
                                         'Periodicidad' => $periodicity,
                                         'Propósito' => $purpose,
-                                        'Stakeholder' => $stakeholder2,
+                                        'Responsable' => $stakeholder2,
                                         'Evidencia' => $control->evidence,
                                         'Costo_control' => $control->expected_cost];
                             $i += 1;

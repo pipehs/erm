@@ -499,7 +499,7 @@ class RiesgosController extends Controller
                 }
                 else
                 {
-                    $efectos = "No tiene causa definida";
+                    $efectos = "No tiene efecto definido";
                 }
 
                 
@@ -625,16 +625,16 @@ class RiesgosController extends Controller
                                 'Subproceso' => $risk->subprocess_name,
                                 'Riesgo' => $risk->name,
                                 'Descripción' => $risk->description,
-                                'Controles' => $controles,
-                                'Fecha_identificación' => $fecha_creacion,
-                                'Fecha_expiración' => $expiration_date,
                                 'Categoría' => $risk->risk_category_name,
-                                'Pérdida_esperada' => $risk->expected_loss,
                                 'Causas' => $causas,
                                 'Efectos' => $efectos,
+                                'Pérdida_esperada' => $risk->expected_loss,
                                 'Probabilidad' => $probabilidad,
                                 'Impacto' => $impacto,
-                                'Score' => $score];
+                                'Score' => $score,
+                                'Fecha_identificación' => $fecha_creacion,
+                                'Fecha_expiración' => $expiration_date,
+                                'Controles' => $controles,];
                     $i += 1;
                 }
 
@@ -645,16 +645,16 @@ class RiesgosController extends Controller
                                 'Objetivo' => $risk->objective_name,
                                 'Riesgo' => $risk->name,
                                 'Descripción' => $risk->description,
-                                'Controles' => $controles,
-                                'Fecha_identificación' => $fecha_creacion,
-                                'Fecha_expiración' => $expiration_date,
-                                'Categoría' => $risk->risk_category_name,              
-                                'Pérdida_esperada' => $risk->expected_loss,
+                                'Categoría' => $risk->risk_category_name,
                                 'Causas' => $causas,
-                                'Efectos' => $efectos,
+                                'Efectos' => $efectos,              
+                                'Pérdida_esperada' => $risk->expected_loss,
                                 'Probabilidad' => $probabilidad,
                                 'Impacto' => $impacto,
-                                'Score' => $score];
+                                'Score' => $score,
+                                'Fecha_identificación' => $fecha_creacion,
+                                'Fecha_expiración' => $expiration_date,
+                                'Controles' => $controles];
                     $i += 1;
                 }
         }

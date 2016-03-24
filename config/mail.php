@@ -28,7 +28,7 @@ return [
     |
     */
 
-    'host' => env('MAIL_HOST', 'smtp.gmail.com'),
+    'host' => env('MAIL_HOST', 'mail.ixus.cl'),
 
     /*
     |--------------------------------------------------------------------------
@@ -54,7 +54,7 @@ return [
     |
     */
 
-    'from' => ['address' => 'pipe.hs@gmail.com', 'name' => 'Administrador ERM'],
+    'from' => ['address' => 'vcortes@ixus.cl', 'name' => 'Administrador B-GRC'],
 
     /*
     |--------------------------------------------------------------------------

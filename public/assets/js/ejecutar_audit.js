@@ -138,7 +138,7 @@ $("#audit").change(function() {
 										{
 											test_results += '<option value="Abierta">En proceso</option>';
 											test_results += '<option value="0">Inefectivo</option>';
-											test_results += '<option value="1" selected>Efectivo/option>';
+											test_results += '<option value="1" selected>Efectivo</option>';
 											test_results += '</select></td><td width="50%"><div id="issues_'+this.id+'"></div></td>';
 										}
 										else

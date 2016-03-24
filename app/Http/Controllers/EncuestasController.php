@@ -23,7 +23,7 @@ class EncuestasController extends Controller
                     Responda cada una de las preguntas asociadas a la encuesta. 
                     Para responderla deberá acceder al siguiente link.
 
-                    http://erm.local/public/identificacion.encuesta.{$id}
+                    http://localhost/erm/public/identificacion.encuesta.{$id}
 
                     Saludos cordiales,
                     Administrador.";
