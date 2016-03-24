@@ -38,38 +38,38 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
 
-<h4>{{ $_POST['nombre'] }}</h4>
+<h4>{{ $name }}</h4>
 <p>Ahora debe ingresar el tipo de respuesta para cada pregunta, y en caso de ser necesario (radio o checkbox) ingresar las alternativas.</p>
 
 {!!Form::open(['url'=>'encuesta.store','method'=>'POST','class'=>'form-horizontal'])!!}
 
 @for($i=1;$i<=$cont;$i++)
-
-	<p><b>Pregunta {{ $i }}: {{ $_POST['pregunta'.$i] }}</b>
-					<div class="form-group">
-						{!!Form::label('tipo_respuesta *',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-							<select id="select<?php echo $i ?>" required="true" name="tipo_respuesta{{ $i }}">
-								<option selected="selected" value="">- Seleccione tipo de respuesta -</option>
-								<option value="0">Texto</option>
-								<option value="1">Radio</option>
-								<option value="2">Checkbox</option>
-							</select>
+	@if ($_POST['pregunta'.$i] != "")
+		<p><b>Pregunta {{ $i }}: {{ $_POST['pregunta'.$i] }}</b>
+						<div class="form-group">
+							{!!Form::label('tipo_respuesta *',null,['class'=>'col-sm-4 control-label'])!!}
+							<div class="col-sm-3">
+								<select id="select<?php echo $i ?>" required="true" name="tipo_respuesta{{ $i }}">
+									<option selected="selected" value="">- Seleccione tipo de respuesta -</option>
+									<option value="0">Texto</option>
+									<option value="1">Radio</option>
+									<option value="2">Checkbox</option>
+								</select>
+							</div>
 						</div>
-					</div>
 
-					<div id="respuestas{{$i}}">
-					</div>
-	</p>
-				<input type="hidden" name="pregunta<?php echo $i; ?>" value="{{ $_POST['pregunta'.$i] }}">
+						<div id="respuestas{{$i}}">
+						</div>
+		</p>
+					<input type="hidden" name="pregunta<?php echo $i; ?>" value="{{ $_POST['pregunta'.$i] }}">
+	@endif
 @endfor
 
 				<!-- Enviamos cantidad de preguntas -->
 				{!!Form::hidden('contpreguntas',$cont)!!}
+
 				<!-- Enviamos nombre de encuesta -->
-				{!!Form::hidden('nombre',$_POST['nombre'])!!}
-				<!-- Enviamos id de encuesta -->
-				{!!Form::hidden('poll_id',$poll_id)!!}
+				{!!Form::hidden('nombre_encuesta',$name)!!}
 				<center>
 					<div class="form-group">
 						{!!Form::submit("Crear encuesta", ["class"=>"btn btn-primary","name"=>"agregar"])!!}	

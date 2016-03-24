@@ -66,7 +66,7 @@ Recuerde que los niveles de criticidad y probabilidad (deben ser iguales) para c
 					<div class="form-group">
 						{!!Form::label('Fecha Expiraci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::text('fecha_expiracion',null,['class'=>'form-control','id'=>'input_date2'])!!}
+							{!!Form::date('fecha_expiracion',null,['class'=>'form-control',])!!}
 						</div>
 					</div>
 

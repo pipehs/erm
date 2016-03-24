@@ -102,15 +102,14 @@ class EncuestasController extends Controller
     public function create()
     {
         if (isset($_POST['agregar'])) //se agregaron las preguntas, ahora se deben agregar las respuestas
-        {
+        { /* NO CUMPLE AISLAMIENTO 
             \Ermtool\Poll::create([
                 'name'=>$_POST['nombre'],
-                ]);
+                ]); */
             $cont = $_POST['cantidad_preguntas'];
-
             //obtenemos id de esta encuesta
             $poll_id = \Ermtool\Poll::max('id');
-            return view('identificacion_eventos_riesgos.crearencuesta2',['cont'=>$cont,'poll_id'=>$poll_id]);
+            return view('identificacion_eventos_riesgos.crearencuesta2',['cont'=>$cont,'name'=>$_POST['nombre']]);
         }
         else
         {
@@ -126,37 +125,44 @@ class EncuestasController extends Controller
      */
     public function store(Request $request)
     {
-        $cont = $_POST['contpreguntas'];
-        
-        //agregamos preguntas y tipos de respuesta
-        for ($i=1; $i<=$cont; $i++)
-        {
-            \Ermtool\Question::create([
-                'question'=>$request['pregunta'.$i],
-                'answers_type'=>$request['tipo_respuesta'.$i],
-                'poll_id'=>$request['poll_id'],
-                ]);
+        DB::transaction(function() {
+            $cont = $_POST['contpreguntas'];
 
-            //vemos tipo de respuesta para ver si se debe agregar en posible answers
-            if ($request['tipo_respuesta'.$i] != 0) //significa que es radio o checkbox
+            //primero agregamos encuesta
+            $poll =  \Ermtool\Poll::create([
+                'name'=>$_POST['nombre_encuesta'],
+                ]);        
+            //agregamos preguntas y tipos de respuesta
+            for ($i=1; $i<=$cont; $i++)
             {
-                //obtenemos id de pregunta recién ingresada
-                $question_id = \Ermtool\Question::max('id');
-
-                $j = 1; //contador cantidad de alternativas para cada pregunta
-                while (isset($_POST['pregunta'.$i.'_alternativa'.$j])) //mientras hayan alternativas para la pregunta
+                if (isset($_POST['pregunta'.$i])) //si es que se agregó la pregunta de índice $i (ya que el usuario al crear puede agregar varias preguntas pero solo enviar 1)
                 {
-                    \Ermtool\Posible_answer::create([
-                        'answer'=>$request['pregunta'.$i.'_alternativa'.$j],
-                        'question_id'=>$question_id,
+                    $question = \Ermtool\Question::create([
+                        'question'=>$_POST['pregunta'.$i],
+                        'answers_type'=>$_POST['tipo_respuesta'.$i],
+                        'poll_id'=>$poll->id,
                         ]);
-                    $j += 1;
+
+                    //vemos tipo de respuesta para ver si se debe agregar en posible answers
+                    if ($_POST['tipo_respuesta'.$i] != 0) //significa que es radio o checkbox
+                    {
+
+                        $j = 1; //contador cantidad de alternativas para cada pregunta
+                        while (isset($_POST['pregunta'.$i.'_alternativa'.$j])) //mientras hayan alternativas para la pregunta
+                        {
+                            \Ermtool\Posible_answer::create([
+                                'answer'=>$_POST['pregunta'.$i.'_alternativa'.$j],
+                                'question_id'=>$question->id,
+                                ]);
+                            $j += 1;
+                        }
+
+                    // echo "Cantidad de alternativas para pregunta ".$i.": ".($j-1)."<br>";
+                    }
                 }
-
-            // echo "Cantidad de alternativas para pregunta ".$i.": ".($j-1)."<br>";
             }
-        }
-
+        });
+        
         return view('identificacion_eventos_riesgos.encuestacreada',['post'=>$_POST]);
     }
 

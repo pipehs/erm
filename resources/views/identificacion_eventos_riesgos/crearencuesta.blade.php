@@ -83,8 +83,14 @@ En esta secci&oacute;n podr&aacute; crear encuestas para la identificaci&oacute;
 			}
 			while (i < $("#cantidad_preguntas").val())
 			{
-				$("#preguntas").append('<div class="form-group"><div class="col-sm-4 control-label"><label for="pregunta'+(i+1)+'">Pregunta '+(i+1)+'</label></div><div class="col-sm-3"><input type="text" class="form-control" required name="pregunta'+(i+1)+'"></div></div>');
-	    		
+				if (i == 0) //sólo si es la primera pregunta será required="true"
+				{
+					$("#preguntas").append('<div class="form-group"><div class="col-sm-4 control-label"><label for="pregunta'+(i+1)+'">Pregunta '+(i+1)+'</label></div><div class="col-sm-3"><input type="text" class="form-control" required name="pregunta'+(i+1)+'"></div></div>');
+	    		}
+	    		else
+	    		{
+	    			$("#preguntas").append('<div class="form-group"><div class="col-sm-4 control-label"><label for="pregunta'+(i+1)+'">Pregunta '+(i+1)+'</label></div><div class="col-sm-3"><input type="text" class="form-control" name="pregunta'+(i+1)+'"></div></div>');
+	    		}
 	    		i++;
 			}
 

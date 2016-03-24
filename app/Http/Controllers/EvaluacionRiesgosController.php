@@ -100,24 +100,15 @@ class EvaluacionRiesgosController extends Controller
 
         else //se está creando encuesta de evaluación
         {
-            if ($request['fecha_exp'] != "")
-            {
-                $fecha = explode("/",$request['fecha_exp']);
-                $fecha_exp = $fecha[2]."-".$fecha[0]."-".$fecha[1];
-            }
-            else
-            {
-                $fecha_exp = NULL;
-            }
 
             //agregamos evaluación y obtenemos id
             $eval_id = DB::table('evaluations')->insertGetId([
-                'name' => $request['nombre'],
+                'name' => $_POST['nombre'],
                 'consolidation' => 0,
-                'description' => $request['descripcion'],
+                'description' => $_POST['descripcion'],
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
-                'expiration_date' => $fecha_exp,
+                'expiration_date' => $_POST['expiration_date'],
                 'max_levels' => 5,
                 ]);
 

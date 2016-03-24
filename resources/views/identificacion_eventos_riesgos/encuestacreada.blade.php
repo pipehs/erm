@@ -50,39 +50,41 @@
 @for ($i=1; $i<=$_POST['contpreguntas']; $i++)
 	<div class="form-group">
 	<br><br>
-	<p><b>{{ $i }}.- {{ $post['pregunta'.$i] }}</b></p>
+	@if (isset($_POST['pregunta'.$i]))
+		<p><b>{{ $i }}.- {{ $post['pregunta'.$i] }}</b></p>
 
-	@if ($_POST['tipo_respuesta'.$i] == 0)
+		@if ($_POST['tipo_respuesta'.$i] == 0)
 
-			<div class="col-sm-6">
-                <input type="text" class="form-control" placeholder="Ingrese respuesta" />
-            </div>
+				<div class="col-sm-6">
+	                <input type="text" class="form-control" placeholder="Ingrese respuesta" />
+	            </div>
 
-	@elseif ($_POST['tipo_respuesta'.$i] == 1)
-		<?php $j = 1; ?>
+		@elseif ($_POST['tipo_respuesta'.$i] == 1)
+			<?php $j = 1; ?>
+			
+			@while(isset($_POST['pregunta'.$i.'_alternativa'.$j]) AND $_POST['pregunta'.$i.'_alternativa'.$j] != "")
+				<div class="radio-inline">
+					<label>
+						<input type="radio" name="radio-inline" checked> {{ $_POST['pregunta'.$i.'_alternativa'.$j] }}
+						<i class="fa fa-circle-o"></i>
+					</label>
+				</div>
+				<?php $j++; ?>
+			@endwhile
+
+		@elseif ($_POST['tipo_respuesta'.$i] == 2)
+			<?php $j = 1; ?>
 		
-		@while(isset($_POST['pregunta'.$i.'_alternativa'.$j]) AND $_POST['pregunta'.$i.'_alternativa'.$j] != "")
-			<div class="radio-inline">
-				<label>
-					<input type="radio" name="radio-inline" checked> {{ $_POST['pregunta'.$i.'_alternativa'.$j] }}
-					<i class="fa fa-circle-o"></i>
-				</label>
-			</div>
-			<?php $j++; ?>
-		@endwhile
-
-	@elseif ($_POST['tipo_respuesta'.$i] == 2)
-		<?php $j = 1; ?>
-	
-		@while(isset($_POST['pregunta'.$i.'_alternativa'.$j]) AND $_POST['pregunta'.$i.'_alternativa'.$j] != "")
-			<div class="checkbox-inline">
-				<label>
-					<input type="checkbox"> {{ $_POST['pregunta'.$i.'_alternativa'.$j] }}
-					<i class="fa fa-square-o"></i>
-				</label>
-			</div>
-			<?php $j++; ?>
-		@endwhile
+			@while(isset($_POST['pregunta'.$i.'_alternativa'.$j]) AND $_POST['pregunta'.$i.'_alternativa'.$j] != "")
+				<div class="checkbox-inline">
+					<label>
+						<input type="checkbox"> {{ $_POST['pregunta'.$i.'_alternativa'.$j] }}
+						<i class="fa fa-square-o"></i>
+					</label>
+				</div>
+				<?php $j++; ?>
+			@endwhile
+		@endif
 	@endif
 	</div>
 @endfor
