@@ -20,9 +20,10 @@
  
  	{!!Html::style('assets/css/matrix.css')!!}
  	{!!Html::style('assets/plugins/bootstrap/bootstrap.css')!!}
+ 	{!!Html::style('assets/plugins/bootstrap/bootstrap-min.css')!!}
  	{!!Html::style('assets/plugins/jquery-ui/jquery-ui.min.css')!!}
- 	{!!Html::style('http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css')!!}
- 	{!!Html::style('http://fonts.googleapis.com/css?family=Righteous')!!}
+ 	{!!Html::style('assets/css/font-awesome.css')!!}
+ 	{!!Html::style('assets/css/Righteous.css')!!}
  	{!!Html::style('assets/plugins/fancybox/jquery.fancybox.css')!!}
  	{!!Html::style('assets/plugins/fullcalendar/fullcalendar.css')!!}
  	{!!Html::style('assets/plugins/xcharts/xcharts.min.css')!!}
@@ -73,17 +74,16 @@
 	{!!Html::script('assets/js/fileinput.js')!!}
 	{!!Html::script('assets/js/fileinput.min.js')!!}
 
-	{!!Html::script('http://code.highcharts.com/highcharts.js')!!}
-	{!!Html::script('http://code.highcharts.com/modules/heatmap.js')!!}
-	{!!Html::script('http://code.highcharts.com/modules/exporting.js')!!}
+	{!!Html::script('assets/js/highcharts.js')!!}
+	{!!Html::script('assets/js/heatmap.js')!!}
+	{!!Html::script('assets/js/exporting.js')!!}
 
-	{!!Html::script('http://code.jquery.com/jquery-1.10.2.js')!!}
-	{!!Html::script('http://code.jquery.com/ui/1.11.4/jquery-ui.js')!!}
+	{!!Html::script('assets/js/jquery-1.10.2.js')!!}
+	{!!Html::script('assets/js/jquery-ui.js')!!}
 
 	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}
 
-	{!!Html::script('http://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css')}
-	{!!Html::script('http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js')}
+	{!!Html::script('assets/js/jquery.min.js')}
 	
 
 
