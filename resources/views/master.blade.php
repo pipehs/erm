@@ -20,7 +20,7 @@
  
  	{!!Html::style('assets/css/matrix.css')!!}
  	{!!Html::style('assets/plugins/bootstrap/bootstrap.css')!!}
- 	{!!Html::style('assets/plugins/bootstrap/bootstrap-min.css')!!}
+ 	{!!Html::style('assets/css/bootstrap-min.css')!!}
  	{!!Html::style('assets/plugins/jquery-ui/jquery-ui.min.css')!!}
  	{!!Html::style('assets/css/font-awesome.css')!!}
  	{!!Html::style('assets/css/Righteous.css')!!}
@@ -35,6 +35,7 @@
  	{!!Html::style('assets/css/fileinput.min.css')!!}
 
  	{!!Html::style('assets/css/imprimir.css',['media'=>'print'])!!}	
+
 
 <!--
 	<link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
