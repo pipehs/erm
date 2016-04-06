@@ -129,7 +129,7 @@ function dropDown4()
 //active de controles
 function dropDown5()
 {
-	$uri = array('controles');
+	$uri = array('controles','evaluar_controles');
 
 	foreach ($uri as $uri)
 	{
@@ -156,6 +156,31 @@ function dropDown6()
 {
 	$uri = array('auditorias','plan_auditoria','nuevo_plan','plan','ver_plan','crear_pruebas','pruebas','ejecutar_pruebas',
 				'supervisar','notas','planes_accion');
+
+	foreach ($uri as $uri)
+	{
+		if(Request::is(Request::segment(1) . '/' . $uri . '/*') || Request::is(Request::segment(1) . '/' . $uri) || Request::is($uri))
+		{
+			return 'display: block;';
+		}
+
+		//verificación para menús compuestos
+		$compuesto = explode(".",Request::segment(1));
+
+		foreach ($compuesto as $compuesto)
+		{
+			if(Request::is($compuesto . '/' . $uri . '/*') || Request::is($compuesto . '.' . $uri) || $compuesto == $uri)
+			{
+				return 'display: block;';
+			}
+		}
+	}
+}
+
+//active de kris
+function dropDown7()
+{
+	$uri = array('enlazar_riesgos','kri');
 
 	foreach ($uri as $uri)
 	{

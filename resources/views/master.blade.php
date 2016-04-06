@@ -33,6 +33,8 @@
  	{!!Html::style('assets/plugins/sweetalert-master/themes/twitter/twitter.css')!!}
  	{!!Html::style('assets/css/fileinput.css')!!}
  	{!!Html::style('assets/css/fileinput.min.css')!!}
+ 	{!!Html::style('assets/css/semaforo.css')!!}
+ 	{!!Html::style('assets/css/upload.css')!!}
 
  	{!!Html::style('assets/css/imprimir.css',['media'=>'print'])!!}	
 
@@ -71,9 +73,7 @@
 	{!!Html::script('assets/plugins/tinymce/jquery.tinymce.min.js')!!}
 	{!!Html::script('assets/js/devoops.js')!!}
 	{!!Html::script('assets/js/scripts.js')!!}
-
-	{!!Html::script('assets/js/fileinput.js')!!}
-	{!!Html::script('assets/js/fileinput.min.js')!!}
+	{!!Html::script('assets/js/upload.js')!!}
 
 	{!!Html::script('assets/js/highcharts.js')!!}
 	{!!Html::script('assets/js/heatmap.js')!!}

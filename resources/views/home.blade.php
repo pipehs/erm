@@ -157,7 +157,7 @@
 @stop
 
 @section('scripts2')
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript" src="assets/js/google.js"></script>
     <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
       google.setOnLoadCallback(drawChart);

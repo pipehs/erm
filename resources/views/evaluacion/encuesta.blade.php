@@ -10,7 +10,11 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="evaluacion.encuesta.{{ $encuesta['id'] }}">Responder Encuesta</a></li>
+			@if ($tipo == 1)
+				<li><a href="evaluacion.encuesta.{{ $encuesta['id'] }}">Responder Encuesta</a></li>
+			@else
+				<li><a href="evaluacion.encuesta.0">Evaluar riesgos</a></li>
+			@endif
 		</ol>
 	</div>
 </div>
@@ -20,7 +24,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-check"></i>
-					<span>Encuesta: {{ $encuesta['nombre'] }}</span>
+					<span>Encuesta: {{ $encuesta }}</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -43,7 +47,7 @@
 				</div>
 			@endif
 
-			<h4><center>{{ $encuesta['descripcion'] }}</center></h4>
+			<h4><center>Evaluaci&oacute;n manual</center></h4>
 
 			{!!Form::open(['route'=>'evaluacion.guardarEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
 
@@ -60,14 +64,21 @@
 			<p>Por cada riesgo identificado, señale un nivel de probabilidad e impacto del mismo. </p>
 
 			@foreach($riesgos as $riesgo)
-
-				{!!Form::hidden('evaluation_risk_id[]',$riesgo['evaluation_risk_id'])!!}
+				@if ($tipo == 1)
+					{!!Form::hidden('evaluation_risk_id[]',$riesgo['evaluation_risk_id'])!!}
+				@else
+					{!!Form::hidden('evaluation_risk_id[]',$riesgo['risk_id'])!!}
+				@endif
 				<b>- {{ $riesgo['risk_name'] }} - {{ $riesgo['subobj'] }} - {{ $riesgo['orgproc'] }}:</b><br><br>
 				Probabilidad:<br>
 				@for($i=1; $i<=5; $i++)
 				<div class="radio-inline">
 					<label>
-						<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }}
+						@if ($tipo == 1)
+							<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[$i-1] }})
+						@else
+							<input type="radio" name="proba_{{$riesgo['risk_id']}}_{{$riesgo['type']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[$i-1] }})
+						@endif
 						<i class="fa fa-circle-o"></i>
 					</label>
 				</div>
@@ -77,18 +88,28 @@
 				@for($i=1; $i<=5; $i++)
 				<div class="radio-inline">
 					<label>
-						<input type="radio" name="criticidad_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }}
+						@if ($tipo == 1)
+							<input type="radio" name="criticidad_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[$i-1] }})
+						@else
+							<input type="radio" name="criticidad_{{$riesgo['risk_id']}}_{{$riesgo['type']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[$i-1] }})
+						@endif
 						<i class="fa fa-circle-o"></i>
 					</label>
 				</div>
 				@endfor
 				<hr>
 			@endforeach
-
-			{!!Form::hidden('evaluation_id',$encuesta['id'])!!}
+			@if ($tipo == 1)
+				{!!Form::hidden('evaluation_id',$encuesta['id'])!!}
+			@endif
+				{!!Form::hidden('tipo',$tipo)!!}
 			<div class="row form-group">
 				<center>
-					{!!Form::submit('Enviar Respuestas', ['class'=>'btn btn-primary'])!!}
+					@if ($tipo == 1)
+						{!!Form::submit('Enviar Respuestas', ['class'=>'btn btn-primary'])!!}
+					@else
+						{!!Form::submit('Enviar Evaluación', ['class'=>'btn btn-primary'])!!}
+					@endif
 				</center>
 			</div>
 

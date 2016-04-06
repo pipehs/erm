@@ -97,7 +97,7 @@ class CategoriasObjetivosController extends Controller
      */
     public function store(Request $request)
     {
-        DB::transactions(function() {
+        DB::transaction(function() {
 
             \Ermtool\Objective_category::create([
                 'name' => $_POST['name'],

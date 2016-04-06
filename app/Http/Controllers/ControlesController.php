@@ -383,6 +383,19 @@ class ControlesController extends Controller
         //
     }
 
+    //index para evaluación de controles
+    public function indexEvaluacion()
+    {
+        $controles = \Ermtool\Control::lists('name','id');
+        return view('controles.evaluar',['controls'=>$controles]);
+    }
+
+    //guarda evaluación de un control
+    public function storeEvaluacion(Request $request)
+    {
+       
+    }
+
     /*
     función identifica si se seleccionarán riesgos/subprocesos o riesgos/objetivos
     al momento de crear un control */

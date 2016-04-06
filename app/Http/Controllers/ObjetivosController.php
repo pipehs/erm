@@ -112,7 +112,7 @@ class ObjetivosController extends Controller
         DB::transaction(function() 
         {
             //si es que se agrego categoría de objetivo
-            if ($request['objective_category_id'])
+            if ($_POST['objective_category_id'])
             {
                 $categoria = $_POST['objective_category_id'];
             }

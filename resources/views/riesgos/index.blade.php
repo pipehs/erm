@@ -52,18 +52,18 @@
 		{!! link_to_route('riesgos.create', $title = 'Agregar Riesgo de Negocio', $parameters = 'N', $attributes = ['class'=>'btn btn-success']) !!}
 		</center>
 	
-	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 	<thead>
-	<th>Nombre</th>
-	<th>Descripci&oacute;n</th>
-	<th>Tipo</th>
-	<th>Categor&iacute;a</th>
-	<th>Fecha Creaci&oacute;n</th>
-	<th>Fecha Actualizaci&oacute;n</th>
-	<th>Fecha Expiraci&oacute;n</th>
-	<th>Subprocesos u Objetivos Relacionados</th>
-	<th>Causa</th>
-	<th>Efecto</th>
+	<th>Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Tipo<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Categor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Fecha Creaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Fecha Actualizaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Subprocesos u Objetivos Relacionados<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Causa<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th>Efecto<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th>Editar</th>
 	</thead>
 	@foreach ($riesgos as $riesgo)

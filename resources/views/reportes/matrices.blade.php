@@ -108,7 +108,6 @@
 							 
 							//seteamos datos en tabla para riesgos a través de un ciclo por todos los controles de procesos
 							$(datos).each( function() {	
-								
 								table_row += '<tr><td>' + this.Control + '</td><td>' + this.Descripción + '</td><td>';
 								table_row += this.Responsable + '</td><td>' + this.Tipo + '</td><td>' + this.Periodicidad +'</td>';
 								table_row += '<td>' + this.Propósito + '</td><td>' + this.Costo_control +'</td>';

@@ -79,88 +79,95 @@ class EvaluacionRiesgosController extends Controller
      */
     public function store(Request $request)
     {
-        if (isset($request['manual'])) //Se está evaluando manualmente
+        $riesgos_objetivos = array();
+        $riesgos_subprocesos = array();
+        if (isset($_POST['manual'])) //Se está evaluando manualmente
         {
 
-            //agregamos evaluación y obtenemos id
-            $eval_id = DB::table('evaluations')->insertGetId([
-                'name' => "Evaluación Manual",
-                'consolidation' => 1,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-                'max_levels' => 5,
-                ]);
+            $tipo = 0; //evaluación manual
 
-            //creamos atributo para identificar que la evaluación es manual 
-            //(posteriormente al guardar los resultados para poder consolidarlos inmediatamente)
-            
-            //Guardaremos una variable de session con nombre type (NO ES NECESARIO)
-            //Session::set('type',1);
+            $i = 0;
+            if (isset($_POST['objective_risk_id'])) //insertamos primero riesgos de negocio -> si es que se agregaron
+            {
+                foreach ($_POST['objective_risk_id'] as $objective_risk_id)
+                {
+                    /*
+                        //insertamos riesgo de negocio en evaluation_risk
+                        DB::table('evaluation_risk')->insert([
+                            'evaluation_id' => $eval_id,
+                            'objective_risk_id' => $objective_risk_id,
+                            ]); */
+                    $riesgos_objetivos[$i] = $objective_risk_id;
+                    $i += 1;
+                }
+            }
+
+            $i = 0;
+            if (isset($_POST['risk_subprocess_id'])) //ahora insertamos riesgos de subproceso (si es que se agregaron)
+            {
+                foreach ($_POST['risk_subprocess_id'] as $subprocess_risk_id)
+                {
+                        /*
+                        //inseratmos riesgo de subproceso en evaluation_risk
+                    DB::table('evaluation_risk')->insert([
+                        'evaluation_id' => $eval_id,
+                        'risk_subprocess_id' => $subprocess_risk_id,
+                        ]); */
+                    $riesgos_subprocesos[$i] = $subprocess_risk_id;
+                    $i += 1;
+                }
+            }
+
+            return $this->generarEvaluacionManual($riesgos_subprocesos,$riesgos_objetivos);
+
         }
 
         else //se está creando encuesta de evaluación
         {
+            DB::transaction(function () {
 
-            //agregamos evaluación y obtenemos id
-            $eval_id = DB::table('evaluations')->insertGetId([
-                'name' => $_POST['nombre'],
-                'consolidation' => 0,
-                'description' => $_POST['descripcion'],
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-                'expiration_date' => $_POST['expiration_date'],
-                'max_levels' => 5,
-                ]);
 
-            //Guardaremos una variable de session con nombre type (NO ES NECESARIO)
-            //Session::set('type',0);
-        }
-            //ahora debemos agregar los riesgos en la tabla evaluation_risk
+                //agregamos evaluación y obtenemos id
+                $eval_id = DB::table('evaluations')->insertGetId([
+                    'name' => $_POST['nombre'],
+                    'consolidation' => 0,
+                    'description' => $_POST['descripcion'],
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'expiration_date' => $_POST['expiration_date'],
+                    'max_levels' => 5,
+                    ]);
 
-            //guardaremos los riesgos en un array en caso de que sea el ingreso manual
-            //$obj_risks = array();
-            //$sub_risks = array();
-
-            if (isset($request['objective_risk_id'])) //insertamos primero riesgos de negocio -> si es que se agregaron
-            {
-                foreach ($request['objective_risk_id'] as $objective_risk_id)
+                if (isset($_POST['objective_risk_id'])) //insertamos primero riesgos de negocio -> si es que se agregaron
                 {
-                    //guardamos en array
-                    //$obj_risks = array('objective_risk_id'=>$objective_risk_id);
-
-                    //insertamos riesgo de negocio en evaluation_risk
-                    DB::table('evaluation_risk')->insert([
-                        'evaluation_id' => $eval_id,
-                        'objective_risk_id' => $objective_risk_id,
-                        ]);
+                    foreach ($_POST['objective_risk_id'] as $objective_risk_id)
+                    {                   
+                        //insertamos riesgo de negocio en evaluation_risk
+                        DB::table('evaluation_risk')->insert([
+                            'evaluation_id' => $eval_id,
+                            'objective_risk_id' => $objective_risk_id,
+                            ]); 
+                    }
                 }
-            }
 
-            if (isset($request['risk_subprocess_id'])) //ahora insertamos riesgos de subproceso (si es que se agregaron)
-            {
-                foreach ($request['risk_subprocess_id'] as $subprocess_risk_id)
+                $i = 0;
+                if (isset($_POST['risk_subprocess_id'])) //ahora insertamos riesgos de subproceso (si es que se agregaron)
                 {
-                    //guardamos en array
-                    //$sub_risks = array('risk_subprocess_id'=>$subprocess_risk_id);
-
-                    //inseratmos riesgo de subproceso en evaluation_risk
-                    DB::table('evaluation_risk')->insert([
-                        'evaluation_id' => $eval_id,
-                        'risk_subprocess_id' => $subprocess_risk_id,
-                        ]);
+                    foreach ($_POST['risk_subprocess_id'] as $subprocess_risk_id)
+                    {
+                        //inseratmos riesgo de subproceso en evaluation_risk
+                        DB::table('evaluation_risk')->insert([
+                            'evaluation_id' => $eval_id,
+                            'risk_subprocess_id' => $subprocess_risk_id,
+                            ]); 
+                    }
                 }
-            }
 
-        if (isset($request['manual']))
-        {
-            return $this->generarEncuesta($eval_id);
+                Session::flash('message','Encuesta de evaluacion agregada correctamente');
+            });
+
+            return Redirect::to('/evaluacion');           
         }
-        else
-        {
-            Session::flash('message','Encuesta de evaluacion agregada correctamente');
-
-            return Redirect::to('/evaluacion');
-        }    
 
     }
 
@@ -277,10 +284,74 @@ class EvaluacionRiesgosController extends Controller
         //
     }
 
+    //función que generará la encuesta manual para proceder a guardar evaluación y encuesta
+    public function generarEvaluacionManual($subprocess_risk,$objective_risk)
+    {
+        $tipo = 0; //identifica evaluación manual
+        $encuesta = "Encuesta Manual";
+        $riesgos = array();
+        $i = 0;
+        
+        //cada uno de los riesgos de subproceso
+        foreach ($subprocess_risk as $risk)
+        {
+
+                $sub = DB::table('risk_subprocess')
+                        ->where('risk_subprocess.id','=',$risk)
+                        ->join('risks','risk_subprocess.risk_id','=','risks.id')
+                        ->join('subprocesses','risk_subprocess.subprocess_id','=','subprocesses.id')
+                        ->join('processes','processes.id','=','subprocesses.process_id')
+                        ->select('risks.name as risk_name','subprocesses.name as subprocess_name',
+                                'processes.name as process_name')
+                        ->get();
+
+                //guardamos el riesgo de subproceso junto a su id de evaluation_risk para crear form de encuesta
+                foreach ($sub as $sub)
+                {
+                    $riesgos[$i] = array('type' => 'subprocess',
+                                        'risk_id' => $risk,
+                                        'risk_name' => $sub->risk_name,
+                                        'subobj' => $sub->subprocess_name,
+                                        'orgproc' => $sub->process_name);
+                    $i += 1;
+                }
+        }
+
+        foreach ($objective_risk as $risk)
+        {
+                //obtenemos nombre de riesgo y organizacion
+                $neg = DB::table('objective_risk')
+                        ->where('objective_risk.id','=',$risk)
+                        ->join('risks','objective_risk.risk_id','=','risks.id')
+                        ->join('objectives','objective_risk.objective_id','=','objectives.id')
+                        ->join('organizations','objectives.organization_id','=','organizations.id')
+                        ->select('risks.name as risk_name','organizations.name as organization_name',
+                                'objectives.name as objective_name')
+                        ->get();
+
+                foreach ($neg as $neg)
+                {
+                    $riesgos[$i] = array('type' => 'objective',
+                                        'risk_id' => $risk,
+                                        'risk_name' => $neg->risk_name,
+                                        'subobj' => $neg->objective_name,
+                                        'orgproc' => $neg->organization_name);
+                    $i += 1;
+                }
+            
+        }
+
+        $tipos_impacto = ['Despreciable','Menor','Moderado','Severo','Catastrófico'];
+        $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
+
+        return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
+                    'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba]);
+    }
     //función que generará la encuesta para que el usuario pueda responderla
     public function generarEncuesta($id)
     {
-        $encuesta = \Ermtool\Evaluation::find($id);
+        $tipo = 1; //identifica que es encuesta y no evaluación manual
+        $encuesta = \Ermtool\Evaluation::find($id)->value('name');
         $evaluation_risk = DB::table('evaluation_risk')->where('evaluation_id','=',$id)->get();
         $riesgos = array();
         $i = 0;
@@ -334,7 +405,11 @@ class EvaluacionRiesgosController extends Controller
             $i += 1;
         }
 
-        return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos]);
+        $tipos_impacto = ['Despreciable','Menor','Moderado','Severo','Catastrófico'];
+        $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
+
+        return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
+                    'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba]);
     }
 
     //Función para enviar correo con link a la encuesta
@@ -381,39 +456,108 @@ class EvaluacionRiesgosController extends Controller
 
         if ($stakeholder) //si es que el rut ingresado es correcto, procedemos a guardar evaluación
         {
-            foreach ($request['evaluation_risk_id'] as $evaluation_risk) //para cada riesgo de la encuesta hacemos un insert
-            {
-                    DB::table('evaluation_risk_stakeholder')->insert([
-                        'evaluation_risk_id'=>$evaluation_risk,
-                        'stakeholder_id'=>$request['rut'],
-                        'probability'=>$request['proba_'.$evaluation_risk],
-                        'impact'=>$request['criticidad_'.$evaluation_risk]
-                        ]);  
-    
-                    //actualizamos promedio de probabilidad e impacto en tabla evaluation_risk
-                    
-                    //para cada riesgo evaluado, identificaremos promedio de probabilidad y de criticidad
-                    $prom_proba = DB::table('evaluation_risk')
-                            ->join('evaluation_risk_stakeholder','evaluation_risk_stakeholder.evaluation_risk_id','=','evaluation_risk.id')
-                            ->where('evaluation_risk.id',$evaluation_risk)
-                            ->avg('probability');
+            
+            DB::transaction(function() {
 
-                    $prom_impacto = DB::table('evaluation_risk')
-                            ->join('evaluation_risk_stakeholder','evaluation_risk_stakeholder.evaluation_risk_id','=','evaluation_risk.id')
-                            ->where('evaluation_risk.id',$evaluation_risk)
-                            ->avg('impact');
+                //verificamos si tipo = 0 (significaria que es evaluación manual por lo tanto se debe crear)
+                $i = 0;
+                $evaluation_risk = array(); //array que guarda los riesgos que se estarán almacenando
+                if ($_POST['tipo'] == 0)
+                {
+                    //primero creamos evaluación manual
 
-                    DB::table('evaluation_risk')
-                        ->join('evaluation_risk_stakeholder','evaluation_risk_stakeholder.evaluation_risk_id','=','evaluation_risk.id')
-                        ->where('evaluation_risk.id',$evaluation_risk)
-                        ->update(['evaluation_risk.avg_probability' => $prom_proba,
-                                'evaluation_risk.avg_impact' => $prom_impacto
+                    $eval_id = DB::table('evaluations')->insertGetId([
+                            'name' => 'Evaluación Manual',
+                            'consolidation' => 1,
+                            'description' => 'Evaluación Manual',
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                            'max_levels' => 5,
+                        ]);
+                    //insertamos riesgos de evaluación
+                    foreach ($_POST['evaluation_risk_id'] as $risk_id) //OBS: Pueden haber riesgos de negocio y de proceso, por lo que se debe verificar
+                    {
+                        if (isset($_POST['proba_'.$risk_id.'_subprocess'])) //existe el id como riesgo de proceso
+                        {
+                            //inseratmos riesgo de subproceso en evaluation_risk
+                            $evaluation_risk[$i] = DB::table('evaluation_risk')->insertGetId([
+                                'evaluation_id' => $eval_id,
+                                'risk_subprocess_id' => $risk_id,
+                                'avg_probability' => $_POST['proba_'.$risk_id.'_subprocess'],
+                                'avg_impact' => $_POST['criticidad_'.$risk_id.'_subprocess']
                                 ]);
 
-            }
+                            //insertamos en evaluation_risk_stakeholder
+                            DB::table('evaluation_risk_stakeholder')->insert([
+                            'evaluation_risk_id'=>$evaluation_risk[$i],
+                            'stakeholder_id'=>$_POST['rut'],
+                            'probability'=>$_POST['proba_'.$risk_id.'_subprocess'],
+                            'impact'=>$_POST['criticidad_'.$risk_id.'_subprocess']
+                            ]);
 
+                            $i += 1;  
+                        }
 
-            Session::flash('message','Respuestas enviadas correctamente');
+                        if (isset($_POST['proba_'.$risk_id.'_objective'])) //existe el id como riesgo de negocio
+                        {
+                            //inseratmos riesgo de negocio en evaluation_risk
+                            $evaluation_risk[$i] = DB::table('evaluation_risk')->insertGetId([
+                                'evaluation_id' => $eval_id,
+                                'objective_risk_id' => $risk_id,
+                                'avg_probability' => $_POST['proba_'.$risk_id.'_objective'],
+                                'avg_impact' => $_POST['criticidad_'.$risk_id.'_objective']
+                                ]);
+
+                            //insertamos en evaluation_risk_stakeholder
+                            DB::table('evaluation_risk_stakeholder')->insert([
+                            'evaluation_risk_id'=>$evaluation_risk[$i],
+                            'stakeholder_id'=>$_POST['rut'],
+                            'probability'=>$_POST['proba_'.$risk_id.'_objective'],
+                            'impact'=>$_POST['criticidad_'.$risk_id.'_objective']
+                            ]);
+
+                            $i += 1; 
+                        }
+                    }
+                }
+
+                else //no es evaluación manual
+                {
+                    foreach ($_POST['evaluation_risk_id'] as $evaluation_risk) //para cada riesgo de la encuesta hacemos un insert
+                    {
+                            DB::table('evaluation_risk_stakeholder')->insert([
+                                'evaluation_risk_id' => $evaluation_risk,
+                                'stakeholder_id' => $_POST['rut'],
+                                'probability'=> $_POST['proba_'.$evaluation_risk],
+                                'impact' => $_POST['criticidad_'.$evaluation_risk]
+                                ]);  
+            
+                            //actualizamos promedio de probabilidad e impacto en tabla evaluation_risk
+                            
+                            //para cada riesgo evaluado, identificaremos promedio de probabilidad y de criticidad
+                            $prom_proba = DB::table('evaluation_risk')
+                                    ->join('evaluation_risk_stakeholder','evaluation_risk_stakeholder.evaluation_risk_id','=','evaluation_risk.id')
+                                    ->where('evaluation_risk.id',$evaluation_risk)
+                                    ->avg('probability');
+
+                            $prom_impacto = DB::table('evaluation_risk')
+                                    ->join('evaluation_risk_stakeholder','evaluation_risk_stakeholder.evaluation_risk_id','=','evaluation_risk.id')
+                                    ->where('evaluation_risk.id',$evaluation_risk)
+                                    ->avg('impact');
+
+                            DB::table('evaluation_risk')
+                                ->join('evaluation_risk_stakeholder','evaluation_risk_stakeholder.evaluation_risk_id','=','evaluation_risk.id')
+                                ->where('evaluation_risk.id',$evaluation_risk)
+                                ->update(['evaluation_risk.avg_probability' => $prom_proba,
+                                        'evaluation_risk.avg_impact' => $prom_impacto
+                                        ]);
+
+                    }
+                }
+
+                Session::flash('message','Respuestas enviadas correctamente');
+            });
+            
             return view('evaluacion.encuestaresp');
             //print_r($_POST);
         }

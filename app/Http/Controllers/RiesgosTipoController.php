@@ -70,18 +70,18 @@ class RiesgosTipoController extends Controller
             //obtenemos causa si es que tiene
             if ($riesgo['cause_id'] != NULL)
             {
-                $causa = \Ermtool\Cause::find($riesgo['cause_id']);
+                $causa = \Ermtool\Cause::find($riesgo['cause_id'])->value('name');
             }
             else
-                $causa['nombre'] = "No especificada";
+                $causa = "No especificada";
 
             //obtenemos efecto si es que existe
             if ($riesgo['effect_id'] != NULL)
             {
-                $efecto = \Ermtool\Effect::find($riesgo['effect_id']);
+                $efecto = \Ermtool\Effect::find($riesgo['effect_id'])->value('name');
             }
             else
-                $efecto['nombre'] = "No especificado";
+                $efecto = "No especificado";
 
             $riesgostipo[$i] = array('id'=>$riesgo['id'],
                                 'nombre'=>$riesgo['name'],
@@ -89,8 +89,8 @@ class RiesgosTipoController extends Controller
                                 'fecha_creacion'=>$fecha_creacion,
                                 'fecha_act'=>$fecha_act,
                                 'fecha_exp'=>$fecha_exp,
-                                'causa'=>$causa['name'],
-                                'efecto'=>$efecto['name'],
+                                'causa'=>$causa,
+                                'efecto'=>$efecto,
                                 'categoria'=>$categoria['name'],
                                 'estado'=>$riesgo['status']);
             $i += 1;

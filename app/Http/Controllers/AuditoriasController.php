@@ -2715,7 +2715,6 @@ class AuditoriasController extends Controller
                         ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_test.audit_audit_plan_id')
                         ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
                         ->join('audits','audits.id','=','audit_audit_plan.audit_id')
-
             			->select('issues.id','issues.name','issues.description','issues.audit_audit_plan_audit_test_id','issues.recommendations',
             				'risks.name as risk_name',
             				'controls.name as control_name',
@@ -2727,7 +2726,7 @@ class AuditoriasController extends Controller
 
             $type = 'Hallazgos de procesos';
 
-            foreach ($issues as $issue1)
+            foreach ($issues as $issue1) //para cada issue obtenemos datos de planes de acción
             {
             	$issue2 = NULL;
             	$issue2 = DB::table('action_plans')
@@ -2741,7 +2740,7 @@ class AuditoriasController extends Controller
                         ->get();
 
 
-                if ($issue2 != NULL)
+                if ($issue2 != NULL) //si es que hay plan de acción asociado
                 {
 	                foreach ($issue2 as $issue)
 	                {
@@ -2771,7 +2770,7 @@ class AuditoriasController extends Controller
 			         }
 			                $i += 1;
 			    }
-			    else
+			    else //no hay plan de accion
 			    {
 			    	if ($issue1->recommendations == "")
 			        {
@@ -2792,10 +2791,9 @@ class AuditoriasController extends Controller
 			                            'Auditoría' => $issue1->audit_name,
 			                            'Plan_de_auditoría' => $issue1->audit_plan_name
 			                           ];
-
+                    $i += 1;
 			    }
-			    	$i += 1;
-
+			    	
 		      }
         }
 

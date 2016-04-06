@@ -433,7 +433,7 @@ Route::get('evaluacion_manual', [
 	'as' => 'evaluacion_manual', 'uses' => 'EvaluacionRiesgosController@evaluacionManual'
 ]);
 
-// ----Rutas para gestión de controles---- //
+// ----RUTAS PARA GESTIÓN DE CONTROLES ---- //
 
 Route::get('controles', [
 	'as' =>'controles', 'uses' => 'ControlesController@index']);
@@ -448,6 +448,13 @@ Route::put('controles.update.{id}', [
 	'as' => 'controles.update', 'uses' => 'ControlesController@update'
 ]);
 
+Route::get('evaluar_controles', [
+	'as' => 'evaluar_controles', 'uses' => 'ControlesController@indexEvaluacion'
+]);
+
+Route::post('control.guardar_evaluacion', [
+	'as' => 'control.guardar_evaluacion', 'uses' => 'ControlesController@storeEvaluacion'
+]);
 
 // ----Rutas para reportes básicos---- //
 
@@ -674,6 +681,41 @@ Route::get('get_processes.{id}', [
 Route::get('get_objectives.{id}', [
 	'as' => 'get_objectives', 'uses' => 'ObjetivosController@getObjectives']);
 
+Route::get('get_kri.{id}', [
+	'as' => 'get_kri', 'uses' => 'KriController@getKri']);
+
+Route::get('get_kri_evaluations.{id}', [
+	'as' => 'get_kri_evaluations', 'uses' => 'KriController@getEvaluations']);
+
+
+// ---- RUTAS PARA KRI ----//
+Route::get('kri', [
+	'as' => 'kri', 'uses' => 'KriController@index']);
+
+Route::get('enlazar_riesgos', [
+	'as' => 'enlazar_riesgos', 'uses' => 'KriController@enlazar']);
+
+Route::post('kri.guardar_enlace', [
+	'as' => 'kri.guardar_enlace', 'uses' => 'KriController@guardarEnlace'
+]);
+
+Route::get('kri.create.{id}', [
+	'as' => 'kri.create', 'uses' => 'KriController@create']);
+
+Route::post('kri.store', [
+	'as' => 'kri.store', 'uses' => 'KriController@store']);
+
+Route::get('kri.edit.{id}', [
+	'as' => 'kri.edit', 'uses' => 'KriController@edit']);
+
+Route::get('kri.evaluar.{id}', [
+	'as' => 'kri.evaluar', 'uses' => 'KriController@evaluar']);
+
+Route::put('kri.update.{id}', [
+    'as' => 'kri.update', 'uses' => 'KriController@update']);
+
+Route::post('kri.guardar_evaluacion', [
+	'as' => 'kri.guardar_evaluacion', 'uses' => 'KriController@storeEval']);
 
 // ---- Rutas adicionales del framework ----//
 

@@ -243,7 +243,7 @@ class RiesgosController extends Controller
                     if (isset($_POST['efecto_nuevo']))
                     {
                         $effect = \Ermtool\Effect::create([
-                            'name'=>$request['efecto_nuevo']
+                            'name'=>$_POST['efecto_nuevo']
                             ]);
 
                         //obtenemos id de efecto agregado

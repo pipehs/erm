@@ -50,17 +50,25 @@
 					</ul>
 				</li>
 
-				<li><a href="controles" class="{{ activeMenu('controles') }}"><i class="fa fa-hand-o-right"></i>Gesti&oacute;n de Controles</a></li>
-
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle">
-						<i class="fa fa-pencil"></i>
+						<i class="fa fa-wrench"></i>
+						<span class="hidden-xs">Gesti&oacute;n de Controles</span>
+					</a>
+					<ul class="dropdown-menu" style="{{ dropDown5() }}">
+						<li><a href="controles" class="{{ activeMenu('controles') }}">Gesti&oacute;n de Controles</a></li>
+						<li><a href="evaluar_controles" class="{{ activeMenu('evaluar_controles') }}">Evaluaci&oacute;n de Controles</a></li>
+					</ul>
+				</li>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle">
+						<i class="fa fa-check-circle"></i>
 						<span class="hidden-xs">Auditor&iacute;a de Riesgos</span>
 					</a>
 					<ul class="dropdown-menu" style="{{ dropDown6() }}">
 						<!--<li><a href="auditorias" class="{{ activeMenu('auditorias') }}">Auditor&iacute;as</a></li>-->
 						<li><a href="plan_auditoria" class="{{ activeMenu('plan_auditoria') }}">Planes de auditor&iacute;a</a></li>
-						<li><a href="crear_pruebas" class="{{ activeMenu('crear_pruebas') }}">Generar pruebas de <br>auditor&iacute;a</a></li>
+						<li><a href="crear_pruebas" class="{{ activeMenu('crear_pruebas') }}">Generar programa de <br>auditor&iacute;a</a></li>
 						<!--<li><a href="pruebas" class="{{ activeMenu('pruebas') }}">Reporte pruebas de <br>auditor&iacute;a</a></li>-->
 						<li><a href="ejecutar_pruebas" class="{{ activeMenu('ejecutar_pruebas') }}">Ejecutar plan de <br>auditor&iacute;a</a></li>
 						<li><a href="supervisar" class="{{ activeMenu('supervisar') }}">Supervisar planes de <br>auditor&iacute;a</a></li>
@@ -81,6 +89,19 @@
 						<li>{!!HTML::link('reporte_hallazgos','Hallazgos',['class'=>activeMenu('hallazgos')])!!}</li>
 						<li>{!!HTML::link('reporte_planes','Planes de Acci&oacute;n',['class'=>activeMenu('reporte_planes')])!!}</li>
 						<li>{!!HTML::link('encuestas','Revisi&oacute;n de Encuestas',['class'=>activeMenu('encuestas')])!!}</li>
+					</ul>
+				</li>
+
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle">
+						<i class="fa fa-check-circle"></i>
+						<span class="hidden-xs">KRI</span>
+					</a>
+					<ul class="dropdown-menu" style="{{ dropDown7() }}">
+						<li><a href="kri" class="{{ activeMenu('kri') }}">Gestionar KRI</a></li>
+						<li><a href="enlazar_riesgos" class="{{ activeMenu('enlazar_riesgos') }}">Enlazar Riesgos</a></li>
+						
+
 					</ul>
 				</li>
 			</ul>
