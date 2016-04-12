@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Enlazar Riesgos')
+@section('title', 'Monitor KRI')
 
 @stop
 
@@ -10,8 +10,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('kri','KRI')!!}</li>
-			<li>{!!Html::link('kri.enlazar','Gestionar KRI')!!}</li>
+			<li>{!!Html::link('kri','Gestionar KRI')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -21,7 +20,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Gestionar KRI</span>
+					<span>Monitor KRI</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -38,71 +37,78 @@
 			</div>
 			<div class="box-content">
 
-			@if ($errors->any())
-				<div class="alert alert-danger alert-dismissible" role="alert">
-					<ul>
-					@foreach ($errors->all() as $error)
-						<li>{{ $error }}</li>
-					@endforeach
-					</ul>
-				</div>
-			@endif
-
 			@if(Session::has('message'))
 				<div class="alert alert-success alert-dismissible" role="alert">
 				{{ Session::get('message') }}
 				</div>
 			@endif
 
-			En esta secci&oacute;n podr&aacute; crear y/o modificar los indicadores para los riesgos relevantes al negocio,
-			y adem&aacute;s evaluar los mismos.
+			En esta secci&oacute;n podr&aacute; monitorear, crear y/o modificar los indicadores para los riesgos relevantes al negocio, adem&aacute;s de poder evaluar los mismos. <br><br>
 
-				{!!Form::open(['route'=>'kri.guardar_enlace','method'=>'POST','class'=>'form-horizontal',
-				'enctype'=>'multipart/form-data'])!!}
-				<div id="cargando"></div>
-				<div id="risks" style="float: center;">
-					<div class="form-group">
-						{!!Form::label('Seleccione riesgo',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							<select name="risk_id" id="risk_id" required="true">
-								<option value="" selected disabled>- Seleccione -</option>
-								<option value="" disabled>- Riesgos de proceso asociados -</option>
-								@if ($risk_subprocess != null)
-									@foreach ($risk_subprocess as $risk)
-										<option value="{{ $risk['id'] }}_sub">
-											{{ $risk['name'] }}
-										</option>
-									@endforeach
-								@else
-									<option value="" disabled>No hay riesgos de proceso asociados</option>
-								@endif
-
-								@if ($objective_risk != null)
-									<option value="" disabled>- Riesgos de negocio -</option>
-									@foreach ($objective_risk as $risk)
-										<option value="{{ $risk['id'] }}_obj">
-											{{ $risk['name'] }}
-										</option>
-									@endforeach
-								@else
-									<option value="" disabled>No hay riesgos de negocio</option>
-								@endif
-							</select>
-						</div>
-					</div>
+			<div id="risks" style="float: center;">
+					
 				</div>
 
 				<div id="info_kri" style="float: center;">
+					@if ($kri == null)
+						<center><b>Aun no se han creado ning&uacute;n KRI.</b></center><br><br>
+					@else
+						<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+						<thead>
+						<th>KRI</th>
+						<th>Descripci&oacute;n</th>
+						<th>Unidad de medida de evaluaci&oacute;n</th>
+						<th>Evaluaci&oacute;n</th>
+						<th>Resultado</th>
+						<th>Descripci&oacute;n de la evaluaci&oacute;n</th>
+						<th>Riesgo</th>
+						<th>Responsable del riesgo</th>
+						<th>Fecha creaci&oacute;n</th>
+						<th>Intervalo de evaluaci&oacute;n</th>
+						<th>Acci&oacute;n</th>
+						<th>Acci&oacute;n</th>
+						</thead>
 
+						@foreach ($kri as $k)
+
+							<tr>
+							<td>{{ $k['name'] }} </td>
+							<td>{{ $k['description'] }}</td>
+							<td>{{ $k['uni_med'] }}</td>
+							<td>{{ $k['last_eval'] }}</td>
+							<td>
+							@if ($k['eval'] == 0)
+								<ul class="semaforo verde"><li></li><li></li><li></li></ul>
+							@elseif ($k['eval'] == 1)
+								<ul class="semaforo amarillo"><li></li><li></li><li></li></ul>
+							@elseif ($k['eval'] == 2)
+								<ul class="semaforo rojo"><li></li><li></li><li></li></ul>
+							@elseif ($k['eval'] == 3)
+								Ninguna
+							@endif
+							</td>
+							<td>{{ $k['description_eval'] }}</td>
+							<td>{{ $k['risk'] }}</td>
+							<td>{{ $k['risk_stakeholder'] }}</td>
+							<td>{{ $k['created_at'] }}</td>
+							<td>
+							@if ($k['date_min'] != null)
+								{{ $k['date_min'] }} - {{ $k['date_max'] }}
+							@else
+								Ninguno
+							@endif
+							</td>
+							<td><a href="kri.edit.{{ $k['id'] }}" class="btn btn-primary">Editar</a></td>
+							<td><a href="kri.evaluar.{{ $k['id'] }}" class="btn btn-success">Evaluar</a></td>
+							</tr>
+						@endforeach
+						</table>
+					@endif
+
+					<center><a href="kri.create" class="btn btn-success">Agregar nuevo KRI</a></center>
 				</div>
 				</br>
 
-				{!!Form::close()!!}
-
-				<center>
-					{!! link_to_route('kri', $title = 'Volver', $parameters = NULL,
-                 		$attributes = ['class'=>'btn btn-danger'])!!}
-				<center>
 			</div>
 		</div>
 	</div>
@@ -111,100 +117,5 @@
 
 
 @section('scripts2')
-<script>
-$("#risk_id").change(function() {
-	if ($("#risk_id").val() != '') //Si es que se ha seleccionado valor válido de riesgo
-	{
-		//Añadimos la imagen de carga en el contenedor
-		$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
-		//se obtienen controles asociados a los riesgos presentes en el plan de prueba seleccionado
-		//primero obtenemos controles asociados a los riesgos de negocio
 
-		//obtenemos kri del riesgo seleccionado
-		$.get('get_kri.'+$("#risk_id").val(), function (result) {
-				
-				$("#cargando").html('<br>');
-				$("#info_kri").empty();
-
-				if (result == "null")
-				{
-					var info = "<center>Aun no se ha creado indicador para el riesgo ";
-					info += $("#risk_id option:selected").text() + ".<br><br></center>";
-					info += '<center><a href="kri.create.'+$("#risk_id").val()+'" class="btn btn-success">Crear KRI</a</center>';
-					$("#info_kri").append(info);
-				}
-
-				else
-				{
-
-					var table_row= '<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">';
-					table_row += '<thead>';
-					table_row += '<th>KRI</th>';
-					table_row += '<th >Descripci&oacute;n</th>';
-					table_row += '<th>Unidad de medida de evaluaci&oacute;n';
-					table_row += '<th>Evaluaci&oacute;n</th>';
-					table_row += '<th>Resultado</th>';
-					table_row += '<th>Descripci&oacute;n de la evaluaci&oacute;n</th>';
-					table_row += '<th>Riesgo</th>';
-					table_row += '<th>Responsable del riesgo</th>';
-					table_row += '<th>Fecha evaluaci&oacute;n</th>';
-					table_row += '<th>Acci&oacute;n</th>';
-					table_row += '<th>Acci&oacute;n</th>';
-					table_row += '</thead>';
-
-					
-
-					//parseamos datos obtenidos
-					var datos = JSON.parse(result);
-					
-					//seteamos datos
-					$(datos).each( function() {
-							table_row += '<tr><td>'+this.name+'</td><td>'+this.description+'</td>';
-							table_row += '<td>'+this.uni_med+'</td>';
-							table_row += '<td>'+this.last_eval+'</td>';
-
-							//mostramos evaluación
-							if (this.eval == 0)
-							{
-								table_row += '<td><ul class="semaforo verde"><li></li><li></li><li></li></ul></td>';	
-							}
-							else if (this.eval == 1)
-							{
-								table_row += '<td><ul class="semaforo amarillo"><li></li><li></li><li></li></ul></td>';	
-							}
-							else if (this.eval == 2)
-							{
-								table_row += '<td><ul class="semaforo rojo"><li></li><li></li><li></li></ul></td>';	
-							}
-							else
-							{
-								table_row += '<td>'+this.eval+'</td>';
-							}
-							
-
-							table_row += '<td>'+this.description_eval+'</td>';
-							table_row += '<td>'+ $("#risk_id option:selected").text() +'</td>';
-							table_row += '<td>Ninguno</td>';
-							table_row += '<td>'+this.last_evaluation+'</td>';
-							table_row += '<td><a href="kri.edit.'+this.id+'" class="btn btn-primary">Editar</a>';
-							table_row += '<td><a href="kri.evaluar.'+this.id+'" class="btn btn-success">Evaluar</a>';
-							table_row += '</tr>';
-
-					
-					});
-
-					table_row += '</table>';
-					table_row += '<center><a href="kri.create.'+$("#risk_id").val()+'" class="btn btn-success">Agregar nuevo KRI</a</center>';
-					$("#info_kri").html(table_row);
-
-				}
-		});
-	}
-	else
-	{
-		$("#info_kri").empty();
-	}
-
-});
-</script>
 @stop

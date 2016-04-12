@@ -38,13 +38,9 @@
 			</div>
 			<div class="box-content">
 
-			@if ($errors->any())
+			@if(Session::has('error'))
 				<div class="alert alert-danger alert-dismissible" role="alert">
-					<ul>
-					@foreach ($errors->all() as $error)
-						<li>{{ $error }}</li>
-					@endforeach
-					</ul>
+				{{ Session::get('error') }}
 				</div>
 			@endif
 
@@ -58,8 +54,21 @@
 			{!!Form::open(['route'=>'kri.guardar_evaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
 			<div class="form-group">
 				{!!Form::label('Evaluación',null,['class'=>'col-sm-4 control-label'])!!}
-				<div class="col-sm-3">
+				<div class="col-sm-5">
 					{!!Form::number('evaluation',null,['class'=>'form-control','required'=>'true','id'=>'evaluation','step'=>'0.1'])!!}
+				</div>
+			</div>
+
+			<div class="form-group">
+				{!!Form::label('Intervalo de valuación',null,['class'=>'col-sm-4 control-label'])!!}
+				<div class="col-sm-2">
+					{!!Form::date('date_min',null,['class'=>'form-control','required'=>'true'])!!}
+				</div>
+				<div class="col-sm-1">
+				<center>-</center>
+				</div>
+				<div class="col-sm-2">
+					{!!Form::date('date_max',null,['class'=>'form-control','required'=>'true'])!!}
 				</div>
 			</div>
 
@@ -134,7 +143,8 @@ $("#ver_evaluaciones").click(function() {
 				table_row += '<thead>';
 				table_row += '<th>Valor evaluaci&oacute;n</th>';
 				table_row += '<th>Resultado</th>';
-				table_row += '<th >Fecha evaluaci&oacute;n</th>';
+				table_row += '<th>Fecha evaluaci&oacute;n</th>';
+				table_row += '<th>Intervalo evaluaci&oacute;n</th>';
 				table_row += '</thead>';
 
 				//parseamos datos obtenidos
@@ -146,7 +156,7 @@ $("#ver_evaluaciones").click(function() {
 						//mostramos evaluación
 						if (this.eval == 0)
 						{
-							table_row += '<td><ul class="semaforo verde"><li></li><li></li><li></li></ul></td>';	
+							table_row += '<td valign="top"><ul class="semaforo verde"><li></li><li></li><li></li></ul></td>';	
 						}
 						else if (this.eval == 1)
 						{
@@ -160,7 +170,8 @@ $("#ver_evaluaciones").click(function() {
 						{
 							table_row += '<td>'+this.eval+'</td>';
 						}
-						table_row += '<td>'+this.date+'</td></tr>';				
+						table_row += '<td>'+this.date+'</td>';
+						table_row += '<td>'+this.date_min+' - '+this.date_max+'</td></tr>';					
 					});
 
 					table_row += '</table>';

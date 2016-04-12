@@ -95,13 +95,12 @@
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle">
 						<i class="fa fa-check-circle"></i>
-						<span class="hidden-xs">KRI</span>
+						<span class="hidden-xs">Gestionar KRI</span>
 					</a>
 					<ul class="dropdown-menu" style="{{ dropDown7() }}">
-						<li><a href="kri" class="{{ activeMenu('kri') }}">Gestionar KRI</a></li>
-						<li><a href="enlazar_riesgos" class="{{ activeMenu('enlazar_riesgos') }}">Enlazar Riesgos</a></li>
-						
-
+						<li><a href="kri" class="{{ activeMenu('kri') }}">Monitor KRI</a></li>
+						<li><a href="riesgo_kri" class="{{ activeMenu('riesgo_kri') }}">Riesgo - KRI</a></li>
+						<li><a href="enlazar_riesgos" class="{{ activeMenu('enlazar_riesgos') }}">Vincular Riesgos</a></li>
 					</ul>
 				</li>
 			</ul>

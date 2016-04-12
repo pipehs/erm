@@ -692,6 +692,9 @@ Route::get('get_kri_evaluations.{id}', [
 Route::get('kri', [
 	'as' => 'kri', 'uses' => 'KriController@index']);
 
+Route::get('riesgo_kri', [
+	'as' => 'riesgo_kri', 'uses' => 'KriController@index2']);
+
 Route::get('enlazar_riesgos', [
 	'as' => 'enlazar_riesgos', 'uses' => 'KriController@enlazar']);
 
@@ -699,7 +702,7 @@ Route::post('kri.guardar_enlace', [
 	'as' => 'kri.guardar_enlace', 'uses' => 'KriController@guardarEnlace'
 ]);
 
-Route::get('kri.create.{id}', [
+Route::get('kri.create', [
 	'as' => 'kri.create', 'uses' => 'KriController@create']);
 
 Route::post('kri.store', [

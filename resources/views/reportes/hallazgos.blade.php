@@ -114,11 +114,11 @@
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
 
-							alert(result);
+							//alert(result);
 							 
 							//seteamos datos en tabla para riesgos a través de un ciclo por todos los controles de procesos
 							$(datos).each(function() {	
-										alert(this);
+										//alert(this);
 										table_row += '<tr><td>' + this.Hallazgo + '</td><td>' + this.Riesgo + '</td><td>';
 										table_row += this.Control +'</td><td>';
 										table_row += this.Proceso + '</td><td>' + this.Recomendación + '</td><td>' + this.Plan_de_acción;

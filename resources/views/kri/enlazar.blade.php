@@ -54,6 +54,12 @@
 				</div>
 			@endif
 
+			@if(Session::has('warning'))
+				<div class="alert alert-warning alert-dismissible" role="alert">
+				{{ Session::get('warning') }}
+				</div>
+			@endif
+
 			Seleccione el riesgo de proceso y el riesgo de negocio que desea enlazar para la posterior medición de KRI
 				{!!Form::open(['route'=>'kri.guardar_enlace','method'=>'POST','class'=>'form-horizontal',
 				'enctype'=>'multipart/form-data'])!!}

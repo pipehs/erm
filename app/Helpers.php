@@ -177,10 +177,10 @@ function dropDown6()
 	}
 }
 
-//active de kris
+//active de risks
 function dropDown7()
 {
-	$uri = array('enlazar_riesgos','kri');
+	$uri = array('enlazar_riesgos','kri','riesgo_kri');
 
 	foreach ($uri as $uri)
 	{
@@ -200,6 +200,18 @@ function dropDown7()
 			}
 		}
 	}
+}
+
+//helper para cargar archivos
+function upload_file($archivo,$dir,$id)
+{
+	//separamos nombre archivo extension
+    $file = explode('.',$archivo->getClientOriginalName());
+
+    $guardado = Storage::put(
+        $dir.'/'. $file[0] . "___" . $id . "." . $file[1],
+        file_get_contents($archivo->getRealPath())
+    );
 }
 
 ?>

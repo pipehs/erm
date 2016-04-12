@@ -48,16 +48,10 @@
 				</div>
 			@endif
 
-			Ingrese la informaci&oacute;n para el nuevo indicador del riesgo <b>{{ $name }}</b>.
+			Ingrese la informaci&oacute;n para el nuevo indicador.
 
 			{!!Form::open(['route'=>'kri.store','method'=>'POST','class'=>'form-horizontal'])!!}
 				@include('kri.form')
-				
-			@if (isset($obj_risk_id))
-				<input type="hidden" name="obj_risk_id" value="{{ $obj_risk_id }}">
-			@elseif (isset($sub_risk_id))
-				<input type="hidden" name="sub_risk_id" value="{{ $sub_risk_id }}">
-			@endif
 
 			{!!Form::close()!!}
 

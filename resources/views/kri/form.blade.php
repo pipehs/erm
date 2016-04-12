@@ -1,4 +1,48 @@
-<div class="form-group">
+				<div class="form-group">
+					{!!Form::label('Seleccione riesgo',null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="col-sm-3">
+						<select name="risk_id" id="risk_id" required="true">
+							<option value="" selected disabled>- Seleccione -</option>
+							<option value="" disabled>- Riesgos de proceso asociados -</option>
+							@if ($risk_subprocess != null)
+								@foreach ($risk_subprocess as $risk)
+									<!-- Buscamos Riesgo que corresponde en caso que sea editar -->
+									@if (isset($kri) && $kri->risk_id == $risk['id'])
+										<option value="{{ $risk['id'] }}" selected>
+											{{ $risk['name'] }}
+										</option>
+									@else
+										<option value="{{ $risk['id'] }}">
+											{{ $risk['name'] }}
+										</option>
+									@endif
+								@endforeach
+							@else
+								<option value="" disabled>No hay riesgos de proceso asociados</option>
+							@endif
+
+							@if ($objective_risk != null)
+								<option value="" disabled>- Riesgos de negocio -</option>
+								@foreach ($objective_risk as $risk)
+									<!-- Buscamos Riesgo que corresponde en caso que sea editar -->
+									@if (isset($kri) && $kri->risk_id == $risk['id'])
+										<option value="{{ $risk['id'] }}" selected>
+											{{ $risk['name'] }}
+										</option>
+									@else
+										<option value="{{ $risk['id'] }}">
+											{{ $risk['name'] }}
+										</ooption>
+									@endif
+								@endforeach
+							@else
+								<option value="" disabled>No hay riesgos de negocio</option>
+							@endif
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group">
 					{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 						{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
@@ -25,7 +69,7 @@
 				<div class="form-group">
 					{!!Form::label('Unidad de medida',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
-					{!!Form::select('uni_med',['0'=>'Porcentaje','1'=>'Cantidad'], 
+					{!!Form::select('uni_med',['0'=>'Porcentaje','1'=>'Monto','2'=>'Cantidad'], 
 				 	   null, 
 				 	   ['id' => 'uni_med','placeholder'=>'- Seleccione -','required'=>'true'])!!}
 					</div>
@@ -102,7 +146,6 @@
 										'required'=>'true','rows'=>'3','id'=>'description_red'])!!}
 					</div>
 				</div>
-
 			</div>
 				<div class="form-group">
 						<center>

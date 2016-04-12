@@ -147,7 +147,7 @@
 							$(datos).each( function() {	
 								
 								table_row += '<tr><td>' + this.Control + '</td><td>' + this.Descripción + '</td><td>';
-								table_row += this.Riesgo_Objetivo_Organización + '</td><td>' + this.Tipo + '</td><td>' + this.Periodicidad +'</td>';
+								table_row += this.Tipo + '</td><td>' + this.Periodicidad +'</td>';
 								table_row += '<td>' + this.Propósito + '</td><td>' + this.Responsable + '</td><td>' + this.Evidencia +'</td>';
 								table_row += '<td>' + this.Costo_esperado + '</td><td>' + this.Riesgo_Objetivo_Organización + '</td></tr>';
 							});

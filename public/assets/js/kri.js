@@ -15,7 +15,20 @@
 				$("#red_max").attr('max','100');
 			}
 
-			else if ($("#uni_med").val() == 1) //cantidad
+			else if ($("#uni_med").val() == 1) //monto
+			{
+				//mostramos cotas y agregamos atributos max a cotas
+				$("#cotas").fadeIn(500);
+				$("#green_min").removeAttr('max');
+				$("#yellow_min").removeAttr('max');
+				$("#red_min").removeAttr('max');
+
+				$("#green_max").removeAttr('max');
+				$("#yellow_max").removeAttr('max');
+				$("#red_max").removeAttr('max');
+			}
+
+			else if ($("#uni_med").val() == 2) //cantidad
 			{
 				//mostramos cotas y agregamos atributos max a cotas
 				$("#cotas").fadeIn(500);
