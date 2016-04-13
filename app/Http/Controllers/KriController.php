@@ -54,6 +54,33 @@ class KriController extends Controller
                 $uni_med = "Cantidad";
             }
 
+
+            //Seteamos periodicity. 0=Diario, 1=Semanal, 2=Mensual, 3=Semestral, 4=Anual
+            switch ($k->periodicity)
+            {
+                case 0:
+                    $periodicity = "Diario";
+                    break;
+                case 1:
+                    $periodicity = "Semanal";
+                    break;
+                case 2:
+                    $periodicity = "Mensual";
+                    break;
+                case 3:
+                    $periodicity = "Semestral";
+                    break;
+                case 4:
+                    $periodicity = "Anual";
+                    break;
+                case 5:
+                    $periodicity = "Cada vez que ocurra";
+                    break;
+                case NULL:
+                    $periodicity = "Falta asignación";
+                    break;
+            }
+
             if ($k->kri_last_evaluation === NULL)
             {
                 $last_eval = "Aun no ha sido evaluado";
@@ -109,6 +136,7 @@ class KriController extends Controller
                 'uni_med' => $uni_med,
                 'created_at' => $created_at, 
                 'type' => $tipo,
+                'periodicity' => $periodicity,
                 'risk' => $k->risk_name,
                 'risk_stakeholder' => $k->risk_stake,
                 'eval' => $eval,
@@ -263,6 +291,7 @@ class KriController extends Controller
                         'name' => $_POST['name'],
                         'description' => $_POST['description'],
                         'type' => $_POST['type'],
+                        'periodicity' => $_POST['periodicity'],
                         'uni_med' => $_POST['uni_med'],
                         'green_min' => $_POST['green_min'],
                         'green_max' => $_POST['green_max'],
@@ -526,7 +555,8 @@ class KriController extends Controller
 
             $kri = \Ermtool\KRI::find($_POST['id']);
 
-            if ($_POST['evaluation'] >= $kri->green_min && $_POST['evaluation'] <= $kri->red_max)
+            //verificamos en caso de que vaya de menos a más ó || de más a menos
+            if ($_POST['evaluation'] >= $kri->green_min && $_POST['evaluation'] <= $kri->red_max || $_POST['evaluation'] <= $kri->green_min && $_POST['evaluation'] >= $kri->red_max)
             {
                 $date = date('Y-m-d H:i:s');
                 $id = DB::table('measurements')
@@ -698,15 +728,16 @@ class KriController extends Controller
     {
         if ($green_max != $yellow_min && $yellow_max != $red_min) //son distintos, por lo tanto incluyentes los minimos
         {
-                if ($value >= $green_min && $value <= $green_max)
+                //OBS: Verificamos en caso de que las cotas sean de mayor a menor Ó de menor a mayor
+                if ($value >= $green_min && $value <= $green_max || $value <= $green_min && $value >= $green_max)
                 {
                     $eval = 0; //0: verde
                 }
-                else if ($value >= $yellow_min && $value <= $yellow_max)
+                else if ($value >= $yellow_min && $value <= $yellow_max || $value <= $yellow_min && $value >= $yellow_max)
                 {
                     $eval = 1; //1: amarillo
                 }
-                else if ($value >= $red_min && $value <= $red_max)
+                else if ($value >= $red_min && $value <= $red_max || $value <= $red_min && $value >= $red_max)
                 {
                     $eval = 2; //2: rojo
                 }
@@ -714,15 +745,17 @@ class KriController extends Controller
 
         else //son iguales, por lo que se debe elegir un criterio, en este caso sera incluyente el mínimo y excluira el máximo
         {
-                if ($value >= $green_min && $value < $green_max)
+                //OBS: También verificamos en caso de que las cotas sean de mayor a menor Ó de menor a mayor
+                if ($value >= $green_min && $value < $green_max || $value <= $green_min && $value > $green_max)
                 {
                     $eval = 0; //0: verde
                 }
-                else if ($value >= $yellow_min && $value < $yellow_max)
+                else if ($value >= $yellow_min && $value < $yellow_max || $value <= $yellow_min && $value > $yellow_max)
                 {
                     $eval = 1; //1: amarillo
                 }
-                else if ($value >= $red_min && $value < $red_max)
+                //en este caso se deja >= $red_max en el último tramo ya que no hay más cotas
+                else if ($value >= $red_min && $value < $red_max || $value <= $red_min && $value >= $red_max)
                 {
                     $eval = 2; //2: rojo
                 }

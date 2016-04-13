@@ -127,7 +127,7 @@
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
 
-							//seteamos datos en select de riesgos / objetivos
+							//seteamos datos en select de riesgos / procesos
 							$(datos).each( function() {
 								$("#risk_subprocess_id").append('<option value="' + this.id + '">' + this.name +'</option>');
 								$("#riesgos").append('<tr><td>' + this.name + '</td><td>' + this.proba_def + ' (' + this.avg_probability + ')</td><td>' + this.impact_def + ' (' + this.avg_impact + ')</td></tr>');
@@ -139,7 +139,7 @@
 					$.get('get_stakeholders.'+$("#orgs").val(), function (result) {
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
-							//seteamos datos en select de riesgos / objetivos
+							//seteamos datos en select de stakeholders
 							$(datos).each( function() {
 								$("#stakeholder_id").append('<option value="' + this.rut + '">' + this.fullname +'</option>');
 							});

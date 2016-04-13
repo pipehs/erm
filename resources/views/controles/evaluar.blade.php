@@ -134,193 +134,74 @@ $("#control_id").change(function() {
 
 function test_diseno() //ESTE SI FUNCIONA!!!!!!
 {
-	if ($("#diseno").val() == 2)
-	{
-		var inefectivo = '<br>';
-		inefectivo += "<select name='clasificacion_diseno' style='width:180px;' class='form-control'>";
-		inefectivo += "<option value='' disabled selected>Seleccione Clasificación</option>";
-		inefectivo += "<option value='0'>Oportunidad de mejora</option>";
-		inefectivo += "<option value='1'>Deficiencia</option>";
-		inefectivo += "<option value='2'>Debilidad significativa</option></select><br>";
-
-		inefectivo += '<textarea name="hallazgo_diseno" class="form-control" style="width:180px" placeholder="Ingrese hallazgo"></textarea><br>';
-		inefectivo += '<textarea name="recomendaciones_diseno" class="form-control" style="width:180px" placeholder="Ingrese recomendaciones"></textarea><br>';
-		inefectivo += '<b><span style="float: left;">Plan de acción: </span></b><br>';
-		inefectivo += '<textarea name="plan_accion_diseno" class="form-control" style="width:180px" placeholder="Ingrese plan de acción"></textarea><br>';
-
-		inefectivo += '<input type="date" name="fecha_plan_diseno" class="form-control" style="width:180px" title="Ingrese fecha de término del plan"></textarea><br>';
-
-		inefectivo += '<select name="responsable_plan_diseno" class="form-control" style="width:180px">';
-		inefectivo += '<option value="" disabled selected>Responsable</option>';
-		@foreach ($stakeholders as $stakeholder)
-			inefectivo += '<option value="{{ $stakeholder["id"] }}">{{ $stakeholder["name"] }}</option>';
-		@endforeach
-
-		inefectivo += '</select>';
-
-		inefectivo += '<br><input type="file" name="file_diseno" id="file1" class="inputfile" />';
-		inefectivo += '<label for="file1">Cargue evidencia</label></div>';
-
-
-		$("#datos_diseno").html(inefectivo);
-		$("#datos_diseno").fadeIn(500);
-	}
-	else if ($("#diseno").val() == 1)
-	{
-		var efectivo = '<br><textarea name="comentarios_diseno" class="form-control" style="width:180px" placeholder="Ingrese comentarios (opcional)"></textarea><br>';
-		
-		efectivo += '<br><input type="file" name="file_diseno" id="file1" class="inputfile" />';
-		efectivo += '<label for="file1">Cargue evidencia</label></div>';
-
-		$("#datos_diseno").html(efectivo);
-		$("#datos_diseno").fadeIn(500);
-	}
-	else
-	{
-		$("#datos_diseno").empty();
-	}
+	agregarCampos("diseno");
 }
 
 function test_efectividad()
 {
-	if ($("#efectividad").val() == 2)
-	{
-		var inefectivo = '<br>';
-		inefectivo += "<select name='clasificacion_efectividad' style='width:180px;' class='form-control'>";
-		inefectivo += "<option value='' disabled selected>Seleccione Clasificación</option>";
-		inefectivo += "<option value='0'>Oportunidad de mejora</option>";
-		inefectivo += "<option value='1'>Deficiencia</option>";
-		inefectivo += "<option value='2'>Debilidad significativa</option></select><br>";
-		inefectivo += '<textarea name="hallazgo_efectividad" class="form-control" style="width:180px" placeholder="Ingrese hallazgo"></textarea><br>';
-		inefectivo += '<textarea name="recomendaciones_efectividad" class="form-control" style="width:180px" placeholder="Ingrese recomendaciones"></textarea><br>';
-		inefectivo += '<b><span style="float: left;">Plan de acción: </span></b><br>';
-		inefectivo += '<textarea name="plan_accion_efectividad" class="form-control" style="width:180px" placeholder="Ingrese plan de acción"></textarea><br>';
-
-		inefectivo += '<input type="date" name="fecha_plan_efectividad" class="form-control" style="width:180px" title="Ingrese fecha de término del plan"></textarea><br>';
-
-		inefectivo += '<select name="responsable_plan_efectividad" class="form-control" style="width:180px">';
-		inefectivo += '<option value="" disabled selected>Responsable</option>';
-		@foreach ($stakeholders as $stakeholder)
-			inefectivo += '<option value="{{ $stakeholder["id"] }}">{{ $stakeholder["name"] }}</option>';
-		@endforeach
-
-		inefectivo += '</select>';
-		inefectivo += '<br><input type="file" name="file_efectividad" id="file2" class="inputfile" />';
-		inefectivo += '<label for="file2">Cargue evidencia</label></div>';
-
-
-		$("#datos_efectividad").html(inefectivo);
-		$("#datos_efectividad").fadeIn(500);
-	}
-	else if ($("#efectividad").val() == 1)
-	{
-		var efectivo = '<br><textarea name="comentarios_efectividad" class="form-control" style="width:180px" placeholder="Ingrese comentarios (opcional)"></textarea><br>';
-		
-		efectivo += '<br><input type="file" name="file_efectividad" id="file2" class="inputfile" />';
-		efectivo += '<label for="file2">Cargue evidencia</label></div>';
-
-		$("#datos_efectividad").html(efectivo);
-		$("#datos_efectividad").fadeIn(500);
-	}
-	else
-	{
-		$("#datos_efectividad").empty();
-	}
+	agregarCampos("efectividad");
 }
 
 function test_sustantiva()
 {
-	if ($("#sustantiva").val() == 2)
-	{
-		var inefectivo = '<br>';
-		inefectivo += "<select name='clasificacion_sustantiva' style='width:180px;' class='form-control'>";
-		inefectivo += "<option value='' disabled selected>Seleccione Clasificación</option>";
-		inefectivo += "<option value='0'>Oportunidad de mejora</option>";
-		inefectivo += "<option value='1'>Deficiencia</option>";
-		inefectivo += "<option value='2'>Debilidad significativa</option></select><br>";
-		inefectivo += '<textarea name="hallazgo_sustantiva" class="form-control" style="width:180px" placeholder="Ingrese hallazgo"></textarea><br>';
-		inefectivo += '<textarea name="recomendaciones_sustantiva" class="form-control" style="width:180px" placeholder="Ingrese recomendaciones"></textarea><br>';
-		inefectivo += '<b><span style="float: left;">Plan de acción: </span></b><br>';
-		inefectivo += '<textarea name="plan_accion_sustantiva" class="form-control" style="width:180px" placeholder="Ingrese plan de acción"></textarea><br>';
-
-		inefectivo += '<input type="date" name="fecha_plan_sustantiva" class="form-control" style="width:180px" title="Ingrese fecha de término del plan"></textarea><br>';
-
-		inefectivo += '<select name="responsable_plan_sustantiva" class="form-control" style="width:180px">';
-		inefectivo += '<option value="" disabled selected>Responsable</option>';
-		@foreach ($stakeholders as $stakeholder)
-			inefectivo += '<option value="{{ $stakeholder["id"] }}">{{ $stakeholder["name"] }}</option>';
-		@endforeach
-
-		inefectivo += '</select>';
-		
-		inefectivo += '<br><input type="file" name="file_sustantiva" id="file3" class="inputfile" />';
-		inefectivo += '<label for="file3">Cargue evidencia</label></div>';
-
-
-		$("#datos_sustantiva").html(inefectivo);
-		$("#datos_sustantiva").fadeIn(500);
-	}
-	else if ($("#sustantiva").val() == 1)
-	{
-		var efectivo = '<br><textarea name="comentarios_sustantiva" class="form-control" style="width:180px" placeholder="Ingrese comentarios (opcional)"></textarea><br>';
-		
-		efectivo += '<br><input type="file" name="file_sustantiva" id="file3" class="inputfile" />';
-		efectivo += '<label for="file3">Cargue evidencia</label></div>';
-
-		$("#datos_sustantiva").html(efectivo);
-		$("#datos_sustantiva").fadeIn(500);
-	}
-	else
-	{
-		$("#datos_sustantiva").empty();
-	}
+	agregarCampos("sustantiva")
 }
 
 function test_cumplimiento()
 {
-	if ($("#cumplimiento").val() == 2)
+	agregarCampos("cumplimiento");
+}
+
+//agrega campos a cada una de las pruebas
+function agregarCampos(prueba)
+{
+
+	if ($("#"+prueba).val() == 2)
 	{
 		var inefectivo = '<br>';
-		inefectivo += "<select name='clasificacion_cumplimiento' style='width:180px;' class='form-control'>";
+		inefectivo += "<select name='clasificacion_"+prueba+"' style='width:180px;' class='form-control'>";
 		inefectivo += "<option value='' disabled selected>Seleccione Clasificación</option>";
 		inefectivo += "<option value='0'>Oportunidad de mejora</option>";
 		inefectivo += "<option value='1'>Deficiencia</option>";
 		inefectivo += "<option value='2'>Debilidad significativa</option></select><br>";
-		inefectivo += '<textarea name="hallazgo_cumplimiento" class="form-control" style="width:180px" placeholder="Ingrese hallazgo"></textarea><br>';
-		inefectivo += '<textarea name="recomendaciones_cumplimiento" class="form-control" style="width:180px" placeholder="Ingrese recomendaciones"></textarea><br>';
+
+		inefectivo += '<input type="text" name="name_hallazgo_'+prueba+'" class="form-control" style="width:180px" placeholder="Nombre hallazgo"><br>';
+		inefectivo += '<textarea name="description_hallazgo_'+prueba+'" class="form-control" style="width:180px" placeholder="Descripción hallazgo"></textarea><br>';
+		inefectivo += '<textarea name="recomendaciones_'+prueba+'" class="form-control" style="width:180px" placeholder="Ingrese recomendaciones"></textarea><br>';
 		inefectivo += '<b><span style="float: left;">Plan de acción: </span></b><br>';
-		inefectivo += '<textarea name="plan_accion_cumplimiento" class="form-control" style="width:180px" placeholder="Ingrese plan de acción"></textarea><br>';
+		inefectivo += '<textarea name="plan_accion_'+prueba+'" class="form-control" style="width:180px" placeholder="Ingrese plan de acción"></textarea><br>';
 
-		inefectivo += '<input type="date" name="fecha_plan_cumplimiento" class="form-control" style="width:180px" title="Ingrese fecha de término del plan"></textarea><br>';
+		inefectivo += '<input type="date" name="fecha_plan_'+prueba+'" class="form-control" style="width:180px" title="Ingrese fecha de término del plan"></textarea><br>';
 
-		inefectivo += '<select name="responsable_plan_cumplimiento" class="form-control" style="width:180px">';
+		inefectivo += '<select name="responsable_plan_'+prueba+'" class="form-control" style="width:180px">';
 		inefectivo += '<option value="" disabled selected>Responsable</option>';
 		@foreach ($stakeholders as $stakeholder)
 			inefectivo += '<option value="{{ $stakeholder["id"] }}">{{ $stakeholder["name"] }}</option>';
 		@endforeach
 
 		inefectivo += '</select>';
-		
-		inefectivo += '<br><input type="file" name="file_cumplimiento" id="file4" class="inputfile" />';
-		inefectivo += '<label for="file4">Cargue evidencia</label></div>';
 
+		inefectivo += '<br><input type="file" name="file_'+name+'" id="file1" class="inputfile" />';
+		inefectivo += '<label for="file1">Cargue evidencia</label></div>';
 
-		$("#datos_cumplimiento").html(inefectivo);
-		$("#datos_cumplimiento").fadeIn(500);
+		identificador = "#datos_"+prueba;
+		$(identificador).html(inefectivo);
+		$(identificador).fadeIn(500);
 	}
-	else if ($("#cumplimiento").val() == 1)
+	else if ($("#"+prueba).val() == 1)
 	{
-		var efectivo = '<br><textarea name="comentarios_cumplimiento" class="form-control" style="width:180px" placeholder="Ingrese comentarios (opcional)"></textarea><br>';
+		var efectivo = '<br><textarea name="comentarios_'+prueba+'" class="form-control" style="width:180px" placeholder="Ingrese comentarios (opcional)"></textarea><br>';
 		
-		efectivo += '<br><input type="file" name="file_cumplimiento" id="file4" class="inputfile" />';
-		efectivo += '<label for="file4">Cargue evidencia</label></div>';
-
-		$("#datos_cumplimiento").html(efectivo);
-		$("#datos_cumplimiento").fadeIn(500);
+		efectivo += '<br><input type="file" name="file_'+prueba+'" id="file1" class="inputfile" />';
+		efectivo += '<label for="file1">Cargue evidencia</label></div>';
+		identificador = "#datos_"+prueba;
+		$(identificador).html(efectivo);
+		$(identificador).fadeIn(500);
 	}
 	else
 	{
-		$("#datos_cumplimiento").empty();
+		identificador = "#datos_"+prueba;
+		$(identificador).empty();
 	}
 }
 

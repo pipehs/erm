@@ -57,6 +57,7 @@
 						<thead>
 						<th>KRI</th>
 						<th>Descripci&oacute;n</th>
+						<th>Periodicidad</th>
 						<th>Unidad de medida de evaluaci&oacute;n</th>
 						<th>Evaluaci&oacute;n</th>
 						<th>Resultado</th>
@@ -74,6 +75,7 @@
 							<tr>
 							<td>{{ $k['name'] }} </td>
 							<td>{{ $k['description'] }}</td>
+							<td>{{ $k['periodicity'] }}</td>
 							<td>{{ $k['uni_med'] }}</td>
 							<td>{{ $k['last_eval'] }}</td>
 							<td>

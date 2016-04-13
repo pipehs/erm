@@ -65,10 +65,9 @@ $("#audit").change(function() {
 										actividades += '<table class="table table-bordered table-striped table-hover table-heading table-datatable">';
 										actividades += '<thead><th>Prueba</th><th>Estado</th><th>Resultado</th></thead>';
 										$(this.activities).each( function(i, activity) {
-
 											activities_id.push(this.id);
 											actividades += '<tr><td>'+activity.name+'</td>';
-											actividades += '<td><div class="col-sm-8"><select class="form-control" name="status_'+this.id+'" id="status_'+this.id+'" onchange="result('+this.id+')">';
+											actividades += '<td><div class="col-sm-8"><select class="form-control" name="status_'+activity.id+'" id="status_'+activity.id+'" onchange="result('+activity.id+','+activity.results+')">';
 
 											if (activity.status == 0)
 											{
@@ -87,6 +86,8 @@ $("#audit").change(function() {
 												actividades += '<option value="0" selected>Abierta</option>';
 												actividades += '<option value="1">En ejecución</option>';
 												actividades += '<option value="2" selected>Cerrada</option>';
+												//alert(activity.results);
+												actividades += '<script>result('+activity.id+','+activity.results+')</script>'
 											}
 											
 											actividades += '</select></div></td>';
@@ -108,46 +109,29 @@ $("#audit").change(function() {
 											test_results += '<option value="Abierta">En proceso</option>';
 											test_results += '<option value="0" selected>Inefectivo</option>';
 											test_results += '<option value="1">Efectivo</option>';
-											test_results += '</select></td><td width="50%"><div id="issues_'+this.id+'"></div></td>';
-
-											//------prueba------//
-											/* AUN NO PUEDO MOSTRAR ISSUES CUANDO YA ESTÁN AGREGADOS (MOSTRARLOS DESDE UN COMIENZO)
-
-											//obtenemos issues si es que existen
-											$.get('auditorias.get_issue.'+this.id, function (result) {
-												//alert(result);
-													//parseamos datos obtenidos
-													var datos = JSON.parse(result);
-													//seteamos datos en select de auditorías
-													
-
-													var resultado = '<select class="form-control" name="issue_classification_'+this.id+'" required>';
-													resultado += '<option value="" disabled selected>- Clasificación debilidad -</option>';
-													resultado += '<option value="0">Oportunidad de mejora</option>';
-													resultado += '<option value="1">Deficiencia</option>';
-													resultado += '<option value="1">Debilidad significativa</option></select><br>';
-													resultado += '<input type="text" class="form-control" name="issue_name_'+this.id+'" value="'+datos.name+'" required placeholder="Nombre de debilidad"><br>'; 
-													resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_description_'+this.id+'" value="'+datos.description+'" placeholder="'+datos.description+'"></textarea><br>';
-													resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_recommendations_'+this.id+'" value="'+datos.recommendations+'" placeholder="'+datos.recommendations+'"></textarea><br>';
-													
-												$("#issues_"+this.id).append(resultado);
-												
-											}); */
+											test_results += '</select><br>';
+											
 										}
 										else if (this.results == 1)
 										{
 											test_results += '<option value="Abierta">En proceso</option>';
 											test_results += '<option value="0">Inefectivo</option>';
 											test_results += '<option value="1" selected>Efectivo</option>';
-											test_results += '</select></td><td width="50%"><div id="issues_'+this.id+'"></div></td>';
+											test_results += '</select><br>';
 										}
 										else
 										{
 											test_results += '<option value="Abierta" selected>En proceso</option>';
 											test_results += '<option value="0">Inefectivo</option>';
 											test_results += '<option value="1">Efectivo</option>';
-											test_results += '</select></td><td width="50%"><div id="issues_'+this.id+'"></div></td>';
+											test_results += '</select><br>';
 										}
+										//agregamos DIV para botón de agregar más issues
+										test_results += '<div id="boton_add_'+this.id+'"></div>';
+										test_results += '</td><td width="50%"><div id="issues_'+this.id+'"></div></td>';
+
+										//ejecutamos función que muestra datos de issue
+										test_results += '<script>testResult('+this.id+');</script>';
 										test_results += '</table>';
 
 												$('#audit_tests').append(test_results);
@@ -187,7 +171,6 @@ $("#audit").change(function() {
 function vermas(id)
 {
 	$("#activities_"+id).show(500);
-	$("#issues")
 }
 
 //desactiva las actividades de una prueba
@@ -197,14 +180,31 @@ function ocultar(id)
 }
 
 //agrega select de resultado de una actividad (efectiva o inefectiva), en el caso de que ésta haya sido señalada como cerrada
-function result(id)
+function result(id,result)
 {
 	if ($("#status_"+id).val() == 2)
 	{
 		var resultado = '<div class="col-sm-8"><select class="form-control" name="result_'+id+'" required>';
-		resultado += '<option value="">- Seleccione resultado -</option>';
-		resultado += '<option value="0">Inefectiva</option>';
-		resultado += '<option value="1">Efectiva</option></div>';
+
+		//seteamos resultado previo si es que existe
+		if (result == 0)
+		{
+			resultado += '<option value="">- Seleccione resultado -</option>';
+			resultado += '<option value="0" selected>Inefectiva</option>';
+			resultado += '<option value="1">Efectiva</option></div>';
+		}
+		else if (result == 1)
+		{
+			resultado += '<option value="">- Seleccione resultado -</option>';
+			resultado += '<option value="0">Inefectiva</option>';
+			resultado += '<option value="1" selected>Efectiva</option></div>';
+		}
+		else
+		{
+			resultado += '<option value="">- Seleccione resultado -</option>';
+			resultado += '<option value="0">Inefectiva</option>';
+			resultado += '<option value="1">Efectiva</option></div>';
+		}
 
 		$("#results_"+id).append(resultado);
 		$("#results_"+id).show(500);
@@ -215,49 +215,94 @@ function result(id)
 	}
 }
 
+//declaramos contador para issues
+contador = 0;
 //agrega campo de issue de una prueba en caso de que esta haya sido mencionada como inefectiva
 function testResult(id)
 {
+
 	if ($("#test_result_"+id).val() == 0)
 	{
 		//obtenemos issues si es que existen
 		$.get('auditorias.get_issue.'+id, function (result) {
 			//alert(result);
+			//agregamos botón para añadir mas issues en div de botón
+			var result_boton = '<button type="button" class="btn btn-primary" onclick="addNewIssue('+id+')">Agregar nuevo hallazgo</button>';
+			$("#boton_add_"+id).html(result_boton);
+
 			if (result == "null") //no existe issue
 			{
-				//alert(result);
-				var resultado = '<select class="form-control" name="issue_classification_'+id+'" required>';
-				resultado += '<option value="" disabled selected>- Clasificación debilidad -</option>';
-				resultado += '<option value="0">Oportunidad de mejora</option>';
-				resultado += '<option value="1">Deficiencia</option>';
-				resultado += '<option value="1">Debilidad significativa</option></select><br>';
-				resultado += '<input type="text" class="form-control" name="issue_name_'+id+'" required placeholder="Nombre de debilidad"><br>'; 
-				resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_description_'+id+'" placeholder="Descripción de debilidad (opcional)"></textarea><br>';
-				resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_recommendations_'+id+'" placeholder="Recomendaciones (opcional)"></textarea><br>';
+				//agregamos nuevo issue
+				addNewIssue(id);
 			}
 
 			else
 			{
 				//parseamos datos obtenidos
 				var datos = JSON.parse(result);
-				var cont = 1; //contador de pruebas
-				activities_id = []; //array con id de actividades para guardar en PHP 
-				tests_id = []; //array con id de pruebas para guardar en PHP
-				//seteamos datos en select de auditorías
-				
 
-				var resultado = '<select class="form-control" name="issue_classification_'+id+'" required>';
-				resultado += '<option value="" disabled selected>- Clasificación debilidad -</option>';
-				resultado += '<option value="0">Oportunidad de mejora</option>';
-				resultado += '<option value="1">Deficiencia</option>';
-				resultado += '<option value="1">Debilidad significativa</option></select><br>';
-				resultado += '<input type="text" class="form-control" name="issue_name_'+id+'" value="'+datos.name+'" required placeholder="Nombre de debilidad"><br>'; 
-				resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_description_'+id+'" value="'+datos.description+'" placeholder="'+datos.description+'"></textarea><br>';
-				resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_recommendations_'+id+'" value="'+datos.recommendations+'" placeholder="'+datos.recommendations+'"></textarea><br>';
+				issues_id = []; //array con id de issues para guardar en PHP 
+				//contador de issues existentes
+				contador = 1;
+				resultado = '';
+				$(datos).each( function() {
+					issues_id.push(this.id);
+					//alert("Entramos2");
+					resultado += '<b>Hallazgo N° '+contador+'</b><br>';
+					resultado += '<select class="form-control" name="issue_classification_'+this.id+'" required>';
+
+					if (this.classification == 0)
+					{
+						resultado += '<option value="" disabled>- Clasificación debilidad -</option>';
+						resultado += '<option value="0" selected>Oportunidad de mejora</option>';
+						resultado += '<option value="1">Deficiencia</option>';
+						resultado += '<option value="2">Debilidad significativa</option></select><br>';
+					}
+					else if (this.classification == 1)
+					{
+						resultado += '<option value="" disabled>- Clasificación debilidad -</option>';
+						resultado += '<option value="0">Oportunidad de mejora</option>';
+						resultado += '<option value="1" selected>Deficiencia</option>';
+						resultado += '<option value="2">Debilidad significativa</option></select><br>';
+					}
+					else if (this.classification == 2)
+					{
+						resultado += '<option value="" disabled>- Clasificación debilidad -</option>';
+						resultado += '<option value="0">Oportunidad de mejora</option>';
+						resultado += '<option value="1">Deficiencia</option>';
+						resultado += '<option value="2" selected>Debilidad significativa</option></select><br>';
+					}
+					
+					resultado += '<input type="text" class="form-control" name="issue_name_'+this.id+'" value="'+this.name+'" required placeholder="Nombre de debilidad"><br>'; 
+					if (this.description == "")
+					{
+						resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_description_'+this.id+'" placeholder="Descripción de debilidad (opcional)"></textarea><br>';
+					}
+					else
+					{
+						resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_description_'+this.id+'" value="'+this.description+'" placeholder="'+this.description+'"></textarea><br>';
+					}
+					
+					if (this.recommendations == "")
+					{
+						resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_recommendations_'+this.id+'" placeholder="Recomendaciones (opcional)"></textarea><br>';
+					}
+					else
+					{
+						resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_recommendations_'+this.id+'" value="'+this.recommendations+'" placeholder="'+this.recommendations+'"></textarea><br>';
+					}
+
+					resultado += '<hr>';
+					contador++;
+				});
+
+				//agregamos id de issues para el id del programa
+				resultado += '<input type="hidden" value="'+issues_id+'" name="'+id+'_issues[]">';
 				
+				$("#issues_"+id).append(resultado);
+
+
 			}
-
-			$("#issues_"+id).append(resultado);
 			
 		});
 	}
@@ -265,4 +310,41 @@ function testResult(id)
 	{
 		$("#issues_"+id).empty();
 	}
+}
+//declaramos contador de nuevas issues
+new_issues = 0;
+//función para agregar un nuevo issue
+function addNewIssue(id)
+{
+	new_issues++;
+	var resultado = '<div id="new_issue_'+new_issues+'"><b>Nuevo hallazgo N° '+new_issues+'</b><br>';
+	//solo si es el primer new issue haremos ALGUNOS de los campos required (los otros siempre aceptan nulos)
+	if (new_issues == 1)
+	{
+		resultado += '<select class="form-control" name="new_issue_classification'+new_issues+'_'+id+'" required>';
+		resultado += '<option value="" disabled selected>- Clasificación debilidad -</option>';
+		resultado += '<option value="0">Oportunidad de mejora</option>';
+		resultado += '<option value="1">Deficiencia</option>';
+		resultado += '<option value="1">Debilidad significativa</option></select><br>';
+
+		resultado += '<input type="text" class="form-control" name="new_issue_name'+new_issues+'_'+id+'" required placeholder="Nombre de debilidad"><br>'; 
+	}
+	else
+	{
+		resultado += '<select class="form-control" name="new_issue_classification'+new_issues+'_'+id+'">';
+		resultado += '<option value="" disabled selected>- Clasificación debilidad -</option>';
+		resultado += '<option value="0">Oportunidad de mejora</option>';
+		resultado += '<option value="1">Deficiencia</option>';
+		resultado += '<option value="1">Debilidad significativa</option></select><br>';
+
+		resultado += '<input type="text" class="form-control" name="new_issue_name'+new_issues+'_'+id+'" placeholder="Nombre de debilidad"><br>'; 
+	}
+
+	
+	resultado += '<textarea rows="3" cols="4" class="form-control" name="new_issue_description'+new_issues+'_'+id+'" placeholder="Descripción de debilidad (opcional)"></textarea><br>';
+	resultado += '<textarea rows="3" cols="4" class="form-control" name="new_issue_recommendations'+new_issues+'_'+id+'" placeholder="Recomendaciones (opcional)"></textarea></div><br>';
+
+	resultado += '<script>$("html,body").animate({scrollTop: $("#new_issue_'+new_issues+'").offset().top}, 900); </script>';
+	$("#issues_"+id).append(resultado);
+
 }

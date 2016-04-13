@@ -67,6 +67,15 @@
 				</div>
 
 				<div class="form-group">
+					{!!Form::label('Periodicidad',null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="col-sm-3">
+						{!!Form::select('periodicity',['0'=>'Diario','1'=>'Semanal','2'=>'Mensual',
+												'3'=>'Semestral','4'=>'Anual','5'=>'Cada vez que ocurra'],null,
+												['placeholder'=>'- Seleccione -'])!!}
+					</div>
+				</div>
+
+				<div class="form-group">
 					{!!Form::label('Unidad de medida',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 					{!!Form::select('uni_med',['0'=>'Porcentaje','1'=>'Monto','2'=>'Cantidad'], 

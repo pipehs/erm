@@ -257,70 +257,95 @@ class AuditoriasController extends Controller
     public function storeEjecution(Request $request)
     {
         //print_r($_POST);
+        DB::transaction(function() {
+            //primero que todo, actualizamos las actividades
+            //para esto, separamos primer string del array id_activities por sus comas
+            $id_activities = explode(',',$_POST['id_activities'][0]);
 
-        //primero que todo, actualizamos las actividades
-        //para esto, separamos primer string del array id_activities por sus comas
-        $id_activities = explode(',',$request['id_activities'][0]);
-
-        foreach ($id_activities as $id)
-        {
-            //actualizamos resultados (si es que el estado de la prueba es cerrado (igual a 2))
-            if ($request['status_'.$id] == 2)
+            foreach ($id_activities as $id)
             {
-                //actualizamos actividad de identificador $id (status y results)
-                DB::table('activities')
-                    ->where('id','=',$id)
-                    ->update([ 
-                        'status' => $request['status_'.$id],
-                        'results' => $request['result_'.$id],
-                        'updated_at' => date('Y-m-d H:i:s')
-                        ]);
+                //actualizamos resultados (si es que el estado de la prueba es cerrado (igual a 2))
+                if ($_POST['status_'.$id] == 2)
+                {
+                    //actualizamos actividad de identificador $id (status y results)
+                    DB::table('activities')
+                        ->where('id','=',$id)
+                        ->update([ 
+                            'status' => $_POST['status_'.$id],
+                            'results' => $_POST['result_'.$id],
+                            'updated_at' => date('Y-m-d H:i:s')
+                            ]);
+                }
+
+                else
+                {
+                    //actualizamos actividad de identificador $id
+                    DB::table('activities')
+                        ->where('id','=',$id)
+                        ->update([ 
+                            'status' => $_POST['status_'.$id],
+                            'updated_at' => date('Y-m-d H:i:s') ]);
+                }
             }
 
-            else
+            //ahora actualizamos resultados de prueba (si es que hay)
+            //para esto, primero separamos primer string del array tests_id
+
+            $tests_id = explode(',',$_POST['tests_id'][0]);
+            $cont = 1; //contador de nuevos issues (el contador por cada prueba no vuelve a iniciar en JQUERY, por lo tanto el contador se inicia fuera del foreach)
+            foreach ($tests_id as $id)
             {
-                //actualizamos actividad de identificador $id
-                DB::table('activities')
+                //si es que la prueba se asigna como inefectiva (0) se deberá ingresar un comentario
+                if ($_POST['test_result_'.$id] == 0)
+                {
+                    //primero que todo, actualizamos issues ya existentes (son enviados como array de $id_issues)
+                    //separamos distintos id de issues existentes
+                    $issues_id = explode(',',$_POST[$id.'_issues'][0]);
+
+                    //actualizamos issues de id = issue
+                    foreach ($issues_id as $issue)
+                    {
+                        DB::table('issues')
+                            ->where('id','=',$issue)
+                            ->update([
+                                'name' => $_POST['issue_name_'.$issue],
+                                'description' => $_POST['issue_description_'.$issue],
+                                'recommendations' => $_POST['issue_recommendations_'.$issue],
+                                'classification' => $_POST['issue_classification_'.$issue],
+                                'updated_at' => date('Y-m-d H:i:s')
+                                ]);
+                    }
+
+                    //ahora agregamos nuevos issues si es que hay           
+                    while(isset($_POST['new_issue_classification'.$cont.'_'.$id]))
+                    {
+                        DB::table('issues')
+                            ->where('id','=',$id)
+                            ->insert([
+                                    'name' => $_POST['new_issue_name'.$cont.'_'.$id],
+                                    'description' => $_POST['new_issue_description'.$cont.'_'.$id],
+                                    'recommendations' => $_POST['new_issue_recommendations'.$cont.'_'.$id],
+                                    'classification' => $_POST['new_issue_classification'.$cont.'_'.$id],
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
+                                    'audit_audit_plan_audit_test_id' => $id
+                                ]);
+
+                        $cont += 1;
+                    }
+                }
+
+                //actualizamos resultado de la prueba
+
+                DB::table('audit_audit_plan_audit_test')
                     ->where('id','=',$id)
-                    ->update([ 
-                        'status' => $request['status_'.$id],
-                        'updated_at' => date('Y-m-d H:i:s') ]);
+                    ->update(['results' => $_POST['test_result_'.$id]]);   
             }
-        }
+            
+            Session::flash('message','Auditor&iacute;a ejecutada correctamente');
 
-        //ahora actualizamos resultados de prueba (si es que hay)
-        //para esto, primero separamos primer string del array tests_id
-
-        $tests_id = explode(',',$request['tests_id'][0]);
-
-        foreach ($tests_id as $id)
-        {
-            //si es que la prueba se asigna como inefectiva (0) se deberá ingresar un comentario
-            if ($request['test_result_'.$id] == 0)
-            {
-                DB::table('issues')
-                    ->where('id','=',$id)
-                    ->insert([
-                        'name' => $request['issue_name_'.$id],
-                        'description' => $request['issue_description_'.$id],
-                        'recommendations' => $request['issue_recommendations_'.$id],
-                        'classification' => $request['issue_classification_'.$id],
-                        'created_at' => date('Y-m-d H:i:s'),
-                        'updated_at' => date('Y-m-d H:i:s'),
-                        'audit_audit_plan_audit_test_id' => $id
-                        ]);
-
-            }
-
-            //actualizamos resultado de la prueba
-
-            DB::table('audit_audit_plan_audit_test')
-                ->where('id','=',$id)
-                ->update(['results' => $request['test_result_'.$id]]);   
-        }
+        });
         
-        Session::flash('message','Auditor&iacute;a ejecutada correctamente');
-
         return Redirect::to('/ejecutar_pruebas');
 
 
@@ -2034,7 +2059,8 @@ class AuditoriasController extends Controller
                         'name' => $activity->name,
                         'result' => $activities_result,
                         'id' => $activity->id,
-                        'status' => $activity->status
+                        'status' => $activity->status,
+                        'results' => $activity->results
                         ];
 
                 $i += 1;
@@ -2468,25 +2494,32 @@ class AuditoriasController extends Controller
     {
         $results = array();
         //obtenemos solo primer issue (en caso de que existieran muchos)
-        $issue = DB::table('issues')
+        //OBS ACTUALIZACIÓN: Ahora (13-04-2016) se obtendrán todos los issues que existan asociados a un plan + audit
+        $issues = DB::table('issues')
                     ->where('issues.audit_audit_plan_audit_test_id','=',$id)
                     ->select('issues.id','issues.name','issues.description','issues.recommendations','issues.classification')
-                    ->first();
+                    //->first();
+                    ->get();
+        $i = 0;
 
-        if ($issue == NULL)
+        if ($issues == NULL)
         {
             $results = NULL;
         }
-
         else
         {
-            $results = [
-                'id' => $issue->id,
-                'name' => $issue->name,
-                'description' => $issue->description,
-                'recommendations' => $issue->recommendations,
-                'classification' => $issue->classification,
-            ];
+            foreach ($issues as $issue)
+            {
+                $results[$i] = [
+                    'id' => $issue->id,
+                    'name' => $issue->name,
+                    'description' => $issue->description,
+                    'recommendations' => $issue->recommendations,
+                    'classification' => $issue->classification
+                ];
+
+                $i += 1;
+            }
         }
         
         return json_encode($results);
