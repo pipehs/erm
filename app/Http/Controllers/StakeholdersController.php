@@ -127,58 +127,73 @@ class StakeholdersController extends Controller
      */
     public function store(Request $request)
     {
-        DB::transaction(function()
+        //validamos rut
+        $rut = $_POST['id'].'-'.$_POST['dv'];
+        $res = validaRut($rut);
+
+        if ($res)
         {
-            \Ermtool\Stakeholder::create([
-                'id' => $_POST['id'],
-                'dv' => $_POST['dv'],
-                'name' => $_POST['name'],
-                'surnames' => $_POST['surnames'],
-                'position' => $_POST['position'],
-                'mail' => $_POST['mail']
-                ]);
-
-            //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
-            foreach($_POST['organization_id'] as $organization_id)
+            DB::transaction(function()
             {
-                DB::table('organization_stakeholder')->insert([
-                    'organization_id'=>$organization_id,
-                    'stakeholder_id'=>$_POST['id']
+                \Ermtool\Stakeholder::create([
+                    'id' => $_POST['id'],
+                    'dv' => $_POST['dv'],
+                    'name' => $_POST['name'],
+                    'surnames' => $_POST['surnames'],
+                    'position' => $_POST['position'],
+                    'mail' => $_POST['mail']
                     ]);
-            }
 
-            //INSERTAMOS ROLES
-                //primero verificamos si es que se está agregando un nuevo rol
-                if (isset($_POST['rol_nuevo']))
+                //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
+                foreach($_POST['organization_id'] as $organization_id)
                 {
-                    $role = \Ermtool\Role::create([
-                        'name' => $_POST['rol_nuevo'],
-                        'status' => 0
-                    ]);
-
-                    //insertamos relación
-                    DB::table('role_stakeholder')->insert([
-                            'stakeholder_id' => $_POST['id'],
-                            'role_id' => $role->id
-                            ]);
+                    DB::table('organization_stakeholder')->insert([
+                        'organization_id'=>$organization_id,
+                        'stakeholder_id'=>$_POST['id']
+                        ]);
                 }
 
-                else //se están seleccionando roles existentes
-                {
-                    foreach ($_POST['role_id'] as $role_id) //insertamos cada rol seleccionado
+                //INSERTAMOS ROLES
+                    //primero verificamos si es que se está agregando un nuevo rol
+                    if (isset($_POST['rol_nuevo']))
                     {
+                        $role = \Ermtool\Role::create([
+                            'name' => $_POST['rol_nuevo'],
+                            'status' => 0
+                        ]);
+
+                        //insertamos relación
                         DB::table('role_stakeholder')->insert([
-                            'stakeholder_id' => $_POST['id'],
-                            'role_id' => $role_id
-                            ]);
+                                'stakeholder_id' => $_POST['id'],
+                                'role_id' => $role->id
+                                ]);
                     }
-                }
+
+                    else //se están seleccionando roles existentes
+                    {
+                        foreach ($_POST['role_id'] as $role_id) //insertamos cada rol seleccionado
+                        {
+                            DB::table('role_stakeholder')->insert([
+                                'stakeholder_id' => $_POST['id'],
+                                'role_id' => $role_id
+                                ]);
+                        }
+                    }
 
 
-                Session::flash('message','Stakeholder agregado correctamente');
-        });
+                    Session::flash('message','Stakeholder agregado correctamente');
+            });
 
             return Redirect::to('/stakeholders');
+        }
+        else
+        {
+            Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente');
+            return Redirect::to('/stakeholders.create');
+        }
+        
+
+            
     }
 
     /**

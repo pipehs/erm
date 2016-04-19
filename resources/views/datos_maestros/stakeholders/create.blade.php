@@ -38,6 +38,11 @@
 				<div class="no-move"></div>
 			</div>
 			<div class="box-content">
+			@if(Session::has('message'))
+				<div class="alert alert-danger alert-dismissible" role="alert">
+				{{ Session::get('message') }}
+				</div>
+			@endif
 			Ingrese los datos del stakeholder.
 				{!!Form::open(['route'=>'stakeholders.store','method'=>'POST','class'=>'form-horizontal'])!!}
 					@include('datos_maestros.stakeholders.form')
