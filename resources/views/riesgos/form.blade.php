@@ -49,6 +49,14 @@
 						</div>
 					</div>
 					<div class="form-group">
+						{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::select('stakeholder_id',$stakeholders,
+							 	   null, 
+							 	   ['id'=>'stakeholder','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+						</div>
+					</div>
+					<div class="form-group">
 						{!!Form::label('Fecha Expiraci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::date('expiration_date',null,['class'=>'form-control'])!!}

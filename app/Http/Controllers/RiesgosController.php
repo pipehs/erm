@@ -150,6 +150,11 @@ class RiesgosController extends Controller
         //riesgos tipo
         $riesgos_tipo = \Ermtool\Risk::where('status',0)->where('type2',0)->lists('name','id');
 
+        //obtenemos lista de stakeholders
+        $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+        ->orderBy('name')
+        ->lists('full_name', 'id');
+
         if(isset($_GET['P']))
         {
             $subprocesos = \Ermtool\Subprocess::where('status',0)->lists('name','id');
@@ -172,7 +177,8 @@ class RiesgosController extends Controller
                             ->lists('name','id');
             
             return view('riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                    'efectos'=>$efectos,'objetivos'=>$objetivos,'riesgos_tipo'=>$riesgos_tipo]);
+                    'efectos'=>$efectos,'objetivos'=>$objetivos,'riesgos_tipo'=>$riesgos_tipo,
+                    'stakeholders'=>$stakeholders]);
         }
 
         
@@ -265,6 +271,7 @@ class RiesgosController extends Controller
                         'type2'=>1,
                         'expiration_date'=>$_POST['expiration_date'],
                         'risk_category_id'=>$_POST['risk_category_id'],
+                        'stakeholder_id'=>$_POST['stakeholder_id'],
                         'cause_id'=>$causa,
                         'effect_id'=>$efecto,
                         'expected_loss'=>$_POST['expected_loss'],

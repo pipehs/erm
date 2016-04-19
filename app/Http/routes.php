@@ -444,6 +444,9 @@ Route::get('controles.create', [
 Route::post('controles.store', [
 	'as' =>'controles.store', 'uses' => 'ControlesController@store']);
 
+Route::get('controles.edit.{id}', [
+	'as' =>'controles.edit', 'uses' => 'ControlesController@edit']);
+
 Route::put('controles.update.{id}', [
 	'as' => 'controles.update', 'uses' => 'ControlesController@update'
 ]);
@@ -561,6 +564,9 @@ Route::get('planes_accion', [
 Route::post('agregar_plan2', [
 	'as' => 'agregar_plan2', 'uses' => 'AuditoriasController@storePlan']);
 
+Route::get('programas_auditoria', [
+	'as' => 'programas_auditoria', 'uses' => 'AuditoriasController@auditTests']);
+
 
 //------ Rutas para trabajar con Excel ------//
 
@@ -580,9 +586,6 @@ Route::get('genexcelissues.{type}', [
 Route::get('controles.subneg.{value}', [
 	'as' => 'controles.subneg', 'uses' => 'ControlesController@subneg'
 ]);
-
-Route::get('controles.edit.{id}', [
-	'as' =>'controles.edit', 'uses' => 'ControlesController@edit']);
 
 Route::get('controles.docs.{id}', [
 	'as' =>'controles.docs', 'uses' => 'ControlesController@docs']);
@@ -624,12 +627,12 @@ Route::get('auditorias.stakeholders.{id}', [
 	'as' => 'auditorias.stakeholders', 'uses' => 'AuditoriasController@getStakeholders']);
 
 //ruta para obtener datos de prueba de auditoría seleccionada
-Route::get('auditorias.get_audit_test.{id}', [
-	'as' => 'auditorias.get_audit_test', 'uses' => 'AuditoriasController@getAuditTest']);
+Route::get('auditorias.get_audit_program.{id}', [
+	'as' => 'auditorias.get_audit_program', 'uses' => 'AuditoriasController@getAuditProgram']);
 
-//ruta para obtener datos de prueba de auditoría seleccionada
-Route::get('auditorias.get_audit_tests2.{id}', [
-	'as' => 'auditorias.get_audit_tests2', 'uses' => 'AuditoriasController@getAuditTest2']);
+//ruta para obtener datos de programa de auditoría seleccionado (al crear un nuevo programa)
+Route::get('auditorias.get_audit_program2.{id}', [
+	'as' => 'auditorias.get_audit_program2', 'uses' => 'AuditoriasController@getAuditProgram2']);
 
 //ruta para obtener controles de negocio asociados a un plan de auditoría
 //(según los objetivos corporativos que contemple este plan)

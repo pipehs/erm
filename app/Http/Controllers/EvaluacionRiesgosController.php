@@ -9,6 +9,7 @@ use Mail;
 use Session;
 use Redirect;
 use DB;
+use DateTime;
 
 class EvaluacionRiesgosController extends Controller
 {
@@ -129,9 +130,9 @@ class EvaluacionRiesgosController extends Controller
 
                 //agregamos evaluación y obtenemos id
                 $eval_id = DB::table('evaluations')->insertGetId([
-                    'name' => $_POST['nombre'],
+                    'name' => $_POST['name'],
                     'consolidation' => 0,
-                    'description' => $_POST['descripcion'],
+                    'description' => $_POST['description'],
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s'),
                     'expiration_date' => $_POST['expiration_date'],
@@ -193,8 +194,8 @@ class EvaluacionRiesgosController extends Controller
 
         if ($poll['expiration_date'] != NULL)
         {
-            $encuesta['expiration_date'] = date_format($poll['expiration_date'],"d-m-Y");
-            $encuesta['expiration_date'] .= " a las ".date_format($poll['expiration_date'],"H:i:s");
+            $expiration_date = new DateTime($poll['expiration_date']);
+            $encuesta['expiration_date'] = date_format($expiration_date, 'd-m-Y');
         }
         else
         {
@@ -291,6 +292,7 @@ class EvaluacionRiesgosController extends Controller
         $encuesta = "Encuesta Manual";
         $riesgos = array();
         $i = 0;
+        $id = 0;
         
         //cada uno de los riesgos de subproceso
         foreach ($subprocess_risk as $risk)
@@ -345,7 +347,7 @@ class EvaluacionRiesgosController extends Controller
         $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
 
         return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
-                    'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba]);
+                    'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id]);
     }
     //función que generará la encuesta para que el usuario pueda responderla
     public function generarEncuesta($id)
@@ -409,7 +411,7 @@ class EvaluacionRiesgosController extends Controller
         $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
 
         return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
-                    'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba]);
+                    'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id]);
     }
 
     //Función para enviar correo con link a la encuesta
@@ -576,7 +578,7 @@ class EvaluacionRiesgosController extends Controller
         return view('reportes.heatmap',['encuestas'=>$encuestas,'organizaciones'=>$organizaciones]); 
     }
 
-    public function generarHeatmap($evaluation_id)
+    public function generarHeatmap(Request $request)
     {
         //print_r($_POST);
         //Nombre y descripción de la encuesta u organización

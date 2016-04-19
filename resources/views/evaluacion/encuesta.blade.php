@@ -11,7 +11,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			@if ($tipo == 1)
-				<li><a href="evaluacion.encuesta.{{ $encuesta['id'] }}">Responder Encuesta</a></li>
+				<li><a href="evaluacion.encuesta.{{ $id }}">Responder Encuesta</a></li>
 			@else
 				<li><a href="evaluacion.encuesta.0">Evaluar riesgos</a></li>
 			@endif
@@ -46,8 +46,11 @@
 					{{ Session::get('message') }}
 				</div>
 			@endif
-
-			<h4><center>Evaluaci&oacute;n manual</center></h4>
+			@if ($tipo == 1)
+				<h4><center>Encuesta de evaluaci&oacute;n</center></h4>
+			@else
+				<h4><center>Evaluaci&oacute;n manual</center></h4>
+			@endif
 
 			{!!Form::open(['route'=>'evaluacion.guardarEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
 
@@ -100,7 +103,7 @@
 				<hr>
 			@endforeach
 			@if ($tipo == 1)
-				{!!Form::hidden('evaluation_id',$encuesta['id'])!!}
+				{!!Form::hidden('evaluation_id',$id)!!}
 			@endif
 				{!!Form::hidden('tipo',$tipo)!!}
 			<div class="row form-group">

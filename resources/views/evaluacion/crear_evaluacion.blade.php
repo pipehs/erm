@@ -52,21 +52,21 @@ Recuerde que los niveles de criticidad y probabilidad (deben ser iguales) para c
 					<div class="form-group">
 						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::text('nombre',null,['class'=>'form-control','required'=>'true'])!!}
+							{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
 						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::textarea('descripcion',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
+							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
 						{!!Form::label('Fecha Expiraci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::date('fecha_expiracion',null,['class'=>'form-control',])!!}
+							{!!Form::date('expiration_date',null,['class'=>'form-control',])!!}
 						</div>
 					</div>
 

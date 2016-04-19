@@ -154,7 +154,7 @@ function dropDown5()
 //active de auditoría de riesgos
 function dropDown6()
 {
-	$uri = array('auditorias','plan_auditoria','nuevo_plan','plan','ver_plan','crear_pruebas','pruebas','ejecutar_pruebas',
+	$uri = array('auditorias','plan_auditoria','nuevo_plan','plan','ver_plan','crear_pruebas','pruebas','programas_auditoria','ejecutar_pruebas',
 				'supervisar','notas','planes_accion');
 
 	foreach ($uri as $uri)

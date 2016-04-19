@@ -11,7 +11,6 @@
 	ul{  
 		list-style-type:none;  
 	}
-
 	#cero_espacios {
 		margin: 0;
 		padding: 0;
@@ -42,10 +41,8 @@
 <!--
 	<link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 	<link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
-
 	<link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 	<link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
-
 		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!--[if lt IE 9]>
 				<script src="http://getbootstrap.com/docs-assets/js/html5shiv.js"></script>
@@ -65,26 +62,6 @@
 	<![endif]-->
 
 	
-	{!!Html::script('assets/plugins/jquery/jquery-2.1.0.min.js')!!}
-	{!!Html::script('assets/plugins/jquery-ui/jquery-ui.min.js')!!}
-	{!!Html::script('assets/plugins/bootstrap/bootstrap.min.js')!!}
-	{!!Html::script('assets/plugins/justified-gallery/jquery.justifiedgallery.min.js')!!}
-	{!!Html::script('assets/plugins/tinymce/tinymce.min.js')!!}
-	{!!Html::script('assets/plugins/tinymce/jquery.tinymce.min.js')!!}
-	{!!Html::script('assets/js/devoops.js')!!}
-	{!!Html::script('assets/js/scripts.js')!!}
-	{!!Html::script('assets/js/upload.js')!!}
-
-	{!!Html::script('assets/js/highcharts.js')!!}
-	{!!Html::script('assets/js/heatmap.js')!!}
-	{!!Html::script('assets/js/exporting.js')!!}
-
-	{!!Html::script('assets/js/jquery-1.10.2.js')!!}
-	{!!Html::script('assets/js/jquery-ui.js')!!}
-
-	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}
-
-	{!!Html::script('assets/js/jquery.min.js')}
 	
 
 
@@ -110,6 +87,31 @@
     @yield('content')
 </div>
 
+	@yield('scripts2')
+</body>
+</html>
+
+{!!Html::script('assets/plugins/jquery/jquery-2.1.0.min.js')!!}
+	{!!Html::script('assets/plugins/jquery-ui/jquery-ui.min.js')!!}
+	{!!Html::script('assets/plugins/bootstrap/bootstrap.min.js')!!}
+	{!!Html::script('assets/plugins/justified-gallery/jquery.justifiedgallery.min.js')!!}
+	{!!Html::script('assets/plugins/tinymce/tinymce.min.js')!!}
+	{!!Html::script('assets/plugins/tinymce/jquery.tinymce.min.js')!!}
+	{!!Html::script('assets/js/devoops.js')!!}
+	{!!Html::script('assets/js/scripts.js')!!}
+	{!!Html::script('assets/js/upload.js')!!}
+
+	{!!Html::script('assets/js/highcharts.js')!!}
+	{!!Html::script('assets/js/heatmap.js')!!}
+	{!!Html::script('assets/js/exporting.js')!!}
+
+	{!!Html::script('assets/js/jquery-1.10.2.js')!!}
+	{!!Html::script('assets/js/jquery-ui.js')!!}
+
+	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}
+
+	{!!Html::script('assets/js/jquery.min.js')}
+	
 	@yield('scripts2')
 </body>
 </html>

@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Audit_test extends Model
 {
-    protected $fillable = ['name','description','type'];
+    protected $fillable = ['name','description','type','status','results','hh'];
 }

@@ -129,21 +129,65 @@ class AuditoriasController extends Controller
                                         'audits'=>$audits,'risk_subprocess'=>$risk_subprocess]);
     }
 
+    //función para abrir la vista de gestión de programas de auditoría
+    public function auditTests()
+    {
+        $programas = array();
+        $tests = \Ermtool\Audit_test::all();
+        $i = 0; //contador de planes
+
+        foreach ($tests as $test)
+        {
+            //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
+            if ($test['created_at'] == NULL OR $test['created_at'] == "0000-00-00" OR $test['created_at'] == "")
+            {
+                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+            }
+
+            else
+            {
+                $fecha_creacion = date_format($test['created_at'],"d-m-Y");
+                $fecha_creacion .= " a las ".date_format($test['created_at'],"H:i:s");
+            }
+
+            //damos formato a fecha de actualización 
+            if ($test['updated_at'] != NULL)
+            {
+                $fecha_act = date_format($test['updated_at'],"d-m-Y");
+                $fecha_act .= " a las ".date_format($test['updated_at'],"H:i:s");
+            }
+
+            else
+                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
+
+            $programas[$i] = [
+                            'id' => $plan['id'],
+                            'name' => $plan['name'],
+                            'description' => $plan['description'],
+                            'created_at' => $fecha_creacion,
+                            'updated_at' => $fecha_act
+                        ];
+            $i += 1;
+        }
+
+        return view('auditorias.index',['planes' => $planes]);         
+    }
+
     public function createPruebas()
     {
         //plan de auditoría
         $audit_plans = \Ermtool\Audit_plan::lists('name','id');
 
-        $audit_tests = \Ermtool\Audit_test::lists('name','id');
+        $audit_programs = \Ermtool\Audit_program::lists('name','id');
 
          //obtenemos lista de stakeholders
-        $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+        $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
         ->orderBy('name')
         ->lists('full_name', 'id');
 
         //echo $audit_tests;
 
-        return view('auditorias.create_test',['audit_plans'=>$audit_plans,'audit_tests'=>$audit_tests,
+        return view('auditorias.create_test',['audit_plans'=>$audit_plans,'audit_programs'=>$audit_programs,
                                                 'stakeholders' => $stakeholders]);     
     }
 
@@ -1552,7 +1596,6 @@ class AuditoriasController extends Controller
         return view('reportes.auditorias',['organizations' => $organizations]);
     }
 
-
     public function generarReportePlanes($org)
     {
         $results = array();
@@ -1957,55 +2000,42 @@ class AuditoriasController extends Controller
     }
 
     //función que obtiene una prueba de auditoría (al crear una nueva prueba basada en una antigua)
-    public function getAuditTest($id)
+    public function getAuditProgram($id)
     {
         $results = array();
-        $activities2 = array();
-        //Seleccionamos prueba de auditoría y actividades
-        $audit_test = DB::table('audit_tests')
+        $tests = array();
+        //Seleccionamos programa de auditoría y pruebas
+        $audit_program = DB::table('audit_programs')
                     ->where('id','=',$id)
-                    ->select('audit_tests.name','audit_tests.id','audit_tests.description',
-                            'audit_tests.type')
+                    ->select('audit_programs.name','audit_programs.id','audit_programs.description')
                     ->get();
 
-        foreach ($audit_test as $test)
+        foreach ($audit_program as $program)
         {
-            $i = 0; //contador de actividades
-            //obtenemos actividades
-            $activities = DB::table('activities')
-                            ->join('audit_audit_plan_audit_test','audit_audit_plan_audit_test.id','=','activities.audit_audit_plan_audit_test_id')
-                            ->where('audit_audit_plan_audit_test.audit_test_id','=',$test->id)
-                            ->select('activities.name')
+            $i = 0; //contador de pruebas
+            //obtenemos pruebas
+            $audit_tests = DB::table('audit_tests')
+                            ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                            ->where('audit_audit_plan_audit_program.audit_program_id','=',$program->id)
+                            ->select('audit_tests.name','audit_tests.description','audit_tests.type','audit_tests.hh')
                             ->get();
 
-            foreach ($activities as $activity)
+            foreach ($audit_tests as $test)
             {
-                $activities2[$i] = $activity->name;
+                $tests[$i] = [
+                        'name' => $test->name,
+                        'description' => $test->description,
+                        'type' => $test->type,
+                        'hh' => $test->hh
+                            ];
                 $i += 1;
             }
 
-            switch ($test->type)
-            {
-                case 0:
-                    $tipo = 'Prueba de diseño';
-                    break;
-                case 1:
-                    $tipo = 'Prueba de efectividad operativa';
-                    break;
-                case 2:
-                    $tipo = 'Prueba de cumplimiento';
-                    break;
-                case 3:
-                    $tipo = 'Prueba sustantiva';
-                    break;
-            }
             $results = [
-                    'name' => $test->name,
-                    'id' => $test->id,
-                    'description' => $test->description,
-                    'type' => $test->type,
-                    'type_name' => $tipo,
-                    'activities' => $activities2
+                    'name' => $program->name,
+                    'id' => $program->id,
+                    'description' => $program->description,
+                    'tests' => $tests
             ];
         }
 
@@ -2014,7 +2044,7 @@ class AuditoriasController extends Controller
 
     /*función que obtiene los datos y las actividades de una prueba de auditoría (al revisar un plan de auditoría)
     a través del identificador de audit_audit_plan (auditoría + plan de auditoría) */
-    public function getAuditTest2($id)
+    public function getAuditProgram2($id)
     {
         $audit_tests = array();
         $results = array();

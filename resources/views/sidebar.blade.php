@@ -69,6 +69,7 @@
 						<!--<li><a href="auditorias" class="{{ activeMenu('auditorias') }}">Auditor&iacute;as</a></li>-->
 						<li><a href="plan_auditoria" class="{{ activeMenu('plan_auditoria') }}">Planes de auditor&iacute;a</a></li>
 						<li><a href="crear_pruebas" class="{{ activeMenu('crear_pruebas') }}">Generar programa de <br>auditor&iacute;a</a></li>
+						<li><a href="programas_auditoria" class="{{ activeMenu('programas_auditoria') }}">Programas de <br>auditor&iacute;a</a></li>
 						<!--<li><a href="pruebas" class="{{ activeMenu('pruebas') }}">Reporte pruebas de <br>auditor&iacute;a</a></li>-->
 						<li><a href="ejecutar_pruebas" class="{{ activeMenu('ejecutar_pruebas') }}">Ejecutar plan de <br>auditor&iacute;a</a></li>
 						<li><a href="supervisar" class="{{ activeMenu('supervisar') }}">Supervisar planes de <br>auditor&iacute;a</a></li>
