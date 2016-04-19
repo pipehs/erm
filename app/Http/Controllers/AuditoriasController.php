@@ -202,70 +202,45 @@ class AuditoriasController extends Controller
         //creamos una transacción para cumplir con atomicidad
         DB::transaction(function()
         {
+            $fecha = date('Y-m-d H:i:s');
             //si es que no tiene valor kind, significa que es una prueba nueva
             if ($_POST['kind'] == "")
             {
-                $audit_test = DB::table('audit_tests')
-                                    ->insertGetId([
-                                        'name' => $_POST['name'],
-                                        'description' => $_POST['description'],
-                                        'type' => $_POST['type'],
-                                        'created_at' => date('Y-m-d H:i:s'),
-                                        'updated_at' => date('Y-m-d H:i:s'),
-                                        ]);
+                $audit_program = \Ermtool\Audit_program::create([
+                            'name' => $_POST['name'],
+                            'description' => $_POST['description']
+                            ]);
             }
             else
             {
-                $audit_test = \Ermtool\Audit_test::find($_POST['audit_test_id'])->value('id');            
+                $audit_program = \Ermtool\Audit_program::find($_POST['audit_program_id'])->value('id');            
             }
 
-                //insertamos en audit_audit_plan_audit_test
-                $audit_audit_plan_audit_test = DB::table('audit_audit_plan_audit_test')
+                //insertamos en audit_audit_plan_audit_program
+                $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')
                             ->insertGetId([
-                                    'audit_test_id' => $audit_test,
-                                    'audit_audit_plan_id' => $_POST['audit'],
-                                    'results' => 2,
-                                    'created_at' => date('Y-m-d H:i:s'),
-                                    'updated_at' => date('Y-m-d H:i:s'),
-                                    'stakeholder_id' => $_POST['stakeholder_id']
+                                    'audit_program_id' => $audit_program,
+                                    'audit_audit_plan_id' => $_POST['audit']
+                                    'created_at' => $fecha,
+                                    'updated_at' => $fecha,
+                                    //'stakeholder_id' => $_POST['stakeholder_id']
                                 ]);
 
-                //insertamos controles de proceso (si es que hay)
-                if (isset($_POST['control_subprocess_id']))
+                $i = 1; //contador de pruebas
+                //insertamos cada una de las pruebas
+                while (isset($_POST['name_test_'.$i]))
                 {
-                    foreach ($_POST['control_subprocess_id'] as $control_sub_id)
-                    {
-                    DB::table('audit_control_risk')
+                    DB::table('audit_tests')
                         ->insert([
-                            'control_id' => $control_sub_id,
-                            'audit_audit_plan_audit_test_id' => $audit_audit_plan_audit_test
-                            ]);
-                    }
-                }
-                
-                //insertamos controles de negocio (si es que hay)
-                if (isset($_POST['control_objective_id']))
-                {
-                    foreach ($_POST['control_objective_id'] as $control_obj_id)
-                    {
-                    DB::table('audit_control_risk')
-                        ->insert([
-                            'control_id' => $control_obj_id,
-                            'audit_audit_plan_audit_test_id' => $audit_audit_plan_audit_test
-                            ]);
-                    }
-                }
-
-                $i = 1; //contador de actividades
-                //insertamos cada una de las actividades
-                while (isset($_POST['activity_'.$i]))
-                {
-                    DB::table('activities')
-                        ->insert([
-                            'name' => $_POST['activity_'.$i],
-                            'results' => 0,
-                            'audit_audit_plan_audit_test_id' => $audit_audit_plan_audit_test,
-                            'status' => 0
+                            'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
+                            'name' => $_POST['name_test_'.$i],
+                            'description' => $_POST['description_test_'.$i], 
+                            'type' => $_POST['type_test_'.$i],
+                            'status' => 1,
+                            'results' => 2,
+                            'created_at' => $fecha,
+                            'updated_at' => $fecha,
+                            'stakeholder_id' => $_POST['stakeholder_test_'.$i],
                             ]);
                     $i += 1;    
                 }

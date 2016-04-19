@@ -227,22 +227,51 @@ $("#kind").change(function() {
 									var prueba = '<div class="form-group">';
 									prueba += '<label for="name_test_'+(i+1)+'" class="col-sm-4 control-label">Prueba '+(i+1)+': Nombre</label>';
 									prueba += '<div class="col-sm-4">';
-									prueba += '<input type="text" name="name_test_'+(i+1)+'" class="form-control"></div></div>';
+									prueba += '<input type="text" name="name_test_'+(i+1)+'" value="'+test.name+'" class="form-control" disabled></div></div>';
 									
 									//descripción
 									prueba += '<div class="form-group">';
 									prueba += '<label for="description_test_'+(i+1)+'" class="col-sm-4 control-label">Descripción</label>';
-									prueba += '<div class="col-sm-4"><textarea name="description_test_'+(i+1)+'" class="form-control" cols="4" rows="3"></textarea></div></div>';
+									prueba += '<div class="col-sm-4"><textarea name="description_test_'+(i+1)+'" class="form-control" cols="4" rows="3">'+test.description+'</textarea></div></div>';
 
 									//tipo
 									prueba += '<div class="form-group">';
 									prueba += '<label for="type_test_'+(i+1)+'" class="col-sm-4 control-label">Tipo</label>';
-									prueba += '<div class="col-sm-4"><select name="type_test_'+(i+1)+'" class="form-control">';
-									prueba += '<option value="" disabled selected>- Seleccione -</option>';
-									prueba += '<option value="0">Prueba de diseño</option>';
-									prueba += '<option value="1">Prueba de efectividad operativa</option>';
-									prueba += '<option value="2">Prueba de cumplimiento</option>';
-									prueba += '<option value="3">Prueba sustantiva</option>';
+									prueba += '<div class="col-sm-4"><select name="type_test_'+(i+1)+'" class="form-control" disabled>';
+
+									if (test.type == 0)
+									{
+										prueba += '<option value="" disabled selected>- Seleccione -</option>';
+										prueba += '<option value="0" selected>Prueba de diseño</option>';
+										prueba += '<option value="1">Prueba de efectividad operativa</option>';
+										prueba += '<option value="2">Prueba de cumplimiento</option>';
+										prueba += '<option value="3">Prueba sustantiva</option>';
+									}
+									else if (test.type == 1)
+									{
+										prueba += '<option value="" disabled selected>- Seleccione -</option>';
+										prueba += '<option value="0">Prueba de diseño</option>';
+										prueba += '<option value="1" selected>Prueba de efectividad operativa</option>';
+										prueba += '<option value="2">Prueba de cumplimiento</option>';
+										prueba += '<option value="3">Prueba sustantiva</option>';
+									}
+									else if (test.type == 2)
+									{
+										prueba += '<option value="" disabled selected>- Seleccione -</option>';
+										prueba += '<option value="0">Prueba de diseño</option>';
+										prueba += '<option value="1" selected>Prueba de efectividad operativa</option>';
+										prueba += '<option value="2" selected>Prueba de cumplimiento</option>';
+										prueba += '<option value="3">Prueba sustantiva</option>';
+									}
+									else if (test.type == 3)
+									{
+										prueba += '<option value="" disabled selected>- Seleccione -</option>';
+										prueba += '<option value="0">Prueba de diseño</option>';
+										prueba += '<option value="1" selected>Prueba de efectividad operativa</option>';
+										prueba += '<option value="2">Prueba de cumplimiento</option>';
+										prueba += '<option value="3" selected>Prueba sustantiva</option>';
+									}
+									
 									prueba += '</select>';
 									prueba += '</div></div>';
 
@@ -250,7 +279,7 @@ $("#kind").change(function() {
 									prueba += '<div class="form-group">';
 									prueba += '<label for="hh_test_'+(i+1)+'" class="col-sm-4 control-label">Horas-hombre</label>';
 									prueba += '<div class="col-sm-4">';
-									prueba += '<input type="number" name="name_test_'+(i+1)+'" class="form-control" min="1"></div></div>';
+									prueba += '<input type="number" name="hh_test_'+(i+1)+'" value="'+test.hh+'" class="form-control" min="1" disabled></div></div>';
 
 									$('#tests').append(prueba);
 
@@ -258,16 +287,44 @@ $("#kind").change(function() {
 					});
 
 			}
-			else
+			else //se volvió a seleccionar generar una nueva prueba, por lo que se dejan los valores del comienzo
 			{
 				cont = 2; //contador para nuevas actividades
 				$("#name").val("");
 				$("#description").val("");
 				$("#type").val("");
 
-				$("#activities").empty();
-				$("#agregar_actividad").show();
-				$("#activities").append('<div class="form-group"><label for="Prueba 1" class="col-sm-4 control-label">Prueba 1</label><div class="col-sm-4"><input id="activity_1" class="form-control" required="true" name="activity_1" type="text"></div></div>');
+				$("#tests").empty();
+				$("#agregar_prueba").show();
+
+				//agregamos campos de prueba 1
+				var prueba = '<div class="form-group"><label for="name_test_1" class="col-sm-4 control-label">Prueba 1: Nombre</label>';
+				prueba += '<div class="col-sm-4"><input id="test_1" class="form-control" required="true" name="name_test_1" type="text"></div></div>';
+
+				//descripción
+				prueba += '<div class="form-group">';
+				prueba += '<label for="description_test_1" class="col-sm-4 control-label">Descripción</label>';
+				prueba += '<div class="col-sm-4"><textarea name="description_test_1" class="form-control" cols="4" rows="3"></textarea></div></div>';
+
+				//tipo
+				prueba += '<div class="form-group">';
+				prueba += '<label for="type_test_1" class="col-sm-4 control-label">Tipo</label>';
+				prueba += '<div class="col-sm-4"><select name="type_test_1" class="form-control">';
+				prueba += '<option value="" disabled selected>- Seleccione -</option>';
+				prueba += '<option value="0">Prueba de diseño</option>';
+				prueba += '<option value="1">Prueba de efectividad operativa</option>';
+				prueba += '<option value="2">Prueba de cumplimiento</option>';
+				prueba += '<option value="3">Prueba sustantiva</option>';
+				prueba += '</select>';
+				prueba += '</div></div>';
+
+				//hh
+				prueba += '<div class="form-group">';
+				prueba += '<label for="hh_test_1" class="col-sm-4 control-label">Horas-hombre</label>';
+				prueba += '<div class="col-sm-4">';
+				prueba += '<input type="number" name="hh_test_1" class="form-control" min="1"></div></div>';
+
+				$("#tests").append(prueba);
 
 				$("audit_test_id").val("");
 
@@ -369,11 +426,21 @@ $("#agregar_prueba").click(function() {
 			prueba += '</select>';
 			prueba += '</div></div>';
 
+
+			//stakeholder
+			prueba += '<div class="form-group">';
+			prueba += '{!!Form::label("Responsable",null,["class"=>"col-sm-4 control-label"])!!}';
+			prueba += '<div class="col-sm-4">';
+			prueba += '{!!Form::select("stakeholder_test_'+cont+'",$stakeholders,null,["placeholder"=>"- Seleccione -","class"=>"form-control first-disabled"])!!}';
+			prueba += '</div>';
+			prueba += '</select>';
+			prueba += '</div>';
+
 			//hh
 			prueba += '<div class="form-group">';
 			prueba += '<label for="hh_test_'+cont+'" class="col-sm-4 control-label">Horas-hombre</label>';
 			prueba += '<div class="col-sm-4">';
-			prueba += '<input type="number" name="name_test_'+cont+'" class="form-control" min="1"></div></div>';
+			prueba += '<input type="number" name="hh_test_'+cont+'" class="form-control" min="1"></div></div>';
 
 			prueba += '</div>';
 			prueba += '<hr>';
