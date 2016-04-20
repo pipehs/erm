@@ -217,10 +217,13 @@ function upload_file($archivo,$dir,$id)
 //Funcion php que valida rut en Chile
 function validaRut($rut){
     $suma=0;
-    if(strpos($rut,"-")==false){
+    if(strpos($rut,"-")==false)
+    {
         $RUT[0] = substr($rut, 0, -1);
         $RUT[1] = substr($rut, -1);
-    }else{
+    }
+    else
+    {
         $RUT = explode("-", trim($rut));
     }
     $elRut = str_replace(".", "", trim($RUT[0]));
@@ -231,11 +234,16 @@ function validaRut($rut){
     endfor;
     $resto = $suma % 11;
     $dv = 11 - $resto;
-    if($dv == 11){
+    if($dv == 11)
+    {
         $dv=0;
-    }else if($dv == 10){
+    }
+    else if($dv == 10)
+    {
         $dv="k";
-    }else{
+    }
+    else
+    {
         $dv=$dv;
     }
    if($dv == trim(strtolower($RUT[1]))){

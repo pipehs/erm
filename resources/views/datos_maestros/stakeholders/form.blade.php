@@ -5,7 +5,7 @@
 							['class'=>'form-control',$required,'input maxlength'=>'8',$disabled])!!}
 						</div>
 						<div class="col-sm-1">
-						{!!Form::select('dv',array('0','1','2','3','4','5','6','7','8','9','k'), 
+						{!!Form::select('dv',$dv, 
 					 	   null, 
 					 	   ['id' => 'el2','placeholder'=>'-',$required,$disabled])!!}
 						</div>

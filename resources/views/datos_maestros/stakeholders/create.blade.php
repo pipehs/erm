@@ -63,7 +63,7 @@
 <script>
 	$("#agregar_rol").click(function() {
 		$("#rol").empty();
-		$("#rol").append('<div class="form-group">{!!Form::label("Tipo",null,["class"=>"col-sm-4 control-label"])!!}<div class="col-sm-3">{!!Form::text("rol_nuevo",null,["class"=>"form-control","required"=>"true"])!!}</div></div>');
+		$("#rol").append('<div class="form-group">{!!Form::label("Tipo",null,["class"=>"col-sm-4 control-label"])!!}<div class="col-sm-3">{!!Form::text("rol_nuevo",null,["class"=>"form-control","required"=>"true","placeholder"=>"Ingrese nuevo rol"])!!}</div></div>');
 
 	});
 </script>

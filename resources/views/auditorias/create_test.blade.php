@@ -70,7 +70,7 @@
 					<div class="form-group">
 						{!!Form::label('Seleccione auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							<select name="audit" id="audit">
+							<select name="audit" id="audit" required>
 								<!-- Aquí se agregarán las auditorías relacionadas al plan seleccionado a través de Jquery -->
 							</select>
 						</div>
@@ -120,8 +120,7 @@
 
 								{!!Form::label('Descripción',null,['class'=>'col-sm-4 control-label'])!!}	
 								<div class="col-sm-4">
-									{!!Form::textarea('description_test_1',null,['id'=>'description_test_1','class'=>'form-control',
-																'rows'=>'3','cols'=>'4','required'=>'true'])!!}
+									{!!Form::textarea('description_test_1',null,['id'=>'description_test_1','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 								</div>
 
 						</div>
@@ -431,7 +430,15 @@ $("#agregar_prueba").click(function() {
 			prueba += '<div class="form-group">';
 			prueba += '{!!Form::label("Responsable",null,["class"=>"col-sm-4 control-label"])!!}';
 			prueba += '<div class="col-sm-4">';
-			prueba += '{!!Form::select("stakeholder_test_'+cont+'",$stakeholders,null,["placeholder"=>"- Seleccione -","class"=>"form-control first-disabled"])!!}';
+			//prueba += '{!!Form::select("stakeholder_test_'+cont+'",$stakeholders,null,["placeholder"=>"- Seleccione -","class"=>"form-control first-disabled"])!!}';
+
+			prueba += '<select name="stakeholder_test_'+cont+'" class="form-control">';
+			prueba += '<option value="" disabled selected>- Seleccione -</option>';
+			@foreach ($stakeholders as $rut=>$name)
+				prueba += '<option value="{{$rut}}">{{$name}}</option>';
+			@endforeach
+
+			prueba += '</select>';
 			prueba += '</div>';
 			prueba += '</select>';
 			prueba += '</div>';

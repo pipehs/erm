@@ -112,11 +112,13 @@ class StakeholdersController extends Controller
     {
         $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
         $roles = \Ermtool\Role::all()->lists('name','id');
+
+        $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
         //si es create, campo rut estara desbloqueado
         $required = 'required';
         $disabled = "";
         return view('datos_maestros.stakeholders.create',['organizations'=>$organizations,'disabled'=>$disabled,
-                                                            'required'=>$required,'roles'=>$roles]);
+                                                            'required'=>$required,'roles'=>$roles,'dv'=>$dv]);
     }
 
     /**
@@ -218,13 +220,14 @@ class StakeholdersController extends Controller
         $stakeholder = \Ermtool\Stakeholder::find($id);
         $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
         $roles = \Ermtool\Role::all()->lists('name','id');
+        $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
 
         $i = 0;
 
         //si es edit, campo rut estara bloqueado y no habrá required
         $disabled = 'disabled';
         return view('datos_maestros.stakeholders.edit',['stakeholder'=>$stakeholder,'organizations'=>$organizations,
-                                                            'disabled'=>$disabled,'required'=>'','roles'=>$roles]);
+                                                            'disabled'=>$disabled,'required'=>'','roles'=>$roles,'dv'=>$dv]);
     }
 
     /**
@@ -265,7 +268,7 @@ class StakeholdersController extends Controller
             DB::table('role_stakeholder')->where('stakeholder_id',$GLOBALS['id1'])->delete();
 
             //ahora, agregamos posibles nuevas relaciones
-            foreach($request['role_id'] as $role_id)
+            foreach($_POST['role_id'] as $role_id)
             {
                 DB::table('role_stakeholder')->insert([
                     'role_id'=>$role_id,

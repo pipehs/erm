@@ -198,7 +198,6 @@ class AuditoriasController extends Controller
 
     public function storePrueba(Request $request)
     {
-        
         //creamos una transacción para cumplir con atomicidad
         DB::transaction(function()
         {
@@ -210,17 +209,19 @@ class AuditoriasController extends Controller
                             'name' => $_POST['name'],
                             'description' => $_POST['description']
                             ]);
+
+                $audit_program_id = $audit_program->id;
             }
             else
             {
-                $audit_program = \Ermtool\Audit_program::find($_POST['audit_program_id'])->value('id');            
+                $audit_program_id = \Ermtool\Audit_program::find($_POST['audit_program_id'])->value('id');            
             }
 
                 //insertamos en audit_audit_plan_audit_program
                 $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')
                             ->insertGetId([
-                                    'audit_program_id' => $audit_program,
-                                    'audit_audit_plan_id' => $_POST['audit']
+                                    'audit_program_id' => $audit_program_id,
+                                    'audit_audit_plan_id' => $_POST['audit'],
                                     'created_at' => $fecha,
                                     'updated_at' => $fecha,
                                     //'stakeholder_id' => $_POST['stakeholder_id']
@@ -230,17 +231,48 @@ class AuditoriasController extends Controller
                 //insertamos cada una de las pruebas
                 while (isset($_POST['name_test_'.$i]))
                 {
+                    //si es que se ingreso descripción
+                    if (isset($_POST['description_test_'.$i]))
+                    {
+                        $description = $_POST['description_test_'.$i];
+                    }
+                    else
+                    {
+                        $description = NULL;
+                    }
+
+                    //si es que se ingreso tipo
+                    if (isset($_POST['type_test_'.$i]))
+                    {
+                        $type = $_POST['type_test_'.$i];
+                    }
+                    else
+                    {
+                        $type = NULL;
+                    }
+
+                    //si es que se ingreso stakeholder
+                    if (isset($_POST['stakeholder_test_'.$i]))
+                    {
+                        $stakeholder = $_POST['stakeholder_test_'.$i];
+                    }
+                    else
+                    {
+                        $stakeholder = NULL;
+                    }
+
+
                     DB::table('audit_tests')
                         ->insert([
-                            'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
-                            'name' => $_POST['name_test_'.$i],
-                            'description' => $_POST['description_test_'.$i], 
-                            'type' => $_POST['type_test_'.$i],
-                            'status' => 1,
-                            'results' => 2,
-                            'created_at' => $fecha,
-                            'updated_at' => $fecha,
-                            'stakeholder_id' => $_POST['stakeholder_test_'.$i],
+                                'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
+                                'name' => $_POST['name_test_'.$i],
+                                'description' => $description, 
+                                'type' => $type,
+                                'status' => 1,
+                                'results' => 2,
+                                'created_at' => $fecha,
+                                'updated_at' => $fecha,
+                                'stakeholder_id' => $stakeholder,
                             ]);
                     $i += 1;    
                 }
