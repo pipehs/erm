@@ -159,7 +159,8 @@ class RiesgosController extends Controller
         {
             $subprocesos = \Ermtool\Subprocess::where('status',0)->lists('name','id');
             return view('riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                    'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo]);
+                    'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,
+                    'stakeholders'=>$stakeholders]);
         }
 
         else if (isset($_GET['N']))
@@ -342,9 +343,14 @@ class RiesgosController extends Controller
         //riesgos tipo
         $riesgos_tipo = \Ermtool\Risk::where('status',0)->where('type2',0)->lists('name','id');
 
+        //obtenemos lista de stakeholders
+        $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+        ->orderBy('name')
+        ->lists('full_name', 'id');
+
         $risk = \Ermtool\Risk::find($id);
         return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
-                                    'categorias'=>$categorias,'efectos'=>$efectos]);
+                                    'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders]);
     }
 
 

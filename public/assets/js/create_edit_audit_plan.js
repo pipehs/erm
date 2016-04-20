@@ -78,18 +78,18 @@
 									$("#informacion").append('<h5><b>Riesgos de procesos:</b> Ninguno</h5>');
 								}
 
-								if (audit.audit_tests.length > 0)
+								if (audit.audit_programs.length > 0)
 								{
-									$("#informacion").append('<h5><b>Pruebas de auditor&iacute;a: </h5>');
+									$("#informacion").append('<h5><b>Programas de auditor&iacute;a: </h5>');
 
 									//seteamos datos de cada prueba de auditoría
-									$(audit.audit_tests).each( function(i, test) {
-										$("#informacion").append('<ul><li>Nombre: ' + test.name + '</li><li>Resultado: ' + test.results + '</br></li></ul>');
+									$(audit.audit_programs).each( function(i, test) {
+										$("#informacion").append('<ul><li>Nombre: ' + test.name + '</li></ul>');
 									});
 								}
 								else
 								{
-									$("#informacion").append('<h5><b>Pruebas de auditor&iacute;a:</b> Ninguno</h5>');
+									$("#informacion").append('<h5><b>Programas de auditor&iacute;a:</b> Ninguno</h5>');
 								}
 
 								$("#informacion").append('<hr>');

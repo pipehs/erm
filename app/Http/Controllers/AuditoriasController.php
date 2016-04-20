@@ -130,47 +130,57 @@ class AuditoriasController extends Controller
     }
 
     //función para abrir la vista de gestión de programas de auditoría
-    public function auditTests()
+    public function auditPrograms()
     {
         $programas = array();
-        $tests = \Ermtool\Audit_test::all();
+        $programs = \Ermtool\Audit_program::all();
+
+        $programs = DB::table('audit_audit_plan_audit_program')
+                        ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                        ->select('audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description',
+                            'audit_audit_plan_audit_program.created_at','audit_audit_plan_audit_program.updated_at')
+                        ->get();
+
+                    //QUEDE AQUI!!!!!
         $i = 0; //contador de planes
 
-        foreach ($tests as $test)
+        foreach ($programs as $program)
         {
             //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
-            if ($test['created_at'] == NULL OR $test['created_at'] == "0000-00-00" OR $test['created_at'] == "")
+            if ($program->created_at == NULL OR $program->created_at == "0000-00-00" OR $program->created_at == "")
             {
                 $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
             }
 
             else
             {
-                $fecha_creacion = date_format($test['created_at'],"d-m-Y");
-                $fecha_creacion .= " a las ".date_format($test['created_at'],"H:i:s");
+                //damos formato a fecha inicial
+                $fecha_creacion = date('d-m-Y',strtotime($program->created_at));
+                $fecha_creacion .= ' a las '.date('H:i:s',strtotime($program->created_at));
             }
 
             //damos formato a fecha de actualización 
-            if ($test['updated_at'] != NULL)
+            if ($program->updated_at != NULL)
             {
-                $fecha_act = date_format($test['updated_at'],"d-m-Y");
-                $fecha_act .= " a las ".date_format($test['updated_at'],"H:i:s");
+                //damos formato a fecha final
+                $fecha_act = date('d-m-Y',strtotime($program->updated_at));
+                $fecha_act .= ' a las '.date('H:i:s',strtotime($program->updated_at));
             }
 
             else
                 $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
 
             $programas[$i] = [
-                            'id' => $plan['id'],
-                            'name' => $plan['name'],
-                            'description' => $plan['description'],
+                            'id' => $program->id,
+                            'name' => $program->name,
+                            'description' => $program->description,
                             'created_at' => $fecha_creacion,
                             'updated_at' => $fecha_act
                         ];
             $i += 1;
         }
 
-        return view('auditorias.index',['planes' => $planes]);         
+        return view('auditorias.programas',['programs' => $programas]);         
     }
 
     public function createPruebas()
@@ -261,6 +271,16 @@ class AuditoriasController extends Controller
                         $stakeholder = NULL;
                     }
 
+                    //si es que se ingreso HH
+                    if (isset($_POST['hh_test_'.$i]))
+                    {
+                        $hh = $_POST['hh_test_'.$i];
+                    }
+                    else
+                    {
+                        $hh = NULL;
+                    }
+
 
                     DB::table('audit_tests')
                         ->insert([
@@ -272,6 +292,7 @@ class AuditoriasController extends Controller
                                 'results' => 2,
                                 'created_at' => $fecha,
                                 'updated_at' => $fecha,
+                                'hh' => $hh,
                                 'stakeholder_id' => $stakeholder,
                             ]);
                     $i += 1;    
@@ -279,7 +300,7 @@ class AuditoriasController extends Controller
 
             Session::flash('message','Programa de auditor&iacute;a creado correctamente');
         });
-        return Redirect::to('/crear_pruebas');
+        return Redirect::to('/programas_auditoria');
         
     }
 
@@ -1090,6 +1111,156 @@ class AuditoriasController extends Controller
 
     }
 
+    public function showProgram($id)
+    {
+        $tests = array();
+        //obtenemos datos de programa (sólo el primero ya que id es único)
+        $audit_program = DB::table('audit_audit_plan_audit_program')
+                            ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                            ->where('audit_audit_plan_audit_program.id','=',$id)
+                            ->first();
+
+        //damos formato a fecha creación
+        $created_at = date('d-m-Y',strtotime($audit_program->created_at));
+        $created_at.= ' a las '.date('H:i:s',strtotime($audit_program->created_at));
+
+        //damos formato a fecha de expiración
+        if ($audit_program->expiration_date == NULL)
+        {
+            $expiration_date = "No se ha especificado";
+        }
+        else
+        {
+            $expiration_date = date('d-m-Y',strtotime($audit_program->expiration_date));
+        }
+        
+
+
+        //obtenemos pruebas de auditoría del programa
+        $audit_tests = DB::table('audit_tests')
+                        ->where('audit_audit_plan_audit_program_id','=',$id)
+                        ->select('name','description','type','status','results','created_at',
+                                 'updated_at','hh','stakeholder_id')
+                        ->get();
+
+        $i = 0;
+        foreach ($audit_tests as $audit_test)
+        {
+            //obtenemos stakeholder
+            if ($audit_test->stakeholder_id == NULL)
+            {
+                $stakeholder = "No asignado";
+            }
+            else
+            {
+                $stakeholder = \Ermtool\Stakeholder::find($audit_test->stakeholder_id);
+                $stakeholder2 = $stakeholder['name'].' '.$stakeholder['surnames'];
+            }
+
+            //damos formato a fecha creación
+            $fecha_creacion = date('d-m-Y',strtotime($audit_test->created_at));
+            $fecha_creacion .= ' a las '.date('H:i:s',strtotime($audit_test->created_at));
+
+            //damos formato a fecha de actualización
+            $fecha_act = date('d-m-Y',strtotime($audit_test->updated_at));
+            $fecha_act .= ' a las '.date('H:i:s',strtotime($audit_test->updated_at));
+
+            //seteamos tipo de prueba
+            switch ($audit_test->type) {
+                case 0:
+                    $type = "Prueba de diseño";
+                    break;
+                case 1:
+                    $type = "Prueba de efectividad operativa";
+                    break;
+                case 2:
+                    $type = "Prueba de cumplimiento";
+                    break;
+                case 3:
+                    $type = "Prueba sustantiva";
+                    break;
+                case NULL:
+                    $type = "No especificado";
+                    break;
+            }
+            //seteamos status
+            switch ($audit_test->status) {
+                case 0:
+                    $status = "Abierta";
+                    break;
+                case 1:
+                    $status = "En ejecución";
+                    break;
+                case 2:
+                    $status = "Cerrada";
+                    break;
+                case NULL:
+                    $type = "No especificado";
+                    break;
+            }
+
+            //seteamos resultados
+            switch ($audit_test->results) {
+                case 0:
+                    $results = "Inefectiva";
+                    break;
+                case 1:
+                    $results = "Efectiva";
+                    break;
+                case 2:
+                    $results = "En proceso";
+                    break;
+                case NULL:
+                    $results = "No especificado";
+                    break;
+            }
+            //seteamos descripción
+            if ($audit_test->description == NULL)
+            {
+                $description = "Sin descripción";
+            }
+            else
+            {
+                $description = $audit_test->description;
+            }
+
+            //seteamos hh
+            if ($audit_test->hh == NULL)
+            {
+                $hh = "Sin horas/hombre definidas";
+            }
+            else
+            {
+                $hh = $audit_test->hh;
+            }
+            $tests[$i] = [
+                'name' => $audit_test->name,
+                'description' => $description,
+                'type' => $type,
+                'status' => $status,
+                'results' => $results,
+                'created_at' => $fecha_creacion,
+                'updated_at' => $fecha_act,
+                'stakeholder' => $stakeholder2,
+                'hh' => $hh,
+            ];
+
+            $i += 1;
+        }
+
+        $programa = [
+            'id' => $audit_program->id,
+            'name' => $audit_program->name,
+            'description' => $audit_program->description,
+            'created_at' => $created_at,
+            'expiration_date' => $expiration_date,
+            'tests' => $tests,
+        ];
+
+        return view('auditorias.show_program',['program'=>$programa]);
+        //print_r($programa);
+        
+    }
     public function showAuditoria($id)
     {
         $planes = array();
@@ -2278,7 +2449,7 @@ class AuditoriasController extends Controller
         $auditorias = array();
         $sub_plan_risks = array();
         $obj_plan_risks = array();
-        $audit_tests = array();
+        $audit_programs = array();
         $i = 0; //contador de pruebas
 
         //primero obtenemos último id de plan de auditoría generado para una organización
@@ -2427,30 +2598,21 @@ class AuditoriasController extends Controller
                                         'processes.name as process_name')
                                 ->get();
 
-                //obtenemos pruebas de auditoría realizadas en cada auditoría (si es que hay)
-                $audit_tests1 = DB::table('audit_audit_plan_audit_test')
-                            ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_test.audit_audit_plan_id')
-                            ->join('audit_tests','audit_tests.id','=','audit_audit_plan_audit_test.audit_test_id')
-                            ->where('audit_audit_plan_audit_test.audit_audit_plan_id','=',$audit->id)
-                            ->select('audit_tests.name as audit_test_name','audit_audit_plan_audit_test.results as results')
+                //obtenemos programas de auditoría realizadas en cada auditoría (si es que hay)
+                $audit_programs1 = DB::table('audit_audit_plan_audit_program')
+                            ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                            ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                            ->where('audit_audit_plan_audit_program.audit_audit_plan_id','=',$audit->id)
+                            ->select('audit_programs.name as audit_program_name')
                             ->get();
 
-                if ($audit_tests1)
+                if ($audit_programs1)
                 {
-                    $j = 0; //contador de pruebas en cero
-                    foreach ($audit_tests1 as $test)
+                    $j = 0; //contador de programas en cero
+                    foreach ($audit_programs1 as $program)
                     {
-                        //seteamos resultados
-                        if ($test->results == NULL)
-                        {
-                            $results = 'No hay resultados';
-                        }
-                        else 
-                            $results = $test->results;
-
-                        $audit_tests[$j] = ['audit_id' => $audit->id,
-                                            'name' => $test->audit_test_name,
-                                            'results' => $results,
+                        $audit_programs[$j] = ['audit_id' => $audit->id,
+                                            'name' => $program->audit_program_name
                                         ];
                         $j += 1;
                     }
@@ -2486,7 +2648,7 @@ class AuditoriasController extends Controller
                                     'resources' => $resources,
                                     'obj_risks' => $obj_risks,
                                     'sub_risks' => $sub_risks,
-                                    'audit_tests' => $audit_tests,
+                                    'audit_programs' => $audit_programs,
                                 ];
                 $i += 1;
             }

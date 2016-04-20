@@ -173,7 +173,7 @@
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('plan_auditoria', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('programas_auditoria', $title = 'Volver', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 			</div>
@@ -208,13 +208,12 @@ $("#kind").change(function() {
 							$("#description").val(datos.description);
 							//$("#type").val(datos.type).change();
 
-							$("#name").attr('disabled','disabled');
-							$("#description").attr('disabled','disabled');
+							//$("#name").attr('disabled','disabled');
+							//$("#description").attr('disabled','disabled');
 							//$("#type").attr('disabled','disabled');
 
 							//asignamos id del programa de auditoria para almacenarla en audit_audit_plan_audit_program
 							$("#audit_program_id").val(datos.id);
-
 							//seteamos datos de cada prueba
 							$(datos.tests).each( function(i, test) {
 									
@@ -226,7 +225,7 @@ $("#kind").change(function() {
 									var prueba = '<div class="form-group">';
 									prueba += '<label for="name_test_'+(i+1)+'" class="col-sm-4 control-label">Prueba '+(i+1)+': Nombre</label>';
 									prueba += '<div class="col-sm-4">';
-									prueba += '<input type="text" name="name_test_'+(i+1)+'" value="'+test.name+'" class="form-control" disabled></div></div>';
+									prueba += '<input type="text" name="name_test_'+(i+1)+'" value="'+test.name+'" class="form-control"></div></div>';
 									
 									//descripción
 									prueba += '<div class="form-group">';
@@ -236,7 +235,7 @@ $("#kind").change(function() {
 									//tipo
 									prueba += '<div class="form-group">';
 									prueba += '<label for="type_test_'+(i+1)+'" class="col-sm-4 control-label">Tipo</label>';
-									prueba += '<div class="col-sm-4"><select name="type_test_'+(i+1)+'" class="form-control" disabled>';
+									prueba += '<div class="col-sm-4"><select name="type_test_'+(i+1)+'" class="form-control">';
 
 									if (test.type == 0)
 									{
@@ -278,7 +277,7 @@ $("#kind").change(function() {
 									prueba += '<div class="form-group">';
 									prueba += '<label for="hh_test_'+(i+1)+'" class="col-sm-4 control-label">Horas-hombre</label>';
 									prueba += '<div class="col-sm-4">';
-									prueba += '<input type="number" name="hh_test_'+(i+1)+'" value="'+test.hh+'" class="form-control" min="1" disabled></div></div>';
+									prueba += '<input type="number" name="hh_test_'+(i+1)+'" value="'+test.hh+'" class="form-control" min="1"></div></div>';
 
 									$('#tests').append(prueba);
 

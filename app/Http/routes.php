@@ -565,7 +565,11 @@ Route::post('agregar_plan2', [
 	'as' => 'agregar_plan2', 'uses' => 'AuditoriasController@storePlan']);
 
 Route::get('programas_auditoria', [
-	'as' => 'programas_auditoria', 'uses' => 'AuditoriasController@auditTests']);
+	'as' => 'programas_auditoria', 'uses' => 'AuditoriasController@auditPrograms']);
+
+Route::get('programas_auditoria.show.{id}', [
+	'as' => 'programas_auditoria.show', 'uses' => 'AuditoriasController@showProgram'
+]);
 
 
 //------ Rutas para trabajar con Excel ------//

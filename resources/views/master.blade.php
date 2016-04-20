@@ -86,8 +86,6 @@
 <div id="content" class="col-xs-12 col-sm-10">
     @yield('content')
 </div>
-
-	@yield('scripts2')
 </body>
 </html>
 
@@ -110,7 +108,7 @@
 
 	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}
 
-	{!!Html::script('assets/js/jquery.min.js')}
+	{!!Html::script('assets/js/jquery.min.js')!!}
 	
 	@yield('scripts2')
 </body>
