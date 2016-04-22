@@ -138,7 +138,8 @@ class AuditoriasController extends Controller
         $programs = DB::table('audit_audit_plan_audit_program')
                         ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
                         ->select('audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description',
-                            'audit_audit_plan_audit_program.created_at','audit_audit_plan_audit_program.updated_at')
+                            'audit_audit_plan_audit_program.created_at','audit_audit_plan_audit_program.updated_at',
+                            'audit_audit_plan_audit_program.expiration_date')
                         ->get();
 
                     //QUEDE AQUI!!!!!
@@ -170,12 +171,21 @@ class AuditoriasController extends Controller
             else
                 $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
 
+            //formato a fecha expiración
+            if ($program->expiration_date)
+            {
+                $fecha_exp = date('d-m-Y',strtotime($program->expiration_date));
+            }
+            else
+                $fecha_exp = "Ninguna";
+
             $programas[$i] = [
                             'id' => $program->id,
                             'name' => $program->name,
                             'description' => $program->description,
                             'created_at' => $fecha_creacion,
-                            'updated_at' => $fecha_act
+                            'updated_at' => $fecha_act,
+                            'expiration_date' => $fecha_exp
                         ];
             $i += 1;
         }
@@ -206,6 +216,7 @@ class AuditoriasController extends Controller
         return view('auditorias.create_auditoria');
     }
 
+    //función que guarda programa de auditoría
     public function storePrueba(Request $request)
     {
         //creamos una transacción para cumplir con atomicidad
@@ -281,8 +292,10 @@ class AuditoriasController extends Controller
                         $hh = NULL;
                     }
 
-
-                    DB::table('audit_tests')
+                    //vemos si el tipo de prueba es de control, de proceso o de riesgo
+                    if ($_POST['type2_test_'.$i] == 1) //es de control
+                    {
+                        DB::table('audit_tests')
                         ->insert([
                                 'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
                                 'name' => $_POST['name_test_'.$i],
@@ -294,7 +307,46 @@ class AuditoriasController extends Controller
                                 'updated_at' => $fecha,
                                 'hh' => $hh,
                                 'stakeholder_id' => $stakeholder,
-                            ]);
+                                'control_id' => $_POST['control_id_test_'.$i]
+                        ]);
+                    }
+
+                    else if ($_POST['type2_test_'.$i] == 2) //es de riesgo
+                    {
+                        DB::table('audit_tests')
+                        ->insert([
+                                'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
+                                'name' => $_POST['name_test_'.$i],
+                                'description' => $description, 
+                                'type' => $type,
+                                'status' => 1,
+                                'results' => 2,
+                                'created_at' => $fecha,
+                                'updated_at' => $fecha,
+                                'hh' => $hh,
+                                'stakeholder_id' => $stakeholder,
+                                'risk_id' => $_POST['risk_id_test_'.$i],
+                        ]);
+                    }
+
+                    else if ($_POST['type2_test_'.$i] == 3) //es de riesgo
+                    {
+                        DB::table('audit_tests')
+                        ->insert([
+                                'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
+                                'name' => $_POST['name_test_'.$i],
+                                'description' => $description, 
+                                'type' => $type,
+                                'status' => 1,
+                                'results' => 2,
+                                'created_at' => $fecha,
+                                'updated_at' => $fecha,
+                                'hh' => $hh,
+                                'stakeholder_id' => $stakeholder,
+                                'subprocess_id' => $_POST['subprocess_id_test_'.$i],
+                        ]);
+                    }
+                    
                     $i += 1;    
                 }
 
@@ -3096,5 +3148,19 @@ class AuditoriasController extends Controller
         }
         else
             return json_encode($results);
+    }
+
+    //obtenemos id de organización perteneciente a un plan de auditoría
+    public function getOrganization($audit_plan)
+    {
+        $organization = NULL;
+
+        $organization = DB::table('organizations')
+                    ->join('audit_plans','audit_plans.organization_id','=','organizations.id')
+                    ->where('audit_plans.id','=',$audit_plan)
+                    ->select('organizations.id')
+                    ->first();
+
+        return json_encode($organization);
     }
 }

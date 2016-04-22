@@ -690,4 +690,56 @@ class RiesgosController extends Controller
     {
         //
     }
+
+    //función para obtener riesgos de una organización
+    public function getRisks($org)
+    {
+        $subprocess_risks = array();
+        $objective_risks = array();
+
+        //obtenemos riesgos de subproceso
+        $risks = DB::table('risks')
+                ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                ->where('organization_subprocess.organization_id','=',$org)
+                ->where('risks.status','=',0)
+                ->select('risks.id','risks.name')
+                ->distinct('risks.id')
+                ->get();
+
+        $i = 0;
+
+        foreach ($risks as $risk)
+        {
+            $results[$i] = [
+                'id' => $risk->id,
+                'name' => $risk->name
+            ];
+
+            $i += 1;
+        }
+
+        //obtenemos riesgos de negocio
+        $risks = DB::table('risks')
+                ->join('objective_risk','objective_risk.risk_id','=','risks.id')
+                ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                ->where('objectives.organization_id','=',$org)
+                ->where('risks.status','=',0)
+                ->select('risks.id','risks.name')
+                ->distinct('risks.id')
+                ->get();
+
+        foreach ($risks as $risk)
+        {
+            $results[$i] = [
+                'id' => $risk->id,
+                'name' => $risk->name
+            ];
+
+            $i += 1;
+        }
+
+        return json_encode($results);
+    }
 }

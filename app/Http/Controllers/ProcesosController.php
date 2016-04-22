@@ -280,11 +280,12 @@ class ProcesosController extends Controller
         //
     }
 
+/*
     //obtiene procesos de una organización
     public function getProcesses($org)
     {
         $results = array();
-        //obtenemos solo primer issue (en caso de que existieran muchos)
+
         $processes = DB::table('processes')
                     ->join('subprocesses','subprocesses.process_id','=','processes.id')
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
@@ -303,4 +304,6 @@ class ProcesosController extends Controller
         
         return json_encode($results);
     }
+
+*/
 }

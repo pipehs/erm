@@ -53,6 +53,7 @@
 		<th>Descripci&oacute;n</th>
 		<th>Fecha Agregado</th>
 		<th>&Uacute;ltima actualizaci&oacute;n</th>
+		<th>Fecha fin programa</th>
 		<th>Ver</th>
 	</thead>
 
@@ -62,6 +63,7 @@
 			<td>{{ $program['description'] }}</td>
 			<td>{{ $program['created_at'] }}</td>
 			<td>{{ $program['updated_at'] }}</td>
+			<td>{{ $program['expiration_date'] }}</td>
 			<td>
 				<div>
 		            {!! link_to_route('programas_auditoria.show', $title = 'Ver', $parameters = $program['id'], $attributes = ['class'=>'btn btn-warning']) !!}

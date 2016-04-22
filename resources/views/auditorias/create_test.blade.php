@@ -105,15 +105,28 @@
 					<center>
 					<div style="cursor:hand; margin:auto; " id="agregar_prueba"><font color="CornflowerBlue"><u>Agregar m&aacute;s pruebas</u></font></div>
 					</center>
+
+					
+						<div id="category" style="display:none;">
+							<div class="form-group">
+								{!!Form::label('Categor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
+								<div class="col-sm-4">
+									{!!Form::select('type2_test_1',['1'=>'Prueba de control','2'=>'Prueba de riesgo',
+																'3'=>'Prueba de subproceso'],null,
+																['id'=>'type2_test_1','required'=>'true','onchange'=>'getType(1)','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+								</div>
+							</div>
+						</div>
+
+						<div id="categoria_test_1" style="display:none;"></div>
+
 					<div id="tests">
 						<div class="form-group">
-			
 								{!!Form::label('Prueba 1: Nombre',null,['class'=>'col-sm-4 control-label'])!!}
 								<div class="col-sm-4">
 									{!!Form::text('name_test_1',null,['id'=>'name_test_1','class'=>'form-control',
 																'required'=>'true'])!!}
 								</div>
-
 						</div>
 
 						<div class="form-group">
@@ -126,14 +139,12 @@
 						</div>
 
 						<div class="form-group">
-
 							{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-4">
 								{!!Form::select('type_test_1',['0'=>'Prueba de diseño','1'=>'Prueba de efectividad operativa',
 															'2'=>'Prueba de cumplimiento','3'=>'Prueba sustantiva'],null,
 															['id'=>'type','required'=>'true','placeholder'=>'- Seleccione -'])!!}
 							</div>
-
 						</div>
 
 						<div class="form-group">
@@ -199,7 +210,9 @@ $("#kind").change(function() {
 							$("#tests").empty();
 							$("#new_pruebas").empty();
 							$("#agregar_prueba").hide();
-							//$("#type").remove();
+							$("#categoria_test_1").empty();
+							//ocultamos categoria
+							$("#category").hide();
 							
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
@@ -223,6 +236,15 @@ $("#kind").change(function() {
 									}
 
 									var prueba = '<div class="form-group">';
+									/*
+									//categoría
+									
+									prueba += '<div class="form-group">';
+									prueba += '<label for="type2_test_'+(i+1)+'" class="col-sm-4 control-label">Tipo</label>';
+									prueba += '<div class="col-sm-4"><select name="type2_test_'+(i+1)+'" class="form-control">';
+									*/
+									//nombre
+									prueba += '<div class="form-group">';
 									prueba += '<label for="name_test_'+(i+1)+'" class="col-sm-4 control-label">Prueba '+(i+1)+': Nombre</label>';
 									prueba += '<div class="col-sm-4">';
 									prueba += '<input type="text" name="name_test_'+(i+1)+'" value="'+test.name+'" class="form-control"></div></div>';
@@ -288,12 +310,10 @@ $("#kind").change(function() {
 			else //se volvió a seleccionar generar una nueva prueba, por lo que se dejan los valores del comienzo
 			{
 				cont = 2; //contador para nuevas actividades
-				$("#name").val("");
-				$("#description").val("");
-				$("#type").val("");
 
 				$("#tests").empty();
 				$("#agregar_prueba").show();
+				$("#category").show();
 
 				//agregamos campos de prueba 1
 				var prueba = '<div class="form-group"><label for="name_test_1" class="col-sm-4 control-label">Prueba 1: Nombre</label>';
@@ -337,10 +357,13 @@ $("#audit_plans").change(function() {
 			
 			if ($("#audit_plans").val() != '') //Si es que se ha seleccionado valor válido de plan
 			{
+				//añadimos botón para seleccionar tipo (o categoría de prueba)
+				$("#category").show(500);
 				//Añadimos la imagen de carga en el contenedor
 					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
 				//se obtienen controles asociados a los riesgos presentes en el plan de prueba seleccionado
 					//primero obtenemos controles asociados a los riesgos de negocio
+					/*
 					$.get('auditorias.objective_controls.'+$("#audit_plans").val(), function (result) {
 
 							$("#cargando").html('<br>');
@@ -371,6 +394,7 @@ $("#audit_plans").change(function() {
 							});
 	
 					});
+					*/
 
 					//obtenemos auditorias relacionadas al plan seleccionado
 					$.get('auditorias.auditorias.'+$("#audit_plans").val(), function (result) {
@@ -391,70 +415,193 @@ $("#audit_plans").change(function() {
 			}
 			else
 			{
-				$("control_id").empty();
+				$("audit").empty();
 			}
 		});
 
 cont = 2; //contador para nuevas actividades
-//función para agregar una nueva auditoría
+//función para agregar una nueva prueba
 $("#agregar_prueba").click(function() {
 
-			//insertamos datos para nueva prueba
-			//insertamos nombre
-			var prueba = '<div id="test_'+cont+'">';
-			prueba += '<div class="form-group">';
-			prueba += '<label for="name_test_'+cont+'" class="col-sm-4 control-label">Prueba '+cont+': Nombre</label>';
-			prueba += '<div class="col-sm-4">';
-			prueba += '<input type="text" name="name_test_'+cont+'" class="form-control"></div></div>';
+			//primero verificamos que se haya seleccionado un plan de auditoría
+			if ($("#audit_plans").val() != '')
+			{
+				//insertamos datos para nueva prueba
+				var prueba = '<div id="test_'+cont+'">';
 
-			//descripción
-			prueba += '<div class="form-group">';
-			prueba += '<label for="description_test_'+cont+'" class="col-sm-4 control-label">Descripción</label>';
-			prueba += '<div class="col-sm-4"><textarea name="description_test_'+cont+'" class="form-control" cols="4" rows="3"></textarea></div></div>';
+				//tipo
+				prueba += '<div class="form-group">';
+				prueba += '<label for="type2_test_'+cont+'" class="col-sm-4 control-label">Categor&iacute;a</label>';
+				prueba += '<div class="col-sm-4">';
+				prueba += '<select name="type2_test_'+cont+'" id="type2_test_'+cont+'" onchange="getType('+cont+')" class="form-control">';
+				prueba += '<option value="" disabled selected>- Seleccione -</option>';
+				prueba += '<option value="1">Prueba de control</option>';
+				prueba += '<option value="2">Prueba de riesgo</option>';
+				prueba += '<option value="3">Prueba de subproceso</option>';
+				prueba += '</select>';
+				prueba += '</div></div>';
 
-			//tipo
-			prueba += '<div class="form-group">';
-			prueba += '<label for="type_test_'+cont+'" class="col-sm-4 control-label">Tipo</label>';
-			prueba += '<div class="col-sm-4"><select name="type_test_'+cont+'" class="form-control">';
-			prueba += '<option value="" disabled selected>- Seleccione -</option>';
-			prueba += '<option value="0">Prueba de diseño</option>';
-			prueba += '<option value="1">Prueba de efectividad operativa</option>';
-			prueba += '<option value="2">Prueba de cumplimiento</option>';
-			prueba += '<option value="3">Prueba sustantiva</option>';
-			prueba += '</select>';
-			prueba += '</div></div>';
+				prueba += '<div id="categoria_test_'+cont+'" style="display:none;"></div>';
+
+				//insertamos nombre
+				prueba += '<div class="form-group">';
+				prueba += '<label for="name_test_'+cont+'" class="col-sm-4 control-label">Prueba '+cont+': Nombre</label>';
+				prueba += '<div class="col-sm-4">';
+				prueba += '<input type="text" name="name_test_'+cont+'" class="form-control"></div></div>';
+
+				//descripción
+				prueba += '<div class="form-group">';
+				prueba += '<label for="description_test_'+cont+'" class="col-sm-4 control-label">Descripción</label>';
+				prueba += '<div class="col-sm-4"><textarea name="description_test_'+cont+'" class="form-control" cols="4" rows="3"></textarea></div></div>';
+
+				//tipo
+				prueba += '<div class="form-group">';
+				prueba += '<label for="type_test_'+cont+'" class="col-sm-4 control-label">Tipo</label>';
+				prueba += '<div class="col-sm-4"><select name="type_test_'+cont+'" class="form-control">';
+				prueba += '<option value="" disabled selected>- Seleccione -</option>';
+				prueba += '<option value="0">Prueba de diseño</option>';
+				prueba += '<option value="1">Prueba de efectividad operativa</option>';
+				prueba += '<option value="2">Prueba de cumplimiento</option>';
+				prueba += '<option value="3">Prueba sustantiva</option>';
+				prueba += '</select>';
+				prueba += '</div></div>';
 
 
-			//stakeholder
-			prueba += '<div class="form-group">';
-			prueba += '{!!Form::label("Responsable",null,["class"=>"col-sm-4 control-label"])!!}';
-			prueba += '<div class="col-sm-4">';
-			//prueba += '{!!Form::select("stakeholder_test_'+cont+'",$stakeholders,null,["placeholder"=>"- Seleccione -","class"=>"form-control first-disabled"])!!}';
+				//stakeholder
+				prueba += '<div class="form-group">';
+				prueba += '{!!Form::label("Responsable",null,["class"=>"col-sm-4 control-label"])!!}';
+				prueba += '<div class="col-sm-4">';
+				//prueba += '{!!Form::select("stakeholder_test_'+cont+'",$stakeholders,null,["placeholder"=>"- Seleccione -","class"=>"form-control first-disabled"])!!}';
 
-			prueba += '<select name="stakeholder_test_'+cont+'" class="form-control">';
-			prueba += '<option value="" disabled selected>- Seleccione -</option>';
-			@foreach ($stakeholders as $rut=>$name)
-				prueba += '<option value="{{$rut}}">{{$name}}</option>';
-			@endforeach
+				prueba += '<select name="stakeholder_test_'+cont+'" class="form-control">';
+				prueba += '<option value="" disabled selected>- Seleccione -</option>';
+				@foreach ($stakeholders as $rut=>$name)
+					prueba += '<option value="{{$rut}}">{{$name}}</option>';
+				@endforeach
 
-			prueba += '</select>';
-			prueba += '</div>';
-			prueba += '</select>';
-			prueba += '</div>';
+				prueba += '</select>';
+				prueba += '</div>';
+				prueba += '</select>';
+				prueba += '</div>';
 
-			//hh
-			prueba += '<div class="form-group">';
-			prueba += '<label for="hh_test_'+cont+'" class="col-sm-4 control-label">Horas-hombre</label>';
-			prueba += '<div class="col-sm-4">';
-			prueba += '<input type="number" name="hh_test_'+cont+'" class="form-control" min="1"></div></div>';
+				//hh
+				prueba += '<div class="form-group">';
+				prueba += '<label for="hh_test_'+cont+'" class="col-sm-4 control-label">Horas-hombre</label>';
+				prueba += '<div class="col-sm-4">';
+				prueba += '<input type="number" name="hh_test_'+cont+'" class="form-control" min="1"></div></div>';
 
-			prueba += '</div>';
-			prueba += '<hr>';
-			prueba += '<script>$("html,body").animate({scrollTop: $("#test_'+cont+'").offset().top}, 900);';
+				prueba += '</div>';
+				prueba += '<hr>';
+				prueba += '<script>$("html,body").animate({scrollTop: $("#test_'+cont+'").offset().top}, 900);';
 
-			$("#new_pruebas").append(prueba);
+				$("#new_pruebas").append(prueba);
 
-			cont = cont + 1;
+				cont = cont + 1;
+			}
+			else
+			{
+				swal("Error","Primero debe seleccionar el plan de auditoría","error");
+			}
 	});
+
+
+//selecciona riesgo, control o subproceso
+function getType(test)
+{
+	//primero obtenemos organizacion de plan de auditoría
+	$.get('get_organization.'+$("#audit_plans").val(), function (result) {
+		//alert($('#type2_test_'+test).val());
+		var organization = JSON.parse(result);
+		org = organization.id; //variable global org
+
+		if (org)
+		{
+			//prueba de control
+			if ($('#type2_test_'+test).val() == 1)
+			{
+				//alert("entro1");
+				//obtenemos los datos necesarios según sea el caso
+				$.get('get_controls.'+org, function (result) {
+					//alert("entro2");
+					//creamos select en div de categorias
+					var select = '<div class="form-group">';
+					select += '{!!Form::label("Seleccione control",null,["class"=>"col-sm-4 control-label"])!!}';
+					select += '<div class="col-sm-4">'
+					select += '<select name="control_id_test_'+test+'" class="form-control">';
+					select += '<option value="" selected disabled>- Seleccione -</option>';
+
+					var datos = JSON.parse(result);
+					
+					$(datos).each( function() {
+							select += '<option value="'+this.id+'">'+this.name+'</option>';
+					});
+
+					select += '</select>';
+					select += '</div></div>';
+
+					$('#categoria_test_'+test).html(select);
+					$('#categoria_test_'+test).show(500);
+				});
+			}
+
+			//prueba de riesgo
+			else if ($("#type2_test_"+test).val() == 2)
+			{
+				
+
+				$.get('get_risks.'+org, function (result) {
+
+					var select = '<div class="form-group">';
+					select += '{!!Form::label("Seleccione riesgo",null,["class"=>"col-sm-4 control-label"])!!}';
+					select += '<div class="col-sm-4">'
+					select += '<select name="risk_id_test_'+test+'" class="form-control">';
+					select += '<option value="" selected disabled>- Seleccione -</option>';
+
+					var datos = JSON.parse(result);
+
+					$(datos).each( function() {
+							select += '<option value="'+this.id+'">'+this.name+'</option>';
+					});
+
+					select += '</select>';
+					select += '</div></div>';
+
+					$('#categoria_test_'+test).html(select);
+					$('#categoria_test_'+test).show(500);
+				});
+			}
+
+			//prueba de subproceso
+			else if ($("#type2_test_"+test).val() == 3)
+			{
+				$.get('get_subprocesses.'+org, function (result) {
+
+					var select = '<div class="form-group">';
+					select += '{!!Form::label("Seleccione subproceso",null,["class"=>"col-sm-4 control-label"])!!}';
+					select += '<div class="col-sm-4">'
+					select += '<select name="subprocess_id_test_'+test+'" class="form-control">';
+					select += '<option value="" selected disabled>- Seleccione -</option>';
+
+					var datos = JSON.parse(result);
+
+					$(datos).each( function() {
+							select += '<option value="'+this.id+'">'+this.name+'</option>';
+					});
+
+					select += '</select>';
+					select += '</div></div>';
+
+					$('#categoria_test_'+test).html(select);
+					$('#categoria_test_'+test).show(500);
+				});
+			}
+			else
+			{
+				$('#categoria_test_'+test).hide(500);
+			}
+		}
+		
+	});	
+}
 </script>
 @stop

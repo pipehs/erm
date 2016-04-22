@@ -294,4 +294,27 @@ class SubprocesosController extends Controller
     {
         //
     }
+
+    public function getSubprocesses($org)
+    {
+        $results = array();
+
+        $subprocesses = DB::table('subprocesses')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->where('subprocesses.status','=',0)
+                    ->select('subprocesses.id','subprocesses.name')
+                    ->distinct('subprocesses.id')
+                    ->get();
+
+        foreach ($subprocesses as $subprocess)
+        {
+            $results = [
+                'id' => $subprocess->id,
+                'name' => $subprocess->name,
+            ];
+        }
+        
+        return json_encode($results);
+    }
 }

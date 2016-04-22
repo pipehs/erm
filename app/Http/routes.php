@@ -681,12 +681,28 @@ Route::get('auditorias.close_note.{id}', [
 	'as' => 'auditorias.close_note', 'uses' => 'AuditoriasController@closeNote']);
 
 //ruta para obtener procesos de una organizacion
-Route::get('get_processes.{id}', [
-	'as' => 'get_processes', 'uses' => 'ProcesosController@getProcesses']);
+//Route::get('get_processes.{id}', [
+//	'as' => 'get_processes', 'uses' => 'ProcesosController@getProcesses']);
+
+//ruta para obtener procesos de una organizacion
+Route::get('get_subprocesses.{id}', [
+	'as' => 'get_subprocesses', 'uses' => 'SubprocesosController@getSubprocesses']);
 
 //ruta para obtener procesos de una organizacion
 Route::get('get_objectives.{id}', [
 	'as' => 'get_objectives', 'uses' => 'ObjetivosController@getObjectives']);
+
+//ruta para obtener riesgos de una organizacion
+Route::get('get_risks.{id}', [
+	'as' => 'get_risks', 'uses' => 'RiesgosController@getRisks']);
+
+//ruta para obtener organizacion de un plan de auditoría
+Route::get('get_organization.{audit_plan_id}', [
+	'as' => 'get_organization', 'uses' => 'AuditoriasController@getOrganization']);
+
+//ruta para obtener controles de una organizacion
+Route::get('get_controls.{id}', [
+	'as' => 'get_controls', 'uses' => 'ControlesController@getControls']);
 
 Route::get('get_kri.{id}', [
 	'as' => 'get_kri', 'uses' => 'KriController@getKri']);

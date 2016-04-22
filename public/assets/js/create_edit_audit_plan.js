@@ -184,7 +184,6 @@
 								$("#stakeholder_team").append('<option value="' + this.id + '">' + this.name +'</option>');
 							});
 					});
-
 			}
 			else
 			{
