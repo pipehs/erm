@@ -89,7 +89,7 @@
 </body>
 </html>
 
-{!!Html::script('assets/plugins/jquery/jquery-2.1.0.min.js')!!}
+	{!!Html::script('assets/plugins/jquery/jquery-2.1.0.min.js')!!}
 	{!!Html::script('assets/plugins/jquery-ui/jquery-ui.min.js')!!}
 	{!!Html::script('assets/plugins/bootstrap/bootstrap.min.js')!!}
 	{!!Html::script('assets/plugins/justified-gallery/jquery.justifiedgallery.min.js')!!}

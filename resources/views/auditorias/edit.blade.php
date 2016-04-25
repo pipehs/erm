@@ -11,7 +11,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="plan_auditoria">Auditor&iacute;as</a></li>
-			<li><a href="plan_auditoria.edit.{{ $audit_plan['id'] }}">Pruebas de auditor&iacute;as</a></li>
+			<li><a href="plan_auditoria.edit.{{ $audit_plan['id'] }}">Plan de auditor&iacute;as</a></li>
 		</ol>
 	</div>
 </div>

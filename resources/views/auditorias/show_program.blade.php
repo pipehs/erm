@@ -52,8 +52,13 @@
 			<li><b>Descripci&oacute;n: {{ $program['description'] }}</b></li>
 			<li><b>Fecha creaci&oacute;n: {{ $program['created_at'] }}</b></li>
 			<li><b>Fecha fin: {{ $program['expiration_date'] }}</b></li>
+
+			<li>{!! link_to_route('programas_auditoria.edit', $title = 'Editar programa', $parameters = $program['id'],
+				 $attributes = ['class'=>'btn btn-info'])!!}</li>
 			<hr>
-			<li><b><u>Pruebas del programa</u></b></li>
+			<li><b><u>Pruebas del programa</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			{!! link_to_route('programas_auditoria.edit', $title = 'Agregar prueba', $parameters = NULL,
+				 $attributes = ['class'=>'btn btn-success'])!!}</li>
 			</ul>
 			<hr>
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
@@ -67,6 +72,7 @@
 				<th>Resultado</th>
 				<th>Responsable</th>
 				<th>Horas / Hombre</th>
+				<th>Acci&oacute;n</th>
 			</tr>
 
 			@foreach ($program['tests'] as $test)
@@ -89,6 +95,9 @@
 					<td>{{ $test['stakeholder'] }}</td>
 
 					<td>{{ $test['hh'] }}</td>
+
+					<td>{!! link_to_route('programas_auditoria.edit_test', $title = 'Editar', $parameters = $test['id'],
+				 $attributes = ['class'=>'btn btn-success'])!!}</td>
 
 				</tr>
 			@endforeach

@@ -223,8 +223,10 @@
       @endfor
       
   @endif
-
-  $(document).tooltip();
+  $(function() {
+    $( document ).tooltip();
+  })
+  
 /*
     $( "#tipo" ).change(function() {
       

@@ -223,7 +223,7 @@ class AuditoriasController extends Controller
         DB::transaction(function()
         {
             $fecha = date('Y-m-d H:i:s');
-            //si es que no tiene valor kind, significa que es una prueba nueva
+            //si es que no tiene valor kind, significa que es un programa nuevo
             if ($_POST['kind'] == "")
             {
                 $audit_program = \Ermtool\Audit_program::create([
@@ -250,7 +250,7 @@ class AuditoriasController extends Controller
 
                 $i = 1; //contador de pruebas
                 //insertamos cada una de las pruebas
-                while (isset($_POST['name_test_'.$i]))
+                while (isset($_POST['name_test_'.$i]) && $_POST['name_test_'.$i] != "")
                 {
                     //si es que se ingreso descripción
                     if (isset($_POST['description_test_'.$i]))
@@ -295,56 +295,65 @@ class AuditoriasController extends Controller
                     //vemos si el tipo de prueba es de control, de proceso o de riesgo
                     if ($_POST['type2_test_'.$i] == 1) //es de control
                     {
-                        DB::table('audit_tests')
-                        ->insert([
-                                'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
-                                'name' => $_POST['name_test_'.$i],
-                                'description' => $description, 
-                                'type' => $type,
-                                'status' => 1,
-                                'results' => 2,
-                                'created_at' => $fecha,
-                                'updated_at' => $fecha,
-                                'hh' => $hh,
-                                'stakeholder_id' => $stakeholder,
-                                'control_id' => $_POST['control_id_test_'.$i]
-                        ]);
+                        if (isset($_POST['control_id_test_'.$i]))
+                        {
+                            DB::table('audit_tests')
+                            ->insert([
+                                    'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
+                                    'name' => $_POST['name_test_'.$i],
+                                    'description' => $description, 
+                                    'type' => $type,
+                                    'status' => 1,
+                                    'results' => 2,
+                                    'created_at' => $fecha,
+                                    'updated_at' => $fecha,
+                                    'hh' => $hh,
+                                    'stakeholder_id' => $stakeholder,
+                                    'control_id' => $_POST['control_id_test_'.$i]
+                            ]);
+                        }
                     }
 
                     else if ($_POST['type2_test_'.$i] == 2) //es de riesgo
                     {
-                        DB::table('audit_tests')
-                        ->insert([
-                                'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
-                                'name' => $_POST['name_test_'.$i],
-                                'description' => $description, 
-                                'type' => $type,
-                                'status' => 1,
-                                'results' => 2,
-                                'created_at' => $fecha,
-                                'updated_at' => $fecha,
-                                'hh' => $hh,
-                                'stakeholder_id' => $stakeholder,
-                                'risk_id' => $_POST['risk_id_test_'.$i],
-                        ]);
+                        if (isset($_POST['risk_id_test_'.$i]))
+                        {
+                            DB::table('audit_tests')
+                            ->insert([
+                                    'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
+                                    'name' => $_POST['name_test_'.$i],
+                                    'description' => $description, 
+                                    'type' => $type,
+                                    'status' => 1,
+                                    'results' => 2,
+                                    'created_at' => $fecha,
+                                    'updated_at' => $fecha,
+                                    'hh' => $hh,
+                                    'stakeholder_id' => $stakeholder,
+                                    'risk_id' => $_POST['risk_id_test_'.$i],
+                            ]);
+                        }
                     }
 
-                    else if ($_POST['type2_test_'.$i] == 3) //es de riesgo
+                    else if ($_POST['type2_test_'.$i] == 3) //es de proceso
                     {
-                        DB::table('audit_tests')
-                        ->insert([
-                                'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
-                                'name' => $_POST['name_test_'.$i],
-                                'description' => $description, 
-                                'type' => $type,
-                                'status' => 1,
-                                'results' => 2,
-                                'created_at' => $fecha,
-                                'updated_at' => $fecha,
-                                'hh' => $hh,
-                                'stakeholder_id' => $stakeholder,
-                                'subprocess_id' => $_POST['subprocess_id_test_'.$i],
-                        ]);
+                        if (isset($_POST['subprocess_id_test_'.$i]))
+                        {
+                            DB::table('audit_tests')
+                            ->insert([
+                                    'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
+                                    'name' => $_POST['name_test_'.$i],
+                                    'description' => $description, 
+                                    'type' => $type,
+                                    'status' => 1,
+                                    'results' => 2,
+                                    'created_at' => $fecha,
+                                    'updated_at' => $fecha,
+                                    'hh' => $hh,
+                                    'stakeholder_id' => $stakeholder,
+                                    'subprocess_id' => $_POST['subprocess_id_test_'.$i],
+                            ]);
+                        }
                     }
                     
                     $i += 1;    
@@ -1170,6 +1179,8 @@ class AuditoriasController extends Controller
         $audit_program = DB::table('audit_audit_plan_audit_program')
                             ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
                             ->where('audit_audit_plan_audit_program.id','=',$id)
+                            ->select('audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description',
+                                'audit_audit_plan_audit_program.created_at','audit_audit_plan_audit_program.expiration_date')
                             ->first();
 
         //damos formato a fecha creación
@@ -1191,7 +1202,7 @@ class AuditoriasController extends Controller
         //obtenemos pruebas de auditoría del programa
         $audit_tests = DB::table('audit_tests')
                         ->where('audit_audit_plan_audit_program_id','=',$id)
-                        ->select('name','description','type','status','results','created_at',
+                        ->select('id','name','description','type','status','results','created_at',
                                  'updated_at','hh','stakeholder_id')
                         ->get();
 
@@ -1286,6 +1297,7 @@ class AuditoriasController extends Controller
                 $hh = $audit_test->hh;
             }
             $tests[$i] = [
+                'id' => $audit_test->id,
                 'name' => $audit_test->name,
                 'description' => $description,
                 'type' => $type,
@@ -1313,6 +1325,209 @@ class AuditoriasController extends Controller
         //print_r($programa);
         
     }
+
+    public function editProgram($id)
+    {
+        $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')->find($id);
+
+        $audit_program = \Ermtool\Audit_program::find($audit_audit_plan_audit_program->audit_program_id);
+
+        return view('auditorias.edit_program',['program'=>$audit_program,
+            'audit_audit_plan_audit_program'=>$audit_audit_plan_audit_program]);
+
+    }
+
+    public function editTest($id)
+    {
+        $audit_test = \Ermtool\Audit_test::find($id);
+
+        //obtenemos audit_plan para despues obtener controles, riesgos o subproceso de la prueba
+        $audit_plan = DB::table('audit_audit_plan_audit_program')
+                    ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                    ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                    ->join('audit_tests','audit_tests.audit_audit_plan_audit_program_id','=','audit_audit_plan_audit_program.id')
+                    ->where('audit_tests.audit_audit_plan_audit_program_id','=',$audit_test->audit_audit_plan_audit_program_id)
+                    ->select('audit_plans.id')
+                    ->first();
+
+        $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+        ->orderBy('name')
+        ->lists('full_name', 'id');
+
+        //seleccionamos tipo o categoría
+        if ($audit_test->control_id != NULL)
+        {
+            $type2 = 1;
+            $type_id = $audit_test->control_id;
+        }
+        else if ($audit_test->risk_id != NULL)
+        {
+            $type2 = 2;
+            $type_id = $audit_test->risk_id;
+        }
+        else if ($audit_test->subprocess_id != NULL)
+        {
+            $type2 = 3;
+            $type_id = $audit_test->subprocess_id;
+        }
+
+        return view('auditorias.edit_test',['audit_test'=>$audit_test,'stakeholders'=>$stakeholders,'type2'=>$type2,'audit_plan' => $audit_plan->id,'type_id'=>$type_id]);
+
+    }
+
+    public function updateProgram(Request $request, $id)
+    {
+        global $id1;
+        $id1 = $id;
+        //echo "POST: ";
+        //print_r($_POST);
+        DB::transaction(function (){
+
+            $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')->find($GLOBALS['id1']);
+
+            $audit_program = \Ermtool\Audit_program::find($audit_audit_plan_audit_program->audit_program_id);
+
+            $audit_program->name = $_POST['name'];
+
+            $audit_program->description = $_POST['description'];
+
+            DB::table('audit_audit_plan_audit_program')
+                ->where('id',$audit_audit_plan_audit_program->id)
+                ->update([
+                        'expiration_date' => $_POST['expiration_date'],
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+        
+            $audit_program->save();
+            //$audit_audit_plan_audit_program->save();
+
+            Session::flash('message','Programa actualizado correctamente');
+
+        });
+        
+
+        return Redirect::to('/programas_auditoria');
+
+    }
+
+    public function updateTest(Request $request, $id)
+    {
+        global $id1;
+        $id1 = $id;
+        //echo "POST: ";
+        //print_r($_POST);
+        DB::transaction(function (){
+
+            //si es que se ingreso descripción
+            if (isset($_POST['description']))
+            {
+                $description = $_POST['description'];
+            }
+            else
+            {
+                $description = NULL;
+            }
+
+            //si es que se ingreso tipo
+            if (isset($_POST['type']))
+            {
+                $type = $_POST['type'];
+            }
+            else
+            {
+                $type = NULL;
+            }
+
+            //si es que se ingreso stakeholder
+            if (isset($_POST['stakeholder_id']))
+            {
+                $stakeholder = $_POST['stakeholder_id'];
+            }
+            else
+            {
+                $stakeholder = NULL;
+            }
+
+            //si es que se ingreso HH
+            if (isset($_POST['hh_test_1']))
+            {
+                $hh = $_POST['hh_test_1'];
+            }
+            else
+            {
+                $hh = NULL;
+            }
+
+            //vemos si el tipo de prueba es de control, de proceso o de riesgo
+            if ($_POST['type2_test_1'] == 1) //es de control
+            {
+                if (isset($_POST['control_id_test_1']))
+                {
+                    DB::table('audit_tests')
+                        ->where('id','=',$GLOBALS['id1'])
+                        ->update([
+                            'name' => $_POST['name_test_1'],
+                            'description' => $description, 
+                            'type' => $type,
+                            'updated_at' => $fecha,
+                            'hh' => $hh,
+                            'stakeholder_id' => $stakeholder,
+                            'control_id' => $_POST['control_id_test_1']
+                            ]);
+                        }
+                    }
+
+                    else if ($_POST['type2_test_'.$i] == 2) //es de riesgo
+                    {
+                        if (isset($_POST['risk_id_test_'.$i]))
+                        {
+                            DB::table('audit_tests')
+                            ->insert([
+                                    'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
+                                    'name' => $_POST['name_test_1'],
+                                    'description' => $description, 
+                                    'type' => $type,
+                                    'status' => 1,
+                                    'results' => 2,
+                                    'created_at' => $fecha,
+                                    'updated_at' => $fecha,
+                                    'hh' => $hh,
+                                    'stakeholder_id' => $stakeholder,
+                                    'risk_id' => $_POST['risk_id_test_1'],
+                            ]);
+                        }
+                    }
+
+                    else if ($_POST['type2_test_'.$i] == 3) //es de proceso
+                    {
+                        if (isset($_POST['subprocess_id_test_1']))
+                        {
+                            DB::table('audit_tests')
+                            ->insert([
+                                    'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
+                                    'name' => $_POST['name_test_'.$i],
+                                    'description' => $description, 
+                                    'type' => $type,
+                                    'status' => 1,
+                                    'results' => 2,
+                                    'created_at' => $fecha,
+                                    'updated_at' => $fecha,
+                                    'hh' => $hh,
+                                    'stakeholder_id' => $stakeholder,
+                                    'subprocess_id' => $_POST['subprocess_id_test_1'],
+                            ]);
+                        }
+                    }
+
+            Session::flash('message','Prueba actualizada correctamente');
+
+        });
+        
+
+        return Redirect::to('programas_auditoria.show.'.$audit_);
+
+    }
+
     public function showAuditoria($id)
     {
         $planes = array();
@@ -2229,7 +2444,7 @@ class AuditoriasController extends Controller
         return json_encode($results);
     }
 
-    //función que obtiene una prueba de auditoría (al crear una nueva prueba basada en una antigua)
+    //función que obtiene un programa de auditoría (al crear uno nuevo basado en uno antiguo)
     public function getAuditProgram($id)
     {
         $results = array();
@@ -2247,16 +2462,42 @@ class AuditoriasController extends Controller
             $audit_tests = DB::table('audit_tests')
                             ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
                             ->where('audit_audit_plan_audit_program.audit_program_id','=',$program->id)
-                            ->select('audit_tests.name','audit_tests.description','audit_tests.type','audit_tests.hh')
+                            ->select('audit_tests.name','audit_tests.description','audit_tests.type','audit_tests.hh',
+                                    'audit_tests.control_id','audit_tests.subprocess_id','audit_tests.risk_id')
                             ->get();
 
             foreach ($audit_tests as $test)
             {
+                if ($test->control_id != NULL)
+                {
+                    //obtenemos nombre de control
+                    $control = \Ermtool\Control::find($test->control_id)->value('id');
+                    $risk = NULL;
+                    $subprocess = NULL;
+                }
+                else if ($test->subprocess_id != NULL)
+                {
+                    //obtenemos nombre de subproceso
+                    $subprocess = \Ermtool\Subprocess::find($test->subprocess_id)->value('id');
+                    $risk = NULL;
+                    $control = NULL;
+                }
+                else if ($test->risk_id != NULL)
+                {
+                    //obtenemos nombre de riesgo
+                    $risk = \Ermtool\Risk::find($test->risk_id)->value('id');
+                    $subprocess = NULL;
+                    $control = NULL;
+                }
+
                 $tests[$i] = [
                         'name' => $test->name,
                         'description' => $test->description,
                         'type' => $test->type,
-                        'hh' => $test->hh
+                        'hh' => $test->hh,
+                        'risk' => $risk,
+                        'control' => $control,
+                        'subprocess' => $subprocess,
                             ];
                 $i += 1;
             }

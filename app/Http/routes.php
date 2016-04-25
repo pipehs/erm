@@ -568,8 +568,19 @@ Route::get('programas_auditoria', [
 	'as' => 'programas_auditoria', 'uses' => 'AuditoriasController@auditPrograms']);
 
 Route::get('programas_auditoria.show.{id}', [
-	'as' => 'programas_auditoria.show', 'uses' => 'AuditoriasController@showProgram'
-]);
+	'as' => 'programas_auditoria.show', 'uses' => 'AuditoriasController@showProgram']);
+
+Route::get('programas_auditoria.edit.{id}', [
+	'as' => 'programas_auditoria.edit', 'uses' => 'AuditoriasController@editProgram']);
+
+Route::get('programas_auditoria.edit_test.{id}', [
+	'as' => 'programas_auditoria.edit_test', 'uses' => 'AuditoriasController@editTest']);
+
+Route::put('programas_auditoria.update_program.{id}', [
+	'as' => 'programas_auditoria.update_program', 'uses' => 'AuditoriasController@updateProgram']);
+
+Route::put('programas_auditoria.update_test.{id}', [
+	'as' => 'programas_auditoria.update_test', 'uses' => 'AuditoriasController@updateTest']);
 
 
 //------ Rutas para trabajar con Excel ------//
