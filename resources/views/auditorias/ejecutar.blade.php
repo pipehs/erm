@@ -16,7 +16,7 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-sm-12 col-sm-8">
+	<div class="col-sm-12 col-sm-10">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -37,7 +37,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-	      	<p>En esta secci&oacute;n podr&aacute; ejecutar los planes de auditor&iacute;as de riesgos.</p>
+	      	<p>En esta secci&oacute;n podr&aacute; ejecutar los planes de auditor&iacute;a con sus respectivos programas.</p>
 
 				@if(Session::has('message'))
 					<div class="alert alert-success alert-dismissible" role="alert">
@@ -65,7 +65,7 @@
 						</div>
 					</div>
 
-					<div id="audit_tests"></div>
+					<div id="audit_programs"></div>
 
 					<div class="form-group">
 						<center>
@@ -74,6 +74,11 @@
 					</div>
 					
 				{!!Form::close()!!}
+
+					<center>
+						{!! link_to_route('plan_auditoria', $title = 'Volver', $parameters = NULL,
+						 $attributes = ['class'=>'btn btn-danger'])!!}
+					<center>
 
 			</div>
 		</div>

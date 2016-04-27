@@ -582,6 +582,12 @@ Route::put('programas_auditoria.update_program.{id}', [
 Route::put('programas_auditoria.update_test.{id}', [
 	'as' => 'programas_auditoria.update_test', 'uses' => 'AuditoriasController@updateTest']);
 
+Route::get('programas_auditoria.create_test.{id}', [
+	'as' => 'programas_auditoria.create_test', 'uses' => 'AuditoriasController@createTest']);
+
+Route::post('programas_auditoria.store_test', [
+	'as' => 'programas_auditoria.store_test', 'uses' => 'AuditoriasController@storeTest']);
+
 
 //------ Rutas para trabajar con Excel ------//
 

@@ -124,60 +124,70 @@ $("#audit").change(function() {
 					//primero obtenemos controles asociados a los riesgos de negocio
 
 					//obtenemos pruebas relacionadas a la auditoría seleccionada
-					$.get('auditorias.get_audit_tests2.'+$("#audit").val(), function (result) {
+					$.get('auditorias.get_audit_program2.'+$("#audit").val(), function (result) {
 
 							$("#cargando").html('<br>');
-							$("#audit_tests").empty();
+							$("#audit_programs").empty();
 
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
-							activities_id = []; //array con id de actividades para guardar en PHP 
-							tests_id = []; //array con id de pruebas para guardar en PHP
+							tests_id = []; //array con id de pruebas para guardar en PHP 
+							programs_id = []; //array con id de programas para guardar en PHP
 							//seteamos datos en select de auditorías
 							$(datos).each( function() {
 
-								tests_id.push(this.id);
+								programs_id.push(this.id);
 								var audit_test = '<h4><b>' + this.name +'</b></h4>';
-							
-								audit_test += '<div style="cursor:hand" id="btn_notas_'+this.id+'" onclick="notas('+this.id+')" class="btn btn-success">Notas</div> ';
 
-								//obtenemos notas
-								$.get('auditorias.get_notes.'+this.id, function (result) {
-									
-									//agregamos div de texto siguiente
-									cantidad_notas = '<div id="mensaje" style="clear: left;">';
+								//por cada prueba del programa
+								$(this.audit_tests).each( function(i,test) {
+										audit_test += '<h5><b>' + test.name +'</b></h5>';
+										audit_test += '<div style="cursor:hand" id="btn_notas_'+test.id+'" onclick="notas('+test.id+')" class="btn btn-success">Notas</div> ';
 
-									if (result == "null") //no existen notas
-									{
-										cantidad_notas += 'No existen notas para esta prueba';
-									}
+										//obtenemos notas 
+										/*
+										$.get('auditorias.get_notes.'+test.id, function (result) {
+											
+											//agregamos div de texto siguiente
+											cantidad_notas = '<div id="mensaje" style="clear: left;">';
 
-									else
-									{
-										cont = 0; //contador de notas
-										cont2 = 0; //contador de notas abiertas
-										//parseamos datos obtenidos
-										var datos = JSON.parse(result);
-										//seteamos datos en select de auditorías
-										
-										$(datos).each( function() {
-											cont = cont+1;
-
-											if (this.status_origin == 0)
-											{	
-												cont2 = cont2 +1;	
+											if (result == "null") //no existen notas
+											{
+												cantidad_notas += 'No existen notas para esta prueba';
 											}
-										});			
-										
-										cantidad_notas = 'Existen '+cont2+' notas abiertas (de un total de '+cont+' notas)';
-									}
-									$("#audit_tests").append(audit_test);
-									$("#audit_tests").append(cantidad_notas);
+
+											else
+											{
+												cont = 0; //contador de notas
+												cont2 = 0; //contador de notas abiertas
+												//parseamos datos obtenidos
+												var datos = JSON.parse(result);
+												//seteamos datos en select de auditorías
+												
+												$(datos).each( function() {
+													cont = cont+1;
+
+													if (this.status_origin == 0)
+													{	
+														cont2 = cont2 +1;	
+													}
+												});			
+												
+												cantidad_notas = 'Existen '+cont2+' notas abiertas (de un total de '+cont+' notas)';
+											}
+											
+											$("#audit_tests").append(cantidad_notas);
+										});
+										*/
+
+										audit_test += '<div id="notas_'+this.id+'" style="display: none;"></div>';
 								});
 
-								$("#audit_tests").append('<div id="notas_'+this.id+'" style="display: none;"></div>');
+								$("#audit_tests").append(audit_test);									
 
 							});
+
+
 					});
 			}
 			else
@@ -186,56 +196,6 @@ $("#audit").change(function() {
 			}
 
 });
-
-
-function notas(id)
-{
-	//$("#btn_notas_"+id).empty();
-	//$("#btn_notas_"+id).
-	$("#notas_"+id).empty();
-	$.get('auditorias.get_notes.'+id, function (result) {
-			
-			//agregamos div de texto siguiente
-			var resultado = '<div id="mensaje" style="clear: left;">';
-
-			if (result == "null") //no existen notas
-			{
-				resultado += 'Aun no se han creado notas para esta prueba.<br><hr>';
-				resultado += '</div>';
-			}
-
-			else
-			{
-				//parseamos datos obtenidos
-				var datos = JSON.parse(result);
-				var cont = 1; //contador de notas 
-				//seteamos datos en select de auditorías
-				
-				$(datos).each( function() {
-					resultado += '<b>Nombre: '+this.name+'</b><br>';
-					resultado += 'Fecha creación: '+this.created_at+'<br>';
-					resultado += 'Estado: '+this.status+'<br>'
-					resultado += '<h4>Nota: '+this.description+'</h4>';
-
-					if (this.status_origin == 0)
-					{
-						resultado += '<div style="cursor:hand" id="responder_nota_'+this.id+'" onclick="responder_nota('+this.id+','+this.test_id+')" class="btn btn-primary">Responder</div>';
-						//agregamos div para formulario de creación de nota
-						resultado += '<div id="respuesta_nota_'+this.id+'"  style="display: none; clear: left;"><br><br></div>';
-					}
-
-					resultado += '<hr><br>';
-				});			
-				
-			}
-
-
-
-			resultado += '<div style="cursor:hand" onclick="ocultar_notas('+id+')"><font color="CornflowerBlue"><u>Ocultar</u></font></div><hr>';
-			$("#notas_"+id).append(resultado).show(500);
-			
-		});
-}
 
 function evidencias(id)
 {
@@ -270,6 +230,8 @@ function responder_nota(id,id_prueba)
 	$("#respuesta_nota_"+id).show(500);
 
 }
-
 </script>
+
+{!!Html::script('assets/js/notas.js')!!}
+
 @stop

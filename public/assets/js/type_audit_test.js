@@ -6,7 +6,6 @@ function getType(test)
 		//alert($('#type2_test_'+test).val());
 		var organization = JSON.parse(result);
 		org = organization.id; //variable global org
-
 		if (org)
 		{
 			//prueba de control
@@ -92,7 +91,7 @@ function getType(test)
 					var datos = JSON.parse(result);
 					$(datos).each( function() {
 						//en caso que se esté editando
-						if (subprocess_id == this.id)
+						if (type_id == this.id)
 						{
 							select += '<option value="'+this.id+'" selected>'+this.name+'</option>';
 						}

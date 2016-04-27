@@ -57,7 +57,7 @@
 				 $attributes = ['class'=>'btn btn-info'])!!}</li>
 			<hr>
 			<li><b><u>Pruebas del programa</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			{!! link_to_route('programas_auditoria.edit', $title = 'Agregar prueba', $parameters = NULL,
+			{!! link_to_route('programas_auditoria.create_test', $title = 'Agregar prueba', $parameters = $program['id'],
 				 $attributes = ['class'=>'btn btn-success'])!!}</li>
 			</ul>
 			<hr>

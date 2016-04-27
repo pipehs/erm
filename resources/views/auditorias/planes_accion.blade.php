@@ -124,7 +124,7 @@ $("#audit").change(function() {
 					//primero obtenemos controles asociados a los riesgos de negocio
 
 					//obtenemos pruebas relacionadas a la auditoría seleccionada
-					$.get('auditorias.get_audit_tests2.'+$("#audit").val(), function (result) {
+					$.get('auditorias.get_audit_program2.'+$("#audit").val(), function (result) {
 
 							$("#cargando").html('<br>');
 							$("#audit_tests").empty();
@@ -132,36 +132,54 @@ $("#audit").change(function() {
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
 							var cont = 1; //contador de pruebas
-							activities_id = []; //array con id de actividades para guardar en PHP 
-							tests_id = []; //array con id de pruebas para guardar en PHP
+							tests_id = []; //array con id de pruebas para guardar en PHP 
+							programs_id = []; //array con id de programas para guardar en PHP
 							//seteamos datos en select de auditorías
 							$(datos).each( function() {
 
-								tests_id.push(this.id);
+
+								programs_id.push(this.id);
 								var audit_test = '<h4><b>' + this.name +'</b></h4>';
-								audit_test += '<b>Debilidades encontradas</b><hr>';
-								$(this.issues).each( function(i,issue) {
-									audit_test += '<li>Clasificación: '+issue.classification+'</li>';
-									audit_test += '<li>Nombre: '+issue.name+'</li>';
-									audit_test += '<li>Descripción: '+issue.description+'</li>';
-									audit_test += '<li>Recomendaciones: '+issue.recommendations+'</li>';
-									audit_test += '<div style="cursor:hand" id="btn_crear_'+issue.id+'" onclick="crear_plan('+issue.id+')" class="btn btn-default">Agregar plan de acción</div>';
 
-									audit_test += '<div id="nuevo_plan_'+issue.id+'" style="display: none;"></div>';
-									audit_test += '<hr>';
+								$(this.audit_tests).each( function(i,test) {
+									audit_test += '<h4>Prueba: '+test.name+'</h4>';
+									audit_test += '<b>Descripción: '+test.description+'</b><br>';
+									audit_test += '<b>Estado: '+test.status_name+'</b><br>';
+									audit_test += '<b>Resultado: '+test.results_name+'</b><br><br>';
+									audit_test += '<b>Hallazgos encontrados: </b>';
 
-								})
+									var cont = 0; //contador de issues
+									$(test.issues).each( function(i,issue) {
+										audit_test += '<hr><li>Clasificación: '+issue.classification+'</li>';
+										audit_test += '<li>Nombre: '+issue.name+'</li>';
+										audit_test += '<li>Descripción: '+issue.description+'</li>';
+										audit_test += '<li>Recomendaciones: '+issue.recommendations+'</li>';
+										audit_test += '<div style="cursor:hand" id="btn_crear_'+issue.id+'" onclick="crear_plan('+issue.id+')" class="btn btn-default">Agregar plan de acción</div>';
+
+										audit_test += '<div id="nuevo_plan_'+issue.id+'" style="display: none;"></div>';
+										audit_test += '<br>';
+
+										cont++;
+									});
+
+									if (cont == 0) //no hay issues
+									{
+										audit_test += '<br><font color="red"><b>No existen hallazgos para la prueba '+test.name+'</b></font><br>';
+									}
+
+										audit_test += '<div style="cursor:hand" id="btn_notas_'+test.id+'" onclick="notas('+test.id+')" class="btn btn-success">Notas</div><hr> ';
+
+										audit_test += '<div id="notas_'+this.id+'" style="display: none;"></div>';
+							});
 								
-
-								audit_test += '<div style="cursor:hand" id="btn_notas_'+this.id+'" onclick="notas('+this.id+')" class="btn btn-success">Notas</div> ';
 
 								$("#audit_tests").append(audit_test);
 
-								$("#audit_tests").append('<div id="notas_'+this.id+'" style="display: none;"></div>');
+								
 
 								//cont = cont+1;
 
-							});
+						});
 
 							//agregamos id de activities
 							//input_actividades = '<input type="hidden" value="'+activities_id+'" name="id_activities[]">';
@@ -181,85 +199,6 @@ $("#audit").change(function() {
 			}
 
 });
-
-
-function notas(id)
-{
-	$("#notas_"+id).empty();
-	$.get('auditorias.get_notes.'+id, function (result) {
-
-			//agregamos div de texto siguiente
-			var resultado = '<div id="mensaje" style="clear: left;">';
-
-			if (result == "null") //no existen notas
-			{
-				resultado += 'Aun no se han creado notas para esta prueba.<br><hr>';
-				resultado += '</div>';
-			}
-
-			else
-			{
-				//parseamos datos obtenidos
-				var datos = JSON.parse(result);
-				var cont = 1; //contador de notas 
-				//seteamos datos en select de auditorías
-				
-				$(datos).each( function() {
-					resultado += '<b>Nombre: '+this.name+'</b><br>';
-					resultado += 'Fecha creación: '+this.created_at+'<br>';
-					resultado += 'Estado: '+this.status+'<br>'
-					resultado += '<h4>Nota: '+this.description+'</h4>';
-
-					//agregamos evidencias
-					if (this.evidences == null)
-					{
-						resultado += '<font color="red">Esta nota no tiene evidencias agregadas</font><br>';
-					}
-
-					else
-					{
-
-						$(this.evidences).each( function(i,evidence) {
-							resultado += '<div style="cursor:hand" id="descargar_'+id+'" onclick="descargar(0,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia</u></font></div><br>';
-						});
-					}
-
-					if (this.answers == null)
-					{
-						resultado += '<div class="alert alert-danger alert-dismissible" role="alert">'
-						resultado += 'Esta nota aun no tiene respuestas</div>';
-					}
-					else
-					{
-						$(this.answers).each( function(i,answer) {
-							resultado += '<div class="alert alert-success alert-dismissible" role="alert">'
-							resultado += '<b><u>Respuesta de auditor: </u></b><br>';
-							resultado += '<font color="black	">'+answer.answer+'</font><br>';
-							
-
-							if (answer.ans_evidences != null)
-							{
-								$(answer.ans_evidences).each( function(i,evidence) {
-									resultado += '<div style="cursor:hand" id="descargar_'+id+'" onclick="descargar(1,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia de respuesta</u></font></div><br>';
-								});
-							}
-
-							resultado += 'Enviada el: '+answer.created_at+'</div>';
-
-						});
-					}
-
-					resultado += '<hr style="border-style: inset; border-width: 1px;">';
-
-				});			
-				
-			}
-
-			resultado += '<div style="cursor:hand" onclick="ocultar_notas('+id+')"><font color="CornflowerBlue"><u>Ocultar</u></font></div><hr><br>';
-			$("#notas_"+id).append(resultado).show(500);
-			
-		});
-}
 
 function ocultar_creacion(id)
 {
@@ -357,4 +296,6 @@ function descargar(tipo,archivo)
 }
 
 </script>
+
+{!!Html::script('assets/js/notas.js')!!}
 @stop

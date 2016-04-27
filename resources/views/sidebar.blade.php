@@ -71,8 +71,8 @@
 						<!--<li><a href="crear_pruebas" class="{{ activeMenu('crear_pruebas') }}">Generar programa de <br>auditor&iacute;a</a></li>-->
 						<li><a href="programas_auditoria" class="{{ activeMenu('programas_auditoria') }}">Programas de <br>auditor&iacute;a</a></li>
 						<!--<li><a href="pruebas" class="{{ activeMenu('pruebas') }}">Reporte pruebas de <br>auditor&iacute;a</a></li>-->
-						<li><a href="ejecutar_pruebas" class="{{ activeMenu('ejecutar_pruebas') }}">Ejecutar plan de <br>auditor&iacute;a</a></li>
-						<li><a href="supervisar" class="{{ activeMenu('supervisar') }}">Supervisar planes de <br>auditor&iacute;a</a></li>
+						<li><a href="ejecutar_pruebas" class="{{ activeMenu('ejecutar_pruebas') }}">Ejecutar auditor&iacute;a</a></li>
+						<li><a href="supervisar" class="{{ activeMenu('supervisar') }}">Supervisar auditor&iacute;a</a></li>
 						<li><a href="notas" class="{{ activeMenu('notas') }}">Revisi&oacute;n de notas</a></li>
 						<li><a href="planes_accion" class="{{ activeMenu('planes_accion') }}">Planes de acci&oacute;n</a></li>
 					</ul>

@@ -20,7 +20,9 @@ $("#audit_plans").change(function() {
 							$(datos).each( function() {
 								$("#audit").append('<option value="' + this.id + '">' + this.name +'</option>');
 							});
+	
 					});
+
 			}
 			else
 			{
@@ -37,136 +39,124 @@ $("#audit").change(function() {
 				//se obtienen controles asociados a los riesgos presentes en el plan de prueba seleccionado
 					//primero obtenemos controles asociados a los riesgos de negocio
 
-					//obtenemos programas y pruebas de la auditoría
-					$.get('auditorias.get_audit_program2.'+$("#audit").val(), function (result) {
+					//obtenemos pruebas relacionadas a la auditoría
+					$.get('auditorias.get_audit_tests2.'+$("#audit").val(), function (result) {
 							//si es que hay pruebas que ejecutar
 							if (result.length > 2)
 							{	
 									$("#btn_guardar").prop('disabled',false);
 									$("#cargando").html('<br>');
-									$("#audit_programs").empty();
+									$("#audit_tests").empty();
 
 									//parseamos datos obtenidos
 									var datos = JSON.parse(result);
-									var cont = 1; //contador de programas
-									audit_tests_id = []; //array con id de pruebas para guardar en PHP 
-									programs_id = []; //array con id de programas para guardar en PHP
+									var cont = 1; //contador de pruebas
+									activities_id = []; //array con id de actividades para guardar en PHP 
+									tests_id = []; //array con id de pruebas para guardar en PHP
 									//seteamos datos en select de auditorías
 									$(datos).each( function() {
 
-										programs_id.push(this.id);
-										$("#audit_programs").append('<h4>' + this.name +'</h4><div style="cursor:hand" onclick="vermas('+this.id+')"><font color="CornflowerBlue"><u>Ver pruebas</u></font></div><hr>');
+										tests_id.push(this.id);
+										$("#audit_tests").append('<h4>' + this.name +'</h4><div style="cursor:hand" onclick="vermas('+this.id+')"><font color="CornflowerBlue"><u>Ver pruebas</u></font></div><hr>');
 
-										//agregamos las pruebas con sus estados y posibles resultados
+										//agregamos las actividades con sus estados y posibles resultados
 										
-										var pruebas = '<div id="audit_tests_'+this.id+'" style="display: none;">';
-										pruebas += '<table class="table table-bordered table-striped table-hover table-heading table-datatable">';
-										pruebas += '<thead><th>Prueba</th><th>Descripci&oacute;n</th><th>Responsable</th><th>Estado</th>';
-										pruebas += '<th>Resultado</th></thead>';
-										$(this.audit_tests).each( function(i, test) {
-											audit_tests_id.push(this.id);
-											pruebas += '<tr><td>'+test.name+'</td>';
-											pruebas += '<td>'+test.description+'</td>';
-											pruebas += '<td>'+test.stakeholder+'</td>';
-											pruebas += '<td><div class="col-sm-8"><select class="form-control" name="status_'+test.id+'" id="status_'+test.id+'" onchange="result('+test.id+','+test.results+')">';
+										var actividades = '<div id="activities_'+this.id+'" style="display: none;">';
+										actividades += '<table class="table table-bordered table-striped table-hover table-heading table-datatable">';
+										actividades += '<thead><th>Prueba</th><th>Estado</th><th>Resultado</th></thead>';
+										$(this.activities).each( function(i, activity) {
+											activities_id.push(this.id);
+											actividades += '<tr><td>'+activity.name+'</td>';
+											actividades += '<td><div class="col-sm-8"><select class="form-control" name="status_'+activity.id+'" id="status_'+activity.id+'" onchange="result('+activity.id+','+activity.results+')">';
 
-											if (test.status == 0)
+											if (activity.status == 0)
 											{
-												pruebas += '<option value="0" selected>Abierta</option>';
-												pruebas += '<option value="1">En ejecución</option>';
-												pruebas += '<option value="2">Cerrada</option>';
+												actividades += '<option value="0" selected>Abierta</option>';
+												actividades += '<option value="1">En ejecución</option>';
+												actividades += '<option value="2">Cerrada</option>';
 											}
-											else if (test.status == 1)
+											else if (activity.status == 1)
 											{
-												pruebas += '<option value="0">Abierta</option>';
-												pruebas += '<option value="1" selected>En ejecución</option>';
-												pruebas += '<option value="2">Cerrada</option>';
+												actividades += '<option value="0">Abierta</option>';
+												actividades += '<option value="1" selected>En ejecución</option>';
+												actividades += '<option value="2">Cerrada</option>';
 											}
-											else if (test.status == 2)
+											else if (activity.status == 2)
 											{
-												pruebas += '<option value="0" selected>Abierta</option>';
-												pruebas += '<option value="1">En ejecución</option>';
-												pruebas += '<option value="2" selected>Cerrada</option>';
+												actividades += '<option value="0" selected>Abierta</option>';
+												actividades += '<option value="1">En ejecución</option>';
+												actividades += '<option value="2" selected>Cerrada</option>';
 												//alert(activity.results);
-												pruebas += '<script>result('+test.id+','+test.results+')</script>'
+												actividades += '<script>result('+activity.id+','+activity.results+')</script>'
 											}
 											
-											pruebas += '</select></div><br><div class="col-sm-8" id="boton_add_'+test.id+'"></div></td>';
-											pruebas += '<td><div id="results_'+this.id+'" style="display: none;"></div></td></tr>';
+											actividades += '</select></div></td>';
+											actividades += '<td><div id="results_'+this.id+'" style="display: none;"></div></td></tr>';
 
 										});
-										pruebas += '<div style="cursor:hand" onclick="ocultar('+this.id+')"><font color="CornflowerBlue"><u>Ocultar</u></font></div>';
-										pruebas += '</div>';
-										
-										$('#audit_programs').append(pruebas);
+										actividades += '<div style="cursor:hand" onclick="ocultar('+this.id+')"><font color="CornflowerBlue"><u>Ocultar</u></font></div>';
+										actividades += '</div>';
+										$('#audit_tests').append(actividades);
+
 										//agregamos campo de texto para resultados (issues) de la auditoría
-								/*
-										var program_results = '<h5>Resultados programa de auditor&iacute;a:</h5>';
-										program_results += '<table class="table">'
-										program_results += '<td width="50%"><select class="form-control" name="test_result_'+this.id+'" id="test_result_'+this.id+'" onchange="testResult('+this.id+')">';
+
+										var test_results = '<h5>Resultados programa de auditor&iacute;a:</h5>';
+										test_results += '<table class="table">'
+										test_results += '<td width="50%"><select class="form-control" name="test_result_'+this.id+'" id="test_result_'+this.id+'" onchange="testResult('+this.id+')">';
 
 										if (this.results == 0)
 										{
-											program_results += '<option value="Abierta">En proceso</option>';
-											program_results += '<option value="0" selected>Inefectivo</option>';
-											program_results += '<option value="1">Efectivo</option>';
-											program_results += '</select><br>';
+											test_results += '<option value="Abierta">En proceso</option>';
+											test_results += '<option value="0" selected>Inefectivo</option>';
+											test_results += '<option value="1">Efectivo</option>';
+											test_results += '</select><br>';
 											
 										}
 										else if (this.results == 1)
 										{
-											program_results += '<option value="Abierta">En proceso</option>';
-											program_results += '<option value="0">Inefectivo</option>';
-											program_results += '<option value="1" selected>Efectivo</option>';
-											program_results += '</select><br>';
+											test_results += '<option value="Abierta">En proceso</option>';
+											test_results += '<option value="0">Inefectivo</option>';
+											test_results += '<option value="1" selected>Efectivo</option>';
+											test_results += '</select><br>';
 										}
 										else
 										{
-											program_results += '<option value="Abierta" selected>En proceso</option>';
-											program_results += '<option value="0">Inefectivo</option>';
-											program_results += '<option value="1">Efectivo</option>';
-											program_results += '</select><br>';
+											test_results += '<option value="Abierta" selected>En proceso</option>';
+											test_results += '<option value="0">Inefectivo</option>';
+											test_results += '<option value="1">Efectivo</option>';
+											test_results += '</select><br>';
 										}
 										//agregamos DIV para botón de agregar más issues
-										program_results += '<div id="boton_add_'+this.id+'"></div>';
-										program_results += '</td><td width="50%"><div id="issues_'+this.id+'"></div></td>';
+										test_results += '<div id="boton_add_'+this.id+'"></div>';
+										test_results += '</td><td width="50%"><div id="issues_'+this.id+'"></div></td>';
 
 										//ejecutamos función que muestra datos de issue
-										program_results += '<script>testResult('+this.id+');</script>';
-										program_results += '</table>';
+										test_results += '<script>testResult('+this.id+');</script>';
+										test_results += '</table>';
 
-												$('#audit_programs').append(program_results);
+												$('#audit_tests').append(test_results);
 
 												cont = cont+1;
 
-										});
+											});
+
+											//agregamos id de activities
+											input_actividades = '<input type="hidden" value="'+activities_id+'" name="id_activities[]">';
 
 											//agregamos id de pruebas
-											input_pruebas = '<input type="hidden" value="'+audit_tests_id+'" name="id_pruebas[]">';
+											input_pruebas = '<input type="hidden" value="'+tests_id+'" name="tests_id[]">';
 
-											//agregamos id de programas
-											input_programas = '<input type="hidden" value="'+programs_id+'" name="programs_id[]">';
-
-											$('#audit_programs').append(input_pruebas);
-											$('#audit_programs').append(input_programas);
-									*/
-
-									//agregamos id de pruebas
-									input_pruebas = '<input type="hidden" value="'+audit_tests_id+'" name="id_pruebas[]">';
-
-									//agregamos id de programas
-									input_programas = '<input type="hidden" value="'+programs_id+'" name="programs_id[]">';
-
-									$('#audit_programs').append(input_pruebas);
-									$('#audit_programs').append(input_programas);
-								});	
+											$('#audit_tests').append(input_actividades);
+											$('#audit_tests').append(input_pruebas);
+					
+									
 							}
 							else
 							{
 								$("#btn_guardar").prop('disabled',true);
 								$("#cargando").html("<br>");
 							}
-					
+
 					});
 
 			}
@@ -180,23 +170,21 @@ $("#audit").change(function() {
 //función para ver las actividades de una prueba
 function vermas(id)
 {
-	$("#audit_tests_"+id).show(500);
+	$("#activities_"+id).show(500);
 }
 
 //desactiva las actividades de una prueba
 function ocultar(id)
 {
-	$("#audit_tests_"+id).hide(500);
+	$("#activities_"+id).hide(500);
 }
 
-//agrega select de resultado de una prueba (efectiva o inefectiva), en el caso de que ésta haya sido señalada como cerrada.
-//En caso de ser inefectiva, se debe agregar los campos para issue y para agregar evidencias
+//agrega select de resultado de una actividad (efectiva o inefectiva), en el caso de que ésta haya sido señalada como cerrada
 function result(id,result)
 {
 	if ($("#status_"+id).val() == 2)
 	{
-		var resultado = '<div class="col-sm-8"><select class="form-control" name="test_result_'+id+'" id="test_result_'+id+'"';
-		resultado += 'onchange="testResult('+id+')" required>';
+		var resultado = '<div class="col-sm-8"><select class="form-control" name="result_'+id+'" required>';
 
 		//seteamos resultado previo si es que existe
 		if (result == 0)
@@ -204,8 +192,6 @@ function result(id,result)
 			resultado += '<option value="">- Seleccione resultado -</option>';
 			resultado += '<option value="0" selected>Inefectiva</option>';
 			resultado += '<option value="1">Efectiva</option></div>';
-
-			resultado += '<script>testResult('+id+');</script>';
 		}
 		else if (result == 1)
 		{
@@ -220,8 +206,6 @@ function result(id,result)
 			resultado += '<option value="1">Efectiva</option></div>';
 		}
 
-		resultado += '</select><hr><br>';
-		resultado += '<div id="issues_'+id+'" class="col-sm-12"></div>'
 		$("#results_"+id).append(resultado);
 		$("#results_"+id).show(500);
 	}
@@ -237,13 +221,13 @@ contador = 0;
 function testResult(id)
 {
 
-	if ($("#test_result_"+id).val() == 0 && $("#test_result_"+id).val() != "") //el resultado de la prueba es inefectivo
+	if ($("#test_result_"+id).val() == 0)
 	{
 		//obtenemos issues si es que existen
 		$.get('auditorias.get_issue.'+id, function (result) {
 			//alert(result);
 			//agregamos botón para añadir mas issues en div de botón
-			var result_boton = '<br><hr><button type="button" class="btn btn-primary btn-xs" onclick="addNewIssue('+id+')">Agregar nuevo hallazgo</button>';
+			var result_boton = '<button type="button" class="btn btn-primary" onclick="addNewIssue('+id+')">Agregar nuevo hallazgo</button>';
 			$("#boton_add_"+id).html(result_boton);
 
 			if (result == "null") //no existe issue
@@ -325,58 +309,42 @@ function testResult(id)
 	else
 	{
 		$("#issues_"+id).empty();
-		$("#boton_add_"+id).empty();
-		new_issues = 0;
 	}
 }
 //declaramos contador de nuevas issues
-//new_issues = 0;
+new_issues = 0;
 //función para agregar un nuevo issue
 function addNewIssue(id)
 {
-	
-	new_issues = 1;
-	//vemos número de issue para cada id de prueba
-	while (1) 
-	{
-		if ($('#new_issue_'+id+'_'+new_issues).length > 0)
-		{
-			new_issues++;
-		}
-		else
-		{
-			break;
-		}
-	}
-
-	var resultado = '<div id="new_issue_'+id+'_'+new_issues+'"><b>Nuevo hallazgo N° '+new_issues+'</b><br>';
+	new_issues++;
+	var resultado = '<div id="new_issue_'+new_issues+'"><b>Nuevo hallazgo N° '+new_issues+'</b><br>';
 	//solo si es el primer new issue haremos ALGUNOS de los campos required (los otros siempre aceptan nulos)
 	if (new_issues == 1)
 	{
-		resultado += '<select class="form-control" name="new_issue_classification_'+id+'_'+new_issues+'" required>';
+		resultado += '<select class="form-control" name="new_issue_classification'+new_issues+'_'+id+'" required>';
 		resultado += '<option value="" disabled selected>- Clasificación debilidad -</option>';
 		resultado += '<option value="0">Oportunidad de mejora</option>';
 		resultado += '<option value="1">Deficiencia</option>';
 		resultado += '<option value="1">Debilidad significativa</option></select><br>';
 
-		resultado += '<input type="text" class="form-control" name="new_issue_name_'+id+'_'+new_issues+'" required placeholder="Nombre de debilidad"><br>'; 
+		resultado += '<input type="text" class="form-control" name="new_issue_name'+new_issues+'_'+id+'" required placeholder="Nombre de debilidad"><br>'; 
 	}
 	else
 	{
-		resultado += '<select class="form-control" name="new_issue_classification_'+id+'_'+new_issues+'">';
+		resultado += '<select class="form-control" name="new_issue_classification'+new_issues+'_'+id+'">';
 		resultado += '<option value="" disabled selected>- Clasificación debilidad -</option>';
 		resultado += '<option value="0">Oportunidad de mejora</option>';
 		resultado += '<option value="1">Deficiencia</option>';
 		resultado += '<option value="1">Debilidad significativa</option></select><br>';
 
-		resultado += '<input type="text" class="form-control" name="new_issue_name_'+id+'_'+new_issues+'" placeholder="Nombre de debilidad"><br>'; 
+		resultado += '<input type="text" class="form-control" name="new_issue_name'+new_issues+'_'+id+'" placeholder="Nombre de debilidad"><br>'; 
 	}
 
 	
-	resultado += '<textarea rows="3" cols="4" class="form-control" name="new_issue_description_'+id+'_'+new_issues+'" placeholder="Descripción de debilidad (opcional)"></textarea><br>';
-	resultado += '<textarea rows="3" cols="4" class="form-control" name="new_issue_recommendations_'+id+'_'+new_issues+'" placeholder="Recomendaciones (opcional)"></textarea></div><br>';
+	resultado += '<textarea rows="3" cols="4" class="form-control" name="new_issue_description'+new_issues+'_'+id+'" placeholder="Descripción de debilidad (opcional)"></textarea><br>';
+	resultado += '<textarea rows="3" cols="4" class="form-control" name="new_issue_recommendations'+new_issues+'_'+id+'" placeholder="Recomendaciones (opcional)"></textarea></div><br>';
 
-	resultado += '<script>$("html,body").animate({scrollTop: $("#new_issue_'+id+'_'+new_issues+'").offset().top}, 900); </script>';
+	resultado += '<script>$("html,body").animate({scrollTop: $("#new_issue_'+new_issues+'").offset().top}, 900); </script>';
 	$("#issues_"+id).append(resultado);
 
 }

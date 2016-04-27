@@ -71,7 +71,7 @@
 						</div>
 					</div>
 
-					<div id="audit_tests"></div>
+					<div id="audit_programs"></div>
 					
 				{!!Form::close()!!}
 
@@ -124,37 +124,49 @@ $("#audit").change(function() {
 					//primero obtenemos controles asociados a los riesgos de negocio
 
 					//obtenemos pruebas relacionadas a la auditoría seleccionada
-					$.get('auditorias.get_audit_tests2.'+$("#audit").val(), function (result) {
+					$.get('auditorias.get_audit_program2.'+$("#audit").val(), function (result) {
 
 							$("#cargando").html('<br>');
-							$("#audit_tests").empty();
+							$("#audit_programs").empty();
 
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
 							var cont = 1; //contador de pruebas
-							activities_id = []; //array con id de actividades para guardar en PHP 
-							tests_id = []; //array con id de pruebas para guardar en PHP
+							tests_id = []; //array con id de pruebas para guardar en PHP 
+							programs_id = []; //array con id de programas para guardar en PHP
 							//seteamos datos en select de auditorías
 							$(datos).each( function() {
+								programs_id.push(this.id);
 
-								tests_id.push(this.id);
-								var audit_test = '<h4><b>' + this.name +'</b></h4>';
-								audit_test += '<b>Debilidades encontradas</b><hr>';
-								$(this.issues).each( function(i,issue) {
-									audit_test += '<li>Clasificación: '+issue.classification+'</li>';
-									audit_test += '<li>Nombre: '+issue.name+'</li>';
-									audit_test += '<li>Descripción: '+issue.description+'</li>';
-									audit_test += '<li>Recomendaciones: '+issue.recommendations+'</li><hr>';
+								//por cada prueba del programa
+								$(this.audit_tests).each( function(i,test) {
+									tests_id.push(test.id)
+									var audit_test = '<h4><b>' + test.name +'</b></h4>';
+									audit_test += '<b>Descripci&oacute;n: '+test.description+'</b><br>';
+									audit_test += '<b>Responsable: '+test.stakeholder+'</b><br>';
+									audit_test += '<b>Estado: '+test.status_name+'</b><br>';
+									audit_test += '<b>Resultado: '+test.results_name+'</b><br><hr>';
+									audit_test += '<b>Hallazgos encontrados</b><hr>';
+									cont = 1; //contador de hallazgos
+									$(test.issues).each( function(i,issue) {
+										//alert(issue.name);
+										audit_test += '<ul><b>Hallazgo '+cont+'</b>'
+										audit_test += '<li>Clasificación: '+issue.classification+'</li>';
+										audit_test += '<li>Nombre: '+issue.name+'</li>';
+										audit_test += '<li>Descripción: '+issue.description+'</li>';
+										audit_test += '<li>Recomendaciones: '+issue.recommendations+'</li></ul><hr>';
 
-								})
-								
-								audit_test += '<div id="nota_cerrada_'+this.id+'"></div>';
+									});
 
-								audit_test += '<div style="cursor:hand" id="btn_notas_'+this.id+'" onclick="notas('+this.id+')" class="btn btn-success">Notas</div> ';
+									audit_test += '<div id="nota_cerrada_'+test.id+'"></div>';
+									audit_test += '<div style="cursor:hand" id="btn_notas_'+test.id+'" onclick="notas('+test.id+')" class="btn btn-success">Notas</div><hr> ';
 
-								$("#audit_tests").append(audit_test);
+									$("#audit_programs").append(audit_test);
 
-								$("#audit_tests").append('<div id="notas_'+this.id+'" style="display: none;"></div>');
+									$("#audit_programs").append('<div id="notas_'+test.id+'" style="display: none;"></div>');
+
+								});
+								/*
 								//agregamos las actividades con sus estados y posibles resultados
 								var actividades = '<div id="activities_'+this.id+'">';
 								actividades += '<table class="table table-bordered table-striped table-hover table-heading table-datatable">';
@@ -185,6 +197,7 @@ $("#audit").change(function() {
 								$('#audit_tests').append(actividades);
 
 								//cont = cont+1;
+								*/
 
 							});
 

@@ -34,7 +34,7 @@
 							<div class="col-sm-4">
 								{!!Form::select('type',['0'=>'Prueba de diseño','1'=>'Prueba de efectividad operativa',
 															'2'=>'Prueba de cumplimiento','3'=>'Prueba sustantiva'],null,
-															['id'=>'type','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+															['id'=>'type','placeholder'=>'- Seleccione -'])!!}
 							</div>
 						</div>
 
@@ -52,7 +52,6 @@
 
 								{!!Form::label('Horas-hombre',null,['class'=>'col-sm-4 control-label'])!!}
 								<div class="col-sm-4">
-									{!!Form::number('hh_test_1',null,['id'=>'hh_test_1','class'=>'form-control',
-																'required'=>'true','min'=>'1'])!!}
+									{!!Form::number('hh',null,['id'=>'hh_test_1','class'=>'form-control','min'=>'1'])!!}
 								</div>
 						</div>

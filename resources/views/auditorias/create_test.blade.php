@@ -181,6 +181,11 @@
 
 @section('scripts2')
 <script>
+
+$(document).ready(function () {
+	type_id = "NULL";
+});
+
 $("#kind").change(function() {
 			
 			if ($("#kind").val() != '') //Si es que se ha seleccionado una prueba previa y no generar una nueva prueba
