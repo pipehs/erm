@@ -3,8 +3,26 @@ function notas(id)
 	$("#notas_"+id).empty();
 	$.get('auditorias.get_notes.'+id, function (result) {
 
-			//agregamos div de texto siguiente
-			var resultado = '<div id="mensaje" style="clear: left;">';
+			//vemos si está en supervisión para poder crear nota
+			var str1 = "supervisar";
+			var str2 = window.location.href;
+
+			if (str2.indexOf(str1) > 0)
+			{
+				var resultado = '<div style="cursor:hand" id="crear_nota_'+id+'" onclick="crear_nota('+id+')" class="btn btn-primary">Agregar nota</div><br>';
+			
+				//agregamos div para formulario de creación de nota
+				resultado += '<div id="nueva_nota_'+id+'"  style="display: none; float: left;"><br><br></div>';
+
+				//agregamos div de texto siguiente
+				resultado += '<div id="mensaje" style="clear: left;">';
+			}
+			else
+			{
+				//agregamos div de texto siguiente
+				var resultado = '<div id="mensaje" style="clear: left;">';
+			}
+			
 
 			if (result == "null") //no existen notas
 			{
@@ -65,7 +83,6 @@ function notas(id)
 					var str1 = "notas";
 					var str2 = window.location.href;
 
-					alert(str2.indexOf(str1));
 					if (str2.indexOf(str1) > 0)
 					{
 						if (this.status_origin == 0)

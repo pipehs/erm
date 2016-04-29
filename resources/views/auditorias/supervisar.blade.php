@@ -220,97 +220,6 @@ $("#audit").change(function() {
 
 });
 
-
-function notas(id)
-{
-	//$("#btn_notas_"+id).empty();
-	//$("#btn_notas_"+id).
-	$("#notas_"+id).empty();
-	$.get('auditorias.get_notes.'+id, function (result) {
-
-			var resultado = '<div style="cursor:hand" id="crear_nota_'+id+'" onclick="crear_nota('+id+')" class="btn btn-primary">Agregar nota</div><br>';
-			
-			//agregamos div para formulario de creación de nota
-			resultado += '<div id="nueva_nota_'+id+'"  style="display: none; float: left;"><br><br></div>';
-
-			//agregamos div de texto siguiente
-			resultado += '<div id="mensaje" style="clear: left;">';
-
-			if (result == "null") //no existen notas
-			{
-				resultado += 'Aun no se han creado notas para esta prueba.<br><hr>';
-				resultado += '</div>';
-			}
-
-			else
-			{
-				//parseamos datos obtenidos
-				var datos = JSON.parse(result);
-				var cont = 1; //contador de notas 
-				//seteamos datos en select de auditorías
-				
-				$(datos).each( function() {
-					resultado += '<b>Nombre: '+this.name+'</b><br>';
-					resultado += 'Fecha creación: '+this.created_at+'<br>';
-					resultado += 'Estado: '+this.status+'<br>'
-					resultado += '<h4>Nota: '+this.description+'</h4>';
-
-					//agregamos evidencias
-					if (this.evidences == null)
-					{
-						resultado += '<font color="red">Esta nota no tiene evidencias agregadas</font><br>';
-					}
-
-					else
-					{
-
-						$(this.evidences).each( function(i,evidence) {
-							resultado += '<div style="cursor:hand" id="descargar_'+id+'" onclick="descargar(0,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia</u></font></div><br>';
-						});
-					}
-
-					if (this.answers == null)
-					{
-						resultado += '<div class="alert alert-danger alert-dismissible" role="alert">'
-						resultado += 'Esta nota aun no tiene respuestas</div>';
-					}
-					else
-					{
-						$(this.answers).each( function(i,answer) {
-							resultado += '<div class="alert alert-success alert-dismissible" role="alert">'
-							resultado += '<b><u>Respuesta de auditor: </u></b><br>';
-							resultado += '<font color="black	">'+answer.answer+'</font><br>';
-							
-
-							if (answer.ans_evidences != null)
-							{
-								$(answer.ans_evidences).each( function(i,evidence) {
-									resultado += '<div style="cursor:hand" id="descargar_'+id+'" onclick="descargar(1,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia de respuesta</u></font></div><br>';
-								});
-							}
-
-							resultado += 'Enviada el: '+answer.created_at+'</div>';
-
-						});
-
-						if (this.status_origin == 0)
-						{
-							resultado += '<div style="cursor:hand" id="cerrar_nota_'+this.id+'" onclick="cerrar_nota('+this.id+','+id+')" class="btn btn-default">Cerrar nota</div><br>';
-						}
-					}
-
-					resultado += '<hr style="border-style: inset; border-width: 1px;">';
-
-				});			
-				
-			}
-
-			resultado += '<div style="cursor:hand" onclick="ocultar_notas('+id+')"><font color="CornflowerBlue"><u>Ocultar</u></font></div><hr><br>';
-			$("#notas_"+id).append(resultado).show(500);
-			
-		});
-}
-
 function evidencias(id)
 {
 	alert("Hola evidencias "+id);
@@ -345,21 +254,6 @@ function crear_nota(id)
 
 }
 
-function descargar(tipo,archivo)
-{
-	//window.open = ('../storage/app/evidencias_notas/'+archivo,'_blank');
-	if (tipo == 0) //evidencia de nota
-	{
-		var win = window.open('../storage/app/evidencias_notas/'+archivo, '_blank');
-	 	win.focus();
-	}
-	else if (tipo == 1) //evidencia de respuesta
-	{
-		var win = window.open('../storage/app/evidencias_resp_notas/'+archivo, '_blank');
-	 	win.focus();
-	}
-}
-
 function cerrar_nota(id,note_id)
 {
 	$.get('auditorias.close_note.'+id, function (result) {
@@ -384,4 +278,6 @@ function cerrar_nota(id,note_id)
 }
 
 </script>
+{!!Html::script('assets/js/notas.js')!!}
+{!!Html::script('assets/js/descargar.js')!!}
 @stop

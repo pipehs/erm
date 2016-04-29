@@ -45,9 +45,15 @@
 					</div>
 				@endif
 
+				@if(Session::has('error'))
+					<div class="alert alert-success alert-danger" role="alert">
+					{{ Session::get('error') }}
+					</div>
+				@endif
+
 				<div id="cargando"><br></div>
 
-				{!!Form::open(['route'=>'agregar_ejecucion','method'=>'POST','class'=>'form-horizontal','id'=>'form'])!!}
+				{!!Form::open(['route'=>'agregar_ejecucion','method'=>'POST','class'=>'form-horizontal','id'=>'form','enctype'=>'multipart/form-data'])!!}
 	      			<div class="form-group">
 						{!!Form::label('Plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
@@ -88,4 +94,5 @@
 
 @section('scripts2')
 {!!Html::script('assets/js/ejecutar_audit.js')!!}
+{!!Html::script('assets/js/descargar.js')!!}
 @stop

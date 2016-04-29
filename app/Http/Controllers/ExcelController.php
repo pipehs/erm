@@ -222,7 +222,7 @@ class ExcelController extends Controller
                     $sheet->fromArray($datos);
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:L1', function($cells) {
+                    $sheet->cells('A1:O1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');

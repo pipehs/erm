@@ -459,6 +459,10 @@ Route::post('control.guardar_evaluacion', [
 	'as' => 'control.guardar_evaluacion', 'uses' => 'ControlesController@storeEvaluacion'
 ]);
 
+Route::get('controles.get_evaluation.{id_control}', [
+	'as' => 'controles.get_evaluation', 'uses' => 'ControlesController@getEvaluacion'
+]);
+
 // ----Rutas para reportes básicos---- //
 
 Route::get('heatmap', [

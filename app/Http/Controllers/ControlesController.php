@@ -15,7 +15,7 @@ use Storage;
 class ControlesController extends Controller
 {
     //guarda pruebas de diseño, sustantivas, efectividad y cumplimiento (y otros tipos si es que hubieran)
-    public function storeTests($test)
+    public function storeTests($test,$kind)
     {
          if (isset($_POST['comentarios_'.$test]))
                 {
@@ -29,7 +29,7 @@ class ControlesController extends Controller
                 $id_eval = DB::table('control_evaluation')
                     ->insertGetId([
                         'control_id' => $_POST['control_id'],
-                        'kind' => 0,
+                        'kind' => $kind,
                         'comments' => $comments,
                         'results' => $_POST[$test],
                         'created_at' => $GLOBALS['date'],
@@ -487,22 +487,22 @@ class ControlesController extends Controller
             //si es que se evaluó diseño
             if ($_POST['diseno'] != "")
             {
-                $this->storeTests('diseno');
+                $this->storeTests('diseno',0);
             }
             //lo mismo con efectividad operativa
             if ($_POST['efectividad'] != "")
             {
-                $this->storeTests('efectividad');
+                $this->storeTests('efectividad',1);
             }
             //lo mismo con pruebas sustantivas
             if ($_POST['sustantiva'] != "")
             {
-                $this->storeTests('sustantiva');
+                $this->storeTests('sustantiva',2);
             }
             //lo mismo con pruebas de cumplimiento
             if ($_POST['cumplimiento'] != "")
             {
-                $this->storeTests('cumplimiento');
+                $this->storeTests('cumplimiento',3);
             }
 
             Session::flash('message','Evaluación realizada correctamente');
@@ -888,5 +888,48 @@ class ControlesController extends Controller
         }
 
         return json_encode($controls);
+    }
+
+    //obtiene evaluación de control de id = $id
+    public function getEvaluacion($id)
+    {
+        $evaluation = array();
+        $max_update = NULL;
+
+        //primero obtenemos fecha máxima de actualización de evaluaciones para el control
+        $max_update = DB::table('control_evaluation')
+                    ->where('control_id','=',$id)
+                    ->max('updated_at');
+
+        if ($max_update != NULL)
+        {
+            //ahora obtenemos los datos de la evaluación de fecha máxima
+            $evals = DB::table('control_evaluation')
+                        ->where('control_id','=',$id)
+                        ->where('updated_at','=',$max_update)
+                        ->select('*')
+                        ->get();
+
+            $i = 0;
+            foreach ($evals as $eval)
+            {
+                $evaluation[$i] = [
+                        'id' => $eval->id,
+                        'kind' => $eval->kind,
+                        'results' => $eval->results,
+                        'comments' => $eval->comments,
+                    ];
+
+                $i += 1;
+            }
+
+            return json_encode($evaluation);
+        }
+        else
+        {
+            return json_encode($max_update);
+        }
+        
+
     }
 }

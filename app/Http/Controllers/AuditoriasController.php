@@ -142,7 +142,7 @@ class AuditoriasController extends Controller
                             'audit_audit_plan_audit_program.expiration_date')
                         ->get();
 
-                    //QUEDE AQUI!!!!!
+                    
         $i = 0; //contador de planes
 
         foreach ($programs as $program)
@@ -389,6 +389,10 @@ class AuditoriasController extends Controller
 
     public function storeEjecution(Request $request)
     {
+
+        //haremos global de request
+        global $req;
+        $req = $request;
         //print_r($_POST);
         DB::transaction(function() {
             //primero que todo, actualizamos las pruebas
@@ -413,15 +417,21 @@ class AuditoriasController extends Controller
                     if ($_POST['test_result_'.$id] == 0) //es inefectiva
                     {
                         $i = 1; //contador de issues
-                        while ($_POST['new_issue_name_'.$id.'_'.$i])
+                        while (isset($_POST['new_issue_name_'.$id.'_'.$i]))
                         {
-                            \Ermtool\Issue::create([
+                            $issue = \Ermtool\Issue::create([
                                 'name' => $_POST['new_issue_name_'.$id.'_'.$i],
                                 'description' => $_POST['new_issue_description_'.$id.'_'.$i],
                                 'recommendations' => $_POST['new_issue_recommendations_'.$id.'_'.$i],
                                 'classification' => $_POST['new_issue_classification_'.$id.'_'.$i],
                                 'audit_test_id' => $id
                                 ]);
+
+                            //vemos si se ingreso una nueva evidencia
+                            if (isset($_POST['new_issue_evidence_'.$id.'_'.$i]) && $_POST['new_issue_evidence_'.$id.'_'.$i] != "")
+                            {
+                                upload_file($GLOBALS['req']->file('new_issue_evidence_'.$id.'_'.$i),'evidencias_hallazgos',$issue->id);
+                            }
 
                             $i += 1; //para ver si es que hay más issues nuevos para esta prueba
                         }
@@ -439,31 +449,44 @@ class AuditoriasController extends Controller
                             'updated_at' => date('Y-m-d H:i:s')
                             ]);
                 }
-            }
+            
 
-            //ahora actualizamos issues existentes (si es que hay)
+                //ahora actualizamos issues existentes (si es que hay)
 
-            //primero que todo, actualizamos issues ya existentes (son enviados como array de $id_issues)
-            //separamos distintos id de issues existentes (si es que hay)
+                //primero que todo, actualizamos issues ya existentes (son enviados como array de $id_issues)
+                //separamos distintos id de issues existentes (si es que hay)
 
-            if (isset($_POST[$id.'_issues']))
-            {
-                $issues_id = explode(',',$_POST[$id.'_issues'][0]);
-
-                //actualizamos issues de id = issue
-                foreach ($issues_id as $issue)
+                if (isset($_POST[$id.'_issues']))
                 {
-                            DB::table('issues')
-                                ->where('id','=',$issue)
-                                ->update([
-                                    'name' => $_POST['issue_name_'.$issue],
-                                    'description' => $_POST['issue_description_'.$issue],
-                                    'recommendations' => $_POST['issue_recommendations_'.$issue],
-                                    'classification' => $_POST['issue_classification_'.$issue],
-                                    'updated_at' => date('Y-m-d H:i:s')
-                                    ]);
+                    $issues_id = explode(',',$_POST[$id.'_issues'][0]);
+
+                    //actualizamos issues de id = issue
+                    foreach ($issues_id as $issue)
+                    {
+
+                                DB::table('issues')
+                                    ->where('id','=',$issue)
+                                    ->update([
+                                        'name' => $_POST['issue_name_'.$issue],
+                                        'description' => $_POST['issue_description_'.$issue],
+                                        'recommendations' => $_POST['issue_recommendations_'.$issue],
+                                        'classification' => $_POST['issue_classification_'.$issue],
+                                        'updated_at' => date('Y-m-d H:i:s')
+                                        ]);
+
+                                //vemos si se ingreso evidencia
+                                if ($GLOBALS['req']->file('issue_evidence_'.$issue) != NULL)
+                                {
+                                    
+                                    $res = upload_file($GLOBALS['req']->file('issue_evidence_'.$issue),'evidencias_hallazgos',$issue);
+                                    if ($res == 1)
+                                    {
+                                        Session::flash('error','No se pudo guardar correctamente el archivo. Intentelo nuevamente');
+                                    }
+
+                                }
+                    }
                 }
-            }
             
                     /*
                     //ahora agregamos nuevos issues si es que hay           
@@ -484,6 +507,7 @@ class AuditoriasController extends Controller
                         $cont += 1;
                     }
                     */
+            }
             Session::flash('message','Auditor&iacute;a ejecutada correctamente');
 
         });
@@ -1600,9 +1624,9 @@ class AuditoriasController extends Controller
                 }
             }
 
-            else if ($_POST['type2_test_'.$i] == 2) //es de riesgo
+            else if ($_POST['type2'] == 2) //es de riesgo
             {
-                if (isset($_POST['risk_id_test_'.$i]))
+                if (isset($_POST['risk_id_test_1']))
                 {
                             DB::table('audit_tests')
                             ->insert([
@@ -1621,9 +1645,9 @@ class AuditoriasController extends Controller
                 }
             }
 
-            else if ($_POST['type2_test_'.$i] == 3) //es de proceso
+            else if ($_POST['type2'] == 3) //es de proceso
             {
-                if (isset($_POST['subprocess_id_test_'.$i]))
+                if (isset($_POST['subprocess_id_test_1']))
                 {
                             DB::table('audit_tests')
                             ->insert([
@@ -2120,34 +2144,32 @@ class AuditoriasController extends Controller
     public function storePlan(Request $request)
     {
         //print_r($_POST);
+        DB::transaction(function() {
+            //id del issue que se está agregando
+            $id = $_POST['issue_id'];
 
-        //id del issue que se está agregando
-        $id = $request['issue_id'];
+            $new_id = DB::table('action_plans')
+                            ->insertGetId([
+                                    'issue_id' => $id,
+                                    'stakeholder_id' => $_POST['responsable_'.$id],
+                                    'description' => $_POST['description_'.$id],
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
+                                    'final_date' => $_POST['final_date_'.$id],
+                                    'status' => 0
+                                ]);
 
-        $new_id = DB::table('action_plans')
-                        ->insertGetId([
-                                'issue_id' => $id,
-                                'stakeholder_id' => $request['responsable_'.$id],
-                                'description' => $request['description_'.$id],
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s'),
-                                'final_date' => $request['final_date_'.$id],
-                                'status' => 0
-                            ]);
-
-        if ($new_id)
-        {
-            Session::flash('message','Plan de acción agregado correctamente');
-
-            return Redirect::to('/planes_accion');
-        }
-        else
-        {
-            Session::flash('error','Problema al agregar plan de acción. Intentelo nuevamente y si el problema persiste, contactese con el administrador del sistema.');
-
-            return Redirect::to('/planes_accion');
-        }
-
+            if ($new_id)
+            {
+                Session::flash('message','Plan de acción agregado correctamente');
+            }
+            else
+            {
+                Session::flash('error','Problema al agregar plan de acción. Intentelo nuevamente y si el problema persiste, contactese con el administrador del sistema.');
+            }
+        });
+        
+        return Redirect::to('/planes_accion');
     }
 
     //función para reporte de planes de acción
@@ -2857,6 +2879,8 @@ class AuditoriasController extends Controller
 
         return json_encode($results);
     }
+
+    /* ESTÁ MALA, CORREGIR SI ES QUE ES NECESARIO 
     //obtiene pruebas asociadas a una plan auditoria + auditoria
     public function getTests($id)
     {
@@ -2886,7 +2910,7 @@ class AuditoriasController extends Controller
         }
 
         return json_encode($results);
-    }
+    } */
 
     //obtiene datos asociados al último plan de auditoría generado para una organización
     public function getAuditPlan($org)
@@ -3155,12 +3179,16 @@ class AuditoriasController extends Controller
         {
             foreach ($issues as $issue)
             {
+                //obtenemos evidencias de issue (si es que existen)
+                $evidences = $this->getEvidences(2,$issue->id);
+
                 $results[$i] = [
                     'id' => $issue->id,
                     'name' => $issue->name,
                     'description' => $issue->description,
                     'recommendations' => $issue->recommendations,
-                    'classification' => $issue->classification
+                    'classification' => $issue->classification,
+                    'evidences' => $evidences
                 ];
 
                 $i += 1;
@@ -3316,33 +3344,43 @@ class AuditoriasController extends Controller
             //seleccionamos carpeta de respuestas evidencias
             $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_resp_notas';
         }
-
-        $archivos = scandir($carpeta);
-
-        foreach ($archivos as $archivo)
+        else if ($kind == 2) //se están solicitando evidencias de un hallazgo
         {
-                        
-                //dividimos archivos para buscar id
-                if (strpos($archivo,'___'))
-                {   
-                    $j = 0;
-                    $temp = explode('___',$archivo);
+            $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_hallazgos';
+        }
 
-                    //sacamos extensión del archivo
-                    $temp2 = explode('.',$temp[1]);
+        if (file_exists($carpeta) != false) //verificamos que exista la carpeta
+        {
+            $archivos = scandir($carpeta);
 
-                    if ($temp2[0] == $id)
-                    {
-                        $evidences[$j] = [
-                            'note_id' => $id,
-                            'url' => $archivo,
-                        ];
+            foreach ($archivos as $archivo)
+            {    
+                    //dividimos archivos para buscar id
+                    if (strpos($archivo,'___'))
+                    {   
+                        $j = 0;
+                        $temp = explode('___',$archivo);
 
-                        $j += 1;
+                        //sacamos extensión del archivo
+                        $temp2 = explode('.',$temp[1]);
+
+                        if ($temp2[0] == $id)
+                        {
+                            $evidences[$j] = [
+                                'note_id' => $id,
+                                'url' => $archivo,
+                            ];
+
+                            $j += 1;
+                        }
                     }
-                }
-                else
-                    $evidences = NULL;                      
+                    else
+                        $evidences = NULL;                      
+            }
+        }
+        else
+        {
+            $evidences = NULL;
         }
 
         return $evidences;
@@ -3380,161 +3418,311 @@ class AuditoriasController extends Controller
         
         if ($tipo == 0)
         {
-            //obtenemos todos los datos necesarios de issues (primero de procesos)
+
+            //obtenemos hallazgos para pruebas de auditoría (para subprocesos)
+
             $issues = DB::table('issues')
-            			->join('audit_audit_plan_audit_test','audit_audit_plan_audit_test.id','=','issues.audit_audit_plan_audit_test_id')
-            			->join('audit_control_risk','audit_control_risk.audit_audit_plan_audit_test_id','=','audit_audit_plan_audit_test.id')
-            			->join('controls','controls.id','=','audit_control_risk.control_id')
-                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
-                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
-                        ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                        ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                        ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                        ->join('subprocesses','subprocesses.id','=','audit_tests.subprocess_id')
                         ->join('processes','processes.id','=','subprocesses.process_id')
-                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_test.audit_audit_plan_id')
+                        ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                        ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
                         ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
                         ->join('audits','audits.id','=','audit_audit_plan.audit_id')
-            			->select('issues.id','issues.name','issues.description','issues.audit_audit_plan_audit_test_id','issues.recommendations',
-            				'risks.name as risk_name',
-            				'controls.name as control_name',
-            				'audit_plans.name as audit_plan_name',
-            				'audits.name as audit_name',
-            				'processes.name as process_name')
+                        ->select('issues.id','issues.name','issues.description','issues.recommendations','issues.classification',
+                            'audit_plans.name as audit_plan_name',
+                            'audits.name as audit_name',
+                            'audit_programs.name as audit_program_name',
+                            'audit_tests.name as audit_test_name',
+                            'processes.name as process_name',
+                            'subprocesses.name as subprocess_name',
+                            'subprocesses.id as subprocess_id')
                         ->get();
-            
 
             $type = 'Hallazgos de procesos';
 
-            foreach ($issues as $issue1) //para cada issue obtenemos datos de planes de acción
-            {
-            	$issue2 = NULL;
-            	$issue2 = DB::table('action_plans')
+        }
+        else if ($tipo == 1)
+        {
+            //obtenemos issues para controles
+            $issues = DB::table('issues')
+                        ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                        ->join('controls','controls.id','=','audit_tests.control_id')
+                        ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                        ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                        ->select('issues.id','issues.name','issues.description','issues.recommendations','issues.classification',
+                            'audit_plans.name as audit_plan_name',
+                            'audits.name as audit_name',
+                            'audit_programs.name as audit_program_name',
+                            'audit_tests.name as audit_test_name',
+                            'controls.type2 as type',
+                            'controls.id as control_id',
+                            'controls.name as control_name')
+                        ->get();
+            
+
+            $type = 'Hallazgos de controles';
+        }
+
+        foreach ($issues as $issue1) //para cada issue obtenemos datos de planes de acción, riesgos y controles
+        {
+                $riesgos = NULL;
+                $controles = NULL;
+                //recomendaciones
+                if ($issue1->recommendations == "")
+                {
+                    $recommendation = 'No se agregaron recomendaciones';
+                }
+                else
+                    $recommendation = $issue1->recommendations;
+
+                //clasificacion
+                switch ($issue1->classification) {
+                    case 0:
+                        $classification = 'Oportunidad de mejora';
+                        break;
+                    case 1:
+                        $classification = 'Deficiencia';
+                        break;
+                    case 2:
+                        $classification = 'Debilidad significativa';
+                        break;
+                    default:
+                        $classification = 'No se ha clasificado';
+                        break;
+                }
+
+            	$action_plans = NULL;
+            	$action_plans = DB::table('action_plans')
             			->join('issues','issues.id','=','action_plans.issue_id')
                         ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id') 
                         ->select('action_plans.description as action_plan',
                                  'action_plans.final_date',
                                  'stakeholders.name as stakeholder_name',
                                  'stakeholders.surnames as stakeholder_surnames')
-                        ->where('action_plans.issue_id',$issue1->id)
+                        ->where('action_plans.issue_id','=',$issue1->id)
                         ->get();
 
-
-                if ($issue2 != NULL) //si es que hay plan de acción asociado
+                if ($action_plans != NULL) //si es que hay plan de acción asociado
                 {
 	                foreach ($issue2 as $issue)
 	                {
-			                if ($issue1->recommendations == "")
-			                {
-			                    $recommendation = 'No se agregaron recomendaciones';
-			                }
-			                else
-			                    $recommendation = $issue1->recommendations;
 			                //¡¡¡¡¡¡¡¡¡corregir problema del año 2038!!!!!!!!!!!! //
 			                $fecha_final = date('d-m-Y',strtotime($issue->final_date));
 
-			                $results[$i] = [
-			                            'Hallazgo' => $issue1->name,
-			                            'Descripción' => $issue1->description,
-			                            'Riesgo' => $issue1->risk_name,
-			                            'Control' => $issue1->control_name,
-			                            'Proceso' => $issue1->process_name,
-			                            'Recomendación' => $recommendation,
-			                            'Plan_de_acción' => $issue->action_plan,
-			                            'Responsable_plan' => $issue->stakeholder_name.' '.$issue->stakeholder_surnames,
-			                            'Fecha_final_plan' => $fecha_final,
-			                            'Auditoría' => $issue1->audit_name,
-			                            'Plan_de_auditoría' => $issue1->audit_plan_name,
-			                        
-			                ];
+                            $plan_accion = $issue->action_plan;
+                            $responsable_plan_accion = $issue->stakeholder_name.' '.$issue->stakeholder_surnames;
+                            $fecha_final_plan_accion = $fecha_final;
 			         }
-			                $i += 1;
 			    }
 			    else //no hay plan de accion
 			    {
-			    	if ($issue1->recommendations == "")
-			        {
-			                    $recommendation = 'No se agregaron recomendaciones';
-			        }
-			        else
-			                    $recommendation = $issue1->recommendations;
-			    	$results[$i] = [
-			                            'Hallazgo' => $issue1->name,
-			                            'Descripción' => $issue1->description,
-			                            'Riesgo' => $issue1->risk_name,
-			                            'Control' => $issue1->control_name,
-			                            'Proceso' => $issue1->process_name,
-			                            'Recomendación' => $recommendation,
-			                            'Plan_de_acción' => "No tiene plan de acción",
-			                            'Responsable_plan' => "No tiene plan de acción",
-			                            'Fecha_final_plan' => "No tiene plan de acción",
-			                            'Auditoría' => $issue1->audit_name,
-			                            'Plan_de_auditoría' => $issue1->audit_plan_name
-			                           ];
-                    $i += 1;
+                    $plan_accion = "No tiene plan de acción";
+                    $responsable_plan_accion = "No tiene plan de acción";
+                    $fecha_final_plan_accion = "No tiene plan de acción";
 			    }
-			    	
-		      }
-        }
 
-        else if ($tipo == 2)
-        {
-            //obtenemos todos los datos necesarios de issues (primero de procesos)
-            $issues = DB::table('issues')
-                        ->join('action_plans','action_plans.issue_id','=','issues.id')
-                        ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
-                        ->join('audit_audit_plan_audit_test','audit_audit_plan_audit_test.id','=','issues.audit_audit_plan_audit_test_id')
-                        ->join('audit_control_risk','audit_control_risk.audit_audit_plan_audit_test_id','=','audit_audit_plan_audit_test.id')
-                        ->join('controls','controls.id','=','audit_control_risk.control_id')
-                        ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
-                        ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
-                        ->join('risks','risks.id','=','objective_risk.risk_id')
-                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_test.audit_audit_plan_id')
-                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
-                        ->join('audits','audits.id','=','audit_audit_plan.audit_id')
-                        ->select('issues.name','issues.description','issues.recommendations',
-                                 'objectives.name as objective_name',
-                                 'risks.name as risk_name',
-                                 'action_plans.description as action_plan',
-                                 'action_plans.final_date',
-                                 'audits.name as audit_name',
-                                 'audit_plans.name as audit_plan_name',
-                                 'stakeholders.name as stakeholder_name',
-                                 'stakeholders.surnames as stakeholder_surnames',
-                                 'controls.name as control_name')
-                        ->get();
-            
+                $j = 0; //contador para riesgos
+                //obtenemos riesgos asociados al subproceso del issue
+                $risks = NULL;
 
-            $type = 'Hallazgos de objetivos';
-
-            foreach ($issues as $issue)
-            {
-                if ($issue->recommendations == "")
+                if ($tipo == 0) //los riesgos obtenidos se obtendrán de distinta forma para hallazgos de proceso o de control
                 {
-                    $recommendation = 'No se agregaron recomendaciones';
+                    $risks = DB::table('risks')
+                            ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                            ->where('risk_subprocess.subprocess_id','=',$issue1->subprocess_id)
+                            ->select('risks.name','risk_subprocess.id')
+                            ->get();  
+                }
+                else if ($tipo == 1)
+                {
+                    if ($issue1->type == 0) //riesgo de proceso
+                    {
+                        $risks = DB::table('control_risk_subprocess')
+                                ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                                ->join('risks','risks.id','=','risk_subprocess.risk_id')
+                                ->where('control_risk_subprocess.control_id','=',$issue1->control_id)
+                                ->select('risks.name')
+                                ->get();
+                    }
+                    else if ($issue1->type == 1) //riesgo de negocio
+                    {
+                        $risks = DB::table('control_objective_risk')
+                                ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                                ->join('risks','risks.id','=','objective_risk.risk_id')
+                                ->where('control_objective_risk.control_id','=',$issue1->control_id)
+                                ->select('risks.name')
+                                ->get();
+                    }
+                }
+
+                if ($risks != NULL) //si es que hay riesgos asociados
+                {       
+                    foreach ($risks as $risk)
+                    {
+                        
+                        if ($tipo == 0) //si son hallazgos de proceso obtenemos controles
+                        {
+                            $k = 0; //contador de controles
+                            $controls = NULL;
+                            //obtenemos controles asociados al riesgo
+                            $controls = DB::table('controls')
+                                            ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                                            ->where('control_risk_subprocess.risk_subprocess_id','=',$risk->id)
+                                            ->select('controls.name')
+                                            ->get();
+
+                            if ($controls != NULL) //si es que hay controles
+                            {
+                                if (strstr($_SERVER["REQUEST_URI"],'genexcelissues')) //se guardaran de distinta forma si es que son para el excel
+                                {
+                                    foreach ($controls as $control)
+                                    {
+                                        if ($k == 0)
+                                        {
+                                            $controles[$j] = $control->name;
+                                        }
+                                        else
+                                        {
+                                            $controles[$j] .= '; '.$control->name;
+                                        }
+
+                                        $k += 1;
+                                    }
+                                }
+                                else
+                                {
+                                    foreach ($controls as $control)
+                                    {
+                                        $controles[$k] = $control->name;
+                                        $k += 1;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (strstr($_SERVER["REQUEST_URI"],'genexcelissues')) //se guardaran de distinta forma si es que son para el excel
+                                {
+                                    $controles[$j] = "No existen controles asignados";
+                                }
+                                else
+                                {
+                                    $controles = "No existen controles asignados";
+                                }
+                            }
+
+                            if (strstr($_SERVER["REQUEST_URI"],'genexcelissues')) //se guardaran de distinta forma si es que son para el excel
+                            {
+                                if ($j == 0)
+                                {
+                                    $riesgos = $risk->name;
+                                }
+                                else
+                                {
+                                    $riesgos .= '|'.$risk->name;
+                                }
+                                
+                            }
+                            else
+                            {
+                                $riesgos[$j] = [
+                                    'name' => $risk->name,
+                                    'controls' => $controles,
+                                ];
+                            }
+                            
+                        }
+                        else if ($tipo == 1)
+                        {
+                            $riesgos[$j] = $risk->name;
+                        }
+
+                        $j += 1;
+                    }
                 }
                 else
-                    $recommendation = $issue->recommendations;
-                //¡¡¡¡¡¡¡¡¡corregir problema del año 2038!!!!!!!!!!!! //
-                $fecha_final = date('d-m-Y',strtotime($issue->final_date));
+                {
+                    $riesgos = "No hay riesgos asociados";
+                }
 
-                $results[$i] = [
-                            'Hallazgo' => $issue->name,
-                            'Descripción' => $issue->description,
-                            'Riesgo' => $issue->risk_name,
-                            'Control' => $issue->control_name,
-                            'Objetivo' => $issue->objective_name,
-                            'Recomendación' => $recommendation,
-                            'Plan_de_acción' => $issue->action_plan,
-                            'Responsable_plan' => $issue->stakeholder_name.' '.$issue->stakeholder_surnames,
-                            'Fecha_final_plan' => $fecha_final,
-                            'Auditoría' => $issue->audit_name,
-                            'Plan_de_auditoría' => $issue->audit_plan_name,
-                        
-                ];
-
+                //se envian distintos campos para hallazgos de proceso o de control
+                if ($tipo == 0) 
+                {
+                    if (strstr($_SERVER["REQUEST_URI"],'genexcelissues')) //se guardaran de distinta forma si es que son para el excel
+                    {   
+                        $m = 0;
+                        $controlcontrol = '';
+                        while (isset($controles[$m]))
+                        {
+                            $controlcontrol .= $controles[$m].'| ';
+                            $m += 1; 
+                        }
+                        $results[$i] = [
+                                        'Proceso' => $issue1->process_name,
+                                        'Subproceso' => $issue1->subprocess_name,
+                                        'Hallazgo' => $issue1->name,
+                                        'Clasificación' => $classification,
+                                        'Descripción' => $issue1->description,
+                                        'Riesgos' => $riesgos,
+                                        'Controles' => $controlcontrol,
+                                        'Recomendación' => $recommendation,
+                                        'Plan_de_acción' => $plan_accion,
+                                        'Responsable_plan' => $responsable_plan_accion,
+                                        'Fecha_final_plan' => $fecha_final_plan_accion,
+                                        'Plan_de_auditoría' => $issue1->audit_plan_name,
+                                        'Auditoría' => $issue1->audit_name,
+                                        'Programa_de_auditoría' => $issue1->audit_program_name,
+                                        'Prueba_de_auditoría' => $issue1->audit_test_name
+                                        
+                                       ];
+                    }
+                    else
+                    {
+                        $results[$i] = [
+                                        'Proceso' => $issue1->process_name,
+                                        'Subproceso' => $issue1->subprocess_name,
+                                        'Hallazgo' => $issue1->name,
+                                        'Clasificación' => $classification,
+                                        'Descripción' => $issue1->description,
+                                        'Riesgos' => $riesgos,
+                                        'Recomendación' => $recommendation,
+                                        'Plan_de_acción' => $plan_accion,
+                                        'Responsable_plan' => $responsable_plan_accion,
+                                        'Fecha_final_plan' => $fecha_final_plan_accion,
+                                        'Plan_de_auditoría' => $issue1->audit_plan_name,
+                                        'Auditoría' => $issue1->audit_name,
+                                        'Programa_de_auditoría' => $issue1->audit_program_name,
+                                        'Prueba_de_auditoría' => $issue1->audit_test_name
+                                        
+                                       ];
+                    }
+                }
+                else if ($tipo == 1) 
+                {
+                    $results[$i] = [
+                                        'Control' => $issue1->control_name,
+                                        'Riesgos' => $riesgos,
+                                        'Hallazgo' => $issue1->name,
+                                        'Clasificación' => $classification,
+                                        'Descripción' => $issue1->description,
+                                        'Recomendación' => $recommendation,
+                                        'Plan_de_acción' => $plan_accion,
+                                        'Responsable_plan' => $responsable_plan_accion,
+                                        'Fecha_final_plan' => $fecha_final_plan_accion,
+                                        'Plan_de_auditoría' => $issue1->audit_plan_name,
+                                        'Auditoría' => $issue1->audit_name,
+                                        'Programa_de_auditoría' => $issue1->audit_program_name,
+                                        'Prueba_de_auditoría' => $issue1->audit_test_name
+                                        
+                                       ];
+                }
                 $i += 1;
-            }
-        }
+			    	
+		}
 
         if (strstr($_SERVER["REQUEST_URI"],'genexcelissues')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
         {

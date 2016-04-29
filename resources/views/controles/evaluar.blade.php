@@ -83,46 +83,67 @@ $("#control_id").change(function() {
 
 				$('#cargando').delay(400).fadeOut(5);
 
-				//Seteamos cabecera
-				var table_head = "<thead>";
-				table_head += "<th>Diseño</th><th>Efectividad operativa</th><th>Prueba sustantiva</th><th>Prueba de cumplimiento</th>";
-				table_head += "</thead>";
+				//obtenemos evaluación (si es que hay) de control seleccionado
+				$.get('controles.get_evaluation.'+$("#control_id").val(), function (result) {
 
-				
+					if (result == "null")
+					{
+						$('#table_evaluacion').empty();
+						//Seteamos cabecera
+						var table_head = "<thead>";
+						table_head += "<th>Diseño</th><th>Efectividad operativa</th><th>Prueba sustantiva</th><th>Prueba de cumplimiento</th>";
+						table_head += "</thead>";
+						var table_row = "<tr>";
+						
+						table_row += "<td><select name='diseno' id='diseno' style='width:180px; vertical-align:top' class='form-control' onchange='test_diseno()'>";
+						table_row += "<option value=''>Seleccione Resultado</option>";
+						table_row += "<option value='1'>Efectivo</option>";
+						table_row += "<option value='2'>Inefectivo</option></select>";
+						table_row += "<div id='datos_diseno' style='display: none;'></div></td>";
 
-				var table_row = "<tr>";
-				table_row += "<td><select name='diseno' id='diseno' style='width:180px; vertical-align:top' class='form-control' onchange='test_diseno()'>";
-				table_row += "<option value=''>Seleccione Resultado</option>";
-				table_row += "<option value='1'>Efectivo</option>";
-				table_row += "<option value='2'>Inefectivo</option></select>";
-				table_row += "<div id='datos_diseno' style='display: none;'></div></td>";
+						table_row += "<td><select name='efectividad' style='width:180px' class='form-control' id='efectividad' onchange='test_efectividad()'>";
+						table_row += "<option value='' selected>Seleccione Resultado</option>";
+						table_row += "<option value='1'>Efectivo</option>";
+						table_row += "<option value='2'>Inefectivo</option></select>";
+						table_row += "<div id='datos_efectividad' style='display: none;'></div></td>";
 
-				table_row += "<td><select name='efectividad' style='width:180px' class='form-control' id='efectividad' onchange='test_efectividad()'>";
-				table_row += "<option value='' selected>Seleccione Resultado</option>";
-				table_row += "<option value='1'>Efectivo</option>";
-				table_row += "<option value='2'>Inefectivo</option></select>";
-				table_row += "<div id='datos_efectividad' style='display: none;'></div></td>";
+						table_row += "<td><select name='sustantiva' style='width:180px' class='form-control' id='sustantiva' onchange='test_sustantiva()'>";
+						table_row += "<option value='' selected>Seleccione Resultado</option>";
+						table_row += "<option value='1'>Efectivo</option>";
+						table_row += "<option value='2'>Inefectivo</option></select>";
+						table_row += "<div id='datos_sustantiva' style='display: none;'></div></td>";
 
-				table_row += "<td><select name='sustantiva' style='width:180px' class='form-control' id='sustantiva' onchange='test_sustantiva()'>";
-				table_row += "<option value='' selected>Seleccione Resultado</option>";
-				table_row += "<option value='1'>Efectivo</option>";
-				table_row += "<option value='2'>Inefectivo</option></select>";
-				table_row += "<div id='datos_sustantiva' style='display: none;'></div></td>";
+						table_row += "<td><select name='cumplimiento' style='width:180px' class='form-control' id='cumplimiento' onchange='test_cumplimiento()'>";
+						table_row += "<option value='' selected>Seleccione Resultado</option>";
+						table_row += "<option value='1'>Efectivo</option>";
+						table_row += "<option value='2'>Inefectivo</option></select>";
+						table_row += "<div id='datos_cumplimiento' style='display: none;'></div></td>";
+						table_row += "</tr>";
 
-				table_row += "<td><select name='cumplimiento' style='width:180px' class='form-control' id='cumplimiento' onchange='test_cumplimiento()'>";
-				table_row += "<option value='' selected>Seleccione Resultado</option>";
-				table_row += "<option value='1'>Efectivo</option>";
-				table_row += "<option value='2'>Inefectivo</option></select>";
-				table_row += "<div id='datos_cumplimiento' style='display: none;'></div></td>";
+						$('#table_evaluacion').html(table_head);
 
-				table_row += "</tr>";
+						$('#boton-guardar').html('<center><button name="guardar" class="btn btn-success">Guardar evaluación</button></center>');
+					}
+					else
+					{
+						var datos = JSON.parse(result);
+						
+						$(datos).each( function() {
+							id_eval = this.id;
+						});
+						$('#table_evaluacion').empty();
+						$('#boton-guardar').empty();
+						var table_row = '<center><b>Indique si desea modificar su última evaluación o si desea agregar una nueva</b></center>';
 
-				$('#table_evaluacion').html(table_head);
-				$('#table_evaluacion').append(table_row);
-				$('#table_evaluacion').fadeIn(500);
+						table_row += '<br><center><button name="new_eval" class="btn btn-success" onchange="newEval()">Nueva evaluación</button>';
+						table_row += '&nbsp;&nbsp;&nbsp;&nbsp;';
+						table_row += '<button name="edit_eval" class="btn btn-primary" onchange="editEval('+id_eval+')">Editar evaluación</button></center>';
+					}
+					
+					$('#table_evaluacion').append(table_row);
+					$('#table_evaluacion').fadeIn(500);
 
-				$('#boton-guardar').html('<center><button name="guardar" class="btn btn-success">Guardar evaluación</button></center>');
-
+				});	
 			}
 
 			else
@@ -181,8 +202,8 @@ function agregarCampos(prueba)
 
 		inefectivo += '</select>';
 
-		inefectivo += '<br><input type="file" name="file_'+name+'" id="file1" class="inputfile" />';
-		inefectivo += '<label for="file1">Cargue evidencia</label></div>';
+		inefectivo += '<br><input type="file" name="file_'+prueba+'" id="file'+prueba+'" class="inputfile" />';
+		inefectivo += '<label for="file'+prueba+'">Cargue evidencia</label></div>';
 
 		identificador = "#datos_"+prueba;
 		$(identificador).html(inefectivo);
@@ -192,8 +213,8 @@ function agregarCampos(prueba)
 	{
 		var efectivo = '<br><textarea name="comentarios_'+prueba+'" class="form-control" style="width:180px" placeholder="Ingrese comentarios (opcional)"></textarea><br>';
 		
-		efectivo += '<br><input type="file" name="file_'+prueba+'" id="file1" class="inputfile" />';
-		efectivo += '<label for="file1">Cargue evidencia</label></div>';
+		efectivo += '<br><input type="file" name="file_'+prueba+'" id="file'+prueba+'" class="inputfile" />';
+		efectivo += '<label for="file'+prueba+'">Cargue evidencia</label></div>';
 		identificador = "#datos_"+prueba;
 		$(identificador).html(efectivo);
 		$(identificador).fadeIn(500);
@@ -203,6 +224,52 @@ function agregarCampos(prueba)
 		identificador = "#datos_"+prueba;
 		$(identificador).empty();
 	}
+}
+
+function editEval(id_eval)
+{
+	$('#table_evaluacion').empty();
+						//Seteamos cabecera
+						var table_head = "<thead>";
+						table_head += "<th>Diseño</th><th>Efectividad operativa</th><th>Prueba sustantiva</th><th>Prueba de cumplimiento</th>";
+						table_head += "</thead>";
+						var table_row = "<tr>";
+						
+						table_row += "<td><select name='diseno' id='diseno' style='width:180px; vertical-align:top' class='form-control' onchange='test_diseno()'>";
+						table_row += "<option value=''>Seleccione Resultado</option>";
+						table_row += "<option value='1'>Efectivo</option>";
+						table_row += "<option value='2'>Inefectivo</option></select>";
+						table_row += "<div id='datos_diseno' style='display: none;'></div></td>";
+
+						table_row += "<td><select name='efectividad' style='width:180px' class='form-control' id='efectividad' onchange='test_efectividad()'>";
+						table_row += "<option value='' selected>Seleccione Resultado</option>";
+						table_row += "<option value='1'>Efectivo</option>";
+						table_row += "<option value='2'>Inefectivo</option></select>";
+						table_row += "<div id='datos_efectividad' style='display: none;'></div></td>";
+
+						table_row += "<td><select name='sustantiva' style='width:180px' class='form-control' id='sustantiva' onchange='test_sustantiva()'>";
+						table_row += "<option value='' selected>Seleccione Resultado</option>";
+						table_row += "<option value='1'>Efectivo</option>";
+						table_row += "<option value='2'>Inefectivo</option></select>";
+						table_row += "<div id='datos_sustantiva' style='display: none;'></div></td>";
+
+						table_row += "<td><select name='cumplimiento' style='width:180px' class='form-control' id='cumplimiento' onchange='test_cumplimiento()'>";
+						table_row += "<option value='' selected>Seleccione Resultado</option>";
+						table_row += "<option value='1'>Efectivo</option>";
+						table_row += "<option value='2'>Inefectivo</option></select>";
+						table_row += "<div id='datos_cumplimiento' style='display: none;'></div></td>";
+						table_row += "</tr>";
+
+						$('#table_evaluacion').html(table_head);
+
+						$('#boton-guardar').html('<center><button name="guardar" class="btn btn-success">Guardar evaluación</button></center>');
+						$('#table_evaluacion').append(table_row);
+						$('#table_evaluacion').fadeIn(500);
+}
+
+function newEval()
+{
+
 }
 
 </script>

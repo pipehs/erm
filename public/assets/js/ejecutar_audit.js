@@ -262,6 +262,7 @@ function testResult(id)
 				contador = 1;
 				resultado = '';
 				$(datos).each( function() {
+					//alert(this.evidences)
 					issues_id.push(this.id);
 					//alert("Entramos2");
 					resultado += '<b>Hallazgo N° '+contador+'</b><br>';
@@ -308,7 +309,18 @@ function testResult(id)
 						resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_recommendations_'+this.id+'" value="'+this.recommendations+'" placeholder="'+this.recommendations+'"></textarea><br>';
 					}
 
-					resultado += '<hr>';
+					if (this.evidences == null)
+					{
+						resultado += '<input type="file" id="file'+this.id+'" class="inputfile" name="issue_evidence_'+this.id+'"/><label for="file'+this.id+'">Cargue evidencia (opcional)</label></div><br>';
+					}
+					else
+					{
+						$(this.evidences).each( function(i,evidence) {
+							resultado += '<div style="cursor:hand" id="descargar_'+this.id+'" onclick="descargar(2,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia</u></font></div><br>';
+						});
+					}
+
+					resultado += '<br>';
 					contador++;
 				});
 
@@ -375,6 +387,7 @@ function addNewIssue(id)
 	
 	resultado += '<textarea rows="3" cols="4" class="form-control" name="new_issue_description_'+id+'_'+new_issues+'" placeholder="Descripción de debilidad (opcional)"></textarea><br>';
 	resultado += '<textarea rows="3" cols="4" class="form-control" name="new_issue_recommendations_'+id+'_'+new_issues+'" placeholder="Recomendaciones (opcional)"></textarea></div><br>';
+	resultado += '<input type="file" id="file'+id+'" class="inputfile" name="new_issue_evidence_'+id+'_'+new_issues+'"/><label for="file'+id+'">Cargue evidencia (opcional)</label></div><br>';
 
 	resultado += '<script>$("html,body").animate({scrollTop: $("#new_issue_'+id+'_'+new_issues+'").offset().top}, 900); </script>';
 	$("#issues_"+id).append(resultado);

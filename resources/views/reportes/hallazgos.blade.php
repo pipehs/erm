@@ -53,7 +53,7 @@
 				<br>
 				<br>
 				<hr>
-				<table id="hallazgos" class="table table-bordered table-striped table-hover table-heading table-datatable" style="display: none;">
+				<table id="hallazgos" class="table table-bordered table-heading table-datatable" style="display: none;">
 				</table>
 		
 				<div id="boton_exportar">
@@ -76,26 +76,30 @@
 
 			if ($("#type").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 			{
+				var table_head = '';
+
 				if ($("#type").val() == 0) //Se seleccionó procesos
 				{
 					//reseteamos matriz
 
 					$("#hallazgos").removeAttr("style").show();
 
-					//Seteamos cabecera
-					var table_head = '<table class="table table-bordered table-striped table-hover table-heading table-datatable auditorias2" id="datatable-2" style="font-size:11px">';
+					//Seteamos cabecera		
 					table_head += "<thead>";
-					table_head += "<th>Hallazgo</th>";
-					table_head += "<th>Riesgo</th>";
-					table_head += "<th>Control</th>";
 					table_head += "<th>Proceso</th>";
+					table_head += "<th>Subproceso</th>";
+					table_head += "<th>Hallazgo</th>";
+					table_head += "<th>Clasificaci&oacute;n</th>";
+					table_head += "<th>Descripci&oacute;n</th>";
+					table_head += "<th>Riesgo(s) - Control(es)</th>";
 					table_head += "<th>Recomendación</th>";
 					table_head += "<th>Plan de acción</th>";
 					table_head += "<th>Responsable plan de acción</th>";
 					table_head += "<th>Fecha límite plan de acción</th>";
 					table_head += "<th>Plan de auditoría</th>";
 					table_head += "<th>Auditoría</th>";
-
+					table_head += "<th>Programa de auditoría</th>";
+					table_head += "<th>Prueba de auditoría</th>";
 
 
 					//Añadimos la imagen de carga en el contenedor
@@ -108,7 +112,6 @@
 						
 							//con la función html se BORRAN los datos existentes anteriormente (de existir)
 							$("#hallazgos").html(table_head);
-							
 
 							var table_row ="";
 							//parseamos datos obtenidos
@@ -119,12 +122,32 @@
 							//seteamos datos en tabla para riesgos a través de un ciclo por todos los controles de procesos
 							$(datos).each(function() {	
 										//alert(this);
-										table_row += '<tr><td>' + this.Hallazgo + '</td><td>' + this.Riesgo + '</td><td>';
-										table_row += this.Control +'</td><td>';
-										table_row += this.Proceso + '</td><td>' + this.Recomendación + '</td><td>' + this.Plan_de_acción;
-										table_row += '</td><td>' + this.Responsable_plan +'</td>';
-										table_row += '<td>' + this.Fecha_final_plan + '</td><td>';
-										table_row += this.Auditoría + '</td><td>' + this.Plan_de_auditoría + '</td></tr>';
+										table_row += '<tr><td>'+this.Proceso+'</td><td>' + this.Subproceso + '</td><td>' + this.Hallazgo + '</td><td>'+this.Clasificación+'</td><td>';
+										table_row += this.Descripción +'</td>';
+										table_row += '<td><table class="table table-bordered table-heading">';
+										$(this.Riesgos).each(function(i,riesgo) {
+
+											table_row += '<tr><td><li>'+riesgo.name+'</li></td><td><table class="table table-bordered table-heading">';
+											if (jQuery.type(riesgo.controls) == "array")
+											{
+												$(riesgo.controls).each(function(j,control) {
+													table_row += '<tr><td><li>'+control+'</li></td></tr>';
+												});
+											}
+											else
+											{
+												table_row += '<tr><td><li>'+riesgo.controls+'</li></td></tr>';
+											}
+											
+											table_row += '</table><hr></td>';
+										});
+
+										table_row += '</table></td>';
+										table_row += '<td>'+this.Recomendación + '</td><td>' + this.Plan_de_acción + '</td><td>' + this.Responsable_plan;
+										table_row += '</td><td>' + this.Fecha_final_plan +'</td>';
+										table_row += '<td>' + this.Plan_de_auditoría + '</td><td>';
+										table_row += this.Auditoría + '</td><td>' + this.Programa_de_auditoría + '</td>';
+										table_row += '<td>'+this.Prueba_de_auditoría+'</td></tr>';
 									});
 					
 									$("#hallazgos").append(table_row);
@@ -138,18 +161,20 @@
 					$("#hallazgos").removeAttr("style").show();
 
 					//Seteamos cabecera
-					var table_head = '<table class="table table-bordered table-striped table-hover table-heading table-datatable auditorias2" id="datatable-2" style="font-size:11px">';
 					table_head += "<thead>";
-					table_head += "<th>Hallazgo</th>";
-					table_head += "<th>Riesgo</th>";
 					table_head += "<th>Control</th>";
-					table_head += "<th>Objetivo</th>";
-					table_head += "<th>Recomendación</th>";
+					table_head += "<th>Riesgos</th>";
+					table_head += "<th>Hallazgo</th>";
+					table_head += "<th>Clasificaci&oacute;n</th>";
+					table_head += "<th>Descripci&oacute;n</th>";
+					table_head += "<th>Recomendaci&oacute;n</th>";
 					table_head += "<th>Plan de acción</th>";
 					table_head += "<th>Responsable plan de acción</th>";
 					table_head += "<th>Fecha límite plan de acción</th>";
 					table_head += "<th>Plan de auditoría</th>";
 					table_head += "<th>Auditoría</th>";
+					table_head += "<th>Programa de auditoría</th>";
+					table_head += "<th>Prueba de auditoría</th>";
 
 
 
@@ -163,23 +188,28 @@
 						
 							//con la función html se BORRAN los datos existentes anteriormente (de existir)
 							$("#hallazgos").html(table_head);
-							
 
 							var table_row ="";
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
-
-
 							 
 							//seteamos datos en tabla para riesgos a través de un ciclo por todos los controles de procesos
 							$(datos).each( function() {	
 										
-										table_row += '<tr><td>' + this.Hallazgo + '</td><td>' + this.Riesgo + '</td><td>';
-										table_row += this.Control +'</td><td>';
-										table_row += this.Objetivo + '</td><td>' + this.Recomendación + '</td><td>' + this.Plan_de_acción;
-										table_row += '</td><td>' + this.Responsable_plan +'</td>';
-										table_row += '<td>' + this.Fecha_final_plan + '</td><td>';
-										table_row += this.Auditoría + '</td><td>' + this.Plan_de_auditoría + '</td></tr>';
+										table_row += '<tr><td>' + this.Control + '</td><td>';
+
+										$(this.Riesgos).each(function(i,riesgo) {
+
+											table_row += '<li>'+riesgo+'</li>';
+										});
+										
+										table_row += '</td><td>'+this.Hallazgo +'</td><td>';
+										table_row += this.Clasificación + '</td><td>' + this.Descripción + '</td><td>' + this.Recomendación;
+										table_row += '</td><td>' + this.Plan_de_acción +'</td>';
+										table_row += '<td>' + this.Responsable_plan + '</td><td>';
+										table_row += this.Fecha_final_plan + '</td><td>' + this.Plan_de_auditoría + '</td>';
+										table_row += '<td>'+this.Auditoría + '</td><td>' + this.Programa_de_auditoría + '</td>';
+										table_row += '<td>' + this.Prueba_de_auditoría + '</td></tr>';
 									});
 					
 									$("#hallazgos").append(table_row);
@@ -203,7 +233,7 @@
 
 			else
 			{
-				//REseteamos datos
+				//Reseteamos datos
 			}
 
 	    });

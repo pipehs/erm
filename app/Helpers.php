@@ -212,6 +212,15 @@ function upload_file($archivo,$dir,$id)
         $dir.'/'. $file[0] . "___" . $id . "." . $file[1],
         file_get_contents($archivo->getRealPath())
     );
+
+    if ($guardado)
+    {
+    	return 0;
+    }
+    else
+    {
+    	return 1;
+    }
 }
 
 //Funcion php que valida rut en Chile
