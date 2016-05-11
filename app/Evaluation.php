@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Evaluation extends Model
 {
-    protected $fillable = ['name','description','expiration_date','max_levels'];
+    protected $fillable = ['name','type','consolidation','description','expiration_date'];
 
     //eliminamos created_at y updated_at
     //public $timestamps = false;

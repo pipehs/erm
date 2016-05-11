@@ -459,6 +459,18 @@ Route::post('control.guardar_evaluacion', [
 	'as' => 'control.guardar_evaluacion', 'uses' => 'ControlesController@storeEvaluacion'
 ]);
 
+Route::get('controles.get_evaluation.{id_control}', [
+	'as' => 'controles.get_evaluation', 'uses' => 'ControlesController@getEvaluacion'
+]);
+
+Route::get('controles.get_issue.{id}', [
+	'as' => 'controles.get_issue', 'uses' => 'ControlesController@getIssue'
+]);
+
+Route::get('controles.get_evaluation2.{id_control}', [
+	'as' => 'controles.get_evaluation2', 'uses' => 'ControlesController@getEvaluacion2'
+]);
+
 // ----Rutas para reportes básicos---- //
 
 Route::get('heatmap', [
@@ -683,7 +695,7 @@ Route::get('auditorias.get_notes.{id}', [
 
 //ruta para obtener plan de acción existente
 Route::get('auditorias.get_action_plan.{id}', [
-	'as' => 'auditorias.get_action_plan', 'uses' => 'AuditoriasController@getActionPlan']);
+	'as' => 'auditorias.get_action_plan', 'uses' => 'PlanesAccionController@getActionPlan']);
 
 //ruta para obtener archivo de evidencias
 Route::get('auditorias.get_file.{archivo}', [

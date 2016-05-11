@@ -1042,6 +1042,21 @@ class ControlesController extends Controller
         {
             upload_file($GLOBALS['file_'.$test],'eval_controles',$id_eval);    
         }
+
+        //si es que la prueba es de efectividad operativa, actualizamos riesgo controlado
+        if ($kind == 1)
+        {
+            $res = calc_controlled_risk($_POST['control_id'],$_POST[$test]);
+
+            if ($res == 0)
+            {
+                echo "Riesgo controlado actualizado correctamente";
+            }
+            else if ($res == 1)
+            {
+                echo "Error al actualizar valor de riesgo controlado";
+            }
+        }
                 
     }
 
@@ -1210,6 +1225,21 @@ class ControlesController extends Controller
         if ($GLOBALS['file_'.$test] != NULL)
         {
             upload_file($GLOBALS['file_'.$test],'eval_controles',$id_eval);    
+        }
+
+        //si es que la prueba es de efectividad operativa, actualizamos riesgo controlado
+        if ($kind == 1)
+        {
+            $res = calc_controlled_risk($_POST['control_id'],$_POST[$test]);
+
+            if ($res == 0)
+            {
+                echo "Riesgo controlado actualizado correctamente";
+            }
+            else if ($res == 1)
+            {
+                echo "Error al actualizar valor de riesgo controlado";
+            }
         }
                 
     }
