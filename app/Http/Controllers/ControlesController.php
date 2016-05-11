@@ -14,79 +14,6 @@ use Storage;
 
 class ControlesController extends Controller
 {
-    //guarda pruebas de diseño, sustantivas, efectividad y cumplimiento (y otros tipos si es que hubieran)
-    public function storeTests($test,$kind)
-    {
-         if (isset($_POST['comentarios_'.$test]))
-                {
-                    $comments = $_POST['comentarios_'.$test];
-                }
-                else
-                {
-                    $comments = NULL;
-                }
-                //independiente de si es eval efectiva o inefectiva, se guardan los mismos datos en la tabla de control_evaluation
-                $id_eval = DB::table('control_evaluation')
-                    ->insertGetId([
-                        'control_id' => $_POST['control_id'],
-                        'kind' => $kind,
-                        'comments' => $comments,
-                        'results' => $_POST[$test],
-                        'created_at' => $GLOBALS['date'],
-                        'updated_at' => $GLOBALS['date'],
-                    ]);
-
-                //ahora guardamos datos de ISSUE si es que la prueba fue inefectiva
-                if ($_POST[$test] == 2)
-                {
-                    if (isset($_POST['clasificacion_'.$test]))
-                    {
-                        $class = $_POST['clasificacion_'.$test];
-                    }
-                    else
-                    {
-                        $class = NULL;
-                    }
-                    $issue_id = DB::table('issues')
-                            ->insertGetId([
-                                'classification' => $class,
-                                'name' => $_POST['name_hallazgo_'.$test],
-                                'description' => $_POST['description_hallazgo_'.$test],
-                                'recommendations' => $_POST['recomendaciones_'.$test],
-                                'created_at' => $GLOBALS['date'],
-                                'updated_at' => $GLOBALS['date'],
-                                'control_evaluation_id' => $id_eval 
-                                ]);
-
-                    //vemos si existe responsable de diseño
-                    if (isset($_POST['responsable_plan_'.$test]))
-                    {
-                        $responsable = $_POST['responsable_plan_'.$test];
-                    }
-                    else
-                    {
-                        $responsable = NULL;
-                    }
-                    //insertamos plan de acción
-                    DB::table('action_plans')
-                        ->insert([
-                            'issue_id' => $issue_id,
-                            'stakeholder_id' => $responsable,
-                            'description' => $_POST['plan_accion_'.$test],
-                            'created_at' => $GLOBALS['date'],
-                            'updated_at' => $GLOBALS['date'],
-                            'final_date' => $_POST['fecha_plan_'.$test],
-                            'status' => 0
-                            ]);
-
-                }
-                //cargamos evidencia
-                if ($GLOBALS['file_'.$test] != NULL)
-                {
-                    upload_file($GLOBALS['file_'.$test],'eval_controles',$id_eval);    
-                }
-                
-    }
     /**
      * Display a listing of the resource.
      *
@@ -468,7 +395,6 @@ class ControlesController extends Controller
     //guarda evaluación de un control
     public function storeEvaluacion(Request $request)
     {
-        //print_r($_POST);
         //para guardar en todas las tablas exactamente la misma fecha
         global $date;
         $date = date('Y-m-d H:i:s');
@@ -483,33 +409,82 @@ class ControlesController extends Controller
         $file_cumplimiento = $request->file('file_cumplimiento');
         //echo "Diseño: ".$file_diseno."Efectividad: ".$file_efectividad."Sustantiva: ".$file_sustantiva."Cumplimiento: ".$file_cumplimiento;
 
-       DB::transaction (function() {
-            //si es que se evaluó diseño
-            if ($_POST['diseno'] != "")
-            {
-                $this->storeTests('diseno',0);
-            }
-            //lo mismo con efectividad operativa
-            if ($_POST['efectividad'] != "")
-            {
-                $this->storeTests('efectividad',1);
-            }
-            //lo mismo con pruebas sustantivas
-            if ($_POST['sustantiva'] != "")
-            {
-                $this->storeTests('sustantiva',2);
-            }
-            //lo mismo con pruebas de cumplimiento
-            if ($_POST['cumplimiento'] != "")
-            {
-                $this->storeTests('cumplimiento',3);
-            }
+        //vemos si se está guardando una nueva evaluación o si se está editando una previa
+        //print_r($_POST);
+        
+        if ($_POST['guardar'] == 0) //se está guardando una evaluación nueva
+        {
+            DB::transaction (function() {
+                //primero que todo, verificaremos que no haya una evaluación anterior abierta, y si es así, la cerramos
+                $last_eval = DB::table('control_evaluation')
+                            ->where('control_id','=',$_POST['control_id'])
+                            ->where('status','=',1)
+                            ->select('control_evaluation.id')
+                            ->get();
 
-            Session::flash('message','Evaluación realizada correctamente');
-        });
+                //sólo si se que hay hará la actualización
+                foreach ($last_eval as $eval)
+                {
+                    //actualizamos dejando status en 2
+                    DB::table('control_evaluation')
+                        ->where('id','=',$eval->id)
+                        ->update([ 'status'=>2 ]);
+                }
+
+                //si es que se evaluó diseño
+                if ($_POST['diseno'] != "")
+                {
+                    $this->storeTests('diseno',0);
+                }
+                //lo mismo con efectividad operativa
+                if ($_POST['efectividad'] != "")
+                {
+                    $this->storeTests('efectividad',1);
+                }
+                //lo mismo con pruebas sustantivas
+                if ($_POST['sustantiva'] != "")
+                {
+                    $this->storeTests('sustantiva',2);
+                }
+                //lo mismo con pruebas de cumplimiento
+                if ($_POST['cumplimiento'] != "")
+                {
+                    $this->storeTests('cumplimiento',3);
+                }
+
+                Session::flash('message','Evaluación realizada correctamente');
+            });
+        }
+        else if ($_POST['guardar'] == 1) //se está editando una evaluación previa
+        {
+            DB::transaction (function() {
+                //si es que se evaluó diseño
+                if ($_POST['diseno'] != "")
+                {
+                    $this->editTests('diseno',0);
+                }
+                //lo mismo con efectividad operativa
+                if ($_POST['efectividad'] != "")
+                {
+                    $this->editTests('efectividad',1);
+                }
+                //lo mismo con pruebas sustantivas
+                if ($_POST['sustantiva'] != "")
+                {
+                    $this->editTests('sustantiva',2);
+                }
+                //lo mismo con pruebas de cumplimiento
+                if ($_POST['cumplimiento'] != "")
+                {
+                    $this->editTests('cumplimiento',3);
+                }
+
+                Session::flash('message','Evaluación actualizada correctamente');
+            });
+        } 
 
         return Redirect::to('/evaluar_controles');
-
+    
     }
 
     /*
@@ -907,17 +882,21 @@ class ControlesController extends Controller
             $evals = DB::table('control_evaluation')
                         ->where('control_id','=',$id)
                         ->where('updated_at','=',$max_update)
+                        ->where('status','=',1)
                         ->select('*')
                         ->get();
 
             $i = 0;
             foreach ($evals as $eval)
             {
+                $evidence = getEvidences(3,$eval->id);
+
                 $evaluation[$i] = [
                         'id' => $eval->id,
                         'kind' => $eval->kind,
                         'results' => $eval->results,
-                        'comments' => $eval->comments,
+                        'evidence' => $evidence, 
+                    //    'comments' => $eval->comments,
                     ];
 
                 $i += 1;
@@ -925,11 +904,314 @@ class ControlesController extends Controller
 
             return json_encode($evaluation);
         }
-        else
+        else //retornamos NULL (max update será null si no hay evaluaciones)
         {
             return json_encode($max_update);
         }
-        
-
     }
+
+    //función obtiene datos de evaluación a través de id de la eval
+    public function getEvaluacion2($id)
+    {
+        $evaluation = NULL;
+        $eval = NULL;
+        //obtenemos los datos de la evaluación
+            $eval = DB::table('control_evaluation')
+                        ->where('id','=',$id)
+                        ->select('id','comments')
+                        ->first();
+
+        if ($eval != NULL)
+        {
+            if ($id != NULL)
+            {
+                $evidence = getEvidences(3,$eval->id);
+            }
+            else
+            {
+                $evidence = NULL;
+            }
+
+            $evaluation = [
+                'id' => $eval->id,
+                'comments' => $eval->comments,
+                'evidence' => $evidence, 
+            ];
+        }
+            return json_encode($evaluation);
+    }
+
+    //función obtiene issue (si es que hay) a través de id de la eval
+    public function getIssue($eval_id)
+    {
+        $issue = NULL;
+
+        $eval = DB::table('control_evaluation')
+                        ->where('id','=',$eval_id)
+                        ->where('status','=',1)
+                        ->select('issue_id')
+                        ->first();
+
+        $evidence = getEvidences(3,$eval_id);
+        if($eval) //si es que hay evaluación => Puede ser que se esté agregando una nueva   
+        {
+            $issue = \Ermtool\Issue::find($eval->issue_id);
+            $issue = [
+                'issue' => $issue,
+                'evidence' => $evidence,
+            ];    
+        }   
+
+        return json_encode($issue);
+    }
+
+     //guarda pruebas de diseño, sustantivas, efectividad y cumplimiento (y otros tipos si es que hubieran)
+    public function storeTests($test,$kind)
+    {
+        if (isset($_POST['comentarios_'.$test]))
+        {
+            $comments = $_POST['comentarios_'.$test];
+        }
+        else
+        {
+            $comments = NULL;
+        }
+        //ahora guardamos datos de ISSUE si es que la prueba fue inefectiva
+        if ($_POST[$test] == 2)
+        {
+                    if (isset($_POST['clasificacion_'.$test]))
+                    {
+                        $class = $_POST['clasificacion_'.$test];
+                    }
+                    else
+                    {
+                        $class = NULL;
+                    }
+                    $issue_id = DB::table('issues')
+                            ->insertGetId([
+                                'classification' => $class,
+                                'name' => $_POST['name_hallazgo_'.$test],
+                                'description' => $_POST['description_hallazgo_'.$test],
+                                'recommendations' => $_POST['recomendaciones_'.$test],
+                                'created_at' => $GLOBALS['date'],
+                                'updated_at' => $GLOBALS['date'],
+                            ]);
+
+                     //vemos si existe responsable de diseño
+                    if (isset($_POST['responsable_plan_'.$test]))
+                    {
+                        $responsable = $_POST['responsable_plan_'.$test];
+                    }
+                    else
+                    {
+                        $responsable = NULL;
+                    }
+                    //insertamos plan de acción
+                    DB::table('action_plans')
+                        ->insert([
+                            'issue_id' => $issue_id,
+                            'stakeholder_id' => $responsable,
+                            'description' => $_POST['plan_accion_'.$test],
+                            'created_at' => $GLOBALS['date'],
+                            'updated_at' => $GLOBALS['date'],
+                            'final_date' => $_POST['fecha_plan_'.$test],
+                            'status' => 0
+                            ]);
+        }
+        else
+        {
+            $issue_id = NULL;
+        }
+
+                    
+        //si es inefectiva issue_id tendrá valor, si no será NULL
+        $id_eval = DB::table('control_evaluation')
+                ->insertGetId([
+                    'control_id' => $_POST['control_id'],
+                    'kind' => $kind,
+                    'comments' => $comments,
+                    'results' => $_POST[$test],
+                    'created_at' => $GLOBALS['date'],
+                    'updated_at' => $GLOBALS['date'],
+                    'status' => 1,
+                    'issue_id' => $issue_id
+                ]);                           
+        
+        //cargamos evidencia
+        if ($GLOBALS['file_'.$test] != NULL)
+        {
+            upload_file($GLOBALS['file_'.$test],'eval_controles',$id_eval);    
+        }
+                
+    }
+
+     //guarda nueva versión (o primera si es que no existia) de pruebas de diseño, sustantivas, efectividad y cumplimiento (y otros tipos si es que hubieran)
+    public function editTests($test,$kind)
+    {
+        //primero que todo, obtenemos datos de prueba anterior si es que existía
+        $last_test = DB::table('control_evaluation')
+                        ->where('status','=',1)
+                        ->where('control_id','=',$_POST['control_id'])
+                        ->where('kind','=',$kind)
+                        ->select('id','results','issue_id')
+                        ->first();
+
+        if (isset($_POST['comentarios_'.$test]))
+        {
+            $comments = $_POST['comentarios_'.$test];
+        }
+        else
+        {
+            $comments = NULL;
+        }
+        //ahora guardamos datos de ISSUE si es que la prueba fue inefectiva
+        if ($_POST[$test] == 2)
+        {
+            if (isset($_POST['clasificacion_'.$test]))
+            {
+                $class = $_POST['clasificacion_'.$test];
+            }
+            else
+            {
+                $class = NULL;
+            }
+            //vemos si anteriormente era inefectiva, si lo era, se debe actualizar issue. De lo contrario se crea uno nuevo
+            if ($last_test->issue_id == NULL)
+            {
+                
+                $issue_id = DB::table('issues')
+                        ->insertGetId([
+                            'classification' => $class,
+                            'name' => $_POST['name_hallazgo_'.$test],
+                            'description' => $_POST['description_hallazgo_'.$test],
+                            'recommendations' => $_POST['recomendaciones_'.$test],
+                            'created_at' => $GLOBALS['date'],
+                            'updated_at' => $GLOBALS['date'],
+                        ]);
+            }
+            else //sólo debe ser actualizado
+            {
+                $issue_id = $last_test->issue_id; //se guarda para después comprobar plan de acción
+                DB::table('issues')
+                    ->where('id','=',$issue_id)
+                    ->update([
+                        'classification' => $class,
+                        'name' => $_POST['name_hallazgo_'.$test],
+                        'description' => $_POST['description_hallazgo_'.$test],
+                        'recommendations' => $_POST['recomendaciones_'.$test],
+                        'updated_at' => $GLOBALS['date'],
+                    ]);
+            }
+
+            $action_plan = NULL;
+            //ahora vemos si existe un plan de acción para el issue 
+            $action_plan = DB::table('action_plans')
+                        ->where('issue_id','=',$issue_id)
+                        ->select('id')
+                        ->first();
+
+            if ($action_plan == NULL) //agregamos nuevo plan de acción
+            {
+                //vemos si existe responsable de diseño
+                if (isset($_POST['responsable_plan_'.$test]))
+                {
+                    $responsable = $_POST['responsable_plan_'.$test];
+                }
+                else
+                {
+                    $responsable = NULL;
+                }
+                //insertamos plan de acción
+                DB::table('action_plans')
+                    ->insert([
+                        'issue_id' => $issue_id,
+                        'stakeholder_id' => $responsable,
+                        'description' => $_POST['plan_accion_'.$test],
+                        'created_at' => $GLOBALS['date'],
+                        'updated_at' => $GLOBALS['date'],
+                        'final_date' => $_POST['fecha_plan_'.$test],
+                        'status' => 0
+                        ]);
+            }
+            else //actualizamos plan de acción
+            {
+                //vemos si existe responsable de diseño
+                if (isset($_POST['responsable_plan_'.$test]))
+                {
+                    $responsable = $_POST['responsable_plan_'.$test];
+                }
+                else
+                {
+                    $responsable = NULL;
+                }
+                //actualizamos plan de acción
+                DB::table('action_plans')
+                    ->where('id','=',$action_plan->id)
+                    ->update([
+                        'issue_id' => $issue_id,
+                        'stakeholder_id' => $responsable,
+                        'description' => $_POST['plan_accion_'.$test],
+                        'updated_at' => $GLOBALS['date'],
+                        'final_date' => $_POST['fecha_plan_'.$test],
+                        'status' => 0
+                        ]);
+            }
+        }
+        else
+        {
+            $issue_id = NULL;
+        }
+
+        //vemos ahora si la evaluación existia anteriormente o es nueva (se pueden haber creado una nueva prueba para una evaluación de un control)
+        $id_eval_prev = NULL;
+        $id_eval_prev = DB::table('control_evaluation')
+                    ->where('control_id','=',$_POST['control_id'])
+                    ->where('kind','=',$kind)
+                    ->where('status','=',1)
+                    ->select('id')
+                    ->first();
+
+        if ($id_eval_prev == NULL)
+        {
+            //si es inefectiva issue_id tendrá valor, si no será NULL
+            $id_eval = DB::table('control_evaluation')
+                    ->insertGetId([
+                        'control_id' => $_POST['control_id'],
+                        'kind' => $kind,
+                        'comments' => $comments,
+                        'results' => $_POST[$test],
+                        'created_at' => $GLOBALS['date'],
+                        'updated_at' => $GLOBALS['date'],
+                        'status' => 1,
+                        'issue_id' => $issue_id
+                    ]);
+        }
+        else
+        {
+            $id_eval = $id_eval_prev->id;
+            DB::table('control_evaluation')
+                    ->where('id','=',$id_eval_prev->id)
+                    ->update([
+                        'control_id' => $_POST['control_id'],
+                        'kind' => $kind,
+                        'comments' => $comments,
+                        'results' => $_POST[$test],
+                        'updated_at' => $GLOBALS['date'],
+                        'status' => 1,
+                        'issue_id' => $issue_id
+                    ]);
+        }                  
+                                   
+        
+        //**************** vemos si es que hay una evidencia cargada *******************
+        //OBS: Lo anteriorun no es necesario, ya que por ahora (y no sé si habrá que hacerlo) la evidencia se agrega solo una vez y no hay opción a cambio de decisión
+                
+        //cargamos evidencia
+        if ($GLOBALS['file_'.$test] != NULL)
+        {
+            upload_file($GLOBALS['file_'.$test],'eval_controles',$id_eval);    
+        }
+                
+    }
+
 }

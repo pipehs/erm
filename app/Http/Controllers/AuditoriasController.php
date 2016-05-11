@@ -3180,7 +3180,7 @@ class AuditoriasController extends Controller
             foreach ($issues as $issue)
             {
                 //obtenemos evidencias de issue (si es que existen)
-                $evidences = $this->getEvidences(2,$issue->id);
+                $evidences = getEvidences(2,$issue->id);
 
                 $results[$i] = [
                     'id' => $issue->id,
@@ -3243,7 +3243,7 @@ class AuditoriasController extends Controller
                     foreach ($answers_notes as $ans)
                     {
                         //obtenemos evidencias de la respuesta (si es que existen)
-                        $evidences = $this->getEvidences(1,$ans->id);
+                        $evidences = getEvidences(1,$ans->id);
 
                         $answers[$j] = [
                                 'id' => $ans->id,
@@ -3259,7 +3259,7 @@ class AuditoriasController extends Controller
                     
                 }
                 //obtenemos evidencias de la nota (si es que existe)
-                $evidences = $this->getEvidences(0,$note->id);
+                $evidences = getEvidences(0,$note->id);
 
                 $fecha_creacion = date('d-m-Y',strtotime($note->created_at));
                 $fecha_creacion .= ' a las '.date('H:i:s',strtotime($note->created_at));
@@ -3282,38 +3282,7 @@ class AuditoriasController extends Controller
 
         return json_encode($results);
     }
-    //obtiene plan de acción para una debilidad dada
-    public function getActionPlan($id)
-    {
-        $results = array();
-        //obtenemos action plan
-        $action_plan = DB::table('action_plans')
-                    ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
-                    ->where('issue_id','=',$id)
-                    ->select('action_plans.id','action_plans.description',
-                            'action_plans.final_date','stakeholders.name as name','stakeholders.surnames as surnames')
-                    ->get();
 
-        if ($action_plan == NULL)
-        {
-            $results = NULL;
-        }
-
-        else
-        {
-            foreach ($action_plan as $ap) //aunque solo existirá uno
-            {
-                $results = [
-                    'id' => $ap->id,
-                    'description' => $ap->description,
-                    'final_date' => $ap->final_date,
-                    'stakeholder' => $ap->name.' '.$ap->surnames,
-                ];
-            }
-        }
-        
-        return json_encode($results);
-    }
 /*
     public function getFile($archivo)
     {
@@ -3330,61 +3299,6 @@ class AuditoriasController extends Controller
         //abort(404);
     }
 */
-    //función interna que obtiene los archivos subidos si es que hay
-    public function getEvidences($kind,$id)
-    {
-        $public_path = public_path();
-        if ($kind == 0) //se están solicitando evidencias de una nota
-        {
-            //seleccionamos carpeta de notas
-            $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_notas';
-        }
-        else if ($kind == 1) //se están solicitando respuestas a evidencias de una nota
-        {
-            //seleccionamos carpeta de respuestas evidencias
-            $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_resp_notas';
-        }
-        else if ($kind == 2) //se están solicitando evidencias de un hallazgo
-        {
-            $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_hallazgos';
-        }
-
-        if (file_exists($carpeta) != false) //verificamos que exista la carpeta
-        {
-            $archivos = scandir($carpeta);
-
-            foreach ($archivos as $archivo)
-            {    
-                    //dividimos archivos para buscar id
-                    if (strpos($archivo,'___'))
-                    {   
-                        $j = 0;
-                        $temp = explode('___',$archivo);
-
-                        //sacamos extensión del archivo
-                        $temp2 = explode('.',$temp[1]);
-
-                        if ($temp2[0] == $id)
-                        {
-                            $evidences[$j] = [
-                                'note_id' => $id,
-                                'url' => $archivo,
-                            ];
-
-                            $j += 1;
-                        }
-                    }
-                    else
-                        $evidences = NULL;                      
-            }
-        }
-        else
-        {
-            $evidences = NULL;
-        }
-
-        return $evidences;
-    }
 
     public function closeNote($id)
     {

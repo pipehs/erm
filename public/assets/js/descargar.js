@@ -16,4 +16,9 @@ function descargar(tipo,archivo)
 		var win = window.open('../storage/app/evidencias_hallazgos/'+archivo, '_blank');
 	 	win.focus();
 	}
+	else if (tipo == 3) //evidencia de eval. de controles
+	{
+		var win = window.open('../storage/app/eval_controles/'+archivo, '_blank');
+	 	win.focus();
+	}
 }

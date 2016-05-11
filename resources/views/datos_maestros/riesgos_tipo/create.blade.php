@@ -17,7 +17,7 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-sm-12 col-m-6">
+	<div class="col-sm-12 col-m-10">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -55,17 +55,6 @@
 @stop
 
 @section('scripts2')
-<script>
-	$("#agregar_causa").click(function() {
-		$("#causa").empty();
-		$("#causa").append('<div class="form-group">{!!Form::label("Causa",null,["class"=>"col-sm-4 control-label"])!!}<div class="col-sm-3">{!!Form::textarea("causa_nueva",null,["class"=>"form-control","rows"=>"3","cols"=>"4","required"=>"true"])!!}</div></div>');
-		});
-
-	$("#agregar_efecto").click(function() {
-		$("#efecto").empty();
-		$("#efecto").append('<div class="form-group">{!!Form::label("Efecto",null,["class"=>"col-sm-4 control-label"])!!}<div class="col-sm-3">{!!Form::textarea("efecto_nuevo",null,["class"=>"form-control","rows"=>"3","cols"=>"4","required"=>"true"])!!}</div></div>');
-		});
-
-</script>
+{!!Html::script('assets/js/create_edit_risks.js')!!}
 @stop
 

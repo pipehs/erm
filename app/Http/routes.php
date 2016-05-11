@@ -459,10 +459,6 @@ Route::post('control.guardar_evaluacion', [
 	'as' => 'control.guardar_evaluacion', 'uses' => 'ControlesController@storeEvaluacion'
 ]);
 
-Route::get('controles.get_evaluation.{id_control}', [
-	'as' => 'controles.get_evaluation', 'uses' => 'ControlesController@getEvaluacion'
-]);
-
 // ----Rutas para reportes básicos---- //
 
 Route::get('heatmap', [
@@ -774,3 +770,14 @@ Route::get('breweries', ['middleware' => 'cors', function()
 
 */
 
+//ruta para obtener todas las causas de riesgo
+Route::get('get_causes', [
+	'as' => 'get_causes', 'uses' => 'RiesgosController@getCauses']);
+
+//ruta para obtener todos los efectos de riesgo
+Route::get('get_effects', [
+	'as' => 'get_effects', 'uses' => 'RiesgosController@getEffects']);
+
+Route::get('error', function(){ 
+    abort(404);
+});

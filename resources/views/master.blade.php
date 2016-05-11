@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 	<title>B-GRC - @yield('title')</title>
 	<meta charset="utf-8">
 	<meta name="description" content="Sistema de gestión de riesgos">
@@ -36,7 +37,6 @@
  	{!!Html::style('assets/css/upload.css')!!}
 
  	{!!Html::style('assets/css/imprimir.css',['media'=>'print'])!!}	
-
 
 <!--
 	<link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">

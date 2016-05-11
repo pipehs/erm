@@ -28,31 +28,9 @@
 						<div class="form-group">
 							{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-3">
-							@if (strstr($_SERVER["REQUEST_URI"],'edit'))
-								<select name="role_id[]" multiple required id="el3">
-								@foreach ($roles as $id=>$name)
-
-									<?php $i = 0; //contador de roles del usuario 
-										  $cont = 0; //contador para ver si es que un rol está seleccionado ?>
-									@while (isset($types_selected[$i]))
-										@if ($types_selected[$i] == $id)
-											<option value="{{ $id }}" selected>{{ $name }}</option>
-											<?php $cont += 1; ?>
-										@endif
-										<?php $i += 1; ?>
-									@endwhile
-
-									@if ($cont == 0)
-										<option value="{{ $id }}">{{ $name }}</option>
-									@endif
-
-								@endforeach
-								</select>
-							@else
 								{!!Form::select('role_id[]',$roles, 
 							 	   null, 
 							 	   ['id' => 'el3','multiple'=>'true','required'=>'true'])!!}
-							@endif
 							</div>
 							<a href="#" id="agregar_rol">Agregar nuevo tipo</a> <br>
 						</div>
@@ -72,31 +50,9 @@
 					<div class="form-group">
 						{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-						@if (strstr($_SERVER["REQUEST_URI"],'edit'))
-								<select name="organization_id[]" multiple required id="el3">
-								@foreach ($organizations as $id=>$name)
-
-									<?php $i = 0; //contador de orgs del usuario 
-										  $cont = 0; //contador para ver si es que una org está seleccionada ?>
-									@while (isset($orgs_selected[$i]))
-										@if ($orgs_selected[$i] == $id)
-											<option value="{{ $id }}" selected>{{ $name }}</option>
-											<?php $cont += 1; ?>
-										@endif
-										<?php $i += 1; ?>
-									@endwhile
-
-									@if ($cont == 0) //no estaba seleccionada
-										<option value="{{ $id }}">{{ $name }}</option>
-									@endif
-
-								@endforeach
-								</select>
-						@else
-							{!!Form::select('organization_id[]',$organizations, 
-						 	   null, 
-						 	   ['id' => 'el3','multiple'=>'true','required'=>'true'])!!}
-						@endif
+						{!!Form::select('organization_id[]',$organizations, 
+					 	   null, 
+					 	   ['id' => 'el3','multiple'=>'true','required'=>'true'])!!}
 						</div>
 					</div>
 					<div class="form-group">

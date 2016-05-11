@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Agregar Stakeholder')
+@section('title', 'Modificar Stakeholder')
 
 @stop
 
@@ -10,9 +10,9 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('#','Datos Maestros')!!}</li>
-			<li>{!!Html::link('stakeholders','Stakeholders')!!}</li>
-			<li>{!!Html::link('stakeholders.create','Agregar Stakeholders')!!}</li>
+			<li><a href="#">Datos Maestros</a></li>
+			<li><a href="stakeholders">Stakeholders</a></li>
+			<li><a href="stakeholders.edit.{{ $stakeholder['id'] }}">Modificar Stakeholder</a></li>
 		</ol>
 	</div>
 </div>
@@ -22,7 +22,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Agregar Stakeholder</span>
+					<span>Modificar Stakeholder</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -38,24 +38,8 @@
 				<div class="no-move"></div>
 			</div>
 			<div class="box-content">
-			@if(Session::has('message'))
-				<div class="alert alert-danger alert-dismissible" role="alert">
-				{{ Session::get('message') }}
-				</div>
-			@endif
-
-			@if ($errors->any())
-				<div class="alert alert-danger alert-dismissible" role="alert">
-					<ul>
-					@foreach ($errors->all() as $error)
-						<li>{{ $error }}</li>
-					@endforeach
-					</ul>
-				</div>
-			@endif
-			
-			Ingrese los datos del stakeholder.
-				{!!Form::open(['route'=>'stakeholders.store','method'=>'POST','class'=>'form-horizontal'])!!}
+			Ingrese los nuevos datos del stakeholder.
+				{!!Form::model($stakeholder,['route'=>['stakeholders.update',$stakeholder->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
 					@include('datos_maestros.stakeholders.form')
 				{!!Form::close()!!}
 
@@ -74,8 +58,9 @@
 <script>
 	$("#agregar_rol").click(function() {
 		$("#rol").empty();
-		$("#rol").append('<div class="form-group">{!!Form::label("Tipo",null,["class"=>"col-sm-4 control-label"])!!}<div class="col-sm-3">{!!Form::text("rol_nuevo",null,["class"=>"form-control","required"=>"true","placeholder"=>"Ingrese nuevo rol"])!!}</div></div>');
+		$("#rol").append('<div class="form-group">{!!Form::label("Tipo",null,["class"=>"col-sm-4 control-label"])!!}<div class="col-sm-3">{!!Form::text("rol_nuevo",null,["class"=>"form-control","required"=>"true"])!!}</div></div>');
 
 	});
 </script>
 @stop
+

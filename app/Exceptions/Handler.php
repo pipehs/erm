@@ -41,7 +41,19 @@ class Handler extends ExceptionHandler
      * @return \Illuminate\Http\Response
      */
     public function render($request, Exception $e)
-    {
+    { /*
+        if ($e instanceof QueryException) {
+            return response()->view('errors.503', [], $e->getStatusCode());
+        }
+
+        if ($e instanceof PDOException) {
+            return response()->view('errors.503', [], $e->getStatusCode());
+        }
+
+        if ($e instanceof ModelNotFoundException) {
+            return response()->view('errors.503', [], $e->getStatusCode());
+        } */
+
         if ($e instanceof ModelNotFoundException) {
             $e = new NotFoundHttpException($e->getMessage(), $e);
         }

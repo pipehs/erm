@@ -10,6 +10,6 @@ class Effect extends Model
 
     public function risks()
     {
-    	return $this->hasMany('Ermtool\Risk');
+    	return $this->belongsToMany('Ermtool\Risk');
     }
 }

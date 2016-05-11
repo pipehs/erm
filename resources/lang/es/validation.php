@@ -50,10 +50,10 @@ return [
     ],
     'mimes'                => 'The :attribute must be a file of type: :values.',
     'min'                  => [
-        'numeric' => 'The :attribute must be at least :min.',
-        'file'    => 'The :attribute must be at least :min kilobytes.',
-        'string'  => 'The :attribute must be at least :min characters.',
-        'array'   => 'The :attribute must have at least :min items.',
+        'numeric' => 'El número :attribute debe ser a lo menos :min.',
+        'file'    => 'El archivo debe pesar al menos :min kilobytes.',
+        'string'  => 'El campo :attribute debe tener al menos :min caracteres.',
+        'array'   => 'El :attribute debe tener a lo menos :min items.',
     ],
     'not_in'               => 'The selected :attribute is invalid.',
     'numeric'              => 'The :attribute must be a number.',
@@ -73,7 +73,7 @@ return [
     ],
     'string'               => 'The :attribute must be a string.',
     'timezone'             => 'The :attribute must be a valid zone.',
-    'unique'               => 'The :attribute has already been taken.',
+    'unique'               => 'El :attribute ingresado ya se encuentra en uso.',
     'url'                  => 'The :attribute format is invalid.',
 
     /*
@@ -88,9 +88,15 @@ return [
     */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
-        ],
+            'id' => [
+                'unique' => 'El rut ingresado ya se encuentra en el sistema.',
+            ],
+            'name' => [
+                'min' => 'El nombre ingresado debe tener a lo menos :min caracteres.',
+            ],
+            'surnames' => [
+                'min' => 'El o los apellidos ingresado(s) debe(n) tener a lo menos :min caracteres.',
+            ],
     ],
 
     /*

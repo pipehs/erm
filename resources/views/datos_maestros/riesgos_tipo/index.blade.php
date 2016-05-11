@@ -59,8 +59,8 @@
 	<th>Fecha Creaci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Fecha Actualizaci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Fecha Expiraci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
-	<th>Causa<label><input type='text' placeholder='Filtrar' /></label></th>
-	<th>Efecto<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th>Causa(s)<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th>Efecto(s)<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Acci&oacute;n</th>
 	<th>Acci&oacute;n</th>
 	</thead>
@@ -72,8 +72,24 @@
 		<td>{{ $riesgo['fecha_creacion'] }}</td>
 		<td>{{ $riesgo['fecha_act'] }}</td>
 		<td>{{ $riesgo['fecha_exp'] }}</td>
-		<td>{{ $riesgo['causa'] }}</td>
-		<td>{{ $riesgo['efecto'] }}</td>
+		<td>
+		@if (gettype($riesgo['causas']) == "array") 
+			@foreach ($riesgo['causas'] as $causa)
+				<li>{{ $causa }}</li>
+			@endforeach
+		@else
+			<li>{{ $riesgo['causas'] }}</li>
+		@endif
+		</td>
+		<td>
+		@if (gettype($riesgo['efectos']) == "array") 
+			@foreach ($riesgo['efectos'] as $efecto)
+				<li>{{ $efecto }}</li>
+			@endforeach
+		@else
+			<li>{{ $riesgo['efectos'] }}
+		@endif
+		</td>
 		<td><div>
 			@if ($riesgo['estado'] == 0)
 	            {!! link_to_route('riskstype.edit', $title = 'Editar', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-success']) !!}

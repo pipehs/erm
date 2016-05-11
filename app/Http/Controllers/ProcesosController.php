@@ -280,7 +280,7 @@ class ProcesosController extends Controller
         //
     }
 
-/*
+
     //obtiene procesos de una organización
     public function getProcesses($org)
     {
@@ -305,5 +305,5 @@ class ProcesosController extends Controller
         return json_encode($results);
     }
 
-*/
+
 }

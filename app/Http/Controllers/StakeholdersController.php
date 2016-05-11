@@ -135,6 +135,13 @@ class StakeholdersController extends Controller
 
         if ($res)
         {
+            //Validación: Si la validación es pasada, el código continua
+            $this->validate($request, [
+                'id' => 'unique:stakeholders|min:7',
+                'name' => 'required|max:45|min:4',
+                'surnames' => 'required|min:4',
+                'mail' => 'unique:stakeholders',
+            ]);
             DB::transaction(function()
             {
                 \Ermtool\Stakeholder::create([
@@ -217,17 +224,43 @@ class StakeholdersController extends Controller
      */
     public function edit($id)
     {
+        $types_selected = array();
+        $orgs_selected = array();
         $stakeholder = \Ermtool\Stakeholder::find($id);
         $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
         $roles = \Ermtool\Role::all()->lists('name','id');
         $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
 
-        $i = 0;
+        //buscamos el o los tipos del stakeholder
+        $types = DB::table('role_stakeholder')
+                    ->where('stakeholder_id','=',$stakeholder->id)
+                    ->select('role_id')
+                    ->get();
 
+        $i = 0;
+        foreach ($types as $type)
+        {
+            $types_selected[$i] = $type->role_id;
+            $i += 1;
+        }
+
+        //buscamos organizaciones del stakeholder
+        $orgs = DB::table('organization_stakeholder')
+                    ->where('stakeholder_id','=',$stakeholder->id)
+                    ->select('organization_id')
+                    ->get();
+
+        $i = 0;
+        foreach ($orgs as $org)
+        {
+            $orgs_selected[$i] = $org->organization_id;
+            $i += 1;
+        }
         //si es edit, campo rut estara bloqueado y no habrá required
         $disabled = 'disabled';
         return view('datos_maestros.stakeholders.edit',['stakeholder'=>$stakeholder,'organizations'=>$organizations,
-                                                            'disabled'=>$disabled,'required'=>'','roles'=>$roles,'dv'=>$dv]);
+                                                            'disabled'=>$disabled,'required'=>'','roles'=>$roles,'dv'=>$dv,
+                                                            'types_selected' => $types_selected,'orgs_selected' => $orgs_selected]);
     }
 
     /**

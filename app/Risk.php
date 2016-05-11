@@ -14,12 +14,12 @@ class Risk extends Model
 
     public function causes()
     {
-    	return $this->belongsTo('Ermtool\Cause');
+    	return $this->belongsToMany('Ermtool\Cause');
     }
 
     public function effects()
     {
-    	return $this->belongsTo('Ermtool\Effect');
+    	return $this->belongsToMany('Ermtool\Effect');
     }
 
     public function risk_categories()

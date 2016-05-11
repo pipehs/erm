@@ -67,21 +67,49 @@ class RiesgosTipoController extends Controller
             //obtenemos categoría de riesgo
             $categoria = \Ermtool\Risk_Category::find($riesgo['risk_category_id']);
 
-            //obtenemos causa si es que tiene
-            if ($riesgo['cause_id'] != NULL)
-            {
-                $causa = \Ermtool\Cause::find($riesgo['cause_id'])->value('name');
-            }
-            else
-                $causa = "No especificada";
+            //obtenemos causas si es que tiene
+            $causes = DB::table('cause_risk')
+                        ->join('causes','causes.id','=','cause_risk.cause_id')
+                        ->where('cause_risk.risk_id','=',$riesgo['id'])
+                        ->select('causes.name')
+                        ->get();
 
-            //obtenemos efecto si es que existe
-            if ($riesgo['effect_id'] != NULL)
+            if ($causes)
             {
-                $efecto = \Ermtool\Effect::find($riesgo['effect_id'])->value('name');
+                $causas = array();
+                $j = 0;
+                foreach ($causes as $cause)
+                {
+                    $causas[$j] = $cause->name;
+                    $j += 1;
+                }
             }
             else
-                $efecto = "No especificado";
+            {
+                $causas = "No se han especificado causas";
+            }
+
+            //obtenemos efectos si es que existen
+            $effects = DB::table('effect_risk')
+                        ->join('effects','effects.id','=','effect_risk.effect_id')
+                        ->where('effect_risk.risk_id','=',$riesgo['id'])
+                        ->select('effects.name')
+                        ->get();
+
+            if ($effects)
+            {
+                $efectos = array();
+                $j = 0;
+                foreach ($effects as $effect)
+                {
+                    $efectos[$j] = $effect->name;
+                    $j += 1;
+                }
+            }
+            else
+            {
+                $efectos = "No se han especificado efectos";
+            }   
 
             $riesgostipo[$i] = array('id'=>$riesgo['id'],
                                 'nombre'=>$riesgo['name'],
@@ -89,8 +117,8 @@ class RiesgosTipoController extends Controller
                                 'fecha_creacion'=>$fecha_creacion,
                                 'fecha_act'=>$fecha_act,
                                 'fecha_exp'=>$fecha_exp,
-                                'causa'=>$causa,
-                                'efecto'=>$efecto,
+                                'causas'=>$causas,
+                                'efectos'=>$efectos,
                                 'categoria'=>$categoria['name'],
                                 'estado'=>$riesgo['status']);
             $i += 1;
@@ -122,6 +150,16 @@ class RiesgosTipoController extends Controller
     {
         DB::transaction(function()
         {
+            $causa = array();
+
+            $risk = \Ermtool\Risk::create([
+                'name'=>$_POST['name'],
+                'description'=>$_POST['description'],
+                'type2'=>0,
+                'expiration_date'=>$_POST['expiration_date'],
+                'risk_category_id'=>$_POST['risk_category_id'],
+                ]);
+
             //vemos si se agrego alguna causa nueva
             if (isset($_POST['causa_nueva']))
             {
@@ -129,15 +167,24 @@ class RiesgosTipoController extends Controller
                     'name'=>$_POST['causa_nueva']
                 ]);
 
-                //guardamos id de causa recien agregada
-                $causa = $new_causa->id;
+                //guardamos en cause_risk
+                DB::table('cause_risk')
+                    ->insert([
+                        'risk_id' => $risk->id,
+                        'cause_id' => $new_causa->id,
+                        ]);
             }
-            else
+            else //se están agregando causas ya creadas
             {
-                if ($_POST['cause_id'] == NULL)
-                    $causa = NULL;
-                else
-                    $causa = $_POST['cause_id'];
+                    foreach ($_POST['cause_id'] as $cause_id)
+                    {
+                        //insertamos cada causa en cause_risk
+                        DB::table('cause_risk')
+                            ->insert([
+                                'risk_id' => $risk->id,
+                                'cause_id' => $cause_id
+                                ]);
+                    } 
             }
 
             //vemos si se agrego algún efecto nuevo
@@ -147,26 +194,30 @@ class RiesgosTipoController extends Controller
                     'name'=>$_POST['efecto_nuevo']
                     ]);
 
-                //obtenemos id de efecto agregado
-                $efecto = $new_effect->id;
+                 //guardamos en cause_risk
+                DB::table('effect_risk')
+                    ->insert([
+                        'risk_id' => $risk->id,
+                        'effect_id' => $new_effect->id,
+                        ]);
             }
             else
             {
                 if ($_POST['effect_id'] == NULL)
                     $efecto = NULL;
                 else
-                    $efecto = $_POST['effect_id'];
+                {
+                    foreach ($_POST['effect_id'] as $effect_id)
+                    {
+                        //insertamos cada causa en cause_risk
+                        DB::table('effect_risk')
+                            ->insert([
+                                'risk_id' => $risk->id,
+                                'effect_id' => $effect_id
+                                ]);
+                    }
+                } 
             }
-
-            \Ermtool\Risk::create([
-                'name'=>$_POST['name'],
-                'description'=>$_POST['description'],
-                'type2'=>0,
-                'expiration_date'=>$_POST['expiration_date'],
-                'risk_category_id'=>$_POST['risk_category_id'],
-                'cause_id'=>$causa,
-                'effect_id'=>$efecto,
-                ]);
 
             Session::flash('message','Riesgo tipo agregado correctamente');
         });
@@ -186,8 +237,37 @@ class RiesgosTipoController extends Controller
         $categorias = \Ermtool\Risk_Category::where('status',0)->lists('name','id');
         $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
         $efectos = \Ermtool\Effect::where('status',0)->lists('name','id');
+
+        $causes_selected = array();
+        $effects_selected = array();
+        //obtenemos causas seleccionadas
+        $causes = DB::table('cause_risk')
+                            ->where('risk_id','=',$riesgo->id)
+                            ->select('cause_risk.cause_id')
+                            ->get();
+
+        $i = 0;
+        foreach ($causes as $cause)
+        {
+            $causes_selected[$i] = $cause->cause_id;
+            $i += 1;
+        }
+
+        //obtenemos efectos seleccionados
+        $effects = DB::table('effect_risk')
+                        ->where('risk_id','=',$riesgo->id)
+                        ->select('effect_risk.effect_id')
+                        ->get();
+
+        $i = 0;
+        foreach ($effects as $effect)
+        {
+            $effects_selected[$i] = $effect->effect_id;
+            $i += 1;
+        }
         return view('datos_maestros.riesgos_tipo.edit',['riesgo'=>$riesgo,
-                    'categorias'=>$categorias,'causas'=>$causas,'efectos'=>$efectos]);
+                    'categorias'=>$categorias,'causas'=>$causas,'efectos'=>$efectos,
+                    'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected]);
     }
 
     /**
@@ -209,44 +289,137 @@ class RiesgosTipoController extends Controller
             if (isset($_POST['causa_nueva']))
             {
                 $new_causa = \Ermtool\Cause::create([
-                    'name'=>$request['causa_nueva']
+                    'name'=>$_POST['causa_nueva']
                 ]);
 
-                //obtenemos id de causa recien agregada
-                $causa = $new_causa->id;
+                //guardamos en cause_risk
+                DB::table('cause_risk')
+                    ->insert([
+                        'risk_id' => $riesgo->id,
+                        'cause_id' => $new_causa->id,
+                        ]);
             }
-            else
+            else //se están agregando causas ya creadas
             {
-                if ($request['cause_id'] == NULL)
-                    $causa = NULL;
-                else
-                    $causa = $request['cause_id'];
+                if (isset($_POST['cause_id']))
+                {
+                    foreach ($_POST['cause_id'] as $cause_id)
+                    {
+                        //primero buscamos si es que existe previamente
+                        $cause = DB::table('cause_risk')
+                            ->where('cause_id','=',$cause_id)
+                            ->where('risk_id','=',$riesgo->id)
+                            ->first();
+
+                        if (!$cause) //no existe, por lo que se agrega
+                        {
+                            DB::table('cause_risk')
+                            ->insert([
+                                'risk_id' => $riesgo->id,
+                                'cause_id' => $cause_id
+                                ]);
+                        }
+                    }
+                } 
             }
 
             //vemos si se agrego algún efecto nuevo
             if (isset($_POST['efecto_nuevo']))
             {
                 $new_effect = \Ermtool\Effect::create([
-                    'name'=>$request['efecto_nuevo']
+                    'name'=>$_POST['efecto_nuevo']
                     ]);
 
-                //obtenemos id de efecto agregado
-                $efecto = $new_effect->id;
+                 //guardamos en cause_risk
+                DB::table('effect_risk')
+                    ->insert([
+                        'risk_id' => $riesgo->id,
+                        'effect_id' => $new_effect->id,
+                        ]);
             }
-            else
+            else //efectos existentes
             {
-                if ($_POST['effect_id'] == NULL)
-                    $efecto = NULL;
-                else
-                    $efecto = $_POST['effect_id'];
+                if (isset($_POST['effect_id']))
+                {
+                    foreach ($_POST['effect_id'] as $effect_id)
+                    {
+                        //primero buscamos si es que existe previamente
+                        $effect = DB::table('effect_risk')
+                            ->where('effect_id','=',$effect_id)
+                            ->where('risk_id','=',$riesgo->id)
+                            ->first();
+
+                        if (!$effect) //no existe, por lo que se agrega
+                        {
+                            //insertamos cada causa en cause_risk
+                            DB::table('effect_risk')
+                                ->insert([
+                                    'risk_id' => $riesgo->id,
+                                    'effect_id' => $effect_id
+                                    ]);
+                        }
+                    }
+                } 
+            }
+
+            //ahora recorreremos todas las causas y efectos de este riesgo, para saber si es que no se borró alguna
+            $causas = DB::table('cause_risk')
+                        ->where('risk_id','=',$riesgo->id)
+                        ->select('cause_id')
+                        ->get();
+
+            foreach($causas as $cause)
+            {
+                $cont = 0; //si se mantiene en cero, nunca habrán sido iguales, por lo que significa que se habria borrado
+                //ahora recorremos todas las causas que se agregaron para comparar
+                foreach ($_POST['cause_id'] as $cause_add)
+                {
+                    if ($cause_add == $cause->cause_id)
+                    {
+                        $cont += 1;
+                    }
+                }
+
+                if ($cont == 0) //hay que eliminar la causa; por ahora solo la eliminaremos de cause_risk
+                {
+                    DB::table('cause_risk')
+                        ->where('risk_id','=',$riesgo->id)
+                        ->where('cause_id','=',$cause->cause_id)
+                        ->delete();
+                }
+            }
+
+            //lo mismo ahora para efectos
+            $efectos = DB::table('effect_risk')
+                        ->where('risk_id','=',$riesgo->id)
+                        ->select('effect_id')
+                        ->get();
+
+            foreach($efectos as $effect)
+            {
+                $cont = 0; //si se mantiene en cero, nunca habrán sido iguales, por lo que significa que se habria borrado
+                //ahora recorremos todas las causas que se agregaron para comparar
+                foreach ($_POST['effect_id'] as $effect_add)
+                {
+                    if ($effect_add == $effect->effect_id)
+                    {
+                        $cont += 1;
+                    }
+                }
+
+                if ($cont == 0) //hay que eliminar la causa; por ahora solo la eliminaremos de cause_risk
+                {
+                    DB::table('effect_risk')
+                        ->where('risk_id','=',$riesgo->id)
+                        ->where('effect_id','=',$effect->effect_id)
+                        ->delete();
+                }
             }
 
             $riesgo->name = $_POST['name'];
             $riesgo->description = $_POST['description'];
             $riesgo->expiration_date = $_POST['expiration_date'];
             $riesgo->risk_category_id = $_POST['risk_category_id'];
-            $riesgo->cause_id = $causa;
-            $riesgo->effect_id = $efecto;
 
             $riesgo->save();
 
