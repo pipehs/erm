@@ -34,7 +34,7 @@
 					<ul class="dropdown-menu" style="{{ dropDown2() }}">
 						<li>{!!HTML::link('crear_encuesta','Crear Encuesta',['class'=>activeMenu('crear_encuesta')])!!}</li>
 						<li>{!!HTML::link('enviar_encuesta','Enviar Encuesta',['class'=>activeMenu('enviar_encuesta')])!!}</li>
-						<!--<li>{!!HTML::link('ver_encuesta','Ver Encuestas',['class'=>activeMenu('ver_encuesta')])!!}</li>-->
+						<li>{!!HTML::link('encuestas','Revisi&oacute;n de Encuestas',['class'=>activeMenu('encuestas')])!!}</li>
 					</ul>
 				</li>
 				<li><a href="riesgos" class="{{ activeMenu('riesgos') }}"><i class="fa fa-hand-o-right"></i>Identificaci&oacute;n de Riesgo</a></li>
@@ -45,7 +45,7 @@
 					</a>
 					<ul class="dropdown-menu" style="{{ dropDown3() }}">
 						<li>{!!HTML::link('evaluacion','Crear Encuesta',['class'=>activeMenu('evaluacion')])!!}</li>
-						<li>{!!HTML::link('evaluacion_encuestas','Encuestas agregadas',['class'=>activeMenu('evaluacion_encuestas')])!!}</li>
+						<li>{!!HTML::link('evaluacion_agregadas','Encuestas agregadas',['class'=>activeMenu('evaluacion_agregadas')])!!}</li>
 						<li>{!!HTML::link('evaluacion_manual','Evaluar riesgo',['class'=>activeMenu('evaluacion_manual')])!!}</li>
 					</ul>
 				</li>
@@ -89,7 +89,7 @@
 						<li>{!!HTML::link('matrices','Matriz de Control',['class'=>activeMenu('matrices')])!!}</li>
 						<li>{!!HTML::link('reporte_hallazgos','Hallazgos',['class'=>activeMenu('hallazgos')])!!}</li>
 						<li>{!!HTML::link('reporte_planes','Planes de Acci&oacute;n',['class'=>activeMenu('reporte_planes')])!!}</li>
-						<li>{!!HTML::link('encuestas','Revisi&oacute;n de Encuestas',['class'=>activeMenu('encuestas')])!!}</li>
+						<li>{!!HTML::link('graficos_controles','Gr&aacute;ficos Controles',['class'=>activeMenu('graficos_controles')])!!}</li>
 					</ul>
 				</li>
 

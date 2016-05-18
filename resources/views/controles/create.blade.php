@@ -2,8 +2,6 @@
 
 @section('title', 'Agregar Control')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

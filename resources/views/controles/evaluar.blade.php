@@ -2,8 +2,6 @@
 
 @section('title', 'Controles')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->
@@ -366,7 +364,7 @@ function editEval(control_id)
 
 		if (result == "null")
 		{
-			swal('error','No hay evaluaciones previas');
+			swal('Error','No hay evaluaciones previas');
 		}
 		else
 		{

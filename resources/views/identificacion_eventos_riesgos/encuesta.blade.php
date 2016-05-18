@@ -4,8 +4,6 @@
 
 @section('title', 'Evaluaci&oacute;n de riesgos')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->
@@ -22,7 +20,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-check"></i>
-					<span>Encuesta: {{ $encuesta['nombre'] }}</span>
+					<span>Encuesta: {{ $encuesta['name'] }}</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -45,18 +43,11 @@
 				</div>
 			@endif
 
-			{!!Form::open(['route'=>'identificacion.guardarEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
-
-			<div class="form-group">
-				<small>
-			    {!!Form::label('Ingrese su Rut (sin dígito verificador)',null,['class'=>'col-sm-4 control-label'])!!}
-				<div class="col-sm-3">
-					{!!Form::text('id',null,
-					['class'=>'form-control','required'=>'true','input maxlength'=>'8'])!!}
-				</div>
-				</small>
-			</div>
-
+			@if (empty($user_answers)) <!-- Si es que no hay respuestas se guardará nueva eval, de lo contrario se editará -->
+				{!!Form::open(['route'=>'identificacion.guardarEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
+			@else
+				{!!Form::open(['route'=>'identificacion.updateEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
+			@endif
 			<?php $i = 1; //contador de preguntas ?>
 			@foreach ($preguntas as $pregunta)
 				{!!Form::hidden('pregunta_id[]',$pregunta->id)!!}
@@ -66,12 +57,28 @@
 					<p>
 					@foreach ($respuestas as $respuesta) <!-- recorremos todas las respuestas para ver si corresponden a la pregunta -->
 						@if ($respuesta['question_id'] == $pregunta->id) <!-- Si la respuesta pertenece a la pregunta -->
-								<div class="radio-inline">
-									<label>
-										<input type="radio" required="true" name="respuesta{{ $pregunta->id }}" value="{{$respuesta['id']}}"> {{ $respuesta['answer'] }}
-										<i class="fa fa-circle-o"></i>
-									</label>
-								</div>
+								<!-- vemos si es que hay una respuesta pre ingresada -->
+								<?php $cont = 0; //verificador para ver si hay respuesta ?>
+								@foreach ($user_answers as $answer)
+									@if ($answer['question_id'] == $pregunta->id && $answer['answer'] == $respuesta['answer'])
+										<div class="radio-inline">
+											<label>
+												<input type="radio" required="true" name="respuesta{{ $pregunta->id }}" value="{{$respuesta['id']}}" checked> {{ $respuesta['answer'] }}
+												<i class="fa fa-circle-o"></i>
+											</label>
+										</div>
+										<?php $cont += 1; ?>
+									@endif
+								@endforeach
+
+								@if ($cont == 0)
+									<div class="radio-inline">
+										<label>
+											<input type="radio" required="true" name="respuesta{{ $pregunta->id }}" value="{{$respuesta['id']}}"> {{ $respuesta['answer'] }}
+											<i class="fa fa-circle-o"></i>
+										</label>
+									</div>
+								@endif
 						@endif
 					@endforeach
 					</p>
@@ -80,30 +87,67 @@
 					<p>
 					@foreach ($respuestas as $respuesta) <!-- recorremos todas las respuestas para ver si corresponden a la pregunta -->
 						@if ($respuesta['question_id'] == $pregunta->id) <!-- Si la respuesta pertenece a la pregunta -->
-							<div class="checkbox">
-								<label>
-									<input type="checkbox" name="respuesta{{ $pregunta->id }}[]" value="{{$respuesta['id']}}">
-									<i class="fa fa-square-o"></i> {{ $respuesta['answer'] }}
-								</label>
-							</div>
+							<!-- vemos si es que hay una respuesta pre ingresada -->
+								<?php $cont = 0; //verificador para ver si hay respuesta ?>
+								@foreach ($user_answers as $answer)
+									@if ($answer['question_id'] == $pregunta->id && $answer['answer'] == $respuesta['answer'])
+										<div class="checkbox">
+											<label>
+												<input type="checkbox" name="respuesta{{ $pregunta->id }}[]" value="{{$respuesta['id']}}" checked>
+												<i class="fa fa-square-o"></i> {{ $respuesta['answer'] }}
+											</label>
+										</div>
+										<?php $cont += 1; ?>
+									@endif
+								@endforeach
+
+								@if ($cont == 0)
+									<div class="checkbox">
+										<label>
+											<input type="checkbox" name="respuesta{{ $pregunta->id }}[]" value="{{$respuesta['id']}}">
+											<i class="fa fa-square-o"></i> {{ $respuesta['answer'] }}
+										</label>
+									</div>
+								@endif
 						@endif
 					@endforeach
 					</p>
 				@elseif ($pregunta->answers_type == 0) <!-- verificamos si es text -->
-				<p>
-				<textarea class="form-control" name="respuesta{{ $pregunta->id }}" required="true" rows="4" cols="50"></textarea>
-				</p>
+					<!-- vemos si es que hay una respuesta pre ingresada -->
+					<?php $cont = 0; //verificador para ver si hay respuesta ?>
+					@foreach ($user_answers as $answer)
+						@if ($answer['question_id'] == $pregunta->id)
+							<p>
+							<textarea class="form-control" name="respuesta{{ $pregunta->id }}" required="true" rows="4" cols="50">{{ $answer['answer'] }}</textarea>
+							</p>
+							<?php $cont += 1; ?>
+						@endif
+					@endforeach
+
+					@if ($cont == 0)
+						<p>
+						<textarea class="form-control" name="respuesta{{ $pregunta->id }}" required="true" rows="4" cols="50"></textarea>
+						</p>
+					@endif
+				
 				@endif
 
 				<?php $i += 1; ?>
 				<hr> 
 			@endforeach
-
+					{!!Form::hidden('stakeholder_id',$user)!!}
 					{!!Form::hidden('encuesta_id',$encuesta['id'])!!}
 			<div class="row form-group">
 				<center>
 					{!!Form::submit('Enviar Respuestas', ['class'=>'btn btn-primary','id'=>'responder'])!!}
 				</center>
+			</div>
+
+			<div class="row form-group">
+				<center>
+					{!! link_to_route('identificacion.encuesta', $title = 'Volver', $parameters = $encuesta['id'],
+                 		$attributes = ['class'=>'btn btn-danger'])!!}
+				<center>
 			</div>
 
 			{!!Form::close()!!}
@@ -115,36 +159,9 @@
 </div>
 @stop
 @section('scripts')
-<script>
-// Run Datables plugin and create 3 variants of settings
-function AllTables(){
-	TestTable1();
-	TestTable2();
-	TestTable3();
-	LoadSelect2Script(MakeSelect);
-}
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
+<script>;
 }
 $(document).ready(function() {
-	// Add slider for change test input length
-	FormLayoutExampleInputLength($( ".slider-style" ));
-	// Initialize datepicker
-	$('#input_date').datepicker({setDate: new Date()});
-	// Initialize datepicker
-	$('#input_date2').datepicker({setDate: new Date()});
-	// Load Timepicker plugin
-	LoadTimePickerScript(DemoTimePicker);
-	// Add tooltip to form-controls
-	$('.form-control').tooltip();
-	LoadSelect2Script(DemoSelect2);
-	// Load example of form validation
-	LoadBootstrapValidatorScript(DemoFormValidator);
-	// Add Drag-n-Drop feature
-	WinMove();
 
 	//función para validar checkboxes (no funciona bien aun)
 	$('#responder').click(function() {

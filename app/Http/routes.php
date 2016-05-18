@@ -352,16 +352,30 @@ Route::post('identificacion.enviarCorreo', [
 ]);
 
 Route::get('identificacion.encuesta.{id}', [
-	'as' => 'identificacion.encuesta', 'uses' => 'EncuestasController@generarEncuesta'
+	'as' => 'identificacion.encuesta', 'uses' => 'EncuestasController@verificadorUserEncuesta'
+]);
+
+Route::post('identificacion.resp_encuesta.{id}', [
+	'as' => 'identificacion.resp_encuesta', 'uses' => 'EncuestasController@generarEncuesta'
 ]);
 
 Route::post('identificacion.guardarEvaluacion.{id}', [
 	'as' => 'identificacion.guardarEvaluacion', 'uses' => 'EncuestasController@guardarEvaluacion'
 ]);
 
+Route::post('identificacion.updateEvaluacion.{id}', [
+	'as' => 'identificacion.eupdateEvaluacion', 'uses' => 'EncuestasController@updateEvaluacion'
+]);
+
 Route::post('identificacion.encuestaRespondida', [
 	'as' => 'identificacion.encuestaRespondida', 'uses' => 'EncuestasController@encuestaRespondida'
 ]);
+
+Route::get('encuestas', [
+	'as' => 'encuestas', 'uses' => 'EncuestasController@verEncuestas']);
+
+Route::get('encuestas.show.{id}', [
+	'as' => 'encuestas.show', 'uses' => 'EncuestasController@show']);
 
 // ----FIN RUTAS PARA IDENTIFICACIÓN DE EVENTOS DE RIESGO---- //
 
@@ -393,36 +407,52 @@ Route::resource('evaluacion','EvaluacionRiesgosController');
 
 Route::post('evaluacion.store','EvaluacionRiesgosController@store');
 
-Route::get('evaluacion_encuestas', [
-	'as' => 'evaluacion_encuestas', 'uses' => 'EvaluacionRiesgosController@encuestas'
+Route::get('evaluacion_agregadas', [
+	'as' => 'evaluacion_agregadas', 'uses' => 'EvaluacionRiesgosController@encuestas'
 ]);
 
 Route::get('evaluacion.ver.{id}', [
 	'as' => 'evaluacion.ver', 'uses' => 'EvaluacionRiesgosController@show'
 ]);
 
-Route::get('evaluacion_encuestas.enviar.{id}', [
-	'as' => 'evaluacion_encuestas.enviar', 'uses' => 'EvaluacionRiesgosController@enviar'
+Route::get('evaluacion.enviar.{id}', [
+	'as' => 'evaluacion.enviar', 'uses' => 'EvaluacionRiesgosController@enviar'
 ]);
 
-Route::get('evaluacion_encuestas.consolidar.{id}', [
-	'as' => 'evaluacion_encuestas.consolidar', 'uses' => 'EvaluacionRiesgosController@getRiesgosConsolidar'
+Route::get('evaluacion.consolidar.{id}', [
+	'as' => 'evaluacion.consolidar', 'uses' => 'EvaluacionRiesgosController@getRiesgosConsolidar'
 ]);
 
-Route::post('evaluacion_encuestas.consolidar2.{id}', [
-	'as' => 'evaluacion_encuestas.consolidar2', 'uses' => 'EvaluacionRiesgosController@consolidar'
+Route::post('evaluacion.consolidar2.{id}', [
+	'as' => 'evaluacion.consolidar2', 'uses' => 'EvaluacionRiesgosController@consolidar'
 ]);
 
-Route::get('evaluacion_encuestas.{id}', [
-	'as' => 'evaluacion_encuestas.show', 'uses' => 'EvaluacionRiesgosController@show'
+Route::get('evaluacion.{id}', [
+	'as' => 'evaluacion.show', 'uses' => 'EvaluacionRiesgosController@show'
 ]);
 
-Route::get('evaluacion.encuesta.{id}', [
-	'as' => 'evaluacion.encuesta', 'uses' => 'EvaluacionRiesgosController@generarEncuesta'
+Route::get('evaluacion_delete.{id}', [
+	'as' => 'evaluacion_delete', 'uses' => 'EvaluacionRiesgosController@delete'
+]);
+
+Route::get('evaluacion_encuesta.{id}', [
+	'as' => 'evaluacion_encuesta', 'uses' => 'EvaluacionRiesgosController@verificadorUserEncuesta'
+]);
+
+Route::post('evaluacion.encuesta2.{id}', [
+	'as' => 'evaluacion.encuesta2', 'uses' => 'EvaluacionRiesgosController@generarEncuesta'
+]);
+
+Route::get('ver_respuestas.{eval_id},{rut}', [
+	'as' => 'ver_respuestas', 'uses' => 'EvaluacionRiesgosController@verRespuestas'
 ]);
 
 Route::post('evaluacion.guardarEvaluacion.{id}', [
 	'as' => 'evaluacion.guardarEvaluacion', 'uses' => 'EvaluacionRiesgosController@guardarEvaluacion'
+]);
+
+Route::post('evaluacion.updateEvaluacion.{id}', [
+	'as' => 'evaluacion.updateEvaluacion', 'uses' => 'EvaluacionRiesgosController@updateEvaluacion'
 ]);
 
 Route::post('evaluacion.enviarCorreo', [
@@ -480,12 +510,6 @@ Route::post('heatmap.{id}', [
 	'as' => 'heatmap2', 'uses' => 'EvaluacionRiesgosController@generarHeatmap'
 ]);
 
-Route::get('encuestas', [
-	'as' => 'encuestas', 'uses' => 'EncuestasController@verEncuestas']);
-
-Route::get('encuestas.show.{id}', [
-	'as' => 'encuestas.show', 'uses' => 'EncuestasController@show']);
-
 Route::get('matrices', [
 	'as' => 'matrices', 'uses' => 'ControlesController@matrices']);
 
@@ -497,6 +521,9 @@ Route::get('reporte_planes', [
 
 Route::get('reporte_hallazgos', [
 	'as' => 'reporte_hallazgos', 'uses' => 'AuditoriasController@issuesReport']);
+
+Route::get('graficos_controles', [
+	'as' => 'graficos_controles', 'uses' => 'ControlesController@indexGraficos']);
 
 
 //------ Rutas para auditoría de riesgos ------//
@@ -633,7 +660,7 @@ Route::get('genmatriz.{value}', [
 
 //ruta para generar reporte de planes de acción
 Route::get('genplanes_accion.{org}', [
-	'as' => 'genplanes_accion', 'uses' => 'AuditoriasController@generarReportePlanes']);
+	'as' => 'genplanes_accion', 'uses' => 'PlanesAccionController@generarReportePlanes']);
 
 //ruta para generar reporte de hallazgos
 Route::get('genissues_report.{org}', [

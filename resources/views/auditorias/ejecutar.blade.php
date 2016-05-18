@@ -2,8 +2,6 @@
 
 @section('title', 'Auditor&iacute;as - Ejecuci&oacute;n de auditor&iacute;as')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

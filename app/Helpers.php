@@ -53,7 +53,7 @@ function dropDown1()
 //dropdown de identificación de eventos de riesgo
 function dropDown2()
 {
-	$uri = array('crear_encuesta','enviar_encuesta','ver_encuesta');
+	$uri = array('crear_encuesta','enviar_encuesta','encuestas');
 
 	foreach ($uri as $uri)
 	{
@@ -78,7 +78,7 @@ function dropDown2()
 //dropdown de evaluación de riesgos
 function dropDown3()
 {
-	$uri = array('evaluacion','evaluacion_encuestas','evaluacion_manual');
+	$uri = array('evaluacion','evaluacion_agregadas','evaluacion_manual');
 
 	foreach ($uri as $uri)
 	{
@@ -103,7 +103,7 @@ function dropDown3()
 //dropdown de reportes básicos
 function dropDown4()
 {
-	$uri = array('heatmap','matrices','matriz_riesgos','encuestas','reporte_planes','hallazgos');
+	$uri = array('heatmap','matrices','matriz_riesgos','reporte_planes','hallazgos');
 
 	foreach ($uri as $uri)
 	{
@@ -469,10 +469,7 @@ function calc_controlled_risk($control_id,$efectividad)
 
 			return 0; //fin correcto	
 		}
-
 	});
-	
-
 }
 
 ?>

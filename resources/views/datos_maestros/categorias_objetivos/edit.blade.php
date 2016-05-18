@@ -2,8 +2,6 @@
 
 @section('title', 'Agregar Categor&iacute;as')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

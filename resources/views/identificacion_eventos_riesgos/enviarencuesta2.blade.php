@@ -2,8 +2,6 @@
 
 @section('title', 'Identificaci&oacute;n de eventos de riesgo')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->
@@ -38,6 +36,17 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
+
+		@if ($errors->any())
+				<div class="alert alert-danger alert-dismissible" role="alert">
+					<ul>
+					@foreach ($errors->all() as $error)
+						<li>{{ $error }}</li>
+					@endforeach
+					</ul>
+				</div>
+		@endif
+
 {!!Form::open(['route'=>'identificacion.enviarCorreo','method'=>'POST','class'=>'form-horizontal'])!!}
 
 	@if ($tipo == 0)
@@ -71,6 +80,7 @@
 			Haga click para enviar correo con link a encuesta
 			<div class="col-sm-3">
 				{!!Form::hidden('tipo',$tipo)!!}
+				{!!Form::hidden('poll_id',$encuesta['id'])!!}
 				{!!Form::submit('Enviar', ['class'=>'btn btn-primary'])!!}
 			</div>
 		</div>

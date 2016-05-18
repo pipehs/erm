@@ -2,8 +2,6 @@
 
 @section('title', 'Evaluaci&oacute;n de riesgos')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->
@@ -52,17 +50,25 @@
 				<h4><center>Evaluaci&oacute;n manual</center></h4>
 			@endif
 
-			{!!Form::open(['route'=>'evaluacion.guardarEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
+			@if (empty($user_answers)) <!-- Si es que no hay respuestas se guardará nueva eval, de lo contrario se editará -->
+				{!!Form::open(['route'=>'evaluacion.guardarEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
+			@else
+				{!!Form::open(['route'=>'evaluacion.updateEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
+			@endif
 
-			<div class="form-group">
-				<small>
-			    {!!Form::label('Ingrese su Rut (sin dígito verificador)',null,['class'=>'col-sm-4 control-label'])!!}
-				<div class="col-sm-3">
-					{!!Form::text('rut',null,
-					['class'=>'form-control','required'=>'true','input maxlength'=>'8'])!!}
+			@if ($tipo == 0)
+				<div class="form-group">
+					<small>
+				    {!!Form::label('Ingrese su Rut (sin dígito verificador)',null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="col-sm-3">
+						{!!Form::text('rut',null,
+						['class'=>'form-control','required'=>'true','input maxlength'=>'8'])!!}
+					</div>
+					</small>
 				</div>
-				</small>
-			</div>
+			@else
+				{!!Form::hidden('rut',$stakeholder)!!}
+			@endif
 
 			<p>Por cada riesgo identificado, señale un nivel de probabilidad e impacto del mismo. </p>
 
@@ -72,13 +78,25 @@
 				@else
 					{!!Form::hidden('evaluation_risk_id[]',$riesgo['risk_id'])!!}
 				@endif
-				<b>- {{ $riesgo['risk_name'] }} - {{ $riesgo['subobj'] }} - {{ $riesgo['orgproc'] }}:</b><br><br>
+				<b>- {{ $riesgo['risk_name'] }} - {{ $riesgo['subobj'] }} - {{ $riesgo['orgproc'] }}:</b><br>
+				<b><p style="color: blue;">Descripci&oacute;n Riesgo</b>: 
+				{{ $riesgo['description'] }}</p><br>
 				Probabilidad:<br>
 				@for($i=1; $i<=5; $i++)
 				<div class="radio-inline">
 					<label>
 						@if ($tipo == 1)
-							<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[$i-1] }})
+							<?php $cont = 0; //verificador para ver si hay respuesta ?>
+							@foreach ($user_answers as $answer)
+								@if ($answer['id'] == $riesgo['evaluation_risk_id'] && $answer['probability'] == $i)
+									<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}" checked> {{ $i }} ({{ $tipos_proba[$i-1] }})
+								<?php $cont += 1; ?>
+								@endif		
+							@endforeach
+
+							@if ($cont == 0)
+								<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[$i-1] }})
+							@endif
 						@else
 							<input type="radio" name="proba_{{$riesgo['risk_id']}}_{{$riesgo['type']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[$i-1] }})
 						@endif
@@ -92,7 +110,17 @@
 				<div class="radio-inline">
 					<label>
 						@if ($tipo == 1)
-							<input type="radio" name="criticidad_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[$i-1] }})
+							<?php $cont = 0; //lo mismo para impacto ?>
+							@foreach ($user_answers as $answer)
+								@if ($answer['id'] == $riesgo['evaluation_risk_id'] && $answer['impact'] == $i)
+									<input type="radio" name="criticidad_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}" checked> {{ $i }} ({{ $tipos_impacto[$i-1] }})
+									<?php $cont += 1; ?>
+								@endif
+							@endforeach
+
+							@if ($cont == 0)
+								<input type="radio" name="criticidad_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[$i-1] }})
+							@endif
 						@else
 							<input type="radio" name="criticidad_{{$riesgo['risk_id']}}_{{$riesgo['type']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[$i-1] }})
 						@endif
@@ -123,40 +151,4 @@
 		</div>
 	</div>
 </div>
-@stop
-@section('scripts')
-<script>
-// Run Datables plugin and create 3 variants of settings
-function AllTables(){
-	TestTable1();
-	TestTable2();
-	TestTable3();
-	LoadSelect2Script(MakeSelect);
-}
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
-}
-$(document).ready(function() {
-	// Add slider for change test input length
-	FormLayoutExampleInputLength($( ".slider-style" ));
-	// Initialize datepicker
-	$('#input_date').datepicker({setDate: new Date()});
-	// Initialize datepicker
-	$('#input_date2').datepicker({setDate: new Date()});
-	// Load Timepicker plugin
-	LoadTimePickerScript(DemoTimePicker);
-	// Add tooltip to form-controls
-	$('.form-control').tooltip();
-	LoadSelect2Script(DemoSelect2);
-	// Load example of form validation
-	LoadBootstrapValidatorScript(DemoFormValidator);
-	// Add Drag-n-Drop feature
-	WinMove();
-
-});
-</script>
-
 @stop

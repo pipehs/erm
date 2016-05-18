@@ -7,10 +7,9 @@
     "require": {
         "php": ">=5.5.9",
         "laravel/framework": "5.1.*",
-        "twbs/bootstrap": "^3.3"
-    },
-    "require": {
-    "laravelcollective/html": "5.1.*"
+        "twbs/bootstrap": "^3.3",
+        "sallar/jdatetime": "dev-master",
+        "laravelcollective/html": "5.1.*"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

@@ -9,6 +9,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Ermtool\Http\Controllers\ControlesController as Controles; //Para poder generar matriz de control y exportarla
 use Ermtool\Http\Controllers\RiesgosController as Riesgos; //Para poder generar matriz de riesgo y exportarla
 use Ermtool\Http\Controllers\AuditoriasController as Auditorias;
+use Ermtool\Http\Controllers\PlanesAccionController as PlanesAccion;
 
 class ExcelController extends Controller
 {
@@ -175,8 +176,8 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte con planes de acción para la organización seleccionada');
 
                 $excel->sheet('Planes', function($sheet) {
-                    $auditoria = new Auditorias;
-                    $datos = $auditoria->generarReportePlanes($GLOBALS['id']);
+                    $planes = new PlanesAccion;
+                    $datos = $planes->generarReportePlanes($GLOBALS['id']);
 
                     //$datos2 = json_decode($datos);
                     $sheet->fromArray($datos);

@@ -2,8 +2,6 @@
 
 @section('title', 'Planes de acci&oacute;n')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

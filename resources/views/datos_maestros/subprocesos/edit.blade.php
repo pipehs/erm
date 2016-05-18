@@ -2,8 +2,6 @@
 
 @section('title', 'Modificar Subproceso')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

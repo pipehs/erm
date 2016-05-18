@@ -640,38 +640,52 @@ class RiesgosController extends Controller
                 $score = "No tiene evaluación";
                 // -- seteamos datos --//
                 //seteamos causa y efecto
-                if ($risk->cause_id != NULL)
-                {
-                    $causes = DB::table('causes')
-                            ->where('causes.id','=',$risk->cause_id)
-                            ->select('causes.name')
-                            ->get();
 
-                    foreach ($causes as $cause)
+                //obtenemos causas
+                $cause_risk = DB::table('cause_risk')
+                                ->where('risk_id','=',$risk->id)
+                                ->select('cause_id as id')
+                                ->get();
+
+                if ($cause_risk)
+                {
+                    foreach ($cause_risk as $cause)
                     {
+                        $cause = DB::table('causes')
+                            ->where('causes.id','=',$cause->id)
+                            ->select('causes.name')
+                            ->first();
+
                         $causas .= '<li>'.$cause->name.'</li>';
                     }
                 }
                 else
                 {
-                    $causas = "No tiene causa definida";
+                    $causas = "No tiene causas definidas";
                 }
 
-                if ($risk->effect_id != NULL)
-                {
-                    $effects = DB::table('effects')
-                            ->where('effects.id','=',$risk->cause_id)
-                            ->select('effects.name')
-                            ->get();
+                //obtenemos efectos
+                $effect_risk = DB::table('effect_risk')
+                                ->where('risk_id','=',$risk->id)
+                                ->select('effect_id as id')
+                                ->get();
 
-                    foreach ($effects as $effect)
+
+                if ($effect_risk)
+                {
+                    foreach ($effect_risk as $effect)
                     {
-                        $efectos .= '<li>'.$cause->name.'</li>';
+                        $effects = DB::table('effects')
+                                ->where('effects.id','=',$effect->id)
+                                ->select('effects.name')
+                                ->first();
+
+                        $efectos .= '<li>'.$effects->name.'</li>';
                     }
                 }
                 else
                 {
-                    $efectos = "No tiene efecto definido";
+                    $efectos = "No tiene efectos definidos";
                 }
 
                 

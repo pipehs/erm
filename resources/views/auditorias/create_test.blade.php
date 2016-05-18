@@ -2,7 +2,6 @@
 
 @section('title', 'Agregar programa de auditor&iacute;a')
 
-@stop
 
 @section('content')
 

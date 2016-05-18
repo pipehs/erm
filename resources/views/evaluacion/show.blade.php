@@ -2,8 +2,6 @@
 
 @section('title', 'Evaluaci&oacute;n de riesgos')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->
@@ -11,7 +9,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Evaluaci&oacute;n de Riesgos</a></li>
-			<li><a href="evaluacion_encuestas">Ver Encuestas</a></li>
+			<li><a href="evaluacion_agregradas">Ver Encuestas</a></li>
 		</ol>
 	</div>
 </div>
@@ -72,9 +70,32 @@
 			<tr>
 			</table>
 
+			<h5><b>Usuarios a los que se les ha enviado esta encuesta</b></h5>
+
+			@if (!empty($stakeholders))
+				<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
+				<thead>
+				<th>Usuario</th><th>Respuestas</th>
+				</thead>
+				@foreach ($stakeholders as $user)
+				<tr>
+					<td>{{ $user['name'].' '.$user['surnames'] }}</td>
+					@if ($user['answers'] == 0)
+						<td>{!! link_to_route('ver_respuestas', $title = 'Ver', $parameters = ['eval_id'=>$encuesta['id'],'rut'=>$user['id']],
+				 $attributes = ['class'=>'btn btn-success'])!!}</td>
+					@else
+						<td>Este usuario aun no envía respuestas</td>
+					@endif
+				</tr>
+				@endforeach
+				</table>
+			@else
+				<b>Esta encuesta aun no ha sido enviada a ning&uacute;n usuario.</b><br><br>
+			@endif
+
 			<center>
-				{!! link_to_route('evaluacion_encuestas', $title = 'Volver', $parameters = NULL,
-				 $attributes = ['class'=>'btn btn-success'])!!}
+				{!! link_to_route('evaluacion_agregadas', $title = 'Volver', $parameters = NULL,
+				 $attributes = ['class'=>'btn btn-danger'])!!}
 			<center>
 			</div>
 		</div>

@@ -2,8 +2,6 @@
 
 @section('title', 'Agregar Plan de auditor&iacute;a')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

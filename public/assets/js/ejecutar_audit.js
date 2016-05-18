@@ -42,6 +42,7 @@ $("#audit").change(function() {
 							//si es que hay pruebas que ejecutar
 							if (result.length > 2)
 							{	
+									alert(result);
 									$("#btn_guardar").prop('disabled',false);
 									$("#cargando").html('<br>');
 									$("#audit_programs").empty();
@@ -99,57 +100,6 @@ $("#audit").change(function() {
 										pruebas += '</div>';
 										
 										$('#audit_programs').append(pruebas);
-										//agregamos campo de texto para resultados (issues) de la auditoría
-								/*
-										var program_results = '<h5>Resultados programa de auditor&iacute;a:</h5>';
-										program_results += '<table class="table">'
-										program_results += '<td width="50%"><select class="form-control" name="test_result_'+this.id+'" id="test_result_'+this.id+'" onchange="testResult('+this.id+')">';
-
-										if (this.results == 0)
-										{
-											program_results += '<option value="Abierta">En proceso</option>';
-											program_results += '<option value="0" selected>Inefectivo</option>';
-											program_results += '<option value="1">Efectivo</option>';
-											program_results += '</select><br>';
-											
-										}
-										else if (this.results == 1)
-										{
-											program_results += '<option value="Abierta">En proceso</option>';
-											program_results += '<option value="0">Inefectivo</option>';
-											program_results += '<option value="1" selected>Efectivo</option>';
-											program_results += '</select><br>';
-										}
-										else
-										{
-											program_results += '<option value="Abierta" selected>En proceso</option>';
-											program_results += '<option value="0">Inefectivo</option>';
-											program_results += '<option value="1">Efectivo</option>';
-											program_results += '</select><br>';
-										}
-										//agregamos DIV para botón de agregar más issues
-										program_results += '<div id="boton_add_'+this.id+'"></div>';
-										program_results += '</td><td width="50%"><div id="issues_'+this.id+'"></div></td>';
-
-										//ejecutamos función que muestra datos de issue
-										program_results += '<script>testResult('+this.id+');</script>';
-										program_results += '</table>';
-
-												$('#audit_programs').append(program_results);
-
-												cont = cont+1;
-
-										});
-
-											//agregamos id de pruebas
-											input_pruebas = '<input type="hidden" value="'+audit_tests_id+'" name="id_pruebas[]">';
-
-											//agregamos id de programas
-											input_programas = '<input type="hidden" value="'+programs_id+'" name="programs_id[]">';
-
-											$('#audit_programs').append(input_pruebas);
-											$('#audit_programs').append(input_programas);
-									*/
 
 									//agregamos id de pruebas
 									input_pruebas = '<input type="hidden" value="'+audit_tests_id+'" name="id_pruebas[]">';

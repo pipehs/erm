@@ -2,8 +2,6 @@
 
 @section('title', 'Modificar rol')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

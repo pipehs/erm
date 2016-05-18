@@ -2,8 +2,6 @@
 
 @section('title', 'Home')
 
-@stop
-
 @section('content')
 <!-- header menu de arbol -->
 <div class="row">
@@ -157,10 +155,10 @@
 @stop
 
 @section('scripts2')
-<script type="text/javascript" src="assets/js/google.js"></script>
+<script type="text/javascript" src="assets/js/loader.js"></script>
     <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback(drawChart);
+      google.charts.load("visualization", "1", {packages:["corechart"]});
+      google.charts.setOnLoadCallback(drawChart);
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
           ['Controles', 'Cantidad'],
@@ -181,8 +179,6 @@
 
     //Código JS para gráfico de barra
 
-    google.load("visualization", "1.1", {packages:["bar"]});
-    google.setOnLoadCallback(drawChart2);
       function drawChart2() {
         var data = google.visualization.arrayToDataTable([
           ['Mes', 'Controles', 'Riesgos'],

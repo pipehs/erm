@@ -1,9 +1,6 @@
 @extends('master')
 
 @section('title', 'Agregar Proceso')
-
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

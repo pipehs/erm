@@ -2,8 +2,6 @@
 
 @section('title', 'Crear KRI')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

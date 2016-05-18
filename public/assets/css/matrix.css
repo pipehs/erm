@@ -18,8 +18,8 @@ background-image:-ms-linear-gradient(right top, #f20505 33%, #c2f01d 75%,#0ccc16
 
 /*Circulo para heatmap*/
 .circulo {
-     width: 25px;
-     height: 25px;
+     width: 20px;
+     height: 20px;
      -moz-border-radius: 50%;
      -webkit-border-radius: 50%;
      border-radius: 50%;
@@ -32,6 +32,7 @@ background-image:-ms-linear-gradient(right top, #f20505 33%, #c2f01d 75%,#0ccc16
     display: inline-block;
     font-weight: bold;
     line-height: 1.8em;
+    font-size: 12px;
     text-align: center;
 
     /*sombra */

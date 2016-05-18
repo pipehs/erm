@@ -176,6 +176,8 @@ class RiesgosTipoController extends Controller
             }
             else //se están agregando causas ya creadas
             {
+                if(isset($_POST['cause_id']))
+                {
                     foreach ($_POST['cause_id'] as $cause_id)
                     {
                         //insertamos cada causa en cause_risk
@@ -184,7 +186,8 @@ class RiesgosTipoController extends Controller
                                 'risk_id' => $risk->id,
                                 'cause_id' => $cause_id
                                 ]);
-                    } 
+                    }
+                } 
             }
 
             //vemos si se agrego algún efecto nuevo
@@ -203,20 +206,23 @@ class RiesgosTipoController extends Controller
             }
             else
             {
-                if ($_POST['effect_id'] == NULL)
-                    $efecto = NULL;
-                else
+                if (isset($_POST['effect_id']))
                 {
-                    foreach ($_POST['effect_id'] as $effect_id)
+                    if ($_POST['effect_id'] == NULL)
+                        $efecto = NULL;
+                    else
                     {
-                        //insertamos cada causa en cause_risk
-                        DB::table('effect_risk')
-                            ->insert([
-                                'risk_id' => $risk->id,
-                                'effect_id' => $effect_id
-                                ]);
+                        foreach ($_POST['effect_id'] as $effect_id)
+                        {
+                            //insertamos cada causa en cause_risk
+                            DB::table('effect_risk')
+                                ->insert([
+                                    'risk_id' => $risk->id,
+                                    'effect_id' => $effect_id
+                                    ]);
+                        }
                     }
-                } 
+                }
             }
 
             Session::flash('message','Riesgo tipo agregado correctamente');

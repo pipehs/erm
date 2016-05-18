@@ -2,8 +2,6 @@
 
 @section('title', 'Stakeholders')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

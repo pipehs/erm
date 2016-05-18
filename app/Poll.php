@@ -20,4 +20,9 @@ class Poll extends Model
     {
     	return $this->hasManyThrough('Ermtool\Answer','Ermtool\Question');
     }
+
+    public function stakeholders()
+    {
+        return $this->belongsToMany('Ermtool\Stakeholder');
+    }
 }

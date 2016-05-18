@@ -2,8 +2,6 @@
 
 @section('title', 'Reporte de Hallazgos')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

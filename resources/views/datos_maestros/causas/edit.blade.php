@@ -2,8 +2,6 @@
 
 @section('title', 'Agregar Causa')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

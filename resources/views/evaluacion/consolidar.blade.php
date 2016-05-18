@@ -2,8 +2,6 @@
 
 @section('title', 'Evaluaci&oacute;n de riesgos')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->
@@ -54,7 +52,7 @@
 			<th>Probabilidad</th>
 			<th>Impacto</th>
 			</thead>
-			{!!Form::open(['route'=>'evaluacion_encuestas.consolidar2','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'evaluacion.consolidar2','method'=>'POST','class'=>'form-horizontal'])!!}
 				@foreach ($evaluations_risks as $evaluation)
 					<tr>
 					<td>{{ $evaluation['risk_name'] }} - {{ $evaluation['subobj_name']}} - {{ $evaluation['orgproc_name'] }}</td>
@@ -85,7 +83,7 @@
 
 		{!!Form::close()!!}
 			<center>
-					{!! link_to_route('evaluacion_encuestas', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('evaluacion_agregadas', $title = 'Volver', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 			<center>
 

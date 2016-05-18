@@ -76,6 +76,8 @@ return [
     'unique'               => 'El :attribute ingresado ya se encuentra en uso.',
     'url'                  => 'The :attribute format is invalid.',
 
+    'validateUser'  =>  'Esta encuesta no ha sido enviada al usuario de rut :attribute',
+
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines
@@ -97,6 +99,9 @@ return [
             'surnames' => [
                 'min' => 'El o los apellidos ingresado(s) debe(n) tener a lo menos :min caracteres.',
             ],
+            'poll_id' => [
+                'unique' => 'Esta encuesta ya fue enviada a alguno de los usuarios ingresados',
+            ]
     ],
 
     /*

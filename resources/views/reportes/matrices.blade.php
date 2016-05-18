@@ -2,8 +2,6 @@
 
 @section('title', 'Matrices de control')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

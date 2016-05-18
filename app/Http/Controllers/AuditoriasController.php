@@ -413,6 +413,12 @@ class AuditoriasController extends Controller
                             'updated_at' => date('Y-m-d H:i:s')
                             ]);
 
+                    //obtenemos id de control para la evaluación de riesgo controlado
+                    $control = DB::table('audit_tests')
+                                ->where('id','=',$id)
+                                ->select('control_id')
+                                ->first();
+
                     //vemos si es inefectiva, por lo que debería tener un issue
                     if ($_POST['test_result_'.$id] == 0) //es inefectiva
                     {
@@ -435,7 +441,35 @@ class AuditoriasController extends Controller
 
                             $i += 1; //para ver si es que hay más issues nuevos para esta prueba
                         }
+
+                        if ($control->control_id != NULL)
+                        {
+                            //guardamos riesgo controlado: RECORDAR: Hay una diferencia (error al crear tablas) entre las evaluaciones de control directo y auditorias, al evaluar controles es 1=inefectiva; 2=efectiva. Al ejecutar auditoría 0=inefectiva, 1=efectiva. Por lo que para no modificar mucho la base de datos, sumaremos uno en esta sección a los resultados de la prueba para igualarlos con la evaluación de control directo, para enviar los datos a la función helpers->calc_controlled_risk()
+
+                            $res = $_POST['test_result_'.$id] + 1;
+
+                            $result = calc_controlled_risk($control->control_id,$res);
+                        }
+                        
                     }
+
+                    $res = $_POST['test_result_'.$id] + 1;
+                    //Verificamos que res no sea igual a 3 (prueba en proceso)
+                    if ($control->control_id != NULL && $res == 2)
+                    {
+                        $result = calc_controlled_risk($control->control_id,$res);
+                    }
+
+                    if ($result == 0)
+                    {
+                        echo "Riesgo controlado actualizado correctamente";
+                    }
+                    else if ($result == 1)
+                    {
+                        echo "Error al actualizar valor de riesgo controlado";
+                    }
+
+                    
                     
                 }
 
@@ -2188,70 +2222,6 @@ class AuditoriasController extends Controller
         return view('reportes.auditorias',['organizations' => $organizations]);
     }
 
-    public function generarReportePlanes($org)
-    {
-        $results = array();
-        $i = 0;
-        //obtenemos datos de plan de auditoría, auditoría, issue y plan de acción
-        $action_plans = DB::table('action_plans')
-            ->join('issues','issues.id','=','action_plans.issue_id')
-            ->join('audit_audit_plan_audit_test','audit_audit_plan_audit_test.id','=','issues.audit_audit_plan_audit_test_id')
-            ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_test.audit_audit_plan_id')
-            ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
-            ->join('audits','audits.id','=','audit_audit_plan.audit_id')
-            ->where('audit_plans.organization_id','=',(int)$org)
-            ->select('audit_plans.name as audit_plan_name',
-                     'audits.name as audit_name',
-                     'issues.name as issue_name',
-                     'action_plans.description',
-                     'action_plans.final_date',
-                     'action_plans.created_at',
-                     'action_plans.status')
-            ->get();
-
-        foreach ($action_plans as $action_plan)
-        {
-            $fecha_creacion = date('d-m-Y',strtotime($action_plan->created_at));
-            $fecha_creacion .= ' a las '.date('H:i:s',strtotime($action_plan->created_at));
-
-            //¡¡¡¡¡¡¡¡¡corregir problema del año 2038!!!!!!!!!!!! //
-            $fecha_final = date('d-m-Y',strtotime($action_plan->final_date));
-            $fecha_final .= ' a las 00:00:00';
-
-            if ($action_plan->status == 0)
-            {
-                $estado = 'Abierto';
-            }
-            else if ($action_plan->status == 1)
-            {
-                $estado = 'Cerrado';
-            }
-            else
-            {
-                $estado = 'Error al obtener estado';
-            }
-
-            $results[$i] = [
-                        'Plan_de_auditoría' => $action_plan->audit_plan_name,
-                        'Auditoría' => $action_plan->audit_name,
-                        'Debilidad' => $action_plan->issue_name,
-                        'Plan_de_acción' => $action_plan->description,
-                        'Estado' => $estado,
-                        'Fecha_creación' => $fecha_creacion,
-                        'Fecha_final' => $fecha_final,
-            ];
-
-            $i += 1;
-        }
-
-        if (strstr($_SERVER["REQUEST_URI"],'genexcelplan')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
-        {
-            return $results;
-        }
-        else
-            return json_encode($results);
-    }
-
     //reporte de auditorías
     public function generarReporteAuditorias($org)
     {
@@ -2660,7 +2630,7 @@ class AuditoriasController extends Controller
         return json_encode($results);
     }
 
-    /*función que obtiene los datos y las actividades de una prueba de auditoría (al revisar un plan de auditoría)
+    /*función que obtiene los datos y las pruebas de un programa de auditoría (al revisar un plan de auditoría)
     a través del identificador de audit_audit_plan (auditoría + plan de auditoría) */
     public function getAuditProgram2($id)
     {
@@ -2676,7 +2646,8 @@ class AuditoriasController extends Controller
 
         foreach ($audit_programs as $program)
         {
-            $i = 0; //contador de actividades
+            $i = 0; //contador de pruebas
+            $k = 0; //contador de programas
             //obtenemos actividades
             $audit_tests = DB::table('audit_tests')
                             ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
@@ -2781,14 +2752,14 @@ class AuditoriasController extends Controller
                 $i += 1;
             }
 
-            $audit_programs[$j] = [
+            $audit_programs[$k] = [
                     'name' => $program->name,
                     'id' => $program->id,
                     'description' => $program->description,
                     'audit_tests' => $audit_tests2
             ];
 
-            $j += 1;
+            $k += 1;
         }
 
         return json_encode($audit_programs);

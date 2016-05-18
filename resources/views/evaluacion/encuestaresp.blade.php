@@ -2,8 +2,6 @@
 
 @section('title', 'Encuesta respondida')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

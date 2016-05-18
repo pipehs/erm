@@ -2,15 +2,13 @@
 
 @section('title', 'Encuestas de evaluación de Riesgos')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes básicos</a></li>
+			<li><a href="#">Identificación de eventos de riesgo</a></li>
 			<li><a href="encuestas">Encuestas</a></li>
 		</ol>
 	</div>
@@ -37,6 +35,22 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
+
+		@if ($errors->any())
+				<div class="alert alert-danger alert-dismissible" role="alert">
+					<ul>
+					@foreach ($errors->all() as $error)
+						<li>{{ $error }}</li>
+					@endforeach
+					</ul>
+				</div>
+		@endif
+
+		@if(Session::has('error'))
+			<div class="alert alert-danger alert-dismissible" role="alert">
+			{{ Session::get('error') }}
+			</div>
+		@endif
 
 		@if(Session::has('message'))
 			<div class="alert alert-success alert-dismissible" role="alert">
@@ -71,21 +85,43 @@
 	<thead>
 	<th>Rut</th><th>Nombre</th><th>Ver respuestas</th>
 	</thead>
+	@if ($answers == "[]")
 		@foreach ($stakeholders as $stakeholder)
 			<tr>
 				<td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
 				<td>{{ $stakeholder['name'] }} {{ $stakeholder['surnames'] }}</td>
-
-				<td>{!! link_to_route('encuestas.show', $title = 'Ver',
-				 $parameters = ['poll_id'=>$poll_id,'stakeholder_id'=>$stakeholder['id']],
-				  $attributes = ['class'=>'btn btn-success']) !!}</td>
+				<td>Este usuario aun no ha respondido</td>
 			</tr>
 		@endforeach
+	@else
+		@foreach ($stakeholders as $stakeholder)
+			<?php $cont = 0; ?>
+			@foreach ($answers as $answer)
+				@if ($answer['stakeholder_id'] == $stakeholder['id'])
+					<?php $cont += 1; ?>
+				@endif
+			@endforeach
+			<tr>
+				<td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
+				<td>{{ $stakeholder['name'] }} {{ $stakeholder['surnames'] }}</td>
+
+				@if ($cont == 0)
+					<td>Este usuario aun no ha respondido</td>
+				@else
+					<td>
+						{!! link_to_route('encuestas.show', $title = 'Ver',
+					 $parameters = ['poll_id'=>$poll_id,'stakeholder_id'=>$stakeholder['id']],
+					  $attributes = ['class'=>'btn btn-success']) !!}
+					</td>
+				@endif
+			</tr>
+		@endforeach
+	@endif
 	</table>
 
 	<center>
 			{!! link_to_route('encuestas', $title = 'Volver', 
-				$parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
+				$parameters = NULL, $attributes = ['class'=>'btn btn-danger']) !!}
 	</center>
 @endif
 

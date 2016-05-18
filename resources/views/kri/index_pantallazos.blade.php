@@ -2,8 +2,6 @@
 
 @section('title', 'Gestionar KRI')
 
-@stop
-
 @section('content')
 <!-- INDEX PARA PANTALLAZOS -->
 

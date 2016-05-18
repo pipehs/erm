@@ -2,8 +2,6 @@
 
 @section('title', 'Evaluaci&oacute;n de riesgos')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->
@@ -11,7 +9,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Evaluaci&oacute;n de Riesgos</a></li>
-			<li><a href="evaluacion_encuestas">Encuestas</a></li>
+			<li><a href="evaluacion_agregadas">Encuestas</a></li>
 		</ol>
 	</div>
 </div>
@@ -38,6 +36,15 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
 
+		@if(Session::has('error'))
+			<div class="alert alert-danger alert-dismissible" role="alert">
+			@foreach (Session::get('error') as $error)
+				{{ $error }}
+				<br>
+			@endforeach
+			</div>
+		@endif
+
 		@if(Session::has('message'))
 			<div class="alert alert-success alert-dismissible" role="alert">
 			{{ Session::get('message') }}
@@ -48,22 +55,31 @@
 		<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="margin: 0 auto;">
 			<thead>
 			<th>Nombre</th>
+			<th>Fecha de t&eacute;rmino</th>
 			<th>Ver</th>
 			<th>Enviar</th>
 			<th>Consolidar</th>
+			<th>Eliminar</th>
 			</thead>
-
 				@foreach ($encuestas as $encuesta)
 					<tr>
 					<td>{{ $encuesta['name'] }}</td>
+					@foreach ($fecha as $f)
+						@if ($f['evaluation_id'] == $encuesta['id'])
+							<td>{{ $f['expiration_date'] }}</td>
+						@endif
+					@endforeach
 					<td>
-					 {!! link_to_route('evaluacion_encuestas.show', $title = 'Ver', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-success']) !!}
+					 {!! link_to_route('evaluacion.show', $title = 'Ver', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-success']) !!}
 					 </td>
 					<td>
-					{!! link_to_route('evaluacion_encuestas.enviar', $title = 'Enviar', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-primary']) !!}
+					{!! link_to_route('evaluacion.enviar', $title = 'Enviar', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-primary']) !!}
 					</td>
 					<td>
-					{!! link_to_route('evaluacion_encuestas.consolidar', $title = 'Consolidar', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-danger']) !!}
+					{!! link_to_route('evaluacion.consolidar', $title = 'Consolidar', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-default']) !!}
+					</td>
+					<td>
+					<button class="btn btn-danger" onclick="eliminar({{ $encuesta['id'] }})">Eliminar</button>
 					</td>
 					 </tr>
 				@endforeach
@@ -71,4 +87,53 @@
 		</div>
 	</div>
 </div>
+@stop
+
+@section('scripts2')
+<script>
+function eliminar(id)
+{
+	swal({   title: "Atención!",
+		   text: "Esta seguro de eliminar esta encuesta de evaluación?",
+		   type: "warning",   
+		   showCancelButton: true,   
+		   confirmButtonColor: "#31B404",   
+		   confirmButtonText: "Eliminar",
+		   cancelButtonText: "Cancelar",   
+		   closeOnConfirm: false }, 
+		   function(){
+		   		$.get('evaluacion_delete.'+id, function (result) {
+
+		   			if (result == 0)
+		   			{
+		   				swal({   title: "",
+		   			   text: "La encuesta fue eliminada con éxito ",
+		   			   type: "success",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Aceptar",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	location.reload();
+		   			   });
+		   			}
+		   			else
+		   			{
+		   				swal({   title: "",
+		   			   text: "La encuesta no pudo ser eliminada. Probablemente ésta ya posee respuestas. Para mayor información contactese con el administrador.",
+		   			   type: "error",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Aceptar",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	location.reload();
+		   			   });
+		   			}
+		   			});
+		   		 
+		   	});
+	//confirm("Esta seguro de bloquear "+type+" "+name+"?")
+}
+</script>
 @stop

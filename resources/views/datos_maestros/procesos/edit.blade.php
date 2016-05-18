@@ -2,8 +2,6 @@
 
 @section('title', 'Editar Proceso')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

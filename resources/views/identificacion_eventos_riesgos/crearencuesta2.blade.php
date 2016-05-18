@@ -2,8 +2,6 @@
 
 @section('title', 'Categor&iacute;as de Riesgos')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->
@@ -49,7 +47,7 @@
 						<div class="form-group">
 							{!!Form::label('tipo_respuesta *',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-3">
-								<select id="select<?php echo $i ?>" required="true" name="tipo_respuesta{{ $i }}">
+								<select id="select{{$i}}" required="true" name="tipo_respuesta{{ $i }}">
 									<option selected="selected" value="">- Seleccione tipo de respuesta -</option>
 									<option value="0">Texto</option>
 									<option value="1">Radio</option>
@@ -129,21 +127,10 @@
 	</div>
 </div>
 @stop
-@section('scripts2')
+@section('scripts2') 
 <script>
+
 // Run Datables plugin and create 3 variants of settings
-function AllTables(){
-	TestTable1();
-	TestTable2();
-	TestTable3();
-	LoadSelect2Script(MakeSelect2);
-}
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
-}
 
 //generar nuevos campos de alternativa
  jQuery.fn.generaNuevosCampos = function(etiqueta, nombreCampo, indice){

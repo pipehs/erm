@@ -2,8 +2,6 @@
 
 @section('title', 'Auditor&iacute;a de Riesgos')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

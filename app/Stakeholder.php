@@ -29,5 +29,9 @@ class Stakeholder extends Model
     {
         return $this->belongsToMany('Ermtool\Audit_plan');
     }
+    public function polls()
+    {
+        return $this->belongsToMany('Ermtool\Poll');
+    }
 }
  

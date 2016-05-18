@@ -2,8 +2,6 @@
 
 @section('title', 'Efectos')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

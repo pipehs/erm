@@ -2,8 +2,6 @@
 
 @section('title', 'Editar Riesgo')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

@@ -2,8 +2,6 @@
 
 @section('title', 'Matriz de riesgos')
 
-@stop
-
 @section('content')
 <!-- header menu de arbol -->
 <div class="row">

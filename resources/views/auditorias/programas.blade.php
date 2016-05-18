@@ -2,7 +2,6 @@
 
 @section('title', 'Auditor&iacute;as - Planes de auditor&iacute;as')
 
-@stop
 
 @section('content')
 

@@ -2,8 +2,6 @@
 
 @section('title', 'Evaluaci&oacute;n de riesgos')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->
@@ -73,7 +71,7 @@
 
 			<div>
 			<center>
-				{!! link_to_route('evaluacion_encuestas', $title = 'Volver', $parameters = NULL,
+				{!! link_to_route('evaluacion_agregadas', $title = 'Volver', $parameters = NULL,
 				 $attributes = ['class'=>'btn btn-success'])!!}
 			<center>
 			</div>

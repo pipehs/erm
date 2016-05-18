@@ -109,6 +109,7 @@
 	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}
 
 	{!!Html::script('assets/js/jquery.min.js')!!}
+	{!!Html::script('assets/js/ajax_jquery-ui.min.js')!!}
 	
 	@yield('scripts2')
 </body>

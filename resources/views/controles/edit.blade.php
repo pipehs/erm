@@ -2,8 +2,6 @@
 
 @section('title', 'Editar Control')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

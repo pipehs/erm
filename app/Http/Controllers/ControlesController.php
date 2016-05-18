@@ -9,6 +9,7 @@ use DB;
 use Session;
 use Redirect;
 use Storage;
+use DateTime;
 
 //sleep(2);
 
@@ -1242,6 +1243,90 @@ class ControlesController extends Controller
             }
         }
                 
+    }
+
+    public function indexGraficos()
+    {
+        $controls = array();
+        $controls_temp = array();
+        $no_ejecutados = array();
+        //primero seleccionamos id de controles de control_evaluation donde tengan status 2 (cerrado) y donde estos sean diferentes para que no se repitan
+        $controles = DB::table('control_evaluation')
+                        ->where('control_evaluation.status','=',2)
+                        ->distinct()
+                        ->get(['control_id as id']);
+
+        $i = 0;
+        foreach ($controles as $control)
+        {
+            $controls_temp[$i] = $control->id;
+            $i += 1; 
+        }
+
+        //ahora en audit_tests y que no hayan sido encontrados en control_evaluation
+        $controles = DB::table('audit_tests')
+                        ->where('audit_tests.status','=',2)
+                        ->whereNotNull('audit_tests.control_id')
+                        ->whereNotIn('audit_tests.control_id',$controls_temp)
+                        ->distinct()
+                        ->get(['control_id as id']);
+
+        foreach ($controles as $control)
+        {
+            $controls_temp[$i] = $control->id;
+            $i += 1;
+        }
+
+        //ahora obtenemos los datos de los controles seleccionados
+        $i = 0;
+        foreach ($controls_temp as $id)
+        {
+            $control = \Ermtool\Control::find($id);
+
+            //fecha de actualización del control
+            $updated_at = new DateTime($control->updated_at);
+            $updated_at = date_format($updated_at, 'd-m-Y');
+
+            $controls[$i] = [
+                    'id' => $control->id,
+                    'name' => $control->name,
+                    'description' => $control->description,
+                    'updated_at' => $updated_at,
+                ];
+
+            $i += 1;
+        }
+        //guardamos cantidad de ejecutados
+        $cont_ejec = $i;
+
+        //ahora obtenemos el resto de controles (para obtener los no ejecutados)
+        $controles = DB::table('controls')
+                        ->whereNotIn('controls.id',$controls_temp)
+                        ->select('id','name','description','updated_at')
+                        ->get();
+
+        //guardamos en array
+        $i = 0;
+        foreach ($controles as $control)
+        {
+            $no_ejecutados[$i] = [
+                        'id' => $control->id,
+                        'name' => $control->name,
+                        'description' => $control->description,
+                        'updated_at' => $updated_at,
+                    ];
+
+            $i += 1;
+        }
+
+        //guardamos cantidad de no ejecutados
+        $cont_no_ejec = $i;
+
+        //return json_encode($controls);
+        //echo $cont_ejec.' y '.$cont_no_ejec;
+        //print_r($no_ejecutados);
+        return view('reportes.controles_graficos',['controls'=>$controls,'no_ejecutados'=>$no_ejecutados,
+                                          'cont_ejec' => $cont_ejec,'cont_no_ejec'=>$cont_no_ejec]);
     }
 
 }

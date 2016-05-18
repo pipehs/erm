@@ -2,8 +2,6 @@
 
 @section('title', 'Mapa de calor')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->
@@ -16,7 +14,7 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-sm-12 col-m-6">
+	<div class="col-sm-12 col-m-12">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -117,60 +115,125 @@
            <p><b> Nombre:</b> {{ $nombre }}.</p>
            <p><b> Descripci&oacute;n:</b> {{ $descripcion }}.</p>
             <center>
-            
-              <div class="col-sm-1">
+               <!-- Heatmap riesgo inherente -->
+              <div class="row">
+                <div class="col-sm-6">
+                  <h4><b>Evaluación de Riesgos Inherentes</b></h4>
+                </div>
+                <div class="col-sm-6">
+                  <h4><b>Evaluación de Riesgos Controlados</b></h4>
+                </div>
+              </div>
+
+              <div style="width: 3%; float:left; padding-top: 10%;">
                   <div style="width: 1px; word-wrap: break-word; text-align: center">Impacto</div>
               </div>
-              <div class="col-sm-5">
-              <table style="text-align: center; font-weight: bold;">
-              <tr>
-                <td width="15%" bgcolor="#CCCCCC">
-                  <table height="395px" width="100%" border="1">
-                    <tr><td>5<br>Cr&iacute;tico</td></tr>
-                    <tr><td>4<br>Alto</td></tr>
-                    <tr><td>3<br>Moderado</td></tr>
-                    <tr><td>2<br>Bajo</td></tr>
-                    <tr><td>1<br>Menor</td></tr>
+              <div style="width: 47%; float: left;">
+                  <table style="text-align: center; font-weight: bold; float: left;">
+                      <tr>
+                        <td width="15%" bgcolor="#CCCCCC">
+                          <table height="395px" width="100%" border="1">
+                            <tr><td>5<br>Cr&iacute;tico</td></tr>
+                            <tr><td>4<br>Alto</td></tr>
+                            <tr><td>3<br>Moderado</td></tr>
+                            <tr><td>2<br>Bajo</td></tr>
+                            <tr><td>1<br>Menor</td></tr>
+                          </table>
+                        </td>
+                        <td width="85%">
+                          <table class="heatmap1" border="1">
+
+                          <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
+                          @for ($i=0; $i<5; $i++)
+
+                            <tr style="height: 20%; ">
+                            @for ($j=1; $j<=5; $j++)
+                                <td id="{{(5-$i)}}_{{($j)}}" style="width: 20%; text-align: center;"></td>
+                            @endfor
+                            </tr>
+                            
+                          @endfor
+
+                        </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="15%"></td>
+                        <td width="85%" bgcolor="#CCCCCC">
+                            <table height="50px" width="100%" border="1">
+                                <td width="20%">1<br>Remoto</td>
+                                <td width="20%">2<br>No probable</td>
+                                <td width="20%">3<br>Probable</td>
+                                <td width="20%">4<br>Altamente probable</td>
+                                <td width="20%">5<br>Esperado</td>
+                            </table>
+                        </td>
+                      </tr>
                   </table>
-                </td>
-                <td width="85%">
-                  <table class="heatmap1" border="1">
+                  <br>
+                  <div style="letter-spacing:5px; text-align: center;"><br>Probabilidad</div>
+              </div>
 
-                  <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
-                  @for ($i=0; $i<5; $i++)
 
-                    <tr style="height: 20%; ">
-                    @for ($j=1; $j<=5; $j++)
-                        <td id="{{(5-$i)}}_{{($j)}}" style="width: 20%; text-align: center;"></td>
-                    @endfor
-                    </tr>
-                    
-                  @endfor
 
-                </table>
-                </td>
-              </tr>
-              <tr>
-              <td width="15%"></td>
-              <td width="85%" bgcolor="#CCCCCC">
-                  <table height="50px" width="100%" border="1">
-                      <td width="20%">1<br>Remoto</td>
-                      <td width="20%">2<br>No probable</td>
-                      <td width="20%">3<br>Probable</td>
-                      <td width="20%">4<br>Altamente probable</td>
-                      <td width="20%">5<br>Esperado</td>
+               <!-- Heatmap riesgo controlado -->
+
+              <div style="width: 3%; float: left; padding-top: 10%;">
+                  <div style="width: 1px; word-wrap: break-word; text-align: center;">Impacto</div>
+              </div>
+              <div style="width: 47%; float: left;">
+                  <table style="text-align: center; font-weight: bold; float:left;">
+                  <tr>
+                    <td width="15%" bgcolor="#CCCCCC">
+                      <table height="395px" width="100%" border="1">
+                        <tr><td>5<br>Cr&iacute;tico</td></tr>
+                        <tr><td>4<br>Alto</td></tr>
+                        <tr><td>3<br>Moderado</td></tr>
+                        <tr><td>2<br>Bajo</td></tr>
+                        <tr><td>1<br>Menor</td></tr>
+                      </table>
+                    </td>
+                    <td width="85%">
+                      <table class="heatmap1" border="1">
+
+                      <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
+                      @for ($i=0; $i<5; $i++)
+
+                        <tr style="height: 20%; ">
+                        @for ($j=1; $j<=5; $j++)
+                            <td id="{{(5-$i)}}_{{($j)}}_ctrl" style="width: 20%; text-align: center;"></td>
+                        @endfor
+                        </tr>
+                        
+                      @endfor
+
+                    </table>
+                    </td>
+                  </tr>
+                  <tr>
+                  <td width="15%"></td>
+                  <td width="85%" bgcolor="#CCCCCC">
+                      <table height="50px" width="100%" border="1">
+                          <td width="20%">1<br>Remoto</td>
+                          <td width="20%">2<br>No probable</td>
+                          <td width="20%">3<br>Probable</td>
+                          <td width="20%">4<br>Altamente probable</td>
+                          <td width="20%">5<br>Esperado</td>
+                      </table>
+                  </td>
+                  </tr>
                   </table>
-              </td>
-              </tr>
-              </table>
-                <br>
-                <div style="letter-spacing:5px; text-align: center">Probabilidad</div>
-                </center>
-              
-              
+                  <br>
+                  <div style="letter-spacing:5px; text-align: center;">Probabilidad</div>
+              </div>
+            </div>
+             </center>
+
+            <div class="row">
               <div class="col-sm-5">
                 <div id="leyendas"> </div>
               </div>
+            </div>
 
             </div>
             <br>
@@ -192,13 +255,13 @@
 
   @if (isset($riesgos))
       <?php $cont = 1; //contador de riesgos ?>
-      //ciclo para rellenar tabla con riesgos
+      //ciclo para rellenar tabla con riesgos INHERENTES
       @for($k=0; $k < count($riesgos); $k++)
           @for($i=0; $i < 5; $i++)
               @for ($j=0; $j < 5; $j++)
-                  @if (intval($prom_criticidad[$k]) == (5-$i))
-                      @if (intval($prom_proba[$k]) == (5-$j))
-                         $('#{{(5-$i)}}_{{(5-$j)}}').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad[$k],1) }}'>{{ $cont }}</span>");
+                  @if (intval($prom_criticidad_in[$k]) == (5-$i))
+                      @if (intval($prom_proba_in[$k]) == (5-$j))
+                         $('#{{(5-$i)}}_{{(5-$j)}}').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_in[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_in[$k],1) }}'>{{ $cont }}</span>");
 
                          var leyendas = "<p><ul><li><small><span class='circulo-small'>{{ $cont }}</span> : <b>Riesgo:</b>";
                          leyendas += "{{ $riesgos[$k]['name'] }}</li>";
@@ -214,15 +277,25 @@
 
                          leyendas += "</ul>";
                          $('#leyendas').append(leyendas);
+                      @endif
+                  @endif
 
-                        <?php $cont += 1; ?>
+                  //controlado
+                  @if (intval($prom_criticidad_ctrl[$k]) == (5-$i))
+                      @if (intval($prom_proba_ctrl[$k]) == (5-$j))
+                         $('#{{(5-$i)}}_{{(5-$j)}}_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_ctrl[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_ctrl[$k],1) }}'>{{ $cont }}</span>");
                       @endif
                   @endif
               @endfor
           @endfor
+
+          <?php $cont += 1; ?>
       @endfor
+
+      
       
   @endif
+
   $(function() {
     $( document ).tooltip();
   })

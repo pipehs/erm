@@ -2,8 +2,6 @@
 
 @section('title', 'Monitor KRI')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->

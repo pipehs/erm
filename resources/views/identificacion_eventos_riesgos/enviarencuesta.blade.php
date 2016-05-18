@@ -2,8 +2,6 @@
 
 @section('title', 'Identificaci&oacute;n de eventos de riesgo')
 
-@stop
-
 @section('content')
 
 <!-- header menu de arbol -->
@@ -37,6 +35,25 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
+
+		@if ($errors->any())
+				<div class="alert alert-danger alert-dismissible" role="alert">
+					<ul>
+					@foreach ($errors->all() as $error)
+						<li>{{ $error }}</li>
+					@endforeach
+					</ul>
+				</div>
+		@endif
+
+		@if(Session::has('error'))
+			<div class="alert alert-danger alert-dismissible" role="alert">
+			@foreach (Session::get('error') as $error)
+				{{ $error }}
+				<br>
+			@endforeach
+			</div>
+		@endif
 
 		@if(Session::has('message'))
 			<div class="alert alert-success alert-dismissible" role="alert">
