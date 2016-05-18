@@ -525,6 +525,9 @@ Route::get('reporte_hallazgos', [
 Route::get('graficos_controles', [
 	'as' => 'graficos_controles', 'uses' => 'ControlesController@indexGraficos']);
 
+Route::get('graficos_auditorias', [
+	'as' => 'graficos_auditorias', 'uses' => 'AuditoriasController@indexGraficos']);
+
 
 //------ Rutas para auditoría de riesgos ------//
 

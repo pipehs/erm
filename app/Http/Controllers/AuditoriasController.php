@@ -3630,4 +3630,111 @@ class AuditoriasController extends Controller
 
         return json_encode($organization);
     }
+
+    public function indexGraficos()
+    {
+        $planes_ejec = 0; //planes en ejecución
+        $planes_abiertos = 0; //planes con al menos una prueba abierta
+        $planes_cerrados = 0; //plan sin pruebas abiertas ni en ejecución, pero si cerradas
+
+        $audits = array();
+        $audit_plans = array();
+        $audit_programs = array();
+        $audit_tests = array();
+
+        //obtenemos todas las auditorías y pruebas de auditoría con su estado de ejecución
+
+        $planes = \Ermtool\Audit_plan::all(['id','name']);
+        $i = 0; //contador de planes
+        foreach ($planes as $audit_plan)
+        {
+            //obtenemos auditorías
+            $auditorias = DB::table('audit_audit_plan')
+                        ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                        ->where('audit_audit_plan.audit_plan_id','=',$audit_plan->id)
+                        ->select('audit_audit_plan.id','audits.name')
+                        ->get();
+
+            $j = 0; //contador de auditorias por plan
+            foreach ($auditorias as $audit)
+            {
+                $audits[$j] = $audit->name;
+                $j += 1;
+                //obtenemos programas
+                $programs = DB::table('audit_audit_plan_audit_program')
+                                ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                                ->where('audit_audit_plan_audit_program.audit_audit_plan_id','=',$audit->id)
+                                ->select('audit_audit_plan_audit_program.id','audit_programs.name')
+                                ->get();
+
+                $k = 0; //contador de programas
+                foreach ($programs as $program)
+                {
+                    $audit_programs[$k] = $program->name;
+                    $k += 1;
+
+                    //obtenemos pruebas
+                    $tests = DB::table('audit_tests')
+                                ->where('audit_audit_plan_audit_program_id','=',$program->id)
+                                ->select('name','status')
+                                ->get();
+
+                    //vemos si hay alguna prueba en ejecución, si es así el plan estará en ejecución
+                    $l = 0; //contador de pruebas
+                    //estados de las pruebas
+                    $ejecucion = 0;
+                    $abiertas = 0;
+                    $cerradas = 0;
+                    foreach ($tests as $test)
+                    {
+                        $audit_tests[$l] = $test->name;
+                        $l += 1;
+
+                        if ($test->status == 0)
+                        {
+                            $abiertas += 1;
+                        }
+                        else if ($test->status == 1)
+                        {
+                            $ejecucion += 1;
+                        }
+                        else if ($test->status == 2)
+                        {
+                            $cerradas += 1;
+                        }
+                    }
+                }
+            }
+
+            $audit_plans[$i] = [
+                'name' => $audit_plan->name,
+                'audits' => $audits,
+                'programs' => $audit_programs,
+                'tests' => $audit_tests,
+                'ejecucion' => $ejecucion,
+                'abiertas' => $abiertas,
+                'cerradas' => $cerradas,
+            ];
+            $i += 1;
+
+            //vemos si el plan está en ejecución o abierto
+            if ($ejecucion > 0) //tiene al menos una prueba en ejecución
+            {
+                $planes_ejec += 1;
+            }
+            else if ($abiertas > 0) //no tiene pruebas en ejecución y tiene al menos una prueba abierta => plan abierto
+            {
+                $planes_abiertos += 1;
+            }
+            else if ($cerradas > 0) //no tiene ni pruebas abiertas ni en ejecución pero si cerradas => plan cerrado
+            {
+                $planes_cerrados += 1;
+            }
+
+        }
+
+        return view('reportes.auditorias_graficos',['audit_plans'=>$audit_plans,'planes_ejec'=>$planes_ejec,
+                                                    'planes_abiertos'=>2,'planes_cerrados'=>1]);
+
+    }
 }

@@ -1250,9 +1250,14 @@ class ControlesController extends Controller
         $controls = array();
         $controls_temp = array();
         $no_ejecutados = array();
+        $efectivos = 0;
+        $inefectivos = 0;
+        $j = 0; //contador para ids de efectivos e inefectivos
+        $id_inefectivos = array();
+        $id_efectivos = array();
         //primero seleccionamos id de controles de control_evaluation donde tengan status 2 (cerrado) y donde estos sean diferentes para que no se repitan
         $controles = DB::table('control_evaluation')
-                        ->where('control_evaluation.status','=',2)
+                        //->where('control_evaluation.status','=',2)
                         ->distinct()
                         ->get(['control_id as id']);
 
@@ -1260,7 +1265,24 @@ class ControlesController extends Controller
         foreach ($controles as $control)
         {
             $controls_temp[$i] = $control->id;
-            $i += 1; 
+            $i += 1;
+
+            //para cada uno vemos si son efectivos o inefectivos: Si al menos una de las pruebas es inefectiva, el control es inefectivo
+            $res = DB::table('control_evaluation')
+                        ->where('control_id','=',$control->id)
+                        ->where('results','=',2)
+                        ->first();
+
+            if ($res)
+            {
+                array_push($id_inefectivos,$control->id);
+                $inefectivos += 1;
+            }
+            else
+            {
+                array_push($id_efectivos,$control->id);
+                $efectivos += 1;
+            }
         }
 
         //ahora en audit_tests y que no hayan sido encontrados en control_evaluation
@@ -1269,12 +1291,23 @@ class ControlesController extends Controller
                         ->whereNotNull('audit_tests.control_id')
                         ->whereNotIn('audit_tests.control_id',$controls_temp)
                         ->distinct()
-                        ->get(['control_id as id']);
+                        ->get(['control_id as id','results']);
 
         foreach ($controles as $control)
         {
             $controls_temp[$i] = $control->id;
             $i += 1;
+
+            if ($control->results == 0)
+            {
+                $inefectivos += 1;
+                array_push($id_inefectivos,$control->id);
+            }
+            else
+            {
+                $efectivos += 1;
+                array_push($id_efectivos,$control->id);
+            }
         }
 
         //ahora obtenemos los datos de los controles seleccionados
@@ -1283,18 +1316,43 @@ class ControlesController extends Controller
         {
             $control = \Ermtool\Control::find($id);
 
+            //obtenemos resultado del control
             //fecha de actualización del control
             $updated_at = new DateTime($control->updated_at);
             $updated_at = date_format($updated_at, 'd-m-Y');
 
-            $controls[$i] = [
-                    'id' => $control->id,
-                    'name' => $control->name,
-                    'description' => $control->description,
-                    'updated_at' => $updated_at,
-                ];
+            foreach ($id_efectivos as $id_ef)
+            {
+                if ($id_ef == $control->id)
+                {
+                    $controls[$i] = [
+                        'id' => $control->id,
+                        'name' => $control->name,
+                        'description' => $control->description,
+                        'updated_at' => $updated_at,
+                        'results' => 2
+                    ];
 
-            $i += 1;
+                    $i += 1;
+                }
+            }
+
+            foreach ($id_inefectivos as $id_inef)
+            {
+                if ($id_inef == $control->id)
+                {
+                    $controls[$i] = [
+                        'id' => $control->id,
+                        'name' => $control->name,
+                        'description' => $control->description,
+                        'updated_at' => $updated_at,
+                        'results' => 1
+                    ];
+
+                    $i += 1;
+                }
+            }
+            
         }
         //guardamos cantidad de ejecutados
         $cont_ejec = $i;
@@ -1322,11 +1380,16 @@ class ControlesController extends Controller
         //guardamos cantidad de no ejecutados
         $cont_no_ejec = $i;
 
+
         //return json_encode($controls);
         //echo $cont_ejec.' y '.$cont_no_ejec;
+        //echo $efectivos. ' y '.$inefectivos;
+        //print_r($id_efectivos);
+        //print_r($id_inefectivos);
         //print_r($no_ejecutados);
         return view('reportes.controles_graficos',['controls'=>$controls,'no_ejecutados'=>$no_ejecutados,
-                                          'cont_ejec' => $cont_ejec,'cont_no_ejec'=>$cont_no_ejec]);
+                                          'cont_ejec' => $cont_ejec,'cont_no_ejec'=>$cont_no_ejec,
+                                          'efectivos' => $efectivos,'inefectivos'=>$inefectivos]);
     }
 
 }
