@@ -71,12 +71,7 @@
 </div>
 <!-- FIN Gráfico de planes de auditoría abiertos, en ejecución o cerrados -->
 
-<!-- Gráfico de controles efectivos v/s inefectivos -->
 
-
-
-
-<!-- FIN Gráfico de controles efectivos v/s inefectivos -->
 
       		
 
@@ -90,7 +85,7 @@
 	@if ($planes_ejec > 0 || $planes_abiertos > 0 || $planes_cerrados > 0)
       google.charts.load("visualization", "1", {packages:["corechart"]});
       google.charts.setOnLoadCallback(chart1);
-      //google.charts.setOnLoadCallback(chart2);
+      google.charts.setOnLoadCallback(chart2);
       function chart1() {
         var data = google.visualization.arrayToDataTable([
           ['Planes de auditoría', 'Cantidad'],
@@ -101,7 +96,8 @@
 
         var options = {
           title: 'Estado de planes de auditoría',
-          is3D: true,
+          is3D: false,
+          colors: ['#74DF00','#FF8000']
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
@@ -192,12 +188,13 @@
       		//console.log(sel);
 		}
       }
-
-    //aqui otro gráfico
     @else
     	$('#alternativo').html('<b>No existen planes de auditor&iacute;as pendientes ni en ejecuci&oacute;on</b>');
     	//$('#alternativo2').html('<b>Aun no se han ejecutado controles</b>');
     @endif
+
+    
+    
       
 </script>
 @stop

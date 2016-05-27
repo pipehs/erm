@@ -58,7 +58,7 @@
 			</div>
 
 			<div class="form-group">
-				{!!Form::label('Intervalo de valuación',null,['class'=>'col-sm-4 control-label'])!!}
+				{!!Form::label('Intervalo de evaluación',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-2">
 					{!!Form::date('date_min',null,['class'=>'form-control','required'=>'true'])!!}
 				</div>

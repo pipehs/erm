@@ -364,7 +364,7 @@ Route::post('identificacion.guardarEvaluacion.{id}', [
 ]);
 
 Route::post('identificacion.updateEvaluacion.{id}', [
-	'as' => 'identificacion.eupdateEvaluacion', 'uses' => 'EncuestasController@updateEvaluacion'
+	'as' => 'identificacion.updateEvaluacion', 'uses' => 'EncuestasController@updateEvaluacion'
 ]);
 
 Route::post('identificacion.encuestaRespondida', [
@@ -516,6 +516,11 @@ Route::get('matrices', [
 Route::get('matriz_riesgos', [
 	'as' => 'matriz_riesgos', 'uses' => 'RiesgosController@matrices']);
 
+// Nuevos enlaces para matrices de riesgos divididas: matriz de riesgos de proceso y corporativos
+
+Route::get('genmatrizriesgos.{value}', [
+	'as' => 'genmatrizriesgos', 'uses' => 'RiesgosController@generarMatriz']);
+
 Route::get('reporte_planes', [
 	'as' => 'reporte_planes', 'uses' => 'AuditoriasController@actionPlansReport']);
 
@@ -527,6 +532,9 @@ Route::get('graficos_controles', [
 
 Route::get('graficos_auditorias', [
 	'as' => 'graficos_auditorias', 'uses' => 'AuditoriasController@indexGraficos']);
+
+Route::get('graficos_planes_accion', [
+	'as' => 'graficos_planes_accion', 'uses' => 'PlanesAccionController@indexGraficos']);
 
 
 //------ Rutas para auditoría de riesgos ------//
@@ -654,8 +662,8 @@ Route::get('controles.docs.{id}', [
 	'as' =>'controles.docs', 'uses' => 'ControlesController@docs']);
 
 //ruta para generar matriz de riesgos a través de JSON
-Route::get('genmatrizriesgos.{value}', [
-	'as' => 'genmatrizriesgos', 'uses' => 'RiesgosController@generarMatriz']);
+//Route::get('genmatrizriesgos.{value}', [
+//	'as' => 'genmatrizriesgos', 'uses' => 'RiesgosController@generarMatriz']);
 
 //ruta para generar matriz de control a través de JSON
 Route::get('genmatriz.{value}', [
@@ -666,8 +674,8 @@ Route::get('genplanes_accion.{org}', [
 	'as' => 'genplanes_accion', 'uses' => 'PlanesAccionController@generarReportePlanes']);
 
 //ruta para generar reporte de hallazgos
-Route::get('genissues_report.{org}', [
-	'as' => 'genissues_report', 'uses' => 'AuditoriasController@generarReporteIssues']);
+Route::get('genissues_report.{type}', [
+	'as' => 'genissues_report', 'uses' => 'IssuesController@generarReporteIssues']);
 
 //ruta para obtener datos de plan de auditoría anterior 
 Route::get('auditorias.get_audit_plan.{org}', [
@@ -740,8 +748,8 @@ Route::get('auditorias.close_note.{id}', [
 	'as' => 'auditorias.close_note', 'uses' => 'AuditoriasController@closeNote']);
 
 //ruta para obtener procesos de una organizacion
-//Route::get('get_processes.{id}', [
-//	'as' => 'get_processes', 'uses' => 'ProcesosController@getProcesses']);
+Route::get('get_processes.{id}', [
+	'as' => 'get_processes', 'uses' => 'ProcesosController@getProcesses']);
 
 //ruta para obtener procesos de una organizacion
 Route::get('get_subprocesses.{id}', [
@@ -786,6 +794,9 @@ Route::post('kri.guardar_enlace', [
 
 Route::get('kri.create', [
 	'as' => 'kri.create', 'uses' => 'KriController@create']);
+
+Route::get('kri.create2.{id}', [
+	'as' => 'kri.create2', 'uses' => 'KriController@create2']);
 
 Route::post('kri.store', [
 	'as' => 'kri.store', 'uses' => 'KriController@store']);

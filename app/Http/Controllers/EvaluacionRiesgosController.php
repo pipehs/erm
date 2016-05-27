@@ -294,8 +294,9 @@ class EvaluacionRiesgosController extends Controller
         $encuesta['name'] = $poll['name'];
         $encuesta['description'] = $poll['description'];
 
-        $encuesta['created_at'] = date_format($poll['created_at'],"d-m-Y");
-        $encuesta['created_at'] .= " a las ".date_format($poll['created_at'],"H:i:s");
+        $created_at = new DateTime($poll['created_at']);
+        $encuesta['created_at'] = date_format($created_at, 'd-m-Y');
+        $encuesta['created_at'] .= " a las ".date_format($created_at, 'H:i:s');
 
         if ($poll['expiration_date'] != NULL)
         {
@@ -442,7 +443,7 @@ class EvaluacionRiesgosController extends Controller
                         ->join('risks','risk_subprocess.risk_id','=','risks.id')
                         ->join('subprocesses','risk_subprocess.subprocess_id','=','subprocesses.id')
                         ->join('processes','processes.id','=','subprocesses.process_id')
-                        ->select('risks.name as risk_name','subprocesses.name as subprocess_name',
+                        ->select('risks.name as risk_name','risks.description','subprocesses.name as subprocess_name',
                                 'processes.name as process_name')
                         ->get();
 
@@ -452,6 +453,7 @@ class EvaluacionRiesgosController extends Controller
                     $riesgos[$i] = array('type' => 'subprocess',
                                         'risk_id' => $risk,
                                         'risk_name' => $sub->risk_name,
+                                        'description' => $sub->description,
                                         'subobj' => $sub->subprocess_name,
                                         'orgproc' => $sub->process_name);
                     $i += 1;
@@ -466,7 +468,7 @@ class EvaluacionRiesgosController extends Controller
                         ->join('risks','objective_risk.risk_id','=','risks.id')
                         ->join('objectives','objective_risk.objective_id','=','objectives.id')
                         ->join('organizations','objectives.organization_id','=','organizations.id')
-                        ->select('risks.name as risk_name','organizations.name as organization_name',
+                        ->select('risks.name as risk_name','risks.description','organizations.name as organization_name',
                                 'objectives.name as objective_name')
                         ->get();
 
@@ -475,6 +477,7 @@ class EvaluacionRiesgosController extends Controller
                     $riesgos[$i] = array('type' => 'objective',
                                         'risk_id' => $risk,
                                         'risk_name' => $neg->risk_name,
+                                        'description' => $neg->description,
                                         'subobj' => $neg->objective_name,
                                         'orgproc' => $neg->organization_name);
                     $i += 1;
@@ -707,7 +710,15 @@ class EvaluacionRiesgosController extends Controller
         else //no se encontró el rut ingresado
         {
             Session::flash('message','El rut ingresado no se encuentra en nuestra base de datos');
+
+            if ($_POST['tipo'] == 0)
+            {
+                return view('evaluacion.show',[''=>'tipo' == $_POST['tipo']]);
+            }
+            else
+            {
                 return Redirect::to('evaluacion.encuesta.'.$request["evaluation_id"]);
+            }
         }
     }
 
@@ -788,6 +799,7 @@ class EvaluacionRiesgosController extends Controller
                                 ->whereNotNull('evaluation_risk.risk_subprocess_id')
                                 ->where('organization_subprocess.organization_id','=',$_POST['organization_id'])
                                 ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
+                                ->where('evaluations.consolidation','=',1)
                                 ->select('evaluation_risk.risk_subprocess_id as risk_id')
                                 ->groupBy('risk_id')
                                 ->get();
@@ -1033,18 +1045,9 @@ class EvaluacionRiesgosController extends Controller
 
                         
        // }
-        /* 
-        $resultado = ['nombre'=>$nombre,'descripcion'=>$descripcion,
-                                        'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
-                                        'prom_criticidad_in'=>$prom_criticidad_in,
-                                        'prom_proba_ctrl'=>$prom_proba_ctrl,
-                                        'prom_criticidad_ctrl'=>$prom_criticidad_ctrl,
-                                        'kind' => $_POST['kind']];
-
-        return json_encode($resultado); */
         
         //retornamos la misma vista con datos
-        return view('reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
+                return view('reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
                                         'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
                                         'prom_criticidad_in'=>$prom_criticidad_in,
                                         'prom_proba_ctrl'=>$prom_proba_ctrl,

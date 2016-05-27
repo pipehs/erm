@@ -107,8 +107,7 @@ class KriController extends Controller
 
                 //calculamos evaluacion (color)
 
-                $eval = $this->calc_sem($last_eval,$k->green_min,$k->green_max,$k->yellow_min,$k->yellow_max,
-                                        $k->red_min,$k->red_max);
+                $eval = $this->calc_sem($last_eval,$k->green_min,$k->interval_min,$k->interval_max,$k->red_max);
 
                 
                 if ($eval == 0) //0: verde
@@ -235,8 +234,8 @@ class KriController extends Controller
         $kri_objective_risk = array();
         //seleccionamos todos los riesgos de proceso que estén enlazados a algún riesgo de negocio
         $risks = DB::table('objective_subprocess_risk')
-                    ->join('risks as risk_subprocess','risk_subprocess.id','=','objective_subprocess_risk.risk_subprocess_id')
-                    ->select('risk_subprocess.id as id','risk_subprocess.name as name')
+                    ->join('risks','risks.id','=','objective_subprocess_risk.risk_subprocess_id')
+                    ->select('risks.id as id','risks.name as name')
                     ->distinct()
                     ->get();
 
@@ -272,6 +271,12 @@ class KriController extends Controller
         return view('kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
     }
 
+    public function create2($id)
+    {
+        return view('kri.create',['risk_id' => $id]);
+    }
+
+
     /**
      * Store a newly created resource in storage.
      *
@@ -293,13 +298,12 @@ class KriController extends Controller
                         'type' => $_POST['type'],
                         'periodicity' => $_POST['periodicity'],
                         'uni_med' => $_POST['uni_med'],
+                        'min_max' => $_POST['min_max'],
                         'green_min' => $_POST['green_min'],
-                        'green_max' => $_POST['green_max'],
                         'description_green' => $_POST['description_green'],
-                        'yellow_min' => $_POST['yellow_min'],
-                        'yellow_max' => $_POST['yellow_max'],
+                        'interval_min' => $_POST['interval_min'],
+                        'interval_max' => $_POST['interval_max'],
                         'description_yellow' => $_POST['description_yellow'],
-                        'red_min' => $_POST['red_min'],
                         'red_max' => $_POST['red_max'],
                         'description_red' => $_POST['description_red'],
                         'created_at' => date('Y-m-d H:i:s'),
@@ -380,6 +384,12 @@ class KriController extends Controller
         }
 
         $kri = \Ermtool\KRI::find($id);
+
+        //redondeamos valores de kri (ya que no sirvio redondearlos al guardar)
+        $kri->green_min = round($kri->green_min,1);
+        $kri->interval_min = round($kri->interval_min,1);
+        $kri->interval_max = round($kri->interval_max,1);
+        $kri->red_max  = round($kri->red_max,1);
         return view('kri.edit',['kri'=>$kri,'risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
     }
 
@@ -403,14 +413,13 @@ class KriController extends Controller
             $kri->name = $_POST['name'];
             $kri->description = $_POST['description'];
             $kri->type = $_POST['type'];
+            $kri->min_max = $_POST['min_max'];
             $kri->uni_med = $_POST['uni_med'];
             $kri->green_min = $_POST['green_min'];
-            $kri->green_max = $_POST['green_max'];
             $kri->description_green = $_POST['description_green'];
-            $kri->yellow_min = $_POST['yellow_min'];
-            $kri->yellow_max = $_POST['yellow_max'];
+            $kri->interval_min = $_POST['interval_min'];
+            $kri->interval_max = $_POST['interval_max'];
             $kri->description_yellow = $_POST['description_yellow'];
-            $kri->red_min = $_POST['red_min'];
             $kri->red_max = $_POST['red_max'];
             $kri->description_red = $_POST['description_red'];
 
@@ -567,20 +576,21 @@ class KriController extends Controller
                         'date_min' => $_POST['date_min'],
                         'date_max' => $_POST['date_max'],
                         ]);
-            }
+            
 
-            if (isset($id))
-            {
-                //insertamos también en last_evaluation y date_evaluation de KRI
-                DB::table('KRI')
-                ->where('id','=',$_POST['id'])
-                ->update([
-                    'kri_last_evaluation' => $_POST['evaluation'],
-                    'date_evaluation' => $date,
-                    'updated_at' => $date,
-                    ]);
+                if (isset($id))
+                {
+                    //insertamos también en last_evaluation y date_evaluation de KRI
+                    DB::table('KRI')
+                    ->where('id','=',$_POST['id'])
+                    ->update([
+                        'kri_last_evaluation' => $_POST['evaluation'],
+                        'date_evaluation' => $date,
+                        'updated_at' => $date,
+                        ]);
 
-                Session::flash('message','Evaluación realizada correctamente');
+                    Session::flash('message','Evaluación realizada correctamente');
+                }
             }
             else
             {
@@ -646,8 +656,7 @@ class KriController extends Controller
                 
                 //calculamos evaluacion (color)
 
-                $eval = $this->calc_sem($last_eval,$k->green_min,$k->green_max,$k->yellow_min,$k->yellow_max,
-                                        $k->red_min,$k->red_max);
+                $eval = $this->calc_sem($last_eval,$k->green_min,$k->interval_min,$k->interval_max,$k->red_max);
 
                 
                 if ($eval == 0) //0: verde
@@ -692,7 +701,7 @@ class KriController extends Controller
         //primero obtenemos cotas de semaforo
         $cotas = DB::table('KRI')
                 ->where('id','=',$id)
-                ->select('green_min','green_max','yellow_min','yellow_max','red_min','red_max')
+                ->select('green_min','interval_min','interval_max','red_max')
                 ->first();
 
         $evals = DB::table('measurements')
@@ -705,8 +714,7 @@ class KriController extends Controller
         foreach ($evals as $eval)
         {
             //calculamos evaluacion (color)
-            $res = $this->calc_sem($eval->value,$cotas->green_min,$cotas->green_max,$cotas->yellow_min,$cotas->yellow_max,
-                $cotas->red_min,$cotas->red_max);    
+            $res = $this->calc_sem($eval->value,$cotas->green_min,$cotas->interval_min,$cotas->interval_max,$cotas->red_max);    
             $date = date('d-m-Y',strtotime($eval->created_at));
             $date_min = date('d-m-Y',strtotime($eval->date_min));
             $date_max = date('d-m-Y',strtotime($eval->date_max));
@@ -724,43 +732,29 @@ class KriController extends Controller
     }
 
     //función para calcular semaforo
-    function calc_sem($value,$green_min,$green_max,$yellow_min,$yellow_max,$red_min,$red_max)
+    function calc_sem($value,$green_min,$interval_min,$interval_max,$red_max)
     {
-        if ($green_max != $yellow_min && $yellow_max != $red_min) //son distintos, por lo tanto incluyentes los minimos
+        if ($value >= $green_min && $value <= $red_max)
         {
-                //OBS: Verificamos en caso de que las cotas sean de mayor a menor Ó de menor a mayor
-                if ($value >= $green_min && $value <= $green_max || $value <= $green_min && $value >= $green_max)
-                {
-                    $eval = 0; //0: verde
-                }
-                else if ($value >= $yellow_min && $value <= $yellow_max || $value <= $yellow_min && $value >= $yellow_max)
-                {
-                    $eval = 1; //1: amarillo
-                }
-                else if ($value >= $red_min && $value <= $red_max || $value <= $red_min && $value >= $red_max)
-                {
-                    $eval = 2; //2: rojo
-                }
+            //OBS: También verificamos en caso de que las cotas sean de mayor a menor Ó de menor a mayor
+            if ($value < $interval_min)
+            {
+                $eval = 0; //0: verde
+            }
+            else if ($value >= $interval_min && $value < $interval_max)
+            {
+                $eval = 1; //1: amarillo
+            }
+            //en este caso se deja >= $red_max en el último tramo ya que no hay más cotas
+            else if ($value >= $interval_max && $value <= $red_max)
+            {
+                $eval = 2; //2: rojo
+            }
         }
-
-        else //son iguales, por lo que se debe elegir un criterio, en este caso sera incluyente el mínimo y excluira el máximo
+        else
         {
-                //OBS: También verificamos en caso de que las cotas sean de mayor a menor Ó de menor a mayor
-                if ($value >= $green_min && $value < $green_max || $value <= $green_min && $value > $green_max)
-                {
-                    $eval = 0; //0: verde
-                }
-                else if ($value >= $yellow_min && $value < $yellow_max || $value <= $yellow_min && $value > $yellow_max)
-                {
-                    $eval = 1; //1: amarillo
-                }
-                //en este caso se deja >= $red_max en el último tramo ya que no hay más cotas
-                else if ($value >= $red_min && $value < $red_max || $value <= $red_min && $value >= $red_max)
-                {
-                    $eval = 2; //2: rojo
-                }
+            $eval = NULL;
         }
-       
 
         $r = $eval;
 

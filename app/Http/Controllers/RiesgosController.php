@@ -642,21 +642,21 @@ class RiesgosController extends Controller
                 //seteamos causa y efecto
 
                 //obtenemos causas
-                $cause_risk = DB::table('cause_risk')
+                $causes = DB::table('cause_risk')
+                                ->join('causes','causes.id','=','cause_risk.cause_id')
                                 ->where('risk_id','=',$risk->id)
-                                ->select('cause_id as id')
+                                ->select('causes.name')
                                 ->get();
 
-                if ($cause_risk)
+                if ($causes)
                 {
-                    foreach ($cause_risk as $cause)
+                    $last = end($causes); //guardamos final para no agregarle coma
+                    foreach ($causes as $cause)
                     {
-                        $cause = DB::table('causes')
-                            ->where('causes.id','=',$cause->id)
-                            ->select('causes.name')
-                            ->first();
-
-                        $causas .= '<li>'.$cause->name.'</li>';
+                        if ($cause != $last)
+                            $causas .= $cause->name.', ';
+                        else
+                            $causas .= $cause->name;
                     }
                 }
                 else
@@ -665,30 +665,28 @@ class RiesgosController extends Controller
                 }
 
                 //obtenemos efectos
-                $effect_risk = DB::table('effect_risk')
+                $effects = DB::table('effect_risk')
+                                ->join('effects','effects.id','=','effect_risk.effect_id')
                                 ->where('risk_id','=',$risk->id)
-                                ->select('effect_id as id')
+                                ->select('effects.name')
                                 ->get();
 
 
-                if ($effect_risk)
+                if ($effects)
                 {
-                    foreach ($effect_risk as $effect)
+                    $last = end($effects); //guardamos final para no agregarle coma
+                    foreach ($effects as $effect)
                     {
-                        $effects = DB::table('effects')
-                                ->where('effects.id','=',$effect->id)
-                                ->select('effects.name')
-                                ->first();
-
-                        $efectos .= '<li>'.$effects->name.'</li>';
+                        if ($effect != $last)
+                            $efectos .= $effect->name.', ';
+                        else
+                            $efectos .= $effect->name;
                     }
                 }
                 else
                 {
                     $efectos = "No tiene efectos definidos";
                 }
-
-                
 
                 if ($value == 0) //controles y eval para riesgos de proceso
                 {
@@ -764,9 +762,13 @@ class RiesgosController extends Controller
                 }
                 else
                 {
+                    $last = end($controls); //guardamos final para no agregarle coma
                     foreach ($controls as $control)
                     {
-                        $controles .= '<li>'.$control->name.'</li>';
+                        if ($control != $last)
+                            $controles .= $control->name.', ';
+                        else
+                            $controles .= $control->name;
                     }
                 }
                 /* IMPORTANTE!!!
@@ -850,7 +852,10 @@ class RiesgosController extends Controller
             return $datos;
         }
         else
-            return json_encode($datos);
+        {
+            return view('reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value]);
+            //return json_encode($datos);
+        }
     }
 
     /**

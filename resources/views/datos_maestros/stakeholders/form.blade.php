@@ -2,7 +2,7 @@
 			            {!!Form::label('Rut',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-2">
 							{!!Form::text('id',null,
-							['class'=>'form-control',$required,'input maxlength'=>'8',$disabled])!!}
+							['class'=>'form-control',$required,'input maxlength'=>'8','input minlength'=>'7', $disabled])!!}
 						</div>
 						<div class="col-sm-1">
 						{!!Form::select('dv',$dv, 

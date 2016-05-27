@@ -20,7 +20,11 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-check"></i>
-					<span>Encuesta: {{ $encuesta['name'] }}</span>
+					@if (isset($encuesta))
+						<span>Encuesta: {{ $encuesta['name'] }}</span>
+					@else
+						<span>Evaluaci&oacute;n Manual</span>
+					@endif
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -42,57 +46,59 @@
 				{{ Session::get('message') }}
 			</div>
 			@endif
-			<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
-			<tr>
-			<th width="50%">Descripci&oacute;n</th>
-			<td>{{ $encuesta['description'] }}</td>
-			</tr>
-			<tr>
-			<th>Fecha Creaci&oacute;n</th>
-			<td>{{ $encuesta['created_at'] }}</td>
-			</tr>
-			<tr>
-			<th>Fecha Expiraci&oacute;n</th>
-			@if ($encuesta['expiration_date'] == "")
-				<td>Ninguna</td>
-			@else
-				<td>{{ $encuesta['expiration_date'] }}</td>
-			@endif
-			</tr>
-			<tr>
-			<th>Riesgos Relacionados</th>
-			<td><ul>
-					@foreach ($riesgos as $riesgo)
-						<li>{{ $riesgo['risk_name'] }} - {{ $riesgo['subobj'] }}</li>
-					@endforeach
-					</ul>					
-				</td>
-			<tr>
-			</table>
 
-			<h5><b>Usuarios a los que se les ha enviado esta encuesta</b></h5>
-
-			@if (!empty($stakeholders))
+			@if (!isset($tipo) && isset($encuesta))
 				<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
-				<thead>
-				<th>Usuario</th><th>Respuestas</th>
-				</thead>
-				@foreach ($stakeholders as $user)
 				<tr>
-					<td>{{ $user['name'].' '.$user['surnames'] }}</td>
-					@if ($user['answers'] == 0)
-						<td>{!! link_to_route('ver_respuestas', $title = 'Ver', $parameters = ['eval_id'=>$encuesta['id'],'rut'=>$user['id']],
-				 $attributes = ['class'=>'btn btn-success'])!!}</td>
-					@else
-						<td>Este usuario aun no envía respuestas</td>
-					@endif
+				<th width="50%">Descripci&oacute;n</th>
+				<td>{{ $encuesta['description'] }}</td>
 				</tr>
-				@endforeach
+				<tr>
+				<th>Fecha Creaci&oacute;n</th>
+				<td>{{ $encuesta['created_at'] }}</td>
+				</tr>
+				<tr>
+				<th>Fecha Expiraci&oacute;n</th>
+				@if ($encuesta['expiration_date'] == "")
+					<td>Ninguna</td>
+				@else
+					<td>{{ $encuesta['expiration_date'] }}</td>
+				@endif
+				</tr>
+				<tr>
+				<th>Riesgos Relacionados</th>
+				<td><ul>
+						@foreach ($riesgos as $riesgo)
+							<li>{{ $riesgo['risk_name'] }} - {{ $riesgo['subobj'] }}</li>
+						@endforeach
+						</ul>					
+					</td>
+				<tr>
 				</table>
-			@else
-				<b>Esta encuesta aun no ha sido enviada a ning&uacute;n usuario.</b><br><br>
-			@endif
 
+				<h5><b>Usuarios a los que se les ha enviado esta encuesta</b></h5>
+
+				@if (!empty($stakeholders))
+					<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
+					<thead>
+					<th>Usuario</th><th>Respuestas</th>
+					</thead>
+					@foreach ($stakeholders as $user)
+					<tr>
+						<td>{{ $user['name'].' '.$user['surnames'] }}</td>
+						@if ($user['answers'] == 0)
+							<td>{!! link_to_route('ver_respuestas', $title = 'Ver', $parameters = ['eval_id'=>$encuesta['id'],'rut'=>$user['id']],
+					 $attributes = ['class'=>'btn btn-success'])!!}</td>
+						@else
+							<td>Este usuario aun no envía respuestas</td>
+						@endif
+					</tr>
+					@endforeach
+					</table>
+				@else
+					<b>Esta encuesta aun no ha sido enviada a ning&uacute;n usuario.</b><br><br>
+				@endif
+			@endif
 			<center>
 				{!! link_to_route('evaluacion_agregadas', $title = 'Volver', $parameters = NULL,
 				 $attributes = ['class'=>'btn btn-danger'])!!}

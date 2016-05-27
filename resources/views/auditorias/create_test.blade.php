@@ -193,7 +193,7 @@ $("#kind").change(function() {
 					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
 				//se obtienen datos de prueba de auditoría
 					$.get('auditorias.get_audit_program.'+$("#kind").val(), function (result) {
-							alert(result);
+							//alert(result);
 							$("#cargando").html('<br>');
 							$("#name").empty();
 							$("#description").empty();

@@ -10,6 +10,7 @@ use Ermtool\Http\Controllers\ControlesController as Controles; //Para poder gene
 use Ermtool\Http\Controllers\RiesgosController as Riesgos; //Para poder generar matriz de riesgo y exportarla
 use Ermtool\Http\Controllers\AuditoriasController as Auditorias;
 use Ermtool\Http\Controllers\PlanesAccionController as PlanesAccion;
+use Ermtool\Http\Controllers\IssuesController as Issues;
 
 class ExcelController extends Controller
 {
@@ -216,8 +217,8 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de hallazgos');
 
                 $excel->sheet('Auditorías', function($sheet) {
-                    $auditoria = new Auditorias;
-                    $datos = $auditoria->generarReporteIssues($GLOBALS['id']);
+                    $issue = new Issues;
+                    $datos = $issue->generarReporteIssues($GLOBALS['id']);
 
                     //$datos2 = json_decode($datos);
                     $sheet->fromArray($datos);

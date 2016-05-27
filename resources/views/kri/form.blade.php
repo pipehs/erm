@@ -1,3 +1,4 @@
+			@if (!isset($risk_id))
 				<div class="form-group">
 					{!!Form::label('Seleccione riesgo',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
@@ -41,7 +42,9 @@
 						</select>
 					</div>
 				</div>
-
+			@else
+				{!!Form::hidden('risk_id',$risk_id)!!}
+			@endif
 				<div class="form-group">
 					{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
@@ -84,20 +87,74 @@
 					</div>
 				</div>
 			<div id="cotas" style="display:none;">
+				<div class="form-group">
+					<div class="col-sm-10 control-label">
+						<center>
+							<b>Indique si el valor n&uacute;merico m&aacute;ximo lo poseer&aacute; el verde o el rojo</b><br>
+							<br>
+							<div class="radio-inline">
+								<label>
+									{!!Form::radio('min_max',1,['onchange'=>'ordenamiento()'])!!}  Verde m&aacute;ximo
+									
+									<i class="fa fa-circle-o"></i>
+								</label>
+							</div>
+							<div class="radio-inline">
+								<label>
+									{!!Form::radio('min_max',2,['onchange'=>'ordenamiento()'])!!}  Rojo m&aacute;ximo
+									<i class="fa fa-circle-o"></i>
+								</label>
+							</div>
+						</center>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="col-sm-10 control-label">
+						<center>
+							<b>Ingrese los intervalos en concordancia a la imagen siguiente</b>
+						</center>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="col-sm-10 control-label">
+						<center>
+							{!! HTML::image('assets/img/gradiente_kri.png',"Imagen no encontrada", array('id' => 'gradiente', 'title' => 'Gradiente de ejemplo','height'=>'95px','width'=>'450px')) !!}
+						</center>
+					</div>
+				</div>
+
 				<div class="form-group" id="div_green_min">
-					{!!Form::label('Cota mínima verde',null,['class'=>'col-sm-4 control-label'])!!}
+					<label for="green_min" class="col-sm-4 control-label"><img src="../public/assets/img/1.png" height="21px" width="21px"></label>
 					<div class="col-sm-3">
-						{!!Form::number('green_min',null,['class'=>'form-control','required'=>'true','id'=>'green_min','step'=>'0.1'])!!}
+						{!!Form::number('green_min',null,['class'=>'form-control','required'=>'true','id'=>'green_min','step'=>'0.1', 'onchange'=>'ordenamiento()'])!!}
 					</div>
 					<div id="error_min_green"></div>
 				</div>
 
-				<div class="form-group" id="div_green_max">
-					{!!Form::label('Cota máxima verde',null,['class'=>'col-sm-4 control-label'])!!}
+				<div class="form-group" id="div_interval_min">
+					<label for="interval_min" class="col-sm-4 control-label"><img src="../public/assets/img/2.png" height="21px" width="21px"></label>
 					<div class="col-sm-3">
-						{!!Form::number('green_max',null,['class'=>'form-control','required'=>'true','id'=>'green_max','step'=>'0.1'])!!}
+						{!!Form::number('interval_min',null,['class'=>'form-control','required'=>'true','id'=>'interval_min','step'=>'0.1', 'onchange'=>'ordenamiento()'])!!}
 					</div>
-					<div id="error_max_green"></div>
+					<div id="error_interval_min"></div>
+				</div>
+
+				<div class="form-group" id="div_interval_max">
+					<label for="interval_max" class="col-sm-4 control-label"><img src="../public/assets/img/3.png" height="21px" width="21px"></label>
+					<div class="col-sm-3">
+						{!!Form::number('interval_max',null,['class'=>'form-control','required'=>'true','id'=>'interval_max','step'=>'0.1', 'onchange'=>'ordenamiento()'])!!}
+					</div>
+					<div id="error_interval_max"></div>
+				</div>
+
+				<div class="form-group" id="div_red_max">
+					<label for="red_max" class="col-sm-4 control-label"><img src="../public/assets/img/4.png" height="21px" width="21px"></label>
+					<div class="col-sm-3">
+						{!!Form::number('red_max',null,['class'=>'form-control','required'=>'true','id'=>'red_max','step'=>'0.1', 'onchange'=>'ordenamiento()'])!!}
+					</div>
+					<div id="error_max_red"></div>
 				</div>
 
 				<div class="form-group">
@@ -108,44 +165,12 @@
 					</div>
 				</div>
 
-				<div class="form-group" id="div_yellow_min">
-					{!!Form::label('Cota mínima amarillo',null,['class'=>'col-sm-4 control-label'])!!}
-					<div class="col-sm-3">
-						{!!Form::number('yellow_min',null,['class'=>'form-control','required'=>'true','id'=>'yellow_min','step'=>'0.1'])!!}
-					</div>
-					<div id="error_min_yellow"></div>
-				</div>
-
-				<div class="form-group" id="div_yellow_max">
-					{!!Form::label('Cota máxima amarillo',null,['class'=>'col-sm-4 control-label'])!!}
-					<div class="col-sm-3">
-						{!!Form::number('yellow_max',null,['class'=>'form-control','required'=>'true','id'=>'yellow_max','step'=>'0.1'])!!}
-					</div>
-					<div id="error_max_yellow"></div>
-				</div>
-
 				<div class="form-group">
 					{!!Form::label('Descripción amarillo',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 						{!!Form::textarea('description_yellow',null,['class'=>'form-control',
 										'required'=>'true','rows'=>'3','id'=>'description_yellow'])!!}
 					</div>
-				</div>
-
-				<div class="form-group" id="div_red_min">
-					{!!Form::label('Cota mínima roja',null,['class'=>'col-sm-4 control-label'])!!}
-					<div class="col-sm-3">
-						{!!Form::number('red_min',null,['class'=>'form-control','required'=>'true','id'=>'red_min','step'=>'0.1'])!!}
-					</div>
-					<div id="error_min_red"></div>
-				</div>
-
-				<div class="form-group" id="div_red_max">
-					{!!Form::label('Cota máxima roja',null,['class'=>'col-sm-4 control-label'])!!}
-					<div class="col-sm-3">
-						{!!Form::number('red_max',null,['class'=>'form-control','required'=>'true','id'=>'red_max'])!!}
-					</div>
-					<div id="error_max_red"></div>
 				</div>
 
 				<div class="form-group">

@@ -189,7 +189,7 @@ class EncuestasController extends Controller
         if (!$user)
         {
             Session::flash('error','La encuesta no ha sido enviada al usuario ingresado');
-            return view('evaluacion.verificar_encuesta',['encuesta'=>$encuesta]);
+            return view('identificacion_eventos_riesgos.verificar_encuesta',['encuesta'=>$encuesta]);
         }
         else
         {
@@ -275,7 +275,7 @@ class EncuestasController extends Controller
                     $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
                 }
 
-                if ($errors)
+                if (isset($errors))
                 {
                     Session::flash('error',$errors);
                 }

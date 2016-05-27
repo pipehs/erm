@@ -88,6 +88,28 @@
       color: #303b44;
       margin-top: 3px; }
 
+/* características para gráfico de planes de auditoría */
+    .swal-wide{
+              width:80% !important;
+              height: 70%;
+              left: 30% !important; 
+              overflow:auto;
+          }
+    /* características para gráfico de controles */
+    .swal-wide2{
+              width:50% !important;
+              height: 50%;
+              left: 45% !important;
+              overflow:auto;
+          }
+    /* características para gráfico de ISSUES */
+    .swal-wide3{
+              width:90% !important;
+              height: 90%;
+              left: 22% !important;
+              overflow:auto; 
+          }
+          
 @-webkit-keyframes animateErrorIcon {
   0% {
     transform: rotateX(100deg), scale(0.5);

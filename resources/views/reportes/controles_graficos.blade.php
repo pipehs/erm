@@ -123,7 +123,8 @@
 
         var options = {
           title: 'Ejecutados v/s Pendientes',
-          is3D: true,
+          is3D: false,
+          colors: ['#74DF00','#FF0000']
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
@@ -191,7 +192,7 @@
         var options = {
           title: 'Efectivos v/s Inefectivos',
           is3D: false,
-          colors: ['#0431B4', '#5882FA']
+          colors: ['#74DF00','#FF0000']
         };
 
         var chart2 = new google.visualization.PieChart(document.getElementById('piechart2'));

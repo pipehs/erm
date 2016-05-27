@@ -103,7 +103,7 @@ function dropDown3()
 //dropdown de reportes básicos
 function dropDown4()
 {
-	$uri = array('heatmap','matrices','matriz_riesgos','reporte_planes','hallazgos','graficos_controles','graficos_auditorias');
+	$uri = array('heatmap','matrices','matriz_riesgos','reporte_planes','hallazgos','graficos_controles','graficos_auditorias','graficos_planes_accion');
 
 	foreach ($uri as $uri)
 	{
@@ -177,7 +177,7 @@ function dropDown6()
 	}
 }
 
-//active de risks
+//active de kri
 function dropDown7()
 {
 	$uri = array('enlazar_riesgos','kri','riesgo_kri');

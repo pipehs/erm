@@ -126,7 +126,7 @@ $("#risk_id").change(function() {
 				{
 					var info = "<center>Aun no se ha creado indicador para el riesgo ";
 					info += $("#risk_id option:selected").text() + ".<br><br></center>";
-					info += '<center><a href="kri.create.'+$("#risk_id").val()+'" class="btn btn-success">Crear KRI</a</center>';
+					info += '<center><a href="kri.create2.'+$("#risk_id").val()+'" class="btn btn-success">Crear KRI</a</center>';
 					$("#info_kri").append(info);
 				}
 
@@ -190,7 +190,7 @@ $("#risk_id").change(function() {
 					});
 
 					table_row += '</table>';
-					table_row += '<center><a href="kri.create.'+$("#risk_id").val()+'" class="btn btn-success">Agregar nuevo KRI</a</center>';
+					table_row += '<center><a href="kri.create2.'+$("#risk_id").val()+'" class="btn btn-success">Agregar nuevo KRI</a</center>';
 					$("#info_kri").html(table_row);
 
 				}

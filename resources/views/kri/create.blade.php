@@ -53,10 +53,18 @@
 
 			{!!Form::close()!!}
 
+			@if(isset($risk_id))
+				<center>
+					{!! link_to_route('riesgo_kri', $title = 'Volver', $parameters = NULL,
+                 		$attributes = ['class'=>'btn btn-danger'])!!}
+				</center>
+			@else
 				<center>
 					{!! link_to_route('kri', $title = 'Volver', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
+			@endif
+
 
 			
 			</div>
