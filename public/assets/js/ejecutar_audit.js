@@ -42,7 +42,7 @@ $("#audit").change(function() {
 							//si es que hay pruebas que ejecutar
 							if (result.length > 2)
 							{	
-									alert(result);
+									//alert(result);
 									$("#btn_guardar").prop('disabled',false);
 									$("#cargando").html('<br>');
 									$("#audit_programs").empty();

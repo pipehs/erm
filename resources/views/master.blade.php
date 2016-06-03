@@ -110,6 +110,7 @@
 
 	{!!Html::script('assets/js/jquery.min.js')!!}
 	{!!Html::script('assets/js/ajax_jquery-ui.min.js')!!}
+	{!!Html::script('assets/js/descargar.js')!!}
 	
 	@yield('scripts2')
 </body>

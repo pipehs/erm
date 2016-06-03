@@ -2,7 +2,7 @@
 
 //funciones para menus activos y dropdown
 function activeMenu($uri='')
- {
+{
   $active = '';
 
   if (Request::is(Request::segment(1) . '/' . $uri . '/*') || Request::is(Request::segment(1) . '/' . $uri) || Request::is($uri))
@@ -103,7 +103,7 @@ function dropDown3()
 //dropdown de reportes básicos
 function dropDown4()
 {
-	$uri = array('heatmap','matrices','matriz_riesgos','reporte_planes','hallazgos','graficos_controles','graficos_auditorias','graficos_planes_accion');
+	$uri = array('heatmap','matrices','matriz_riesgos','reporte_planes','reporte_hallazgos','graficos_controles','graficos_auditorias','graficos_planes_accion');
 
 	foreach ($uri as $uri)
 	{
@@ -210,15 +210,19 @@ function upload_file($archivo,$dir,$id)
 
     if (isset($file[1])) //si es que existe file[1], el archivo tenía extensión; por el contrario no tiene extensión
     {
+    	//eliminamos acentos (si es que hay)
+    	$nombre = eliminaAcentos($file[0]);
 	    $guardado = Storage::put(
-	        $dir.'/'. $file[0] . "___" . $id . "." . $file[1],
+	        $dir.'/'. $nombre . "___" . $id . "." . $file[1],
 	        file_get_contents($archivo->getRealPath())
 	    );
 	}
 	else
 	{
+		//eliminamos acentos (si es que hay)
+    	$nombre = eliminaAcentos($file[0]);
 		$guardado = Storage::put(
-	        $dir.'/'. $file[0] . "___" . $id ,
+	        $dir.'/'. $nombre . "___" . $id ,
 	        file_get_contents($archivo->getRealPath())
 	    );
 	}
@@ -294,6 +298,14 @@ function getEvidences($kind,$id)
         else if ($kind == 3) //solicitando evidencias de una evaluación de control
         {
         	$carpeta = 'C:\virtualhost\erm\storage\app\eval_controles';
+        }
+        else if ($kind == 4) //solicitando evidencias de un programa de auditoría
+        {
+        	$carpeta = 'C:\virtualhost\erm\storage\app\programas_auditoria';
+        }
+        else if ($kind == 5) //solicitando evidencias de un programa de auditoría
+        {
+        	$carpeta = 'C:\virtualhost\erm\storage\app\pruebas_auditoria';
         }
 
         if (file_exists($carpeta) != false) //verificamos que exista la carpeta
@@ -472,4 +484,72 @@ function calc_controlled_risk($control_id,$efectividad)
 	});
 }
 
+//función para eliminar los tíldes en el string ingresado
+function eliminaAcentos($String)
+{
+    $String = str_replace(array('á','à','â','ã','ª','ä'),"a",$String);
+    $String = str_replace(array('Á','À','Â','Ã','Ä'),"A",$String);
+    $String = str_replace(array('Í','Ì','Î','Ï'),"I",$String);
+    $String = str_replace(array('í','ì','î','ï'),"i",$String);
+    $String = str_replace(array('é','è','ê','ë'),"e",$String);
+    $String = str_replace(array('É','È','Ê','Ë'),"E",$String);
+    $String = str_replace(array('ó','ò','ô','õ','ö','º'),"o",$String);
+    $String = str_replace(array('Ó','Ò','Ô','Õ','Ö'),"O",$String);
+    $String = str_replace(array('ú','ù','û','ü'),"u",$String);
+    $String = str_replace(array('Ú','Ù','Û','Ü'),"U",$String);
+    $String = str_replace(array('[','^','´','`','¨','~',']'),"",$String);
+    $String = str_replace("ç","c",$String);
+    $String = str_replace("Ç","C",$String);
+    $String = str_replace("ñ","n",$String);
+    $String = str_replace("Ñ","N",$String);
+    $String = str_replace("Ý","Y",$String);
+    $String = str_replace("ý","y",$String);
+     
+    $String = str_replace("&aacute;","a",$String);
+    $String = str_replace("&Aacute;","A",$String);
+    $String = str_replace("&eacute;","e",$String);
+    $String = str_replace("&Eacute;","E",$String);
+    $String = str_replace("&iacute;","i",$String);
+    $String = str_replace("&Iacute;","I",$String);
+    $String = str_replace("&oacute;","o",$String);
+    $String = str_replace("&Oacute;","O",$String);
+    $String = str_replace("&uacute;","u",$String);
+    $String = str_replace("&Uacute;","U",$String);
+    return $String;
+}
+
+function eliminarArchivo($id,$kind)
+{
+	//Elimina evidencias de prueba (carpeta pruebas_auditoria)
+	if ($kind == 0)
+	{
+		$dir = "../storage/app/pruebas_auditoria";
+	}
+	//Elimina evidencias de programa (carpeta pruebas_auditoria)
+	else if ($kind == 1)
+	{
+		$dir = "../storage/app/programas_auditoria";
+	}
+		
+	$handle = opendir($dir); 
+
+	while ($file = readdir($handle))  
+	{   
+		if (is_file($dir.'/'.$file)) 
+		{ 
+
+		    //verificamos que sea la misma
+		    $file_temp = explode('___',$file);
+		    $file_temp2 = explode('.',$file_temp[1]);
+
+		    if ($file_temp2[0] == $id)
+		    {
+		    	//unlink($dir.'/'.$file);
+		    	File::delete($dir.'/'.$file);
+		    }
+		         
+		}
+	}	
+	
+}
 ?>

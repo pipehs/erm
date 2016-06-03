@@ -547,13 +547,15 @@ class KriController extends Controller
 
     public function evaluar($id)
     {
+        $kri = \Ermtool\KRI::find($id);
         //obtenemos unidad de medida
         $uni_med = \Ermtool\KRI::where('id',$id)->value('uni_med');
 
         //obtenemos nombre
         $name = \Ermtool\KRI::where('id',$id)->value('name');
 
-        return view('kri.evaluar',['id' => $id,'uni_med'=>$uni_med,'name'=>$name]);
+        return view('kri.evaluar',['id' => $id,'uni_med'=>$kri->uni_med,'name'=>$kri->name,
+                                    'green_min' => $kri->green_min, 'red_max' => $kri->red_max]);
     }
 
     public function storeEval()

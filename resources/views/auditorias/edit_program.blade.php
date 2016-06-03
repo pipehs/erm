@@ -50,7 +50,7 @@
 				<div id="cargando"><br></div>
 
 				{!!Form::model($program,['route'=>['programas_auditoria.update_program',
-				$audit_audit_plan_audit_program->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				$audit_audit_plan_audit_program->id],'method'=>'PUT','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
 					@include('auditorias.form_program')
 
 					<div class="form-group">
@@ -72,7 +72,7 @@
 @stop
 
 @section('scripts2')
-
+{!!Html::script('assets/js/descargar.js')!!}
 <script>
 </script>
 @stop

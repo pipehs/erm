@@ -49,7 +49,8 @@
 			Modifique la informaci&oacute;n que desee de la prueba de auditor&iacute;a <b>{{ $audit_test['name'] }}</b>.
 				<div id="cargando"><br></div>
 
-				{!!Form::model($audit_test,['route'=>['programas_auditoria.update_test',$audit_test->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::model($audit_test,['route'=>['programas_auditoria.update_test',$audit_test->id],'method'=>'PUT','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}	
+
 					@include('auditorias.form_test')
 
 					<div class="form-group">
@@ -81,4 +82,5 @@ $(document).ready(function () {
 });
 </script>
 {!!Html::script('assets/js/type_audit_test.js')!!}
+{!!Html::script('assets/js/descargar.js')!!}
 @stop

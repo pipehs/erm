@@ -87,7 +87,7 @@
 						<li>{!!HTML::link('heatmap','Mapa de Calor',['class'=>activeMenu('heatmap')])!!}</li>
 						<li>{!!HTML::link('matriz_riesgos','Matriz de Riesgos',['class'=>activeMenu('matriz_riesgos')])!!}</li>
 						<li>{!!HTML::link('matrices','Matriz de Control',['class'=>activeMenu('matrices')])!!}</li>
-						<li>{!!HTML::link('reporte_hallazgos','Hallazgos',['class'=>activeMenu('hallazgos')])!!}</li>
+						<li>{!!HTML::link('reporte_hallazgos','Hallazgos',['class'=>activeMenu('reporte_hallazgos')])!!}</li>
 						<li>{!!HTML::link('reporte_planes','Planes de Acci&oacute;n',['class'=>activeMenu('reporte_planes')])!!}</li>
 						<li>{!!HTML::link('graficos_controles','Gr&aacute;ficos Controles',['class'=>activeMenu('graficos_controles')])!!}</li>
 						<li>{!!HTML::link('graficos_auditorias','Gr&aacute;ficos Auditor&iacute;as',['class'=>activeMenu('graficos_auditorias')])!!}</li>
@@ -106,5 +106,8 @@
 						<li><a href="enlazar_riesgos" class="{{ activeMenu('enlazar_riesgos') }}">Vincular Riesgos</a></li>
 					</ul>
 				</li>
+				<li><a href="hallazgos" class="{{ activeMenu('hallazgos') }}"><i class="fa fa-search-minus"></i>Hallazgos</a></li>
 			</ul>
+
+
 		</div>

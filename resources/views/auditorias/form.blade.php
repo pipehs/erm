@@ -89,7 +89,7 @@
 						{!!Form::label('Objetivos',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::textarea('objectives',null,['class'=>'form-control','rows'=>'3',
-																'cols'=>'4','required'=>'true'])!!}
+																'cols'=>'4'])!!}
 						</div>
 					</div>
 
@@ -97,7 +97,7 @@
 						{!!Form::label('Alcances',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::textarea('scopes',null,['class'=>'form-control','rows'=>'3',
-															'cols'=>'4','required'=>'true'])!!}
+															'cols'=>'4'])!!}
 						</div>
 					</div>
 
@@ -105,7 +105,7 @@
 						{!!Form::label('Recursos',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::textarea('resources',null,['class'=>'form-control','rows'=>'3',
-																'cols'=>'4','required'=>'true'])!!}
+																'cols'=>'4'])!!}
 						</div>
 					</div>
 
@@ -138,7 +138,7 @@
 						{!!Form::label('Metodolog&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::textarea('methodology',null,['class'=>'form-control','rows'=>'3',
-																'cols'=>'4','required'=>'true'])!!}
+																'cols'=>'4'])!!}
 						</div>
 					</div>
 
@@ -189,6 +189,6 @@
 
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'guardar','disabled'=>'true'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-success','id'=>'guardar','disabled'=>'true'])!!}
 						</center>
 					</div>

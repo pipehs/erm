@@ -21,4 +21,14 @@ function descargar(tipo,archivo)
 		var win = window.open('../storage/app/eval_controles/'+archivo, '_blank');
 	 	win.focus();
 	}
+	else if (tipo == 4) //evidencia de programas de auditoria
+	{
+		var win = window.open('../storage/app/programas_auditoria/'+archivo, '_blank');
+	 	win.focus();
+	}
+	else if (tipo == 5) //evidencia de pruebas de auditoria
+	{
+		var win = window.open('../storage/app/pruebas_auditoria/'+archivo, '_blank');
+	 	win.focus();
+	}
 }

@@ -813,6 +813,33 @@ Route::put('kri.update.{id}', [
 Route::post('kri.guardar_evaluacion', [
 	'as' => 'kri.guardar_evaluacion', 'uses' => 'KriController@storeEval']);
 
+
+
+//ruta para obtener todas las causas de riesgo
+Route::get('get_causes', [
+	'as' => 'get_causes', 'uses' => 'RiesgosController@getCauses']);
+
+//ruta para obtener todos los efectos de riesgo
+Route::get('get_effects', [
+	'as' => 'get_effects', 'uses' => 'RiesgosController@getEffects']);
+
+
+//---- Rutas para mantenedor de Hallazgos ----//
+//ruta para obtener todos los efectos de riesgo
+Route::get('hallazgos', [
+	'as' => 'hallazgos', 'uses' => 'IssuesController@index']);
+
+//ruta para obtener todos los efectos de riesgo
+Route::post('hallazgos_lista', [
+	'as' => 'hallazgos_lista', 'uses' => 'IssuesController@index2']);
+
+
+
+//ruta para eliminar evidencias
+Route::get('evidences.delete.{id},{kind}', function($id,$kind) {
+	return eliminarArchivo($id,$kind);
+});
+
 // ---- Rutas adicionales del framework ----//
 
 /*
@@ -822,14 +849,6 @@ Route::get('breweries', ['middleware' => 'cors', function()
 }]);
 
 */
-
-//ruta para obtener todas las causas de riesgo
-Route::get('get_causes', [
-	'as' => 'get_causes', 'uses' => 'RiesgosController@getCauses']);
-
-//ruta para obtener todos los efectos de riesgo
-Route::get('get_effects', [
-	'as' => 'get_effects', 'uses' => 'RiesgosController@getEffects']);
 
 Route::get('error', function(){ 
     abort(404);

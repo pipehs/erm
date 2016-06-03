@@ -20,7 +20,15 @@ class IssuesController extends Controller
      */
     public function index()
     {
-        //
+        //obtenemos lista de organizaciones
+        $organizations = \Ermtool\Organization::lists('name','id');
+
+        return view('hallazgos.index',['organizations'=>$organizations]);
+    }
+
+    public function index2()
+    {
+        print_r($_POST);
     }
 
     /**

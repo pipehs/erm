@@ -48,6 +48,35 @@ function bloquear(id,name,kind,type)
 	//confirm("Esta seguro de bloquear "+type+" "+name+"?")
 }
 
+//función para eliminar evidencias
+function eliminar_ev(id,kind)
+{
+	swal({   title: "Atención!",
+		   text: "Esta seguro de eliminar este documento?",
+		   type: "warning",   
+		   showCancelButton: true,   
+		   confirmButtonColor: "#FF0000",   
+		   confirmButtonText: "Eliminar",
+		   cancelButtonText: "Cancelar",   
+		   closeOnConfirm: false }, 
+		   function(){
+		   		$.get('evidences.delete.'+id+','+kind, function (result) {
+		   			swal({   title: "",
+		   			   text: "El documento fue eliminado con éxito ",
+		   			   type: "success",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Aceptar",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	location.reload();
+		   			  });
+		   		});
+		   		 
+		   	});
+	//confirm("Esta seguro de bloquear "+type+" "+name+"?")
+}
+
 $(document).ready(function() {
 	// Load Datatables and run plugin on tables 
 	LoadDataTablesScripts(AllTables);

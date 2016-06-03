@@ -50,6 +50,24 @@
 			<li><b>Descripci&oacute;n: {{ $program['description'] }}</b></li>
 			<li><b>Fecha creaci&oacute;n: {{ $program['created_at'] }}</b></li>
 			<li><b>Fecha fin: {{ $program['expiration_date'] }}</b></li>
+			<li><b>Documento asociado: 
+
+			@if ($program['evidence'] == NULL)
+				El programa no tiene ning&uacute;n documento asociado
+			@else
+			<table>
+			<tr>
+			<td>
+				<div style="cursor:hand" id="descargar_{{ $program['id'] }}" onclick="descargar(4,'{{$program['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Descargar</u></font></div>
+			</td>
+			<td>&nbsp;&nbsp;
+				<img src="assets/img/btn_eliminar.png" height="40px" width="40px" onclick="eliminar_ev({{ $program['id'] }},1)">
+			</td>
+			</tr>
+			</table>
+			</br>
+			@endif
+			</b></li>
 
 			<li>{!! link_to_route('programas_auditoria.edit', $title = 'Editar programa', $parameters = $program['id'],
 				 $attributes = ['class'=>'btn btn-info'])!!}</li>
@@ -70,6 +88,7 @@
 				<th>Resultado</th>
 				<th>Responsable</th>
 				<th>Horas / Hombre</th>
+				<th>Documento</th>
 				<th>Acci&oacute;n</th>
 			</tr>
 
@@ -93,6 +112,18 @@
 					<td>{{ $test['stakeholder'] }}</td>
 
 					<td>{{ $test['hh'] }}</td>
+
+					<td>
+					@if ($test['evidence'] == NULL)
+						No tiene documentos
+					@else
+						<div style="cursor:hand" id="descargar_{{ $test['id'] }}" onclick="descargar(5,'{{$test['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Descargar</u></font></div>
+
+						<img src="assets/img/btn_eliminar.png" height="40px" width="40px" onclick="eliminar_ev({{ $test['id'] }},0)">
+
+						</br>
+					@endif
+					</td>
 
 					<td>{!! link_to_route('programas_auditoria.edit_test', $title = 'Editar', $parameters = $test['id'],
 				 $attributes = ['class'=>'btn btn-success'])!!}</td>

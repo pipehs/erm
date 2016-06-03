@@ -220,6 +220,8 @@ class AuditoriasController extends Controller
     //función que guarda programa de auditoría
     public function storePrueba(Request $request)
     {
+        global $req;
+        $req = $request;
         //creamos una transacción para cumplir con atomicidad
         DB::transaction(function()
         {
@@ -248,6 +250,12 @@ class AuditoriasController extends Controller
                                     'updated_at' => $fecha,
                                     //'stakeholder_id' => $_POST['stakeholder_id']
                                 ]);
+
+                //agregamos evidencia (si es que existe)
+                if ($GLOBALS['req']->file('file_program') != NULL)
+                {
+                    upload_file($GLOBALS['req']->file('file_program'),'programas_auditoria',$audit_audit_plan_audit_program);    
+                }
 
                 $i = 1; //contador de pruebas
                 //insertamos cada una de las pruebas
@@ -298,8 +306,8 @@ class AuditoriasController extends Controller
                     {
                         if (isset($_POST['control_id_test_'.$i]))
                         {
-                            DB::table('audit_tests')
-                            ->insert([
+                            $test_id = DB::table('audit_tests')
+                            ->insertGetId([
                                     'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
                                     'name' => $_POST['name_test_'.$i],
                                     'description' => $description, 
@@ -319,8 +327,8 @@ class AuditoriasController extends Controller
                     {
                         if (isset($_POST['risk_id_test_'.$i]))
                         {
-                            DB::table('audit_tests')
-                            ->insert([
+                            $test_id = DB::table('audit_tests')
+                            ->insertGetId([
                                     'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
                                     'name' => $_POST['name_test_'.$i],
                                     'description' => $description, 
@@ -340,8 +348,8 @@ class AuditoriasController extends Controller
                     {
                         if (isset($_POST['subprocess_id_test_'.$i]))
                         {
-                            DB::table('audit_tests')
-                            ->insert([
+                            $test_id = DB::table('audit_tests')
+                            ->insertGetId([
                                     'audit_audit_plan_audit_program_id' => $audit_audit_plan_audit_program,
                                     'name' => $_POST['name_test_'.$i],
                                     'description' => $description, 
@@ -356,6 +364,12 @@ class AuditoriasController extends Controller
                             ]);
                         }
                     }
+
+                    //guardamos evidencia (si es que hay)
+                    if ($GLOBALS['req']->file('file_'.$i) != NULL)
+                    {
+                        upload_file($_FILES['file_'.$i],'pruebas_auditoria',$test_id);    
+                    }
                     
                     $i += 1;    
                 }
@@ -363,7 +377,6 @@ class AuditoriasController extends Controller
             Session::flash('message','Programa de auditor&iacute;a creado correctamente');
         });
         return Redirect::to('/programas_auditoria');
-        
     }
 
     public function storeAuditoria(Request $request)
@@ -741,27 +754,80 @@ class AuditoriasController extends Controller
     public function store(Request $request)
     {
 
-        print_r($_POST);
+        //print_r($_POST);
         
         //Mantenemos atomicidad y consistencia
         DB::transaction(function()
         {
+            //verificamos datos que no hayan sido ingresados
+            if ($_POST['objectives'] == "")
+            {
+                $objectives = NULL;
+            }
+            else
+            {
+                $objectives = $_POST['objectives'];
+            }
 
+            if ($_POST['scopes'] == "")
+            {
+                $scopes = NULL;
+            }
+            else
+            {
+                $scopes = $_POST['scopes'];
+            }
+
+            if ($_POST['resources'] == "")
+            {
+                $resources = NULL;
+            }
+            else
+            {
+                $resources = $_POST['resources'];
+            }
+
+            if ($_POST['methodology'] == "")
+            {
+                $methodology = NULL;
+            }
+            else
+            {
+                $methodology = $_POST['methodology'];
+            }
+
+            if ($_POST['rules'] == "")
+            {
+                $rules = NULL;
+            }
+            else
+            {
+                $rules = $_POST['rules'];
+            }
+
+            if ($_POST['HH_plan'] == "")
+            {
+                $estimated_HH = NULL;
+            }
+            else
+            {
+                $estimated_HH = $_POST['HH_plan'];
+            }
             //insertamos plan y obtenemos ID
             $audit_plan_id = DB::table('audit_plans')->insertGetId([
                     'name'=>$_POST['name'],
                     'description'=>$_POST['description'],
-                    'objectives'=>$_POST['objectives'],
-                    'scopes'=>$_POST['scopes'],
+                    'objectives'=>$objectives,
+                    'scopes'=>$scopes,
                     'status'=>0,
-                    'resources'=>$_POST['resources'],
-                    'methodology'=>$_POST['methodology'],
+                    'resources'=>$resources,
+                    'methodology'=>$methodology,
                     'initial_date'=>$_POST['initial_date'],
                     'final_date'=>$_POST['final_date'],
                     'created_at'=>date('Y-m-d H:i:s'),
                     'updated_at'=>date('Y-m-d H:i:s'),
-                    'rules'=>$_POST['rules'],
-                    'estimated_HH'=>$_POST['HH_plan'],
+                    'rules'=>$rules,
+                    'hh'=>$estimated_HH,
                     'organization_id'=>$_POST['organization_id']
                     ]);
 
@@ -876,6 +942,23 @@ class AuditoriasController extends Controller
             {
                 foreach ($_POST['audits'] as $audit)
                 {
+                    if ($_POST['audit_'.$audit.'_resources'] == "")
+                    {
+                        $resources = NULL;
+                    }
+                    else
+                    {
+                        $resources = $_POST['audit_'.$audit.'_resources'];
+                    }
+
+                    if ($_POST['audit_'.$audit.'_HH'] == "")
+                    {
+                        $estimated_HH = NULL;
+                    }
+                    else
+                    {
+                        $estimated_HH = $_POST['audit_'.$audit.'_HH'];
+                    }
                     //insertamos y obtenemos id para ingresarlo en audit_risk y otros
                     $audit_audit_plan_id = DB::table('audit_audit_plan')
                                 ->insertGetId([
@@ -883,8 +966,8 @@ class AuditoriasController extends Controller
                                     'audit_id' => $audit,
                                     'initial_date' => $_POST['audit_'.$audit.'_initial_date'],
                                     'final_date' => $_POST['audit_'.$audit.'_final_date'],
-                                    'resources' => $_POST['audit_'.$audit.'_resources'],
-                                    'estimated_HH' => $_POST['audit_'.$audit.'_HH']
+                                    'resources' => $resources,
+                                    'hh' => $estimated_HH
                                     ]);
                     
                     if ($_POST['type'] == 0) //se agrego auditoría de procesos
@@ -988,7 +1071,7 @@ class AuditoriasController extends Controller
                                     'updated_at' => date('Y-m-d H:i:s')
                                     ]);
                     //no están obligatorias las HH
-                    if (isset($_POST['audit_new'.$i.'_HH']))
+                    if ($_POST['audit_new'.$i.'_HH'] != "")
                     {
                         $HH = $_POST['audit_new'.$i.'_HH'];
                     }
@@ -1002,7 +1085,7 @@ class AuditoriasController extends Controller
                                     'initial_date' => $_POST['audit_new'.$i.'_initial_date'],
                                     'final_date' => $_POST['audit_new'.$i.'_final_date'],
                                     'resources' => $_POST['audit_new'.$i.'_resources'],
-                                    'estimated_HH' => $HH
+                                    'hh' => $HH
                                     ]);
 
                     if ($_POST['type'] == 0) //se agrego auditoría de procesos
@@ -1365,6 +1448,9 @@ class AuditoriasController extends Controller
             {
                 $hh = $audit_test->hh;
             }
+
+            $evidence = getEvidences(5,$audit_test->id);
+
             $tests[$i] = [
                 'id' => $audit_test->id,
                 'name' => $audit_test->name,
@@ -1376,10 +1462,13 @@ class AuditoriasController extends Controller
                 'updated_at' => $fecha_act,
                 'stakeholder' => $stakeholder2,
                 'hh' => $hh,
+                'evidence' => $evidence,
             ];
 
             $i += 1;
         }
+
+        $evidence = getEvidences(4,$audit_program->id);
 
         $programa = [
             'id' => $audit_program->id,
@@ -1388,6 +1477,7 @@ class AuditoriasController extends Controller
             'created_at' => $created_at,
             'expiration_date' => $expiration_date,
             'tests' => $tests,
+            'evidence' => $evidence,
         ];
 
         return view('auditorias.show_program',['program'=>$programa]);
@@ -1401,8 +1491,12 @@ class AuditoriasController extends Controller
 
         $audit_program = \Ermtool\Audit_program::find($audit_audit_plan_audit_program->audit_program_id);
 
+        //obtenemos evidencias de la nota (si es que existe)
+        $evidence = getEvidences(4,$audit_audit_plan_audit_program->id);
+
         return view('auditorias.edit_program',['program'=>$audit_program,
-            'audit_audit_plan_audit_program'=>$audit_audit_plan_audit_program]);
+            'audit_audit_plan_audit_program'=>$audit_audit_plan_audit_program,
+            'evidence'=>$evidence]);
 
     }
 
@@ -1445,7 +1539,10 @@ class AuditoriasController extends Controller
             $type_id = NULL;
         }
 
-        return view('auditorias.edit_test',['audit_test'=>$audit_test,'stakeholders'=>$stakeholders,'type2'=>$type2,'audit_plan' => $audit_plan->id,'type_id'=>$type_id]);
+        //obtenemos evidencias de prueba (si es que existen)
+        $evidence = getEvidences(5,$audit_test->id);
+
+        return view('auditorias.edit_test',['audit_test'=>$audit_test,'stakeholders'=>$stakeholders,'type2'=>$type2,'audit_plan' => $audit_plan->id,'type_id'=>$type_id,'evidence'=>$evidence]);
 
     }
 
@@ -1453,6 +1550,9 @@ class AuditoriasController extends Controller
     {
         global $id1;
         $id1 = $id;
+
+        global $req;
+        $req = $request;
         //echo "POST: ";
         //print_r($_POST);
         DB::transaction(function (){
@@ -1471,6 +1571,12 @@ class AuditoriasController extends Controller
                         'expiration_date' => $_POST['expiration_date'],
                         'updated_at' => date('Y-m-d H:i:s')
                     ]);
+
+            //agregamos evidencia (si es que existe)
+            if ($GLOBALS['req']->file('file_program') != NULL)
+            {
+                upload_file($GLOBALS['req']->file('file_program'),'programas_auditoria',$audit_audit_plan_audit_program->id); 
+            }
         
             $audit_program->save();
             //$audit_audit_plan_audit_program->save();
@@ -1492,6 +1598,8 @@ class AuditoriasController extends Controller
         $audit_test = \Ermtool\Audit_test::find($id);
         //echo "POST: ";
         //print_r($_POST);
+        global $req;
+        $req = $request;
         DB::transaction(function (){
 
             $GLOBALS['audit_test']->name = $_POST['name'];
@@ -1561,6 +1669,11 @@ class AuditoriasController extends Controller
                 }
             }
 
+            if ($GLOBALS['req']->file('file_1') != NULL)
+            {
+                upload_file($GLOBALS['req']->file('file_1'),'pruebas_auditoria',$GLOBALS['audit_test']->id);     
+            }
+
             $GLOBALS['audit_test']->save();
 
             Session::flash('message','Prueba actualizada correctamente');
@@ -1594,7 +1707,8 @@ class AuditoriasController extends Controller
     public function storeTest(Request $request)
     {
         //print_r($_POST);
-
+        global $req;
+        $req = $request;
         DB::transaction(function () {
 
             $fecha = date('Y-m-d H:i:s');
@@ -1643,8 +1757,8 @@ class AuditoriasController extends Controller
             {
                 if (isset($_POST['control_id_test_1']))
                 {
-                    DB::table('audit_tests')
-                    ->insert([
+                    $test_id = DB::table('audit_tests')
+                            ->insertGetId([
                             'audit_audit_plan_audit_program_id' => $_POST['audit_audit_plan_audit_program_id'],
                             'name' => $_POST['name'],
                             'description' => $description, 
@@ -1664,8 +1778,8 @@ class AuditoriasController extends Controller
             {
                 if (isset($_POST['risk_id_test_1']))
                 {
-                            DB::table('audit_tests')
-                            ->insert([
+                            $test_id = DB::table('audit_tests')
+                            ->insertGetId([
                                     'audit_audit_plan_audit_program_id' => $_POST['audit_audit_plan_audit_program_id'],
                                     'name' => $_POST['name'],
                                     'description' => $description, 
@@ -1685,8 +1799,8 @@ class AuditoriasController extends Controller
             {
                 if (isset($_POST['subprocess_id_test_1']))
                 {
-                            DB::table('audit_tests')
-                            ->insert([
+                            $test_id = DB::table('audit_tests')
+                            ->insertGetId([
                                     'audit_audit_plan_audit_program_id' => $_POST['audit_audit_plan_audit_program_id'],
                                     'name' => $_POST['name'],
                                     'description' => $description, 
@@ -1700,6 +1814,11 @@ class AuditoriasController extends Controller
                                     'subprocess_id' => $_POST['subprocess_id_test_1'],
                             ]);
                 }
+            }
+
+            if ($GLOBALS['req']->file('file_1') != NULL)
+            {
+                upload_file($GLOBALS['req']->file('file_1'),'pruebas_auditoria',$test_id);    
             }
 
             Session::flash('message','Prueba de auditor&iacute;a creado correctamente');

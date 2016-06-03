@@ -22,10 +22,41 @@
 						</div>
 					</div>
 			@else
-					<div class="form-group">
+					<div id="exp_date" class="form-group">
 						{!!Form::label('Fecha fin',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::date('expiration_date',null,['id'=>'expiration_date','class'=>'form-control', 'required'=>'true'])!!}
+							{!!Form::date('expiration_date',null,['id'=>'expiration_date','class'=>'form-control', 'required'=>'true','onblur'=>'validarFechaMayorActual(this.value)'])!!}
 						</div>
 					</div>
 			@endif
+
+			@if (isset($audit_audit_plan_audit_program))
+					@if ($evidence == NULL)
+						<div class="form-group">
+
+							<label for="file_program" class="col-sm-4 control-label">Opcionalmente puede agregar un documento al programa</label>
+
+							<div class="col-sm-4">
+								<input type="file" name="file_program" id="fileprogram" class="inputfile" />
+								<label for="fileprogram">Cargue evidencia</label>
+							</div>
+						</div>
+					@else
+						<center>
+						<a href="../storage/app/programas_auditoria/{{$evidence[0]['url'] }}" style="cursor:hand">
+						<font color="CornflowerBlue"><u>Descargar evidencia</u></font></a><br>
+						</center>
+					@endif
+			@else
+					<div class="form-group">
+
+							<label for="file_program" class="col-sm-4 control-label">Opcionalmente puede agregar un documento al programa</label>
+
+							<div class="col-sm-4">
+								<input type="file" name="file_program" id="fileprogram" class="inputfile" />
+								<label for="fileprogram">Cargue evidencia</label>
+							</div>
+					</div>
+			@endif
+
+					

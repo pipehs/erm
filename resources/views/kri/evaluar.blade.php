@@ -51,13 +51,6 @@
 			
 			{!!Form::open(['route'=>'kri.guardar_evaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
 			<div class="form-group">
-				{!!Form::label('Evaluación',null,['class'=>'col-sm-4 control-label'])!!}
-				<div class="col-sm-5">
-					{!!Form::number('evaluation',null,['class'=>'form-control','required'=>'true','id'=>'evaluation','step'=>'0.1'])!!}
-				</div>
-			</div>
-
-			<div class="form-group">
 				{!!Form::label('Intervalo de evaluación',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-2">
 					{!!Form::date('date_min',null,['class'=>'form-control','required'=>'true'])!!}
@@ -68,6 +61,57 @@
 				<div class="col-sm-2">
 					{!!Form::date('date_max',null,['class'=>'form-control','required'=>'true'])!!}
 				</div>
+			</div>
+
+			<div class="form-group">
+				{!!Form::label('Unidad de medida',null,['class'=>'col-sm-4 control-label'])!!}
+				<div class="col-sm-5">
+					@if ($uni_med == 0)
+						{!!Form::text('0','Porcentaje',['class'=>'form-control','disabled'=>'true'])!!}
+					@elseif ($uni_med == 1)
+						{!!Form::text('0','Monto',['class'=>'form-control','disabled'=>'true'])!!}
+					@elseif ($uni_med == 3)
+						{!!Form::text('0','Cantidad',['class'=>'form-control','disabled'=>'true'])!!}
+					@endif
+				</div>
+			</div>
+
+			<div class="form-group">
+				{!!Form::label('Valor mínimo de evaluación',null,['class'=>'col-sm-4 control-label'])!!}
+				@if ($green_min < $red_max)
+					<div class="col-sm-1">
+						{!!Form::number('min',$green_min,['class'=>'form-control','disabled'=>'true'])!!}
+					</div>
+					<div class="col-sm-3">
+					<center><b>Valor M&aacute;ximo De Evaluaci&oacute;n</b></center>
+					</div>
+					<div class="col-sm-1">
+						{!!Form::number('max',$red_max,['class'=>'form-control','disabled'=>'true'])!!}
+					</div>
+				@elseif ($green_min > $red_max)
+					<div class="col-sm-1">
+						{!!Form::number('min',$red_max,['class'=>'form-control','disabled'=>'true'])!!}
+					</div>
+					<div class="col-sm-3">
+					<center><b>Valor M&aacute;ximo De Evaluaci&oacute;n</b></center>
+					</div>
+					<div class="col-sm-1">
+						{!!Form::number('max',$green_min,['class'=>'form-control','disabled'=>'true'])!!}
+					</div>
+				@endif
+			</div>
+
+			<div class="form-group">
+				{!!Form::label('Evaluación',null,['class'=>'col-sm-4 control-label'])!!}
+				@if ($green_min < $red_max)
+					<div class="col-sm-5">
+						{!!Form::number('evaluation',null,['class'=>'form-control','required'=>'true','id'=>'evaluation','step'=>'0.1','min'=>$green_min,'max'=>$red_max])!!}
+					</div>
+				@elseif ($green_min > $red_max)
+					<div class="col-sm-5">
+						{!!Form::number('evaluation',null,['class'=>'form-control','required'=>'true','id'=>'evaluation','step'=>'0.1','min'=>$red_max,'max'=>$green_min])!!}
+					</div>
+				@endif
 			</div>
 
 			<div class="form-group">

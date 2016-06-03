@@ -53,19 +53,19 @@
 					@else
 						<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 						<thead>
-						<th>KRI</th>
-						<th>Descripci&oacute;n</th>
-						<th>Periodicidad</th>
-						<th>Unidad de medida de evaluaci&oacute;n</th>
-						<th>Evaluaci&oacute;n</th>
-						<th>Resultado</th>
-						<th>Descripci&oacute;n de la evaluaci&oacute;n</th>
-						<th>Riesgo</th>
-						<th>Responsable del riesgo</th>
-						<th>Fecha creaci&oacute;n</th>
-						<th>Intervalo de evaluaci&oacute;n</th>
-						<th>Acci&oacute;n</th>
-						<th>Acci&oacute;n</th>
+						<th style="vertical-align:top;">KRI</th>
+						<th style="vertical-align:top;">Descripci&oacute;n</th>
+						<th style="vertical-align:top;">Periodicidad</th>
+						<th style="vertical-align:top;">Unidad de medida de evaluaci&oacute;n</th>
+						<th style="vertical-align:top;">Evaluaci&oacute;n</th>
+						<th style="vertical-align:top;">Resultado</th>
+						<th style="vertical-align:top;">Descripci&oacute;n de la evaluaci&oacute;n</th>
+						<th style="vertical-align:top;">Riesgo</th>
+						<th style="vertical-align:top;">Responsable del riesgo</th>
+						<th style="vertical-align:top;">Fecha creaci&oacute;n</th>
+						<th style="vertical-align:top;">Intervalo de evaluaci&oacute;n</th>
+						<th style="vertical-align:top;">Acci&oacute;n</th>
+						<th style="vertical-align:top;">Acci&oacute;n</th>
 						</thead>
 
 						@foreach ($kri as $k)

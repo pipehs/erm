@@ -282,7 +282,7 @@ function agregarCampos(prueba,eval)
 							
 						});
 
-					//hacemos ciclo aunque es solo una evidencia (ya que en otros casos, como notas, pueden ser más de uno, por lo que se debe dejar abierto para la opción)
+				//hacemos ciclo aunque es solo una evidencia (ya que en otros casos, como notas, pueden ser más de uno, por lo que se debe dejar abierto para la opción)
 
 				$(this.evidence).each(function(i,arc) {
 

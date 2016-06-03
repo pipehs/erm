@@ -4,6 +4,6 @@
 {
 	$( '.inputfile' ).each( function()
 	{
-		alert("HOLI");
+		
 	});
 })( jQuery, window, document );

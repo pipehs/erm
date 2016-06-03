@@ -72,15 +72,15 @@
 
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 	<thead>
-	<th>Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
-	<th width="20%">Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-	<th>Fecha Creaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-	<th>Fecha Actualizado<label><input type="text" placeholder="Filtrar" /></label></th>
-	<th>Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-	<th>Org. de servicios compartidos<label><input type="text" placeholder="Filtrar" /></label></th>
-	<th>Organizaciones dependientes<label><input type="text" placeholder="Filtrar" /></label></th>
-	<th>Acci&oacute;n</th>
-	<th>Acci&oacute;n</th>
+	<th style="vertical-align:top;">Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th style="vertical-align:top;" width="20%">Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th style="vertical-align:top;">Fecha Creaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th style="vertical-align:top;">Fecha Actualizado<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th style="vertical-align:top;">Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th style="vertical-align:top;">Servicios compartidos<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th style="vertical-align:top;">Organizaciones dependientes<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th style="vertical-align:top;">Acci&oacute;n</th>
+	<th style="vertical-align:top;">Acci&oacute;n</th>
 	</thead>
 
 	@foreach ($organizations as $organization)
