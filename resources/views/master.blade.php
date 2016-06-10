@@ -38,6 +38,8 @@
 
  	{!!Html::style('assets/css/imprimir.css',['media'=>'print'])!!}	
 
+ 	{!!Html::style('assets/bootstrap-toggle-master/css/bootstrap2-toggle.min.css')!!}
+
 <!--
 	<link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 	<link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
@@ -111,6 +113,8 @@
 	{!!Html::script('assets/js/jquery.min.js')!!}
 	{!!Html::script('assets/js/ajax_jquery-ui.min.js')!!}
 	{!!Html::script('assets/js/descargar.js')!!}
+
+	{!!Html::script('assets/bootstrap-toggle-master/js/bootstrap2-toggle.min.js')!!}
 	
 	@yield('scripts2')
 </body>

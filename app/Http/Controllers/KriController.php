@@ -92,8 +92,8 @@ class KriController extends Controller
             }
             else
             {
-                $last_eval = $k->kri_last_evaluation;
-                $date_last = date('d-m-Y',strtotime($k->date_evaluation));
+                $last_eval = new DateTime($k->kri_last_evaluation);
+                $date_last = date_format($last_eval, 'd-m-Y');
                 
                 //obtenemos periodo de evaluación
 
@@ -102,8 +102,12 @@ class KriController extends Controller
                             ->where('created_at','=',$k->date_evaluation)
                             ->select('date_min','date_max')
                             ->first();
-                $date_min = date('d-m-Y',strtotime($periodo->date_min));
-                $date_max = date('d-m-Y',strtotime($periodo->date_max));
+
+                $date_min_temp = new DateTime($periodo->date_min);
+                $date_min = date_format($date_min_temp,'d-m-Y');
+
+                $date_max_temp = new DateTime($periodo->date_max);
+                $date_max = date_format($date_max_temp,'d-m-Y');
 
                 //calculamos evaluacion (color)
 

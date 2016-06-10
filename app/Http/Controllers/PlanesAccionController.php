@@ -12,33 +12,67 @@ class PlanesAccionController extends Controller
 {
 
     //función que obtiene planes de acción de auditoría
-    public function getActionPlanAudit()
+    public function getActionPlanAudit($org)
     {
-        //obtenemos datos de plan de auditoría, auditoría, issue y plan de acción
-        $action_plans = DB::table('action_plans')
-            ->join('issues','issues.id','=','action_plans.issue_id')
-            ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
-            ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
-            ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
-            ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
-            ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
-            ->join('audits','audits.id','=','audit_audit_plan.audit_id')
-            ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
-            ->whereNotNull('issues.audit_test_id')
-            ->select('audit_plans.name as audit_plan_name',
-                     'audits.name as audit_name',
-                     'audit_programs.name as program_name',
-                     'audit_tests.name as test_name',
-                     'issues.name as issue_name',
-                     'issues.recommendations',
-                     'action_plans.id',
-                     'action_plans.description',
-                     'action_plans.final_date',
-                     'action_plans.updated_at',
-                     'action_plans.status',
-                     'stakeholders.name as user_name',
-                     'stakeholders.surnames as user_surnames')
-            ->get();;
+        if ($org != NULL)
+        {
+            //obtenemos datos de plan de auditoría, auditoría, issue y plan de acción
+            $action_plans = DB::table('action_plans')
+                ->join('issues','issues.id','=','action_plans.issue_id')
+                ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
+                ->where('audit_plans.organization_id','=',$org)
+                ->whereNotNull('issues.audit_test_id')
+                ->select('audit_plans.name as audit_plan_name',
+                         'audits.name as audit_name',
+                         'audit_programs.name as program_name',
+                         'audit_tests.name as test_name',
+                         'issues.name as issue_name',
+                         'issues.recommendations',
+                         'action_plans.id',
+                         'action_plans.description',
+                         'action_plans.final_date',
+                         'action_plans.updated_at',
+                         'action_plans.status',
+                         'action_plans.created_at',
+                         'stakeholders.name as user_name',
+                         'stakeholders.surnames as user_surnames')
+                ->get();;
+        }
+        else
+        {
+            //obtenemos datos de plan de auditoría, auditoría, issue y plan de acción
+            $action_plans = DB::table('action_plans')
+                ->join('issues','issues.id','=','action_plans.issue_id')
+                ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
+                ->whereNotNull('issues.audit_test_id')
+                ->select('audit_plans.name as audit_plan_name',
+                         'audits.name as audit_name',
+                         'audit_programs.name as program_name',
+                         'audit_tests.name as test_name',
+                         'issues.name as issue_name',
+                         'issues.recommendations',
+                         'action_plans.id',
+                         'action_plans.description',
+                         'action_plans.final_date',
+                         'action_plans.updated_at',
+                         'action_plans.status',
+                         'action_plans.created_at',
+                         'stakeholders.name as user_name',
+                         'stakeholders.surnames as user_surnames')
+                ->get();;
+        }
 
         return $action_plans;
     }
@@ -49,7 +83,15 @@ class PlanesAccionController extends Controller
      */
     public function index()
     {
-        //
+        //obtenemos lista de organizaciones
+        //$organizations = \Ermtool\Organization::lists('name','id');
+
+        //return view('planes_accion.index',['organizations'=>$organizations]);
+    }
+
+    public function index2()
+    {
+        //print_r($_POST);
     }
 
     /**
@@ -68,9 +110,19 @@ class PlanesAccionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store($issue_id,$description,$stakeholder,$final_date)
     {
-        //
+        $new_plan = DB::table('action_plans')
+                ->insertGetId([
+                    'issue_id' => $issue_id,
+                    'description' => $description,
+                    'stakeholder_id' => $stakeholder,
+                    'final_date' => $final_date,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+
+        return $new_plan;
     }
 
     /**
@@ -125,8 +177,7 @@ class PlanesAccionController extends Controller
         //obtenemos action plan
         $action_plan = DB::table('action_plans')
                     ->where('action_plans.issue_id','=',$id)
-                    ->select('action_plans.id','action_plans.description','action_plans.final_date',
-                        'action_plans.stakeholder_id')
+                    ->select('id','description','final_date','stakeholder_id','created_at')
                     ->get();
 
         if ($action_plan == NULL)
@@ -156,6 +207,7 @@ class PlanesAccionController extends Controller
                     'final_date' => $ap->final_date,
                     'stakeholder' => $stakeholder,
                     'rut' => $rut,
+                    'created_at' => $ap->created_at
                 ];
             }
         }
@@ -169,7 +221,7 @@ class PlanesAccionController extends Controller
         $results = array();
         $i = 0;
         
-        $action_plans = $this->getActionPlanAudit();
+        $action_plans = $this->getActionPlanAudit($org);
 
         foreach ($action_plans as $action_plan)
         {
@@ -576,7 +628,7 @@ class PlanesAccionController extends Controller
         }
 
         //ahora para action plans de auditoría
-        $action_plans = $this->getActionPlanAudit();
+        $action_plans = $this->getActionPlanAudit(NULL);
 
         $i = 0;
         foreach ($action_plans as $plan)
@@ -799,4 +851,5 @@ class PlanesAccionController extends Controller
                                                     'cont_danger' => $cont_danger,
                                                     'cont_closed' => $cont_closed]);
     }
+
 }

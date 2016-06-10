@@ -45,7 +45,35 @@ function bloquear(id,name,kind,type)
 		   			});
 		   		 
 		   	});
-	//confirm("Esta seguro de bloquear "+type+" "+name+"?")
+}
+
+//función para eliminar datos
+function eliminar(id,name,kind,type)
+{
+	swal({   title: "Atención!",
+		   text: "Esta seguro de eliminar "+type+" "+name+"?. Se borrarán todos sus datos asociados",
+		   type: "warning",   
+		   showCancelButton: true,   
+		   confirmButtonColor: "#31B404",   
+		   confirmButtonText: "Eliminar",
+		   cancelButtonText: "Cancelar",   
+		   closeOnConfirm: false }, 
+		   function(){
+		   		$.get('delete_'+kind+'.'+id, function (result) {
+		   			swal({   title: "",
+		   			   text: ""+type+" "+name+" fue eliminado(a) con éxito ",
+		   			   type: "success",   
+		   			   showCancelButton: false,
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Aceptar",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	location.reload();
+		   			   });
+
+		   			});
+		   	});
+	
 }
 
 //función para eliminar evidencias
@@ -75,6 +103,22 @@ function eliminar_ev(id,kind)
 		   		 
 		   	});
 	//confirm("Esta seguro de bloquear "+type+" "+name+"?")
+}
+
+function validarFechaMayorActual(date)
+{
+    var today = new Date();
+    var date2= new Date(date);
+        
+    if (date2<today)
+    {   
+        swal('Cuidado!','Está ingresando una fecha menor a la fecha actual','warning');
+        $("#exp_date").attr('class','form-group has-error has-feedback');
+    }
+    else
+    {
+        $("#exp_date").attr('class','form-group');
+    }   
 }
 
 $(document).ready(function() {

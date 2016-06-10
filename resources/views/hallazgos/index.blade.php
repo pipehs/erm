@@ -71,6 +71,55 @@
 			</div>
 
 
+			@if (isset($issues))
+
+				@if ($kind == 0)
+					<h4><b>{{ $org }}: Hallazgos de proceso</b></h4>
+				@elseif ($kind == 2)
+					<h4><b>{{ $org }}: Hallazgos de organizaci&oacute;n</b></h4>
+				@endif
+
+				{!! link_to_route('create_hallazgo', $title = 'Agregar Hallazgo', $parameters = ['org'=>$org_id,'kind'=>$kind],$attributes = ['class'=>'btn btn-success'])!!}
+				<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+				<thead>
+					<th>Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Estado<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Evidencia</th>
+					<th>Editar</th>
+					<th>Eliminar</th>
+				</thead>
+
+				@foreach ($issues as $issue)
+					<tr>
+						<td>{{ $issue['name'] }}</td>
+						<td>{{ $issue['classification'] }}</td>
+						<td>{{ $issue['recommendations'] }}</td>
+						<td>{{ $issue['plan'] }}</td>
+						<td>{{ $issue['status'] }}</td>
+						<td>{{ $issue['final_date'] }}</td>
+						<td>
+						@if ($issue['evidence'] == NULL)
+							No tiene documentos
+						@else
+							<div style="cursor:hand" id="descargar_{{ $issue['id'] }}" onclick="descargar(2,'{{$issue['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Descargar</u></font></div>
+
+							<img src="assets/img/btn_eliminar.png" height="40px" width="40px" onclick="eliminar_ev({{ $issue['id'] }},2)">
+
+							</br>
+						@endif
+						<td>{!! link_to_route('edit_hallazgo', $title = 'Editar', $parameters = ['org'=>$org_id,'id'=>$issue['id']],$attributes = ['class'=>'btn btn-success'])!!}</td>
+						<td>
+						<button class="btn btn-danger" onclick="eliminar({{ $issue['id'] }},'{{ $issue['name'] }}','hallazgo','el hallazgo')">Eliminar</button></td>
+					</tr>
+				@endforeach
+
+			@endif
+
+
 			</div>
 		</div>
 	</div>

@@ -197,12 +197,13 @@ class ExcelController extends Controller
             })->export('xlsx');
     }
 
-    public function generarExcelIssue($type)
+    public function generarExcelIssue($type,$org)
     {
         //generamos variable global para usarla en la función excel
         global $id;
-
+        global $org2;
         $id = $type;
+        $org2 = $org;
 
         Excel::create('Reporte de hallazgos '.date("d-m-Y"), function($excel) {
 
@@ -218,13 +219,13 @@ class ExcelController extends Controller
 
                 $excel->sheet('Auditorías', function($sheet) {
                     $issue = new Issues;
-                    $datos = $issue->generarReporteIssues($GLOBALS['id']);
+                    $datos = $issue->generarReporteIssuesExcel($GLOBALS['id'],$GLOBALS['org2']);
 
                     //$datos2 = json_decode($datos);
                     $sheet->fromArray($datos);
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:O1', function($cells) {
+                    $sheet->cells('A1:J1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');

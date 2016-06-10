@@ -3418,14 +3418,6 @@ class AuditoriasController extends Controller
         return $res;
     }
 
-    //función para reporte de hallazgos
-    public function issuesReport()
-    {
-        $organizations = \Ermtool\Organization::lists('name','id');
-
-        return view('reportes.hallazgos',['organizations' => $organizations]);
-    }
-
     //obtenemos id de organización perteneciente a un plan de auditoría
     public function getOrganization($audit_plan)
     {

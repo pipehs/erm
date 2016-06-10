@@ -525,7 +525,7 @@ Route::get('reporte_planes', [
 	'as' => 'reporte_planes', 'uses' => 'AuditoriasController@actionPlansReport']);
 
 Route::get('reporte_hallazgos', [
-	'as' => 'reporte_hallazgos', 'uses' => 'AuditoriasController@issuesReport']);
+	'as' => 'reporte_hallazgos', 'uses' => 'IssuesController@issuesReport']);
 
 Route::get('graficos_controles', [
 	'as' => 'graficos_controles', 'uses' => 'ControlesController@indexGraficos']);
@@ -647,7 +647,7 @@ Route::get('genexcel.{value}', [
 Route::get('genexcelplan.{org}', [
 	'as' => 'genexcelplan', 'uses' => 'ExcelController@generarExcelPlan']);
 
-Route::get('genexcelissues.{type}', [
+Route::get('genexcelissues.{type},{org}', [
 	'as' => 'genexcelissues', 'uses' => 'ExcelController@generarExcelIssue']);
 
 
@@ -674,7 +674,7 @@ Route::get('genplanes_accion.{org}', [
 	'as' => 'genplanes_accion', 'uses' => 'PlanesAccionController@generarReportePlanes']);
 
 //ruta para generar reporte de hallazgos
-Route::get('genissues_report.{type}', [
+Route::post('genissues_report', [
 	'as' => 'genissues_report', 'uses' => 'IssuesController@generarReporteIssues']);
 
 //ruta para obtener datos de plan de auditoría anterior 
@@ -825,17 +825,43 @@ Route::get('get_effects', [
 
 
 //---- Rutas para mantenedor de Hallazgos ----//
-//ruta para obtener todos los efectos de riesgo
+
 Route::get('hallazgos', [
 	'as' => 'hallazgos', 'uses' => 'IssuesController@index']);
 
-//ruta para obtener todos los efectos de riesgo
+//ruta para ver lista de hallazgos segun tipo
 Route::post('hallazgos_lista', [
 	'as' => 'hallazgos_lista', 'uses' => 'IssuesController@index2']);
 
+//ruta para crear hallazgos
+Route::get('create_hallazgo', [
+	'as' => 'create_hallazgo', 'uses' => 'IssuesController@create']);
 
+Route::post('store_hallazgo', [
+	'as' => 'store_hallazgo', 'uses' => 'IssuesController@store']);
 
-//ruta para eliminar evidencias
+//ruta para editar hallazgos
+Route::get('edit_hallazgo', [
+	'as' => 'edit_hallazgo', 'uses' => 'IssuesController@edit']);
+
+//ruta para eliminar  hallazgos
+Route::get('delete_hallazgo.{id}', [
+	'as' => 'delete_hallazgo', 'uses' => 'IssuesController@destroy']);
+
+Route::put('update_hallazgo.{id}', [
+    'as' => 'update_hallazgo', 'uses' => 'IssuesController@update']);
+
+//---- Rutas para mantenedor de Planes de acción ----//
+/*
+Route::get('action_plans', [
+	'as' => 'action_plans', 'uses' => 'PlanesAccionController@index']);
+
+//ruta para ver lista de hallazgos segun tipo
+Route::post('action_plans_lista', [
+	'as' => 'action_plans_lista', 'uses' => 'PlanesAccionController@index2']);
+*/
+
+//ruta para eliminar evidencias (llama a funcion helper)
 Route::get('evidences.delete.{id},{kind}', function($id,$kind) {
 	return eliminarArchivo($id,$kind);
 });

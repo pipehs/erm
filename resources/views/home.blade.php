@@ -11,7 +11,7 @@
 		</ol>
 	</div>
 </div>
-    <h4>Bienvenido al sistema ERM</h4>
+    <h3><b>Bienvenido al sistema B-GRC</b>  </h3>
     <br>
      <!-- Heatmap de última encuesta agregada -->
 <div class="row">
@@ -99,6 +99,7 @@
 	</div>
 	</div>
 </div>
+<!--
 <div class="row">
     <div class="col-xs-12 col-sm-6">
 		<div class="box">
@@ -151,7 +152,10 @@
 			</div>
 		</div>
 	</div>
+  -->
 </div>
+
+
 @stop
 
 @section('scripts2')

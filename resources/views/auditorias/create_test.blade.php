@@ -518,22 +518,6 @@ $("#agregar_prueba").click(function() {
 			}
 	});
 
-function validarFechaMayorActual(date)
-{
-    var today = new Date();
-    var date2= new Date(date);
-        
-    if (date2<today)
-    {   
-        swal('Cuidado!','Está ingresando una fecha de cierre menor a la fecha actual','warning');
-        $("#exp_date").attr('class','form-group has-error has-feedback');
-    }
-    else
-    {
-        $("#exp_date").attr('class','form-group');
-    }   
-}
-
 </script>
 
 {!!Html::script('assets/js/type_audit_test.js')!!}

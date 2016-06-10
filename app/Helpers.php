@@ -525,10 +525,15 @@ function eliminarArchivo($id,$kind)
 	{
 		$dir = "../storage/app/pruebas_auditoria";
 	}
-	//Elimina evidencias de programa (carpeta pruebas_auditoria)
+	//Elimina evidencias de programa (carpeta programas_auditoria)
 	else if ($kind == 1)
 	{
 		$dir = "../storage/app/programas_auditoria";
+	}
+	//Elimina evidencias de hallazgos (carpeta evidencias_hallazgos)
+	else if ($kind == 2)
+	{
+		$dir = "../storage/app/evidencias_hallazgos";
 	}
 		
 	$handle = opendir($dir); 

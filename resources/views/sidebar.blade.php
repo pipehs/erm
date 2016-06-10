@@ -106,7 +106,8 @@
 						<li><a href="enlazar_riesgos" class="{{ activeMenu('enlazar_riesgos') }}">Vincular Riesgos</a></li>
 					</ul>
 				</li>
-				<li><a href="hallazgos" class="{{ activeMenu('hallazgos') }}"><i class="fa fa-search-minus"></i>Hallazgos</a></li>
+				<li><a href="hallazgos" class="{{ activeMenu('hallazgos') }}"><i class="fa fa-search-minus"></i>Mantenedor Hallazgos</a></li>
+				
 			</ul>
 
 
