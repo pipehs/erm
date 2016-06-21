@@ -69,7 +69,7 @@
 					<div class="form-group">
 						{!!Form::label('Seleccione auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							<select name="audit" id="audit" required>
+							<select name="audit" id="audit" required="true">
 								<!-- Aquí se agregarán las auditorías relacionadas al plan seleccionado a través de Jquery -->
 							</select>
 						</div>
@@ -198,7 +198,7 @@ $(document).ready(function () {
 
 $("#kind").change(function() {
 			
-			if ($("#kind").val() != '') //Si es que se ha seleccionado una prueba previa y no generar una nueva prueba
+			if ($("#kind").val() != '') //Si es que se ha seleccionado un programa previo y no generar uno nuevo
 			{
 				//Añadimos la imagen de carga en el contenedor
 					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
@@ -237,12 +237,32 @@ $("#kind").change(function() {
 									}
 
 									var prueba = '<div class="form-group">';
-									/*
+									
 									//categoría
-									prueba += '<div class="form-group">';
-									prueba += '<label for="type2_test_'+(i+1)+'" class="col-sm-4 control-label">Tipo</label>';
-									prueba += '<div class="col-sm-4"><select name="type2_test_'+(i+1)+'" class="form-control">';
-									*/
+									prueba += '<label for="type2_test_'+(i+1)+'" class="col-sm-4 control-label">Categor&iacute;a</label>';
+									prueba += '<div class="col-sm-4"><select name="type2_test_'+(i+1)+'" class="form-control" onchange="getType('+(i+1)+')">>';
+									
+									if (test.category == 1)
+									{
+										prueba += '<option value="1" selected>Prueba de control</option>';
+										prueba += '<option value="2">Prueba de riesgo</option>';
+										prueba += '<option value="3">Prueba de subproceso</option>';
+									}
+									else if (test.category == 2)
+									{
+										prueba += '<option value="1">Prueba de control</option>';
+										prueba += '<option value="2" selected>Prueba de riesgo</option>';
+										prueba += '<option value="3">Prueba de subproceso</option>';
+									}
+									else if (test.category == 3)
+									{
+										prueba += '<option value="1">Prueba de control</option>';
+										prueba += '<option value="2">Prueba de riesgo</option>';
+										prueba += '<option value="3" selected>Prueba de subproceso</option>';
+									}
+
+									prueba += '</select></div></div>';
+
 									//nombre
 									prueba += '<div class="form-group">';
 									prueba += '<label for="name_test_'+(i+1)+'" class="col-sm-4 control-label">Prueba '+(i+1)+': Nombre</label>';
@@ -364,8 +384,12 @@ $("#audit_plans").change(function() {
 			
 			if ($("#audit_plans").val() != '') //Si es que se ha seleccionado valor válido de plan
 			{
-				//añadimos botón para seleccionar tipo (o categoría de prueba)
-				$("#category").show(500);
+				if ($("#kind").val() == '') // SOLO SI ES QUE NO SE ESTÁ BASANDO EN UN PROGRAMA PREVIO SE AGREGARÁ CATEGORÍA, YA QUE DE LO CONTRARIO LA CATEGORÍA VENDRÁ INCLUIDA EN LOS DATOS DEL PROGRAMA (MEJOR DICHO DE LAS PRUEBAS)
+				{	
+					//añadimos botón para seleccionar tipo (o categoría de prueba)
+					$("#category").show(500);
+				}
+				
 				//Añadimos la imagen de carga en el contenedor
 					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
 				//se obtienen controles asociados a los riesgos presentes en el plan de prueba seleccionado
@@ -411,11 +435,13 @@ $("#audit_plans").change(function() {
 
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
-
+							audit = '<option value="" selected disabled>- Seleccione </option>';
 							//seteamos datos en select de auditorías
 							$(datos).each( function() {
-								$("#audit").append('<option value="' + this.id + '">' + this.name +'</option>');
+								audit += '<option value="' + this.id + '">' + this.name +'</option>';
 							});
+
+							$("#audit").append(audit);
 	
 					});
 

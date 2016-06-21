@@ -53,13 +53,13 @@
 			<div class="form-group">
 				{!!Form::label('Intervalo de evaluación',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-2">
-					{!!Form::date('date_min',null,['class'=>'form-control','required'=>'true'])!!}
+					{!!Form::date('date_min',null,['class'=>'form-control','required'=>'true','onblur'=>'compararFechas(this.value,form.date_max.value)'])!!}
 				</div>
 				<div class="col-sm-1">
 				<center>-</center>
 				</div>
 				<div class="col-sm-2">
-					{!!Form::date('date_max',null,['class'=>'form-control','required'=>'true'])!!}
+					{!!Form::date('date_max',null,['class'=>'form-control','required'=>'true','onblur'=>'compararFechas(form.date_min.value,this.value)'])!!}
 				</div>
 			</div>
 

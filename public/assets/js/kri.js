@@ -218,7 +218,7 @@ function mayorMenor(elem1,elem2) //función de comparación para función js sor
 {
 	return elem2 - elem1; 
 }
-
+/*
 function changeVals()
 {
 	$("#green_min").change();
@@ -226,6 +226,7 @@ function changeVals()
 	$("#interval_max").change();
 	$("#red_max").change();
 }
+*/
 //función para ordenar valores
 function ordenamiento()
 {
@@ -246,7 +247,7 @@ function ordenamiento()
 		$("#interval_max").val(new_array[2]);
 		$("#red_max").val(new_array[3]);
 
-		changeVals();
+		//changeVals();
 
 	}
 
@@ -261,7 +262,7 @@ function ordenamiento()
 		$("#interval_max").val(new_array[2]);
 		$("#red_max").val(new_array[3]);
 
-		changeVals();
+		//changeVals();
 
 		
 	}
@@ -270,9 +271,17 @@ function ordenamiento()
 
 function tramos_distintos() //verifica que no haya intervalos iguales
 {
-	if ($("#green_min").val() == $("#interval_min").val() || $("#interval_min").val() == $("#interval_max").val() || $("#interval_max").val() == $("#red_max").val())
+	if ($("#green_min").val() != "" && $("#interval_min").val() != "" && $("#interval_max").val() != "" && $("#red_max").val() != "")
 	{
-		swal('Cuidado','Los intervalos deben ser distintos','error');
-		$("#guardar").attr('disabled','true');
+		if ($("#green_min").val() == $("#interval_min").val() || $("#interval_min").val() == $("#interval_max").val() || $("#interval_max").val() == $("#red_max").val())
+		{
+			swal('Cuidado','Los intervalos deben ser distintos','error');
+			$("#guardar").attr('disabled',true);
+		}
+		
+		if ($("#green_min").val() != $("#interval_min").val() && $("#interval_min").val() != $("#interval_max").val() && $("#interval_max").val() != $("#red_max").val())
+		{
+			$("#guardar").attr('disabled',false);
+		}
 	}
 }

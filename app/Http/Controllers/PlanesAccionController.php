@@ -290,10 +290,18 @@ class PlanesAccionController extends Controller
 
             if ($action_plan != NULL)
             {
-                //obtenemos nombre de responsable
-                $user = DB::table('stakeholders')
-                        ->where('id','=',$action_plan->stakeholder_id)
-                        ->first(['name','surnames']);
+                if ($action_plan->stakeholder_id == NULL)
+                {
+                    $user->name = "No definido";
+                    $user->surnames = "";
+                }
+                else
+                {
+                    //obtenemos nombre de responsable
+                    $user = DB::table('stakeholders')
+                            ->where('id','=',$action_plan->stakeholder_id)
+                            ->first(['name','surnames']);
+                } 
 
                 //seteamos status
                 if ($action_plan->status == 0)
@@ -473,10 +481,22 @@ class PlanesAccionController extends Controller
             ];
 
             //verificamos para tercer gráfico el tipo de control (abierto, proximo a cerrar, cerrado, falta mucho para que cierre...)
-            $fecha_temp = explode('-',$plan->final_date); //obtenemos solo mes y año
-            $fecha_ano = (int)$fecha_temp[0] - (int)date('Y'); //obtenemos solo año
-            $fecha = (int)$fecha_temp[1] - (int)date('m'); //solo mes
-            $fecha_dia = (int)$fecha_temp[2] - (int)date('d'); //solo día
+
+            if ($plan->final_date != NULL)
+            {
+                $fecha_temp = explode('-',$plan->final_date); //obtenemos solo mes y año
+                $fecha_ano = (int)$fecha_temp[0] - (int)date('Y'); //obtenemos solo año
+                $fecha = (int)$fecha_temp[1] - (int)date('m'); //solo mes
+                $fecha_dia = (int)$fecha_temp[2] - (int)date('d'); //solo día
+            }
+            else //no se ha registrado fecha de cierre, así que por defecto dejaremos 31-12-9999
+            {
+                $fecha_ano = 9999 - (int)date('Y'); //año
+                $fecha = 12 - (int)date('m'); //mes
+                $fecha_dia = 31 - (int)date('d'); //día
+            }
+
+            
 
             if ($fecha_ano > 0)
             {

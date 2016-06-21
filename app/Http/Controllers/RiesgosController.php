@@ -273,6 +273,8 @@ class RiesgosController extends Controller
                     }
                     else //se están agregando causas ya creadas
                     {
+                        if (isset($_POST['cause_id']))
+                        {
                             foreach ($_POST['cause_id'] as $cause_id)
                             {
                                 //insertamos cada causa en cause_risk
@@ -281,7 +283,8 @@ class RiesgosController extends Controller
                                         'risk_id' => $risk->id,
                                         'cause_id' => $cause_id
                                         ]);
-                            } 
+                            }
+                        } 
                     }
 
                     //vemos si se agrego algún efecto nuevo
@@ -300,9 +303,7 @@ class RiesgosController extends Controller
                     }
                     else
                     {
-                        if ($_POST['effect_id'] == NULL)
-                            $efecto = NULL;
-                        else
+                        if (isset($_POST['effect_id']))
                         {
                             foreach ($_POST['effect_id'] as $effect_id)
                             {
@@ -576,6 +577,7 @@ class RiesgosController extends Controller
                 $riesgo->type2 = 1;
                 $riesgo->risk_category_id = $_POST['risk_category_id'];
                 $riesgo->expected_loss = $_POST['expected_loss'];
+                $riesgo->stakeholder_id = $_POST['stakeholder_id'];
 
                 $riesgo->save();
 

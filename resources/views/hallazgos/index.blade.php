@@ -55,7 +55,7 @@
 			<div class="form-group">
 				{!!Form::label('Seleccione un tipo',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-3">
-					{!!Form::select('kind',['0'=>'De proceso','1'=>'De Subproceso','2'=>'De organización'],null, 
+					{!!Form::select('kind',['0'=>'De proceso','1'=>'De subproceso','2'=>'De organización','3'=>'Control de proceso','4'=>'De control de entidad','5'=>'De programa de auditoría','6'=>'De auditoría'],null, 
 							 	   ['id' => 'kind','required'=>'true','placeholder'=>'- Seleccione -'])!!}
 				</div>
 			</div>
@@ -70,18 +70,40 @@
 			
 			</div>
 
-
 			@if (isset($issues))
 
 				@if ($kind == 0)
-					<h4><b>{{ $org }}: Hallazgos de proceso</b></h4>
+					<h4><b>{{ $org }}: Hallazgos de procesos</b></h4>
+				@elseif($kind == 1)
+					<h4><b>{{ $org }}: Hallazgos de subprocesos</b></h4>
 				@elseif ($kind == 2)
 					<h4><b>{{ $org }}: Hallazgos de organizaci&oacute;n</b></h4>
+				@elseif ($kind == 3)
+					<h4><b>{{ $org }}: Hallazgos de controles de procesos</b></h4>
+				@elseif ($kind == 4)
+					<h4><b>{{ $org }}: Hallazgos de controles de entidad</b></h4>
+				@elseif ($kind == 5)
+					<h4><b>{{ $org }}: Hallazgos de programas de auditor&iacute;a</b></h4>
+				@elseif ($kind == 6)
+					<h4><b>{{ $org }}: Hallazgos de auditor&iacute;a</b></h4>
 				@endif
 
 				{!! link_to_route('create_hallazgo', $title = 'Agregar Hallazgo', $parameters = ['org'=>$org_id,'kind'=>$kind],$attributes = ['class'=>'btn btn-success'])!!}
 				<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 				<thead>
+					@if ($kind == 0)
+						<th>Proceso<label><input type="text" placeholder="Filtrar" /></label></th>
+					@elseif($kind == 1)
+						<th>Subproceso<label><input type="text" placeholder="Filtrar" /></label></th>
+					@elseif ($kind == 2)
+						<th>Organizaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+					@elseif ($kind == 3 || $kind == 4)
+						<th>Control<label><input type="text" placeholder="Filtrar" /></label></th>
+					@elseif ($kind == 5)
+						<th>Programa de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+					@elseif ($kind == 6)
+						<th>Plan de auditor&iacute;a - Auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+					@endif
 					<th>Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -95,6 +117,7 @@
 
 				@foreach ($issues as $issue)
 					<tr>
+						<td>{{ $issue['origin'] }}</td>
 						<td>{{ $issue['name'] }}</td>
 						<td>{{ $issue['classification'] }}</td>
 						<td>{{ $issue['recommendations'] }}</td>

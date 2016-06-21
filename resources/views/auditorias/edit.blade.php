@@ -50,7 +50,7 @@
 			Modifique la informaci&oacute;n que desee del plan de auditor&iacute;a <b>{{ $audit_plan['name'] }}</b>.
 				<div id="cargando"><br></div>
 
-				{!!Form::model($audit_plan,['route'=>['auditorias.update',$audit_plan->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::model($audit_plan,['route'=>['auditorias.update',$audit_plan->id],'method'=>'PUT','class'=>'form-horizontal','name'=>'form'])!!}
 					@include('auditorias.form')
 				{!!Form::close()!!}
 

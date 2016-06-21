@@ -93,7 +93,7 @@
 							<td>{{ $k['created_at'] }}</td>
 							<td>
 							@if ($k['date_min'] != null)
-								{{ $k['date_min'] }} - {{ $k['date_max'] }}
+								{{ $k['date_min'] }} al {{ $k['date_max'] }}
 							@else
 								Ninguno
 							@endif

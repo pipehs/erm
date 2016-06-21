@@ -15,13 +15,73 @@ use Ermtool\Http\Controllers\PlanesAccionController as PlanesAccion;
 
 class IssuesController extends Controller
 {
+    public function getOrigin($kind,$id,$org_id)
+    {
+        if ($kind == 0) //obtenemos nombre de proceso
+        {
+            $origin = DB::table('processes')
+                        ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('risk_subprocess.id','=',$id)
+                        ->select('processes.name')
+                        ->first();
+        }
+        else if ($kind == 1) //obtenemos nombre de subproceso
+        {
+            $origin = DB::table('subprocesses')
+                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('risk_subprocess.id','=',$id)
+                        ->select('subprocesses.name')
+                        ->first();
+        }
+        else if ($kind == 2) //organización
+        {
+            $origin = \Ermtool\Organization::find($org_id);
+        }
+        else if ($kind == 3) //control de proceso
+        {
+            $origin = DB::table('controls')
+                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                        ->where('control_risk_subprocess.id','=',$id)
+                        ->select('controls.name')
+                        ->first();
+        }
+
+        else if ($kind == 4) //control de entidad
+        {
+            $origin = DB::table('controls')
+                        ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
+                        ->where('control_objective_risk.id','=',$id)
+                        ->select('controls.name')
+                        ->first();
+        }
+        else if ($kind == 5) //programa de auditoría
+        {
+            $origin = DB::table('audit_programs')
+                        ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_program_id','=','audit_programs.id')
+                        ->where('audit_audit_plan_audit_program.id','=',$id)
+                        ->select('audit_programs.name')
+                        ->first();
+        }
+        else if ($kind == 6) //auditoría
+        {
+            $origin = DB::table('audits')
+                        ->join('audit_audit_plan','audit_audit_plan.audit_id','=','audits.id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->where('audit_audit_plan.id','=',$id)
+                        ->select(DB::raw('CONCAT(audit_plans.name, " - ", audits.name) AS name'))
+                        ->first();
+        }
+
+        return $origin->name;
+    }
     //obtiene hallazgos de tipo $kind (proceso u organización) para la org $org_id. Esto para mantenedor de hallazgos y reporte de hallazgos
     public function getIssues($kind,$org_id,$kind2)
     {
         $issues = array();
         $datos = array(); //se usará sólo para reportes
 
-        if ($kind == 0) //Hallazgo de proceso
+        if ($kind == 0 || $kind == 1) //Hallazgo de proceso o de subproceso
         {
             //primero seleccionamos los hallazgos obtenidos a través de la evaluación de controles
             $issues1 = DB::table('control_evaluation')
@@ -30,8 +90,6 @@ class IssuesController extends Controller
                         ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                         ->join('issues','issues.id','=','control_evaluation.issue_id')
-                        //->join('action_plans','action_plans.issue_id','=','issues.id')
-                        //->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
                         ->where('organization_subprocess.organization_id','=',$org_id)
                         ->select('issues.id','issues.name as issue_name','issues.classification',
                                  'issues.recommendations','risk_subprocess.id as subobj_id')
@@ -42,9 +100,6 @@ class IssuesController extends Controller
             //ahora los hallazgos generados a través de auditoría orientada a procesos
             $issues2 = DB::table('issues')
                         ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
-                        //->join('issues','issues.audit_test_id','=','audit_tests.id')
-                        //->join('action_plans','action_plans.issue_id','=','issues.id')
-                        //->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
                         ->join('subprocesses','subprocesses.id','=','audit_tests.subprocess_id')
                         ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
@@ -58,8 +113,6 @@ class IssuesController extends Controller
             //hallazgos de auditoría orientados a riesgos (de proceso)
             $issues3 = DB::table('audit_tests')
                         ->join('issues','issues.audit_test_id','=','audit_tests.id')
-                        //->join('action_plans','action_plans.issue_id','=','issues.id')
-                        //->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
                         ->join('risk_subprocess','risk_subprocess.risk_id','=','audit_tests.risk_id')
                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                         ->where('organization_subprocess.organization_id','=',$org_id)
@@ -72,8 +125,6 @@ class IssuesController extends Controller
             //hallazgos de auditoría con pruebas de controles (controles orientados a subproceso)
             $issues4 = DB::table('audit_tests')
                         ->join('issues','issues.audit_test_id','=','audit_tests.id')
-                        //->join('action_plans','action_plans.issue_id','=','issues.id')
-                        //->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
                         ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','audit_tests.control_id')
                         ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
@@ -83,16 +134,34 @@ class IssuesController extends Controller
                         ->distinct()
                         ->groupBy('issues.id')
                         ->get();
+        }
 
+        if ($kind == 0)
+        {
             //hallazgos de proceso creados directamente
             $issues5 = DB::table('issues')
                         ->join('processes','processes.id','=','issues.process_id')
                         ->join('subprocesses','subprocesses.process_id','=','processes.id')
                         ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                        //->join('action_plans','action_plans.issue_id','=','issues.id')
                         ->where('organization_subprocess.organization_id','=',$org_id)
                         ->whereNotNull('issues.process_id')
+                        ->select('issues.id','issues.name as issue_name','issues.classification',
+                                     'issues.recommendations','risk_subprocess.id as subobj_id')
+                        ->distinct()
+                        ->groupBy('issues.id')
+                        ->get();
+        }
+
+        else if ($kind == 1) 
+        {
+            //Hallazgos de subproceso creados directamente
+            $issues5 = DB::table('issues')
+                        ->join('subprocesses','subprocesses.id','=','issues.subprocess_id')
+                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('organization_subprocess.organization_id','=',$org_id)
+                        ->whereNotNull('issues.subprocess_id')
                         ->select('issues.id','issues.name as issue_name','issues.classification',
                                      'issues.recommendations','risk_subprocess.id as subobj_id')
                         ->distinct()
@@ -109,11 +178,9 @@ class IssuesController extends Controller
                         ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
                         ->join('objectives','objectives.id','=','objective_risk.objective_id')
                         ->join('issues','issues.id','=','control_evaluation.issue_id')
-                        //->join('action_plans','action_plans.issue_id','=','issues.id')
-                        //->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
                         ->where('objectives.organization_id','=',$org_id)
                         ->select('issues.id','issues.name as issue_name','issues.classification',
-                                     'issues.recommendations')
+                                     'issues.recommendations','objective_risk.id as subobj_id')
                         ->distinct()
                         ->groupBy('issues.id')
                         ->get();
@@ -121,13 +188,11 @@ class IssuesController extends Controller
             //hallazgos de auditoría orientados a riesgos (de negocio)
             $issues2 = DB::table('audit_tests')
                         ->join('issues','issues.audit_test_id','=','audit_tests.id')
-                        //->join('action_plans','action_plans.issue_id','=','issues.id')
-                        //->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
                         ->join('objective_risk','objective_risk.risk_id','=','audit_tests.risk_id')
                         ->join('objectives','objectives.id','=','objective_risk.objective_id')
                         ->where('objectives.organization_id','=',$org_id)
                         ->select('issues.id','issues.name as issue_name','issues.classification',
-                                     'issues.recommendations')
+                                     'issues.recommendations','objective_risk.id as subobj_id')
                         ->distinct()
                         ->groupBy('issues.id')
                         ->get();
@@ -135,25 +200,141 @@ class IssuesController extends Controller
             //hallazgos de auditoría con pruebas de controles (controles orientados a objetivos)
             $issues3 = DB::table('audit_tests')
                         ->join('issues','issues.audit_test_id','=','audit_tests.id')
-                        //->join('action_plans','action_plans.issue_id','=','issues.id')
-                        //->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
                         ->join('control_objective_risk','control_objective_risk.control_id','=','audit_tests.control_id')
                         ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
                         ->join('objectives','objectives.id','=','objective_risk.objective_id')
                         ->where('objectives.organization_id','=',$org_id)
                         ->select('issues.id','issues.name as issue_name','issues.classification',
-                                     'issues.recommendations')
+                                     'issues.recommendations','objective_risk.id as subobj_id')
                         ->distinct()
                         ->groupBy('issues.id')
                         ->get();
 
             //hallazgos de organización creados directamente
             $issues4 = DB::table('issues')
-                        //->join('action_plans','action_plans.issue_id','=','issues.id')
+                        ->join('organizations','organizations.id','=','issues.organization_id')
                         ->where('issues.organization_id','=',$org_id)
                         ->whereNotNull('issues.organization_id')
                         ->select('issues.id','issues.name as issue_name','issues.classification',
-                                     'issues.recommendations')
+                                     'issues.recommendations','organizations.id as subobj_id')
+                        ->distinct()
+                        ->groupBy('issues.id')
+                        ->get();
+        }
+        else if ($kind == 3) //Hallazgos de control
+        {
+
+            //primero seleccionamos los hallazgos obtenidos a través de la evaluación de controles (riesgos de subproceso)
+            $issues1 = DB::table('control_evaluation')
+                        ->join('controls','controls.id','=','control_evaluation.control_id')
+                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                        ->join('issues','issues.id','=','control_evaluation.issue_id')
+                        ->where('organization_subprocess.organization_id','=',$org_id)
+                        ->select('issues.id','issues.name as issue_name','issues.classification',
+                                 'issues.recommendations','control_risk_subprocess.id as subobj_id')
+                        ->distinct()
+                        ->groupBy('issues.id')
+                        ->get();
+
+
+            //hallazgos de auditoría con pruebas de controles (controles orientados a subprocesos)
+            $issues2 = DB::table('audit_tests')
+                        ->join('issues','issues.audit_test_id','=','audit_tests.id')
+                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','audit_tests.control_id')
+                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                        ->where('organization_subprocess.organization_id','=',$org_id)
+                        ->select('issues.id','issues.name as issue_name','issues.classification',
+                                     'issues.recommendations','control_risk_subprocess.id as subobj_id')
+                        ->distinct()
+                        ->groupBy('issues.id')
+                        ->get();
+
+            //hallazgos de control creados directamente (controles de proceso)
+            $issues3 = DB::table('issues')
+                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','issues.control_id')
+                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                        ->where('organization_subprocess.organization_id','=',$org_id)
+                        ->whereNotNull('issues.control_id')
+                        ->select('issues.id','issues.name as issue_name','issues.classification',
+                                     'issues.recommendations','control_risk_subprocess.id as subobj_id')
+                        ->distinct()
+                        ->groupBy('issues.id')
+                        ->get();
+
+            $issues4 = array();
+
+        }
+        else if ($kind == 4) //hallazgos de control de negocio
+        {
+            //seleccionamos los hallazgos obtenidos a través de la evaluación de controles (que sean de la organización)
+            $issues1 = DB::table('control_evaluation')
+                        ->join('controls','controls.id','=','control_evaluation.control_id')
+                        ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
+                        ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                        ->join('issues','issues.id','=','control_evaluation.issue_id')
+                        ->where('objectives.organization_id','=',$org_id)
+                        ->select('issues.id','issues.name as issue_name','issues.classification',
+                                     'issues.recommendations','control_objective_risk.id as subobj_id')
+                        ->distinct()
+                        ->groupBy('issues.id')
+                        ->get();
+            //hallazgos de auditoría con pruebas de controles (controles orientados a objetivos)
+            $issues2 = DB::table('audit_tests')
+                        ->join('issues','issues.audit_test_id','=','audit_tests.id')
+                        ->join('control_objective_risk','control_objective_risk.control_id','=','audit_tests.control_id')
+                        ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                        ->where('objectives.organization_id','=',$org_id)
+                        ->select('issues.id','issues.name as issue_name','issues.classification',
+                                     'issues.recommendations','control_objective_risk.id as subobj_id')
+                        ->distinct()
+                        ->groupBy('issues.id')
+                        ->get();
+            //hallazgos de control creados directamente (controles de negocio)
+            $issues3 = DB::table('issues')
+                        ->join('control_objective_risk','control_objective_risk.control_id','=','issues.control_id')
+                        ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                        ->where('objectives.organization_id','=',$org_id)
+                        ->whereNotNull('issues.control_id')
+                        ->select('issues.id','issues.name as issue_name','issues.classification',
+                                     'issues.recommendations','control_objective_risk.id as subobj_id')
+                        ->distinct()
+                        ->groupBy('issues.id')
+                        ->get();
+
+            $issues4 = array();
+        }
+        else if ($kind == 5) //hallazgos de programa auditoría
+        {
+            //hallazgos de programa de auditoría creados directamente
+            $issues1 = DB::table('issues')
+                        ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','issues.audit_audit_plan_audit_program_id')
+                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->where('audit_plans.organization_id','=',$org_id)
+                        ->whereNotNull('issues.audit_audit_plan_audit_program_id')
+                        ->select('issues.id','issues.name as issue_name','issues.classification',
+                                     'issues.recommendations','audit_audit_plan_audit_program.id as subobj_id')
+                        ->distinct()
+                        ->groupBy('issues.id')
+                        ->get();
+        }
+        else if ($kind == 6) //hallazgos de auditoría
+        {
+            //hallazgos de auditoría creados directamente
+            $issues1 = DB::table('issues')
+                        ->join('audit_audit_plan','audit_audit_plan.id','=','issues.audit_audit_plan_id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->where('audit_plans.organization_id','=',$org_id)
+                        ->whereNotNull('issues.audit_audit_plan_id')
+                        ->select('issues.id','issues.name as issue_name','issues.classification',
+                                     'issues.recommendations','audit_audit_plan.id as subobj_id')
                         ->distinct()
                         ->groupBy('issues.id')
                         ->get();
@@ -178,14 +359,14 @@ class IssuesController extends Controller
                 $temp = $this->formatearIssue($issue->id,$issue->issue_name,$issue->classification,$issue->recommendations,NULL,NULL,NULL);
             }       
 
-            if ($kind2 == 2) //estamos formateando para reporte de hallazgos, por lo que se agregarán los riesgos
+            if ($kind2 == 2) //estamos formateando para reporte de hallazgos, por lo que se agregarán algunos datos
             {
-                $datos = $this->datosReporte($issue->subobj_id,$kind);
+                $datos = $this->datosReporte($issue->subobj_id,$kind,NULL);
             }
 
             if (strstr($_SERVER["REQUEST_URI"],'genexcelissues'))
             {
-                if ($kind == 0)
+                if ($kind == 0 || $kind == 1) //proceso o subproceso
                 {
                     $issues[$i] = [
                         'Procesos' => $datos['processes'],
@@ -200,7 +381,7 @@ class IssuesController extends Controller
                         'Fecha límite plan' => $temp['final_date']
                     ];
                 }
-                else if ($kind == 2)
+                else if ($kind == 2) //organización
                 {
                     $issues[$i] = [
                         'Objetivos' => $datos['objectives'],
@@ -214,14 +395,74 @@ class IssuesController extends Controller
                         'Fecha límite plan' => $temp['final_date']
                     ];
                 }
+                else if ($kind == 3) //hallazgos de control de proceso
+                {
+                    $issues[$i] = [
+                        'Procesos' => $datos['processes'],
+                        'Subprocesos' => $datos['subprocesses'],
+                        'Riesgos' => $datos['risks'],
+                        'Controles' => $datos['controls'],
+                        'Nombre' => $temp['name'],
+                        'Clasificación' => $temp['classification'],
+                        'Recomendaciones' => $temp['recommendations'],
+                        'Plan de acción' => $temp['plan'],
+                        'Estado' => $temp['status'],
+                        'Fecha límite plan' => $temp['final_date']
+                    ];
+                }
+                else if ($kind == 4) //hallazgos de control de entidad
+                {
+                    $issues[$i] = [
+                        'Objetivos' => $datos['objectives'],
+                        'Riesgos' => $datos['risks'],
+                        'Controles' => $datos['controls'],
+                        'Nombre' => $temp['name'],
+                        'Clasificación' => $temp['classification'],
+                        'Recomendaciones' => $temp['recommendations'],
+                        'Plan de acción' => $temp['plan'],
+                        'Estado' => $temp['status'],
+                        'Fecha límite plan' => $temp['final_date']
+                    ];
+                }
+
+                else if ($kind == 5) //hallazgos de programa de auditoría
+                {
+                    $issues[$i] = [
+                        'Plan de auditoría' => $datos['audit_plan'],
+                        'Auditoría' => $datos['audit'],
+                        'Programa de auditoría' => $datos['audit_program'],
+                        'Nombre' => $temp['name'],
+                        'Clasificación' => $temp['classification'],
+                        'Recomendaciones' => $temp['recommendations'],
+                        'Plan de acción' => $temp['plan'],
+                        'Estado' => $temp['status'],
+                        'Fecha límite plan' => $temp['final_date']
+                    ];
+                }
+                else if ($kind == 6) //hallazgos de programa de auditoría
+                {
+                    $issues[$i] = [
+                        'Plan de auditoría' => $datos['audit_plan'],
+                        'Auditoría' => $datos['audit'],
+                        'Nombre' => $temp['name'],
+                        'Clasificación' => $temp['classification'],
+                        'Recomendaciones' => $temp['recommendations'],
+                        'Plan de acción' => $temp['plan'],
+                        'Estado' => $temp['status'],
+                        'Fecha límite plan' => $temp['final_date']
+                    ];
+                }
             }
             else
             {
                 //obtenemos posibles evidencias
                 $evidence = getEvidences(2,$temp['id']);
+                
+                $origin = $this->getOrigin($kind,$issue->subobj_id,$org_id);
 
                 $issues[$i] = [
                     'id' => $temp['id'],
+                    'origin' => $origin,
                     'name' => $temp['name'],
                     'classification' => $temp['classification'],
                     'recommendations' => $temp['recommendations'],
@@ -236,7 +477,8 @@ class IssuesController extends Controller
         
             $i += 1;
         }
-
+    if ($kind != 5 AND $kind != 6)
+    {
         foreach ($issues2 as $issue)
         {
             $plan = NULL;
@@ -257,7 +499,7 @@ class IssuesController extends Controller
 
             if ($kind2 == 2) //estamos formateando para reporte de hallazgos, por lo que se agregarán los riesgos
             {
-                $datos = $this->datosReporte($issue->subobj_id,$kind);
+                $datos = $this->datosReporte($issue->subobj_id,$kind,NULL);
             }
 
             if (strstr($_SERVER["REQUEST_URI"],'genexcelissues'))
@@ -296,8 +538,12 @@ class IssuesController extends Controller
             {
                 //obtenemos posibles evidencias
                 $evidence = getEvidences(2,$temp['id']);
+
+                $origin = $this->getOrigin($kind,$issue->subobj_id,$org_id);
+
                 $issues[$i] = [
                     'id' => $temp['id'],
+                    'origin' => $origin,
                     'name' => $temp['name'],
                     'classification' => $temp['classification'],
                     'recommendations' => $temp['recommendations'],
@@ -333,7 +579,7 @@ class IssuesController extends Controller
 
             if ($kind2 == 2) //estamos formateando para reporte de hallazgos, por lo que se agregarán los riesgos
             {
-                $datos = $this->datosReporte($issue->subobj_id,$kind);
+                $datos = $this->datosReporte($issue->subobj_id,$kind,NULL);
             }
 
             if (strstr($_SERVER["REQUEST_URI"],'genexcelissues'))
@@ -372,8 +618,12 @@ class IssuesController extends Controller
             {
                 //obtenemos posibles evidencias
                 $evidence = getEvidences(2,$temp['id']);
+
+                $origin = $this->getOrigin($kind,$issue->subobj_id,$org_id);
+
                 $issues[$i] = [
                     'id' => $temp['id'],
+                    'origin' => $origin,
                     'name' => $temp['name'],
                     'classification' => $temp['classification'],
                     'recommendations' => $temp['recommendations'],
@@ -409,7 +659,8 @@ class IssuesController extends Controller
 
             if ($kind2 == 2) //estamos formateando para reporte de hallazgos, por lo que se agregarán los riesgos
             {
-                $datos = $this->datosReporte($issue->subobj_id,$kind);
+                if ($kind == 2) //estamos formateando para organizacion, se envía en vez de NULL un 1
+                $datos = $this->datosReporte($issue->subobj_id,$kind,1);
             }            
 
             if (strstr($_SERVER["REQUEST_URI"],'genexcelissues'))
@@ -448,8 +699,12 @@ class IssuesController extends Controller
             {
                 //obtenemos posibles evidencias
                 $evidence = getEvidences(2,$temp['id']);
+
+                $origin = $this->getOrigin($kind,$issue->subobj_id,$org_id);
+
                 $issues[$i] = [
                     'id' => $temp['id'],
+                    'origin' => $origin,
                     'name' => $temp['name'],
                     'classification' => $temp['classification'],
                     'recommendations' => $temp['recommendations'],
@@ -465,7 +720,7 @@ class IssuesController extends Controller
             $i += 1;
         }
 
-        if ($kind == 0)
+        if ($kind == 0 || $kind == 1)
         {
             foreach ($issues5 as $issue)
             {
@@ -487,7 +742,7 @@ class IssuesController extends Controller
 
                 if ($kind2 == 2) //estamos formateando para reporte de hallazgos, por lo que se agregarán los riesgos
                 {
-                    $datos = $this->datosReporte($issue->subobj_id,$kind);
+                    $datos = $this->datosReporte($issue->subobj_id,$kind,NULL);
                 }
 
                 if (strstr($_SERVER["REQUEST_URI"],'genexcelissues'))
@@ -509,8 +764,12 @@ class IssuesController extends Controller
                 {
                     //obtenemos posibles evidencias
                     $evidence = getEvidences(2,$temp['id']);
+
+                    $origin = $this->getOrigin($kind,$issue->subobj_id,$org_id);
+
                     $issues[$i] = [
                         'id' => $temp['id'],
+                        'origin' => $origin,
                         'name' => $temp['name'],
                         'classification' => $temp['classification'],
                         'recommendations' => $temp['recommendations'],
@@ -528,18 +787,18 @@ class IssuesController extends Controller
 
             }
         }
-
+    }
         return $issues;
     }
 
     //datos extras para reporte de auditoría
-    public function datosReporte($risk_subobj_id,$kind)
+    public function datosReporte($risk_subobj_id,$kind,$is_org)
     {
         $datos = array();
         $risks = "";
         $controls = "";
 
-        if ($kind == 0)
+        if ($kind == 0 || $kind == 1)
         {
             $subprocesses = "";
             $processes = "";
@@ -640,11 +899,48 @@ class IssuesController extends Controller
         {
             $objectives = "";
 
-            $objectives1 = DB::table('objectives')
-                            ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
-                            ->where('objective_risk.id','=',$risk_subobj_id)
-                            ->select('objectives.name')
+            if ($is_org == 1)
+            {
+                $objectives1 = DB::table('objectives')
+                                ->where('objectives.organization_id','=',$risk_subobj_id)
+                                ->select('objectives.name')
+                                ->get();
+
+                $risks1 = DB::table('risks')
+                            ->join('objective_risk','objective_risk.risk_id','=','risks.id')
+                            ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                            ->where('objectives.organization_id','=',$risk_subobj_id)
+                            ->select('risks.name')
                             ->get();
+
+                $controls1 = DB::table('controls')
+                            ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
+                            ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                            ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                            ->where('objectives.organization_id','=',$risk_subobj_id)
+                            ->select('controls.name')
+                            ->get();
+            }
+            else
+            {
+                $objectives1 = DB::table('objectives')
+                                ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
+                                ->where('objective_risk.id','=',$risk_subobj_id)
+                                ->select('objectives.name')
+                                ->get();
+
+                $risks1 = DB::table('risks')
+                            ->join('objective_risk','objective_risk.risk_id','=','risks.id')
+                            ->where('objective_risk.id','=',$risk_subobj_id)
+                            ->select('risks.name')
+                            ->get();
+
+                $controls1 = DB::table('controls')
+                            ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
+                            ->where('control_objective_risk.objective_risk_id','=',$risk_subobj_id)
+                            ->select('controls.name')
+                            ->get();
+            }
 
             $last = end($objectives1); //guardamos final para no agregarle coma
             foreach ($objectives1 as $obj)
@@ -657,9 +953,82 @@ class IssuesController extends Controller
                     $objectives .= $obj->name;
             }
 
+            if ($risks1)
+            {
+                $last = end($risks1); //guardamos final para no agregarle coma
+                foreach ($risks1 as $risk)
+                {
+                    if ($risk != $last)
+                    {
+                        $risks .= $risk->name.', ';
+                    }
+                    else
+                        $risks .= $risk->name;
+                }
+            }
+            else
+            {
+                $risks = "No se han identificado riesgos";
+            }
+
+            if ($controls1)
+            {
+                $last = end($controls1); //guardamos final para no agregarle coma
+                foreach ($controls1 as $control)
+                {
+                    if ($control != $last)
+                    {
+                        $controls .= $control->name.', ';
+                    }
+                    else
+                        $controls .= $control->name;
+                }
+            }
+            else
+            {
+                $controls = "No se han definido controles";
+            }
+            
+
+            $datos = [
+                'risks' => $risks,
+                'objectives' => $objectives,
+                'controls' => $controls,
+                ];
+        }
+        else if ($kind == 3) //hallazgos de control de proceso
+        {
+            $processes = "";
+            $subprocesses = "";
+
+            $processes1 = DB::table('processes')
+                            ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                            ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                            ->join('control_risk_subprocess','control_risk_subprocess.risk_subprocess_id','=','risk_subprocess.id')
+                            ->where('control_risk_subprocess.id','=',$risk_subobj_id)
+                            ->select('processes.name as process','subprocesses.name as subprocess')
+                            ->get();
+
+            $last = end($processes1); //guardamos final para no agregarle coma
+            foreach ($processes1 as $process)
+            {
+                if ($process != $last)
+                {
+                    $processes .= $process->process.', ';
+                    $subprocesses .= $process->subprocess.', ';
+                }
+                else
+                {
+                    $processes .= $process->process;
+                    $subprocesses .= $process->subprocess;
+                }
+            
+            }
+
             $risks1 = DB::table('risks')
-                        ->join('objective_risk','objective_risk.risk_id','=','risks.id')
-                        ->where('objective_risk.id','=',$risk_subobj_id)
+                        ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                        ->join('control_risk_subprocess','control_risk_subprocess.risk_subprocess_id','=','risk_subprocess.id')
+                        ->where('control_risk_subprocess.id','=',$risk_subobj_id)
                         ->select('risks.name')
                         ->get();
 
@@ -682,8 +1051,68 @@ class IssuesController extends Controller
             }
 
             $controls1 = DB::table('controls')
+                            ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                            ->where('control_risk_subprocess.id','=',$risk_subobj_id)
+                            ->select('controls.name')
+                            ->get();
+
+            if ($controls1)
+            {
+                $last = end($controls1); //guardamos final para no agregarle coma
+                foreach ($controls1 as $control)
+                {
+                    if ($control != $last)
+                    {
+                        $controls .= $control->name.', ';
+                    }
+                    else
+                        $controls .= $control->name;
+                }
+            }
+            else
+            {
+                $controls = "No se han definido controles";
+            }
+            
+
+            $datos = [
+                'processes' => $processes,
+                'subprocesses' => $subprocesses,
+                'risks' => $risks,
+                'controls' => $controls,
+                ];
+        }
+        else if ($kind == 4) //hallazgos de control de entidad
+        {
+            $objectives = "";
+
+            $objectives1 = DB::table('objectives')
+                            ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
+                            ->join('risks','risks.id','=','objective_risk.risk_id')
+                            ->join('control_objective_risk','control_objective_risk.objective_risk_id','=','objective_risk.id')
+                            ->where('control_objective_risk.id','=',$risk_subobj_id)
+                            ->select('objectives.name as obj','risks.name as risk')
+                            ->get();
+
+            $last = end($objectives1); //guardamos final para no agregarle coma
+            foreach ($objectives1 as $obj)
+            {
+                if ($obj != $last)
+                {
+                    $objectives .= $obj->obj.', ';
+                    $risks .= $obj->risk.', ';
+                }
+                else
+                {
+                    $objectives .= $obj->obj;
+                    $risks .= $obj->risk;
+                }
+            
+            }
+
+            $controls1 = DB::table('controls')
                             ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
-                            ->where('control_objective_risk.objective_risk_id','=',$risk_subobj_id)
+                            ->where('control_objective_risk.id','=',$risk_subobj_id)
                             ->select('controls.name')
                             ->get();
 
@@ -712,27 +1141,78 @@ class IssuesController extends Controller
                 'controls' => $controls,
                 ];
         }
+        else if ($kind == 5) //programas de auditoría
+        {
+            $audit_programs1 = DB::table('audit_programs')
+                                ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_program_id','=','audit_programs.id')
+                                ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                                ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                                ->where('audit_audit_plan_audit_program.id','=',$risk_subobj_id)
+                                ->select('audit_plans.name as audit_plan','audits.name as audit','audit_programs.name as audit_program')
+                                ->first();
+
+            //es solo uno (los de arriba con coma son innecesarios pero tampoco es necesario modificarlos)
+            if ($audit_programs1)
+            {
+                $audit_program = $audit_programs1->audit_program;
+                $audit = $audit_programs1->audit;
+                $audit_plan = $audit_programs1->audit_plan;
+            }
+            else
+            {
+                $audit_program = "";
+                $audit = "";
+                $audit_plan = "";
+            }
+
+            $datos = [
+                'audit_plan' => $audit_plan,
+                'audit' => $audit,
+                'audit_program' => $audit_program,
+            ];
+        }
+        else if ($kind == 6) //auditorías
+        {
+            $audit1 = DB::table('audits')
+                        ->join('audit_audit_plan','audit_audit_plan.audit_id','=','audits.id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->where('audit_audit_plan.id','=',$risk_subobj_id)
+                        ->select('audit_plans.name as audit_plan','audits.name as audit')
+                        ->first();
+
+            //es solo uno (los de arriba con coma son innecesarios pero tampoco es necesario modificarlos)
+            if ($audit1)
+            {
+                $audit = $audit1->audit;
+                $audit_plan = $audit1->audit_plan;
+            }
+            else
+            {
+                $audit = "";
+                $audit_plan = "";
+            }
+
+            $datos = [
+                'audit_plan' => $audit_plan,
+                'audit' => $audit,
+            ];
+        }
 
         return $datos;
     }
 
     public function formatearIssue($id,$name,$classification,$recommendations,$plan,$status,$date)
     {
-            switch ($classification) 
-            {
-                case 0:
-                    $class = 'Oportunidad de mejora';
-                    break;
-                case 1:
-                    $class = 'Deficiencia';
-                    break;
-                case 2:
-                    $class = 'Debilidad significativa';
-                    break;
-                default:
-                    $class = 'Aun no se ha clasificado';
-                    break;
-            }
+            
+            if ($classification === 0) //debe ser identico para no tomar en cuenta null
+                $class = 'Oportunidad de mejora';
+            else if ($classification == 1)
+                $class = 'Deficiencia';
+            else if ($classification == 2)
+                $class = 'Debilidad significativa';
+            else
+                $class = 'Aun no se ha clasificado';
 
             if ($recommendations == "" || $recommendations == NULL)
             {
@@ -852,9 +1332,62 @@ class IssuesController extends Controller
 
             return view('hallazgos.create',['org'=>$org, 'processes' => $processes,'kind' => $_GET['kind'],'stakeholders'=>$stakes]);
         }
+        else if ($_GET['kind'] == 1) //obtenemos subprocesos
+        {
+            $subprocesses = \Ermtool\Subprocess::where('subprocesses.status',0)
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('organization_subprocess.organization_id','=',$_GET['org'])
+                        ->lists('subprocesses.name','subprocesses.id');
+
+            return view('hallazgos.create',['org'=>$org, 'subprocesses' => $subprocesses,'kind' => $_GET['kind'],'stakeholders'=>$stakes]);
+        }
         else if ($_GET['kind'] == 2) //mandamos id de org
         {
             return view('hallazgos.create',['org'=>$org, 'kind' => $_GET['kind'], 'org_id'=>$_GET['org'],'stakeholders'=>$stakes]);
+        }
+        else if ($_GET['kind'] == 3) //obtenemos controles de proceso
+        {
+            $controls = DB::table('controls')
+                            ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                            ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                            ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                            ->where('organization_subprocess.organization_id','=',$_GET['org'])
+                            ->lists('controls.name','controls.id');
+
+            return view('hallazgos.create',['org'=>$org, 'controls' => $controls, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes]);
+        }
+        else if ($_GET['kind'] == 4) //obtenemos controles de entidad
+        {
+            $controls = DB::table('controls')
+                            ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
+                            ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                            ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                            ->where('objectives.organization_id','=',$_GET['org'])
+                            ->lists('controls.name','controls.id');
+
+            return view('hallazgos.create',['org'=>$org, 'controls' => $controls, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes]);
+        }
+        else if ($_GET['kind'] == 5)
+        {
+            $audit_programs = DB::table('audit_programs')
+                        ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_program_id','=','audit_programs.id')
+                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->where('audit_plans.organization_id','=',$_GET['org'])
+                        ->lists('audit_programs.name','audit_audit_plan_audit_program.id');
+                        
+            return view('hallazgos.create',['org'=>$org, 'audit_programs' => $audit_programs, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes]);            
+        }
+        else if ($_GET['kind'] == 6)
+        {
+            $audits = DB::table('audit_audit_plan')
+                    ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                    ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                    ->where('audit_plans.organization_id','=',$_GET['org'])
+                    ->select('audit_audit_plan.id',DB::raw('CONCAT(audit_plans.name, " - ", audits.name) AS audit_name'))
+                    ->lists('audit_name','audit_audit_plan.id');
+                        
+            return view('hallazgos.create',['org'=>$org, 'audits' => $audits, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes]);            
         }
     }
 
@@ -889,7 +1422,7 @@ class IssuesController extends Controller
             {
                 $recommendations = NULL;
             }
-            if (isset($_POST['classification']))
+            if (isset($_POST['classification']) && $_POST['classification'] != "")
             {
                 $classification = $_POST['classification'];
             }
@@ -911,6 +1444,19 @@ class IssuesController extends Controller
                             'updated_at' => date('Y-m-d H:i:s'),
                         ]);
             }
+            else if ($_POST['kind'] == 1) //hallazgo de subproceso
+            {
+                $issue = DB::table('issues')
+                    ->insertGetId([
+                            'name' => $_POST['name'],
+                            'description' => $description,
+                            'recommendations' => $recommendations,
+                            'classification' => $classification,
+                            'subprocess_id' => $_POST['subprocess_id'],
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+            }
             else if ($_POST['kind'] == 2) //hallazgo de organización
             {
                 $issue = DB::table('issues')
@@ -920,6 +1466,45 @@ class IssuesController extends Controller
                             'recommendations' => $recommendations,
                             'classification' => $classification,
                             'organization_id' => $_POST['org_id'],
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+            }
+            else if ($_POST['kind'] == 3 || $_POST['kind'] == 4)
+            {
+                $issue = DB::table('issues')
+                    ->insertGetId([
+                            'name' => $_POST['name'],
+                            'description' => $description,
+                            'recommendations' => $recommendations,
+                            'classification' => $classification,
+                            'control_id' => $_POST['control_id'],
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+            }
+            else if ($_POST['kind'] == 5)
+            {
+                $issue = DB::table('issues')
+                    ->insertGetId([
+                            'name' => $_POST['name'],
+                            'description' => $description,
+                            'recommendations' => $recommendations,
+                            'classification' => $classification,
+                            'audit_audit_plan_audit_program_id' => $_POST['audit_audit_plan_audit_program_id'],
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+            }
+            else if ($_POST['kind'] == 6)
+            {
+                $issue = DB::table('issues')
+                    ->insertGetId([
+                            'name' => $_POST['name'],
+                            'description' => $description,
+                            'recommendations' => $recommendations,
+                            'classification' => $classification,
+                            'audit_audit_plan_id' => $_POST['audit_audit_plan_id'],
                             'created_at' => date('Y-m-d H:i:s'),
                             'updated_at' => date('Y-m-d H:i:s'),
                         ]);

@@ -92,8 +92,9 @@ class KriController extends Controller
             }
             else
             {
-                $last_eval = new DateTime($k->kri_last_evaluation);
-                $date_last = date_format($last_eval, 'd-m-Y');
+                $last_eval = $k->kri_last_evaluation;
+                $date_last0 = new DateTime($k->date_evaluation);
+                $date_last = date_format($date_last0, 'd-m-Y');
                 
                 //obtenemos periodo de evaluación
 
@@ -130,6 +131,20 @@ class KriController extends Controller
 
             $created_at = date('d-m-Y',strtotime($k->created_at));
 
+            //obtenemos stakeholder
+            if ($k->risk_stake == 0 || $k->risk_stake == NULL)
+            {
+                $stakeholder = "Ninguno";
+            }
+             else
+            {
+                //obtenemos stakeholder
+                $stake = DB::table('stakeholders')
+                            ->where('id',$k->risk_stake)
+                            ->select(DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+                            ->first();
+                $stakeholder = $stake->full_name;
+            }
             $kri[$i] = [
                 'id' => $k->id,
                 'name' => $k->name,
@@ -141,7 +156,7 @@ class KriController extends Controller
                 'type' => $tipo,
                 'periodicity' => $periodicity,
                 'risk' => $k->risk_name,
-                'risk_stakeholder' => $k->risk_stake,
+                'risk_stakeholder' => $stakeholder,
                 'eval' => $eval,
                 'description_eval' => $description_eval,
                 'last_evaluation' => $last_eval,
@@ -291,6 +306,18 @@ class KriController extends Controller
     {
         //print_r($_POST);
 
+        if ($_POST['uni_med'] == 0) //porcentaje, se deben volver a validar las medidas
+        {
+            //Validación: Si la validación es pasada, el código continua
+            $this->validate($request, [
+                'green_min' => 'required|max:100|min:0',
+                'interval_min' => 'required|max:100|min:0',
+                'interval_max' => 'required|max:100|min:0',
+                'red_max' => 'required|max:100|min:0',
+            ]);
+        }
+        
+
         //creamos NUEVO KRI
         DB::transaction(function() {
 
@@ -407,6 +434,17 @@ class KriController extends Controller
     public function update(Request $request, $id)
     {
         //print_r($_POST);
+        if ($_POST['uni_med'] == 0) //porcentaje, se deben volver a validar las medidas
+        {
+            //Validación: Si la validación es pasada, el código continua
+            $this->validate($request, [
+                'green_min' => 'required|numeric|between:0,100',
+                'interval_min' => 'required|numeric|between:0,100',
+                'interval_max' => 'required|numeric|between:0,100',
+                'red_max' => 'required|numeric|between:0,100',
+            ]);
+        }
+
         global $id1;
         $id1 = $id;
         DB::transaction(function()
@@ -622,6 +660,26 @@ class KriController extends Controller
                 ->select('KRI.*')
                 ->get();
 
+        //obtenemos id de stakeholder
+        $s = DB::table('risks')
+                    ->where('id','=',$id)
+                    ->select('stakeholder_id')
+                    ->first();
+
+        if ($s->stakeholder_id == 0 || $s->stakeholder_id == NULL)
+        {
+            $stakeholder = "Ninguno";
+        }
+         else
+        {
+            //obtenemos stakeholder
+            $stake = DB::table('stakeholders')
+                        ->where('id',$s->stakeholder_id)
+                        ->select(DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+                        ->first();
+            $stakeholder = $stake->full_name;
+        }
+
         $i=0;
         foreach ($kri_query as $k)
         {
@@ -677,6 +735,7 @@ class KriController extends Controller
                 {
                     $description_eval = $k->description_red;
                 }
+
             }
 
             $kri[$i] = [
@@ -690,7 +749,7 @@ class KriController extends Controller
                 'type' => $tipo,
                 'eval' => $eval,
                 'description_eval' => $description_eval,
-                'last_evaluation' => $last_eval,
+                'stakeholder' => $stakeholder
             ];
 
             $i += 1;

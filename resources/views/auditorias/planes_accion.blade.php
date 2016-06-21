@@ -236,7 +236,7 @@ function crear_plan(id)
 			plan += '</select>';
 
 			plan += '<label class="control-label">Ingrese fecha de término del plan de acción</label>';
-			plan += '<input type="date" class="form-control" name="final_date_'+id+'"></div>';
+			plan += '<input type="date" class="form-control" name="final_date_'+id+'" onblur="validarFechaMayorActual(this.value)"></div>';
 			plan += '<div class="form-group col-sm-12">';
 			plan += '<button class="btn btn-success" name="guardar_'+id+'">Guardar</button></div><hr><br>';
 			$("#nuevo_plan_"+id).append(plan);
@@ -261,7 +261,7 @@ function crear_plan(id)
 				plan += '<input type="text" value="'+this.stakeholder+'" class="form-control" disabled>';
 
 				plan += '<label class="control-label">Ingrese fecha de término del plan de acción</label>';
-				plan += '<input type="date" class="form-control" name="final_date_'+id+'" disabled value="'+this.final_date+'"></div>';
+				plan += '<input type="date" class="form-control" name="final_date_'+id+'" onblur="validarFechaMayorActual(this.value)" disabled value="'+this.final_date+'"></div>';
 				plan += '<hr><br>';
 				$("#nuevo_plan_"+id).append(plan);
 				$("#nuevo_plan_"+id).show(500);

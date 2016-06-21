@@ -121,6 +121,44 @@ function validarFechaMayorActual(date)
     }   
 }
 
+//compara 2 fechas y verifica que una sea menor a la otra (en el caso de plan de auditoría)
+function compararFechas(fecha_menor,fecha_mayor)
+{
+	//primero hacemos la misma validación de arriba
+	var today = new Date();
+    var date1 = new Date(fecha_mayor);
+    var date2 = new Date(fecha_menor);
+        
+    if (date2<today)
+    {   
+        swal('Cuidado!','Está ingresando una fecha menor a la fecha actual','warning');
+        $("#init_date").attr('class','form-group has-error has-feedback');
+    }
+    else if (date1<today)
+    {
+    	swal('Cuidado!','Está ingresando una fecha menor a la fecha actual','warning');
+        $("#fin_date").attr('class','form-group has-error has-feedback');
+    }
+    else
+    {
+		if (fecha_mayor != "" && fecha_menor != "")
+		{
+			// ----------------- REALIZAR LA COMPARACIÓN -----------------//
+			if (fecha_menor >= fecha_mayor)
+			{
+				swal('Cuidado!','La fecha de inicio debe ser menor a la fecha de término','error');
+				$("#init_date").attr('class','form-group has-error has-feedback');
+				$("#fin_date").attr('class','form-group has-error has-feedback');
+			}
+			else
+			{
+				$("#init_date").attr('class','form-group');
+				$("#fin_date").attr('class','form-group');
+			}
+		}
+	}
+}
+
 $(document).ready(function() {
 	// Load Datatables and run plugin on tables 
 	LoadDataTablesScripts(AllTables);

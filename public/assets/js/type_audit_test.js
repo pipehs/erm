@@ -19,7 +19,7 @@ function getType(test)
 					var select = '<div class="form-group">';
 					select += '<label for="control_id_test'+test+'" class="col-sm-4 control-label">Seleccione control</label>';
 					select += '<div class="col-sm-4">'
-					select += '<select name="control_id_test_'+test+'" class="form-control">';
+					select += '<select name="control_id_test_'+test+'" class="form-control" required="true">';
 					select += '<option value="" selected disabled>- Seleccione -</option>';
 
 					var datos = JSON.parse(result);
@@ -53,7 +53,7 @@ function getType(test)
 					var select = '<div class="form-group">';
 					select += '<label for="control_id_test'+test+'" class="col-sm-4 control-label">Seleccione riesgo</label>';
 					select += '<div class="col-sm-4">'
-					select += '<select name="risk_id_test_'+test+'" class="form-control">';
+					select += '<select name="risk_id_test_'+test+'" class="form-control" required="true">>';
 					select += '<option value="" selected disabled>- Seleccione -</option>';
 
 					var datos = JSON.parse(result);
@@ -85,7 +85,7 @@ function getType(test)
 					var select = '<div class="form-group">';
 					select += '<label for="control_id_test'+test+'" class="col-sm-4 control-label">Seleccione subproceso</label>';
 					select += '<div class="col-sm-4">'
-					select += '<select name="subprocess_id_test_'+test+'" class="form-control">';
+					select += '<select name="subprocess_id_test_'+test+'" class="form-control" required="true">>';
 					select += '<option value="" selected disabled>- Seleccione -</option>';
 
 					var datos = JSON.parse(result);

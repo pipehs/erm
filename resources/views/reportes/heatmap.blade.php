@@ -80,6 +80,17 @@
                 </div>
             </div>
 
+            <div class="form-group" id="tipo2" style="display: none;">
+                <div class="row">
+                  {!!Form::label('Riesgos inherentes o controlados',null,['class'=>'col-sm-4 control-label'])!!}
+                  <div class="col-sm-3">
+                    {!!Form::select('kind2',(['0'=>'Riesgos inherentes','1'=>'Riesgos inherentes v/s Riesgos controlados']), 
+                         null, 
+                         ['id' => 'kind2','placeholder'=>'- Seleccione -'])!!}
+                  </div>
+                </div>
+            </div>
+
                 <div class="row">
                   <div class="form-group">
                     {!!Form::label('Seleccione mes Y año (si desea ver heatmap de todo un año el mes debe quedar en blanco)',
@@ -87,7 +98,7 @@
                     <div class="col-sm-2">
                       {!!Form::number('ano',null,
                       ['id'=>'ano','class'=>'form-control','input maxlength'=>'4',
-                       'placeholder'=>'AAAA','min'=>'2015'])!!}
+                       'placeholder'=>'AAAA','min'=>'2016'])!!}
                     </div>
                     <div class="col-sm-1">
                     {!!Form::number('mes',null,
@@ -120,9 +131,11 @@
                 <div class="col-sm-6">
                   <h4><b>Evaluación de Riesgos Inherentes</b></h4>
                 </div>
+              @if ($kind2 == 1)
                 <div class="col-sm-6">
                   <h4><b>Evaluación de Riesgos Controlados</b></h4>
                 </div>
+              @endif
               </div>
 
               <div style="width: 3%; float:left; padding-top: 10%;">
@@ -161,11 +174,11 @@
                         <td width="15%"></td>
                         <td width="85%" bgcolor="#CCCCCC">
                             <table height="50px" width="100%" border="1">
-                                <td width="20%">1<br>Remoto</td>
-                                <td width="20%">2<br>No probable</td>
-                                <td width="20%">3<br>Probable</td>
-                                <td width="20%">4<br>Altamente probable</td>
-                                <td width="20%">5<br>Esperado</td>
+                                <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
+                                <td width="20%" style="vertical-align:top;">2<br>No probable</td>
+                                <td width="20%" style="vertical-align:top;">3<br>Probable</td>
+                                <td width="20%" style="vertical-align:top;">4<br>Altamente probable</td>
+                                <td width="20%" style="vertical-align:top;">5<br>Esperado</td>
                             </table>
                         </td>
                       </tr>
@@ -174,8 +187,7 @@
                   <div style="letter-spacing:5px; text-align: center;"><br>Probabilidad</div>
               </div>
 
-
-
+    @if ($kind2)
                <!-- Heatmap riesgo controlado -->
 
               <div style="width: 3%; float: left; padding-top: 10%;">
@@ -214,11 +226,11 @@
                   <td width="15%"></td>
                   <td width="85%" bgcolor="#CCCCCC">
                       <table height="50px" width="100%" border="1">
-                          <td width="20%">1<br>Remoto</td>
-                          <td width="20%">2<br>No probable</td>
-                          <td width="20%">3<br>Probable</td>
-                          <td width="20%">4<br>Altamente probable</td>
-                          <td width="20%">5<br>Esperado</td>
+                          <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
+                          <td width="20%" style="vertical-align:top;">2<br>No probable</td>
+                          <td width="20%" style="vertical-align:top;">3<br>Probable</td>
+                          <td width="20%" style="vertical-align:top;">4<br>Altamente probable</td>
+                          <td width="20%" style="vertical-align:top;">5<br>Esperado</td>
                       </table>
                   </td>
                   </tr>
@@ -227,14 +239,15 @@
                   <div style="letter-spacing:5px; text-align: center;">Probabilidad</div>
               </div>
             </div>
+
+    @endif
              </center>
 
             <div class="row">
               <div class="col-sm-5">
                 <div id="leyendas"> </div>
               </div>
-            </div>
-
+            </div>   
             </div>
             <br>
             <hr>
@@ -279,13 +292,14 @@
                          $('#leyendas').append(leyendas);
                       @endif
                   @endif
-
+                @if ($kind2 == 1)
                   //controlado
                   @if (intval($prom_criticidad_ctrl[$k]) == (5-$i))
                       @if (intval($prom_proba_ctrl[$k]) == (5-$j))
                          $('#{{(5-$i)}}_{{(5-$j)}}_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_ctrl[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_ctrl[$k],1) }}'>{{ $cont }}</span>");
                       @endif
                   @endif
+                @endif
               @endfor
           @endfor
 
@@ -327,6 +341,7 @@
 
  $("#org").change(function() {
     $("#tipo").show(500);
+    $("#tipo2").show(500);
  });
 
 

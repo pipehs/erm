@@ -1,3 +1,5 @@
+	horasPlan = 0;
+	total_horas = 0;
 	//script para agregar select de riesgos de organización
 	$("#orgs").change(function() {
 
@@ -196,50 +198,11 @@
 //funcion para contador general de HH del plan
 $('#HH_plan').change(function() {
 
-	if (typeof contHH == "undefined") //si es igual significa que no existe contHH
-	{
-		contHH = $('#HH_plan').val();
-	}
-	else
-	{
-		contHH = $('#HH_plan').val() - contHH;	
-	}
-	
-	if (typeof HH_audits == "undefined") //aun no se agregan horas hombre de auditoria
-	{
-		comprobador = parseInt(contHH);
-	}
-	else
-	{
-		comprobador = parseInt(contHH) - parseInt(HH_audits);
-	}
+	horasPlan = $('#HH_plan').val();
 
-	if (comprobador > 0)
-	{
-		$('#contador_HH').html('<font color="red">Quedan ' + comprobador + ' horas disponibles para asignar a auditorías</font>');
-	}
-	else
-	{
-		$('#contador_HH').html('<font color="red">Debe asignar horas hombre al plan</font>');
-	}
-});
-
-//función que restará horas asignadas a auditorias a las horas generales
-function horas(horas)
-{
-	
-	if (typeof HH_audits == "undefined") //verifica si es la primera vez que se agregan HH de auditoría
-	{
-		HH_audits = parseInt(horas);
-	}
-	else
-	{
-		HH_audits = parseInt(HH_audits) + parseInt(horas);
-	}
-
-	comprobador = parseInt(contHH) - parseInt(HH_audits);
-
-	if (comprobador > 0)
+	comprobador = horasPlan - total_horas;
+	//alert(comprobador)
+	if (horasPlan - total_horas >= 0)
 	{
 		$('#contador_HH').html('<font color="red">Quedan ' + comprobador + ' horas disponibles para asignar a auditorías</font>');
 	}
@@ -247,6 +210,71 @@ function horas(horas)
 	{
 		$('#contador_HH').html('<font color="red">Debe volver a asignar horas hombre al plan</font>');
 	}
+	
+});
+
+//función que restará horas asignadas a auditorias a las horas generales
+function horas()
+{
+	total_horas = 0; //seteamos cantidad de horas de auditoría
+	//recorremos todas las auditorias antiguas por id
+	cont = 1;
+	while(1)
+	{
+		if (typeof $('#audit_'+cont).val() != "undefined")
+		{
+			if ($("#audit_"+cont).val() == "")
+			{
+				total_horas = parseInt(total_horas) + 0;
+			}
+			else
+			{
+				total_horas = parseInt(total_horas) + parseInt($("#audit_"+cont).val());
+			}
+
+			cont++;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	//ahora sumamos las horas de las nuevas auditorías
+	cont2 = 1;
+	while(1)
+	{
+		if (typeof $('#newaudit_'+cont2).val() != "undefined")
+		{
+			if ($("#newaudit_"+cont2).val() == "")
+			{
+				total_horas = parseInt(total_horas) + 0;
+			}
+			else
+			{
+				total_horas = parseInt(total_horas) + parseInt($("#newaudit_"+cont2).val());
+			}
+
+			cont2++;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	//alert(total_horas)
+	comprobador = horasPlan - total_horas;
+
+	if (horasPlan - total_horas >= 0)
+	{
+		$('#contador_HH').html('<font color="red">Quedan ' + comprobador + ' horas disponibles para asignar a auditorías</font>');
+	}
+	else
+	{
+		$('#contador_HH').html('<font color="red">Debe volver a asignar horas hombre al plan</font>');
+	}
+ 
 }
 //por el momento no se podrán editar los datos de las auditorías ya creadas
 var pathname = window.location.pathname;
@@ -259,15 +287,17 @@ var pathname = window.location.pathname;
 			//función para agregar info de auditorías existentes
 			$("#auditorias").change(function() 
 			{
-					if ($("#orgs").val() != "" && $('input:radio').prop("checked"))//si es que hay una organización seleccionada y tipo de audit
+
+					if ($("#orgs").val() != "" && $('input[name=type]:radio').is(':checked'))//si es que hay una organización seleccionada y tipo de audit
 					{
 						if ($('#auditorias').val() != null)
 						{
 							$('#info_auditorias').empty();
-
+							cont1 = 0;
 							//insertamos los campos necesarios para la información de cada una de las auditorías seleccionadas
 							$('#auditorias > option:selected').each( function () {
-								
+								cont1 += 1; //contador para ver cantidad de auditorías existentes (para agregar en id de HH)
+								//alert(cont1);
 								$('#info_auditorias').append('<div id="titulo_'+ $(this).val() +'"><b><font color="red">Ingrese informaci&oacute;n para ' + $(this).text() + '</b></div></br>');
 								
 								if (tipo == 0) //auditoría de procesos
@@ -319,7 +349,7 @@ var pathname = window.location.pathname;
 								//HH
 								$('#info_auditorias').append('<div class="form-group">');
 								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_HH"  class="col-sm-4 control-label">Horas-Hombre de auditoría</label>');
-								$('#info_auditorias').append('<div class="col-sm-8"><input type="number" min="0" onchange="horas(this.value)" name="audit_' + $(this).val() + '_HH" class="form-control" ></div>');
+								$('#info_auditorias').append('<div class="col-sm-8"><input type="number" min="0" onchange="horas()" id="audit_'+cont1+'" "name="audit_' + $(this).val() + '_HH" class="form-control" ></div>');
 
 								//fecha inicio
 								$('#info_auditorias').append('<div class="form-group">');
@@ -338,6 +368,7 @@ var pathname = window.location.pathname;
 						else
 						{
 							$('#info_auditorias').empty();
+							cont1 = 0;
 						}
 					}
 					else
@@ -352,7 +383,7 @@ var pathname = window.location.pathname;
 		//función para agregar una nueva auditoría
 		$("#agregar_auditoria").click(function() {
 			
-			if ($("#orgs").val() != "" && $('input:radio').prop("checked")) //si es que hay una organización seleccionada y esta chequeado tipo de audit
+			if ($("#orgs").val() != "" && $('input[name=type]:radio').is(':checked')) //si es que hay una organización seleccionada y esta chequeado tipo de audit
 			{
 				$('#info_new_auditorias').append('<div id="titulo_'+cont+'"><b><font color="red">Ingrese informaci&oacute;n para la nueva auditor&iacute;a '+cont+'</b></div></br>');
 				
@@ -419,7 +450,7 @@ var pathname = window.location.pathname;
 								//HH
 								$('#info_new_auditorias').append('<div class="form-group">');
 								$('#info_new_auditorias').append('<label for="audit_new' + cont + '_HH"  class="col-sm-4 control-label">Horas-Hombre de auditoría</label>');
-								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="number" min="0" onchange="horas(this.value)" name="audit_new' + cont + '_HH" class="form-control" ></div>');
+								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="number" id="newaudit_'+cont+'" min="0" onchange="horas()" name="audit_new' + cont + '_HH" class="form-control" ></div>');
 
 								//fecha inicio
 								$('#info_new_auditorias').append('<div class="form-group">');

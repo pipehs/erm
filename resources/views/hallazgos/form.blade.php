@@ -6,6 +6,38 @@
 							null,['placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
+				@elseif (isset($subprocesses))
+					<div class="form-group">
+						{!!Form::label('Seleccione subproceso involucrado',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::select('subprocess_id',$subprocesses,
+							null,['placeholder'=>'- Seleccione -'])!!}
+						</div>
+					</div>
+				@elseif(isset($controls))
+					<div class="form-group">
+						{!!Form::label('Seleccione control involucrado',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::select('control_id',$controls,
+							null,['placeholder'=>'- Seleccione -'])!!}
+						</div>
+					</div>
+				@elseif(isset($audit_programs))
+					<div class="form-group">
+						{!!Form::label('Seleccione programa de auditoría involucrado',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::select('audit_audit_plan_audit_program_id',$audit_programs,
+							null,['placeholder'=>'- Seleccione -'])!!}
+						</div>
+					</div>
+				@elseif(isset($audits))
+					<div class="form-group">
+						{!!Form::label('Seleccione auditoría involucrada',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::select('audit_audit_plan_id',$audits,
+							null,['placeholder'=>'- Seleccione -'])!!}
+						</div>
+					</div>
 				@endif
 					<div class="form-group">
 						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}

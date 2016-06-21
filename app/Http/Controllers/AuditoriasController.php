@@ -194,6 +194,7 @@ class AuditoriasController extends Controller
         return view('auditorias.programas',['programs' => $programas]);         
     }
 
+    //función crea PROGRAMAS de auditoría
     public function createPruebas()
     {
         //plan de auditoría
@@ -318,7 +319,9 @@ class AuditoriasController extends Controller
                                     'updated_at' => $fecha,
                                     'hh' => $hh,
                                     'stakeholder_id' => $stakeholder,
-                                    'control_id' => $_POST['control_id_test_'.$i]
+                                    'control_id' => $_POST['control_id_test_'.$i],
+                                    'subprocess_id' => NULL,
+                                    'risk_id' => NULL,
                             ]);
                         }
                     }
@@ -340,6 +343,8 @@ class AuditoriasController extends Controller
                                     'hh' => $hh,
                                     'stakeholder_id' => $stakeholder,
                                     'risk_id' => $_POST['risk_id_test_'.$i],
+                                    'subprocess_id' => NULL,
+                                    'control_id' => NULL,
                             ]);
                         }
                     }
@@ -361,6 +366,8 @@ class AuditoriasController extends Controller
                                     'hh' => $hh,
                                     'stakeholder_id' => $stakeholder,
                                     'subprocess_id' => $_POST['subprocess_id_test_'.$i],
+                                    'risk_id' => NULL,
+                                    'control_id' => NULL,
                             ]);
                         }
                     }
@@ -2712,6 +2719,7 @@ class AuditoriasController extends Controller
                     $control = \Ermtool\Control::find($test->control_id)->value('id');
                     $risk = NULL;
                     $subprocess = NULL;
+                    $category = 1;
                 }
                 else if ($test->subprocess_id != NULL)
                 {
@@ -2719,6 +2727,7 @@ class AuditoriasController extends Controller
                     $subprocess = \Ermtool\Subprocess::find($test->subprocess_id)->value('id');
                     $risk = NULL;
                     $control = NULL;
+                    $category = 2;
                 }
                 else if ($test->risk_id != NULL)
                 {
@@ -2726,6 +2735,7 @@ class AuditoriasController extends Controller
                     $risk = \Ermtool\Risk::find($test->risk_id)->value('id');
                     $subprocess = NULL;
                     $control = NULL;
+                    $category = 3;
                 }
 
                 $tests[$i] = [
@@ -2736,6 +2746,7 @@ class AuditoriasController extends Controller
                         'risk' => $risk,
                         'control' => $control,
                         'subprocess' => $subprocess,
+                        'category' => $category,
                             ];
                 $i += 1;
             }

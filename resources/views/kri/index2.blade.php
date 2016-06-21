@@ -180,8 +180,8 @@ $("#risk_id").change(function() {
 
 							table_row += '<td>'+this.description_eval+'</td>';
 							table_row += '<td>'+ $("#risk_id option:selected").text() +'</td>';
-							table_row += '<td>Ninguno</td>';
-							table_row += '<td>'+this.last_evaluation+'</td>';
+							table_row += '<td>'+this.stakeholder+'</td>';
+							table_row += '<td>'+this.date_last+'</td>';
 							table_row += '<td><a href="kri.edit.'+this.id+'" class="btn btn-primary">Editar</a></td>';
 							table_row += '<td><a href="kri.evaluar.'+this.id+'" class="btn btn-success">Evaluar</a></td>';
 							table_row += '</tr>';

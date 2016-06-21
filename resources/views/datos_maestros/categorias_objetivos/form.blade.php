@@ -13,10 +13,10 @@
 							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
-					<div class="form-group">
+					<div id="exp_date" class="form-group">
 						{!!Form::label('Fecha Expiraci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::date('expiration_date',null,['class'=>'form-control'])!!}
+							{!!Form::date('expiration_date',null,['class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)'])!!}
 						</div>
 					</div>
 					

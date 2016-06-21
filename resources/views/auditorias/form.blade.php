@@ -142,19 +142,20 @@
 						</div>
 					</div>
 
-					<div class="form-group">
+					<div class="form-group" id="init_date">
 						{!!Form::label('Fecha Inicio',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::date('initial_date',null,['class'=>'form-control'
-																,'required'=>'true'])!!}
+																,'required'=>'true','id'=>'initial_date','onblur'=>'compararFechas(this.value,form.final_date.value)'])!!}
 						</div>
 					</div>
 
-					<div class="form-group">
+					<div class="form-group" id="fin_date">
 						{!!Form::label('Fecha t&eacute;rmino',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::date('final_date',null,['class'=>'form-control'
-															,'required'=>'true'])!!}
+															,'required'=>'true','id'=>'final_date'
+																,'required'=>'true','onblur'=>'compararFechas(form.initial_date.value,this.value)'])!!}
 						</div>
 					</div>
 

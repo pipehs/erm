@@ -726,7 +726,7 @@ class EvaluacionRiesgosController extends Controller
     {
         //obtenemos encuestas distintas a las que corresponden a una evaluación manual
         $encuestas = \Ermtool\Evaluation::where('description','<>','NULL')->lists('name','id');
-        $organizaciones = \Ermtool\Organization::lists('name','id');
+        $organizaciones = \Ermtool\Organization::where('status',0)->lists('name','id');
         return view('reportes.heatmap',['encuestas'=>$encuestas,'organizaciones'=>$organizaciones]); 
     }
 
@@ -746,6 +746,7 @@ class EvaluacionRiesgosController extends Controller
         $riesgo_temp = array();
         $riesgos = array();
         $i = 0;
+
         /* POR AHORA NO SE VERÁ HEATMAP POR ENCUESTA DE EVALUACIÓN --> PROBABLEMENTE NO ES NECESARIO
         if ($_POST['evaluation_id'] != "") //se seleccionó ver mapa para encuesta específica
         {
@@ -828,19 +829,22 @@ class EvaluacionRiesgosController extends Controller
                                 ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
                                 ->max('evaluations.updated_at');
 
-                    //obtenemos fecha de actualización de riesgo controlado
-                    $updated_at_ctrl = DB::table('evaluation_risk')
-                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                ->where('evaluation_risk.risk_subprocess_id',$evaluation->risk_id)
-                                ->where('evaluations.consolidation','=',1)
-                                ->where('evaluations.type','=',2)
-                                ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
-                                ->max('evaluations.updated_at');
+                    if ($_POST['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
+                    {
+                        //obtenemos fecha de actualización de riesgo controlado
+                        $updated_at_ctrl = DB::table('evaluation_risk')
+                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->where('evaluation_risk.risk_subprocess_id',$evaluation->risk_id)
+                                    ->where('evaluations.consolidation','=',1)
+                                    ->where('evaluations.type','=',2)
+                                    ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
+                                    ->max('evaluations.updated_at');
+                    }
 
                     $proba_impacto_in = DB::table('evaluation_risk')
                                 ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                                 ->where('evaluations.updated_at','=',$updated_at_in)
-                                ->where('evaluation_risk.risk_subprocess_id',$evaluation->risk_id)
+                                ->where('evaluation_risk.risk_subprocess_id','=',$evaluation->risk_id)
                                 ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
                                 ->get();
 
@@ -920,25 +924,29 @@ class EvaluacionRiesgosController extends Controller
                 {
                     $updated_at_in = DB::table('evaluation_risk')
                                 ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                ->where('evaluation_risk.objective_risk_id',$evaluation->risk_id)
+                                ->where('evaluation_risk.objective_risk_id','=',$evaluation->risk_id)
                                 ->where('evaluations.consolidation','=',1)
+                                ->where('evaluations.type','=',1)
                                 ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
                                 ->max('evaluations.updated_at');
 
-                    //obtenemos fecha de actualización de riesgo controlado
-                    $updated_at_ctrl = DB::table('evaluation_risk')
-                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                ->where('evaluation_risk.objective_risk_id',$evaluation->risk_id)
-                                ->where('evaluations.consolidation','=',1)
-                                ->where('evaluations.type','=',2)
-                                ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
-                                ->max('evaluations.updated_at');
+                    if ($_POST['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
+                    {
+                        //obtenemos fecha de actualización de riesgo controlado
+                        $updated_at_ctrl = DB::table('evaluation_risk')
+                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->where('evaluation_risk.objective_risk_id','=',$evaluation->risk_id)
+                                    ->where('evaluations.consolidation','=',1)
+                                    ->where('evaluations.type','=',2)
+                                    ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
+                                    ->max('evaluations.updated_at');
+                    }
 
                     //obtenemos promedio de probabilidad e impacto
                     $proba_impacto_in = DB::table('evaluation_risk')
                                 ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                                 ->where('evaluations.updated_at','=',$updated_at_in)
-                                ->where('evaluation_risk.objective_risk_id',$evaluation->risk_id)
+                                ->where('evaluation_risk.objective_risk_id','=',$evaluation->risk_id)
                                 ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
                                 ->get();
 
@@ -949,7 +957,7 @@ class EvaluacionRiesgosController extends Controller
                         $proba_impacto_ctrl = DB::table('evaluation_risk')
                                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                                     ->where('evaluations.updated_at','=',$updated_at_ctrl)
-                                    ->where('evaluation_risk.risk_subprocess_id',$evaluation->risk_id)
+                                    ->where('evaluation_risk.objective_risk_id',$evaluation->risk_id)
                                     ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
                                     ->get();
                     }
@@ -1046,13 +1054,26 @@ class EvaluacionRiesgosController extends Controller
                         
        // }
         
-        //retornamos la misma vista con datos
+        if ($_POST['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
+        {
+            //retornamos la misma vista con datos
                 return view('reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
                                         'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
                                         'prom_criticidad_in'=>$prom_criticidad_in,
                                         'prom_proba_ctrl'=>$prom_proba_ctrl,
                                         'prom_criticidad_ctrl'=>$prom_criticidad_ctrl,
-                                        'kind' => $_POST['kind']]); 
+                                        'kind' => $_POST['kind'],
+                                        'kind2' => $_POST['kind2']]); 
+        }
+        else
+        {
+            //retornamos la misma vista con datos pero solo de riesgos inherentes
+                return view('reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
+                                        'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
+                                        'prom_criticidad_in'=>$prom_criticidad_in,
+                                        'kind' => $_POST['kind'],
+                                        'kind2' => $_POST['kind2']]); 
+        }
     }
 
 

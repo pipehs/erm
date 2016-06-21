@@ -48,7 +48,7 @@
 				<div class="form-group">
 				{!!Form::label('Seleccione un tipo',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-3">
-					{!!Form::select('kind',['0'=>'De proceso','1'=>'De Subproceso','2'=>'De organización'],null, 
+					{!!Form::select('kind',['0'=>'De proceso','1'=>'De subproceso','2'=>'De organización','3'=>'Controles de proceso','4'=>'Controles de entidad','5'=>'De programa de auditoría','6'=>'De auditoría'],null, 
 							 	   ['id' => 'kind','required'=>'true','placeholder'=>'- Seleccione -'])!!}
 				</div>
 			</div>
@@ -117,6 +117,129 @@
 							<td>{{ $issue['datos']['objectives'] }}</td>
 							<td>{{ $issue['datos']['risks'] }}</td>
 							<td>{{ $issue['datos']['controls'] }}</td> 
+							<td>{{ $issue['name'] }}</td>
+							<td>{{ $issue['classification'] }}</td>
+							<td>{{ $issue['recommendations'] }}</td>
+							<td>{{ $issue['plan'] }}</td>
+							<td>{{ $issue['status'] }}</td>
+							<td>{{ $issue['final_date'] }}</td>
+						</tr>
+					@endforeach
+
+				@elseif ($kind == 3)
+					<h4><b>{{ $org }}: Hallazgos de controles de procesos</b></h4>
+					<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+					<thead>
+						<th style="vertical-align:top;">Proceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Control(es)<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></lab style="vertical-align:top;"el></th>
+						<th style="vertical-align:top;">Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+					</thead>
+
+				
+
+					@foreach ($issues as $issue)
+						<tr>
+							<td>{{ $issue['datos']['processes'] }}</td>
+							<td>{{ $issue['datos']['subprocesses'] }}</td>
+							<td>{{ $issue['datos']['risks'] }}</td>
+							<td>{{ $issue['datos']['controls'] }}</td> 
+							<td>{{ $issue['name'] }}</td>
+							<td>{{ $issue['classification'] }}</td>
+							<td>{{ $issue['recommendations'] }}</td>
+							<td>{{ $issue['plan'] }}</td>
+							<td>{{ $issue['status'] }}</td>
+							<td>{{ $issue['final_date'] }}</td>
+						</tr>
+					@endforeach
+
+				@elseif ($kind == 4)
+					<h4><b>{{ $org }}: Hallazgos de controles de entidad</b></h4>
+					<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+					<thead>
+						<th style="vertical-align:top;">Objetivo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Control(es)<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></lab style="vertical-align:top;"el></th>
+						<th style="vertical-align:top;">Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+					</thead>
+
+				
+
+					@foreach ($issues as $issue)
+						<tr>
+							<td>{{ $issue['datos']['objectives'] }}</td>
+							<td>{{ $issue['datos']['risks'] }}</td>
+							<td>{{ $issue['datos']['controls'] }}</td> 
+							<td>{{ $issue['name'] }}</td>
+							<td>{{ $issue['classification'] }}</td>
+							<td>{{ $issue['recommendations'] }}</td>
+							<td>{{ $issue['plan'] }}</td>
+							<td>{{ $issue['status'] }}</td>
+							<td>{{ $issue['final_date'] }}</td>
+						</tr>
+					@endforeach
+
+				@elseif ($kind == 5)
+					<h4><b>{{ $org }}: Hallazgos de programas de auditor&iacute;a</b></h4>
+					<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+					<thead>
+						<th style="vertical-align:top;">Plan de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Programa de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></lab style="vertical-align:top;"el></th>
+						<th style="vertical-align:top;">Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+					</thead>
+
+				
+
+					@foreach ($issues as $issue)
+						<tr>
+							<td>{{ $issue['datos']['audit_plan'] }}</td>
+							<td>{{ $issue['datos']['audit'] }}</td> 
+							<td>{{ $issue['name'] }}</td>
+							<td>{{ $issue['classification'] }}</td>
+							<td>{{ $issue['recommendations'] }}</td>
+							<td>{{ $issue['plan'] }}</td>
+							<td>{{ $issue['status'] }}</td>
+							<td>{{ $issue['final_date'] }}</td>
+						</tr>
+					@endforeach
+
+				@elseif ($kind == 6)
+					<h4><b>{{ $org }}: Hallazgos de auditor&iacute;a</b></h4>
+					<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+					<thead>
+						<th style="vertical-align:top;">Plan de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></lab style="vertical-align:top;"el></th>
+						<th style="vertical-align:top;">Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+					</thead>
+
+				
+
+					@foreach ($issues as $issue)
+						<tr>
+							<td>{{ $issue['datos']['audit_plan'] }}</td>
+							<td>{{ $issue['datos']['audit'] }}</td>
 							<td>{{ $issue['name'] }}</td>
 							<td>{{ $issue['classification'] }}</td>
 							<td>{{ $issue['recommendations'] }}</td>
