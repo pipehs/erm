@@ -13,15 +13,32 @@
 //Route::post('posts/store-new-post', 'PostsController@store');
 //Route::post('posts/{slug}', 'PostsController@update');
 
-Route::get('/', [
-	'as' => '/', 'uses' => 'HomeController@index'
+//----- AUTENTICACIÓN -----//
+Route::get('/',[
+	'as' => '/', 'uses' => 'HomeController@home'
+]);
+
+//Route::get('auth/login', 'Auth\AuthController@getLogin');
+//Route::post('auth/login', ['as' =>'auth/login', 'uses' => 'Auth\AuthController@postLogin']);
+//Route::get('auth/logout', ['as' => 'auth/logout', 'uses' => 'Auth\AuthController@getLogout']);
+
+//Route::post('auth/login', [ 'as' => 'login', 'uses' => 'Auth\AuthController@postLogin']);
+
+Route::resource('log','logController');
+Route::get('logout','logController@logout');
+
+Route::get('home',[
+	'as' => 'home', 'uses' => 'HomeController@index'
 ]
 );
 
-Route::get('home',[
-	'as' => '/', 'uses' => 'HomeController@index'
-]
-);
+
+// ----RUTA PARA CREAR USUARIO---- //
+Route::get('crear_usuario','logController@createUser');
+
+Route::post('usuario.store', [
+	'as' => 'usuario.store', 'uses' => 'logController@storeUser'
+	]);
 
 // ----RUTAS PARA GESTIÓN DE DATOS MAESTROS---- //
 
@@ -374,6 +391,11 @@ Route::post('identificacion.encuestaRespondida', [
 Route::get('encuestas', [
 	'as' => 'encuestas', 'uses' => 'EncuestasController@verEncuestas']);
 
+//Lista de encuestas
+Route::get('ver_encuestas', [
+	'as' => 'ver_encuestas', 'uses' => 'EncuestasController@showEncuesta']);
+
+//Muestra encuesta y respuestas enviadas por un usuario
 Route::get('encuestas.show.{id}', [
 	'as' => 'encuestas.show', 'uses' => 'EncuestasController@show']);
 

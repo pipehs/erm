@@ -15,6 +15,7 @@ use Ermtool\Http\Controllers\PlanesAccionController as PlanesAccion;
 
 class IssuesController extends Controller
 {
+    //obtiene datos del origen de un control
     public function getOrigin($kind,$id,$org_id)
     {
         if ($kind == 0) //obtenemos nombre de proceso
@@ -1279,7 +1280,7 @@ class IssuesController extends Controller
     public function index()
     {
         //obtenemos lista de organizaciones
-        $organizations = \Ermtool\Organization::lists('name','id');
+        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
         return view('hallazgos.index',['organizations'=>$organizations]);
     }

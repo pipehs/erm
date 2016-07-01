@@ -8,7 +8,6 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Datos Maestros</a></li>
 			<li><a href="riesgos">Identificación de Riesgos</a></li>
 		</ol>
 	</div>

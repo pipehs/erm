@@ -22,11 +22,11 @@ class OrganizationController extends Controller
         $organization = array();
         if (isset($_GET['verbloqueados']))
         {
-            $organizations = \Ermtool\Organization::all()->where('status',1); //select organizaciones bloqueadas  
+            $organizations = \Ermtool\Organization::where('status',1)->get(); //select organizaciones bloqueadas  
         }
         else
         {
-            $organizations = \Ermtool\Organization::all()->where('status',0); //select organizaciones desbloqueadas
+            $organizations = \Ermtool\Organization::where('status',0)->get(); //select organizaciones desbloqueadas
         }
 
         $org_dependientes = array();
@@ -35,7 +35,7 @@ class OrganizationController extends Controller
         foreach ($organizations as $organizaciones)
         {
             //buscamos organizaciones que dependen de ésta
-            $organizaciones_dependientes = \Ermtool\Organization::all()->where('organization_id',$organizaciones['id']);
+            $organizaciones_dependientes = \Ermtool\Organization::where('organization_id',$organizaciones['id'])->get();
             
             $j = 0;
             foreach ($organizaciones_dependientes as $hijos)

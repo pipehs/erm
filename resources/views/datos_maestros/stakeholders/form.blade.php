@@ -1,3 +1,9 @@
+
+	@if (isset($post))
+		{{ print_r($post)}}
+
+	@endif
+
 					<div class="form-group">
 			            {!!Form::label('Rut',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-2">

@@ -22,11 +22,11 @@ class RiesgosTipoController extends Controller
         $riesgostipo = array();
         if (isset($_GET['verbloqueados']))
         {
-            $riesgostipo2 = \Ermtool\Risk::all()->where('type2',0)->where('status',1); //select riesgos tipo bloqueados  
+            $riesgostipo2 = \Ermtool\Risk::where('type2',0)->where('status',1)->get(); //select riesgos tipo bloqueados  
         }
         else
         {
-            $riesgostipo2 = \Ermtool\Risk::all()->where('type2',0)->where('status',0); //select riesgos tipo desbloqueados
+            $riesgostipo2 = \Ermtool\Risk::where('type2',0)->where('status',0)->get(); //select riesgos tipo desbloqueados
         }
 
         $i = 0;
@@ -65,7 +65,7 @@ class RiesgosTipoController extends Controller
                 $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
 
             //obtenemos categoría de riesgo
-            $categoria = \Ermtool\Risk_Category::find($riesgo['risk_category_id']);
+            $categoria = \Ermtool\Risk_category::find($riesgo['risk_category_id']);
 
             //obtenemos causas si es que tiene
             $causes = DB::table('cause_risk')
@@ -133,7 +133,7 @@ class RiesgosTipoController extends Controller
      */
     public function create()
     {
-        $categorias = \Ermtool\Risk_Category::where('status',0)->lists('name','id');
+        $categorias = \Ermtool\Risk_category::where('status',0)->lists('name','id');
         $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
         $efectos = \Ermtool\Effect::where('status',0)->lists('name','id');
         return view('datos_maestros.riesgos_tipo.create',
@@ -240,7 +240,7 @@ class RiesgosTipoController extends Controller
     public function edit($id)
     {
         $riesgo = \Ermtool\Risk::find($id);
-        $categorias = \Ermtool\Risk_Category::where('status',0)->lists('name','id');
+        $categorias = \Ermtool\Risk_category::where('status',0)->lists('name','id');
         $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
         $efectos = \Ermtool\Effect::where('status',0)->lists('name','id');
 

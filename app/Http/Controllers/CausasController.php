@@ -21,11 +21,11 @@ class CausasController extends Controller
         $causas = array();
         if (isset($_GET['verbloqueados']))
         {
-            $causas2 = \Ermtool\Cause::all()->where('status',1); //select causas bloqueadas  
+            $causas2 = \Ermtool\Cause::where('status',1)->get(); //select causas bloqueadas  
         }
         else
         {
-            $causas2 = \Ermtool\Cause::all()->where('status',0); //select causas desbloqueadas
+            $causas2 = \Ermtool\Cause::where('status',0)->get(); //select causas desbloqueadas
         }
 
         $i = 0;

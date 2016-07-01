@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
 use DB;
+use Auth;
+use Redirect;
 
 class HomeController extends Controller
 {
@@ -14,6 +16,17 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function home()
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            return Redirect::route('home');
+        }
+    }
     public function index()
     {
         //--- GENERAMOS HEATMAP PARA ÚLTIMA ENCUESTA DE EVALUACIÓN AGREGADA ---//

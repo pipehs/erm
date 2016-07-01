@@ -1209,7 +1209,7 @@ class AuditoriasController extends Controller
         $i = 0; //contador de riesgos de proceso
 
         //obtenemos plan de auditoría
-        $audit_plan = \Ermtool\Audit_plan::all()->where('id',(int)$id);
+        $audit_plan = \Ermtool\Audit_plan::where('id',(int)$id)->get();
 
         foreach ($audit_plan as $plan)
         {
@@ -1230,7 +1230,7 @@ class AuditoriasController extends Controller
             $fecha_final = date("d-m-Y",strtotime($plan['final_date']));
 
             //obtenemos organizacion
-            $organization = \Ermtool\Organization::all()->where('id',$plan['organization_id']);
+            $organization = \Ermtool\Organization::where('id',$plan['organization_id'])->get();
 
             foreach ($organization as $org)
             {
@@ -1291,7 +1291,7 @@ class AuditoriasController extends Controller
             foreach ($audits as $audit)
             {
                 //obtenemos datos de auditoría
-                $audite = \Ermtool\Audit::all()->where('id',$audit->audit_id);
+                $audite = \Ermtool\Audit::where('id',$audit->audit_id)->get();
 
                 foreach ($audite as $audit1)
                 {
@@ -1841,7 +1841,7 @@ class AuditoriasController extends Controller
         $k = 0; //contador de planes
 
         //obtenemos auditoría
-        $audite = \Ermtool\Audit::all()->where('id',(int)$id);
+        $audite = \Ermtool\Audit::where('id',(int)$id)->get();
 
         foreach ($audite as $audit)
         {
@@ -2287,7 +2287,7 @@ class AuditoriasController extends Controller
         //$stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
         //->orderBy('name')
         //->lists('full_name', 'id');
-
+        $stakeholders = array();
         $stakes = DB::table('stakeholders')->select('id','name','surnames')->get();
         $i = 0;
         foreach ($stakes as $stake)
@@ -2447,7 +2447,7 @@ class AuditoriasController extends Controller
     public function getObjetivos($org)
     {
         $results = array();
-        $objectives = \Ermtool\Objective::all()->where('organization_id',(int)$org);
+        $objectives = \Ermtool\Objective::where('organization_id',(int)$org)->get();
         $i = 0; //contador de objetivos
         foreach ($objectives as $objective)
         {

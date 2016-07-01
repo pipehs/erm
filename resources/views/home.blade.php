@@ -13,6 +13,13 @@
 </div>
     <h3><b>Bienvenido al sistema B-GRC</b>  </h3>
     <br>
+
+    @if(Session::has('message'))
+      <div class="alert alert-success alert-dismissible" role="alert">
+      {{ Session::get('message') }}
+      </div>
+    @endif
+
      <!-- Heatmap de última encuesta agregada -->
 <div class="row">
 	<div class="col-sm-12 col-m-6">

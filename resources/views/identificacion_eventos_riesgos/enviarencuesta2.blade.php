@@ -113,7 +113,7 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
 			
-				<b>Nombre:  {{ $encuesta['name']}}</b><br><br>
+			<b>Nombre:  {{ $encuesta['name']}}</b><br><br>
 
 			<?php $i = 1; //contador de preguntas ?>
 			@foreach ($preguntas as $pregunta)

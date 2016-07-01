@@ -23,11 +23,11 @@ class ProcesosController extends Controller
 
         if(isset($_GET['verbloqueados']))
         {
-            $procesos = \Ermtool\Process::all()->where('status',1); //select procesos bloqueados 
+            $procesos = \Ermtool\Process::where('status',1)->get(); //select procesos bloqueados 
         }
         else
         {
-            $procesos = \Ermtool\Process::all()->where('status',0); //select procesos desbloqueados
+            $procesos = \Ermtool\Process::where('status',0)->get(); //select procesos desbloqueados
         }
         $i = 0;
         $j = 0; //contador de subprocesos

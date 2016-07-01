@@ -537,12 +537,50 @@ class EncuestasController extends Controller
         }
         
     }
+
+    //función para revisar encuestas en su format (NO respuestas)
+    public function showEncuesta()
+    {
+        if (isset($_GET['encuesta']))  //se seleccionó la encuesta a revisar
+        {
+            $poll = \Ermtool\Poll::find($_GET['encuesta']);
+
+            //obtenemos preguntas
+            $preguntas = DB::table('questions')->where('poll_id','=',$poll['id'])->get();
+
+            $answers = array(); //almacenaremos aquí respuestas posibles para las preguntas
+            $i = 0; //contador de respuestas
+            foreach ($preguntas as $pregunta)
+            {
+                if ($pregunta->answers_type != 0) //pregunta tiene alguna posible answer
+                {
+                    $posible_answers = DB::table('posible_answers')->where('question_id',$pregunta->id)->get();
+
+                    foreach ($posible_answers as $posible_answer)
+                    {
+                        $answers[$i] = array('id'=>$posible_answer->id,
+                                            'respuesta'=>$posible_answer->answer,
+                                            'question_id'=>$posible_answer->question_id);
+                        $i += 1;
+                    }
+                }
+            }
+
+            return view('identificacion_eventos_riesgos.ver_encuestas',['encuesta'=>$poll,'preguntas'=>$preguntas,'respuestas'=>$answers]);
+        }
+        else
+        {
+            $polls = \Ermtool\Poll::lists('name','id');
+            return view('identificacion_eventos_riesgos.ver_encuestas',['polls'=>$polls]);
+        }
+    }
     /**
      * Display the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    //Muestra encuesta y respuestas enviadas por un usuario
     public function show($id)
     {
         //obtenemos preguntas de encuesta

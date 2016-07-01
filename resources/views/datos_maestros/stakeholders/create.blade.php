@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Agregar Stakeholder')
+@section('title', 'Agregar Usuario')
 
 @section('content')
 
@@ -9,8 +9,8 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li>{!!Html::link('#','Datos Maestros')!!}</li>
-			<li>{!!Html::link('stakeholders','Stakeholders')!!}</li>
-			<li>{!!Html::link('stakeholders.create','Agregar Stakeholders')!!}</li>
+			<li>{!!Html::link('stakeholders','Usuarios')!!}</li>
+			<li>{!!Html::link('stakeholders.create','Agregar Usuario')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -20,7 +20,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Agregar Stakeholder</span>
+					<span>Agregar Usuario</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -52,7 +52,7 @@
 				</div>
 			@endif
 			
-			Ingrese los datos del stakeholder.
+			Ingrese los datos del usuario.
 				{!!Form::open(['route'=>'stakeholders.store','method'=>'POST','class'=>'form-horizontal'])!!}
 					@include('datos_maestros.stakeholders.form')
 				{!!Form::close()!!}

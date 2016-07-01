@@ -9,7 +9,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Identificación de eventos de riesgo</a></li>
-			<li><a href="encuestas">Encuestas</a></li>
+			<li><a href="ver_encuestas">Encuestas</a></li>
 		</ol>
 	</div>
 </div>
@@ -58,11 +58,11 @@
 			</div>
 		@endif
 
-<p>En esta secci&oacute;n podr&aacute; ver las respuestas a las encuestas de identificaci&oacute;n de eventos de riesgos.</p>
+<p>En esta secci&oacute;n podr&aacute; revisar el formato de todas las encuestas de identificaci&oacute;n de eventos de riesgos agregadas.</p>
 
 @if (isset($polls))
 
-	{!!Form::open(['url'=>'encuestas','method'=>'GET','class'=>'form-horizontal'])!!}
+	{!!Form::open(['url'=>'ver_encuestas','method'=>'GET','class'=>'form-horizontal'])!!}
 	<div class="row form-group">
 		{!!Form::label('Seleccione una encuesta',null,['class'=>'col-sm-4 control-label'])!!}
 		<div class="col-sm-4">
@@ -80,49 +80,55 @@
 		  {!!Form::submit('Seleccionar', ['class'=>'btn btn-success','name'=>'aplicar'])!!}
 		</div>
 	</center>
-@elseif (isset($stakeholders))
-	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
-	<thead>
-	<th>Rut</th><th>Nombre</th><th>Ver respuestas</th>
-	</thead>
-	@if ($answers == "[]")
-		@foreach ($stakeholders as $stakeholder)
-			<tr>
-				<td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
-				<td>{{ $stakeholder['name'] }} {{ $stakeholder['surnames'] }}</td>
-				<td>Este usuario aun no ha respondido</td>
-			</tr>
-		@endforeach
-	@else
-		@foreach ($stakeholders as $stakeholder)
-			<?php $cont = 0; ?>
-			@foreach ($answers as $answer)
-				@if ($answer['stakeholder_id'] == $stakeholder['id'])
-					<?php $cont += 1; ?>
+@elseif (isset($encuesta))
+	<!-- Mostramos encuesta -->
+
+			<b>Nombre:  {{ $encuesta['name']}}</b><br><br>
+
+			<?php $i = 1; //contador de preguntas ?>
+			@foreach ($preguntas as $pregunta)
+
+				<p>{{$i}}. {{ $pregunta->question }} </p>
+
+				@if ($pregunta->answers_type == 1) <!-- verificamos si es radio -->
+					<p>
+					@foreach ($respuestas as $respuesta) <!-- recorremos todas las respuestas para ver si corresponden a la pregunta -->
+						@if ($respuesta['question_id'] == $pregunta->id) <!-- Si la respuesta pertenece a la pregunta -->
+								<div class="radio-inline">
+									<label>
+										<input type="radio" name="{{ $pregunta->id }}"> {{ $respuesta['respuesta'] }}
+										<i class="fa fa-circle-o"></i>
+									</label>
+								</div>
+						@endif
+					@endforeach
+					</p>
+
+				@elseif ($pregunta->answers_type == 2) <!-- verificamos si es checkbox -->
+					<p>
+					@foreach ($respuestas as $respuesta) <!-- recorremos todas las respuestas para ver si corresponden a la pregunta -->
+						@if ($respuesta['question_id'] == $pregunta->id) <!-- Si la respuesta pertenece a la pregunta -->
+							<div class="checkbox-inline">
+								<label>
+									<input type="checkbox" name="{{ $pregunta->id }}">
+									<i class="fa fa-square-o"></i> {{ $respuesta['respuesta'] }}
+								</label>
+							</div>
+						@endif
+					@endforeach
+					</p>
+				@elseif ($pregunta->answers_type == 0) <!-- verificamos si es text -->
+				<p>
+				<textarea class="form-control" name="{{ $pregunta->id }}" rows="4" cols="50"></textarea>
+				</p>
 				@endif
+
+				<?php $i += 1; ?> 
 			@endforeach
-			<tr>
-				<td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
-				<td>{{ $stakeholder['name'] }} {{ $stakeholder['surnames'] }}</td>
-
-				@if ($cont == 0)
-					<td>Este usuario aun no ha respondido</td>
-				@else
-					<td>
-						{!! link_to_route('encuestas.show', $title = 'Ver',
-					 $parameters = ['poll_id'=>$poll_id,'stakeholder_id'=>$stakeholder['id']],
-					  $attributes = ['class'=>'btn btn-success']) !!}
-					</td>
-				@endif
-			</tr>
-		@endforeach
-	@endif
-	</table>
-
-	<center>
-			{!! link_to_route('encuestas', $title = 'Volver', 
-				$parameters = NULL, $attributes = ['class'=>'btn btn-danger']) !!}
-	</center>
+			<br>
+			<center>
+			<a href="ver_encuestas" class="btn btn-danger">Volver</a>
+			</center>
 @endif
 
 		

@@ -73,6 +73,10 @@
 				{!!Form::submit('Ver Objetivos Desbloqueados', ['class'=>'btn btn-success'])!!}
 			{!!Form::close()!!}
 		@endif
+
+		{!!Form::open(['url'=>'objetivos.create','method'=>'GET','class'=>'form-horizontal'])!!}
+			{!!Form::hidden('nombre_organizacion',$nombre_organizacion )!!}
+			{!!Form::submit('Agregar objetivo', ['class'=>'btn btn-primary'])!!}
 	<hr>
 		@if ($probador !== 0) {{-- Si es que existe algún objetivo creado, probador no será cero --}}
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
@@ -126,17 +130,16 @@
 		<hr>
 
 		<center>
-		{!!Form::open(['url'=>'objetivos.create','method'=>'GET','class'=>'form-horizontal'])!!}
+		
 		@if (isset($_GET['organizacion']))
 			{!!Form::hidden('organizacion',$_GET['organizacion'] )!!}
 		@else
 			{!!Form::hidden('organizacion',$organizacion)!!}
 		@endif
-			{!!Form::hidden('nombre_organizacion',$nombre_organizacion )!!}
-			{!!Form::submit('Agregar objetivo', ['class'=>'btn btn-primary'])!!}
+			
 		{!!Form::close()!!}
 
-		{!! link_to_route('objetivos.index', $title = 'Limpiar', $parameters = NULL, $attributes = ['class'=>'btn btn-danger']) !!}
+		{!! link_to_route('objetivos.index', $title = 'Volver', $parameters = NULL, $attributes = ['class'=>'btn btn-danger']) !!}
 		</center>
 
 	@endif

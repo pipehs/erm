@@ -21,11 +21,11 @@ class EfectosController extends Controller
         $efectos = array();
         if (isset($_GET['verbloqueados']))
         {
-            $efectos2 = \Ermtool\Effect::all()->where('status',1); //select efectos bloqueados  
+            $efectos2 = \Ermtool\Effect::where('status',1)->get(); //select efectos bloqueados  
         }
         else
         {
-            $efectos2 = \Ermtool\Effect::all()->where('status',0); //select efectos desbloqueados
+            $efectos2 = \Ermtool\Effect::where('status',0)->get(); //select efectos desbloqueados
         }
 
         $i = 0;

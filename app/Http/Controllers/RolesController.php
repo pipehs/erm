@@ -24,11 +24,11 @@ class RolesController extends Controller
         
         if (isset($_GET['verbloqueados']))
         {
-            $roles = \Ermtool\Role::all()->where('status',1); //select stakeholders bloqueadas  
+            $roles = \Ermtool\Role::where('status',1)->get(); //select stakeholders bloqueadas  
         }
         else
         {
-            $roles = \Ermtool\Role::all()->where('status',0); //select stakeholders desbloqueadas
+            $roles = \Ermtool\Role::where('status',0)->get(); //select stakeholders desbloqueadas
         }
 
         $i = 0;

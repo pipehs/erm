@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Roles de stakeholders</span>
+					<span>Roles de Usuarios</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">

@@ -259,7 +259,7 @@ class EvaluacionRiesgosController extends Controller
     //Función que mostrará lista de encuestas agregadas
     public function encuestas()
     {
-        $encuestas = \Ermtool\Evaluation::all()->where('consolidation',0); //se muestran las encuestas NO consolidadas
+        $encuestas = \Ermtool\Evaluation::where('consolidation',0)->get(); //se muestran las encuestas NO consolidadas
         $i = 0;
         $fecha = array();
         foreach($encuestas as $encuesta)

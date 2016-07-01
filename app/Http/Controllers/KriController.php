@@ -23,9 +23,9 @@ class KriController extends Controller
         $kri = NULL;
 
         //seleccionamos todos los kri
-        $kri_query = DB::table('KRI')
-                ->join('risks','risks.id','=','KRI.risk_id')
-                ->select('KRI.*','risks.name as risk_name','risks.stakeholder_id as risk_stake')
+        $kri_query = DB::table('kri')
+                ->join('risks','risks.id','=','kri.risk_id')
+                ->select('kri.*','risks.name as risk_name','risks.stakeholder_id as risk_stake')
                 ->get();
 
         $i=0;
@@ -321,7 +321,7 @@ class KriController extends Controller
         //creamos NUEVO KRI
         DB::transaction(function() {
 
-            $in = DB::table('KRI')
+            $in = DB::table('kri')
                     ->insertGetId([
                         'risk_id' => $_POST['risk_id'],
                         'name' => $_POST['name'],
@@ -615,7 +615,7 @@ class KriController extends Controller
                 $id = DB::table('measurements')
                     ->insertGetId([
                         'value'=>$_POST['evaluation'],
-                        'KRI_id' => $_POST['id'],
+                        'kri_id' => $_POST['id'],
                         'created_at' => $date,
                         'date_min' => $_POST['date_min'],
                         'date_max' => $_POST['date_max'],
@@ -625,7 +625,7 @@ class KriController extends Controller
                 if (isset($id))
                 {
                     //insertamos también en last_evaluation y date_evaluation de KRI
-                    DB::table('KRI')
+                    DB::table('kri')
                     ->where('id','=',$_POST['id'])
                     ->update([
                         'kri_last_evaluation' => $_POST['evaluation'],
@@ -655,9 +655,9 @@ class KriController extends Controller
         $kri = NULL;
 
         //hay más de un kri, buscamos todos
-        $kri_query = DB::table('KRI')
+        $kri_query = DB::table('kri')
                 ->where('risk_id','=',$id)
-                ->select('KRI.*')
+                ->select('kri.*')
                 ->get();
 
         //obtenemos id de stakeholder
@@ -764,13 +764,13 @@ class KriController extends Controller
         $evaluations = NULL;
 
         //primero obtenemos cotas de semaforo
-        $cotas = DB::table('KRI')
+        $cotas = DB::table('kri')
                 ->where('id','=',$id)
                 ->select('green_min','interval_min','interval_max','red_max')
                 ->first();
 
         $evals = DB::table('measurements')
-                    ->where('KRI_id','=',$id)
+                    ->where('kri_id','=',$id)
                     ->select('value','created_at','date_min','date_max')
                     ->orderBy('id','desc')
                     ->get();

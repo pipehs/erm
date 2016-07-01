@@ -24,8 +24,8 @@ class ObjetivosController extends Controller
 
         if (isset($_GET['organizacion'])) //se seleccionó la organización para ver objetivos
         {
-            $objetivos = \Ermtool\Objective::all()->where('organization_id',(int)$_GET['organizacion'])
-                                                ->where('status',0);
+            $objetivos = \Ermtool\Objective::where('organization_id',(int)$_GET['organizacion'])
+                                                ->where('status',0)->get();
             $nombre_organizacion = \Ermtool\Organization::name($_GET['organizacion']);
             $i=0; //para saber si hay objetivos
             $objectives = array(); //almacenará los objetivos con el formato correcto de sus atributos
@@ -98,7 +98,9 @@ class ObjetivosController extends Controller
     public function create()
     {
         $categorias = \Ermtool\Objective_category::where('status',0)->lists('name','id');
-        return view('datos_maestros.objetivos.create',['categorias'=>$categorias]);
+
+        $org_id = \Ermtool\Organization::where('id',$_GET['organizacion'])->value('id');
+        return view('datos_maestros.objetivos.create',['categorias'=>$categorias,'org_id'=>$org_id]);
     }
 
     /**
@@ -131,7 +133,7 @@ class ObjetivosController extends Controller
 
             Session::flash('message','Objetivo corporativo agregado correctamente');
         });
-        return Redirect::to('/objetivos');
+        return Redirect::to('/objetivos?organizacion='.$_POST['organization_id']);
     }
 
     /**
@@ -155,7 +157,8 @@ class ObjetivosController extends Controller
     {
         $categorias = \Ermtool\Objective_category::where('status',0)->lists('name','id');
         $objetivo = \Ermtool\Objective::find($id);
-        return view('datos_maestros.objetivos.edit',['categorias'=>$categorias,'objetivo'=>$objetivo]);
+        $org_id = \Ermtool\Organization::where('id',$objetivo['organization_id'])->value('id');
+        return view('datos_maestros.objetivos.edit',['categorias'=>$categorias,'objetivo'=>$objetivo,'org_id'=>$org_id]);
     }
 
     public function bloquear($id)
@@ -200,8 +203,8 @@ class ObjetivosController extends Controller
         $nombre_organizacion = \Ermtool\Organization::name($id_organizacion);
 
         $objective = array();
-        $objetivos = \Ermtool\Objective::all()->where('status',1)
-                                            ->where('organization_id',(int)$id_organizacion); //select objetivos bloqueadas
+        $objetivos = \Ermtool\Objective::where('status',1)
+                                            ->where('organization_id',(int)$id_organizacion)->get(); //select objetivos bloqueadas
 
         $i = 0;
         // ---recorremos todas las organizaciones para asignar formato de datos correspondientes--- //
@@ -273,7 +276,8 @@ class ObjetivosController extends Controller
             Session::flash('message','Objetivo actualizado correctamente');
         });
 
-        return Redirect::to('/objetivos');
+        $id_org = \Ermtool\Objective::where('id',$id)->value('organization_id');
+        return Redirect::to('/objetivos?organizacion='.$id_org);
     }
 
     /**
@@ -292,8 +296,8 @@ class ObjetivosController extends Controller
     {
         $results = array();
         //obtenemos objetivos
-        $objectives = \Ermtool\Objective::all()->where('status',0)
-                                            ->where('organization_id',(int)$org);
+        $objectives = \Ermtool\Objective::where('status',0)
+                                        ->where('organization_id',(int)$org)->get();
 
         foreach ($objectives as $objective)
         {

@@ -50,10 +50,35 @@ function dropDown1()
 	}
 }
 
-//dropdown de identificación de eventos de riesgo
+//dropdown GENERAL de gestión de
 function dropDown2()
 {
-	$uri = array('crear_encuesta','enviar_encuesta','encuestas');
+	$uri = array('crear_encuesta','enviar_encuesta','encuestas','evaluacion','evaluacion_agregadas','evaluacion_manual','riesgos','enlazar_riesgos','kri','riesgo_kri');
+
+	foreach ($uri as $uri)
+	{
+		if(Request::is(Request::segment(1) . '/' . $uri . '/*') || Request::is(Request::segment(1) . '/' . $uri) || Request::is($uri) || stristr(Request::segment(1), $uri))
+		{
+			return 'display: block;';
+		}
+
+		//verificación para menús compuestos
+		$compuesto = explode(".",Request::segment(1));
+
+		foreach ($compuesto as $compuesto)
+		{
+			if(Request::is($compuesto . '/' . $uri . '/*') || Request::is($compuesto . '.' . $uri) || $compuesto == $uri)
+			{
+				return 'display: block;';
+			}
+		}
+	}
+}
+
+//dropdown de identificación de eventos de riesgo
+function dropDown21()
+{
+	$uri = array('crear_encuesta','ver_encuestas','enviar_encuesta','encuestas');
 
 	foreach ($uri as $uri)
 	{
@@ -76,9 +101,34 @@ function dropDown2()
 }
 
 //dropdown de evaluación de riesgos
-function dropDown3()
+function dropDown22()
 {
 	$uri = array('evaluacion','evaluacion_agregadas','evaluacion_manual');
+
+	foreach ($uri as $uri)
+	{
+		if(Request::is(Request::segment(1) . '/' . $uri . '/*') || Request::is(Request::segment(1) . '/' . $uri) || Request::is($uri))
+		{
+			return 'display: block;';
+		}
+
+		//verificación para menús compuestos
+		$compuesto = explode(".",Request::segment(1));
+
+		foreach ($compuesto as $compuesto)
+		{
+			if(Request::is($compuesto . '/' . $uri . '/*') || Request::is($compuesto . '.' . $uri) || $compuesto == $uri)
+			{
+				return 'display: block;';
+			}
+		}
+	}
+}
+
+//active de kri
+function dropDown23()
+{
+	$uri = array('enlazar_riesgos','kri','riesgo_kri');
 
 	foreach ($uri as $uri)
 	{
@@ -156,31 +206,6 @@ function dropDown6()
 {
 	$uri = array('auditorias','plan_auditoria','nuevo_plan','plan','ver_plan','crear_pruebas','pruebas','programas_auditoria','ejecutar_pruebas',
 				'supervisar','notas','planes_accion');
-
-	foreach ($uri as $uri)
-	{
-		if(Request::is(Request::segment(1) . '/' . $uri . '/*') || Request::is(Request::segment(1) . '/' . $uri) || Request::is($uri))
-		{
-			return 'display: block;';
-		}
-
-		//verificación para menús compuestos
-		$compuesto = explode(".",Request::segment(1));
-
-		foreach ($compuesto as $compuesto)
-		{
-			if(Request::is($compuesto . '/' . $uri . '/*') || Request::is($compuesto . '.' . $uri) || $compuesto == $uri)
-			{
-				return 'display: block;';
-			}
-		}
-	}
-}
-
-//active de kri
-function dropDown7()
-{
-	$uri = array('enlazar_riesgos','kri','riesgo_kri');
 
 	foreach ($uri as $uri)
 	{

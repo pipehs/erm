@@ -23,11 +23,11 @@ class SubprocesosController extends Controller
 
         if(isset($_GET['verbloqueados']))
         {
-            $subprocesos = \Ermtool\Subprocess::all()->where('status',1); //select subprocesos bloqueados 
+            $subprocesos = \Ermtool\Subprocess::where('status',1)->get(); //select subprocesos bloqueados 
         }
         else
         {
-            $subprocesos = \Ermtool\Subprocess::all()->where('status',0); //select subprocesos desbloqueados
+            $subprocesos = \Ermtool\Subprocess::where('status',0)->get(); //select subprocesos desbloqueados
         }
         $i = 0;
         $j = 0; //contador de organizaciones relacionadas 
@@ -50,7 +50,7 @@ class SubprocesosController extends Controller
                  $j += 1;
             }
         
-            $subprocesos_dependientes = \Ermtool\Subprocess::all()->where('subprocess_id',$subprocess['id']);
+            $subprocesos_dependientes = \Ermtool\Subprocess::where('subprocess_id',$subprocess['id'])->get();
             
             
             foreach ($subprocesos_dependientes as $hijos)
@@ -187,12 +187,12 @@ class SubprocesosController extends Controller
     public function edit($id)
     {
         $subproceso = \Ermtool\Subprocess::find($id);
-        $procesos = \Ermtool\Process::all()->where('status',0)->lists('name','id');
+        $procesos = \Ermtool\Process::where('status',0)->lists('name','id');
 
         //Seleccionamos subprocesos que pueden ser padres
-        $subprocesos = \Ermtool\Subprocess::all()->where('subprocess_id',NULL)->where('status',0)->where('id','<>',$id)->lists('name','id');
+        $subprocesos = \Ermtool\Subprocess::where('subprocess_id',NULL)->where('status',0)->where('id','<>',$id)->lists('name','id');
 
-        $organizaciones = \Ermtool\Organization::all()->where('status',0)->lists('name','id');
+        $organizaciones = \Ermtool\Organization::where('status',0)->lists('name','id');
 
         return view('datos_maestros.subprocesos.edit',['procesos'=>$procesos,'subprocesos'=>$subprocesos,
             'subproceso'=>$subproceso,'organizaciones'=>$organizaciones]);

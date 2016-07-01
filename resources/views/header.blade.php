@@ -40,7 +40,12 @@
 						</div>-->
 					</div>
 					<div class="col-xs-4 col-sm-8 top-panel-right">
-						
+						<p align="right">
+						@if (!Auth::guest())
+							{{ Auth::user()->name }}
+							<a href="logout">Cerrar Sesi&oacute;n</a>
+							<a href="crear_usuario">Crear Usuario</a></p>
+						@endif
 					</div>
 				</div>
 			</div>

@@ -23,7 +23,7 @@ class RiesgosController extends Controller
         $relacionados = array();
         $i = 0; //contador de riesgos
 
-        $riesgos2 = \Ermtool\Risk::all()->where('type2',1); //Selecciona todos los riesgos ya identificados
+        $riesgos2 = \Ermtool\Risk::where('type2',1)->get(); //Selecciona todos los riesgos ya identificados
         $j = 0; //contador de subprocesos u objetivos relacionados
 
         foreach ($riesgos2 as $riesgo)
@@ -95,7 +95,7 @@ class RiesgosController extends Controller
             }
 
             //obtenemos nombre de categoría
-            $categoria = \Ermtool\Risk_Category::where('id',$riesgo['risk_category_id'])->value('name');
+            $categoria = \Ermtool\Risk_category::where('id',$riesgo['risk_category_id'])->value('name');
 
             //obtenemos causas si es que tiene
             $causes = DB::table('cause_risk')
@@ -177,7 +177,7 @@ class RiesgosController extends Controller
     public function create()
     {
         //categorias de riesgo
-        $categorias = \Ermtool\Risk_Category::where('status',0)->lists('name','id');
+        $categorias = \Ermtool\Risk_category::where('status',0)->lists('name','id');
 
         //causas preingresadas
         $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
@@ -376,7 +376,7 @@ class RiesgosController extends Controller
     public function edit($id)
     {
         //categorias de riesgo
-        $categorias = \Ermtool\Risk_Category::where('status',0)->lists('name','id');
+        $categorias = \Ermtool\Risk_category::where('status',0)->lists('name','id');
         //causas
         $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
         //efectos

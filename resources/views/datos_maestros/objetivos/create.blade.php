@@ -40,8 +40,9 @@
 				{!!Form::open(['route'=>'objetivos.store','method'=>'POST','class'=>'form-horizontal'])!!}
 					@include('datos_maestros.objetivos.form')
 				{!!Form::close()!!}
+				
 				<center>
-				{!! link_to_route('objetivos.index', $title = 'Volver', $parameters = NULL, $attributes = ['class'=>'btn btn-danger']) !!}
+					<a href="objetivos?organizacion={{$org_id}}" class="btn btn-danger">Volver</a>	
 				<center>
 			</div>
 		</div>

@@ -22,11 +22,11 @@ class CategoriasObjetivosController extends Controller
         $objective_category = array();
         if (isset($_GET['verbloqueados']))
         {
-            $objective_categories = \Ermtool\Objective_category::all()->where('status',1); //select categorias bloqueadas  
+            $objective_categories = \Ermtool\Objective_category::where('status',1)->get(); //select categorias bloqueadas  
         }
         else
         {
-            $objective_categories = \Ermtool\Objective_category::all()->where('status',0); //select categorias desbloqueadas
+            $objective_categories = \Ermtool\Objective_category::where('status',0)->get(); //select categorias desbloqueadas
         }
 
         $i = 0;

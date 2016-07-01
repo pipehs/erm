@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Modificar Stakeholder')
+@section('title', 'Modificar Usuario')
 
 @section('content')
 
@@ -9,8 +9,8 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Datos Maestros</a></li>
-			<li><a href="stakeholders">Stakeholders</a></li>
-			<li><a href="stakeholders.edit.{{ $stakeholder['id'] }}">Modificar Stakeholder</a></li>
+			<li><a href="stakeholders">Usuarios</a></li>
+			<li><a href="stakeholders.edit.{{ $stakeholder['id'] }}">Modificar Usuario</a></li>
 		</ol>
 	</div>
 </div>
@@ -20,7 +20,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Modificar Stakeholder</span>
+					<span>Modificar Usuario</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -36,7 +36,7 @@
 				<div class="no-move"></div>
 			</div>
 			<div class="box-content">
-			Ingrese los nuevos datos del stakeholder.
+			Ingrese los nuevos datos del usuario.
 				{!!Form::model($stakeholder,['route'=>['stakeholders.update',$stakeholder->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
 					@include('datos_maestros.stakeholders.form')
 				{!!Form::close()!!}

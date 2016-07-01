@@ -375,6 +375,7 @@ class ControlesController extends Controller
     //index para evaluación de controles
     public function indexEvaluacion()
     {
+        $stakeholders = array();
         $controles = \Ermtool\Control::lists('name','id');
 
         //stakeholders posibles responsables plan de acción

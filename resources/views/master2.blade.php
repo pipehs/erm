@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>ERM - @yield('title')</title>
+	<title>B-GRC - @yield('title')</title>
 	<meta charset="utf-8">
 	<meta name="description" content="Sistema de gestión de riesgos">
 	<meta name="author" content="ERM">
@@ -18,13 +18,11 @@
 	}  
 	</style>
  
- 	{!!Html::style('assets/css/matrix.css')!!}
  	{!!Html::style('assets/plugins/bootstrap/bootstrap.css')!!}
  	{!!Html::style('assets/plugins/jquery-ui/jquery-ui.min.css')!!}
  	{!!Html::style('http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css')!!}
  	{!!Html::style('http://fonts.googleapis.com/css?family=Righteous')!!}
  	{!!Html::style('assets/plugins/fancybox/jquery.fancybox.css')!!}
- 	{!!Html::style('assets/plugins/fullcalendar/fullcalendar.css')!!}
  	{!!Html::style('assets/plugins/xcharts/xcharts.min.css')!!}
  	{!!Html::style('assets/css/style.css')!!}
  	{!!Html::style('assets/plugins/select2/select2.css')!!}
@@ -45,25 +43,35 @@
 
 	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}
 
-<style>
-#container {
-    min-width: 300px;
-    max-width: 1000px;
-    height: 400px;
-    margin: 1em auto;
-}
-</style>
 </head>
 <body>
 
-@include('header')
+<br><br>
+<div class="container">
+@if (Session::has('errors'))
+	<div class="alert alert-warning" role="alert">
+		<ul>
+            <strong>Ocurrio un error!</strong>
+		    @foreach ($errors->all() as $error)
+			<li>{{ $error }}</li>
+	            @endforeach
+	    </ul>
+	</div>
+@endif
 
-
-
-<div id="content" class="col-xs-12 col-sm-12">
-    @yield('content')
+@if (Session::has('message-error'))
+	<div class="alert alert-danger" role="alert">
+		<ul>
+            <strong>{{ Session::get('message-error') }}</strong>
+	    </ul>
+	</div>
+@endif
 </div>
 
-	@yield('scripts')
+
+    @yield('content')
+
+
+	@yield('scripts2')
 </body>
 </html>

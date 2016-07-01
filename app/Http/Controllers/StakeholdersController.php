@@ -25,11 +25,11 @@ class StakeholdersController extends Controller
         
         if (isset($_GET['verbloqueados']))
         {
-            $stakeholders = \Ermtool\Stakeholder::all()->where('status',1); //select stakeholders bloqueadas  
+            $stakeholders = \Ermtool\Stakeholder::where('status',1)->get(); //select stakeholders bloqueadas  
         }
         else
         {
-            $stakeholders = \Ermtool\Stakeholder::all()->where('status',0); //select stakeholders desbloqueadas
+            $stakeholders = \Ermtool\Stakeholder::where('status',0)->get(); //select stakeholders desbloqueadas
         }
 
         $i = 0;
@@ -198,7 +198,7 @@ class StakeholdersController extends Controller
         else
         {
             Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente');
-            return Redirect::to('/stakeholders.create');
+            return Redirect::to('/stakeholders.create')->withInput();
         }
         
 

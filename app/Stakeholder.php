@@ -33,5 +33,9 @@ class Stakeholder extends Model
     {
         return $this->belongsToMany('Ermtool\Poll');
     }
+    public function user()
+    {
+        return $this->hasOne('App\User');
+    }
 }
  

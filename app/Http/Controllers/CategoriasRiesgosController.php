@@ -21,11 +21,11 @@ class CategoriasRiesgosController extends Controller
         $risk_category = array();
         if (isset($_GET['verbloqueados']))
         {
-            $risk_categories = \Ermtool\Risk_category::all()->where('status',1); //select categorias bloqueadas  
+            $risk_categories = \Ermtool\Risk_category::where('status',1)->get(); //select categorias bloqueadas  
         }
         else
         {
-            $risk_categories = \Ermtool\Risk_category::all()->where('status',0); //select categorias desbloqueadas
+            $risk_categories = \Ermtool\Risk_category::where('status',0)->get(); //select categorias desbloqueadas
         }
 
         $i = 0;
@@ -35,7 +35,7 @@ class CategoriasRiesgosController extends Controller
         {
 
             //buscamos categorias que dependen de ésta
-            $cat_dependientes = \Ermtool\Risk_category::all()->where('risk_category_id',$category['id']);
+            $cat_dependientes = \Ermtool\Risk_category::where('risk_category_id',$category['id'])->get();
             
             $j = 0;
             foreach ($cat_dependientes as $hijos)

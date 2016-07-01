@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Stakeholders')
+@section('title', 'Usuarios')
 
 @section('content')
 
@@ -9,7 +9,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Datos Maestros</a></li>
-			<li><a href="stakeholders">Stakeholders</a></li>
+			<li><a href="stakeholders">Usuarios</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Stakeholders</span>
+					<span>Usuarios</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -42,7 +42,7 @@
 			</div>
 		@endif
 
-		{!! link_to_route('stakeholders.create', $title = 'Agregar Stakeholder', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
+		{!! link_to_route('stakeholders.create', $title = 'Agregar Usuario', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 
 	@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
 		{!! link_to_route('stakeholders.index', $title = 'Ver Desbloqueadas', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
