@@ -159,11 +159,11 @@ Route::put('subprocesos.update.{id}', [
 Route::resource('categorias_risks','CategoriasRiesgosController');
 
 Route::get('categorias_risks.create', [
-	'as' => 'categorias_riesgos.create', 'uses' => 'CategoriasRiesgosController@create'
+	'as' => 'categorias_risks.create', 'uses' => 'CategoriasRiesgosController@create'
 ]);
 
 Route::get('categorias_risks.edit.{id}', [
-	'as' => 'categorias_riesgos.edit', 'uses' => 'CategoriasRiesgosController@edit'
+	'as' => 'categorias_risks.edit', 'uses' => 'CategoriasRiesgosController@edit'
 ]);
 
 Route::get('categorias_risks.bloquear.{id}', [

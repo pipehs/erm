@@ -53,7 +53,7 @@
 						<div class="col-sm-5">
 							{!!Form::select('stakeholder_id',$stakeholders,
 							 	   null, 
-							 	   ['id'=>'stakeholder','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+							 	   ['id'=>'stakeholder','placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
 					<div id="exp_date" class="form-group">

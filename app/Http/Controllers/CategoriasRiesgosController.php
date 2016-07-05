@@ -123,7 +123,7 @@ class CategoriasRiesgosController extends Controller
                 Session::flash('message','Categor&iacute;a agregada correctamente');
         });
 
-            return Redirect::to('/categorias_riesgos');
+            return Redirect::to('/categorias_risks');
     }
 
     /**
@@ -193,7 +193,7 @@ class CategoriasRiesgosController extends Controller
             Session::flash('message','Categor&iacute;a de riesgo actualizada correctamente');
         });
 
-        return Redirect::to('/categorias_riesgos');
+        return Redirect::to('/categorias_risks');
     }
 
     public function bloquear($id)

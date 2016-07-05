@@ -261,7 +261,15 @@ class RiesgosController extends Controller
                     {
                         $type = 1;
                     }
-                    
+
+                    if (!isset($_POST['stakeholder_id']) || $_POST['stakeholder_id'] == "")
+                    {
+                        $stake = NULL;
+                    }
+                    else
+                    {
+                        $stake = $_POST['stakeholder_id'];
+                    }
 
                     $risk = \Ermtool\Risk::create([
                         'name'=>$_POST['name'],
@@ -270,7 +278,7 @@ class RiesgosController extends Controller
                         'type2'=>1,
                         'expiration_date'=>$_POST['expiration_date'],
                         'risk_category_id'=>$_POST['risk_category_id'],
-                        'stakeholder_id'=>$_POST['stakeholder_id'],
+                        'stakeholder_id'=>$stake,
                         'expected_loss'=>$_POST['expected_loss'],
                         ]);
 
@@ -588,13 +596,21 @@ class RiesgosController extends Controller
                     }
                 }
 
+                if (!isset($_POST['stakeholder_id']) || $_POST['stakeholder_id'] == "")
+                {
+                    $stake = NULL;
+                }
+                else
+                {
+                    $stake = $_POST['stakeholder_id'];
+                }
                 $riesgo->name = $_POST['name'];
                 $riesgo->description = $_POST['description'];
                 $riesgo->expiration_date = $_POST['expiration_date'];
                 $riesgo->type2 = 1;
                 $riesgo->risk_category_id = $_POST['risk_category_id'];
                 $riesgo->expected_loss = $_POST['expected_loss'];
-                $riesgo->stakeholder_id = $_POST['stakeholder_id'];
+                $riesgo->stakeholder_id = $stake;
 
                 $riesgo->save();
 

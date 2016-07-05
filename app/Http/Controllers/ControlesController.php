@@ -153,11 +153,8 @@ class ControlesController extends Controller
     {
         //Validación: Si la validación es pasada, el código continua
         $this->validate($request, [
-            'name' => 'required|max:45',
-            'description' => 'required|max:255',
-            'type' => 'required|digits:1',
-            'periodicity' => 'required',
-            'purpose' => 'required',
+            'name' => 'required|max:255',
+            'description' => 'required',
         ]);
 
         //print_r($_POST);
@@ -174,6 +171,23 @@ class ControlesController extends Controller
                 else
                     $stakeholder = $_POST['stakeholder_id'];
 
+                if ($_POST['periodicity'] == NULL || $_POST['periodicity'] == "")
+                {
+                    $periodicity = NULL;
+                }
+                else
+                {
+                    $periodicity = $_POST['periodicity'];
+                }
+                if ($_POST['purpose'] == NULL || $_POST['purpose'] == "")
+                {
+                    $purpose = NULL;
+                }
+                else
+                {
+                    $purpose = $_POST['purpose'];
+                }
+
                 //insertamos control y obtenemos ID
                 $control_id = DB::table('controls')->insertGetId([
                         'name'=>$_POST['name'],
@@ -181,8 +195,8 @@ class ControlesController extends Controller
                         'type'=>$_POST['type'],
                         'type2'=>$_POST['subneg'],
                         'evidence'=>$_POST['evidence'],
-                        'periodicity'=>$_POST['periodicity'],
-                        'purpose'=>$_POST['purpose'],
+                        'periodicity'=>$periodicity,
+                        'purpose'=>$purpose,
                         'stakeholder_id'=>$stakeholder,
                         'created_at'=>date('Y-m-d H:i:s'),
                         'updated_at'=>date('Y-m-d H:i:s'),
