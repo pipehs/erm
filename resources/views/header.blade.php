@@ -43,8 +43,14 @@
 						<p align="right">
 						@if (!Auth::guest())
 							{{ Auth::user()->name }}
-							<a href="logout">Cerrar Sesi&oacute;n</a>
-							<a href="crear_usuario">Crear Usuario</a></p>
+								<a href="logout">Cerrar Sesi&oacute;n</a>
+							@foreach (Session::get('roles') as $role)
+								@if ($role != 6)
+									<a href="crear_usuario">Crear Usuario</a>
+								<?php break; ?>
+								@endif
+							@endforeach
+						</p>
 						@endif
 					</div>
 				</div>

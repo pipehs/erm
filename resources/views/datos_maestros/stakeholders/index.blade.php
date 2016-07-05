@@ -41,14 +41,18 @@
 			{{ Session::get('message') }}
 			</div>
 		@endif
-
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		{!! link_to_route('stakeholders.create', $title = 'Agregar Usuario', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 
-	@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
-		{!! link_to_route('stakeholders.index', $title = 'Ver Desbloqueadas', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
-	@else
-		{!! link_to_route('stakeholders.verbloqueados', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
+		@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
+			{!! link_to_route('stakeholders.index', $title = 'Ver Desbloqueadas', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
+		@else
+			{!! link_to_route('stakeholders.verbloqueados', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
+		@endif
+	<?php break; ?>
 	@endif
+@endforeach
 
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 	<thead>
@@ -61,8 +65,13 @@
 	<th>Correo Electr&oacute;nico<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Organizacion(es)<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Cargo<label><input type='text' placeholder='Filtrar' /></label></th>
-	<th>Acci&oacute;n</th>
-	<th>Acci&oacute;n</th>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
+	<th style="vertical-align:top;">Acci&oacute;n</th>
+	<th style="vertical-align:top;">Acci&oacute;n</th>
+	<?php break; ?>
+	@endif
+@endforeach
 	</thead>
 
 	@foreach($stakeholders as $stakeholder)
@@ -88,6 +97,8 @@
 			@endforeach
 			</ul></td>
 			<td>{{ $stakeholder['cargo'] }}</td>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 			<td> 
 			<div>
 			@if ($stakeholder['estado'] == 0)
@@ -106,6 +117,9 @@
 	        @endif
 	        </div><!-- /btn-group -->
 		</td>
+	<?php break; ?>
+	@endif
+@endforeach
 		</tr>
 	@endforeach
 	</table>

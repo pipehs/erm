@@ -24,9 +24,7 @@
 					<div class="text-center">
 						{!!Form::submit('Ingresar', ['class'=>'btn btn-primary'])!!}
 					</div>
-					<div class="text-center">
-						<a href="crear_usuario">Crear Usuario</a></p>
-					</div>
+
 					{!! Form::close() !!}
 				</div>
 			</div>

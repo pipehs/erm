@@ -40,7 +40,8 @@
 			{{ Session::get('message') }}
 			</div>
 		@endif
-
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		<p>En esta secci&oacute;n podr&aacute; identificar un riesgo formal en base al an&aacute;lisis realizado sobre los eventos de riesgo. 
 		Tambi&eacute;n podr&aacute; ver los riesgos previamente identificados.</p>
 		<center>
@@ -48,6 +49,12 @@
 		&nbsp;&nbsp;
 		{!! link_to_route('riesgos.create', $title = 'Agregar Riesgo de Negocio', $parameters = 'N', $attributes = ['class'=>'btn btn-success']) !!}
 		</center>
+	<?php break; ?>
+
+	@else
+		<p>En esta secci&oacute;n podr&aacute; ver los riesgos previamente identificados.</p>
+	@endif
+@endforeach
 	
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 	<thead>
@@ -61,7 +68,12 @@
 	<th>Subprocesos u Objetivos Relacionados<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th>Causa(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th>Efecto(s)<label><input type="text" placeholder="Filtrar" /></label></th>
-	<th>Editar</th>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
+		<th>Editar</th>
+	<?php break; ?>
+	@endif
+@endforeach
 	</thead>
 	@foreach ($riesgos as $riesgo)
 		<tr>
@@ -103,7 +115,12 @@
 			<li>{{ $riesgo['efectos'] }}
 		@endif
 		</td>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		<td>{!! link_to_route('riesgos.edit', $title = 'Editar', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
+	<?php break; ?>
+	@endif
+@endforeach
 		</tr>
 	@endforeach
 	</table>

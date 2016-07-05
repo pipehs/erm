@@ -126,7 +126,12 @@ $("#risk_id").change(function() {
 				{
 					var info = "<center>Aun no se ha creado indicador para el riesgo ";
 					info += $("#risk_id option:selected").text() + ".<br><br></center>";
+			@foreach (Session::get('roles') as $role)
+				@if ($role != 6)
 					info += '<center><a href="kri.create2.'+$("#risk_id").val()+'" class="btn btn-success">Crear KRI</a</center>';
+				<?php break; ?>
+				@endif
+			@endforeach
 					$("#info_kri").append(info);
 				}
 
@@ -144,8 +149,13 @@ $("#risk_id").change(function() {
 					table_row += '<th>Riesgo</th>';
 					table_row += '<th>Responsable del riesgo</th>';
 					table_row += '<th>Fecha evaluaci&oacute;n</th>';
+			@foreach (Session::get('roles') as $role)
+				@if ($role != 6)
 					table_row += '<th>Acci&oacute;n</th>';
 					table_row += '<th>Acci&oacute;n</th>';
+				<?php break; ?>
+				@endif
+			@endforeach
 					table_row += '</thead>';
 
 					
@@ -182,15 +192,25 @@ $("#risk_id").change(function() {
 							table_row += '<td>'+ $("#risk_id option:selected").text() +'</td>';
 							table_row += '<td>'+this.stakeholder+'</td>';
 							table_row += '<td>'+this.date_last+'</td>';
+					@foreach (Session::get('roles') as $role)
+						@if ($role != 6)
 							table_row += '<td><a href="kri.edit.'+this.id+'" class="btn btn-primary">Editar</a></td>';
 							table_row += '<td><a href="kri.evaluar.'+this.id+'" class="btn btn-success">Evaluar</a></td>';
+							<?php break; ?>
+						@endif
+					@endforeach
 							table_row += '</tr>';
 
 					
 					});
 
 					table_row += '</table>';
+			@foreach (Session::get('roles') as $role)
+				@if ($role != 6)
 					table_row += '<center><a href="kri.create2.'+$("#risk_id").val()+'" class="btn btn-success">Agregar nuevo KRI</a</center>';
+				<?php break; ?>
+				@endif
+			@endforeach
 					$("#info_kri").html(table_row);
 
 				}

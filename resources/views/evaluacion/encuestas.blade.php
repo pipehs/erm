@@ -50,16 +50,28 @@
 			{{ Session::get('message') }}
 			</div>
 		@endif
-
-		<p>Seleccione la encuesta que desea ver o enviar.</p>
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)
+			<p>Seleccione la encuesta que desea ver, enviar, consolidar o eliminar.</p>
+			<?php break; ?>
+		@else
+			<p>Seleccione la encuesta que desea ver.<p>
+		@endif
+	@endforeach
 		<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="margin: 0 auto;">
 			<thead>
 			<th>Nombre</th>
 			<th>Fecha de t&eacute;rmino</th>
 			<th>Ver</th>
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)
 			<th>Enviar</th>
 			<th>Consolidar</th>
 			<th>Eliminar</th>
+		<?php break; ?>
+		@endif
+	@endforeach
+
 			</thead>
 				@foreach ($encuestas as $encuesta)
 					<tr>
@@ -72,6 +84,8 @@
 					<td>
 					 {!! link_to_route('evaluacion.show', $title = 'Ver', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-success']) !!}
 					 </td>
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)
 					<td>
 					{!! link_to_route('evaluacion.enviar', $title = 'Enviar', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-primary']) !!}
 					</td>
@@ -81,6 +95,9 @@
 					<td>
 					<button class="btn btn-danger" onclick="eliminar({{ $encuesta['id'] }})">Eliminar</button>
 					</td>
+		<?php break; ?>
+		@endif
+	@endforeach
 					 </tr>
 				@endforeach
 			</div>

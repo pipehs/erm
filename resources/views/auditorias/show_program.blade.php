@@ -43,9 +43,6 @@
 			</div>
 			@endif
 
-			<!--	FALTA EDITAR 
-				{!! link_to_route('plan_auditoria.edit', $title = 'Editar', $parameters = $program['id'],
-				 $attributes = ['class'=>'btn btn-success'])!!} -->
 			<ul style="text-align: left;">
 			<li><b>Descripci&oacute;n: {{ $program['description'] }}</b></li>
 			<li><b>Fecha creaci&oacute;n: {{ $program['created_at'] }}</b></li>
@@ -60,21 +57,36 @@
 			<td>
 				<div style="cursor:hand" id="descargar_{{ $program['id'] }}" onclick="descargar(4,'{{$program['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Descargar</u></font></div>
 			</td>
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)
 			<td>&nbsp;&nbsp;
 				<img src="assets/img/btn_eliminar.png" height="40px" width="40px" onclick="eliminar_ev({{ $program['id'] }},1)">
 			</td>
+		<?php break; ?>
+		@endif
+	@endforeach
 			</tr>
 			</table>
 			</br>
 			@endif
 			</b></li>
-
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)		
 			<li>{!! link_to_route('programas_auditoria.edit', $title = 'Editar programa', $parameters = $program['id'],
 				 $attributes = ['class'=>'btn btn-info'])!!}</li>
+		<?php break; ?>
+		@endif
+	@endforeach
 			<hr>
 			<li><b><u>Pruebas del programa</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		@foreach (Session::get('roles') as $role)
+			@if ($role != 6)
 			{!! link_to_route('programas_auditoria.create_test', $title = 'Agregar prueba', $parameters = $program['id'],
-				 $attributes = ['class'=>'btn btn-success'])!!}</li>
+				 $attributes = ['class'=>'btn btn-success'])!!}
+			<?php break; ?>
+			@endif
+		@endforeach
+			</li>
 			</ul>
 			<hr>
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
@@ -89,7 +101,12 @@
 				<th>Responsable</th>
 				<th>Horas / Hombre</th>
 				<th>Documento</th>
+		@foreach (Session::get('roles') as $role)
+			@if ($role != 6)
 				<th>Acci&oacute;n</th>
+			<?php break; ?>
+			@endif
+		@endforeach
 			</tr>
 
 			@foreach ($program['tests'] as $test)
@@ -118,15 +135,23 @@
 						No tiene documentos
 					@else
 						<div style="cursor:hand" id="descargar_{{ $test['id'] }}" onclick="descargar(5,'{{$test['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Descargar</u></font></div>
-
+					@foreach (Session::get('roles') as $role)
+						@if ($role != 6)
 						<img src="assets/img/btn_eliminar.png" height="40px" width="40px" onclick="eliminar_ev({{ $test['id'] }},0)">
+						<?php break; ?>
+						@endif
+					@endforeach
 
 						</br>
 					@endif
 					</td>
-
+		@foreach (Session::get('roles') as $role)
+			@if ($role != 6)
 					<td>{!! link_to_route('programas_auditoria.edit_test', $title = 'Editar', $parameters = $test['id'],
 				 $attributes = ['class'=>'btn btn-success'])!!}</td>
+			<?php break; ?>
+			@endif
+		@endforeach
 
 				</tr>
 			@endforeach

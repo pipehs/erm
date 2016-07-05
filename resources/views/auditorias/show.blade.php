@@ -42,9 +42,13 @@
 				{{ Session::get('message') }}
 			</div>
 			@endif
-
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 			{!! link_to_route('plan_auditoria.edit', $title = 'Editar', $parameters = $plan_auditoria['id'],
 				 $attributes = ['class'=>'btn btn-success'])!!}
+	<?php break; ?>
+	@endif
+@endforeach
 
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
 			<tr>

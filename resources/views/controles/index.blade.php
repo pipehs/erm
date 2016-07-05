@@ -40,8 +40,12 @@
 			{{ Session::get('message') }}
 			</div>
 		@endif
-
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		{!! link_to_route('controles.create', $title = 'Agregar Nuevo Control', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
+	<?php break; ?>
+	@endif
+@endforeach
 
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 	<thead>
@@ -55,7 +59,12 @@
 	<th>Responsable del Control</th>
 	<th>Evidencia</th>
 	<th>Prop&oacute;sito</th>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 	<th>Editar</th>
+	<?php break; ?>
+	@endif
+@endforeach
 	<th>Documentos</th>
 	</thead>
 
@@ -102,11 +111,16 @@
 				Error al ingresar prop&oacute;sito
 			@endif
 			</td>
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)	
 			<td> 
 			<div>
 	            {!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'], $attributes = ['class'=>'btn btn-success']) !!}
 	        </div><!-- /btn-group -->
-		</td>
+			</td>
+		<?php break; ?>
+		@endif
+	@endforeach
 		<td>
 			<div>
 	            {!! link_to_route('controles.docs', $title = 'Ver', $parameters = $control['id'], $attributes = ['class'=>'btn btn-warning']) !!}

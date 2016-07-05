@@ -36,6 +36,21 @@ class LogController extends Controller
 
     public function createUser()
     {
+        if (Auth::guest())
+        {
+            return Redirect::route('/');
+        }
+        else
+        {
+            foreach (Session::get('roles') as $role)
+            {
+                if ($role == 6)
+                {
+                    return Redirect::route('home');
+                }
+            }
+        }
+
         $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
         //si es create, campo rut estara desbloqueado
         $required = 'required';
@@ -82,7 +97,7 @@ class LogController extends Controller
                 Session::flash('message','Usuario creado con &eacute;xito');
             });
         
-            return Redirect::to('home');
+            return Redirect::to('/');
         }
         else
         {

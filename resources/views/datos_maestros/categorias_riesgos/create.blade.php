@@ -9,8 +9,8 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Datos Maestros</a></li>
-			<li><a href="categorias_riesgos">Categor&iacute;as de Riesgos</a></li>
-			<li><a href="categorias_riesgos.create">Agregar Categor&iacute;a</a></li>
+			<li><a href="categorias_risks">Categor&iacute;as de Riesgos</a></li>
+			<li><a href="categorias_risks.create">Agregar Categor&iacute;a</a></li>
 		</ol>
 	</div>
 </div>
@@ -37,11 +37,11 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos de la nueva categor&iacute;a.
-			{!!Form::open(['route'=>'categorias_riesgos.store','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'categorias_risks.store','method'=>'POST','class'=>'form-horizontal'])!!}
 				@include('datos_maestros.categorias_riesgos.form')
 			{!!Form::close()!!}
 				<center>
-				{!!Form::open(['url'=>'categorias_riesgos','method'=>'GET'])!!}
+				{!!Form::open(['url'=>'categorias_risks','method'=>'GET'])!!}
 					{!!Form::submit('Volver', ['class'=>'btn btn-danger'])!!}
 				{!!Form::close()!!}
 				<center>

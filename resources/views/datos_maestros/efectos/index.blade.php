@@ -43,22 +43,31 @@
 		@endif
 
 		<p>En esta secci&oacute;n podr&aacute; agregar, ver, editar o bloquear efectos gen&eacute;ricas para los futuros riesgos identificados o riesgos tipo.</p>
-
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		{!! link_to_route('efectos.create', $title = 'Agregar Efecto', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 
-	@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
-		{!! link_to_route('efectos.index', $title = 'Ver Desbloqueados', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
-	@else
-		{!! link_to_route('efectos.index', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
+		@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
+			{!! link_to_route('efectos.index', $title = 'Ver Desbloqueados', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
+		@else
+			{!! link_to_route('efectos.index', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
+		@endif
+	<?php break; ?>
 	@endif
+@endforeach
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 	<thead>
 	<th>Nombre<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th width="30%">Descripci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Fecha Creaci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Fecha Actualizado<label><input type='text' placeholder='Filtrar' /></label></th>
-	<th>Acci&oacute;n</th>
-	<th>Acci&oacute;n</th>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
+	<th style="vertical-align:top;">Acci&oacute;n</th>
+	<th style="vertical-align:top;">Acci&oacute;n</th>
+	<?php break; ?>
+	@endif
+@endforeach
 	</thead>
 	@foreach ($efectos as $efecto)
 		<tr>
@@ -72,6 +81,8 @@
 		</td>
 		<td>{{ $efecto['fecha_creacion'] }}</td>
 		<td>{{ $efecto['fecha_act'] }}</td>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		<td><div>
 			@if ($efecto['estado'] == 0)
 	            {!! link_to_route('efectos.edit', $title = 'Editar', $parameters = $efecto['id'], $attributes = ['class'=>'btn btn-success']) !!}
@@ -87,6 +98,9 @@
 	        @endif
 	        </div><!-- /btn-group -->
 	    </td>
+	<?php break; ?>
+	@endif
+@endforeach
 		</tr>
 	@endforeach
 	</table>

@@ -43,8 +43,12 @@
 					{{ Session::get('message') }}
 					</div>
 				@endif
-
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		{!! link_to_route('crear_pruebas', $title = 'Agregar Nuevo Programa', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
+	<?php break; ?>
+	@endif
+@endforeach
 
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 	<thead>

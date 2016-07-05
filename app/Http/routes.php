@@ -24,8 +24,8 @@ Route::get('/',[
 
 //Route::post('auth/login', [ 'as' => 'login', 'uses' => 'Auth\AuthController@postLogin']);
 
-Route::resource('log','logController');
-Route::get('logout','logController@logout');
+Route::resource('log','LogController');
+Route::get('logout','LogController@logout');
 
 Route::get('home',[
 	'as' => 'home', 'uses' => 'HomeController@index'
@@ -34,10 +34,10 @@ Route::get('home',[
 
 
 // ----RUTA PARA CREAR USUARIO---- //
-Route::get('crear_usuario','logController@createUser');
+Route::get('crear_usuario','LogController@createUser');
 
 Route::post('usuario.store', [
-	'as' => 'usuario.store', 'uses' => 'logController@storeUser'
+	'as' => 'usuario.store', 'uses' => 'LogController@storeUser'
 	]);
 
 // ----RUTAS PARA GESTIÓN DE DATOS MAESTROS---- //
@@ -156,30 +156,30 @@ Route::put('subprocesos.update.{id}', [
 
 //Rutas para CRUD + bloquear Categorías de Riesgo//
 
-Route::resource('categorias_riesgos','CategoriasRiesgosController');
+Route::resource('categorias_risks','CategoriasRiesgosController');
 
-Route::get('categorias_riesgos.create', [
+Route::get('categorias_risks.create', [
 	'as' => 'categorias_riesgos.create', 'uses' => 'CategoriasRiesgosController@create'
 ]);
 
-Route::get('categorias_riesgos.edit.{id}', [
+Route::get('categorias_risks.edit.{id}', [
 	'as' => 'categorias_riesgos.edit', 'uses' => 'CategoriasRiesgosController@edit'
 ]);
 
-Route::get('categorias_riesgos.bloquear.{id}', [
-	'as' => 'categorias_riesgos.bloquear', 'uses' => 'CategoriasRiesgosController@bloquear'
+Route::get('categorias_risks.bloquear.{id}', [
+	'as' => 'categorias_risks.bloquear', 'uses' => 'CategoriasRiesgosController@bloquear'
 ]);
 
-Route::get('categorias_riesgos.verbloqueados', [
-	'as' => 'categorias_riesgos.verbloqueados', 'uses' => 'CategoriasRiesgosController@index'
+Route::get('categorias_risks.verbloqueados', [
+	'as' => 'categorias_risks.verbloqueados', 'uses' => 'CategoriasRiesgosController@index'
 ]);
 
-Route::get('categorias_riesgos.desbloquear.{id}', [
-	'as' => 'categorias_riesgos.desbloquear', 'uses' => 'CategoriasRiesgosController@desbloquear'
+Route::get('categorias_risks.desbloquear.{id}', [
+	'as' => 'categorias_risks.desbloquear', 'uses' => 'CategoriasRiesgosController@desbloquear'
 ]);
 
-Route::put('categorias_riesgos.update.{id}', [
-	'as' => 'categorias_riesgos.update', 'uses' => 'CategoriasRiesgosController@update'
+Route::put('categorias_risks.update.{id}', [
+	'as' => 'categorias_risks.update', 'uses' => 'CategoriasRiesgosController@update'
 ]);
 
 //Rutas para CRUD + bloquear Categorías de Objetivo//

@@ -1288,7 +1288,7 @@ class IssuesController extends Controller
     public function index2()
     {
         //volvemos a obtener lista de organizaciones
-        $organizations = \Ermtool\Organization::lists('name','id');
+        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
         //obtenemos nombre de organización
         $org = \Ermtool\Organization::where('id',$_POST['organization_id'])->value('name');

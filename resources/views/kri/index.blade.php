@@ -64,8 +64,13 @@
 						<th style="vertical-align:top;">Responsable del riesgo</th>
 						<th style="vertical-align:top;">Fecha creaci&oacute;n</th>
 						<th style="vertical-align:top;">Intervalo de evaluaci&oacute;n</th>
+			@foreach (Session::get('roles') as $role)
+				@if ($role != 6)
 						<th style="vertical-align:top;">Acci&oacute;n</th>
 						<th style="vertical-align:top;">Acci&oacute;n</th>
+				<?php break; ?>
+				@endif
+			@endforeach
 						</thead>
 
 						@foreach ($kri as $k)
@@ -98,14 +103,23 @@
 								Ninguno
 							@endif
 							</td>
+			@foreach (Session::get('roles') as $role)
+				@if ($role != 6)
 							<td><a href="kri.edit.{{ $k['id'] }}" class="btn btn-primary">Editar</a></td>
 							<td><a href="kri.evaluar.{{ $k['id'] }}" class="btn btn-success">Evaluar</a></td>
+				<?php break; ?>
+				@endif
+			@endforeach
 							</tr>
 						@endforeach
 						</table>
 					@endif
-
+			@foreach (Session::get('roles') as $role)
+				@if ($role != 6)
 					<center><a href="kri.create" class="btn btn-success">Agregar nuevo KRI</a></center>
+				<?php break; ?>
+				@endif
+			@endforeach
 				</div>
 				</br>
 

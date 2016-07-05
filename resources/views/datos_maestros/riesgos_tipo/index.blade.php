@@ -41,14 +41,18 @@
 			{{ Session::get('message') }}
 			</div>
 		@endif
-
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		{!! link_to_route('riskstype.create', $title = 'Agregar Riesgo', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 
-	@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
-		{!! link_to_route('riskstype.index', $title = 'Ver Desbloqueados', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
-	@else
-		{!! link_to_route('riskstype.index', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
+		@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
+			{!! link_to_route('riskstype.index', $title = 'Ver Desbloqueados', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
+		@else
+			{!! link_to_route('riskstype.index', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
+		@endif
+	<?php break; ?>
 	@endif
+@endforeach
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 	<thead>
 	<th>Nombre<label><input type='text' placeholder='Filtrar' /></label></th>
@@ -59,8 +63,13 @@
 	<th>Fecha Expiraci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Causa(s)<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Efecto(s)<label><input type='text' placeholder='Filtrar' /></label></th>
-	<th>Acci&oacute;n</th>
-	<th>Acci&oacute;n</th>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
+	<th style="vertical-align:top;">Acci&oacute;n</th>
+	<th style="vertical-align:top;">Acci&oacute;n</th>
+	<?php break; ?>
+	@endif
+@endforeach
 	</thead>
 	@foreach ($riesgos as $riesgo)
 		<tr>
@@ -88,6 +97,8 @@
 			<li>{{ $riesgo['efectos'] }}
 		@endif
 		</td>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		<td><div>
 			@if ($riesgo['estado'] == 0)
 	            {!! link_to_route('riskstype.edit', $title = 'Editar', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-success']) !!}
@@ -102,6 +113,9 @@
 	    
 	        @endif
 	        </div><!-- /btn-group -->
+	<?php break; ?>
+	@endif
+@endforeach
 	    </td>
 		</tr>
 	@endforeach

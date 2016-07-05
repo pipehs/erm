@@ -44,16 +44,19 @@
 @endif
 
 
-	
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
+			{!! link_to_route('organization.create', $title = 'Agregar Organizaci&oacute;n', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 
+		@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
+			{!! link_to_route('organization.index', $title = 'Ver Desbloqueadas', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
+		@else
+			{!! link_to_route('organization.verbloqueados', $title = 'Ver Bloqueadas', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
+		@endif
 
-	{!! link_to_route('organization.create', $title = 'Agregar Organizaci&oacute;n', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
-
-@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
-	{!! link_to_route('organization.index', $title = 'Ver Desbloqueadas', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
-@else
-	{!! link_to_route('organization.verbloqueados', $title = 'Ver Bloqueadas', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
-@endif
+		<?php break; ?>
+	@endif
+@endforeach
 <!--
 		<form class="form-horizontal" method="REQUEST" action="organization.create">
 		<input type="hidden" name="_token" value="{{{ csrf_token() }}}" >
@@ -79,8 +82,14 @@
 	<th style="vertical-align:top;">Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th style="vertical-align:top;">Servicios compartidos<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th style="vertical-align:top;">Organizaciones dependientes<label><input type="text" placeholder="Filtrar" /></label></th>
+
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 	<th style="vertical-align:top;">Acci&oacute;n</th>
 	<th style="vertical-align:top;">Acci&oacute;n</th>
+	<?php break; ?>
+	@endif
+@endforeach
 	</thead>
 
 	@foreach ($organizations as $organization)
@@ -103,25 +112,29 @@
 			@endforeach
 		@endif
 		</td>
-		<ul>
-		<td>
-			<div>
-			@if ($organization['estado'] == 0)
-	            {!! link_to_route('organization.edit', $title = 'Editar', $parameters = $organization['id'], $attributes = ['class'=>'btn btn-success']) !!}
-	        @else
-	        	{!! link_to_route('organization.desbloquear', $title = 'Desbloquear', $parameters = $organization['id'], $attributes = ['class'=>'btn btn-success']) !!}
-	        @endif
-	        </div><!-- /btn-group -->
-		</td>
-		<td>
-			<div>
-			@if ($organization['estado'] == 0)
-				<button class="btn btn-danger" onclick="bloquear({{ $organization['id'] }},'{{ $organization['nombre'] }}','organization','la organización')">Bloquear</button>
-	        @else
-	        	
-	        @endif
-	        </div><!-- /btn-group -->
-		</td>
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)
+			<td>
+				<div>
+				@if ($organization['estado'] == 0)
+		            {!! link_to_route('organization.edit', $title = 'Editar', $parameters = $organization['id'], $attributes = ['class'=>'btn btn-success']) !!}
+		        @else
+		        	{!! link_to_route('organization.desbloquear', $title = 'Desbloquear', $parameters = $organization['id'], $attributes = ['class'=>'btn btn-success']) !!}
+		        @endif
+		        </div><!-- /btn-group -->
+			</td>
+			<td>
+				<div>
+				@if ($organization['estado'] == 0)
+					<button class="btn btn-danger" onclick="bloquear({{ $organization['id'] }},'{{ $organization['nombre'] }}','organization','la organización')">Bloquear</button>
+		        @else
+		        	
+		        @endif
+		        </div><!-- /btn-group -->
+			</td>
+			<?php break; ?>
+		@endif
+	@endforeach
 		</tr>
 	@endforeach
 	</table>

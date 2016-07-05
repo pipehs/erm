@@ -35,7 +35,8 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		{!! link_to_route('categorias_objetivos.create', $title = 'Agregar Categor&iacute;a', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 
 		@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
@@ -43,7 +44,9 @@
 		@else
 			{!! link_to_route('categorias_objetivos.verbloqueados', $title = 'Ver Bloqueadas', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
 		@endif
-
+	<?php break; ?>
+	@endif
+@endforeach
 		@if(Session::has('message'))
 			<div class="alert alert-success alert-dismissible" role="alert">
 			{{ Session::get('message') }}
@@ -57,8 +60,13 @@
 	<th>Fecha Creaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th>Fecha Actualizaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th>Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-	<th>Acci&oacute;n</th>
-	<th>Acci&oacute;n</th>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
+	<th style="vertical-align:top;">Acci&oacute;n</th>
+	<th style="vertical-align:top;">Acci&oacute;n</th>
+	<?php break; ?>
+	@endif
+@endforeach
 	</thead>
 	@foreach ($objective_categories as $objective_category)
 		<tr>
@@ -67,6 +75,8 @@
 		<td>{{$objective_category['fecha_creacion']}}</td>
 		<td>{{$objective_category['fecha_act']}}</td>
 		<td>{{$objective_category['fecha_exp']}}</td>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		<td>
 			<div>
 			@if ($objective_category['estado'] == 0)
@@ -86,6 +96,9 @@
 	        </div><!-- /btn-group -->
 		</td>
 		</tr>
+	<?php break; ?>
+	@endif
+@endforeach
 	@endforeach
 	</table>
 

@@ -40,7 +40,8 @@
 			{{ Session::get('message') }}
 			</div>
 		@endif
-
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		{!! link_to_route('procesos.create', $title = 'Agregar Proceso', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 
 	@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
@@ -48,9 +49,12 @@
 	@else
 		{!! link_to_route('procesos.verbloqueados', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
 	@endif
+
+	<?php break; ?>
+	@endif
+@endforeach
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px" >
 					<thead>
-						<tr>
 							<th>Organizaciones<label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Proceso<label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Subprocesos<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -59,12 +63,16 @@
 							<th>Fecha Actualizaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>¿Depende de otro proceso?<label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Acci&oacute;n</th>
-							<th>Acci&oacute;n</th>
-						</tr>
+							@foreach (Session::get('roles') as $role)
+								@if ($role != 6)
+								<th style="vertical-align:top;">Acci&oacute;n</th>
+								<th style="vertical-align:top;">Acci&oacute;n</th>
+								<?php break; ?>
+								@endif
+							@endforeach
 					</thead>
 	<tr style="display:none;">
-	<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+	<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 	@foreach ($procesos as $proceso)
 		<tr>
 		<td><ul>
@@ -98,6 +106,8 @@
 		<td>{{ $proceso['fecha_act'] }}</td>
 		<td>{{ $proceso['fecha_exp'] }}</td>
 		<td>{{ $proceso['proceso_dependiente'] }}</td>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)		
 		<td><div>
 			@if ($proceso['estado'] == 0)
 	            {!! link_to_route('procesos.edit', $title = 'Editar', $parameters = $proceso['id'], $attributes = ['class'=>'btn btn-success']) !!}
@@ -112,6 +122,9 @@
 	        @endif
 	        </div><!-- /btn-group -->
 	    </td>
+	<?php break; ?>
+	@endif
+@endforeach
 		</tr>
 	@endforeach
 	</table>

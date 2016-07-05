@@ -28,7 +28,7 @@ function activeMenu($uri='')
 function dropDown1()
 {
 	$uri = array('organization','categorias_objetivos','objetivos','procesos','subprocesos',
-				'categorias_riesgos','riskstype','roles','stakeholders','causas','efectos');
+				'categorias_risks','riskstype','roles','stakeholders','causas','efectos');
 
 	foreach ($uri as $uri)
 	{

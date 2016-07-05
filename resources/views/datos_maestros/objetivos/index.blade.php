@@ -61,22 +61,37 @@
 		<hr>
 
 	@if (isset($_GET['organizacion']))
-		{!! link_to_route('objetivos.verbloqueados', $title = 'Ver Objetivos Bloqueados', $parameters = $_GET['organizacion'], $attributes = ['class'=>'btn btn-danger']) !!}
+		@foreach (Session::get('roles') as $role)
+			@if ($role != 6)
+				{!! link_to_route('objetivos.verbloqueados', $title = 'Ver Objetivos Bloqueados', $parameters = $_GET['organizacion'], $attributes = ['class'=>'btn btn-danger']) !!}
+			<?php break; ?>
+			@endif
+		@endforeach
 	@endif
 		
 
 	@if (isset($objetivos))
 		@if (isset($organizacion))
-			{{-- Se hará el botón con un formulario para poder enviar por el método GET a la función index de ObjetivosController --}}
-			{!!Form::open(['url'=>'objetivos','method'=>'GET','class'=>'form-horizontal'])!!}
-				{!!Form::hidden('organizacion',$organizacion)!!}
-				{!!Form::submit('Ver Objetivos Desbloqueados', ['class'=>'btn btn-success'])!!}
-			{!!Form::close()!!}
+			@foreach (Session::get('roles') as $role)
+				@if ($role != 6)
+					{{-- Se hará el botón con un formulario para poder enviar por el método GET a la función index de ObjetivosController --}}
+					{!!Form::open(['url'=>'objetivos','method'=>'GET','class'=>'form-horizontal'])!!}
+						{!!Form::hidden('organizacion',$organizacion)!!}
+						{!!Form::submit('Ver Objetivos Desbloqueados', ['class'=>'btn btn-success'])!!}
+					{!!Form::close()!!}
+				<?php break; ?>
+				@endif
+			@endforeach
 		@endif
 
 		{!!Form::open(['url'=>'objetivos.create','method'=>'GET','class'=>'form-horizontal'])!!}
-			{!!Form::hidden('nombre_organizacion',$nombre_organizacion )!!}
-			{!!Form::submit('Agregar objetivo', ['class'=>'btn btn-primary'])!!}
+		@foreach (Session::get('roles') as $role)
+			@if ($role != 6)	
+				{!!Form::hidden('nombre_organizacion',$nombre_organizacion )!!}
+				{!!Form::submit('Agregar objetivo', ['class'=>'btn btn-primary'])!!}
+			<?php break; ?>
+			@endif
+		@endforeach
 	<hr>
 		@if ($probador !== 0) {{-- Si es que existe algún objetivo creado, probador no será cero --}}
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
@@ -87,8 +102,13 @@
 				<th>Fecha Actualizaci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
 				<th>Fecha Expiraci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
 				<th>Categor&iacute;a<label><input type='text' placeholder='Filtrar' /></label></th>
-				<th>Acci&oacute;n</th>
-				<th>Acci&oacute;n</th>
+			@foreach (Session::get('roles') as $role)
+				@if ($role != 6)
+				<th style="vertical-align:top;">Acci&oacute;n</th>
+				<th style="vertical-align:top;">Acci&oacute;n</th>
+				<?php break; ?>
+				@endif
+			@endforeach
 				</thead>
 
 				@foreach ($objetivos as $objetivo)
@@ -99,6 +119,8 @@
 					<td>{{$objetivo['fecha_act']}}</td>
 					<td>{{$objetivo['fecha_exp']}}</td>
 					<td>{{$objetivo['categoria']}}</td>
+			@foreach (Session::get('roles') as $role)
+				@if ($role != 6)
 					<td>
 						<div>
 						@if ($objetivo['estado'] == 0)
@@ -117,6 +139,9 @@
 				        @endif
 				        </div><!-- /btn-group -->
 					</td>
+				<?php break; ?>
+				@endif
+			@endforeach
 					</tr>
 				@endforeach
 				</table>

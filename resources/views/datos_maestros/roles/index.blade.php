@@ -43,21 +43,30 @@
 		@endif
 
 		En esta secci&oacute;n podr&aacute; crear los distintos roles para los usuarios del sistema.<br>
-
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 		{!! link_to_route('roles.create', $title = 'Agregar Rol', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 
-	@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
-		{!! link_to_route('roles.index', $title = 'Ver Desbloqueadas', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
-	@else
-		{!! link_to_route('roles.verbloqueados', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
+		@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
+			{!! link_to_route('roles.index', $title = 'Ver Desbloqueadas', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
+		@else
+			{!! link_to_route('roles.verbloqueados', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
+		@endif
+	<?php break; ?>
 	@endif
+@endforeach
 
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 	<thead>
 	<th>Nombre Rol<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Cantidad de usuarios<label><input type='text' placeholder='Filtrar' /></label></th>
-	<th>Acci&oacute;n</th>
-	<th>Acci&oacute;n</th>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
+	<th style="vertical-align:top;">Acci&oacute;n</th>
+	<th style="vertical-align:top;">Acci&oacute;n</th>
+	<?php break; ?>
+	@endif
+@endforeach
 	</thead>
 
 	@foreach($roles as $rol)
@@ -70,6 +79,8 @@
 				{{ $rol['cantidad'] }} usuarios
 			@endif
 			</td>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
 			<td> 
 			<div>
 			@if ($rol['status'] == 0)
@@ -88,6 +99,9 @@
 	        @endif
 	        </div><!-- /btn-group -->
 		</td>
+	<?php break; ?>
+	@endif
+@endforeach
 		</tr>
 	@endforeach
 	</table>

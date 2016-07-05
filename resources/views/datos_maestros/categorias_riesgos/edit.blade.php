@@ -9,8 +9,8 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Datos Maestros</a></li>
-			<li><a href="categorias_riesgos">Categor&iacute;as de Riesgos</a></li>
-			<li><a href="categorias_riesgos.edit.{{ $risk_category['id'] }}">Editar Categor&iacute;a</a></li>
+			<li><a href="categorias_risks">Categor&iacute;as de Riesgos</a></li>
+			<li><a href="categorias_risks.edit.{{ $risk_category['id'] }}">Editar Categor&iacute;a</a></li>
 		</ol>
 	</div>
 </div>
@@ -37,11 +37,11 @@
 			</div>
 			<div class="box-content">
 			Modifique los datos que desee cambiar de la categor&iacute;a.
-			{!!Form::model($risk_category,['route'=>['categorias_riesgos.update',$risk_category->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+			{!!Form::model($risk_category,['route'=>['categorias_risks.update',$risk_category->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
 					@include('datos_maestros.categorias_riesgos.form')
 			{!!Form::close()!!}
 				<center>
-				{!!Form::open(['url'=>'categorias_riesgos','method'=>'GET'])!!}
+				{!!Form::open(['url'=>'categorias_risks','method'=>'GET'])!!}
 					{!!Form::submit('Volver', ['class'=>'btn btn-danger'])!!}
 				{!!Form::close()!!}
 				<center>

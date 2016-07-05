@@ -9,7 +9,7 @@
 		<li>{!!HTML::link('objetivos','Objetivos Corporativos',['class'=>activeMenu('objetivos')])!!}</li>
 		<li>{!!HTML::link('procesos','Procesos',['class'=>activeMenu('procesos')])!!}</li>
 		<li>{!!HTML::link('subprocesos','Subprocesos',['class'=>activeMenu('subprocesos')])!!}</li>
-		<li>{!!HTML::link('categorias_riesgos','Categor&iacute;as de Riesgos',['class'=>activeMenu('categorias_riesgos')])!!}</li>
+		<li>{!!HTML::link('categorias_risks','Categor&iacute;as de Riesgos',['class'=>activeMenu('categorias_risks')])!!}</li>
 		<li>{!!HTML::link('riskstype','Riesgos Tipo',['class'=>activeMenu('riskstype')])!!}</li>
 		<li>{!!HTML::link('roles','Roles de Usuarios',['class'=>activeMenu('roles')])!!}</li>
 		<li>{!!HTML::link('stakeholders','Usuarios',['class'=>activeMenu('stakeholders')])!!}</li>

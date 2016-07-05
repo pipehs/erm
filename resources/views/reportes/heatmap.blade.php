@@ -98,7 +98,7 @@
                     <div class="col-sm-2">
                       {!!Form::number('ano',null,
                       ['id'=>'ano','class'=>'form-control','input maxlength'=>'4',
-                       'placeholder'=>'AAAA','min'=>'2016'])!!}
+                       'placeholder'=>'AAAA','min'=>'2016','required'=>'true'])!!}
                     </div>
                     <div class="col-sm-1">
                     {!!Form::number('mes',null,

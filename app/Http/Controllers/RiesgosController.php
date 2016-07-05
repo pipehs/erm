@@ -33,15 +33,22 @@ class RiesgosController extends Controller
             {
                 $tipo = "De Proceso";
                 //primero obtenemos subprocesos relacionados
-                $subprocesses = \Ermtool\Risk::find($riesgo['id'])->subprocesses;
+                //$subprocesses = \Ermtool\Risk::find($riesgo['id'])->subprocesses;
+                $subprocesses = DB::table('subprocesses')
+                                ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                                ->join('organizations','organizations.id','=','organization_subprocess.organization_id')
+                                ->where('risk_subprocess.risk_id','=',$riesgo['id'])
+                                ->select('subprocesses.name','subprocesses.id','organizations.name as org_name')
+                                ->get();
 
                 foreach($subprocesses as $subprocess)
                 {
                     //agregamos org_name ya que este estará identificado si el riesgo es de negocio
                     $relacionados[$j] = array('risk_id'=>$riesgo['id'],
-                                        'id'=>$subprocess['id'],
-                                        'nombre'=>$subprocess['name'],
-                                        'org_name'=>"");
+                                        'id'=>$subprocess->id,
+                                        'nombre'=>$subprocess->name,
+                                        'org_name'=>$subprocess->org_name);
                     $j += 1;
                 }
             }
@@ -49,16 +56,24 @@ class RiesgosController extends Controller
             {
                 $tipo = "De Negocio";
                 //primero obtenemos objetivos relacionados
-                $objectives = \Ermtool\Risk::find($riesgo['id'])->objectives;
+                //$objectives = \Ermtool\Risk::find($riesgo['id'])->objectives;
+                $objectives = DB::table('objectives')
+                                ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
+                                ->join('organizations','organizations.id','=','objectives.organization_id')
+                                ->where('objective_risk.risk_id','=',$riesgo['id'])
+                                ->select('objectives.name','objectives.id','organizations.name as org_name')
+                                ->get();
 
                 foreach ($objectives as $objective)
                 {
+
                     //obtenemos organización
-                    $org = \Ermtool\Organization::where('id',$objective['organization_id'])->value('name');
+                    //$org = \Ermtool\Organization::where('id',$objective['organization_id'])->value('name');
                     $relacionados[$j] = array('risk_id'=>$riesgo['id'],
-                                            'id'=>$objective['id'],
-                                            'nombre'=>$objective['name'],
-                                            'org_name'=>$org);
+                                            'id'=>$objective->id,
+                                            'nombre'=>$objective->name,
+                                            'org_name'=>$objective->org_name);
+
                     $j += 1;
                 }
             }
@@ -107,11 +122,11 @@ class RiesgosController extends Controller
             if ($causes)
             {
                 $causas = array();
-                $j = 0;
+                $k = 0;
                 foreach ($causes as $cause)
                 {
                     $causas[$j] = $cause->name;
-                    $j += 1;
+                    $k += 1;
                 }
             }
             else
@@ -139,11 +154,11 @@ class RiesgosController extends Controller
             if ($effects)
             {
                 $efectos = array();
-                $j = 0;
+                $k = 0;
                 foreach ($effects as $effect)
                 {
                     $efectos[$j] = $effect->name;
-                    $j += 1;
+                    $k += 1;
                 }
             }
             else
@@ -167,6 +182,8 @@ class RiesgosController extends Controller
         }
 
         return view('riesgos.index',['riesgos'=>$riesgos,'relacionados'=>$relacionados]);
+        //return json_encode(['riesgos'=>$riesgos,'relacionados'=>$relacionados]);
+        //print_r($relacionados);
     }
 
     /**
