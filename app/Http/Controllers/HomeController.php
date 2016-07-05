@@ -29,6 +29,10 @@ class HomeController extends Controller
     }
     public function index()
     {
+        if (Auth::guest())
+        {
+            return Redirect::route('/');
+        }
         //--- GENERAMOS HEATMAP PARA ÚLTIMA ENCUESTA DE EVALUACIÓN AGREGADA ---//
 
         //obtenemos id de última evaluación

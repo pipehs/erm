@@ -73,7 +73,14 @@
 						</tr>
 					</thead>
 	<tr style="display:none;">
-	<td></td><td></td><td></td><td><td></td></td><td></td><td></td><td></td></tr>
+@foreach (Session::get('roles') as $role)
+	@if ($role != 6)
+		<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+		<?php break; ?>
+	@else
+		<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+	@endif
+@endforeach
 	@foreach ($subprocesos as $subproceso)
 		<tr>
 		<td><ul>
