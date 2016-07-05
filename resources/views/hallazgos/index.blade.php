@@ -95,7 +95,7 @@
 			<?php break; ?>
 			@endif
 		@endforeach
-				<table  style="font-size:11px">
+				<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 				<thead>
 					@if ($kind == 0)
 						<th>Proceso<label><input type="text" placeholder="Filtrar" /></label></th>
