@@ -506,9 +506,9 @@ function calc_controlled_risk($control_id,$efectividad)
 			{
 				return 1;
 			}
-
-			return 0; //fin correcto	
 		}
+
+		return 0; //fin correcto	
 	});
 }
 

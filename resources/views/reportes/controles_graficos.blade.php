@@ -93,7 +93,7 @@
 			<div class="no-move"></div>
 		</div>
 		<div class="box-content">
-			<p align="justify">En este gr&aacute;fico podr&aacute; observar los resultados obtenidos en los controles que han sido ejecutados a trav&eacute;s de una evaluaci&oacute;n de controles o de una prueba de auditor&iacute;a. Haga click en el gr&aacute;fico si desea observar la informaci&oacute;n de los controles efectivos o inefectivos.</p>
+			<p align="justify">En este gr&aacute;fico podr&aacute; observar los resultados obtenidos en los controles que han sido ejecutados en el sistema. Haga click en el gr&aacute;fico si desea observar la informaci&oacute;n de los controles efectivos o inefectivos.</p>
 			<p id="alternativo2"></p>
 			<div id="piechart2" style="width: 500px; height: 300px;"></div>
 		</div>
