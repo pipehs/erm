@@ -1336,6 +1336,8 @@ class ControlesController extends Controller
             $updated_at = new DateTime($control->updated_at);
             $updated_at = date_format($updated_at, 'd-m-Y');
 
+            $description = preg_replace("[\n|\r|\n\r]", ' ', $control->description); 
+
             foreach ($id_efectivos as $id_ef)
             {
                 if ($id_ef == $control->id)
@@ -1343,7 +1345,7 @@ class ControlesController extends Controller
                     $controls[$i] = [
                         'id' => $control->id,
                         'name' => $control->name,
-                        'description' => $control->description,
+                        'description' => $description,
                         'updated_at' => $updated_at,
                         'results' => 2
                     ];
@@ -1359,7 +1361,7 @@ class ControlesController extends Controller
                     $controls[$i] = [
                         'id' => $control->id,
                         'name' => $control->name,
-                        'description' => $control->description,
+                        'description' => $description,
                         'updated_at' => $updated_at,
                         'results' => 1
                     ];
@@ -1382,10 +1384,11 @@ class ControlesController extends Controller
         $i = 0;
         foreach ($controles as $control)
         {
+            $description = preg_replace("[\n|\r|\n\r]", ' ', $control->description);  
             $no_ejecutados[$i] = [
                         'id' => $control->id,
                         'name' => $control->name,
-                        'description' => $control->description,
+                        'description' => $description,
                         'updated_at' => $updated_at,
                     ];
 
