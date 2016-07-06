@@ -44,7 +44,7 @@
 			En esta secci&oacute;n podr&aacute; crear, modificar y cerrar hallazgos para los distintos datos maestros relevantes a una organizaci&oacute;n. Estos hallazgos puedes estar relacionados a un proceso, subproceso, o a la organizaci&oacute;n misma<br><br>
 			<div id="cargando"><br></div>
 
-			{!!Form::open(['route'=>'hallazgos_lista','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'hallazgos_lista','method'=>'GET','class'=>'form-horizontal'])!!}
 			<div class="form-group">
 				{!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-3">

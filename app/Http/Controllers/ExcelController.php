@@ -14,9 +14,10 @@ use Ermtool\Http\Controllers\IssuesController as Issues;
 
 class ExcelController extends Controller
 {
-    public function generarExcel($value)
+    public function generarExcel($value,$org)
     {
-
+        global $id_org;
+        $id_org = $org;
         if ($value == 0) //se genera excel para controles de proceso
         {
             Excel::create('Matriz controles de procesos '.date("d-m-Y"), function($excel) {
@@ -33,13 +34,13 @@ class ExcelController extends Controller
 
                 $excel->sheet('Controles', function($sheet) {
                     $control = new Controles;
-                    $datos = $control->generarMatriz(0);
+                    $datos = $control->generarMatriz(0,$GLOBALS['id_org']);
 
                     //$datos2 = json_decode($datos);
                     $sheet->fromArray($datos);
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:N1', function($cells) {
+                    $sheet->cells('A1:I1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');
@@ -49,7 +50,7 @@ class ExcelController extends Controller
 
                 });
 
-            })->export('xlsx');
+            })->export('xls');
         }
         else if ($value == 1) //se genera excel para controles de negocio
         {
@@ -67,14 +68,14 @@ class ExcelController extends Controller
 
                 $excel->sheet('Controles', function($sheet) {
                     $control = new Controles;
-                    $datos = $control->generarMatriz(1);
+                    $datos = $control->generarMatriz(1,$GLOBALS['id_org']);
 
                     //$datos2 = json_decode($datos);
                     $sheet->fromArray($datos);
                     $sheet->setAutoFilter();
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:N1', function($cells) {
+                    $sheet->cells('A1:I1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');
@@ -84,7 +85,7 @@ class ExcelController extends Controller
 
                 });
 
-            })->export('xlsx');
+            })->export('xls');
         }
         else if ($value == 3) //se genera excel para riesgos de proceso
         {
@@ -102,13 +103,13 @@ class ExcelController extends Controller
 
                 $excel->sheet('Riesgos', function($sheet) {
                     $riesgo = new Riesgos;
-                    $datos = $riesgo->generarMatriz(0);
+                    $datos = $riesgo->generarMatriz(0,$GLOBALS['id_org']);
 
                     //$datos2 = json_decode($datos);
                     $sheet->fromArray($datos);
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:N1', function($cells) {
+                    $sheet->cells('A1:I1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');
@@ -118,7 +119,7 @@ class ExcelController extends Controller
 
                 });
 
-            })->export('xlsx');
+            })->export('xls');
         }
         else if ($value == 4) //se genera excel para riesgos de proceso
         {
@@ -136,7 +137,7 @@ class ExcelController extends Controller
 
                 $excel->sheet('Riesgos', function($sheet) {
                     $riesgo = new Riesgos;
-                    $datos = $riesgo->generarMatriz(1);
+                    $datos = $riesgo->generarMatriz(1,$GLOBALS['id_org']);
 
                     //$datos2 = json_decode($datos);
                     $sheet->fromArray($datos);
@@ -152,7 +153,7 @@ class ExcelController extends Controller
 
                 });
 
-            })->export('xlsx');
+            })->export('xls');
         }
  
     }
@@ -194,7 +195,7 @@ class ExcelController extends Controller
 
                 });
 
-            })->export('xlsx');
+            })->export('xls');
     }
 
     public function generarExcelIssue($type,$org)
@@ -235,6 +236,6 @@ class ExcelController extends Controller
 
                 });
 
-            })->export('xlsx');
+            })->export('xls');
     }
 }

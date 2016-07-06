@@ -584,111 +584,124 @@ class ControlesController extends Controller
     //función para reportes básicos->matriz de control
     public function matrices()
     {
-        return view('reportes.matrices');
+        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+        return view('reportes.matrices',['organizations'=>$organizations]);
     }
 
     /***********
     * función generadora de matriz de control
     ***********/
-    public function generarMatriz($value)
+    public function generarMatriz($value,$org)
     {
         $i = 0; //contador de controles/subprocesos o controles/objetivos
         $datos = array();
 
-        if (strstr($_SERVER["REQUEST_URI"],'genexcel')) //se esta generado el archivo excel, por la consulta para los datos es diferente 
-                                                        //(ya que en excel los datos no se muestran igual que en html)
+        
+        if (!strstr($_SERVER["REQUEST_URI"],'genexcel'))
         {
-            if ($value == 0) //Se generará la matriz de controles de procesos
-            {
-                $controls = DB::table('control_risk_subprocess')
-                                        ->join('controls','controls.id','=','control_risk_subprocess.control_id')
-                                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
-                                        ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                                        ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                                        ->join('organizations','organizations.id','=','organization_subprocess.organization_id')
-                                        ->select('controls.*','risks.name as risk_name',
-                                                'subprocesses.name as subprocess_name',
-                                                'organizations.name as organization_name')
-                                        ->get();
-            }
-
-            else if ($value == 1) //Se generará matriz para controles de negocio
-            {
-                $controls = DB::table('control_objective_risk')
-                                    ->join('controls','controls.id','=','control_objective_risk.control_id')
-                                    ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
-                                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                    ->join('risks','risks.id','=','objective_risk.risk_id')
-                                    ->join('organizations','organizations.id','=','objectives.organization_id')
-                                    ->select('controls.*','risks.name as risk_name',
-                                            'objectives.name as objective_name',
-                                            'organizations.name as organization_name')
-                                    ->get();
-            }
+            $value = $_GET['kind'];
+            $org = $_GET['organization_id'];
         }
-        else
-        {
-            //obtenemos controles
-            $controls = DB::table('controls')                                    
+
+        //obtenemos controles
+        $controls = DB::table('controls')                                    
                                 ->select('controls.*')
                                 ->get();
-        }
 
 
         foreach ($controls as $control)
         {
         
-                $risk_obj_org = NULL;
-                $risk_sub_org = NULL;
+                $risk_obj = NULL;
+                $risk_sub = NULL;
                 // -- seteamos datos --//
 
-                //Seteamos type. 0=Manual, 1=Semi-automático, 2=Automático
-                switch($control->type)
+                if ($control->type === NULL)
                 {
-                    case 0:
-                        $type = "Manual";
-                        break;
-                    case 1:
-                        $type = "Semi-automático";
-                        break;
-                    case 2:
-                        $type = "Autom&aacute;tico";
+                    $type = "No definido";
+                }
+                else
+                {
+                    //Seteamos type. 0=Manual, 1=Semi-automático, 2=Automático
+                    switch($control->type)
+                    {
+                        case 0:
+                            $type = "Manual";
+                            break;
+                        case 1:
+                            $type = "Semi-automático";
+                            break;
+                        case 2:
+                            $type = "Autom&aacute;tico";
+                    }
                 }
 
-                //Seteamos periodicity. 0=Diario, 1=Semanal, 2=Mensual, 3=Semestral, 4=Anual
-                switch ($control->periodicity)
+                if ($control->periodicity === NULL)
                 {
-                    case 0:
-                        $periodicity = "Diario";
-                        break;
-                    case 1:
-                        $periodicity = "Semanal";
-                        break;
-                    case 2:
-                        $periodicity = "Mensual";
-                        break;
-                    case 3:
-                        $periodicity = "Semestral";
-                        break;
-                    case 4:
-                        $periodicity = "Anual";
-                        break;
-                    case 5:
-                        $periodicity = "Cada vez que ocurra";
-                        break;
+                    $periodicity = "No definido";
+                }
+                else
+                {
+                    //Seteamos periodicity. 0=Diario, 1=Semanal, 2=Mensual, 3=Semestral, 4=Anual
+                    switch ($control->periodicity)
+                    {
+                        case 0:
+                            $periodicity = "Diario";
+                            break;
+                        case 1:
+                            $periodicity = "Semanal";
+                            break;
+                        case 2:
+                            $periodicity = "Mensual";
+                            break;
+                        case 3:
+                            $periodicity = "Semestral";
+                            break;
+                        case 4:
+                            $periodicity = "Anual";
+                            break;
+                        case 5:
+                            $periodicity = "Cada vez que ocurra";
+                            break;
+                    }
                 }
 
-                //Seteamos purpose. 0=Preventivo, 1=Detectivo, 2=Correctivo
-                switch ($control->purpose)
+                if ($control->purpose === NULL)
                 {
-                    case 0:
-                        $purpose = "Preventivo";
-                    case 1:
-                        $purpose = "Detectivo";
-                    case 2:
-                        $purpose = "Correctivo";
+                    $purpose = "No definido";
                 }
+                else
+                {
+                    //Seteamos purpose. 0=Preventivo, 1=Detectivo, 2=Correctivo
+                    switch ($control->purpose)
+                    {
+                        case 0:
+                            $purpose = "Preventivo";
+                        case 1:
+                            $purpose = "Detectivo";
+                        case 2:
+                            $purpose = "Correctivo";
+                    }
+                }
+
+                if ($control->expected_cost === NULL)
+                {
+                    $expected_cost = "No definido";
+                }
+                else
+                {
+                    $expected_cost = $control->expected_cost;
+                }
+
+                if ($control->evidence === NULL || $control->evidence == "")
+                {
+                    $evidence = "Sin evidencia";
+                }
+                else
+                {
+                    $evidence = $control->evidence;
+                }
+                
 
                 //Seteamos responsable del control
                 $stakeholder = \Ermtool\Stakeholder::find($control->stakeholder_id);
@@ -706,44 +719,6 @@ class ControlesController extends Controller
                     Los nombres de las variables serán guardados en español para mostrarlos
                     en el archivo excel que será exportado
                 */
-                if (strstr($_SERVER["REQUEST_URI"],'genexcel')) //si es que se está generando el excel solo se guardan los datos ya obtenidos
-                {
-                    if ($value == 0) //guardamos datos de controles de procesos
-                    {
-                        $datos[$i] = [//'id' => $control->id,
-                                    'Control' => $control->name,
-                                    'Descripción' => $control->description,    
-                                    'Responsable' => $stakeholder2,
-                                    'Tipo' => $type,
-                                    'Periodicidad' => $periodicity,
-                                    'Propósito' => $purpose,
-                                    'Costo control' => $control->expected_cost,
-                                    'Evidencia' => $control->evidence,
-                                    'Riesgo' => $control->risk_name,
-                                    'Subproceso' => $control->subprocess_name,
-                                    'Organización' => $control->organization_name];
-                        $i += 1;
-                    }
-
-                    else if($value == 1)
-                    {
-                        $datos[$i] = [//'id' => $control->id,
-                                    'Control' => $control->name,
-                                    'Descripción' => $control->description,
-                                    'Responsable' => $stakeholder2,
-                                    'Tipo' => $type,
-                                    'Periodicidad' => $periodicity,
-                                    'Propósito' => $purpose,
-                                    'Costo control' => $control->expected_cost,
-                                    'Evidencia' => $control->evidence,
-                                    'Riesgo' => $control->risk_name,
-                                    'Objetivo' => $control->objective_name,
-                                    'Organización' => $control->organization_name,];
-                        $i += 1;
-                    }
-                }
-                else //los datos son mostrados en html
-                {
                     //obtenemos riesgo - objetivo - organización o riesgo - subproceso - organización para cada control
                     if ($value == 0)
                     {
@@ -755,29 +730,41 @@ class ControlesController extends Controller
                                             ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                                             ->join('organizations','organizations.id','=','organization_subprocess.organization_id')
                                             ->where('controls.id','=',$control->id)
+                                            ->where('organizations.id','=',$org)
                                             ->select('subprocesses.name as subprocess_name',
-                                                'organizations.name as organization_name',
                                                 'risks.name as risk_name')
                                             ->get();
 
                         if ($risk_subprocess != NULL) //si es NULL, significa que el control que se está recorriendo es de negocio
                         {
+                            $last = end($risk_subprocess);
                             //seteamos cada riesgo, subproceso y organización
-                            foreach ($risk_subprocess as $risk_sub)
+                            foreach ($risk_subprocess as $sub_risk)
                             {
-                                    $risk_sub_org .= '<li>'.$risk_sub->risk_name.' / '.$risk_sub->subprocess_name.
-                                                     ' / '.$risk_sub->organization_name.'</li>';
+                                if ($sub_risk != $last)
+                                {
+                                    if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //agregamos &nbsp; solo si no es excel
+                                    {
+                                        $risk_sub .= $sub_risk->risk_name.' / '.$sub_risk->subprocess_name.', &nbsp;';
+                                    }
+                                    else
+                                    {
+                                        $risk_sub .= $sub_risk->risk_name.' / '.$sub_risk->subprocess_name.', ';
+                                    }
+                                }
+                                else
+                                    $risk_sub .= $sub_risk->risk_name.' / '.$sub_risk->subprocess_name;
                             }
                             $datos[$i] = [//'id' => $control->id,
                                         'Control' => $control->name,
                                         'Descripción' => $control->description,
-                                        'Riesgo_Subproceso_Organización' => $risk_sub_org,
+                                        'Responsable' => $stakeholder2,
                                         'Tipo' => $type,
                                         'Periodicidad' => $periodicity,
                                         'Propósito' => $purpose,
-                                        'Responsable' => $stakeholder2,
-                                        'Evidencia' => $control->evidence,
-                                        'Costo_control' => $control->expected_cost];
+                                        'Costo_control' => $expected_cost,
+                                        'Evidencia' => $evidence,
+                                        'Riesgo_Subproceso' => $risk_sub,];
                             $i += 1;
                         }
                     }
@@ -791,43 +778,57 @@ class ControlesController extends Controller
                                             ->join('risks','risks.id','=','objective_risk.risk_id')
                                             ->join('organizations','organizations.id','=','objectives.organization_id')
                                             ->where('controls.id','=',$control->id)
+                                            ->where('organizations.id','=',$org)
                                             ->select('objectives.name as objective_name',
-                                                'organizations.name as organization_name',
                                                 'risks.name as risk_name')
                                             ->get();
 
                         if ($objective_risk != NULL) //si es NULL, significa que el control que se está recorriendo es de proceso
                         {
+                            $last = end($objective_risk);
                             //seteamos cada riesgo, objetivo y organización
                             foreach ($objective_risk as $obj_risk)
                             {
-                                    $risk_obj_org .= '<li>'.$obj_risk->risk_name.' / '.$obj_risk->objective_name.
-                                                     ' / '.$obj_risk->organization_name.'</li>';
+                                if ($obj_risk != $last)
+                                {
+                                    if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //agregamos &nbsp; solo si no es excel
+                                    {
+                                        $risk_obj .= $obj_risk->risk_name.' / '.$obj_risk->objective_name.', &nbsp;';
+                                    }
+                                    else
+                                        $risk_obj .= $obj_risk->risk_name.' / '.$obj_risk->objective_name.', ';
+                                    
+                                }
+                                else
+                                    $risk_obj .= $obj_risk->risk_name.' / '.$obj_risk->objective_name;
                             }
                             
                                            
                             $datos[$i] = [//'id' => $control->id,
                                         'Control' => $control->name,
                                         'Descripción' => $control->description,
-                                        'Riesgo_Objetivo_Organización' => $risk_obj_org,
+                                        'Responsable' => $stakeholder2,
                                         'Tipo' => $type,
                                         'Periodicidad' => $periodicity,
                                         'Propósito' => $purpose,
-                                        'Responsable' => $stakeholder2,
-                                        'Evidencia' => $control->evidence,
-                                        'Costo_control' => $control->expected_cost];
+                                        'Costo_control' => $expected_cost,
+                                        'Evidencia' => $evidence,
+                                        'Riesgo_Objetivo' => $risk_obj,];
                             $i += 1;
                         }
                     }
-                }
-        }
+        }        
+        
 
         if (strstr($_SERVER["REQUEST_URI"],'genexcel')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
         {
             return $datos;
         }
         else
-            return json_encode($datos);
+        {
+            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+            return view('reportes.matrices',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org]);
+        }
     }
 
     //obtiene los controles de una organización

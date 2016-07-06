@@ -39,25 +39,107 @@
       En caso de que desee ver la matriz de control para los riesgos de negocio, deber&aacute; especificar si desea ver
       la matriz para todas las organizaciones o para alguna en espec&iacute;fica.</p>
 
-      	{!!Form::open()!!}
-				<div class="form-group">
-							{!!Form::label('Seleccione tipo',null,['class'=>'col-sm-4 control-label'])!!}
-							<div class="col-sm-3">
-								{!!Form::select('type',['0'=>'Matriz para controles de procesos','1'=>'Matriz para controles de negocio'],
-								 	   null, 
-								 	   ['id' => 'type','placeholder'=>'- Seleccione -'])!!}
-							</div>
-				</div>
+      	{!!Form::open(['route'=>'genmatriz','method'=>'GET','class'=>'form-horizontal'])!!}
 
-				{!!Form::close()!!}
+      			<div class="form-group">
+                 	<div class="row">
+                  		{!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
+                  		<div class="col-sm-3">
+                    		{!!Form::select('organization_id',$organizations, 
+                         		null, 
+                         	['id' => 'org','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+                  		</div>
+                	</div>
+                </div>
+
+                <div class="form-group" id="tipo">
+	                <div class="row">
+	                  {!!Form::label('Seleccione tipo de matriz',null,['class'=>'col-sm-4 control-label'])!!}
+	                  <div class="col-sm-3">
+	                    {!!Form::select('kind',(['0'=>'Controles de proceso','1'=>'Controles de negocio']), 
+	                         null, 
+	                         ['id' => 'kind','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+	                  </div>
+	                </div>
+	            </div>
+
+           		<div class="form-group">
+	                <center>
+	                {!!Form::submit('Seleccionar', ['class'=>'btn btn-primary'])!!}
+	                </center>
+	              </div>
 				<br>
 				<br>
 				<hr>
-				<table id="matrizcontrol" class="table table-bordered table-striped table-hover table-heading table-datatable" style="display: none;">
+		@if (isset($datos))
+			<hr>
+			<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+
+			@if ($value == 0)
+				<thead>
+				<th>ID Control<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Tipo<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Periodicidad<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Costo control<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Evidencia<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Riesgo(s) / Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+				</thead>
+				
+				
+				@foreach ($datos as $dato)
+					<tr>
+						<td>{{$dato['Control']}}</td>
+						<td>{{$dato['Descripción']}}</td>
+						<td>{{$dato['Responsable']}}</td>
+						<td>{{$dato['Tipo']}}</td>
+						<td>{{$dato['Periodicidad']}}</td>
+						<td>{{$dato['Propósito']}}</td>
+						<td>{{$dato['Costo_control']}}</td>
+						<td>{{$dato['Evidencia']}}</td>
+						<td>{{$dato['Riesgo_Subproceso']}}</td>
+					</tr>
+				@endforeach
 				</table>
-		
 				<div id="boton_exportar">
+					{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "0,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
 				</div>
+
+			@elseif ($value == 1)
+				<thead>
+				<th>ID Control<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Tipo<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Periodicidad<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Costo control<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Evidencia<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Riesgo(s) / Objetivos(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+				</thead>
+				
+				
+				@foreach ($datos as $dato)
+					<tr>
+						<td>{{$dato['Control']}}</td>
+						<td>{{$dato['Descripción']}}</td>
+						<td>{{$dato['Responsable']}}</td>
+						<td>{{$dato['Tipo']}}</td>
+						<td>{{$dato['Periodicidad']}}</td>
+						<td>{{$dato['Propósito']}}</td>
+						<td>{{$dato['Costo_control']}}</td>
+						<td>{{$dato['Evidencia']}}</td>
+						<td>{{$dato['Riesgo_Objetivo']}}</td>
+					</tr>
+				@endforeach
+				</table>
+				<div id="boton_exportar">
+					{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "1,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
+				</div>
+			@endif
+		@endif
 
       </div>
 		</div>
@@ -69,120 +151,5 @@
 @stop
 @section('scripts2')
 <script>
-
-//Mostraremos matriz de controles para riesgos de procesos o de negocio
-	$("#type").change(function() {
-
-
-			if ($("#type").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
-			{
-				if ($("#type").val() == 0) //Se seleccionó Riesgos / Procesos, por lo que se generará la matriz con estos controles
-				{
-					//reseteamos matriz
-
-					$("#matrizcontrol").removeAttr("style").show();
-
-					//Seteamos cabecera
-					var table_head = "<thead>";
-					table_head += "<th>ID Control</th><th>Descripci&oacute;n Control</th><th>Responsable</th>";
-					table_head += "<th>Tipo</th><th>Periodicidad</th><th>Propósito</th><th>Costo control</th><th>Evidencia</th>";
-					table_head += "<th>Riesgo(s) / Subproceso(s)</th></thead>";
-
-					//Añadimos la imagen de carga en el contenedor
-					$('#matrizcontrol').html('<div><center><img src="../public/assets/img/loading.gif"/></center></div>');
-					//generamos matriz a través de JSON y PHP
-
-					
-      				
-					$.get('genmatriz.'+$("#type").val(), function (result) {
-
-							//con la función html se BORRAN los datos existentes anteriormente (de existir)
-							$("#matrizcontrol").html(table_head);
-							
-
-							var table_row ="";
-							//parseamos datos obtenidos
-							var datos = JSON.parse(result);
-							 
-							//seteamos datos en tabla para riesgos a través de un ciclo por todos los controles de procesos
-							$(datos).each( function() {	
-								table_row += '<tr><td>' + this.Control + '</td><td>' + this.Descripción + '</td><td>';
-								table_row += this.Responsable + '</td><td>' + this.Tipo + '</td><td>' + this.Periodicidad +'</td>';
-								table_row += '<td>' + this.Propósito + '</td><td>' + this.Costo_control +'</td>';
-								table_row += '<td>' + this.Evidencia + '</td><td>' + this.Riesgo_Subproceso_Organización +'</td></tr>';
-							});
-
-							$("#matrizcontrol").append(table_row);
-					});
-				}
-
-				else if ($("#type").val() == 1) //Se seleccionó Riesgos / Objetivos
-				{
-					//reseteamos matriz
-
-					$("#matrizcontrol").removeAttr("style").show();
-
-					//Seteamos cabecera
-					var table_head = "<thead>";
-					table_head += "<th>ID Control</th><th>Descripci&oacute;n Control</th><th>Responsable</th>";
-					table_head += "<th>Tipo</th><th>Periodicidad</th><th>Propósito</th><th>Costo control</th><th>Evidencia</th>";
-					table_head += "<th>Riesgo(s) / Objetivos(s) / Organizaci&oacute;n</th></thead>";
-
-					$('#matrizcontrol').html('<div><center><img src="../public/assets/img/loading.gif"/></center></div>');
-					//generamos matriz a través de JSON y PHP
-
-					//generamos matriz a través de JSON y PHP
-					$.get('genmatriz.'+$("#type").val(), function (result) {
-
-							//con la función html se BORRAN los datos existentes anteriormente (de existir)
-							$("#matrizcontrol").html(table_head);
-							
-							var table_row ="";
-							//parseamos datos obtenidos
-							var datos = JSON.parse(result);
-							 
-							//seteamos datos en tabla para riesgos a través de un ciclo por todos los controles de procesos
-							$(datos).each( function() {	
-								
-								table_row += '<tr><td>' + this.Control + '</td><td>' + this.Descripción + '</td><td>';
-								table_row += this.Tipo + '</td><td>' + this.Periodicidad +'</td>';
-								table_row += '<td>' + this.Propósito + '</td><td>' + this.Responsable + '</td><td>' + this.Evidencia +'</td>';
-								table_row += '<td>' + this.Costo_esperado + '</td><td>' + this.Riesgo_Objetivo_Organización + '</td></tr>';
-							});
-
-							$("#matrizcontrol").append(table_row);
-					});
-				}
-				
-			}
-
-			else
-			{
-				//REseteamos datos
-			}
-
-			var value = $("#type").val();
-			//agregamos botón para exportar y array con datos
-			var insert = "<input type='hidden' name='datos[]' value='" + $("#type").val() + "'>";
-			insert += '<button type="button" id="btnExport" class="btn btn-success">Exportar Excel</button>';
-			$("#boton_exportar").html(insert);
-
-				if (value == 0)
-				{
-					$("#btnExport").click(function(e) {
-			        window.location.href = "{{URL::to('genexcel.0')}}"
-			        e.preventDefault();
-			    });
-			  }
-
-			  else if (value == 1)
-				{
-					$("#btnExport").click(function(e) {
-			        window.location.href = "{{URL::to('genexcel.1')}}"
-			        e.preventDefault();
-			    });
-			  }
-	    });
-
 </script>
 @stop

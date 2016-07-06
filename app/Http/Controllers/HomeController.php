@@ -48,7 +48,9 @@ class HomeController extends Controller
         $evaluations = DB::table('evaluation_risk')
                             ->where('evaluation_risk.evaluation_id',$id_eval)
                             ->select('evaluation_risk.id','evaluation_risk.risk_id',
-                                'evaluation_risk.objective_risk_id','evaluation_risk.risk_subprocess_id')->get();
+                                'evaluation_risk.objective_risk_id','evaluation_risk.risk_subprocess_id',
+                                'evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                            ->get();
 
         //obtenemos nombre y descripcion de la última encuesta
         $datos = DB::table('evaluations')->where('id',$id_eval)->select('name','description')->get();
@@ -68,15 +70,9 @@ class HomeController extends Controller
         {
 
             //para cada riesgo evaluado, identificaremos promedio de probabilidad y de criticidad
-            $prom_proba[$i] = DB::table('evaluation_risk')
-                        ->join('evaluation_risk_stakeholder','evaluation_risk_stakeholder.evaluation_risk_id','=','evaluation_risk.id')
-                        ->where('evaluation_risk.objective_risk_id',$evaluation->objective_risk_id)
-                        ->avg('probability');
+            $prom_proba[$i] = $evaluation->avg_probability;
 
-            $prom_criticidad[$i] = DB::table('evaluation_risk')
-                        ->join('evaluation_risk_stakeholder','evaluation_risk_stakeholder.evaluation_risk_id','=','evaluation_risk.id')
-                        ->where('evaluation_risk.objective_risk_id',$evaluation->objective_risk_id)
-                        ->avg('impact');
+            $prom_criticidad[$i] = $evaluation->avg_impact;
 
                 //primero verificamos de que tipo de riesgo se trata
                 if($evaluation->risk_subprocess_id != NULL) //si es riesgo de subproceso

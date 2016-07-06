@@ -769,26 +769,26 @@ class EvaluacionRiesgosController extends Controller
         else if ($_POST['organization_id'] != "") //se seleccionó ver heatmap por organización
         { */
 
-            $ano = $_POST['ano'];
+            $ano = $_GET['ano'];
 
-            if ($_POST['mes'] == NULL)
+            if ($_GET['mes'] == NULL)
             {
                 $mes = "12";
             }
             else
             {
-                $mes = $_POST['mes'];
+                $mes = $_GET['mes'];
             }
 
             //obtenemos nombre y descripción de organización
-            $datos = DB::table('organizations')->where('id',$_POST['organization_id'])->select('name','description')->get();
+            $datos = DB::table('organizations')->where('id',$_GET['organization_id'])->select('name','description')->get();
 
             foreach ($datos as $datos)
             {
                  $nombre = $datos->name;
                  $descripcion = $datos->description;
             }
-            if ($_POST['kind'] == 0)
+            if ($_GET['kind'] == 0)
             {
                  //---- consulta multiples join para obtener los subprocesos evaluados relacionados a la organización ----//
 
@@ -798,7 +798,7 @@ class EvaluacionRiesgosController extends Controller
                                 ->join('risk_subprocess','risk_subprocess.id','=','evaluation_risk.risk_subprocess_id')
                                 ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                                 ->whereNotNull('evaluation_risk.risk_subprocess_id')
-                                ->where('organization_subprocess.organization_id','=',$_POST['organization_id'])
+                                ->where('organization_subprocess.organization_id','=',$_GET['organization_id'])
                                 ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
                                 ->where('evaluations.consolidation','=',1)
                                 ->select('evaluation_risk.risk_subprocess_id as risk_id')
@@ -829,7 +829,7 @@ class EvaluacionRiesgosController extends Controller
                                 ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
                                 ->max('evaluations.updated_at');
 
-                    if ($_POST['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
+                    if ($_GET['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
                     {
                         //obtenemos fecha de actualización de riesgo controlado
                         $updated_at_ctrl = DB::table('evaluation_risk')
@@ -1054,7 +1054,7 @@ class EvaluacionRiesgosController extends Controller
                         
        // }
         
-        if ($_POST['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
+        if ($_GET['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
         {
             //retornamos la misma vista con datos
                 return view('reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
@@ -1062,8 +1062,8 @@ class EvaluacionRiesgosController extends Controller
                                         'prom_criticidad_in'=>$prom_criticidad_in,
                                         'prom_proba_ctrl'=>$prom_proba_ctrl,
                                         'prom_criticidad_ctrl'=>$prom_criticidad_ctrl,
-                                        'kind' => $_POST['kind'],
-                                        'kind2' => $_POST['kind2']]); 
+                                        'kind' => $_GET['kind'],
+                                        'kind2' => $_GET['kind2']]); 
         }
         else
         {
@@ -1071,8 +1071,8 @@ class EvaluacionRiesgosController extends Controller
                 return view('reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
                                         'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
                                         'prom_criticidad_in'=>$prom_criticidad_in,
-                                        'kind' => $_POST['kind'],
-                                        'kind2' => $_POST['kind2']]); 
+                                        'kind' => $_GET['kind'],
+                                        'kind2' => $_GET['kind2']]); 
         }
     }
 

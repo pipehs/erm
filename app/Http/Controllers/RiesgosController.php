@@ -623,13 +623,25 @@ class RiesgosController extends Controller
     //matriz de riesgos
     public function matrices()
     {
-        return view('reportes.matriz_riesgos');
+        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+        return view('reportes.matriz_riesgos',['organizations'=>$organizations]);
     }
 
-    public function generarMatriz($value)
+    public function generarMatriz($value,$org)
     {
+        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
+        if (!strstr($_SERVER["REQUEST_URI"],'genexcel'))
+        {
+            $value = $_GET['kind'];
+            $org = $_GET['organization_id'];
+        }
+        
         $i = 0; //contador de controles/subprocesos o controles/objetivos
         $datos = array();
+
+        $proba_string = ['Muy poco probable','Poco probable','Intermedio','Probable','Muy probable'];
+        $impact_string = ['Muy poco impacto','Poco impacto','Intermedio','Alto impacto','Muy alto impacto'];
 
         if ($value == 0) //Se generará la matriz de controles de procesos
         {
@@ -637,10 +649,12 @@ class RiesgosController extends Controller
             //---------- OBS: EXISTE PROBLEMA SI ES QUE EL RIESGO NO CONTIENE CAUSA Y EFECTO --------//
             $risks = DB::table('risk_subprocess')
                                 ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                                 ->join('processes','subprocesses.process_id','=','processes.id')
                                 ->join('risks','risks.id','=','risk_subprocess.risk_id')
                                 ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
                                 ->where('risks.type2','=',1)
+                                ->where('organization_subprocess.organization_id','=',$org)
                                 ->select('risks.*',
                                         'subprocesses.name as subprocess_name',
                                         'processes.name as process_name',
@@ -657,6 +671,7 @@ class RiesgosController extends Controller
                                 ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
                                 ->join('organizations','organizations.id','=','objectives.organization_id')
                                 ->where('risks.type2','=',1)
+                                ->where('objectives.organization_id','=',$org)
                                 ->select('risks.*',
                                         'objectives.name as objective_name',
                                         'organizations.name as organization_name',
@@ -743,8 +758,8 @@ class RiesgosController extends Controller
                     {
                         if ($eval->avg_probability != NULL AND $eval->avg_impact != NULL)
                         {
-                            $impacto = $eval->avg_impact;
-                            $probabilidad = $eval->avg_probability;
+                            $impacto = $eval->avg_impact.' ('.$impact_string[$eval->avg_impact-1].')';
+                            $probabilidad = $eval->avg_probability.' ('.$proba_string[$eval->avg_probability-1].')';
                             $score = $impacto * $probabilidad;
                         }
                     }
@@ -840,6 +855,15 @@ class RiesgosController extends Controller
                     $expiration_date = $fecha_temp1[2].'-'.$fecha_temp1[1].'-'.$fecha_temp1[0];
                 }
 
+                if ($risk->expected_loss == 0 || $risk->expected_loss == NULL)
+                {
+                    $expected_loss = "No se ha asignado p&eacute;rdida esperada";
+                }
+                else
+                {
+                    $expected_loss = $risk->expected_loss;
+                }
+
                 //Seteamos datos
                 if ($value == 0) //guardamos datos de riesgos de procesos
                 {
@@ -851,7 +875,7 @@ class RiesgosController extends Controller
                                 'Categoría' => $risk->risk_category_name,
                                 'Causas' => $causas,
                                 'Efectos' => $efectos,
-                                'Pérdida_esperada' => $risk->expected_loss,
+                                'Pérdida_esperada' => $expected_loss,
                                 'Probabilidad' => $probabilidad,
                                 'Impacto' => $impacto,
                                 'Score' => $score,
@@ -888,7 +912,7 @@ class RiesgosController extends Controller
         }
         else
         {
-            return view('reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value]);
+            return view('reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org]);
             //return json_encode($datos);
         }
     }

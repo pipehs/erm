@@ -49,11 +49,11 @@
            <p><b> Descripci&oacute;n:</b> {{ $descripcion }}.</p>
             <center>
             
-               <div class="col-sm-1">
+               <div style="width: 3%; float:left; padding-top: 10%;">
                   <div style="width: 1px; word-wrap: break-word; text-align: center">Impacto</div>
               </div>
               <div class="col-sm-5">
-              <table style="text-align: center; font-weight: bold;">
+              <table style="text-align: center; font-weight: bold; float: left;">
               <tr>
                 <td width="15%" bgcolor="#CCCCCC">
                   <table height="395px" width="100%" border="1">
@@ -85,11 +85,11 @@
               <td width="15%"></td>
               <td width="85%" bgcolor="#CCCCCC">
                   <table height="50px" width="100%" border="1">
-                      <td width="20%">1<br>Remoto</td>
-                      <td width="20%">2<br>No probable</td>
-                      <td width="20%">3<br>Probable</td>
-                      <td width="20%">4<br>Altamente probable</td>
-                      <td width="20%">5<br>Esperado</td>
+                      <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
+                      <td width="20%" style="vertical-align:top;">2<br>No probable</td>
+                      <td width="20%" style="vertical-align:top;">3<br>Probable</td>
+                      <td width="20%" style="vertical-align:top;">4<br>Altamente probable</td>
+                      <td width="20%" style="vertical-align:top;">5<br>Esperado</td>
                   </table>
               </td>
               </tr>

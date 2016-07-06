@@ -38,7 +38,7 @@
 
       <p>En esta secci&oacute;n podr&aacute; ver los riesgos asociados a alguna encuesta de evaluaci&oacute;n o a alguna organizaci&oacute;n en particular. </p>
       @if (!isset($riesgos))
-            {!!Form::open(['route'=>'heatmap2','method'=>'POST','class'=>'form-horizontal'])!!}
+            {!!Form::open(['route'=>'heatmap2','method'=>'GET','class'=>'form-horizontal'])!!}
 				   	<!--
             <div class="form-group">
                 {!!Form::label('Seleccione tipo',null,['class'=>'col-sm-4 control-label'])!!}

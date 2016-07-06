@@ -1291,16 +1291,16 @@ class IssuesController extends Controller
         $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
         //obtenemos nombre de organización
-        $org = \Ermtool\Organization::where('id',$_POST['organization_id'])->value('name');
+        $org = \Ermtool\Organization::where('id',$_GET['organization_id'])->value('name');
 
-        $org_id = $_POST['organization_id'];
+        $org_id = $_GET['organization_id'];
         
         $issues = array();
 
-        $issues = $this->getIssues($_POST['kind'],$_POST['organization_id'],1);
+        $issues = $this->getIssues($_GET['kind'],$_GET['organization_id'],1);
         //print_r($_POST);
         
-        return view('hallazgos.index',['issues'=>$issues,'kind'=>$_POST['kind'],'organizations'=>$organizations,'org'=>$org,'org_id'=>$org_id]);
+        return view('hallazgos.index',['issues'=>$issues,'kind'=>$_GET['kind'],'organizations'=>$organizations,'org'=>$org,'org_id'=>$org_id]);
     }
 
 

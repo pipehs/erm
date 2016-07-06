@@ -528,7 +528,7 @@ Route::get('controles.get_evaluation2.{id_control}', [
 Route::get('heatmap', [
 	'as' =>'heatmap', 'uses' => 'EvaluacionRiesgosController@listHeatmap']);
 
-Route::post('heatmap.{id}', [
+Route::get('heatmap.{id}', [
 	'as' => 'heatmap2', 'uses' => 'EvaluacionRiesgosController@generarHeatmap'
 ]);
 
@@ -540,8 +540,12 @@ Route::get('matriz_riesgos', [
 
 // Nuevos enlaces para matrices de riesgos divididas: matriz de riesgos de proceso y corporativos
 
-Route::get('genmatrizriesgos.{value}', [
+Route::get('genmatrizriesgos.{value},{org}', [
 	'as' => 'genmatrizriesgos', 'uses' => 'RiesgosController@generarMatriz']);
+
+//ruta para generar matriz de control a través de JSON
+Route::get('genmatriz.{value},{org}', [
+	'as' => 'genmatriz', 'uses' => 'ControlesController@generarMatriz']);
 
 Route::get('reporte_planes', [
 	'as' => 'reporte_planes', 'uses' => 'AuditoriasController@actionPlansReport']);
@@ -663,7 +667,7 @@ Route::post('programas_auditoria.store_test', [
 
 //------ Rutas para trabajar con Excel ------//
 
-Route::get('genexcel.{value}', [
+Route::get('genexcel.{value},{org}', [
 	'as' => 'genexcel', 'uses' => 'ExcelController@generarExcel']);
 
 Route::get('genexcelplan.{org}', [
@@ -687,9 +691,6 @@ Route::get('controles.docs.{id}', [
 //Route::get('genmatrizriesgos.{value}', [
 //	'as' => 'genmatrizriesgos', 'uses' => 'RiesgosController@generarMatriz']);
 
-//ruta para generar matriz de control a través de JSON
-Route::get('genmatriz.{value}', [
-	'as' => 'genmatriz', 'uses' => 'ControlesController@generarMatriz']);
 
 //ruta para generar reporte de planes de acción
 Route::get('genplanes_accion.{org}', [
@@ -852,7 +853,7 @@ Route::get('hallazgos', [
 	'as' => 'hallazgos', 'uses' => 'IssuesController@index']);
 
 //ruta para ver lista de hallazgos segun tipo
-Route::post('hallazgos_lista', [
+Route::get('hallazgos_lista', [
 	'as' => 'hallazgos_lista', 'uses' => 'IssuesController@index2']);
 
 //ruta para crear hallazgos
