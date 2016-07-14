@@ -70,6 +70,31 @@ class ObjetivosController extends Controller
                 else
                     $categoria = \Ermtool\Objective_category::where('id',$objetivo['objective_category_id'])->value('name');
 
+                if ($objetivo['perspective'] == NULL)
+                {
+                    $perspective = "No definida";
+                }
+                else
+                {
+                    switch ($objetivo['perspective']) {
+                        case 1:
+                            $perspective = "Financiera";
+                            break;
+                        case 2:
+                            $perspective = "Procesos";
+                            break;
+                        case 3:
+                            $perspective = "Clientes";
+                            break;
+                        case 4:
+                            $perspective = "Aprendizaje";
+                            break;
+                        default:
+                            # code...
+                            break;
+                    }
+                }
+
                 $objectives[$i] = array('id'=>$objetivo['id'],
                                 'nombre'=>$objetivo['name'],
                                 'descripcion'=>$objetivo['description'],
@@ -77,7 +102,8 @@ class ObjetivosController extends Controller
                                 'fecha_act'=>$fecha_act,
                                 'fecha_exp'=>$fecha_exp,
                                 'categoria'=>$categoria,
-                                'estado'=>$objetivo['status']);
+                                'estado'=>$objetivo['status'],
+                                'perspective' => $perspective);
                 $i += 1;
 
             }
@@ -129,6 +155,7 @@ class ObjetivosController extends Controller
                 'objective_category_id' => $categoria,
                 'organization_id' => $_POST['organization_id'],
                 'status' => 0,
+                'perspective' => $_POST['perspective']
                 ]);
 
             Session::flash('message','Objetivo corporativo agregado correctamente');
@@ -265,11 +292,20 @@ class ObjetivosController extends Controller
             {
                 $categoria = NULL;
             }
+            if ($_POST['perspective'] != "")
+            {
+                $perspective = $_POST['perspective'];
+            }
+            else
+            {
+                $perspective = NULL;
+            }
 
             $objetivo->name = $_POST['name'];
             $objetivo->description = $_POST['description'];
             $objetivo->expiration_date = $_POST['expiration_date'];
             $objetivo->objective_category_id = $categoria;
+            $objetivo->perspective = $perspective;
 
             $objetivo->save();
 

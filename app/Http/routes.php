@@ -874,6 +874,50 @@ Route::get('delete_hallazgo.{id}', [
 Route::put('update_hallazgo.{id}', [
     'as' => 'update_hallazgo', 'uses' => 'IssuesController@update']);
 
+//---- Rutas para gestión estratégica ----//
+Route::get('kpi', [
+	'as' => 'kpi', 'uses' => 'GestionEstrategicaController@kpi']);
+
+Route::get('kpi2', [
+	'as' => 'kpi2', 'uses' => 'GestionEstrategicaController@kpi2']);
+
+Route::get('kpi.create.{id}', [
+	'as' => 'kpi.create', 'uses' => 'GestionEstrategicaController@kpiCreate']);
+
+Route::post('kpi.store', [
+	'as' => 'kpi.store', 'uses' => 'GestionEstrategicaController@kpiStore']);
+
+Route::get('kpi.edit.{id}', [
+	'as' => 'kpi.edit', 'uses' => 'GestionEstrategicaController@kpiEdit']);
+
+Route::put('kpi.update.{id}', [
+	'as' => 'kpi.update', 'uses' => 'GestionEstrategicaController@kpiUpdate']);
+
+Route::get('kpi.evaluate.{id}', [
+	'as' => 'kpi.evaluate', 'uses' => 'GestionEstrategicaController@kpiEvaluate']);
+
+Route::post('kpi.store_eval', [
+	'as' => 'kpi.store_eval', 'uses' => 'GestionEstrategicaController@kpiStoreEvaluate']);
+
+Route::get('kpi.validate.{id}', [
+	'as' => 'kpi.validate', 'uses' => 'GestionEstrategicaController@kpiValidate']);
+
+Route::get('monitor_kpi', [
+	'as' => 'monitor_kpi', 'uses' => 'GestionEstrategicaController@kpiMonitor']);
+
+Route::get('monitor_kpi_2', [
+	'as' => 'monitor_kpi_2', 'uses' => 'GestionEstrategicaController@kpiMonitor2']);
+
+Route::get('getkpi.{org_id}', [
+	'as' => 'getkpi', 'uses' => 'GestionEstrategicaController@getKpi']);
+
+
+Route::get('mapas', [
+	'as' => 'mapas', 'uses' => 'GestionEstrategicaController@mapas']);
+
+Route::get('mapas2', [
+	'as' => 'mapas2', 'uses' => 'GestionEstrategicaController@mapas2']);
+
 //---- Rutas para mantenedor de Planes de acción ----//
 /*
 Route::get('action_plans', [

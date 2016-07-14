@@ -904,7 +904,7 @@ class EvaluacionRiesgosController extends Controller
                     $i += 1;
                 }
             }
-            else if ($_POST['kind'] == 1) //evaluaciones de riesgos de negocio
+            else if ($_GET['kind'] == 1) //evaluaciones de riesgos de negocio
             {
                 //---- consulta multiples join para obtener los objetivos evaluados relacionados a la organización ----// 
                 $evaluations = DB::table('evaluation_risk')
@@ -912,7 +912,7 @@ class EvaluacionRiesgosController extends Controller
                                 ->join('objective_risk','objective_risk.id','=','evaluation_risk.objective_risk_id')
                                 ->join('objectives','objectives.id','=','objective_risk.objective_id')
                                 ->join('organizations','organizations.id','=','objectives.organization_id')
-                                ->where('organizations.id','=',$_POST['organization_id'])
+                                ->where('organizations.id','=',$_GET['organization_id'])
                                 ->where('evaluations.consolidation','=',1)
                                 ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
                                 ->select('evaluation_risk.objective_risk_id as risk_id')
@@ -930,7 +930,7 @@ class EvaluacionRiesgosController extends Controller
                                 ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
                                 ->max('evaluations.updated_at');
 
-                    if ($_POST['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
+                    if ($_GET['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
                     {
                         //obtenemos fecha de actualización de riesgo controlado
                         $updated_at_ctrl = DB::table('evaluation_risk')

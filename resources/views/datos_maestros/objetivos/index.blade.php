@@ -84,11 +84,18 @@
 			@endforeach
 		@endif
 
-		{!!Form::open(['url'=>'objetivos.create','method'=>'GET','class'=>'form-horizontal'])!!}
 		@foreach (Session::get('roles') as $role)
-			@if ($role != 6)	
+			@if ($role != 6)
+			{!!Form::open(['url'=>'objetivos.create','method'=>'GET','class'=>'form-horizontal'])!!}	
 				{!!Form::hidden('nombre_organizacion',$nombre_organizacion )!!}
 				{!!Form::submit('Agregar objetivo', ['class'=>'btn btn-primary'])!!}
+				@if (isset($_GET['organizacion']))
+					{!!Form::hidden('organizacion',$_GET['organizacion'] )!!}
+				@else
+					{!!Form::hidden('organizacion',$organizacion)!!}
+				@endif
+					
+				{!!Form::close()!!}
 			<?php break; ?>
 			@endif
 		@endforeach
@@ -102,6 +109,8 @@
 				<th>Fecha Actualizaci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
 				<th>Fecha Expiraci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
 				<th>Categor&iacute;a<label><input type='text' placeholder='Filtrar' /></label></th>
+				<th>Perspectiva<label><input type='text' placeholder='Filtrar' /></label></th>
+
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
 				<th style="vertical-align:top;">Acci&oacute;n</th>
@@ -119,6 +128,7 @@
 					<td>{{$objetivo['fecha_act']}}</td>
 					<td>{{$objetivo['fecha_exp']}}</td>
 					<td>{{$objetivo['categoria']}}</td>
+					<td>{{$objetivo['perspective']}}</td>
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
 					<td>
@@ -155,14 +165,6 @@
 		<hr>
 
 		<center>
-		
-		@if (isset($_GET['organizacion']))
-			{!!Form::hidden('organizacion',$_GET['organizacion'] )!!}
-		@else
-			{!!Form::hidden('organizacion',$organizacion)!!}
-		@endif
-			
-		{!!Form::close()!!}
 
 		{!! link_to_route('objetivos.index', $title = 'Volver', $parameters = NULL, $attributes = ['class'=>'btn btn-danger']) !!}
 		</center>

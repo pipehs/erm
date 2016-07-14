@@ -14,6 +14,7 @@
 		
      	@foreach (Session::get('roles') as $role)
 			@if ($role == 1 || $role == 6) <!-- ADMIN TIENE ACCESO A TODO -->
+				@include('menu.estrategia')
 				@include('menu.riesgos')
 				@include('menu.controles')
 				@include('menu.auditorias')

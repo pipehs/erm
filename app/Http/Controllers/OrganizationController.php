@@ -66,30 +66,40 @@ class OrganizationController extends Controller
             else
                 $serv_compartidos = "Si";
 
-            //damos formato a fecha creación
-            if ($organizaciones['created_at'] != NULL)
+            if ($organizaciones['mision'] == NULL || $organizaciones['mision'] == "")
             {
-                $fecha_creacion = date_format($organizaciones['created_at'],"d-m-Y");
-                $fecha_creacion .= " a las ".date_format($organizaciones['created_at'],"H:i:s");
+                $mision = "No se ha definido misión de la organización";
             }
             else
-                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+            {
+                $mision = $organizaciones['mision'];
+            }
 
-            //damos formato a fecha de actualización 
-            if ($organizaciones['updated_at'] != NULL)
+            if ($organizaciones['vision'] == NULL || $organizaciones['vision'] == "")
             {
-                $fecha_act = date_format($organizaciones['updated_at'],"d-m-Y");
-                $fecha_act .= " a las ".date_format($organizaciones['updated_at'],"H:i:s");
+                $vision = "No se ha definido visión de la organización";
             }
             else
-                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
+            {
+                $vision = $organizaciones['vision'];
+            }
+
+            if ($organizaciones['target_client'] == NULL || $organizaciones['target_client'] == "")
+            {
+                $target_client = "No se ha definido clientes objetivo";
+            }
+            else
+            {
+                $target_client = $organizaciones['target_client'];
+            }
             
 
             $organization[$i] = array('id'=>$organizaciones['id'],
                                 'nombre'=>$organizaciones['name'],
                                 'descripcion'=>$organizaciones['description'],
-                                'fecha_creacion'=>$fecha_creacion,
-                                'fecha_act'=>$fecha_act,
+                                'target_client'=>$target_client,
+                                'mision'=>$mision,
+                                'vision'=>$vision,
                                 'fecha_exp'=>$fecha_exp,
                                 'serv_compartidos'=>$serv_compartidos,
                                 'estado'=>$organizaciones['status']);
@@ -130,12 +140,30 @@ class OrganizationController extends Controller
                 $organizacion_padre = NULL;
             }
 
+            if ($_POST['mision'] != "")
+                $mision = $_POST['mision'];
+            else
+                $mision = NULL;
+
+            if ($_POST['vision'] != "")
+                $vision = $_POST['vision'];
+            else
+                $vision = NULL;
+
+            if ($_POST['target_client'] != "")
+                $target_client = $_POST['target_client'];
+            else
+                $target_client = NULL;
+
             \Ermtool\Organization::create([
                 'name' => $_POST['name'],
                 'description' => $_POST['description'],
                 'expiration_date' => $_POST['expiration_date'],
                 'shared_services' => $_POST['shared_services'],
                 'organization_id' => $organizacion_padre,
+                'mision' => $mision,
+                'vision' => $vision,
+                'target_client' => $target_client
                 ]);
 
             Session::flash('message','Organizaci&oacute;n creada correctamente');
@@ -227,12 +255,29 @@ class OrganizationController extends Controller
             {
                 $organizacion_padre = NULL;
             }
+            if ($_POST['mision'] != "")
+                $mision = $_POST['mision'];
+            else
+                $mision = NULL;
+
+            if ($_POST['vision'] != "")
+                $vision = $_POST['vision'];
+            else
+                $vision = NULL;
+
+            if ($_POST['target_client'] != "")
+                $target_client = $_POST['target_client'];
+            else
+                $target_client = NULL;
 
             $organization->name = $_POST['name'];
             $organization->description = $_POST['description'];
             $organization->expiration_date = $_POST['expiration_date'];
             $organization->shared_services = $_POST['shared_services'];
             $organization->organization_id = $organizacion_padre;
+            $organization->mision = $mision;
+            $organization->vision = $vision;
+            $organization->target_client = $target_client;
 
             $organization->save();
 

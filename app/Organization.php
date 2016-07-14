@@ -7,7 +7,7 @@ use DB;
 
 class Organization extends Model
 {
-    protected $fillable = ['name','description','expiration_date','shared_services','organization_id','status'];
+    protected $fillable = ['name','description','expiration_date','shared_services','organization_id','status','mision','vision','target_client'];
 
     //eliminamos created_at y updated_at
     //public $timestamps = false;

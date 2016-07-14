@@ -77,9 +77,10 @@
 	<thead>
 	<th style="vertical-align:top;">Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th style="vertical-align:top;" width="20%">Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-	<th style="vertical-align:top;">Fecha Creaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-	<th style="vertical-align:top;">Fecha Actualizado<label><input type="text" placeholder="Filtrar" /></label></th>
-	<th style="vertical-align:top;">Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th style="vertical-align:top;">Misi&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th style="vertical-align:top;">Visi&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th style="vertical-align:top;">Cliente objetivo<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th style="vertical-align:top;">Fecha expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th style="vertical-align:top;">Servicios compartidos<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th style="vertical-align:top;">Organizaciones dependientes<label><input type="text" placeholder="Filtrar" /></label></th>
 
@@ -96,8 +97,9 @@
 		<tr>
 		<td>{{$organization['nombre']}}</td>
 		<td>{{$organization['descripcion']}}</td>
-		<td>{{$organization['fecha_creacion']}}</td>
-		<td>{{$organization['fecha_act']}}
+		<td>{{$organization['mision']}}</td>
+		<td>{{$organization['vision']}}</td>
+		<td>{{$organization['target_client']}}</td>
 		<td>{{$organization['fecha_exp']}}</td>
 		<td>{{$organization['serv_compartidos']}}</td>
 		<td>

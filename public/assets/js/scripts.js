@@ -47,6 +47,35 @@ function bloquear(id,name,kind,type)
 		   	});
 }
 
+//función para validar un KPI
+function validatekpi(id,name)
+{
+	swal({   title: "Atención!",
+		   text: "Esta seguro de validar la última medición del KPI "+name+"?",
+		   type: "warning",   
+		   showCancelButton: true,   
+		   confirmButtonColor: "#31B404",   
+		   confirmButtonText: "Validar",
+		   cancelButtonText: "Cancelar",   
+		   closeOnConfirm: false }, 
+		   function(){
+		   		$.get('kpi.validate.'+id, function (result) {
+		   			swal({   title: "",
+		   			   text: "La medición del KPI "+name+" fue validada con éxito ",
+		   			   type: "success",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Aceptar",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	location.reload();
+		   			   });
+
+		   			});
+		   		 
+		   	});
+}
+
 //función para eliminar datos
 function eliminar(id,name,kind,type)
 {

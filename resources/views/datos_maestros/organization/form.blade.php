@@ -11,6 +11,28 @@
 							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
+
+					<div class="form-group">
+						{!!Form::label('Misi&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::textarea('mision',null,['class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
+						{!!Form::label('Visi&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::textarea('vision',null,['class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
+						{!!Form::label('Cliente objetivo',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::textarea('target_client',null,['class'=>'form-control','rows'=>'2','cols'=>'4'])!!}
+						</div>
+					</div>
+
 					<div id="exp_date" class="form-group">
 						{!!Form::label('Fecha Expiraci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">

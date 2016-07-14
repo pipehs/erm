@@ -22,6 +22,16 @@
 							!!}
 						</div>
 					</div>
+					<div class="form-group">
+						{!!Form::label('Perspectiva',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::select('perspective',["1"=>"Financiera","2"=>"Procesos","3"=>"Clientes","4"=>"Aprendizaje"],
+								 	   null, 
+								 	   ['placeholder' => '- Seleccione una perspectiva -',
+								 	   	'id' => 'el2'])
+							!!}
+						</div>
+					</div>
 					<div id="exp_date" class="form-group">
 						{!!Form::label('Fecha Expiraci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">

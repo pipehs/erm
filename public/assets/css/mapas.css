@@ -1,0 +1,68 @@
+.perspectiva{
+	float:left !important;
+	font-size: 22px;
+	width: 3%;
+	height:620px;
+	padding: 10px;
+	word-wrap:break-word;
+	letter-spacing:500px; 
+	text-align: center;
+	background-color: #FAAC58;
+	border-radius: 5px;
+	margin:5px;
+	padding-top: 150px;
+
+}
+
+.objetivos{
+	float:block !important;
+	width: 95%;
+	padding: 5px;
+	text-align: center;
+	vertical-align: middle;
+	background-color: #FAAC58;
+	border-radius: 5px;
+	margin:5px;
+	letter-spacing:2px; 
+}
+
+.financiera{
+	float:left !important;  
+	height:150px; 
+	width:92%; 
+	background-color:lightblue;
+	border-radius: 25px;
+	font-size: 18px;
+	margin:5px;
+	padding-left:10px;
+	font-weight: bold;
+	border-left: thick solid #CCCCCC;
+}
+.procesos{
+	float:left !important; 
+	height:150px; 
+	width:92%; 
+	background-color:lightblue;
+	border-radius: 25px;
+	font-size: 18px;
+	margin:5px;
+	padding-left:10px;
+	font-weight: bold;
+	border-left: thick solid #CCCCCC;
+}
+
+.objectives {
+     background: #428bca;
+     display: inline-block;
+     padding: 10px;
+     border:4px outset #4444ff;
+     border-radius: 50px;
+/*
+     -webkit-transform: skew(20deg);
+     -moz-transform: skew(20deg);
+     -ms-transform: skew(20deg);
+     -o-transform: skew(20deg);
+     transform: skew(20deg);
+
+     */
+}
