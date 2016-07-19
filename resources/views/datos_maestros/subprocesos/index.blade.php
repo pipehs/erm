@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Procesos')
+@section('title', 'Subprocesos')
 
 @section('content')
 

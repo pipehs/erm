@@ -2,7 +2,7 @@
 
 @extends('master')
 
-@section('title', 'Evaluaci&oacute;n de riesgos')
+@section('title', 'Identificaci&oacute;n de eventos de riesgos')
 
 @section('content')
 

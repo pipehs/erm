@@ -37,7 +37,7 @@ class RiesgosTipoController extends Controller
             //damos formato a fecha expiración
             if ($riesgo['expiration_date'] == NULL OR $riesgo['expiration_date'] == "0000-00-00")
             {
-                $fecha_exp = "Ninguna";
+                $fecha_exp = NULL;
             }
             else 
             {
@@ -50,19 +50,17 @@ class RiesgosTipoController extends Controller
             if ($riesgo['created_at'] != NULL)
             {
                 $fecha_creacion = date_format($riesgo['created_at'],"d-m-Y");
-                $fecha_creacion .= " a las ".date_format($riesgo['created_at'],"H:i:s");
             }
             else
-                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                $fecha_creacion = NULL;
 
             //damos formato a fecha de actualización 
             if ($riesgo['updated_at'] != NULL)
             {
                 $fecha_act = date_format($riesgo['updated_at'],"d-m-Y");
-                $fecha_act .= " a las ".date_format($riesgo['updated_at'],"H:i:s");
             }
             else
-                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
+                $fecha_act = NULL;
 
             //obtenemos categoría de riesgo
             $categoria = \Ermtool\Risk_category::find($riesgo['risk_category_id']);
@@ -86,7 +84,7 @@ class RiesgosTipoController extends Controller
             }
             else
             {
-                $causas = "No se han especificado causas";
+                $causas = NULL;
             }
 
             //obtenemos efectos si es que existen
@@ -108,7 +106,7 @@ class RiesgosTipoController extends Controller
             }
             else
             {
-                $efectos = "No se han especificado efectos";
+                $efectos = NULL;
             }   
 
             $riesgostipo[$i] = array('id'=>$riesgo['id'],
@@ -123,7 +121,14 @@ class RiesgosTipoController extends Controller
                                 'estado'=>$riesgo['status']);
             $i += 1;
         }
-        return view('datos_maestros.riesgos_tipo.index',['riesgos'=>$riesgostipo]); 
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.riesgos_tipo.index',['riesgos'=>$riesgostipo]); 
+        }
+        else
+        {
+            return view('datos_maestros.riesgos_tipo.index',['riesgos'=>$riesgostipo]); 
+        }
     }
 
     /**
@@ -136,8 +141,16 @@ class RiesgosTipoController extends Controller
         $categorias = \Ermtool\Risk_category::where('status',0)->lists('name','id');
         $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
         $efectos = \Ermtool\Effect::where('status',0)->lists('name','id');
-        return view('datos_maestros.riesgos_tipo.create',
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.riesgos_tipo.create',
                     ['categorias'=>$categorias,'causas'=>$causas,'efectos'=>$efectos]);
+        }
+        else
+        {
+           return view('datos_maestros.riesgos_tipo.create',
+                    ['categorias'=>$categorias,'causas'=>$causas,'efectos'=>$efectos]); 
+        }
     }
 
     /**
@@ -224,8 +237,14 @@ class RiesgosTipoController extends Controller
                     }
                 }
             }
-
-            Session::flash('message','Riesgo tipo agregado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Template risk successfully created');
+            }
+            else
+            {
+                Session::flash('message','Riesgo tipo agregado correctamente');
+            }
         });
         return Redirect::to('/riskstype');
 
@@ -271,9 +290,18 @@ class RiesgosTipoController extends Controller
             $effects_selected[$i] = $effect->effect_id;
             $i += 1;
         }
-        return view('datos_maestros.riesgos_tipo.edit',['riesgo'=>$riesgo,
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.riesgos_tipo.edit',['riesgo'=>$riesgo,
                     'categorias'=>$categorias,'causas'=>$causas,'efectos'=>$efectos,
                     'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected]);
+        }
+        else
+        {
+            return view('datos_maestros.riesgos_tipo.edit',['riesgo'=>$riesgo,
+                    'categorias'=>$categorias,'causas'=>$causas,'efectos'=>$efectos,
+                    'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected]);
+        }
     }
 
     /**
@@ -428,8 +456,14 @@ class RiesgosTipoController extends Controller
             $riesgo->risk_category_id = $_POST['risk_category_id'];
 
             $riesgo->save();
-
-            Session::flash('message','Riesgo tipo actualizado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Template risk successfully updated');
+            }
+            else
+            {
+                Session::flash('message','Riesgo tipo actualizado correctamente');
+            }
         });
 
         return Redirect::to('/riskstype');
@@ -445,7 +479,14 @@ class RiesgosTipoController extends Controller
             $riesgo->status = 1;
             $riesgo->save();
 
-            Session::flash('message','Riesgo tipo bloqueado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Template risk successfully blocked');
+            }
+            else
+            {
+                Session::flash('message','Riesgo tipo bloqueado correctamente');
+            }
         });
         return Redirect::to('/riskstype');
     }
@@ -460,7 +501,14 @@ class RiesgosTipoController extends Controller
             $riesgo->status = 0;
             $riesgo->save();
 
-            Session::flash('message','Riesgo tipo desbloqueado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Template risk successfully updated');
+            }
+            else
+            {
+                Session::flash('message','Riesgo tipo desbloqueado correctamente');
+            }
         });
 
         return Redirect::to('/riskstype');

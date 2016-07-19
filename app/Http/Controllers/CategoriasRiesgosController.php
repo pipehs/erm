@@ -49,24 +49,22 @@ class CategoriasRiesgosController extends Controller
             //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
             if ($category['created_at'] == NULL OR $category['created_at'] == "0000-00-00" OR $category['created_at'] == "")
             {
-                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                $fecha_creacion = NULL;
             }
             else
             {
                 $fecha_creacion = date_format($category['created_at'],"d-m-Y");
-                $fecha_creacion .= " a las ".date_format($category['created_at'],"H:i:s");
             }
 
              //damos formato a fecha expiración
             if ($category['expiration_date'] == NULL OR $category['expiration_date'] == "0000-00-00")
             {
-                $fecha_exp = "Ninguna";
+                $fecha_exp = NULL;
             }
             else 
             {
                 $expiration_date = new DateTime($category['expiration_date']);
                 $fecha_exp = date_format($expiration_date, 'd-m-Y');
-                $fecha_exp .= " a las ".date_format($expiration_date,"H:i:s");
             }
 
             $risk_category[$i] = array('id'=>$category['id'],
@@ -78,7 +76,14 @@ class CategoriasRiesgosController extends Controller
             $i += 1;
         }
 
-        return view('datos_maestros.categorias_riesgos.index',['risk_categories'=>$risk_category,'categorias_dependientes'=>$categorias_dependientes]); 
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.categorias_riesgos.index',['risk_categories'=>$risk_category,'categorias_dependientes'=>$categorias_dependientes]);
+        }
+        else
+        {
+            return view('datos_maestros.categorias_riesgos.index',['risk_categories'=>$risk_category,'categorias_dependientes'=>$categorias_dependientes]);
+        } 
     }
 
     /**
@@ -90,7 +95,14 @@ class CategoriasRiesgosController extends Controller
     {
         //Seleccionamos categorías que pueden ser padres
         $categorias = \Ermtool\Risk_category::where('risk_category_id',NULL)->where('status',0)->lists('name','id');
-        return view('datos_maestros.categorias_riesgos.create',['categorias'=>$categorias]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.categorias_riesgos.create',['categorias'=>$categorias]);
+        }
+        else
+        {
+            return view('datos_maestros.categorias_riesgos.create',['categorias'=>$categorias]);
+        }
     }
 
     /**
@@ -120,7 +132,14 @@ class CategoriasRiesgosController extends Controller
                 'risk_category_id' => $risk_category_id,
                 ]);
 
-                Session::flash('message','Categor&iacute;a agregada correctamente');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Risk category successfully created');
+                }
+                else
+                {
+                    Session::flash('message','Categor&iacute;a agregada correctamente');
+                }
         });
 
             return Redirect::to('/categorias_risks');
@@ -153,8 +172,17 @@ class CategoriasRiesgosController extends Controller
                                             ->where('id','<>',$id)
                                             ->lists('name','id');
 
-        return view('datos_maestros.categorias_riesgos.edit',['risk_category'=>$risk_category,
-            'categorias'=>$categorias]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.categorias_riesgos.edit',['risk_category'=>$risk_category,
+            'categorias'=>$categorias]); 
+        }
+        else
+        {
+            return view('datos_maestros.categorias_riesgos.edit',['risk_category'=>$risk_category,
+            'categorias'=>$categorias]); 
+        }
+            
     }
 
     /**
@@ -189,8 +217,14 @@ class CategoriasRiesgosController extends Controller
             $risk_category->risk_category_id = $risk_category_id;
 
             $risk_category->save();
-
-            Session::flash('message','Categor&iacute;a de riesgo actualizada correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Risk category succcessfully updated');
+            }
+            else
+            {
+                Session::flash('message','Categor&iacute;a de riesgo actualizada correctamente');
+            }
         });
 
         return Redirect::to('/categorias_risks');
@@ -206,7 +240,14 @@ class CategoriasRiesgosController extends Controller
             $risk_category->status = 1;
             $risk_category->save();
 
-            Session::flash('message','Categor&iacute;a de riesgo bloqueada correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Risk category successfully blocked');
+            }
+            else
+            {
+                Session::flash('message','Categor&iacute;a de riesgo bloqueada correctamente');
+            }
         });
         return Redirect::to('/categorias_riesgos');
     }
@@ -220,8 +261,14 @@ class CategoriasRiesgosController extends Controller
             $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
             $risk_category->status = 0;
             $risk_category->save();
-
-            Session::flash('message','Categor&iacute;a de riesgo desbloqueada correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Risk category successfully unblocked');
+            }
+            else
+            {
+                Session::flash('message','Categor&iacute;a de riesgo desbloqueada correctamente');
+            }
         });
         return Redirect::to('/categorias_riesgos');
     }

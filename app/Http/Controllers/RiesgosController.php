@@ -31,7 +31,7 @@ class RiesgosController extends Controller
             //damos formato a tipo de riesgo
             if ($riesgo['type'] == 0)
             {
-                $tipo = "De Proceso";
+                $tipo = 0;
                 //primero obtenemos subprocesos relacionados
                 //$subprocesses = \Ermtool\Risk::find($riesgo['id'])->subprocesses;
                 $subprocesses = DB::table('subprocesses')
@@ -54,7 +54,7 @@ class RiesgosController extends Controller
             }
             else if ($riesgo['type'] == 1)
             {
-                $tipo = "De Negocio";
+                $tipo = 1;
                 //primero obtenemos objetivos relacionados
                 //$objectives = \Ermtool\Risk::find($riesgo['id'])->objectives;
                 $objectives = DB::table('objectives')
@@ -81,32 +81,29 @@ class RiesgosController extends Controller
             //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
             if ($riesgo['created_at'] == NULL OR $riesgo['created_at'] == "0000-00-00" OR $riesgo['created_at'] == "")
             {
-                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                $fecha_creacion = NULL;
             }
 
             else
             {
                 $fecha_creacion = date_format($riesgo['created_at'],"d-m-Y");
-                $fecha_creacion .= " a las ".date_format($riesgo['created_at'],"H:i:s");
             }
 
             //damos formato a fecha expiración
             if ($riesgo['expiration_date'] == NULL OR $riesgo['expiration_date'] == "0000-00-00")
             {
-                $fecha_exp = "Ninguna";
+                $fecha_exp = NULL;
             }
             else
             { 
                 $expiration_date = new DateTime($riesgo['expiration_date']);
                 $fecha_exp = date_format($expiration_date, 'd-m-Y');
-                $fecha_exp .= " a las ".date_format($expiration_date,"H:i:s");
             }
 
             //damos formato a fecha de actualización 
             if ($riesgo['updated_at'] != NULL)
             {
                 $fecha_act = date_format($riesgo['updated_at'],"d-m-Y");
-                $fecha_act .= " a las ".date_format($riesgo['updated_at'],"H:i:s");
             }
 
             //obtenemos nombre de categoría
@@ -131,7 +128,7 @@ class RiesgosController extends Controller
             }
             else
             {
-                $causas = "No se han especificado causas";
+                $causas = NULL;
             }
 
             $stakeholder = DB::table('stakeholders')
@@ -141,7 +138,14 @@ class RiesgosController extends Controller
 
             if (!$stakeholder)
             {
-                $stakeholder = (object) array('name'=>'No','surnames'=>'especificado');
+                if (Session::get('languaje') == 'en')
+                {
+                    $stakeholder = (object) array('name'=>'No','surnames'=>'specified');
+                }
+                else
+                {
+                    $stakeholder = (object) array('name'=>'No','surnames'=>'especificado');
+                }
             }
 
             //obtenemos efectos si es que existen
@@ -163,7 +167,7 @@ class RiesgosController extends Controller
             }
             else
             {
-                $efectos = "No se han especificado efectos";
+                $efectos = NULL;
             }
 
             $riesgos[$i] = array('id'=>$riesgo['id'],
@@ -181,7 +185,14 @@ class RiesgosController extends Controller
 
         }
 
-        return view('riesgos.index',['riesgos'=>$riesgos,'relacionados'=>$relacionados]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.riesgos.index',['riesgos'=>$riesgos,'relacionados'=>$relacionados]);
+        }
+        else
+        {
+            return view('riesgos.index',['riesgos'=>$riesgos,'relacionados'=>$relacionados]);
+        }
         //return json_encode(['riesgos'=>$riesgos,'relacionados'=>$relacionados]);
         //print_r($relacionados);
     }
@@ -231,10 +242,19 @@ class RiesgosController extends Controller
                             ->select('objectives.id as id',
                                 DB::raw('CONCAT(objectives.name, " - ", organizations.name) AS name'))
                             ->lists('name','id');
-            
-            return view('riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                    'efectos'=>$efectos,'objetivos'=>$objetivos,'riesgos_tipo'=>$riesgos_tipo,
-                    'stakeholders'=>$stakeholders]);
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
+                        'efectos'=>$efectos,'objetivos'=>$objetivos,'riesgos_tipo'=>$riesgos_tipo,
+                        'stakeholders'=>$stakeholders]);
+            }
+            else
+            {
+                return view('riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
+                        'efectos'=>$efectos,'objetivos'=>$objetivos,'riesgos_tipo'=>$riesgos_tipo,
+                        'stakeholders'=>$stakeholders]);
+            }
         }
 
         
@@ -368,7 +388,14 @@ class RiesgosController extends Controller
                     }       
                 }
 
-                Session::flash('message','Riesgo agregado correctamente');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Risk successfully created');
+                }
+                else
+                {
+                    Session::flash('message','Riesgo agregado correctamente');
+                }
         });
 
         return Redirect::to('/riesgos');
@@ -442,9 +469,19 @@ class RiesgosController extends Controller
         ->lists('full_name', 'id');
 
         $risk = \Ermtool\Risk::find($id);
-        return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
+
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
                                     'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders,
                                     'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected]);
+        }
+        else
+        {
+            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
+                                    'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders,
+                                    'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected]);
+        }
     }
 
 
@@ -468,8 +505,9 @@ class RiesgosController extends Controller
                 //vemos si se agrego alguna causa nueva
                 if (isset($_POST['causa_nueva']))
                 {
+
                     $new_causa = \Ermtool\Cause::create([
-                        'name'=>$_POST['causa_nueva']
+                        'name'=>$_POST['causa']
                     ]);
 
                     //guardamos en cause_risk
@@ -506,8 +544,9 @@ class RiesgosController extends Controller
                 //vemos si se agrego algún efecto nuevo
                 if (isset($_POST['efecto_nuevo']))
                 {
+
                     $new_effect = \Ermtool\Effect::create([
-                        'name'=>$_POST['efecto_nuevo']
+                        'name'=>$_POST['efecto']
                         ]);
 
                      //guardamos en cause_risk
@@ -604,6 +643,8 @@ class RiesgosController extends Controller
                 {
                     $stake = $_POST['stakeholder_id'];
                 }
+                //eliminamos salto de linea del final de cada una de las textarea (en este caso solo descripción)
+
                 $riesgo->name = $_POST['name'];
                 $riesgo->description = $_POST['description'];
                 $riesgo->expiration_date = $_POST['expiration_date'];
@@ -614,7 +655,14 @@ class RiesgosController extends Controller
 
                 $riesgo->save();
 
-                Session::flash('message','Riesgo actualizado correctamente');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Risk successfully updated');
+                }
+                else
+                {
+                    Session::flash('message','Riesgo actualizado correctamente');
+                }
         });
 
         return Redirect::to('/riesgos');
@@ -624,7 +672,14 @@ class RiesgosController extends Controller
     public function matrices()
     {
         $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-        return view('reportes.matriz_riesgos',['organizations'=>$organizations]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.reportes.matriz_riesgos',['organizations'=>$organizations]);
+        }
+        else
+        {
+            return view('reportes.matriz_riesgos',['organizations'=>$organizations]);  
+        }
     }
 
     public function generarMatriz($value,$org)
@@ -640,8 +695,16 @@ class RiesgosController extends Controller
         $i = 0; //contador de controles/subprocesos o controles/objetivos
         $datos = array();
 
-        $proba_string = ['Muy poco probable','Poco probable','Intermedio','Probable','Muy probable'];
-        $impact_string = ['Muy poco impacto','Poco impacto','Intermedio','Alto impacto','Muy alto impacto'];
+        if (Session::get('languaje') == 'en')
+        {
+            $proba_string = ['Very low','Low','Medium','High','Very high'];
+            $impact_string = ['Very low','Low','Medium','High','Very high'];
+        }
+        else
+        {
+            $proba_string = ['Muy poco probable','Poco probable','Intermedio','Probable','Muy probable'];
+            $impact_string = ['Muy poco impacto','Poco impacto','Intermedio','Alto impacto','Muy alto impacto'];
+        }
 
         if ($value == 0) //Se generará la matriz de controles de procesos
         {
@@ -685,9 +748,18 @@ class RiesgosController extends Controller
                 $controles = NULL;
                 $causas = NULL;
                 $efectos = NULL;
-                $probabilidad = "No tiene evaluación";
-                $impacto = "No tiene evaluación";
-                $score = "No tiene evaluación";
+                if (Session::get('languaje') == 'en')
+                {
+                    $probabilidad = "No evaluation";
+                    $impacto = "No evaluation";
+                    $score = "No evaluation";
+                }
+                else
+                {
+                    $probabilidad = "No tiene evaluación";
+                    $impacto = "No tiene evaluación";
+                    $score = "No tiene evaluación";
+                }
                 // -- seteamos datos --//
                 //seteamos causa y efecto
 
@@ -711,7 +783,15 @@ class RiesgosController extends Controller
                 }
                 else
                 {
-                    $causas = "No tiene causas definidas";
+                    //se realizarán acá los textos (y no en la vista) para el caso en que se esté exportando a excel
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $causas = "No defined cause";
+                    }
+                    else
+                    {
+                        $causas = "No tiene causas definidas";
+                    }
                 }
 
                 //obtenemos efectos
@@ -735,7 +815,14 @@ class RiesgosController extends Controller
                 }
                 else
                 {
-                    $efectos = "No tiene efectos definidos";
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $efectos = "No defined effects";
+                    }
+                    else
+                    {
+                        $efectos = "No tiene efectos definidos";
+                    }
                 }
 
                 if ($value == 0) //controles y eval para riesgos de proceso
@@ -808,7 +895,14 @@ class RiesgosController extends Controller
                 //seteamos controles
                 if ($controls == NULL)
                 {
-                    $controles = "No se han especificado controles";
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $controles = "No controls specified";
+                    }
+                    else
+                    {
+                        $controles = "No se han especificado controles";
+                    }
                 }
                 else
                 {
@@ -828,7 +922,14 @@ class RiesgosController extends Controller
                 //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
                 if ($risk->created_at == NULL OR $risk->created_at == "0000-00-00" OR $risk->created_at == "")
                 {
-                    $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $fecha_creacion = "Failed to register creation date";
+                    }
+                    else
+                    {
+                        $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                    }
                 }
 
                 else
@@ -846,7 +947,14 @@ class RiesgosController extends Controller
                 //damos formato a fecha expiración
                 if ($risk->expiration_date == NULL OR $risk->expiration_date == "0000-00-00")
                 {
-                    $expiration_date = "Ninguna";
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $expiration_date = "None";
+                    }
+                    else
+                    {
+                        $expiration_date = "Ninguna";
+                    }
                 }
                 else
                 { 
@@ -857,7 +965,14 @@ class RiesgosController extends Controller
 
                 if ($risk->expected_loss == 0 || $risk->expected_loss == NULL)
                 {
-                    $expected_loss = "No se ha asignado p&eacute;rdida esperada";
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $expected_loss = "Not assigned expected loss";
+                    }
+                    else
+                    {
+                        $expected_loss = "No se ha asignado p&eacute;rdida esperada";
+                    }
                 }
                 else
                 {
@@ -867,41 +982,83 @@ class RiesgosController extends Controller
                 //Seteamos datos
                 if ($value == 0) //guardamos datos de riesgos de procesos
                 {
-                    $datos[$i] = [//'id' => $control->id,
-                                'Proceso' => $risk->process_name,
-                                'Subproceso' => $risk->subprocess_name,
-                                'Riesgo' => $risk->name,
-                                'Descripción' => $risk->description,
-                                'Categoría' => $risk->risk_category_name,
-                                'Causas' => $causas,
-                                'Efectos' => $efectos,
-                                'Pérdida_esperada' => $expected_loss,
-                                'Probabilidad' => $probabilidad,
-                                'Impacto' => $impacto,
-                                'Score' => $score,
-                                'Fecha_identificación' => $fecha_creacion,
-                                'Fecha_expiración' => $expiration_date,
-                                'Controles' => $controles,];
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $datos[$i] = [//'id' => $control->id,
+                                    'Process' => $risk->process_name,
+                                    'Subprocess' => $risk->subprocess_name,
+                                    'Risk' => $risk->name,
+                                    'Description' => $risk->description,
+                                    'Category' => $risk->risk_category_name,
+                                    'Causes' => $causas,
+                                    'Effects' => $efectos,
+                                    'Expected_loss' => $expected_loss,
+                                    'Probability' => $probabilidad,
+                                    'Impact' => $impacto,
+                                    'Score' => $score,
+                                    'Identification_date' => $fecha_creacion,
+                                    'Expiration_date' => $expiration_date,
+                                    'Controls' => $controles,];
+                    }
+                    else
+                    {
+                        $datos[$i] = [//'id' => $control->id,
+                                    'Proceso' => $risk->process_name,
+                                    'Subproceso' => $risk->subprocess_name,
+                                    'Riesgo' => $risk->name,
+                                    'Descripción' => $risk->description,
+                                    'Categoría' => $risk->risk_category_name,
+                                    'Causas' => $causas,
+                                    'Efectos' => $efectos,
+                                    'Pérdida_esperada' => $expected_loss,
+                                    'Probabilidad' => $probabilidad,
+                                    'Impacto' => $impacto,
+                                    'Score' => $score,
+                                    'Fecha_identificación' => $fecha_creacion,
+                                    'Fecha_expiración' => $expiration_date,
+                                    'Controles' => $controles,];
+                    }
                     $i += 1;
                 }
 
                 else if ($value == 1) //guardamos datos de riesgos de negocio
                 {
-                    $datos[$i] = [//'id' => $control->id,
-                                'Organización' => $risk->organization_name,
-                                'Objetivo' => $risk->objective_name,
-                                'Riesgo' => $risk->name,
-                                'Descripción' => $risk->description,
-                                'Categoría' => $risk->risk_category_name,
-                                'Causas' => $causas,
-                                'Efectos' => $efectos,              
-                                'Pérdida_esperada' => $risk->expected_loss,
-                                'Probabilidad' => $probabilidad,
-                                'Impacto' => $impacto,
-                                'Score' => $score,
-                                'Fecha_identificación' => $fecha_creacion,
-                                'Fecha_expiración' => $expiration_date,
-                                'Controles' => $controles];
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $datos[$i] = [//'id' => $control->id,
+                                    'Organization' => $risk->organization_name,
+                                    'Objective' => $risk->objective_name,
+                                    'Risk' => $risk->name,
+                                    'Description' => $risk->description,
+                                    'Category' => $risk->risk_category_name,
+                                    'Causes' => $causas,
+                                    'Effects' => $efectos,              
+                                    'Expected_loss' => $risk->expected_loss,
+                                    'Probability' => $probabilidad,
+                                    'Impact' => $impacto,
+                                    'Score' => $score,
+                                    'Identification_date' => $fecha_creacion,
+                                    'Expiration_date' => $expiration_date,
+                                    'Controls' => $controles];
+                    }
+                    else
+                    {
+                        $datos[$i] = [//'id' => $control->id,
+                                    'Organización' => $risk->organization_name,
+                                    'Objetivo' => $risk->objective_name,
+                                    'Riesgo' => $risk->name,
+                                    'Descripción' => $risk->description,
+                                    'Categoría' => $risk->risk_category_name,
+                                    'Causas' => $causas,
+                                    'Efectos' => $efectos,              
+                                    'Pérdida_esperada' => $risk->expected_loss,
+                                    'Probabilidad' => $probabilidad,
+                                    'Impacto' => $impacto,
+                                    'Score' => $score,
+                                    'Fecha_identificación' => $fecha_creacion,
+                                    'Fecha_expiración' => $expiration_date,
+                                    'Controles' => $controles];
+                    }
                     $i += 1;
                 }
         }
@@ -912,7 +1069,14 @@ class RiesgosController extends Controller
         }
         else
         {
-            return view('reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org]);
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org]);
+            }
+            else
+            {
+                return view('reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org]);
+            }
             //return json_encode($datos);
         }
     }

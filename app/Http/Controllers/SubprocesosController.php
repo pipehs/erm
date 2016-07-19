@@ -64,7 +64,7 @@ class SubprocesosController extends Controller
             //damos formato a fecha expiración
             if ($subprocess['expiration_date'] == NULL OR $subprocess['expiration_date'] == "0000-00-00")
             {
-                $fecha_exp = "Ninguna";
+                $fecha_exp = NULL;
             }
             else 
             {
@@ -80,7 +80,7 @@ class SubprocesosController extends Controller
                 $fecha_creacion .= " a las ".date_format($subprocess['created_at'],"H:i:s");
             }
             else
-                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                $fecha_creacion = NULL;
 
             //damos formato a fecha de actualización 
             if ($subprocess['updated_at'] != NULL)
@@ -89,7 +89,7 @@ class SubprocesosController extends Controller
                 $fecha_act .= " a las ".date_format($subprocess['updated_at'],"H:i:s");
             }
             else
-                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
+                $fecha_act = NULL;
 
             //$proceso = \Ermtool\Subprocess::find($subprocess['id'])->processes; No me funciono
             $proceso = \Ermtool\Process::find($subprocess['process_id']);
@@ -105,7 +105,15 @@ class SubprocesosController extends Controller
             $i += 1;
         }
 
-        return view('datos_maestros.subprocesos.index',['subprocesos'=>$subproceso,'sub_dependientes'=>$sub_dependientes,'organizaciones'=>$organizaciones]);    
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.subprocesos.index',['subprocesos'=>$subproceso,'sub_dependientes'=>$sub_dependientes,'organizaciones'=>$organizaciones]);
+        }
+        else
+        {
+            return view('datos_maestros.subprocesos.index',['subprocesos'=>$subproceso,'sub_dependientes'=>$sub_dependientes,'organizaciones'=>$organizaciones]);
+        }
+
     }
 
     /**
@@ -122,7 +130,14 @@ class SubprocesosController extends Controller
 
         $organizaciones = \Ermtool\Organization::where('status',0)->lists('name','id');
 
-        return view('datos_maestros.subprocesos.create',['procesos'=>$procesos,'subprocesos'=>$subprocesos,'organizaciones'=>$organizaciones]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.subprocesos.create',['procesos'=>$procesos,'subprocesos'=>$subprocesos,'organizaciones'=>$organizaciones]);
+        }
+        else
+        {
+            return view('datos_maestros.subprocesos.create',['procesos'=>$procesos,'subprocesos'=>$subprocesos,'organizaciones'=>$organizaciones]);
+        }
     }
     /**
      * Store a newly created resource in storage.
@@ -162,7 +177,14 @@ class SubprocesosController extends Controller
                     $organization->subprocesses()->attach($subprocess);
                 }
 
-                Session::flash('message','Subproceso agregado correctamente');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Process successfully created');
+                }
+                else
+                {
+                    Session::flash('message','Subproceso agregado correctamente');
+                }
         });
             return Redirect::to('/subprocesos');
     }
@@ -194,8 +216,14 @@ class SubprocesosController extends Controller
 
         $organizaciones = \Ermtool\Organization::where('status',0)->lists('name','id');
 
-        return view('datos_maestros.subprocesos.edit',['procesos'=>$procesos,'subprocesos'=>$subprocesos,
-            'subproceso'=>$subproceso,'organizaciones'=>$organizaciones]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.subprocesos.edit',['procesos'=>$procesos,'subprocesos'=>$subprocesos,'subproceso'=>$subproceso,'organizaciones'=>$organizaciones]);
+        }
+        else
+        {
+            return view('datos_maestros.subprocesos.edit',['procesos'=>$procesos,'subprocesos'=>$subprocesos,'subproceso'=>$subproceso,'organizaciones'=>$organizaciones]);
+        }
     }
 
     /**
@@ -247,8 +275,14 @@ class SubprocesosController extends Controller
             }
 
             $subproceso->save();
-
-            Session::flash('message','Subproceso actualizado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Subprocess successfully updated');
+            }
+            else
+            {
+                Session::flash('message','Subproceso actualizado correctamente');
+            }
         });
 
         return Redirect::to('/subprocesos');
@@ -263,8 +297,14 @@ class SubprocesosController extends Controller
             $subproceso = \Ermtool\Subprocess::find($GLOBALS['id1']);
             $subproceso->status = 1;
             $subproceso->save();
-
-            Session::flash('message','Subproceso bloqueado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Subprocess successfully blocked');
+            }
+            else
+            {
+                Session::flash('message','Subproceso bloqueado correctamente');
+            }
         });
         return Redirect::to('/subprocesos');
     }
@@ -278,8 +318,14 @@ class SubprocesosController extends Controller
             $subproceso = \Ermtool\Subprocess::find($GLOBALS['id1']);
             $subproceso->status = 0;
             $subproceso->save();
-
-            Session::flash('message','Subproceso desbloqueado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Subprocess successfully unblocked');
+            }
+            else
+            {
+                Session::flash('message','Subproceso desbloqueado correctamente');
+            }
         });
         return Redirect::to('/subprocesos');
     }

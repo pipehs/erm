@@ -39,7 +39,7 @@
 
 			{!!Form::open(['route'=>'evaluacion.enviarCorreo','method'=>'POST','class'=>'form-horizontal'])!!}
 
-				{!!Form::label('Seleccione stakeholders',null,['class'=>'col-sm-4 control-label'])!!}
+				{!!Form::label('Seleccione usuarios',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="row form-group">
 						<div class="col-sm-6">
 							{!!Form::select('stakeholder_id[]',$stakeholders,

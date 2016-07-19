@@ -37,19 +37,17 @@ class EfectosController extends Controller
             if ($efecto['created_at'] != NULL)
             {
                 $fecha_creacion = date_format($efecto['created_at'],"d-m-Y");
-                $fecha_creacion .= " a las ".date_format($efecto['created_at'],"H:i:s");
             }
             else
-                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                $fecha_creacion = NULL;
 
             //damos formato a fecha de actualización
             if ($efecto['updated_at'] != NULL)
             {
                 $fecha_act = date_format($efecto['updated_at'],"d-m-Y");
-                $fecha_act .= " a las ".date_format($efecto['updated_at'],"H:i:s");
             }
             else
-                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
+                $fecha_act = NULL;
 
             $efectos[$i] = array('id'=>$efecto['id'],
                                 'nombre'=>$efecto['name'],
@@ -59,7 +57,14 @@ class EfectosController extends Controller
                                 'estado'=>$efecto['status']);
             $i += 1;
         }
-        return view('datos_maestros.efectos.index',['efectos'=>$efectos]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.efectos.index',['efectos'=>$efectos]);
+        }
+        else
+        {
+            return view('datos_maestros.efectos.index',['efectos'=>$efectos]);
+        }
     }
 
     /**
@@ -69,7 +74,14 @@ class EfectosController extends Controller
      */
     public function create()
     {
-        return view('datos_maestros.efectos.create');
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.efectos.create');
+        }
+        else
+        {
+            return view('datos_maestros.efectos.create');
+        }
     }
 
     /**
@@ -85,7 +97,14 @@ class EfectosController extends Controller
             'description' => $request['description'],
             ]);
 
-            Session::flash('message','Efecto agregado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Effect successfully created');
+            }
+            else
+            {
+                Session::flash('message','Efecto agregado correctamente');
+            }
 
             return Redirect::to('/efectos');
     }
@@ -100,7 +119,14 @@ class EfectosController extends Controller
     {
         $efecto = \Ermtool\Effect::find($id);
 
-        return view('datos_maestros.efectos.edit',['efecto'=>$efecto]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.efectos.edit',['efecto'=>$efecto]);
+        }
+        else
+        {
+            return view('datos_maestros.efectos.edit',['efecto'=>$efecto]);
+        }
     }
 
     /**
@@ -119,7 +145,14 @@ class EfectosController extends Controller
 
         $efecto->save();
 
-        Session::flash('message','Efecto actualizado correctamente');
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Effect successfully updated');
+        }
+        else
+        {
+            Session::flash('message','Efecto actualizado correctamente');
+        }
 
         return Redirect::to('/efectos');
     }
@@ -130,7 +163,14 @@ class EfectosController extends Controller
         $efecto->status = 1;
         $efecto->save();
 
-        Session::flash('message','Efecto bloqueado correctamente');
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Effect successfully blocked');
+        }
+        else
+        {
+            Session::flash('message','Efecto bloqueado correctamente');
+        }
 
         return Redirect::to('/efectos');
     }
@@ -141,7 +181,14 @@ class EfectosController extends Controller
         $efecto->status = 0;
         $efecto->save();
 
-        Session::flash('message','Efecto desbloqueado correctamente');
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Effect successfully unblocked');
+        }
+        else
+        {
+            Session::flash('message','Efecto desbloqueado correctamente');
+        }
 
         return Redirect::to('/efectos');
     }

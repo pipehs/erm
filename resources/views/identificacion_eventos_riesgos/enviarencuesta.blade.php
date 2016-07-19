@@ -81,7 +81,7 @@ En esta secci&oacute;n podr&aacute; enviar encuestas previamente creadas.
 	<div class="col-sm-4">
 		{!!Form::select('destinatarios', 
 							array('' => '- Seleccione una opci&oacute;n -',
-								  '0' => 'Seleccionar stakeholders manualmente',
+								  '0' => 'Seleccionar usuarios manualmente',
 							 	  '1' => 'Enviar por organizaci&oacute;n',
 							 	  '2' => 'Enviar por tipo de stakeholder'),
 							 	   null,

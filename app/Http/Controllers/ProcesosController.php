@@ -75,7 +75,7 @@ class ProcesosController extends Controller
             //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
             if ($process['created_at'] == NULL OR $process['created_at'] == "0000-00-00" OR $process['created_at'] == "")
             {
-                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                $fecha_creacion = NULL;
             }
 
             else
@@ -87,7 +87,7 @@ class ProcesosController extends Controller
             //damos formato a fecha expiración
             if ($process['expiration_date'] == NULL OR $process['expiration_date'] == "0000-00-00")
             {
-                $fecha_exp = "Ninguna";
+                $fecha_exp = NULL;
             }
             else
             { 
@@ -104,7 +104,7 @@ class ProcesosController extends Controller
             }
 
             else
-                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
+                $fecha_act = NULL;
 
             //damos formato si depende de otro proceso
             if ($process['process_id'] == NULL)
@@ -127,8 +127,15 @@ class ProcesosController extends Controller
             $i += 1;
         }
 
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.procesos.index',['procesos'=>$proceso,'subprocesos'=>$subprocesos,'organizaciones'=>$organizaciones]);
+        }
+        else
+        {
+            return view('datos_maestros.procesos.index',['procesos'=>$proceso,'subprocesos'=>$subprocesos,'organizaciones'=>$organizaciones]);
+        }
 
-        return view('datos_maestros.procesos.index',['procesos'=>$proceso,'subprocesos'=>$subprocesos,'organizaciones'=>$organizaciones]);    
     }
 
     /**
@@ -141,7 +148,11 @@ class ProcesosController extends Controller
         //Seleccionamos procesos que pueden ser padres
         $procesos = \Ermtool\Process::where('process_id',NULL)->lists('name','id');
 
-        return view('datos_maestros.procesos.create',['procesos'=>$procesos]);
+        if (Session::get('languaje') == 'en') {
+            return view('en.datos_maestros.procesos.create',['procesos'=>$procesos]);
+        } else {
+            return view('datos_maestros.procesos.create',['procesos'=>$procesos]);
+        }
     }
 
     /**
@@ -169,8 +180,14 @@ class ProcesosController extends Controller
                 'expiration_date' => $_POST['expiration_date'],
                 'process_id' => $process_id,
                 ]);
-
-            Session::flash('message','Proceso agregado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Process successfully created');
+            }
+            else
+            {
+                Session::flash('message','Proceso agregado correctamente');
+            }
         });
 
         return Redirect::to('/procesos');
@@ -197,7 +214,16 @@ class ProcesosController extends Controller
     {
         $proceso = \Ermtool\Process::find($id);
         $combobox = \Ermtool\Process::where('id','<>',$id)->lists('name','id');
-        return view('datos_maestros.procesos.edit',['proceso'=>$proceso,'procesos'=>$combobox]);
+
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.procesos.edit',['proceso'=>$proceso,'procesos'=>$combobox]);
+        }
+        else
+        {
+            return view('datos_maestros.procesos.edit',['proceso'=>$proceso,'procesos'=>$combobox]);
+        }
+        
     }
 
     public function bloquear($id)
@@ -210,7 +236,15 @@ class ProcesosController extends Controller
             $proceso->status = 1;
             $proceso->save();
 
-            Session::flash('message','Proceso bloqueado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Process successfully blocked');
+            }
+            else
+            {
+                Session::flash('message','Proceso bloqueado correctamente');
+            }
+            
         });
 
         return Redirect::to('/procesos');
@@ -226,7 +260,14 @@ class ProcesosController extends Controller
             $proceso->status = 0;
             $proceso->save();
 
-            Session::flash('message','Proceso desbloqueado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Process successfully unblocked');
+            }
+            else
+            {
+                Session::flash('message','Proceso desbloqueado correctamente');
+            }
         });
         return Redirect::to('/procesos');
     }
@@ -263,8 +304,15 @@ class ProcesosController extends Controller
             $proceso->process_id = $process_id;
 
             $proceso->save();
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Process successfully updated');
+            }
+            else
+            {
+                Session::flash('message','Proceso actualizado correctamente');
+            }
 
-            Session::flash('message','Proceso actualizado correctamente');
         });
         return Redirect::to('/procesos');
     }

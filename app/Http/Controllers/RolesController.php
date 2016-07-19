@@ -44,20 +44,18 @@ class RolesController extends Controller
             if ($rol['created_at'] != NULL)
             {
                 $fecha_creacion = date_format($rol['created_at'],"d-m-Y");
-                $fecha_creacion .= " a las ".date_format($rol['created_at'],"H:i:s");
             }
             else
-                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                $fecha_creacion = NULL;
 
             //damos formato a fecha de actualización 
             if ($rol['updated_at'] != NULL)
             {
                 $fecha_act = date_format($rol['updated_at'],"d-m-Y");
-                $fecha_act .= " a las ".date_format($rol['updated_at'],"H:i:s");
             }
 
             else
-                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
+                $fecha_act = NULL;
 
             $roles2[$i] = array('id'=>$rol['id'],
                                 'nombre'=>$rol['name'],
@@ -67,7 +65,14 @@ class RolesController extends Controller
                                 'cantidad' => $cont);
             $i += 1;
         }
-        return view('datos_maestros.roles.index',['roles'=>$roles2]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.roles.index',['roles'=>$roles2]);
+        }
+        else
+        {
+            return view('datos_maestros.roles.index',['roles'=>$roles2]);
+        }
     }
 
     /**
@@ -77,7 +82,14 @@ class RolesController extends Controller
      */
     public function create()
     {
-        return view('datos_maestros.roles.create');
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.roles.create');
+        }
+        else
+        {
+            return view('datos_maestros.roles.create');
+        }
     }
 
     /**
@@ -93,7 +105,14 @@ class RolesController extends Controller
             'status' => 0
             ]);
 
-            Session::flash('message','Rol agregado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Role successfully created');
+            }
+            else
+            {
+                Session::flash('message','Rol agregado correctamente');
+            }
 
             return Redirect::to('/roles');
     }
@@ -118,7 +137,14 @@ class RolesController extends Controller
     public function edit($id)
     {
         $rol = \Ermtool\Role::find($id);
-        return view('datos_maestros.roles.edit',['rol' => $rol]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.roles.edit',['rol' => $rol]);
+        }
+        else
+        {
+            return view('datos_maestros.roles.edit',['rol' => $rol]);
+        }
     }
 
     /**
@@ -135,8 +161,14 @@ class RolesController extends Controller
             $role->name = $request['name'];
     
             $role->save();
-
-            Session::flash('message','Rol actualizado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Role successfully updated');
+            }
+            else
+            {
+                Session::flash('message','Rol actualizado correctamente');
+            }
 
             return Redirect::to('/roles');
     }
@@ -147,7 +179,14 @@ class RolesController extends Controller
         $role->status = 1;
         $role->save();
 
-        Session::flash('message','Rol bloqueado correctamente');
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Role successfully blocked');
+        }
+        else
+        {
+            Session::flash('message','Rol bloqueado correctamente');
+        }
 
         return Redirect::to('/roles');
     }
@@ -158,7 +197,14 @@ class RolesController extends Controller
         $role->status = 0;
         $role->save();
 
-        Session::flash('message','Rol desbloqueado correctamente');
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Role successfully unblocked');
+        }
+        else
+        {
+            Session::flash('message','Rol desbloqueado correctamente');
+        }
 
         return Redirect::to('/roles');
     }

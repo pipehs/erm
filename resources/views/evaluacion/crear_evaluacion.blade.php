@@ -43,7 +43,6 @@
 		@endif
 
 En esta secci&oacute;n podr&aacute; crear encuestas para la evaluación de los riesgos identificados.
-Recuerde que los niveles de criticidad y probabilidad (deben ser iguales) para cada riesgo que se asignará.
 
 {!!Form::open(['url'=>'evaluacion.store','method'=>'POST','class'=>'form-horizontal'])!!}
 

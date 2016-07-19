@@ -93,15 +93,31 @@ class EvaluacionRiesgosController extends Controller
     }
     public function mensaje($id)
     {
+        if (Session::get('languaje') == 'en')
+        {
+            //Mensaje predeterminado al enviar encuestas (inglés)
+            $mensaje = "Dear User.
+
+                        We send to you the following poll for risk assessments. You must assign a value on probability and impact for each one of the risks associated to the survey. To answer this poll you have to access to the following link:
+
+                        http://erm.local/public/evaluacion_encuesta.{$id}
+
+                        Best Regards,
+                        Administration.";
+                    
+        }
+        else
+        {
             //Mensaje predeterminado al enviar encuestas
-        $mensaje = "Estimado Usuario.
+            $mensaje = "Estimado Usuario.
 
-                    Le enviamos la siguiente encuesta para la evaluación de riesgos. Ud deberá asignar un valor de probabilidad y criticidad para cada uno de los riesgos asociados a la encuesta. Para responderla deberá acceder al siguiente link.
+                        Le enviamos la siguiente encuesta para la evaluación de riesgos. Ud deberá asignar un valor de probabilidad y criticidad para cada uno de los riesgos asociados a la encuesta. Para responderla deberá acceder al siguiente link.
 
-                    http://erm.local/public/evaluacion_encuesta.{$id}
+                        http://erm.local/public/evaluacion_encuesta.{$id}
 
-                    Saludos cordiales,
-                    Administrador.";
+                        Saludos cordiales,
+                        Administrador.";
+        }
         return $mensaje;
     }
     /**
@@ -136,8 +152,14 @@ class EvaluacionRiesgosController extends Controller
         //juntamos riesgos
         //$riesgos = $riesgos_sub+$riesgos_obj; no se pueden juntar ya que se puede repetir id
 
-        
-        return view('evaluacion.crear_evaluacion',['riesgos_obj'=>$riesgos_obj,'riesgos_sub'=>$riesgos_sub]);
+        if (Session::get('languaje') == 'en')
+        { 
+            return view('en.evaluacion.crear_evaluacion',['riesgos_obj'=>$riesgos_obj,'riesgos_sub'=>$riesgos_sub]);
+        }
+        else
+        {
+            return view('evaluacion.crear_evaluacion',['riesgos_obj'=>$riesgos_obj,'riesgos_sub'=>$riesgos_sub]);
+        }
     }
 
     /**
@@ -247,8 +269,14 @@ class EvaluacionRiesgosController extends Controller
                             ]); 
                     }
                 }
-
-                Session::flash('message','Encuesta de evaluacion agregada correctamente');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Evaluation poll successfully created');
+                }
+                else
+                {
+                    Session::flash('message','Encuesta de evaluacion agregada correctamente');
+                }
             });
 
             return Redirect::to('/evaluacion');           
@@ -280,7 +308,14 @@ class EvaluacionRiesgosController extends Controller
             $i += 1;
         }
         
-        return view('evaluacion.encuestas',['encuestas'=>$encuestas,'fecha'=>$fecha]);
+        if (Session::get('languaje') == 'en')
+        { 
+            return view('en.evaluacion.encuestas',['encuestas'=>$encuestas,'fecha'=>$fecha]);
+        }
+        else
+        {
+            return view('evaluacion.encuestas',['encuestas'=>$encuestas,'fecha'=>$fecha]);
+        }
     }
 
     public function show($id)
@@ -389,7 +424,14 @@ class EvaluacionRiesgosController extends Controller
             $i += 1;
         }
 
-        return view('evaluacion.show',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'stakeholders'=>$stakeholders]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.evaluacion.show',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'stakeholders'=>$stakeholders]);
+        }
+        else
+        {
+            return view('evaluacion.show',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'stakeholders'=>$stakeholders]);
+        }
     }
 
     public function enviar($id)
@@ -399,7 +441,15 @@ class EvaluacionRiesgosController extends Controller
         $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
         ->orderBy('name')
         ->lists('full_name', 'id');
-        return view('evaluacion.enviar',['encuesta_id'=>$id,'stakeholders'=>$stakeholders,'mensaje'=>$this->mensaje($id)]);
+
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.evaluacion.enviar',['encuesta_id'=>$id,'stakeholders'=>$stakeholders,'mensaje'=>$this->mensaje($id)]);
+        }
+        else
+        {
+            return view('evaluacion.enviar',['encuesta_id'=>$id,'stakeholders'=>$stakeholders,'mensaje'=>$this->mensaje($id)]);
+        }
     }
 
     /**
@@ -429,7 +479,14 @@ class EvaluacionRiesgosController extends Controller
     public function generarEvaluacionManual($subprocess_risk,$objective_risk)
     {
         $tipo = 0; //identifica evaluación manual
-        $encuesta = "Encuesta Manual";
+        if (Session::get('languaje') == 'en')
+        {
+            $encuesta = "Manual evaluation";
+        }
+        else
+        {
+            $encuesta = "Evaluación Manual";
+        }
         $riesgos = array();
         $i = 0;
         $id = 0;
@@ -484,12 +541,22 @@ class EvaluacionRiesgosController extends Controller
                 }
             
         }
+        if (Session::get('languaje') == 'en')
+        {
+            $tipos_impacto = ['Despicable','Less','Moderate','Severe','Catastrophic'];
+            $tipos_proba = ['Very improbable','Unlikely','Possible','Likely','Very likely'];
 
-        $tipos_impacto = ['Despreciable','Menor','Moderado','Severo','Catastrófico'];
-        $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
-
-        return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
+            return view('en.evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
                     'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id]);
+        }
+        else
+        {
+            $tipos_impacto = ['Despreciable','Menor','Moderado','Severo','Catastrófico'];
+            $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
+
+            return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
+                    'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id]);
+        }
     }
     //función que generará la encuesta para que el usuario pueda responderla
     public function generarEncuesta()
@@ -507,20 +574,35 @@ class EvaluacionRiesgosController extends Controller
 
         if (!$user)
         {
-            Session::flash('error','La encuesta no ha sido enviada al usuario ingresado');
-            return view('evaluacion.verificar_encuesta',['encuesta'=>$encuesta]);
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('error',"The poll doesn't send to the entered user");
+                return view('en.evaluacion.verificar_encuesta',['encuesta'=>$encuesta]);
+            }
+            else
+            {
+                Session::flash('error','La encuesta no ha sido enviada al usuario ingresado');
+                return view('evaluacion.verificar_encuesta',['encuesta'=>$encuesta]);
+            }
         }
         else
         {   
             //cada uno de los riesgos de la evaluación
             $res = $this->getEvalRisks($_POST['encuesta_id'],$user->stakeholder_id);
+            if (Session::get('languaje') == 'en')
+            {
+                $tipos_impacto = ['Despicable','Less','Moderate','Severe','Catastrophic'];
+            $tipos_proba = ['Very improbable','Unlikely','Possible','Likely','Very likely'];
+                
+                return view('en.evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id]);
+            }
+            else
+            {
+                $tipos_impacto = ['Despreciable','Menor','Moderado','Severo','Catastrófico'];
+                $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
 
-            $tipos_impacto = ['Despreciable','Menor','Moderado','Severo','Catastrófico'];
-            $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
-
-            return view('evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,
-                        'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],
-                        'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id]);
+                return view('evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id]);
+            }
         }
     }
 
@@ -555,7 +637,14 @@ class EvaluacionRiesgosController extends Controller
                         $errors = new ArrayObject();
                     }
 
-                    $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $errors->append("The poll was already sent to the user ".$stakeholder->name." ".$stakeholder->surnames.". It can't be send again.");
+                    }
+                    else
+                    {
+                        $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
+                    }
                 }
 
                 if (isset($errors))
@@ -572,7 +661,14 @@ class EvaluacionRiesgosController extends Controller
         Mail::send('envio_mail',$request->all(), 
             function ($msj) use ($correos)
             {
-                $msj->subject('Encuesta evaluación de Riesgos');
+                if (Session::get('languaje') == 'en')
+                {
+                    $msj->subject('Risks assessments poll');
+                }
+                else
+                {
+                    $msj->subject('Encuesta evaluación de Riesgos');
+                }
                 //Seleccionamos correos de stakeholders
                 $i = 0; //verifica si se debe ingresar to o cc
                 foreach ($correos as $correo)
@@ -588,7 +684,14 @@ class EvaluacionRiesgosController extends Controller
             }
         );
 
-        Session::flash('message','Encuesta enviada correctamente');
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Poll successfully sent');
+        }
+        else
+        {
+            Session::flash('message','Encuesta enviada correctamente');
+        }    
                 return Redirect::to('/evaluacion_agregadas');
     }
 
@@ -700,8 +803,14 @@ class EvaluacionRiesgosController extends Controller
 
                     }
                 }
-
-                Session::flash('message','Respuestas enviadas correctamente');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Answers successfully sent');
+                }
+                else
+                {
+                    Session::flash('message','Respuestas enviadas correctamente');
+                }
             });
             
             return view('evaluacion.encuestaresp');
@@ -709,11 +818,25 @@ class EvaluacionRiesgosController extends Controller
         }
         else //no se encontró el rut ingresado
         {
-            Session::flash('message','El rut ingresado no se encuentra en nuestra base de datos');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message',"The entered Id is not in our database");
+            }
+            else
+            {
+                Session::flash('message','El rut ingresado no se encuentra en nuestra base de datos');
+            }
 
             if ($_POST['tipo'] == 0)
             {
-                return view('evaluacion.show',[''=>'tipo' == $_POST['tipo']]);
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.evaluacion.show',[''=>'tipo' == $_POST['tipo']]);
+                }
+                else
+                {
+                    return view('evaluacion.show',[''=>'tipo' == $_POST['tipo']]);
+                }
             }
             else
             {
@@ -727,7 +850,16 @@ class EvaluacionRiesgosController extends Controller
         //obtenemos encuestas distintas a las que corresponden a una evaluación manual
         $encuestas = \Ermtool\Evaluation::where('description','<>','NULL')->lists('name','id');
         $organizaciones = \Ermtool\Organization::where('status',0)->lists('name','id');
-        return view('reportes.heatmap',['encuestas'=>$encuestas,'organizaciones'=>$organizaciones]); 
+
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.reportes.heatmap',['encuestas'=>$encuestas,'organizaciones'=>$organizaciones]);
+        }
+        else
+        {
+            return view('reportes.heatmap',['encuestas'=>$encuestas,'organizaciones'=>$organizaciones]);
+        }
+
     }
 
     public function generarHeatmap(Request $request)
@@ -826,7 +958,7 @@ class EvaluacionRiesgosController extends Controller
                                 ->where('evaluation_risk.risk_subprocess_id',$evaluation->risk_id)
                                 ->where('evaluations.consolidation','=',1)
                                 ->where('evaluations.type','=',1)
-                                ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
+                                ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-31 23:59:59'))
                                 ->max('evaluations.updated_at');
 
                     if ($_GET['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
@@ -837,7 +969,7 @@ class EvaluacionRiesgosController extends Controller
                                     ->where('evaluation_risk.risk_subprocess_id',$evaluation->risk_id)
                                     ->where('evaluations.consolidation','=',1)
                                     ->where('evaluations.type','=',2)
-                                    ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
+                                    ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-31 23:59:59'))
                                     ->max('evaluations.updated_at');
                     }
 
@@ -896,6 +1028,10 @@ class EvaluacionRiesgosController extends Controller
 
                     foreach ($riesgo_temp as $temp) //el riesgo recién obtenido es almacenado en riesgos
                     {
+                        //probamos eliminar espacios en descripcion
+                        $description = preg_replace('(\n)',' ',$temp->description);
+                        $description = preg_replace('(\r)',' ',$description);
+
                         $riesgos[$i] = array('name' => $temp->name,
                                             'subobj' => $temp->subobj,
                                             'description' => $temp->description);
@@ -906,7 +1042,7 @@ class EvaluacionRiesgosController extends Controller
             }
             else if ($_GET['kind'] == 1) //evaluaciones de riesgos de negocio
             {
-                //---- consulta multiples join para obtener los objetivos evaluados relacionados a la organización ----// 
+                //---- consulta multiples join para obtener los objective_risk evaluados relacionados a la organización ----// 
                 $evaluations = DB::table('evaluation_risk')
                                 ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                                 ->join('objective_risk','objective_risk.id','=','evaluation_risk.objective_risk_id')
@@ -927,7 +1063,7 @@ class EvaluacionRiesgosController extends Controller
                                 ->where('evaluation_risk.objective_risk_id','=',$evaluation->risk_id)
                                 ->where('evaluations.consolidation','=',1)
                                 ->where('evaluations.type','=',1)
-                                ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
+                                ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-31 23:59:59'))
                                 ->max('evaluations.updated_at');
 
                     if ($_GET['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
@@ -938,7 +1074,7 @@ class EvaluacionRiesgosController extends Controller
                                     ->where('evaluation_risk.objective_risk_id','=',$evaluation->risk_id)
                                     ->where('evaluations.consolidation','=',1)
                                     ->where('evaluations.type','=',2)
-                                    ->where('evaluations.updated_at','<',date($ano.'-'.$mes.'-31 23:59:59'))
+                                    ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-31 23:59:59'))
                                     ->max('evaluations.updated_at');
                     }
 
@@ -997,82 +1133,62 @@ class EvaluacionRiesgosController extends Controller
 
                     foreach ($riesgo_temp as $temp) //el riesgo recién obtenido es almacenado en riesgos
                     {
+                        //probamos eliminar espacios en descripcion
+                        $description = preg_replace('(\n)',' ',$temp->description);
+                        $description = preg_replace('(\r)',' ',$description);
+
                         $riesgos[$i] = array('name' => $temp->name,
                                             'subobj' => $temp->subobj,
-                                            'description' => $temp->description);
+                                            'description' => $description);
                     }
 
                     $i += 1;
                 }      
             }
-        /*
-            if ($_POST['evaluation_id'] != "")
-            {
-
-                //para cada riesgo evaluado, identificaremos promedio de probabilidad y de criticidad
-                $proba_impact = DB::table('evaluation_risk')
-                        ->where('evaluation_risk.objective_risk_id',$evaluation->objective_risk_id)
-                        ->where('evaluation_risk.risk_subprocess_id',$evaluation->risk_subprocess_id)
-                        ->where('evaluation_risk.evaluation_id','=',$_POST['evaluation_id'])
-                        ->select('avg_probability','avg_impact')->get();
-
-                foreach($proba_impact as $proba_impacto)
-                {
-                    $prom_proba[$i] = $proba_impacto->avg_probability;
-                    $prom_criticidad[$i] = $proba_impacto->avg_impact;
-                }
-
-                //primero verificamos de que tipo de riesgo se trata
-                if($evaluation->risk_subprocess_id != NULL) //si es riesgo de subproceso
-                {
-                    //obtenemos nombre del riesgo y lo guardamos en array de riesgo junto al nombre de subproceso
-                    $riesgo_temp = DB::table('risk_subprocess')
-                                    ->where('risk_subprocess.id','=',$evaluation->risk_subprocess_id)
-                                    ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                                    ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                                    ->select('risks.name as name','risks.description as description','subprocesses.name as subobj')->get();
-                }
-
-                else if ($evaluation->objective_risk_id != NULL) //es riesgo de negocio
-                {
-                    //obtenemos nombre del riesgo y lo guardamos en array de riesgo junto al nombre de organización
-                    $riesgo_temp = DB::table('objective_risk')
-                                    ->where('objective_risk.id','=',$evaluation->objective_risk_id)
-                                    ->join('risks','risks.id','=','objective_risk.risk_id')
-                                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                    ->join('organizations','organizations.id','=','objectives.organization_id')
-                                    ->select('risks.name as name','risks.description as description','organizations.name as subobj')->get();
-                }
-
-                else
-                {
-                    //aun no se soluciona para riesgos generales
-                    $riesgo_temp = array();
-                }
-            } */
-
-                        
-       // }
         
         if ($_GET['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
         {
-            //retornamos la misma vista con datos
+            if (Session::get('languaje') == 'en')
+            {
+                //retornamos la misma vista con datos (inglés)
+                return view('en.reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
+                                        'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
+                                        'prom_criticidad_in'=>$prom_criticidad_in,
+                                        'prom_proba_ctrl'=>$prom_proba_ctrl,
+                                        'prom_criticidad_ctrl'=>$prom_criticidad_ctrl,
+                                        'kind' => $_GET['kind'],
+                                        'kind2' => $_GET['kind2']]);
+            }
+            else
+            {
                 return view('reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
                                         'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
                                         'prom_criticidad_in'=>$prom_criticidad_in,
                                         'prom_proba_ctrl'=>$prom_proba_ctrl,
                                         'prom_criticidad_ctrl'=>$prom_criticidad_ctrl,
                                         'kind' => $_GET['kind'],
-                                        'kind2' => $_GET['kind2']]); 
+                                        'kind2' => $_GET['kind2']]);
+            } 
         }
         else
         {
-            //retornamos la misma vista con datos pero solo de riesgos inherentes
+            if (Session::get('languaje') == 'en')
+            {
+                //retornamos la misma vista con datos pero solo de riesgos inherentes (inglés)
+                return view('en.reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
+                                        'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
+                                        'prom_criticidad_in'=>$prom_criticidad_in,
+                                        'kind' => $_GET['kind'],
+                                        'kind2' => $_GET['kind2']]);
+            }
+            else
+            {
                 return view('reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
                                         'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
                                         'prom_criticidad_in'=>$prom_criticidad_in,
                                         'kind' => $_GET['kind'],
-                                        'kind2' => $_GET['kind2']]); 
+                                        'kind2' => $_GET['kind2']]);
+            } 
         }
     }
 
@@ -1096,8 +1212,14 @@ class EvaluacionRiesgosController extends Controller
                                 DB::raw('CONCAT(risks.name, " - ", subprocesses.name) AS name'))
                             ->lists('name','id');
 
-        
-        return view('evaluacion.evaluacion_manual',['riesgos_obj'=>$riesgos_obj,'riesgos_sub'=>$riesgos_sub]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.evaluacion.evaluacion_manual',['riesgos_obj'=>$riesgos_obj,'riesgos_sub'=>$riesgos_sub]);
+        }
+        else
+        {
+            return view('evaluacion.evaluacion_manual',['riesgos_obj'=>$riesgos_obj,'riesgos_sub'=>$riesgos_sub]);
+        }
     }
     /**
      * Remove the specified resource from storage.
@@ -1181,7 +1303,14 @@ class EvaluacionRiesgosController extends Controller
             }
         }
 
-        return view('evaluacion.consolidar',['evaluations_risks' => $evaluations_risks,'evaluation_id' => $id]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.evaluacion.consolidar',['evaluations_risks' => $evaluations_risks,'evaluation_id' => $id]);
+        }
+        else
+        {
+            return view('evaluacion.consolidar',['evaluations_risks' => $evaluations_risks,'evaluation_id' => $id]);
+        }
         //print_r($evaluations_risks);
 
     }
@@ -1212,7 +1341,14 @@ class EvaluacionRiesgosController extends Controller
                                 ->update(['consolidation' => 1]);
         }
 
-        Session::flash('message','Encuesta de evaluación consolidada correctamente');
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Poll successfully consolidated');
+        }
+        else
+        {
+            Session::flash('message','Encuesta de evaluación consolidada correctamente');
+        }
 
         return Redirect::to('/evaluacion_agregadas');
     }
@@ -1305,7 +1441,14 @@ class EvaluacionRiesgosController extends Controller
     {
         $encuesta = \Ermtool\Evaluation::find($id);
 
-        return view('evaluacion.verificar_encuesta',['encuesta'=>$encuesta]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.evaluacion.verificar_encuesta',['encuesta'=>$encuesta]);
+        }
+        else
+        {
+            return view('evaluacion.verificar_encuesta',['encuesta'=>$encuesta]);
+        }
     }
 
     public function verRespuestas($eval_id,$rut)
@@ -1321,12 +1464,24 @@ class EvaluacionRiesgosController extends Controller
 
         $res = $this->getEvalRisks($eval_id,$rut);
 
-        $tipos_impacto = ['Despreciable','Menor','Moderado','Severo','Catastrófico'];
-        $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
+        if (Session::get('languaje') == 'en')
+        {
+            $tipos_impacto = ['Despicable','Less','Moderate','Severe','Catastrophic'];
+            $tipos_proba = ['Very improbable','Unlikely','Possible','Likely','Very likely'];
 
-        return view('evaluacion.respuestas',['riesgos'=>$res['riesgos'],'user_answers'=>$res['user_answers'],
-                                             'eval_id'=>$eval_id,'rut'=>$rut,'encuesta'=>$encuesta,'user'=>$user,
-                                             'tipos_impacto'=>$tipos_impacto,'tipos_proba'=>$tipos_proba]);
+            return view('en.evaluacion.respuestas',['riesgos'=>$res['riesgos'],'user_answers'=>$res['user_answers'],
+                                                 'eval_id'=>$eval_id,'rut'=>$rut,'encuesta'=>$encuesta,'user'=>$user,
+                                                 'tipos_impacto'=>$tipos_impacto,'tipos_proba'=>$tipos_proba]);
+        }
+        else
+        {
+            $tipos_impacto = ['Despreciable','Menor','Moderado','Severo','Catastrófico'];
+            $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
+
+            return view('evaluacion.respuestas',['riesgos'=>$res['riesgos'],'user_answers'=>$res['user_answers'],
+                                                 'eval_id'=>$eval_id,'rut'=>$rut,'encuesta'=>$encuesta,'user'=>$user,
+                                                 'tipos_impacto'=>$tipos_impacto,'tipos_proba'=>$tipos_proba]);
+        }
 
     }
 
@@ -1371,10 +1526,17 @@ class EvaluacionRiesgosController extends Controller
 
                 }
 
-                Session::flash('message','Respuestas actualizadas correctamente');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Answers successfully updated');
+                }
+                else
+                {
+                    Session::flash('message','Respuestas actualizadas correctamente');
+                }
             });
             
-            return view('evaluacion.encuestaresp');
+            return view('en.evaluacion.encuestaresp');
             //print_r($_POST);
     }
 

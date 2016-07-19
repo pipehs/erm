@@ -9,20 +9,36 @@
 			<div class="box">
 				<div class="box-content">
 					<div class="text-center">
-						<h3 class="page-header">Ingreso Sistema - B-GRC</h3>
+						<h3 class="page-header">B-GRC Business, Governance, Risk and Compliance</h3>
 					</div>
 					
 				    {!! Form::open(['route' => 'log.store', 'class' => 'form', 'method' => 'POST']) !!}
+				    <div class="form-group">
+						<label class="control-label">Choose Languaje</label><br>
+							<div class="radio-inline">
+								<label>Español
+									<input type="radio" name="languaje" value="es" checked>
+									<i class="fa fa-circle-o"></i>
+								</label>
+							</div>
+							<div class="radio-inline">
+								<label>English
+									<input type="radio" name="languaje" value="en">
+									<i class="fa fa-circle-o"></i>
+								</label>
+							</div>
+					</div>
+
 					<div class="form-group">
 						<label class="control-label">E-mail</label>
 						<input type="email" class="form-control" name="email" />
 					</div>
 					<div class="form-group">
-						<label class="control-label">Contraseña</label>
+						<label class="control-label">Password</label>
 						<input type="password" class="form-control" name="password" />
 					</div>
 					<div class="text-center">
-						{!!Form::submit('Ingresar', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Log on', ['class'=>'btn btn-primary'])!!}
 					</div>
 
 					{!! Form::close() !!}

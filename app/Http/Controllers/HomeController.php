@@ -5,6 +5,7 @@ namespace Ermtool\Http\Controllers;
 use Illuminate\Http\Request;
 use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
+use Session;
 use DB;
 use Auth;
 use Redirect;
@@ -120,10 +121,19 @@ class HomeController extends Controller
         }
 
         //retornamos la vista HOME con datos
-
-        return view('home',['nombre'=>$nombre,'descripcion'=>$descripcion,
+        //OBS: desde 15-07-2016 verificaremos idioma seleccionado
+        if (Session::get('languaje') == 'es')
+        {
+            return view('home',['nombre'=>$nombre,'descripcion'=>$descripcion,
                                         'riesgos'=>$riesgos,'prom_proba'=>$prom_proba,
                                         'prom_criticidad'=>$prom_criticidad]);
+        }
+        else if (Session::get('languaje') == 'en')
+        {
+            return view('en.home',['nombre'=>$nombre,'descripcion'=>$descripcion,
+                                        'riesgos'=>$riesgos,'prom_proba'=>$prom_proba,
+                                        'prom_criticidad'=>$prom_criticidad]);
+        }
     }
 
     

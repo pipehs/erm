@@ -57,7 +57,15 @@ class LogController extends Controller
         $disabled = "";
 
         $system_roles = \Ermtool\System_role::lists('role','id');
-        return view('usuarios.create',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled]);
+
+        if (Session::get('languaje') == 'en')
+        {
+           return view('en.usuarios.create',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled]); 
+        }
+        else
+        {
+            return view('usuarios.create',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled]);
+        }
     }
 
     public function storeUser(Request $request)
@@ -93,16 +101,30 @@ class LogController extends Controller
                             'system_role_id' => $role,
                         ]);
                 }
-                
-                Session::flash('message','Usuario creado con &eacute;xito');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','User successfully created');
+                }
+                else
+                {
+                    Session::flash('message','Usuario creado con &eacute;xito');
+                }
             });
         
             return Redirect::to('/');
         }
         else
         {
-            Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente');
-            return Redirect::to('crear_usuario')->withInput();
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','The entered id was incorrect. Try again');
+                return Redirect::to('crear_usuario')->withInput();
+            }
+            else
+            {
+                Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente');
+                return Redirect::to('crear_usuario')->withInput();
+            }
         }
     }
 
@@ -114,11 +136,12 @@ class LogController extends Controller
      */
     public function store(LoginRequest $request)
     {
+        Session::put('languaje',$request['languaje']);
         //return $request->email;
         if (Auth::attempt(['email'=>$request['email'], 'password' => $request['password']]))
         {
             //echo Auth::user()->id.'<br>'.Auth::user()->name;
-
+            
             //obtenemos roles del usuario
             $id = Auth::user()->id;
 
@@ -134,8 +157,14 @@ class LogController extends Controller
                 $i += 1;
             }
         }
-
-        Session::flash('message-error','Usuario y/o contraseña incorrecta! vuelva a intentarlo');
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message-error','Incorrect User and/or Pass. Try again.');
+        }
+        else
+        {
+            Session::flash('message-error','Usuario y/o contraseña incorrecta! vuelva a intentarlo');
+        }
         return Redirect::to('/');
     }
 
@@ -143,6 +172,7 @@ class LogController extends Controller
     {
         Auth::logout();
         Session::forget('roles');
+        Session::forget('languaje');
         return Redirect::to('/');
     }
 

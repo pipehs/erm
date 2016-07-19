@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Categor&iacute;as de Riesgos')
+@section('title', 'Eventos de Riesgos')
 
 @section('content')
 

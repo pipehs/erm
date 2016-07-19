@@ -37,19 +37,17 @@ class CausasController extends Controller
             if ($causa['created_at'] != NULL)
             {
                 $fecha_creacion = date_format($causa['created_at'],"d-m-Y");
-                $fecha_creacion .= " a las ".date_format($causa['created_at'],"H:i:s");
             }
             else
-                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                $fecha_creacion = NULL;
 
             //damos formato a fecha de actualización
             if ($causa['updated_at'] != NULL)
             {
                 $fecha_act = date_format($causa['updated_at'],"d-m-Y");
-                $fecha_act .= " a las ".date_format($causa['updated_at'],"H:i:s");
             }
             else
-                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
+                $fecha_act = NULL;
 
             $causas[$i] = array('id'=>$causa['id'],
                                 'nombre'=>$causa['name'],
@@ -59,7 +57,15 @@ class CausasController extends Controller
                                 'estado'=>$causa['status']);
             $i += 1;
         }
-        return view('datos_maestros.causas.index',['causas'=>$causas]);
+
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.causas.index',['causas'=>$causas]);
+        }
+        else
+        {
+           return view('datos_maestros.causas.index',['causas'=>$causas]); 
+        }
     }
 
     /**
@@ -69,7 +75,14 @@ class CausasController extends Controller
      */
     public function create()
     {
-        return view('datos_maestros.causas.create');
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.causas.create');
+        }
+        else
+        {
+            return view('datos_maestros.causas.create'); 
+        }
     }
 
     /**
@@ -86,8 +99,14 @@ class CausasController extends Controller
             'description' => $request['description'],
             ]);
 
-            Session::flash('message','Causa agregada correctamente');
-
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Cause successfully created');
+            }
+            else
+            {
+                Session::flash('message','Causa agregada correctamente');
+            }
             return Redirect::to('/causas');
     }
 
@@ -101,7 +120,14 @@ class CausasController extends Controller
     {
         $causa = \Ermtool\Cause::find($id);
 
-        return view('datos_maestros.causas.edit',['causa'=>$causa]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.causas.edit',['causa'=>$causa]);
+        }
+        else
+        {
+            return view('datos_maestros.causas.edit',['causa'=>$causa]);
+        }
     }
 
     /**
@@ -120,7 +146,14 @@ class CausasController extends Controller
 
         $causa->save();
 
-        Session::flash('message','Causa actualizada correctamente');
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Cause successfully updated');
+        }
+        else
+        {
+            Session::flash('message','Causa actualizada correctamente');
+        }
 
         return Redirect::to('/causas');
     }
@@ -131,7 +164,14 @@ class CausasController extends Controller
         $causa->status = 1;
         $causa->save();
 
-        Session::flash('message','Causa bloqueada correctamente');
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Cause successfully blocked');
+        }
+        else
+        {
+            Session::flash('message','Causa bloqueada correctamente');
+        }
 
         return Redirect::to('/causas');
     }
@@ -142,7 +182,14 @@ class CausasController extends Controller
         $causa->status = 0;
         $causa->save();
 
-        Session::flash('message','Causa desbloqueada correctamente');
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Cause successfully unblocked');
+        }
+        else
+        {
+            Session::flash('message','Causa desbloqueada correctamente');
+        }
 
         return Redirect::to('/causas');
     }

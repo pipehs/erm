@@ -17,8 +17,22 @@ class EncuestasController extends Controller
 
     public function mensaje($id)
     {
+        if (Session::get('languaje') == 'en')
+        {   
+            //Mensaje predeterminado al enviar encuestas (inglés)
+            $mensaje = "Dear User.
+
+                        We send to you the following poll for the identification of risk events. Answer each one of the questions associated to the poll. To answer it you have to access to the following link:
+
+                        http://erm.local/public/evaluacion_encuesta.{$id}
+
+                        Best Regards,
+                        Administration.";
+        }
+        else
+        {
             //Mensaje predeterminado al enviar encuestas
-        $mensaje = "Estimado Usuario.
+            $mensaje = "Estimado Usuario.
 
                     Le enviamos la siguiente encuesta para la identificación de eventos de riesgos. 
                     Responda cada una de las preguntas asociadas a la encuesta. 
@@ -28,6 +42,9 @@ class EncuestasController extends Controller
 
                     Saludos cordiales,
                     Administrador.";
+        } 
+            
+        
         return $mensaje;
     }
 
@@ -83,20 +100,43 @@ class EncuestasController extends Controller
                 }
             }
 
-            return view('identificacion_eventos_riesgos.enviarencuesta2',['tipo'=>$request['destinatarios'],
-                'dest'=>$dest,'encuesta'=>$encuesta,'preguntas'=>$preguntas,'respuestas'=>$answers,
-                'mensaje'=>$this->mensaje($encuesta['id'])]);
+            if (Session::get('languaje') == 'en')
+            { 
+                return view('en.identificacion_eventos_riesgos.enviarencuesta2',['tipo'=>$request['destinatarios'],
+                    'dest'=>$dest,'encuesta'=>$encuesta,'preguntas'=>$preguntas,'respuestas'=>$answers,
+                    'mensaje'=>$this->mensaje($encuesta['id'])]);
+            }
+            else
+            {
+                return view('identificacion_eventos_riesgos.enviarencuesta2',['tipo'=>$request['destinatarios'],
+                    'dest'=>$dest,'encuesta'=>$encuesta,'preguntas'=>$preguntas,'respuestas'=>$answers,
+                    'mensaje'=>$this->mensaje($encuesta['id'])]);
+            }
         }
         else if (isset($_GET['volver']))
         {
             $polls = \Ermtool\Poll::lists('name','id');
 
-            return view('identificacion_eventos_riesgos.enviarencuesta',['polls'=>$polls]);
+            if (Session::get('languaje') == 'en')
+            { 
+                return view('en.identificacion_eventos_riesgos.enviarencuesta',['polls'=>$polls]);
+            }
+            else
+            {
+                return view('identificacion_eventos_riesgos.enviarencuesta',['polls'=>$polls]);
+            }
         }
         else
         {
             $polls = \Ermtool\Poll::lists('name','id');
-            return view('identificacion_eventos_riesgos.enviarencuesta',['polls'=>$polls]);
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.identificacion_eventos_riesgos.enviarencuesta',['polls'=>$polls]);
+            }
+            else
+            {
+                return view('identificacion_eventos_riesgos.enviarencuesta',['polls'=>$polls]);
+            }
         }
     }
 
@@ -110,11 +150,25 @@ class EncuestasController extends Controller
             $cont = $_POST['cantidad_preguntas'];
             //obtenemos id de esta encuesta
             $poll_id = \Ermtool\Poll::max('id');
-            return view('identificacion_eventos_riesgos.crearencuesta2',['cont'=>$cont,'name'=>$_POST['nombre']]);
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.identificacion_eventos_riesgos.crearencuesta2',['cont'=>$cont,'name'=>$_POST['nombre']]);
+            }
+            else
+            {
+                return view('identificacion_eventos_riesgos.crearencuesta2',['cont'=>$cont,'name'=>$_POST['nombre']]);
+            }
         }
         else
         {
-            return view('identificacion_eventos_riesgos.crearencuesta');
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.identificacion_eventos_riesgos.crearencuesta');
+            }
+            else
+            {
+                return view('identificacion_eventos_riesgos.crearencuesta');
+            }
         }
     }
 
@@ -164,7 +218,14 @@ class EncuestasController extends Controller
             }
         });
         
-        return view('identificacion_eventos_riesgos.encuestacreada',['post'=>$_POST]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.identificacion_eventos_riesgos.encuestacreada',['post'=>$_POST]);
+        }
+        else
+        {
+            return view('identificacion_eventos_riesgos.encuestacreada',['post'=>$_POST]);
+        }
     }
 
     //función que primero verificará que el usuario no haya respondido previamente (si es que respondio permitirá editar sus respuestas)
@@ -172,7 +233,14 @@ class EncuestasController extends Controller
     {
         $encuesta = \Ermtool\Poll::find($id);
 
-        return view('identificacion_eventos_riesgos.verificar_encuesta',['encuesta'=>$encuesta]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.identificacion_eventos_riesgos.verificar_encuesta',['encuesta'=>$encuesta]);
+        }
+        else
+        {
+            return view('identificacion_eventos_riesgos.verificar_encuesta',['encuesta'=>$encuesta]);
+        }
     }
 
     public function generarEncuesta()
@@ -188,8 +256,16 @@ class EncuestasController extends Controller
 
         if (!$user)
         {
-            Session::flash('error','La encuesta no ha sido enviada al usuario ingresado');
-            return view('identificacion_eventos_riesgos.verificar_encuesta',['encuesta'=>$encuesta]);
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('error',"The poll doesn't send to the entered user");
+                return view('en.identificacion_eventos_riesgos.verificar_encuesta',['encuesta'=>$encuesta]);
+            }
+            else
+            {
+                Session::flash('error','La encuesta no ha sido enviada al usuario ingresado');
+                return view('identificacion_eventos_riesgos.verificar_encuesta',['encuesta'=>$encuesta]);
+            }
         }
         else
         {
@@ -231,8 +307,14 @@ class EncuestasController extends Controller
                 }
             }
 
-            return view('identificacion_eventos_riesgos.encuesta',['encuesta'=>$encuesta,'preguntas'=>$preguntas,
-                'respuestas'=>$answers,'user_answers'=>$user_answers,'user'=>$user->stakeholder_id]);
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.identificacion_eventos_riesgos.encuesta',['encuesta'=>$encuesta,'preguntas'=>$preguntas,'respuestas'=>$answers,'user_answers'=>$user_answers,'user'=>$user->stakeholder_id]);
+            }
+            else
+            {
+                return view('identificacion_eventos_riesgos.encuesta',['encuesta'=>$encuesta,'preguntas'=>$preguntas,'respuestas'=>$answers,'user_answers'=>$user_answers,'user'=>$user->stakeholder_id]);
+            }
         }
     }
 
@@ -272,7 +354,14 @@ class EncuestasController extends Controller
                         $errors = new ArrayObject();
                     }
 
-                    $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $errors->append("The poll was already sent to the user ".$stakeholder->name." ".$stakeholder->surnames.". It can't be send again.");
+                    }
+                    else
+                    {
+                        $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
+                    }
                 }
 
                 if (isset($errors))
@@ -315,7 +404,14 @@ class EncuestasController extends Controller
                             $errors = new ArrayObject();
                         }
 
-                        $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
+                        if (Session::get('languaje') == 'en')
+                        {
+                            $errors->append("The poll was already sent to the user ".$stakeholder->name." ".$stakeholder->surnames.". It can't be send again.");
+                        }
+                        else
+                        {
+                            $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
+                        }
                     }
 
                     if ($errors)
@@ -359,7 +455,14 @@ class EncuestasController extends Controller
                             $errors = new ArrayObject();
                         }
 
-                        $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
+                        if (Session::get('languaje') == 'en')
+                        {
+                            $errors->append("The poll was already sent to the user ".$stakeholder->name." ".$stakeholder->surnames.". It can't be send again.");
+                        }
+                        else
+                        {
+                            $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
+                        }
                     }
 
                     if ($errors)
@@ -374,7 +477,14 @@ class EncuestasController extends Controller
         Mail::send('envio_mail',$request->all(), 
             function ($msj) use ($correos)
             {
-                $msj->subject('Encuesta identificación de eventos de Riesgos');
+                if (Session::get('languaje') == 'en')
+                {
+                    $msj->subject('Poll for events of risk identification');
+                }
+                else
+                {
+                    $msj->subject('Encuesta identificación de eventos de Riesgos');
+                }
                 //Seleccionamos correos de stakeholders
                 $i = 0; //verifica si se debe ingresar to o cc
                 foreach ($correos as $correo)
@@ -390,8 +500,16 @@ class EncuestasController extends Controller
             }
         );
 
-        Session::flash('message','Encuesta enviada correctamente');
-                return Redirect::to('enviar_encuesta');
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Poll successfully sent');
+        }
+        else
+        {
+            Session::flash('message','Encuesta enviada correctamente');    
+        }
+
+        return Redirect::to('enviar_encuesta');
     }
 
     public function guardarEvaluacion(Request $request)
@@ -443,9 +561,17 @@ class EncuestasController extends Controller
 
             //echo "Encuesta agregada con éxito";
             ///////////////////// MEJORAR MENSAJE ////////////////////////
-
-            Session::flash('message','Respuestas enviadas correctamente');
-            return view('evaluacion.encuestaresp');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Answers successfully sent');
+                return view('en.evaluacion.encuestaresp');
+            }
+            else
+            {
+                Session::flash('message','Respuestas enviadas correctamente');
+                return view('evaluacion.encuestaresp');
+            }
+            
     }
 
     public function updateEvaluacion(Request $request)
@@ -503,17 +629,33 @@ class EncuestasController extends Controller
                     }
                 }
             }
-
-            Session::flash('message','Respuestas modificadas correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Answers successfully updated');
+                return view('en.evaluacion.encuestaresp');
+            }
+            else
+            {
+                Session::flash('message','Respuestas modificadas correctamente');
+                return view('evaluacion.encuestaresp');
+            }
         });
             
-            return view('evaluacion.encuestaresp');
+            
     }
 
     public function encuestaRespondida()
     {
-        Session::flash('message','El rut ingresado no se encuentra en nuestra base de datos');
-                return Redirect::to('identificacion.encuesta.'.$request["encuesta_id"]);
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message',"The entered Id is not in our database");
+        }
+        else
+        {
+            Session::flash('message','El rut ingresado no se encuentra en nuestra base de datos');
+        } 
+                
+        return Redirect::to('identificacion.encuesta.'.$request["encuesta_id"]);
     }
 
     //función para ver las respuestas enviadas a las encuestas
@@ -528,12 +670,27 @@ class EncuestasController extends Controller
             $answers = $poll->answers;
             $stakeholders = $poll->stakeholders;
 
-            return view('identificacion_eventos_riesgos.encuestas',['stakeholders'=>$stakeholders,'poll_id'=>$_GET['encuesta'],'answers'=>$answers]);
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.identificacion_eventos_riesgos.encuestas',['stakeholders'=>$stakeholders,'poll_id'=>$_GET['encuesta'],'answers'=>$answers]);
+            }
+            else
+            {
+                return view('en.identificacion_eventos_riesgos.encuestas',['stakeholders'=>$stakeholders,'poll_id'=>$_GET['encuesta'],'answers'=>$answers]);
+            }
         }
         else
         {
             $polls = \Ermtool\Poll::lists('name','id');
-            return view('identificacion_eventos_riesgos.encuestas',['polls'=>$polls]);    
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.identificacion_eventos_riesgos.encuestas',['polls'=>$polls]);
+            }
+            else
+            {
+                return view('identificacion_eventos_riesgos.encuestas',['polls'=>$polls]);
+            }    
         }
         
     }
@@ -566,12 +723,27 @@ class EncuestasController extends Controller
                 }
             }
 
-            return view('identificacion_eventos_riesgos.ver_encuestas',['encuesta'=>$poll,'preguntas'=>$preguntas,'respuestas'=>$answers]);
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.identificacion_eventos_riesgos.ver_encuestas',['encuesta'=>$poll,'preguntas'=>$preguntas,'respuestas'=>$answers]);
+            }
+            else
+            {
+                return view('identificacion_eventos_riesgos.ver_encuestas',['encuesta'=>$poll,'preguntas'=>$preguntas,'respuestas'=>$answers]);
+            }
         }
         else
         {
             $polls = \Ermtool\Poll::lists('name','id');
-            return view('identificacion_eventos_riesgos.ver_encuestas',['polls'=>$polls]);
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.identificacion_eventos_riesgos.ver_encuestas',['polls'=>$polls]);
+            }
+            else
+            {
+                return view('identificacion_eventos_riesgos.ver_encuestas',['polls'=>$polls]); 
+            }
         }
     }
     /**
@@ -608,9 +780,18 @@ class EncuestasController extends Controller
             $i += 1;
         }
 
-        return view('identificacion_eventos_riesgos.encuesta2',['questions'=>$questions,'answers'=>$answers,
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.identificacion_eventos_riesgos.encuesta2',['questions'=>$questions,'answers'=>$answers,
                                         'stakeholder'=>$stakeholder,'encuesta'=>$encuesta,
                                         'roles'=>$roles]);
+        }
+        else
+        {
+            return view('identificacion_eventos_riesgos.encuesta2',['questions'=>$questions,'answers'=>$answers,
+                                        'stakeholder'=>$stakeholder,'encuesta'=>$encuesta,
+                                        'roles'=>$roles]);
+        }
     }
 
     /**

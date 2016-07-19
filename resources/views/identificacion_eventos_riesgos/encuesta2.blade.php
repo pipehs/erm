@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Encuestas de evaluación de Riesgos')
+@section('title', 'Encuestas de identificación de eventos de Riesgos')
 
 @section('content')
 
@@ -44,7 +44,7 @@
 
 			<div class="row">
 				<div class="col-sm-6">
-				<p><b>Datos de stakeholder</b></p>
+				<p><b>Datos de usuario</b></p>
 				
 					<table class="table table-striped" style="font-size:11px">
 					<tr>

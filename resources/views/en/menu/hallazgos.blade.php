@@ -1,0 +1,1 @@
+<li><a href="hallazgos" class="{{ activeMenu('hallazgos') }}"><i class="fa fa-search-minus"></i>Issues Mantainer</a></li>

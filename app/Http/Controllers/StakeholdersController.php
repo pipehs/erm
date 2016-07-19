@@ -65,7 +65,7 @@ class StakeholdersController extends Controller
             }
 
             if ($persona['position'] == NULL)
-                $cargo = "No especificado";
+                $cargo = NULL;
             else
                 $cargo = $persona['position'];
 
@@ -73,20 +73,18 @@ class StakeholdersController extends Controller
             if ($persona['created_at'] != NULL)
             {
                 $fecha_creacion = date_format($persona['created_at'],"d-m-Y");
-                $fecha_creacion .= " a las ".date_format($persona['created_at'],"H:i:s");
             }
             else
-                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                $fecha_creacion = NULL;
 
             //damos formato a fecha de actualización 
             if ($persona['updated_at'] != NULL)
             {
-                $fecha_act = date_format($persona['updated_at'],"d-m-Y");
-                $fecha_act .= " a las ".date_format($persona['updated_at'],"H:i:s");
+                $fecha_act = date_format($persona['updated_at'],"d-m-Y");;
             }
 
             else
-                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
+                $fecha_act = NULL;
 
             $stakeholder[$i] = array('id'=>$persona['id'],
                                 'dv'=>$persona['dv'],
@@ -99,8 +97,16 @@ class StakeholdersController extends Controller
                                 'estado'=>$persona['status']);
             $i += 1;
         }
-        return view('datos_maestros.stakeholders.index',['stakeholders'=>$stakeholder,
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.stakeholders.index',['stakeholders'=>$stakeholder,
+                                            'organizaciones'=>$organizaciones,'roles'=>$roles]);
+        }
+        else
+        {
+            return view('datos_maestros.stakeholders.index',['stakeholders'=>$stakeholder,
                                             'organizaciones'=>$organizaciones,'roles'=>$roles]); 
+        } 
     }
 
     /**
@@ -117,8 +123,14 @@ class StakeholdersController extends Controller
         //si es create, campo rut estara desbloqueado
         $required = 'required';
         $disabled = "";
-        return view('datos_maestros.stakeholders.create',['organizations'=>$organizations,'disabled'=>$disabled,
-                                                            'required'=>$required,'roles'=>$roles,'dv'=>$dv]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.stakeholders.create',['organizations'=>$organizations,'disabled'=>$disabled,'required'=>$required,'roles'=>$roles,'dv'=>$dv]);
+        }
+        else
+        {
+            return view('datos_maestros.stakeholders.create',['organizations'=>$organizations,'disabled'=>$disabled,'required'=>$required,'roles'=>$roles,'dv'=>$dv]);
+        }
     }
 
     /**
@@ -189,15 +201,28 @@ class StakeholdersController extends Controller
                         }
                     }
 
-
-                    Session::flash('message','Stakeholder agregado correctamente');
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','Stakeholder successfully created');
+                    }
+                    else
+                    {
+                        Session::flash('message','Usuario agregado correctamente');
+                    }
             });
 
             return Redirect::to('/stakeholders');
         }
         else
         {
-            Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','The Id that you entered was incorrect. Please try again.');
+            }
+            else
+            {
+               Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente'); 
+            }
             return Redirect::to('/stakeholders.create')->withInput();
         }
         
@@ -258,9 +283,14 @@ class StakeholdersController extends Controller
         }
         //si es edit, campo rut estara bloqueado y no habrá required
         $disabled = 'disabled';
-        return view('datos_maestros.stakeholders.edit',['stakeholder'=>$stakeholder,'organizations'=>$organizations,
-                                                            'disabled'=>$disabled,'required'=>'','roles'=>$roles,'dv'=>$dv,
-                                                            'types_selected' => $types_selected,'orgs_selected' => $orgs_selected]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.stakeholders.edit',['stakeholder'=>$stakeholder,'organizations'=>$organizations,'disabled'=>$disabled,'required'=>'','roles'=>$roles,'dv'=>$dv,'types_selected' => $types_selected,'orgs_selected' => $orgs_selected]);
+        }
+        else
+        {
+            return view('datos_maestros.stakeholders.edit',['stakeholder'=>$stakeholder,'organizations'=>$organizations,'disabled'=>$disabled,'required'=>'','roles'=>$roles,'dv'=>$dv,'types_selected' => $types_selected,'orgs_selected' => $orgs_selected]);
+        }
     }
 
     /**
@@ -309,8 +339,14 @@ class StakeholdersController extends Controller
                     ]);
             }
 
-
-            Session::flash('message','Stakeholder actualizado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Stakeholder successfully updated');
+            }
+            else
+            {
+                Session::flash('message','Usuario actualizado correctamente');
+            }
         });
             return Redirect::to('/stakeholders');
     }
@@ -325,7 +361,14 @@ class StakeholdersController extends Controller
             $stakeholder->status = 1;
             $stakeholder->save();
 
-            Session::flash('message','Stakeholder bloqueado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Stakeholder successfully blocked');
+            }
+            else
+            {
+                Session::flash('message','Usuario bloqueado correctamente');
+            }
         });
         return Redirect::to('/stakeholders');
     }
@@ -339,8 +382,14 @@ class StakeholdersController extends Controller
             $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
             $stakeholder->status = 0;
             $stakeholder->save();
-
-            Session::flash('message','Stakeholder desbloqueado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Stakeholder successfully unblocked');
+            }
+            else
+            {
+                Session::flash('message','Usuario desbloqueado correctamente');
+            }
         });
         return Redirect::to('/stakeholders');
     }

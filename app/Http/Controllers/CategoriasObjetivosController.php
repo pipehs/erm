@@ -37,35 +37,35 @@ class CategoriasObjetivosController extends Controller
             //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
             if ($category['created_at'] == NULL OR $category['created_at'] == "0000-00-00" OR $category['created_at'] == "")
             {
-                $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                $fecha_creacion = NULL;
             }
             else
             {
                 $fecha_creacion = date_format($category['created_at'],"d-m-Y");
-                $fecha_creacion .= " a las ".date_format($category['created_at'],"H:i:s");
+                $fecha_creacion .= " at ".date_format($category['created_at'],"H:i:s");
             }
 
              //damos formato a fecha expiración
             if ($category['expiration_date'] == NULL OR $category['expiration_date'] == "0000-00-00")
             {
-                $fecha_exp = "Ninguna";
+                $fecha_exp = NULL;
             }
             else
             {
                 $expiration_date = new DateTime($category['expiration_date']);
                 $fecha_exp = date_format($expiration_date, 'd-m-Y');
-                $fecha_exp .= " a las ".date_format($expiration_date,"H:i:s");
+                $fecha_exp .= " at ".date_format($expiration_date,"H:i:s");
             }
 
             //damos formato a fecha de actualización 
             if ($category['updated_at'] != NULL)
             {
                 $fecha_act = date_format($category['updated_at'],"d-m-Y");
-                $fecha_act .= " a las ".date_format($category['updated_at'],"H:i:s");
+                $fecha_act .= " at ".date_format($category['updated_at'],"H:i:s");
             }
 
             else
-                $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
+                $fecha_act = NULL;
 
             $objective_category[$i] = array('id'=>$category['id'],
                                 'nombre'=>$category['name'],
@@ -76,7 +76,15 @@ class CategoriasObjetivosController extends Controller
                                 'estado'=>$category['status']);
             $i += 1;
         }
-        return view('datos_maestros.categorias_objetivos.index',['objective_categories'=>$objective_category]);   
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.categorias_objetivos.index',['objective_categories'=>$objective_category]); 
+        }
+        else
+        {
+            return view('datos_maestros.categorias_objetivos.index',['objective_categories'=>$objective_category]); 
+        }
+          
     }
 
     /**
@@ -86,7 +94,14 @@ class CategoriasObjetivosController extends Controller
      */
     public function create()
     {
-        return view('datos_maestros.categorias_objetivos.create');
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.categorias_objetivos.create');
+        }
+        else
+        {
+            return view('datos_maestros.categorias_objetivos.create');
+        }      
     }
 
     /**
@@ -105,7 +120,14 @@ class CategoriasObjetivosController extends Controller
                 'expiration_date' => $_POST['expiration_date'],
                 ]);
 
-                Session::flash('message','Categor&iacute;a agregada correctamente');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Category stored successfully');
+                }
+                else
+                {
+                    Session::flash('message','Categor&iacute;a agregada correctamente');
+                }
 
         });
 
@@ -122,7 +144,14 @@ class CategoriasObjetivosController extends Controller
     {
         $objective_category = \Ermtool\Objective_category::find($id);
 
-        return view('datos_maestros.categorias_objetivos.edit',['objective_category'=>$objective_category]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.categorias_objetivos.edit',['objective_category'=>$objective_category]);
+        }
+        else
+        {
+            return view('datos_maestros.categorias_objetivos.edit',['objective_category'=>$objective_category]);
+        }
     }
 
     /**
@@ -145,8 +174,14 @@ class CategoriasObjetivosController extends Controller
             $objective_category->expiration_date = $_POST['expiration_date'];
 
             $objective_category->save();
-
-            Session::flash('message','Categor&iacute;a de objetivo actualizada correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Category updated successfully');
+            }
+            else
+            {
+                Session::flash('message','Categor&iacute;a de objetivo actualizada correctamente');
+            }
         });
 
         return Redirect::to('/categorias_objetivos');
@@ -161,7 +196,14 @@ class CategoriasObjetivosController extends Controller
             $objective_category->status = 1;
             $objective_category->save();
 
-            Session::flash('message','Categor&iacute;a de objetivo bloqueada correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Category blocked successfully');
+            }
+            else
+            {
+                Session::flash('message','Categor&iacute;a de objetivo bloqueada correctamente');
+            }
         });
         return Redirect::to('/categorias_objetivos');
     }
@@ -175,7 +217,14 @@ class CategoriasObjetivosController extends Controller
             $objective_category->status = 0;
             $objective_category->save();
 
-            Session::flash('message','Categor&iacute;a de objetivo desbloqueada correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Category unblocked successfully');
+            }
+            else
+            {
+                Session::flash('message','Categor&iacute;a de objetivo desbloqueada correctamente');
+            }
         });
         return Redirect::to('/categorias_objetivos');
     }

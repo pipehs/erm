@@ -35,7 +35,7 @@ class ObjetivosController extends Controller
                  //damos formato a fecha expiración
                 if ($objetivo['expiration_date'] == NULL OR $objetivo['expiration_date'] == "0000-00-00")
                 {
-                    $fecha_exp = "Ninguna";
+                    $fecha_exp = NULL;
                 }
                 else 
                 {
@@ -51,7 +51,7 @@ class ObjetivosController extends Controller
                     $fecha_creacion .= " a las ".date_format($objetivo['created_at'],"H:i:s");
                 }
                 else
-                    $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                    $fecha_creacion = NULL;
 
                 //damos formato a fecha de actualización 
                 if ($objetivo['updated_at'] != NULL)
@@ -65,34 +65,18 @@ class ObjetivosController extends Controller
                 //damos formato a categoría de objetivo
                 if ($objetivo['objective_category_id'] == NULL)
                 {
-                    $categoria = "Ninguna";
+                    $categoria = NULL;
                 }
                 else
                     $categoria = \Ermtool\Objective_category::where('id',$objetivo['objective_category_id'])->value('name');
 
                 if ($objetivo['perspective'] == NULL)
                 {
-                    $perspective = "No definida";
+                    $perspective = NULL;
                 }
                 else
                 {
-                    switch ($objetivo['perspective']) {
-                        case 1:
-                            $perspective = "Financiera";
-                            break;
-                        case 2:
-                            $perspective = "Procesos";
-                            break;
-                        case 3:
-                            $perspective = "Clientes";
-                            break;
-                        case 4:
-                            $perspective = "Aprendizaje";
-                            break;
-                        default:
-                            # code...
-                            break;
-                    }
+                    $perspective = $objetivo['perspective'];   
                 }
 
                 $objectives[$i] = array('id'=>$objetivo['id'],
@@ -107,11 +91,25 @@ class ObjetivosController extends Controller
                 $i += 1;
 
             }
-            return view('datos_maestros.objetivos.index',['organizations'=>$organizations,'objetivos'=>$objectives,'nombre_organizacion'=>$nombre_organizacion,'probador' => $i]);
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.objetivos.index',['organizations'=>$organizations,'objetivos'=>$objectives,'nombre_organizacion'=>$nombre_organizacion,'probador' => $i]);
+            }
+            else
+            {
+                return view('datos_maestros.objetivos.index',['organizations'=>$organizations,'objetivos'=>$objectives,'nombre_organizacion'=>$nombre_organizacion,'probador' => $i]);
+            }
         }
         else
         {
-            return view('datos_maestros.objetivos.index',['organizations'=>$organizations]);
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.objetivos.index',['organizations'=>$organizations]);
+            }
+            else
+            {
+                return view('datos_maestros.objetivos.index',['organizations'=>$organizations]);
+            }
         }
 
     }
@@ -126,7 +124,14 @@ class ObjetivosController extends Controller
         $categorias = \Ermtool\Objective_category::where('status',0)->lists('name','id');
 
         $org_id = \Ermtool\Organization::where('id',$_GET['organizacion'])->value('id');
-        return view('datos_maestros.objetivos.create',['categorias'=>$categorias,'org_id'=>$org_id]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.objetivos.create',['categorias'=>$categorias,'org_id'=>$org_id]);
+        }
+        else
+        {
+            return view('datos_maestros.objetivos.create',['categorias'=>$categorias,'org_id'=>$org_id]);
+        }
     }
 
     /**
@@ -158,7 +163,14 @@ class ObjetivosController extends Controller
                 'perspective' => $_POST['perspective']
                 ]);
 
-            Session::flash('message','Objetivo corporativo agregado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Bussiness objective was successfully created');
+            }
+            else
+            {
+                Session::flash('message','Objetivo corporativo agregado correctamente');
+            }
         });
         return Redirect::to('/objetivos?organizacion='.$_POST['organization_id']);
     }
@@ -185,7 +197,15 @@ class ObjetivosController extends Controller
         $categorias = \Ermtool\Objective_category::where('status',0)->lists('name','id');
         $objetivo = \Ermtool\Objective::find($id);
         $org_id = \Ermtool\Organization::where('id',$objetivo['organization_id'])->value('id');
-        return view('datos_maestros.objetivos.edit',['categorias'=>$categorias,'objetivo'=>$objetivo,'org_id'=>$org_id]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.objetivos.edit',['categorias'=>$categorias,'objetivo'=>$objetivo,'org_id'=>$org_id]);
+        }
+        else
+        {
+            return view('datos_maestros.objetivos.edit',['categorias'=>$categorias,'objetivo'=>$objetivo,'org_id'=>$org_id]);
+        }
+        
     }
 
     public function bloquear($id)
@@ -198,7 +218,14 @@ class ObjetivosController extends Controller
             $objetivo->status = 1;
             $objetivo->save();
 
-            Session::flash('message','Objetivo bloqueado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Objective successfully blocked');
+            }
+            else
+            {
+                Session::flash('message','Objetivo bloqueado correctamente');
+            }
         });
 
         return Redirect::to('/objetivos');
@@ -214,7 +241,14 @@ class ObjetivosController extends Controller
             $objetivo->status = 0;
             $objetivo->save();
 
-            Session::flash('message','Objetivo desbloqueado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Objective successfully unblocked');
+            }
+            else
+            {
+                Session::flash('message','Objetivo desbloqueado correctamente');
+            }
         });
 
         //obtenemos org
@@ -237,21 +271,31 @@ class ObjetivosController extends Controller
         // ---recorremos todas las organizaciones para asignar formato de datos correspondientes--- //
         foreach ($objetivos as $objetivo)
         {
-            //damos formato a categoria de objetivo
-            if ($objetivo['objective_category_id'] != NULL)
-            {
-                $categoria = \Ermtool\Objective_category::find($objetivo['objective_category_id'])->value('name');
-            }
-            else 
-                $categoria = "ninguna";
 
             //damos formato a fecha expiración
             if ($objetivo['expiration_date'] == NULL OR $objetivo['expiration_date'] == "0000-00-00")
             {
-                $fecha_exp = "Ninguna";
+                $fecha_exp = NULL;
             }
             else 
                 $fecha_exp = $objetivo['fecha_exp'];
+
+            //damos formato a categoría de objetivo
+            if ($objetivo['objective_category_id'] == NULL)
+            {
+                 $categoria = NULL;
+            }
+            else
+                $categoria = \Ermtool\Objective_category::where('id',$objetivo['objective_category_id'])->value('name');
+
+            if ($objetivo['perspective'] == NULL)
+            {
+                $perspective = NULL;
+            }
+            else
+            {
+                $perspective = $objetivo['perspective'];   
+            }
 
             $objective[$i] = array('id'=>$objetivo['id'],
                                 'nombre'=>$objetivo['name'],
@@ -260,11 +304,20 @@ class ObjetivosController extends Controller
                                 'fecha_act'=>$objetivo['updated_at'],
                                 'fecha_exp'=>$fecha_exp,
                                 'categoria'=>$categoria,
-                                'estado'=>$objetivo['status']);
+                                'estado'=>$objetivo['status'],
+                                'perspective' => $perspective);
             $i += 1;
         }
 
-        return view('datos_maestros.objetivos.index',['organizations'=>$combobox,'objetivos'=>$objective,'nombre_organizacion'=>$nombre_organizacion,'probador' => $i,'organizacion'=>$id_organizacion]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.objetivos.index',['organizations'=>$combobox,'objetivos'=>$objective,'nombre_organizacion'=>$nombre_organizacion,'probador' => $i,'organizacion'=>$id_organizacion]);
+        }
+        else
+        {
+            return view('datos_maestros.objetivos.index',['organizations'=>$combobox,'objetivos'=>$objective,'nombre_organizacion'=>$nombre_organizacion,'probador' => $i,'organizacion'=>$id_organizacion]);
+        }
+        
     }
     /**
      * Update the specified resource in storage.
@@ -309,7 +362,15 @@ class ObjetivosController extends Controller
 
             $objetivo->save();
 
-            Session::flash('message','Objetivo actualizado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Objective was successfully updated');
+            }
+            else
+            {
+                Session::flash('message','Objetivo actualizado correctamente');
+            }
+            
         });
 
         $id_org = \Ermtool\Objective::where('id',$id)->value('organization_id');

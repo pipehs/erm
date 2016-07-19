@@ -49,7 +49,7 @@ class OrganizationController extends Controller
             //damos formato a fecha expiración
             if ($organizaciones['expiration_date'] == NULL OR $organizaciones['expiration_date'] == "0000-00-00")
             {
-                $fecha_exp = "Ninguna";
+                $fecha_exp = NULL;
             }
             else 
             {
@@ -58,17 +58,9 @@ class OrganizationController extends Controller
                 $fecha_exp .= " a las ".date_format($expiration_date,"H:i:s");
             }
 
-            //damos formato a servicios compartidos
-            if ($organizaciones['shared_services'] == 0)
-            {
-                $serv_compartidos = "No";
-            }
-            else
-                $serv_compartidos = "Si";
-
             if ($organizaciones['mision'] == NULL || $organizaciones['mision'] == "")
             {
-                $mision = "No se ha definido misión de la organización";
+                $mision = NULL;
             }
             else
             {
@@ -77,7 +69,7 @@ class OrganizationController extends Controller
 
             if ($organizaciones['vision'] == NULL || $organizaciones['vision'] == "")
             {
-                $vision = "No se ha definido visión de la organización";
+                $vision = NULL;
             }
             else
             {
@@ -86,7 +78,7 @@ class OrganizationController extends Controller
 
             if ($organizaciones['target_client'] == NULL || $organizaciones['target_client'] == "")
             {
-                $target_client = "No se ha definido clientes objetivo";
+                $target_client = NULL;      
             }
             else
             {
@@ -101,12 +93,19 @@ class OrganizationController extends Controller
                                 'mision'=>$mision,
                                 'vision'=>$vision,
                                 'fecha_exp'=>$fecha_exp,
-                                'serv_compartidos'=>$serv_compartidos,
+                                'serv_compartidos'=>$organizaciones['shared_services'],
                                 'estado'=>$organizaciones['status']);
             $i += 1;
         }
 
-        return view('datos_maestros.organization.index',['organizations'=>$organization,'org_dependientes'=>$org_dependientes]);    
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.organization.index',['organizations'=>$organization,'org_dependientes'=>$org_dependientes]);
+        }
+        else
+        {
+            return view('datos_maestros.organization.index',['organizations'=>$organization,'org_dependientes'=>$org_dependientes]);
+        }
     }
 
     /**
@@ -116,8 +115,16 @@ class OrganizationController extends Controller
      */
     public function create()
     {
-        $organizations = \Ermtool\Organization::where('status',0)->where('organization_id',NULL)->lists('name','id');
-        return view('datos_maestros.organization.create',['organizations'=>$organizations]);
+        if (Session::get('languaje') == 'en')
+        {
+            $organizations = \Ermtool\Organization::where('status',0)->where('organization_id',NULL)->lists('name','id');
+            return view('en.datos_maestros.organization.create',['organizations'=>$organizations]);
+        }
+        else
+        {
+            $organizations = \Ermtool\Organization::where('status',0)->where('organization_id',NULL)->lists('name','id');
+            return view('datos_maestros.organization.create',['organizations'=>$organizations]);
+        }
     }
 
     /**
@@ -166,7 +173,14 @@ class OrganizationController extends Controller
                 'target_client' => $target_client
                 ]);
 
-            Session::flash('message','Organizaci&oacute;n creada correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Organization created successfully');
+            }
+            else
+            {
+                Session::flash('message','Organizaci&oacute;n creada correctamente');
+            }
         });
 
         return Redirect::to('/organization');
@@ -194,7 +208,15 @@ class OrganizationController extends Controller
     {
         $organizations = \Ermtool\Organization::where('id','<>',$id)->where('status',0)->where('organization_id',NULL)->lists('name','id');
         $org = \Ermtool\Organization::find($id);
-        return view('datos_maestros.organization.edit',['organizations'=>$organizations,'organization'=>$org]);
+
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.datos_maestros.organization.edit',['organizations'=>$organizations,'organization'=>$org]);
+        }
+        else
+        {
+            return view('datos_maestros.organization.edit',['organizations'=>$organizations,'organization'=>$org]);
+        }
     }
 
 
@@ -208,7 +230,14 @@ class OrganizationController extends Controller
             $organization->status = 1;
             $organization->save();
 
-            Session::flash('message','Organizaci&oacute;n bloqueada correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Organization blocked successfully');
+            }
+            else
+            {
+                Session::flash('message','Organizaci&oacute;n bloqueada correctamente');
+            }
         });
         return Redirect::to('/organization');
     }
@@ -223,7 +252,16 @@ class OrganizationController extends Controller
             $organization->status = 0;
             $organization->save();
 
-            Session::flash('message','Organizaci&oacute;n desbloqueada correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Organization unblocked successfully');
+            }
+            
+            else
+            {
+                Session::flash('message','Organizaci&oacute;n desbloqueada correctamente');
+            }
+            
         });
         return Redirect::to('/organization');
     }
@@ -280,8 +318,14 @@ class OrganizationController extends Controller
             $organization->target_client = $target_client;
 
             $organization->save();
-
-            Session::flash('message','Organizaci&oacute;n actualizada correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Organization update successfully');
+            }    
+            else
+            {
+                Session::flash('message','Organizaci&oacute;n actualizada correctamente');
+            }
         });
 
         return Redirect::to('/organization');

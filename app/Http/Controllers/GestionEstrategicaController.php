@@ -23,7 +23,14 @@ class GestionEstrategicaController extends Controller
     {
         $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
-        return view('gestion_estrategica.kpi',['organizations' => $organizations]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.gestion_estrategica.kpi',['organizations' => $organizations]);
+        }
+        else
+        {
+            return view('gestion_estrategica.kpi',['organizations' => $organizations]);
+        }
     }
 
     public function kpi2()
@@ -70,10 +77,18 @@ class GestionEstrategicaController extends Controller
                 $date_last_eval = date_format($date_last, 'd-m-Y');
             }
             else
-            {
-                $last_eval_value = "No hay evaluaciones validadas";
+            {   //Resulta más fácil configurarlo los mensajes aquí que en la vista (en este caso)
+                if (Session::get('languaje') == 'en')
+                {
+                    $last_eval_value = "No valid assessments";
+                    $date_last_eval = "No valid assessments";
+                }
+                else
+                {
+                    $last_eval_value = "No hay evaluaciones validadas";
+                    $date_last_eval = "No hay evaluaciones validadas";
+                }
                 $last_eval_status = NULL;
-                $date_last_eval = "No hay evaluaciones validadas";
             }
 
             //vemos si existe eval para validar
@@ -103,7 +118,14 @@ class GestionEstrategicaController extends Controller
             }
             else
             {
-                $stake = "No se ha asignado responsable";
+                if (Session::get('languaje') == 'en')
+                {
+                    $stake = "No responsable assigned";
+                }
+                else
+                {
+                    $stake = "No se ha asignado responsable";   
+                }
             }
 
             //realizamos un contador de perspectivas, para poder mostrar ordenadamente en gráfica
@@ -127,7 +149,14 @@ class GestionEstrategicaController extends Controller
 
             if ($k->goal == NULL)
             {
-                $goal = "No se han definido metas";
+                if (Session::get('languaje') == 'en')
+                {
+                    $goal = "No defined goals";
+                }
+                else
+                {
+                    $goal = "No se han definido metas";
+                }
             }
             else
             {
@@ -150,14 +179,27 @@ class GestionEstrategicaController extends Controller
             $i += 1;
         }
 
-        return view('gestion_estrategica.kpi',['organizations' => $organizations, 'org_selected' => $org_selected, 'kpi' => $kpi,'org_id' => $_GET['organization_id'],'financiera' => $financiera,'procesos' => $procesos,'clientes' => $clientes,'aprendizaje' => $aprendizaje]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.gestion_estrategica.kpi',['organizations' => $organizations, 'org_selected' => $org_selected, 'kpi' => $kpi,'org_id' => $_GET['organization_id'],'financiera' => $financiera,'procesos' => $procesos,'clientes' => $clientes,'aprendizaje' => $aprendizaje]);
+        }
+        else
+        {
+            return view('gestion_estrategica.kpi',['organizations' => $organizations, 'org_selected' => $org_selected, 'kpi' => $kpi,'org_id' => $_GET['organization_id'],'financiera' => $financiera,'procesos' => $procesos,'clientes' => $clientes,'aprendizaje' => $aprendizaje]);
+        }
     }
 
     public function mapas()
     {
         $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
-        return view('gestion_estrategica.mapas',['organizations' => $organizations]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.gestion_estrategica.mapas',['organizations' => $organizations]);
+        }
+        else
+        {
+            return view('gestion_estrategica.mapas',['organizations' => $organizations]);
+        }
     }
 
     public function mapas2()
@@ -173,8 +215,14 @@ class GestionEstrategicaController extends Controller
                     ->where('status','=',0)
                     ->select('name','id','perspective','description')
                     ->get();
-
-        return view('gestion_estrategica.mapas',['organizations' => $organizations, 'vision' => $vision, 'objectives' => $objectives, 'org_selected' => $org_selected]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.gestion_estrategica.mapas',['organizations' => $organizations, 'vision' => $vision, 'objectives' => $objectives, 'org_selected' => $org_selected]);
+        }
+        else
+        {
+            return view('gestion_estrategica.mapas',['organizations' => $organizations, 'vision' => $vision, 'objectives' => $objectives, 'org_selected' => $org_selected]);
+        }
     }
 
     /**
@@ -194,7 +242,14 @@ class GestionEstrategicaController extends Controller
         ->orderBy('name')
         ->lists('full_name', 'id');
 
-        return view('gestion_estrategica.createkpi',['objectives' => $objectives,'org_selected' => $org_selected,'org_id' => $id,'stakeholders'=>$stakeholders]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.gestion_estrategica.createkpi',['objectives' => $objectives,'org_selected' => $org_selected,'org_id' => $id,'stakeholders'=>$stakeholders]);
+        }
+        else
+        {
+            return view('gestion_estrategica.createkpi',['objectives' => $objectives,'org_selected' => $org_selected,'org_id' => $id,'stakeholders'=>$stakeholders]);
+        }
 
     }
 
@@ -298,11 +353,25 @@ class GestionEstrategicaController extends Controller
 
             if (isset($kpi))
             {
-                Session::flash('message','KPI generado correctamente');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','KPI successfully created');
+                }
+                else
+                {
+                    Session::flash('message','KPI generado correctamente');
+                }
             }
             else
             {
-                Session::flash('error','Error al grabar KPI');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('error','Error at storing KPI');
+                }
+                else
+                {
+                    Session::flash('error','Error al grabar KPI');
+                }
             }
         });
 
@@ -351,7 +420,14 @@ class GestionEstrategicaController extends Controller
             $i += 1;
         }
 
-        return view('gestion_estrategica.editkpi',['objectives' => $objectives,'org_selected' => $org_selected,'org_id' => $_GET['org_id'],'stakeholders'=>$stakeholders,'obj_selected' => $obj_selected,'kpi' => $kpi]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.gestion_estrategica.editkpi',['objectives' => $objectives,'org_selected' => $org_selected,'org_id' => $_GET['org_id'],'stakeholders'=>$stakeholders,'obj_selected' => $obj_selected,'kpi' => $kpi]);
+        }
+        else
+        {
+            return view('gestion_estrategica.editkpi',['objectives' => $objectives,'org_selected' => $org_selected,'org_id' => $_GET['org_id'],'stakeholders'=>$stakeholders,'obj_selected' => $obj_selected,'kpi' => $kpi]);
+        }
     }
 
     public function kpiEvaluate($id)
@@ -378,9 +454,7 @@ class GestionEstrategicaController extends Controller
                             ->where('status','=',1)
                             ->max('month');
 
-                $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
-                $last_eval = "La &uacute;ltima evaluaci&oacute;n fue realizada en ".$meses[$month-1]." del año ".$year.".";
+                $last_eval = $month;
             }
             else if ($kpi->periodicity == 2) //Semestral
             {
@@ -389,10 +463,8 @@ class GestionEstrategicaController extends Controller
                             ->where('year','=',$year)
                             ->where('status','=',1)
                             ->max('semester');
-                if ($semester == 1)
-                    $last_eval = "La &uacute;ltima evaluaci&oacute;n fue realizada el primer semestre del año ".$year.".";
-                else if ($semester == 2)
-                    $last_eval = "La &uacute;ltima evaluaci&oacute;n fue realizada el segundo semestre del año ".$year.".";
+                
+                $last_eval = $semester;
 
             }
             else if ($kpi->periodicity == 3) //Trimestral
@@ -403,31 +475,17 @@ class GestionEstrategicaController extends Controller
                             ->where('status','=',1)
                             ->max('trimester');
 
-                if ($trimester == 1)
-                {
-                    $last_eval = "La &uacute;ltima evaluaci&oacute;n fue realizada el primer trimestre del año ".$year.".";
-                }
-                else if ($trimester == 2)
-                {
-                    $last_eval = "La &uacute;ltima evaluaci&oacute;n fue realizada el segundo trimestre del año ".$year.".";
-                }
-                else if ($trimester == 3)
-                {
-                    $last_eval = "La &uacute;ltima evaluaci&oacute;n fue realizada el tercer trimestre del año ".$year.".";
-                }
-                else if ($trimester == 4)
-                {
-                    $last_eval = "La &uacute;ltima evaluaci&oacute;n fue realizada el cuarto trimestre del año ".$year.".";
-                }
+                $last_eval = $trimester;
             }
             else if ($kpi->periodicity == 4) //Anual
             {
-                $last_eval = "La &uacute;ltima evaluaci&oacute;n fue realizada el año ".$year.".";
+                $last_eval = $year;
             }
         }
         else
         {
-            $last_eval = "No hay evaluaciones previas validadas";
+            $last_eval = NULL;
+            $year = NULL;
         }
 
         //ahora verificaremos que existan una evaluación no validada para actualizar
@@ -439,11 +497,25 @@ class GestionEstrategicaController extends Controller
 
         if ($eval)
         {
-            return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'min_year' => $min_year,'eval'=>$eval]);
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval]);
+            }
+            else
+            {
+                return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval]);
+            }
         }
         else
         {
-            return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'min_year' => $min_year]);
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year]);
+            }
+            else
+            {
+                return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year]);
+            }
         }
     }
 
@@ -492,7 +564,14 @@ class GestionEstrategicaController extends Controller
         }
         if ($eval)
         {
-            Session::flash('error','El periodo de evaluación ya existe. Debe evaluar en un periodo nuevo');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('error','The evaluation period already exists. Please evaluate on a new period.');
+            }
+            else
+            {
+                Session::flash('error','El periodo de evaluación ya existe. Debe evaluar en un periodo nuevo');
+            }
             return Redirect::to('kpi.evaluate.'.$_POST['kpi_id'].'?org_id='.$_POST['org_id'])->withInput();
         }
         else
@@ -533,7 +612,14 @@ class GestionEstrategicaController extends Controller
                         }
 
                         Session::forget('error');
-                        Session::flash('message','Medición guardada con éxito');
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('message','Measurement successfully saved');
+                        }
+                        else
+                        {
+                            Session::flash('message','Medición guardada con éxito');
+                        }
                 }
                 else if (isset($_POST['semester']))
                 {
@@ -569,7 +655,14 @@ class GestionEstrategicaController extends Controller
                         }
 
                         Session::forget('error');
-                        Session::flash('message','Medición guardada con éxito');
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('message','Measurement successfully saved');
+                        }
+                        else
+                        {
+                            Session::flash('message','Medición guardada con éxito');
+                        }
                 }
                 else if (isset($_POST['mes']))
                 {
@@ -605,7 +698,14 @@ class GestionEstrategicaController extends Controller
                         }
 
                         Session::forget('error');
-                        Session::flash('message','Medición guardada con éxito');
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('message','Measurement successfully saved');
+                        }
+                        else
+                        {
+                            Session::flash('message','Medición guardada con éxito');
+                        }
                 }
 
                 else //es anual
@@ -640,7 +740,14 @@ class GestionEstrategicaController extends Controller
                         }
 
                         Session::forget('error');
-                        Session::flash('message','Medición guardada con éxito');
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('message','Measurement successfully saved');
+                        }
+                        else
+                        {
+                            Session::flash('message','Medición guardada con éxito');
+                        }
                 }
             });
 
@@ -664,7 +771,14 @@ class GestionEstrategicaController extends Controller
 
             if ($kpi)
             {
-                Session::flash('message','KPI validado con éxito');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','KPI successfully validated');
+                }
+                else
+                {
+                    Session::flash('message','KPI validado con éxito');
+                }
             }
         });
     }
@@ -770,8 +884,14 @@ class GestionEstrategicaController extends Controller
             }
 
             $kpi->save();
-
-            Session::flash('message','KPI generado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','KPI successfully generated');
+            }
+            else
+            {
+                Session::flash('message','KPI generado correctamente');
+            }
         });
 
         return Redirect::to('kpi2?organization_id='.$_POST['org_id']);
@@ -780,8 +900,14 @@ class GestionEstrategicaController extends Controller
     public function kpiMonitor()
     {
         $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
-        return view('gestion_estrategica.monitorkpi',['organizations' => $organizations]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.gestion_estrategica.monitorkpi',['organizations' => $organizations]);
+        }
+        else
+        {
+            return view('gestion_estrategica.monitorkpi',['organizations' => $organizations]);
+        }
     }
 
     public function kpiMonitor2()
@@ -809,12 +935,22 @@ class GestionEstrategicaController extends Controller
             $stake = NULL;
         }
 
-        $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        if (Session::get('languaje') == 'en')
+        {
+            $meses = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            $trimestres = ['First quarter','Second quarter','Third quarter','Fourth quarter'];
+            $semestres = ['First half','Second half'];
 
-        $trimestres = ['Primer trimestre','Segundo trimestre','Tercer trimestre','Cuarto trimestre'];
-        $semestres = ['Primer semestre','Segundo semestre'];
+            return view('en.gestion_estrategica.monitorkpi',['organizations' => $organizations,'org_selected' => $org_selected,'kpi' => $kpi, 'measures' => $measures,'stake' => $stake,'meses' => $meses, 'trimestres' => $trimestres, 'semestres' => $semestres]);
+        }
+        else
+        {
+            $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+            $trimestres = ['Primer trimestre','Segundo trimestre','Tercer trimestre','Cuarto trimestre'];
+            $semestres = ['Primer semestre','Segundo semestre'];
 
-        return view('gestion_estrategica.monitorkpi',['organizations' => $organizations,'org_selected' => $org_selected,'kpi' => $kpi, 'measures' => $measures,'stake' => $stake,'meses' => $meses, 'trimestres' => $trimestres, 'semestres' => $semestres]);
+            return view('gestion_estrategica.monitorkpi',['organizations' => $organizations,'org_selected' => $org_selected,'kpi' => $kpi, 'measures' => $measures,'stake' => $stake,'meses' => $meses, 'trimestres' => $trimestres, 'semestres' => $semestres]);
+        }
     }
 
     public function getKpi($org)

@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Agregar Causa')
+@section('title', 'Agregar Usuario')
 
 @section('content')
 
