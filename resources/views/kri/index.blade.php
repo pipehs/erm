@@ -78,8 +78,32 @@
 							<tr>
 							<td>{{ $k['name'] }} </td>
 							<td>{{ $k['description'] }}</td>
-							<td>{{ $k['periodicity'] }}</td>
-							<td>{{ $k['uni_med'] }}</td>
+							<td>
+							@if ($k['periodicity'] == 0)
+								Diario
+							@elseif ($k['periodicity'] == 1)
+								Semanal
+							@elseif ($k['periodicity'] == 2)
+								Mensual
+							@elseif ($k['periodicity'] == 3)
+								Semestral
+							@elseif ($k['periodicity'] == 4)
+								Anual
+							@elseif ($k['periodicity'] == 5)
+								Cada vez que ocurra
+							@else
+								No definida
+							@endif
+							</td>
+							<td>
+							@if ($k['uni_med'] == 0)
+								Porcentaje
+							@elseif ($k['uni_med'] == 1)
+								Monto
+							@elseif ($k['uni_med'] == 2)
+								Cantidad
+							@endif
+							</td>
 							<td>{{ $k['last_eval'] }}</td>
 							<td>
 							@if ($k['eval'] == 0)
@@ -89,18 +113,24 @@
 							@elseif ($k['eval'] == 2)
 								<ul class="semaforo rojo"><li></li><li></li><li></li></ul>
 							@elseif ($k['eval'] == 3)
-								Ninguna
+								None
 							@endif
 							</td>
 							<td>{{ $k['description_eval'] }}</td>
 							<td>{{ $k['risk'] }}</td>
-							<td>{{ $k['risk_stakeholder'] }}</td>
+							<td>
+							@if ($k['risk_stakeholder'] == NULL)
+								No se ha especificado
+							@else
+								{{ $k['risk_stakeholder'] }}
+							@endif
+							</td>
 							<td>{{ $k['created_at'] }}</td>
 							<td>
 							@if ($k['date_min'] != null)
 								{{ $k['date_min'] }} al {{ $k['date_max'] }}
 							@else
-								Ninguno
+								No definido
 							@endif
 							</td>
 			@foreach (Session::get('roles') as $role)

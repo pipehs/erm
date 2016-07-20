@@ -74,7 +74,7 @@
 		<td>{{ $causa['nombre'] }}</td>
 		<td>
 		@if ($causa['descripcion'] == NULL)
-			Ninguna
+			None
 		@else
 			{{ $causa['descripcion'] }}
 		@endif

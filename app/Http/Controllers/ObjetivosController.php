@@ -41,14 +41,12 @@ class ObjetivosController extends Controller
                 {
                     $expiration_date = new DateTime($objetivo['expiration_date']);
                     $fecha_exp = date_format($expiration_date, 'd-m-Y');
-                    $fecha_exp .= " a las ".date_format($expiration_date,"H:i:s");
                 }
 
                 //damos formato a fecha creación
                 if ($objetivo['created_at'] != NULL)
                 {
                     $fecha_creacion = date_format($objetivo['created_at'],"d-m-Y");
-                    $fecha_creacion .= " a las ".date_format($objetivo['created_at'],"H:i:s");
                 }
                 else
                     $fecha_creacion = NULL;
@@ -57,10 +55,9 @@ class ObjetivosController extends Controller
                 if ($objetivo['updated_at'] != NULL)
                 {
                     $fecha_act = date_format($objetivo['updated_at'],"d-m-Y");
-                    $fecha_act .= " a las ".date_format($objetivo['updated_at'],"H:i:s");
                 }
                 else
-                    $fecha_act = "Error al registrar fecha de actualizaci&oacute;n";
+                    $fecha_act = NULL;
 
                 //damos formato a categoría de objetivo
                 if ($objetivo['objective_category_id'] == NULL)

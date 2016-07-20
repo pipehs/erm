@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Enlazar Riesgos')
+@section('title', 'Link Risks')
 
 @section('content')
 
@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('riesgo_kri','Riesgo - KRI')!!}</li>
+			<li>{!!Html::link('riesgo_kri','Risk - KRI')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -18,7 +18,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Riesgo - KRI</span>
+					<span>Risk - KRI</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -51,18 +51,18 @@
 				</div>
 			@endif
 
-			En esta secci&oacute;n podr&aacute; ver, crear, modificar y/o evaluar los indicadores filtrando &eacute;stos por el riesgo de negocio o de proceso enlazado.
+			On this section you will be able to view, create, update or asses the indicators filtering it for the bussiness risk or process risk related.
 
 				{!!Form::open(['route'=>'kri.guardar_enlace','method'=>'POST','class'=>'form-horizontal',
 				'enctype'=>'multipart/form-data'])!!}
 				<div id="cargando"></div>
 				<div id="risks" style="float: center;">
 					<div class="form-group">
-						{!!Form::label('Seleccione riesgo',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Select risk',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							<select name="risk_id" id="risk_id" required="true">
-								<option value="" selected disabled>- Seleccione -</option>
-								<option value="" disabled>- Riesgos de proceso asociados -</option>
+								<option value="" selected disabled>- Select -</option>
+								<option value="" disabled>- Process risks associated -</option>
 								@if ($risk_subprocess != null)
 									@foreach ($risk_subprocess as $risk)
 										<option value="{{ $risk['id'] }}">
@@ -70,18 +70,18 @@
 										</option>
 									@endforeach
 								@else
-									<option value="" disabled>No hay riesgos de proceso asociados</option>
+									<option value="" disabled>No process risks associated</option>
 								@endif
 
 								@if ($objective_risk != null)
-									<option value="" disabled>- Riesgos de negocio -</option>
+									<option value="" disabled>- Bussiness risks -</option>
 									@foreach ($objective_risk as $risk)
 										<option value="{{ $risk['id'] }}">
 											{{ $risk['name'] }}
 										</option>
 									@endforeach
 								@else
-									<option value="" disabled>No hay riesgos de negocio</option>
+									<option value="" disabled>No bussiness risks</option>
 								@endif
 							</select>
 						</div>
@@ -96,7 +96,7 @@
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('kri', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('kri', $title = 'Return', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 			</div>
@@ -124,11 +124,11 @@ $("#risk_id").change(function() {
 
 				if (result == "null")
 				{
-					var info = "<center>Aun no se ha creado indicador para el riesgo ";
+					var info = "<center>Still have not created indicators for the risk ";
 					info += $("#risk_id option:selected").text() + ".<br><br></center>";
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
-					info += '<center><a href="kri.create2.'+$("#risk_id").val()+'" class="btn btn-success">Crear KRI</a</center>';
+					info += '<center><a href="kri.create2.'+$("#risk_id").val()+'" class="btn btn-success">Create KRI</a</center>';
 				<?php break; ?>
 				@endif
 			@endforeach
@@ -141,18 +141,18 @@ $("#risk_id").change(function() {
 					var table_row= '<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">';
 					table_row += '<thead>';
 					table_row += '<th>KRI</th>';
-					table_row += '<th >Descripci&oacute;n</th>';
-					table_row += '<th>Unidad de medida de evaluaci&oacute;n';
-					table_row += '<th>Evaluaci&oacute;n</th>';
-					table_row += '<th>Resultado</th>';
-					table_row += '<th>Descripci&oacute;n de la evaluaci&oacute;n</th>';
-					table_row += '<th>Riesgo</th>';
-					table_row += '<th>Responsable del riesgo</th>';
-					table_row += '<th>Fecha evaluaci&oacute;n</th>';
+					table_row += '<th >Description</th>';
+					table_row += '<th>Assessment unit of measurement';
+					table_row += '<th>Assessment</th>';
+					table_row += '<th>Result</th>';
+					table_row += '<th>Description of the assessment</th>';
+					table_row += '<th>Risk</th>';
+					table_row += '<th>Risk responsable</th>';
+					table_row += '<th>Assessment date</th>';
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
-					table_row += '<th>Acci&oacute;n</th>';
-					table_row += '<th>Acci&oacute;n</th>';
+					table_row += '<th>Action</th>';
+					table_row += '<th>Action</th>';
 				<?php break; ?>
 				@endif
 			@endforeach
@@ -166,7 +166,14 @@ $("#risk_id").change(function() {
 					//seteamos datos
 					$(datos).each( function() {
 							table_row += '<tr><td>'+this.name+'</td><td>'+this.description+'</td>';
-							table_row += '<td>'+this.uni_med+'</td>';
+
+							if (this.uni_med == 0)
+								uni_med = "Percentage"
+							else if (this.uni_med == 1)
+								uni_med = "Amount"
+							else if (this.uni_med == 2)
+								uni_med = "Quantity"
+							table_row += '<td>'+uni_med+'</td>';
 							table_row += '<td>'+this.last_eval+'</td>';
 
 							//mostramos evaluación
@@ -190,12 +197,18 @@ $("#risk_id").change(function() {
 
 							table_row += '<td>'+this.description_eval+'</td>';
 							table_row += '<td>'+ $("#risk_id option:selected").text() +'</td>';
-							table_row += '<td>'+this.stakeholder+'</td>';
+
+							if (this.stakeholder == null)
+								resp = "None"
+							else
+								resp = this.stakeholder
+
+							table_row += '<td>'+resp+'</td>';
 							table_row += '<td>'+this.date_last+'</td>';
 					@foreach (Session::get('roles') as $role)
 						@if ($role != 6)
-							table_row += '<td><a href="kri.edit.'+this.id+'" class="btn btn-primary">Editar</a></td>';
-							table_row += '<td><a href="kri.evaluar.'+this.id+'" class="btn btn-success">Evaluar</a></td>';
+							table_row += '<td><a href="kri.edit.'+this.id+'" class="btn btn-primary">Edit</a></td>';
+							table_row += '<td><a href="kri.evaluar.'+this.id+'" class="btn btn-success">Assess</a></td>';
 							<?php break; ?>
 						@endif
 					@endforeach
@@ -207,7 +220,7 @@ $("#risk_id").change(function() {
 					table_row += '</table>';
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
-					table_row += '<center><a href="kri.create2.'+$("#risk_id").val()+'" class="btn btn-success">Agregar nuevo KRI</a</center>';
+					table_row += '<center><a href="kri.create2.'+$("#risk_id").val()+'" class="btn btn-success">Create new KRI</a</center>';
 				<?php break; ?>
 				@endif
 			@endforeach

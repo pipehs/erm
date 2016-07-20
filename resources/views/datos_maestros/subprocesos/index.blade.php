@@ -93,9 +93,23 @@
 		<td>{{ $subproceso['proceso_relacionado'] }}</td>
 		<td>{{ $subproceso['nombre'] }}</td>
 		<td>{{ $subproceso['descripcion'] }}</td>
-		<td>{{ $subproceso['fecha_creacion'] }}</td>
-		<td>{{ $subproceso['fecha_act'] }}</td>
-		<td>{{ $subproceso['fecha_exp'] }}</td>
+		@if ($subproceso['fecha_creacion'] == NULL)
+			<td>Error al registrar fecha de creaci&oacute;n</td>
+		@else
+			<td>{{ $subproceso['fecha_creacion'] }}</td>
+		@endif
+
+		@if ($subproceso['fecha_act'] == NULL)
+			<td>Error al registrar fecha de actualizaci&oacute;n</td>
+		@else
+			<td>{{ $subproceso['fecha_act'] }}</td>
+		@endif
+
+		@if ($subproceso['fecha_exp'] == NULL)
+			<td>Ninguna</td>
+		@else
+			<td>{{ $subproceso['fecha_exp'] }}</td>
+		@endif
 		<td><ul style="none">
 		@if ($sub_dependientes == NULL)
 			Ninguno

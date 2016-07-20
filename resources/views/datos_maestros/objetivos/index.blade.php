@@ -124,11 +124,41 @@
 					<tr>
 					<td>{{$objetivo['nombre']}}</td>
 					<td>{{$objetivo['descripcion']}}</td>
-					<td>{{$objetivo['fecha_creacion']}}</td>
-					<td>{{$objetivo['fecha_act']}}</td>
-					<td>{{$objetivo['fecha_exp']}}</td>
-					<td>{{$objetivo['categoria']}}</td>
-					<td>{{$objetivo['perspective']}}</td>
+					@if ($objetivo['fecha_creacion'] == NULL)
+						<td>Error al guardar fecha de creaci&oacute;n</td>
+					@else
+						<td>{{$objetivo['fecha_creacion']}}</td>
+					@endif
+
+					@if ($objetivo['fecha_act'] == NULL)
+						<td>Error al guardar fecha de &uacute;ltima actualizaci&oacute;n</td>
+					@else
+						<td>{{$objetivo['fecha_act']}}</td>
+					@endif
+
+					@if ($objetivo['fecha_exp'] == NULL)
+						<td>Ninguna</td>
+					@else
+						<td>{{$objetivo['fecha_exp']}}</td>
+					@endif
+					@if ($objetivo['categoria'] == NULL)
+						<td>No se ha definido categor&iacute;a</td>
+					@else
+						<td>{{$objetivo['categoria']}}</td>
+					@endif
+					
+					@if ($objetivo['perspective'] == NULL)
+						<td>No se ha definido perspectiva</td>
+					@elseif ($objetivo['perspective'] == 1)
+						<td>Financiera</td>
+					@elseif ($objetivo['perspective'] == 2)
+						<td>Procesos</td>
+					@elseif ($objetivo['perspective'] == 3)
+						<td>Clientes</td>
+					@elseif ($objetivo['perspective'] == 4)
+						<td>Aprendizaje</td>
+					@endif
+
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
 					<td>

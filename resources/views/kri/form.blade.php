@@ -1,4 +1,4 @@
-			@if (!isset($risk_id))
+						@if (!isset($risk_id))
 				<div class="form-group">
 					{!!Form::label('Seleccione riesgo',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
@@ -186,3 +186,5 @@
 						{!!Form::submit('Guardar', ['class'=>'btn btn-success','id'=>'guardar'])!!}
 						</center>
 				</div>
+
+			

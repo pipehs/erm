@@ -86,7 +86,7 @@
 				@endif
 			@endforeach
 			</ul></td>
-			<td>{{ $stakeholder['fecha_creacion'] }}></td>
+			<td>{{ $stakeholder['fecha_creacion'] }}</td>
 			<td>{{ $stakeholder['fecha_act'] }}</td>
 			<td>{{ $stakeholder['correo'] }}</td>
 			<td><ul>
@@ -96,7 +96,12 @@
 				@endif
 			@endforeach
 			</ul></td>
-			<td>{{ $stakeholder['cargo'] }}</td>
+			<td>
+			@if ($stakeholder['cargo'] == NULL)
+				No se ha especificado cargo
+			@else
+				{{ $stakeholder['cargo'] }}
+			@endif</td>
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
 			<td> 

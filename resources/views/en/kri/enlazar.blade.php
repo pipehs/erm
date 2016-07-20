@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Enlazar Riesgos')
+@section('title', 'Link Risks')
 
 @section('content')
 
@@ -9,7 +9,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li>{!!Html::link('kri','KRI')!!}</li>
-			<li>{!!Html::link('kri.enlazar','Enlazar Riesgos')!!}</li>
+			<li>{!!Html::link('kri.enlazar','Link Risks')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Enlazar Riesgos</span>
+					<span>Link Risks</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -58,16 +58,17 @@
 				</div>
 			@endif
 
-			Seleccione el riesgo de proceso y el riesgo de negocio que desea enlazar para la posterior medición de KRI
+			Select the process and bussiness risks that you want to link in.
+
 				{!!Form::open(['route'=>'kri.guardar_enlace','method'=>'POST','class'=>'form-horizontal',
 				'enctype'=>'multipart/form-data'])!!}
 
 				<div id="risk_subprocess" style="float: left; width: 50%">
 					<div class="form-group">
-						{!!Form::label('Riesgos (Riesgo-Subproceso-Proceso)',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Risks (Risk-Subprocess-Process)',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-6">
 							<select name="risk_subprocess_id" required="true">
-								<option value="" selected disabled>-Seleccione-</option>
+								<option value="" selected disabled>- Select -</option>
 								@foreach ($risk_subprocess as $risk)
 									<option value="{{ $risk['id'] }}">
 										{{ $risk['name'] }} - {{ $risk['subprocess_name']}} - {{ $risk['process_name'] }}
@@ -80,10 +81,10 @@
 
 				<div id="objective_risk" style="float: left; width: 50%">
 					<div class="form-group">
-						{!!Form::label('Riesgos (Riesgo-Objetivo)',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Risks (Risk-Objective)',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-6">
 							<select name="objective_risk_id" required="true">
-								<option value="" selected disabled>-Seleccione-</option>
+								<option value="" selected disabled>- Select -</option>
 								@foreach ($objective_risk as $risk)
 									<option value="{{ $risk['id'] }}">
 										{{ $risk['name'] }} - {{ $risk['objective_name']}}
@@ -96,17 +97,17 @@
 
 				<div class="form-group">
 						<center>
-						{!!Form::submit('Enlazar', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Link', ['class'=>'btn btn-primary'])!!}
 						</center>
 					</div>
 
 				{!!Form::close()!!}
-				<center><h4><b>Riesgos enlazados</b></h4></center>
+				<center><h4><b>Linked Risks</b></h4></center>
 				<div width="50%">
 					<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px; width:50%; text-align:center; margin:auto;">
 					<thead>
-					<th>Riesgo de subproceso<label><input type='text' placeholder='Filtrar' /></label></th>
-					<th>Riesgo de negocio<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Subprocess Risk<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Bussiness Risk<label><input type='text' placeholder='Filtrar' /></label></th>
 					</thead>
 
 					@foreach($enlaces as $enlace)
@@ -118,7 +119,7 @@
 					</table>
 				</div>
 				<center>
-					{!! link_to_route('kri', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('kri', $title = 'Return', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 			</div>

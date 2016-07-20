@@ -73,8 +73,17 @@
 		<tr>
 		<td>{{$risk_category['nombre']}}</td>
 		<td>{{$risk_category['descripcion']}}</td>
-		<td>{{$risk_category['fecha_creacion']}}</td>
-		<td>{{$risk_category['fecha_exp']}}</td>
+		@if ($risk_category['fecha_creacion'] == NULL)
+			<td>Error al registrar fecha de creaci&oacute;n</td>
+		@else
+			<td>{{$risk_category['fecha_creacion']}}</td>
+		@endif
+
+		@if ($risk_category['fecha_exp'] == NULL)
+			<td>Ninguna</td>
+		@else
+			<td>{{$risk_category['fecha_exp']}}</td>
+		@endif
 		<td>
 		<ul>
 		@if ($categorias_dependientes != NULL)

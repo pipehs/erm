@@ -56,7 +56,7 @@
 				if ($("#green_min").val() > 100)
 				{
 					$("#div_green_min").attr('class','form-group has-error has-feedback');
-					$("#error_min_green").html('<font color="red"><b>El valor de porcentaje debe ser menor o igual a 100</b></font>');
+					$("#error_min_green").html('<font color="red"><b>The percentage value must be less or equal than 100</b></font>');
 					$("#guardar").attr('disabled','true');
 				}
 				else
@@ -78,7 +78,7 @@
 				if ($("#interval_min").val() > 100)
 				{
 					$("#div_interval_min").attr('class','form-group has-error has-feedback');
-					$("#error_interval_min").html('<font color="red"><b>El valor de porcentaje debe ser menor o igual a 100</b></font>');
+					$("#error_interval_min").html('<font color="red"><b>The percentage value must be less or equal than 100</b></font>');
 					$("#guardar").attr('disabled','true');
 				}
 				else
@@ -100,7 +100,7 @@
 				if ($("#interval_max").val() > 100)
 				{
 					$("#div_interval_max").attr('class','form-group has-error has-feedback');
-					$("#error_interval_max").html('<font color="red"><b>El valor de porcentaje debe ser menor o igual a 100</b></font>');
+					$("#error_interval_max").html('<font color="red"><b>The percentage value must be less or equal than 100</b></font>');
 					$("#guardar").attr('disabled','true');
 				}
 				else
@@ -122,7 +122,7 @@
 				if ($("#red_max").val() > 100)
 				{
 					$("#div_red_max").attr('class','form-group has-error has-feedback');
-					$("#error_max_red").html('<font color="red"><b>El valor de porcentaje debe ser menor o igual a 100</b></font>');
+					$("#error_max_red").html('<font color="red"><b>The percentage value must be less or equal than 100</b></font>');
 					$("#guardar").attr('disabled','true');
 				}
 				else
@@ -144,7 +144,7 @@
 			if ($("#green_min").val() > 100)
 			{
 				$("#div_green_min").attr('class','form-group has-error has-feedback');
-				$("#error_min_green").html('<font color="red"><b>El valor de porcentaje debe ser menor o igual a 100</b></font>');
+				$("#error_min_green").html('<font color="red"><b>The percentage value must be less or equal than 100</b></font>');
 				$("#guardar").attr('disabled','true');
 			}
 			else
@@ -157,7 +157,7 @@
 			if ($("#interval_min").val() > 100)
 			{
 				$("#div_interval_min").attr('class','form-group has-error has-feedback');
-				$("#error_interval_min").html('<font color="red"><b>El valor de porcentaje debe ser menor o igual a 100</b></font>');
+				$("#error_interval_min").html('<font color="red"><b>The percentage value must be less or equal than 100</b></font>');
 				$("#guardar").attr('disabled','true');
 			}
 			else
@@ -170,7 +170,7 @@
 			if ($("#interval_max").val() > 100)
 			{
 				$("#div_interval_max").attr('class','form-group has-error has-feedback');
-				$("#error_interval_max").html('<font color="red"><b>El valor de porcentaje debe ser menor o igual a 100</b></font>');
+				$("#error_interval_max").html('<font color="red"><b>The percentage value must be less or equal than 100</b></font>');
 				$("#guardar").attr('disabled','true');
 			}
 			else
@@ -183,7 +183,7 @@
 			if ($("#red_max").val() > 100)
 			{
 				$("#div_red_max").attr('class','form-group has-error has-feedback');
-				$("#error_max_red").html('<font color="red"><b>El valor de porcentaje debe ser menor o igual a 100</b></font>');
+				$("#error_max_red").html('<font color="red"><b>The percentage value must be less or equal than 100</b></font>');
 				$("#guardar").attr('disabled','true');
 			}
 			else
@@ -275,7 +275,7 @@ function tramos_distintos() //verifica que no haya intervalos iguales
 	{
 		if ($("#green_min").val() == $("#interval_min").val() || $("#interval_min").val() == $("#interval_max").val() || $("#interval_max").val() == $("#red_max").val())
 		{
-			swal('Cuidado','Los intervalos deben ser distintos','error');
+			swal('Warning','The intervals must be different','error');
 			$("#guardar").attr('disabled',true);
 		}
 		

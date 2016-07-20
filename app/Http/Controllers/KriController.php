@@ -32,63 +32,30 @@ class KriController extends Controller
         foreach ($kri_query as $k)
         {
 
-            if ($k->type == 0)
-            {
-                $tipo = "Manual";
-            }
-            else if ($k->type == 1)
-            {
-                $tipo = "Automático";
-            }
-
-            if ($k->uni_med == 0)
-            {
-                $uni_med = "Porcentaje";
-            }
-            else if ($k->uni_med == 1)
-            {
-                $uni_med = "Monto";
-            }
-            else if ($k->uni_med == 2)
-            {
-                $uni_med = "Cantidad";
-            }
-
-
-            //Seteamos periodicity. 0=Diario, 1=Semanal, 2=Mensual, 3=Semestral, 4=Anual
-            switch ($k->periodicity)
-            {
-                case 0:
-                    $periodicity = "Diario";
-                    break;
-                case 1:
-                    $periodicity = "Semanal";
-                    break;
-                case 2:
-                    $periodicity = "Mensual";
-                    break;
-                case 3:
-                    $periodicity = "Semestral";
-                    break;
-                case 4:
-                    $periodicity = "Anual";
-                    break;
-                case 5:
-                    $periodicity = "Cada vez que ocurra";
-                    break;
-                case NULL:
-                    $periodicity = "Falta asignación";
-                    break;
-            }
+            $tipo = $k->type;
+            $uni_med = $k->uni_med;
+            $periodicity = $k->periodicity;
 
             if ($k->kri_last_evaluation === NULL)
             {
-                $last_eval = "Aun no ha sido evaluado";
-                $date_last = "Aun no ha sido evaluado";
-                $eval = 3; //probamos con el valor 3 ya que escribiendo "Ninguna" lo toma como = a 0
-                $description_eval = "Ninguna";
-                $date_min = null;
-                $date_max = null;
+                if (Session::get('languaje') == 'en')
+                {
+                    $last_eval = "Still have not evaluated";
+                    $date_last = "Still have not evaluated";
+                    $eval = 3; //probamos con el valor 3 ya que escribiendo "Ninguna" lo toma como = a 0
+                    $description_eval = "None";
+                    $date_min = null;
+                    $date_max = null;
+                }
+                else
+                {
+                    $last_eval = "Aun no ha sido evaluado";
+                    $date_last = "Aun no ha sido evaluado";
+                    $eval = 3; //probamos con el valor 3 ya que escribiendo "Ninguna" lo toma como = a 0
+                    $description_eval = "Ninguna";
+                    $date_min = null;
+                    $date_max = null;
+                }
             }
             else
             {
@@ -134,7 +101,7 @@ class KriController extends Controller
             //obtenemos stakeholder
             if ($k->risk_stake == 0 || $k->risk_stake == NULL)
             {
-                $stakeholder = "Ninguno";
+                $stakeholder = $k->risk_stake;
             }
              else
             {
@@ -166,8 +133,14 @@ class KriController extends Controller
 
             $i += 1;
         }
-
-        return view('kri.index',['kri'=>$kri]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.kri.index',['kri'=>$kri]);
+        }
+        else
+        {
+            return view('kri.index',['kri'=>$kri]);   
+        }
     }
 
     public function index2()
@@ -210,7 +183,14 @@ class KriController extends Controller
             $i += 1;
         }
 
-        return view('kri.index2',['risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.kri.index2',['risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
+        }
+        else
+        {
+            return view('kri.index2',['risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
+        }
     }
 
     /**
@@ -287,12 +267,26 @@ class KriController extends Controller
             $i += 1;
         }
 
-        return view('kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
+        }
+        else
+        {
+            return view('en.kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
+        }
     }
 
     public function create2($id)
     {
-        return view('kri.create',['risk_id' => $id]);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.kri.create',['risk_id' => $id]);
+        }
+        else
+        {
+            return view('kri.create',['risk_id' => $id]);   
+        }
     }
 
 
@@ -344,11 +338,25 @@ class KriController extends Controller
 
             if (isset($in))
             {
-                Session::flash('message','KRI generado correctamente');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','KRI successfully created');
+                }
+                else
+                {
+                    Session::flash('message','KRI generado correctamente');   
+                }
             }
             else
             {
-                Session::flash('errors','Error al grabar KRI');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('errors','Error storing KRI');
+                }
+                else
+                {
+                    Session::flash('errors','Error al grabar KRI');   
+                }
             }
         });
 
@@ -421,7 +429,15 @@ class KriController extends Controller
         $kri->interval_min = round($kri->interval_min,1);
         $kri->interval_max = round($kri->interval_max,1);
         $kri->red_max  = round($kri->red_max,1);
-        return view('kri.edit',['kri'=>$kri,'risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
+
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.kri.edit',['kri'=>$kri,'risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
+        }
+        else
+        {
+            return view('kri.edit',['kri'=>$kri,'risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);   
+        }
     }
 
     /**
@@ -467,7 +483,14 @@ class KriController extends Controller
 
             $kri->save();
 
-            Session::flash('message','KRI actualizado correctamente');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','KRI successfully updated');
+            }
+            else
+            {
+                Session::flash('message','KRI actualizado correctamente');   
+            }
         });
 
         return Redirect::to('kri');
@@ -541,8 +564,16 @@ class KriController extends Controller
             $i += 1;
         }
 
-        return view('kri.enlazar',['risk_subprocess' => $risk_subprocess, 'objective_risk' => $objective_risk,
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.kri.enlazar',['risk_subprocess' => $risk_subprocess, 'objective_risk' => $objective_risk,
                                     'enlaces' => $enlaces]);
+        }
+        else
+        {
+            return view('kri.enlazar',['risk_subprocess' => $risk_subprocess, 'objective_risk' => $objective_risk,
+                                    'enlaces' => $enlaces]);
+        }
     }
 
     //función que almacena el enlace señalado entre un riesgo de proceso y de negocio
@@ -560,7 +591,14 @@ class KriController extends Controller
             if ($enlace_previo)
             {
                 Session::forget('message');
-                Session::flash('warning','Los riesgos seleccionados ya se encuentran enlazados');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('warning','Selected risks are already attached');
+                }
+                else
+                {
+                    Session::flash('warning','Los riesgos seleccionados ya se encuentran enlazados');
+                }
             }
             else
             {
@@ -574,11 +612,25 @@ class KriController extends Controller
 
                 if (isset($in))
                 {
-                    Session::flash('message','Enlace generado correctamente');
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','Link successfully created');
+                    }
+                    else
+                    {
+                        Session::flash('message','Enlace generado correctamente');
+                    }
                 }
                 else
                 {
-                    Session::flash('errors','Error al grabar KRI');
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('errors','Error storing KRI');
+                    }
+                    else
+                    {
+                        Session::flash('errors','Error al grabar KRI');
+                    }
                 }
             }
 
@@ -596,8 +648,16 @@ class KriController extends Controller
         //obtenemos nombre
         $name = \Ermtool\KRI::where('id',$id)->value('name');
 
-        return view('kri.evaluar',['id' => $id,'uni_med'=>$kri->uni_med,'name'=>$kri->name,
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.kri.evaluar',['id' => $id,'uni_med'=>$kri->uni_med,'name'=>$kri->name,
                                     'green_min' => $kri->green_min, 'red_max' => $kri->red_max]);
+        }
+        else
+        {
+            return view('kri.evaluar',['id' => $id,'uni_med'=>$kri->uni_med,'name'=>$kri->name,
+                                    'green_min' => $kri->green_min, 'red_max' => $kri->red_max]);
+        }
     }
 
     public function storeEval()
@@ -633,12 +693,26 @@ class KriController extends Controller
                         'updated_at' => $date,
                         ]);
 
-                    Session::flash('message','Evaluación realizada correctamente');
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','Measurement successfully created');
+                    }
+                    else
+                    {
+                        Session::flash('message','Evaluación realizada correctamente');
+                    }
                 }
             }
             else
             {
-                Session::flash('error','Error al grabar evaluación. Compruebe que ingreso un valor de evaluación correcto');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('error','Error storing measurement. Check if you entered a correct measurement value');
+                }
+                else
+                {
+                    Session::flash('error','Error al grabar evaluación. Compruebe que ingreso un valor de evaluación correcto');
+                }
 
             }
         });
@@ -668,7 +742,7 @@ class KriController extends Controller
 
         if ($s->stakeholder_id == 0 || $s->stakeholder_id == NULL)
         {
-            $stakeholder = "Ninguno";
+            $stakeholder = NULL;
         }
          else
         {
@@ -684,34 +758,25 @@ class KriController extends Controller
         foreach ($kri_query as $k)
         {
 
-            if ($k->type == 0)
-            {
-                $tipo = "Manual";
-            }
-            else if ($k->type == 1)
-            {
-                $tipo = "Automático";
-            }
-
-            if ($k->uni_med == 0)
-            {
-                $uni_med = "Porcentaje";
-            }
-            else if ($k->uni_med == 1)
-            {
-                $uni_med = "Monto";
-            }
-            else if ($k->uni_med == 2)
-            {
-                $uni_med = "Cantidad";
-            }
+            $tipo = $k->type;
+            $uni_med = $k->uni_med;
 
             if ($k->kri_last_evaluation == NULL)
             {
-                $last_eval = "Aun no ha sido evaluado";
-                $date_last = "Aun no ha sido evaluado";
-                $eval = "Ninguna";
-                $description_eval = "Ninguna";
+                if (Session::get('languaje') == 'en')
+                {
+                    $last_eval = "Still have not evaluated";
+                    $date_last = "Still have not evaluated";
+                    $eval = "None";
+                    $description_eval = "None";
+                }
+                else
+                {
+                    $last_eval = "Aun no ha sido evaluado";
+                    $date_last = "Aun no ha sido evaluado";
+                    $eval = "Ninguna";
+                    $description_eval = "Ninguna";   
+                }
             }
             else
             {

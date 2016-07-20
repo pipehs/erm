@@ -166,7 +166,15 @@ $("#risk_id").change(function() {
 					//seteamos datos
 					$(datos).each( function() {
 							table_row += '<tr><td>'+this.name+'</td><td>'+this.description+'</td>';
-							table_row += '<td>'+this.uni_med+'</td>';
+							if (this.uni_med == 0)
+								uni_med = "Porcentaje"
+							else if (this.uni_med == 1)
+								uni_med = "Monto"
+							else if (this.uni_med == 2)
+								uni_med = "Cantidad"
+
+							table_row += '<td>'+uni_med+'</td>';
+
 							table_row += '<td>'+this.last_eval+'</td>';
 
 							//mostramos evaluación
@@ -190,7 +198,10 @@ $("#risk_id").change(function() {
 
 							table_row += '<td>'+this.description_eval+'</td>';
 							table_row += '<td>'+ $("#risk_id option:selected").text() +'</td>';
-							table_row += '<td>'+this.stakeholder+'</td>';
+							if (this.stakeholder == null)
+								resp = "Ninguno"
+							else
+								resp = this.stakeholder
 							table_row += '<td>'+this.date_last+'</td>';
 					@foreach (Session::get('roles') as $role)
 						@if ($role != 6)

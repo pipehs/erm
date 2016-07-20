@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Editar KRI')
+@section('title', 'Edit KRI')
 
 @section('content')
 
@@ -9,7 +9,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li>{!!Html::link('kri','KRI')!!}</li>
-			<li><a href="kri.edit.{{ $kri['id'] }}">Editar KRI</a></li>
+			<li><a href="kri.edit.{{ $kri['id'] }}">Edit KRI</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Crear KRI</span>
+					<span>Edit KRI</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -46,14 +46,14 @@
 				</div>
 			@endif
 
-			Modifique la informaci&oacute;n para el KRI: <b>{{ $kri['name'] }}</b>.
+			Change the data that you want to update for the KRI: <b>{{ $kri['name'] }}</b>.
 
 			{!!Form::model($kri,['route'=>['kri.update',$kri->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
-				@include('kri.form')
+				@include('en.kri.form')
 
 			{!!Form::close()!!}
 				<center>
-					{!! link_to_route('kri', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('kri', $title = 'Return', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 
@@ -66,7 +66,7 @@
 
 
 @section('scripts2')
-{!!Html::script('assets/js/kri.js')!!}
+{!!Html::script('assets/js/en/kri.js')!!}
 
 
 <script>

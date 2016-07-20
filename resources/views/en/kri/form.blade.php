@@ -1,10 +1,10 @@
-			@if (!isset($risk_id))
+@if (!isset($risk_id))
 				<div class="form-group">
-					{!!Form::label('Seleccione riesgo',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Select risk',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 						<select name="risk_id" id="risk_id" required="true">
-							<option value="" selected disabled>- Seleccione -</option>
-							<option value="" disabled>- Riesgos de proceso asociados -</option>
+							<option value="" selected disabled>- Select -</option>
+							<option value="" disabled>- Process risks associated -</option>
 							@if ($risk_subprocess != null)
 								@foreach ($risk_subprocess as $risk)
 									<!-- Buscamos Riesgo que corresponde en caso que sea editar -->
@@ -19,11 +19,11 @@
 									@endif
 								@endforeach
 							@else
-								<option value="" disabled>No hay riesgos de proceso asociados</option>
+								<option value="" disabled>There are no process risks associated</option>
 							@endif
 
 							@if ($objective_risk != null)
-								<option value="" disabled>- Riesgos de negocio -</option>
+								<option value="" disabled>- Bussiness risks -</option>
 								@foreach ($objective_risk as $risk)
 									<!-- Buscamos Riesgo que corresponde en caso que sea editar -->
 									@if (isset($kri) && $kri->risk_id == $risk['id'])
@@ -37,7 +37,7 @@
 									@endif
 								@endforeach
 							@else
-								<option value="" disabled>No hay riesgos de negocio</option>
+								<option value="" disabled>No bussiness risks</option>
 							@endif
 						</select>
 					</div>
@@ -46,14 +46,14 @@
 				{!!Form::hidden('risk_id',$risk_id)!!}
 			@endif
 				<div class="form-group">
-					{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Name',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 						{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 					</div>
 				</div>
 
 				<div class="form-group">
-					{!!Form::label('Descripción',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Description',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 						{!!Form::textarea('description',null,['class'=>'form-control',
 										'required'=>'true','rows'=>'3'])!!}
@@ -61,47 +61,47 @@
 				</div>
 
 				<div class="form-group">
-					{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Kind',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
-					{!!Form::select('type',['0'=>'Manual','1'=>'Automático'], 
+					{!!Form::select('type',['0'=>'Manual','1'=>'Automatic'], 
 				 	   null, 
-				 	   ['id' => 'el2','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+				 	   ['id' => 'el2','placeholder'=>'- Select -','required'=>'true'])!!}
 					</div>
 				</div>
 
 				<div class="form-group">
-					{!!Form::label('Periodicidad',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Periodicity',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
-						{!!Form::select('periodicity',['0'=>'Diario','1'=>'Semanal','2'=>'Mensual',
-												'3'=>'Semestral','4'=>'Anual','5'=>'Cada vez que ocurra'],null,
-												['placeholder'=>'- Seleccione -'])!!}
+						{!!Form::select('periodicity',['0'=>'Diary','1'=>'Weekly','2'=>'Monthly',
+												'3'=>'Biannual','4'=>'Annual','5'=>'Each time it ocurrs'],null,
+												['placeholder'=>'- Select -'])!!}
 					</div>
 				</div>
 
 				<div class="form-group">
-					{!!Form::label('Unidad de medida',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Measurement unit',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
-					{!!Form::select('uni_med',['0'=>'Porcentaje','1'=>'Monto','2'=>'Cantidad'], 
+					{!!Form::select('uni_med',['0'=>'Percentage','1'=>'Amount','2'=>'Quantity'], 
 				 	   null, 
-				 	   ['id' => 'uni_med','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+				 	   ['id' => 'uni_med','placeholder'=>'- Select -','required'=>'true'])!!}
 					</div>
 				</div>
 			<div id="cotas" style="display:none;">
 				<div class="form-group">
 					<div class="col-sm-10 control-label">
 						<center>
-							<b>Indique si el valor n&uacute;merico m&aacute;ximo lo poseer&aacute; el verde o el rojo</b><br>
+							<b>Specify whether the maximum numeric value will be green or red.</b><br>
 							<br>
 							<div class="radio-inline">
 								<label>
-									{!!Form::radio('min_max',1,['onchange'=>'ordenamiento()'])!!}  Verde m&aacute;ximo
+									{!!Form::radio('min_max',1,['onchange'=>'ordenamiento()'])!!} Green Maximum
 									
 									<i class="fa fa-circle-o"></i>
 								</label>
 							</div>
 							<div class="radio-inline">
 								<label>
-									{!!Form::radio('min_max',2,['onchange'=>'ordenamiento()'])!!}  Rojo m&aacute;ximo
+									{!!Form::radio('min_max',2,['onchange'=>'ordenamiento()'])!!} Red Maximum
 									<i class="fa fa-circle-o"></i>
 								</label>
 							</div>
@@ -112,7 +112,7 @@
 				<div class="form-group">
 					<div class="col-sm-10 control-label">
 						<center>
-							<b>Ingrese los intervalos en concordancia a la imagen siguiente</b>
+							<b>Input the intervals according to the following image</b>
 						</center>
 					</div>
 				</div>
@@ -120,7 +120,7 @@
 				<div class="form-group">
 					<div class="col-sm-10 control-label">
 						<center>
-							{!! HTML::image('assets/img/gradiente_kri.png',"Imagen no encontrada", array('id' => 'gradiente', 'title' => 'Gradiente de ejemplo','height'=>'95px','width'=>'450px')) !!}
+							{!! HTML::image('assets/img/gradiente_kri.png',"Image not found", array('id' => 'gradiente', 'title' => 'Example of gradient','height'=>'95px','width'=>'450px')) !!}
 						</center>
 					</div>
 				</div>
@@ -158,7 +158,7 @@
 				</div>
 
 				<div class="form-group">
-					{!!Form::label('Descripción verde',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Green description',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 						{!!Form::textarea('description_green',null,['class'=>'form-control',
 										'required'=>'true','rows'=>'3','id'=>'description_green'])!!}
@@ -166,7 +166,7 @@
 				</div>
 
 				<div class="form-group">
-					{!!Form::label('Descripción amarillo',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Yellow description',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 						{!!Form::textarea('description_yellow',null,['class'=>'form-control',
 										'required'=>'true','rows'=>'3','id'=>'description_yellow'])!!}
@@ -174,7 +174,7 @@
 				</div>
 
 				<div class="form-group">
-					{!!Form::label('Descripción rojo',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Red description',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 						{!!Form::textarea('description_red',null,['class'=>'form-control',
 										'required'=>'true','rows'=>'3','id'=>'description_red'])!!}
@@ -183,6 +183,6 @@
 			</div>
 				<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-success','id'=>'guardar'])!!}
+						{!!Form::submit('Save', ['class'=>'btn btn-success','id'=>'guardar'])!!}
 						</center>
 				</div>

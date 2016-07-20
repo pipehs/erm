@@ -109,9 +109,23 @@
 		@endif
 		</td>
 		<td>{{ $proceso['descripcion'] }}</td>
-		<td>{{ $proceso['fecha_creacion'] }}</td>
-		<td>{{ $proceso['fecha_act'] }}</td>
-		<td>{{ $proceso['fecha_exp'] }}</td>
+		@if ($proceso['fecha_creacion'] == NULL)
+			<td>Error al guardar fecha de creaci&oacute;n</td>
+		@else
+			<td>{{$proceso['fecha_creacion']}}</td>
+		@endif
+
+		@if ($proceso['fecha_act'] == NULL)
+			<td>Error al guardar fecha de &uacute;ltima actualizaci&oacute;n</td>
+		@else
+			<td>{{$proceso['fecha_act']}}</td>
+		@endif
+
+		@if ($proceso['fecha_exp'] == NULL)
+			<td>Ninguna</td>
+		@else
+			<td>{{$proceso['fecha_exp']}}</td>
+		@endif
 		<td>{{ $proceso['proceso_dependiente'] }}</td>
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)		

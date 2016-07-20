@@ -117,15 +117,15 @@
 		@endif
 
 		@if ($organization['fecha_exp'] == NULL)
-			<td>Expiration date was not specified</td>
+			<td>None</td>
 		@else
 			<td>{{$organization['fecha_exp']}}</td>
 		@endif
 		
-		@if ($organization['serv_compartidos'] == NULL)
-			<td>Shared services was not specified</td>
+		@if ($organization['serv_compartidos'] == 0)
+			<td>No</td>
 		@else
-			<td>{{$organization['serv_compartidos']}}</td>
+			<td>Yes</td>
 		@endif
 		<td>
 		<ul>

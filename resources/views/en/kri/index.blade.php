@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Monitor KRI')
+@section('title', 'KRI Monitor')
 
 @section('content')
 
@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('kri','Gestionar KRI')!!}</li>
+			<li>{!!Html::link('kri','Manage KRI')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -18,7 +18,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Monitor KRI</span>
+					<span>KRI Monitor</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -41,7 +41,7 @@
 				</div>
 			@endif
 
-			En esta secci&oacute;n podr&aacute; monitorear, crear y/o modificar los indicadores para los riesgos relevantes al negocio, adem&aacute;s de poder evaluar los mismos. <br><br>
+			On this section you will be able to monitor, create or edit the indicators for the relevant bussiness risks. Also you can assess them. <br><br>
 
 			<div id="risks" style="float: center;">
 					
@@ -49,25 +49,25 @@
 
 				<div id="info_kri" style="float: center;">
 					@if ($kri == null)
-						<center><b>Aun no se han creado ning&uacute;n KRI.</b></center><br><br>
+						<center><b>Still have not created any KRI</b></center><br><br>
 					@else
 						<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 						<thead>
 						<th style="vertical-align:top;">KRI</th>
-						<th style="vertical-align:top;">Descripci&oacute;n</th>
-						<th style="vertical-align:top;">Periodicidad</th>
-						<th style="vertical-align:top;">Unidad de medida de evaluaci&oacute;n</th>
-						<th style="vertical-align:top;">Evaluaci&oacute;n</th>
-						<th style="vertical-align:top;">Resultado</th>
-						<th style="vertical-align:top;">Descripci&oacute;n de la evaluaci&oacute;n</th>
-						<th style="vertical-align:top;">Riesgo</th>
-						<th style="vertical-align:top;">Responsable del riesgo</th>
-						<th style="vertical-align:top;">Fecha creaci&oacute;n</th>
-						<th style="vertical-align:top;">Intervalo de evaluaci&oacute;n</th>
+						<th style="vertical-align:top;">Description</th>
+						<th style="vertical-align:top;">Periodicity</th>
+						<th style="vertical-align:top;">Assessment unit of measurement</th>
+						<th style="vertical-align:top;">Assessment</th>
+						<th style="vertical-align:top;">Results</th>
+						<th style="vertical-align:top;">Assessment description</th>
+						<th style="vertical-align:top;">Risk</th>
+						<th style="vertical-align:top;">Risk responsable</th>
+						<th style="vertical-align:top;">Created date</th>
+						<th style="vertical-align:top;">Assessment interval</th>
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
-						<th style="vertical-align:top;">Acci&oacute;n</th>
-						<th style="vertical-align:top;">Acci&oacute;n</th>
+						<th style="vertical-align:top;">Action</th>
+						<th style="vertical-align:top;">Action</th>
 				<?php break; ?>
 				@endif
 			@endforeach
@@ -78,8 +78,33 @@
 							<tr>
 							<td>{{ $k['name'] }} </td>
 							<td>{{ $k['description'] }}</td>
-							<td>{{ $k['periodicity'] }}</td>
-							<td>{{ $k['uni_med'] }}</td>
+
+							<td>
+							@if ($k['periodicity'] == 0)
+								Diary
+							@elseif ($k['periodicity'] == 1)
+								Weekly
+							@elseif ($k['periodicity'] == 2)
+								Monthly
+							@elseif ($k['periodicity'] == 3)
+								Biannual
+							@elseif ($k['periodicity'] == 4)
+								Annual
+							@elseif ($k['periodicity'] == 5)
+								Each time it occurs
+							@else
+								Not defined
+							@endif
+							</td>
+							<td>
+							@if ($k['uni_med'] == 0)
+								Percentage
+							@elseif ($k['uni_med'] == 1)
+								Amount
+							@elseif ($k['uni_med'] == 2)
+								Quantity
+							@endif
+							</td>
 							<td>{{ $k['last_eval'] }}</td>
 							<td>
 							@if ($k['eval'] == 0)
@@ -89,24 +114,30 @@
 							@elseif ($k['eval'] == 2)
 								<ul class="semaforo rojo"><li></li><li></li><li></li></ul>
 							@elseif ($k['eval'] == 3)
-								Ninguna
+								None
 							@endif
 							</td>
 							<td>{{ $k['description_eval'] }}</td>
 							<td>{{ $k['risk'] }}</td>
-							<td>{{ $k['risk_stakeholder'] }}</td>
+							<td>
+							@if ($k['risk_stakeholder'] == NULL)
+								Not specified
+							@else
+								{{ $k['risk_stakeholder'] }}
+							@endif
+							</td>
 							<td>{{ $k['created_at'] }}</td>
 							<td>
 							@if ($k['date_min'] != null)
 								{{ $k['date_min'] }} al {{ $k['date_max'] }}
 							@else
-								Ninguno
+								None
 							@endif
 							</td>
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
-							<td><a href="kri.edit.{{ $k['id'] }}" class="btn btn-primary">Editar</a></td>
-							<td><a href="kri.evaluar.{{ $k['id'] }}" class="btn btn-success">Evaluar</a></td>
+							<td><a href="kri.edit.{{ $k['id'] }}" class="btn btn-primary">Edit</a></td>
+							<td><a href="kri.evaluar.{{ $k['id'] }}" class="btn btn-success">Assess</a></td>
 				<?php break; ?>
 				@endif
 			@endforeach
@@ -116,7 +147,7 @@
 					@endif
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
-					<center><a href="kri.create" class="btn btn-success">Agregar nuevo KRI</a></center>
+					<center><a href="kri.create" class="btn btn-success">Create new KRI</a></center>
 				<?php break; ?>
 				@endif
 			@endforeach

@@ -76,16 +76,34 @@
 		<td>{{ $riesgo['nombre'] }}</td>
 		<td>{{ $riesgo['descripcion'] }}</td>
 		<td>{{ $riesgo['categoria'] }}</td>
-		<td>{{ $riesgo['fecha_creacion'] }}</td>
-		<td>{{ $riesgo['fecha_act'] }}</td>
-		<td>{{ $riesgo['fecha_exp'] }}</td>
+		@if ($riesgo['fecha_creacion'] == NULL)
+			<td>Error al registrar fecha de creaci&oacute;n</td>
+		@else
+			<td>{{$riesgo['fecha_creacion']}}</td>
+		@endif
+
+		@if ($riesgo['fecha_act'] == NULL)
+			<td>Error al registrar fecha de actualizaci&oacute;n</td>
+		@else
+			<td>{{$riesgo['fecha_act']}}</td>
+		@endif
+
+		@if ($riesgo['fecha_exp'] == NULL)
+			<td>Ninguna</td>
+		@else
+			<td>{{$riesgo['fecha_exp']}}</td>
+		@endif
 		<td>
 		@if (gettype($riesgo['causas']) == "array") 
 			@foreach ($riesgo['causas'] as $causa)
 				<li>{{ $causa }}</li>
 			@endforeach
 		@else
-			<li>{{ $riesgo['causas'] }}</li>
+			@if ($riesgo['causas'] == NULL)
+				No se han agregado causas
+			@else
+				<li>{{ $riesgo['causas'] }}</li>
+			@endif
 		@endif
 		</td>
 		<td>
@@ -94,7 +112,11 @@
 				<li>{{ $efecto }}</li>
 			@endforeach
 		@else
-			<li>{{ $riesgo['efectos'] }}
+			@if ($riesgo['causas'] == NULL)
+				No se han agregado efectos
+			@else
+				<li>{{ $riesgo['efectos'] }}
+			@endif
 		@endif
 		</td>
 @foreach (Session::get('roles') as $role)

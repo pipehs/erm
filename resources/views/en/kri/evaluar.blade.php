@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Evaluar KRI')
+@section('title', 'Assess KRI')
 
 @section('content')
 
@@ -9,7 +9,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li>{!!Html::link('kri','KRI')!!}</li>
-			<li><a href="kri.evaluar.{{ $id }}">Evaluar KRI</a></li>
+			<li><a href="kri.evaluar.{{ $id }}">Assess KRI</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Evaluar KRI</span>
+					<span>Assess KRI</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -42,16 +42,16 @@
 				</div>
 			@endif
 
-			Ingrese la evaluaci&oacute;n para el KRI: <b>{{ $name }}</b>.</br></br>
+			Input the assessment for the KRI: <b>{{ $name }}</b>.</br></br>
 
 			@if ($uni_med == 0)
-				Recuerde que la unidad de medida para este KRI es en porcentaje, por lo que su evaluaci&oacute;n debe ser igual o menor a 100.
+				Remember that the measurement unit for this KRI is percentage, thus it assessment must be equal or less than 100.
 			@endif
 
 			
 			{!!Form::open(['route'=>'kri.guardar_evaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
 			<div class="form-group">
-				{!!Form::label('Intervalo de evaluación',null,['class'=>'col-sm-4 control-label'])!!}
+				{!!Form::label('Assessment interval',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-2">
 					{!!Form::date('date_min',null,['class'=>'form-control','required'=>'true','onblur'=>'compararFechas(this.value,form.date_max.value)'])!!}
 				</div>
@@ -64,26 +64,26 @@
 			</div>
 
 			<div class="form-group">
-				{!!Form::label('Unidad de medida',null,['class'=>'col-sm-4 control-label'])!!}
+				{!!Form::label('Measurement unit',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-5">
 					@if ($uni_med == 0)
-						{!!Form::text('0','Porcentaje',['class'=>'form-control','disabled'=>'true'])!!}
+						{!!Form::text('0','Percentage',['class'=>'form-control','disabled'=>'true'])!!}
 					@elseif ($uni_med == 1)
-						{!!Form::text('0','Monto',['class'=>'form-control','disabled'=>'true'])!!}
+						{!!Form::text('0','Amount',['class'=>'form-control','disabled'=>'true'])!!}
 					@elseif ($uni_med == 3)
-						{!!Form::text('0','Cantidad',['class'=>'form-control','disabled'=>'true'])!!}
+						{!!Form::text('0','Quantity',['class'=>'form-control','disabled'=>'true'])!!}
 					@endif
 				</div>
 			</div>
 
 			<div class="form-group">
-				{!!Form::label('Valor mínimo de evaluación',null,['class'=>'col-sm-4 control-label'])!!}
+				{!!Form::label('Minimal value of assessment',null,['class'=>'col-sm-4 control-label'])!!}
 				@if ($green_min < $red_max)
 					<div class="col-sm-1">
 						{!!Form::number('min',$green_min,['class'=>'form-control','disabled'=>'true'])!!}
 					</div>
 					<div class="col-sm-3">
-					<center><b>Valor M&aacute;ximo De Evaluaci&oacute;n</b></center>
+					<center><b>Maximum assessment value</b></center>
 					</div>
 					<div class="col-sm-1">
 						{!!Form::number('max',$red_max,['class'=>'form-control','disabled'=>'true'])!!}
@@ -93,7 +93,7 @@
 						{!!Form::number('min',$red_max,['class'=>'form-control','disabled'=>'true'])!!}
 					</div>
 					<div class="col-sm-3">
-					<center><b>Valor M&aacute;ximo De Evaluaci&oacute;n</b></center>
+					<center><b>Maximum assessment value</b></center>
 					</div>
 					<div class="col-sm-1">
 						{!!Form::number('max',$green_min,['class'=>'form-control','disabled'=>'true'])!!}
@@ -102,7 +102,7 @@
 			</div>
 
 			<div class="form-group">
-				{!!Form::label('Evaluación',null,['class'=>'col-sm-4 control-label'])!!}
+				{!!Form::label('Assessment',null,['class'=>'col-sm-4 control-label'])!!}
 				@if ($green_min < $red_max)
 					<div class="col-sm-5">
 						{!!Form::number('evaluation',null,['class'=>'form-control','required'=>'true','id'=>'evaluation','step'=>'0.1','min'=>$green_min,'max'=>$red_max])!!}
@@ -116,13 +116,13 @@
 
 			<div class="form-group">
 				<center>
-					{!!Form::submit('Guardar', ['class'=>'btn btn-success','id'=>'guardar'])!!}
+					{!!Form::submit('Save', ['class'=>'btn btn-success','id'=>'guardar'])!!}
 				</center>
 			</div>
 
 			<div class="form-group">
 				<center>
-					<a href="#" class="btn btn-warning" id="ver_evaluaciones">Ver evaluaciones anteriores</a>
+					<a href="#" class="btn btn-warning" id="ver_evaluaciones">Previous assessments</a>
 				</center>
 			</div>
 
@@ -136,7 +136,7 @@
 			{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('kri', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('kri', $title = 'Return', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 
@@ -173,7 +173,7 @@ $("#ver_evaluaciones").click(function() {
 
 			if (result == "null")
 			{
-				var info = "<center>Aun no se han agregado evaluaciones para el riesgo ";
+				var info = "<center>Still have not been added assesment risk";
 				info += "{{ $name }}" + ".<br><br></center>";
 				$("#evaluaciones").append(info);
 			}
@@ -183,10 +183,10 @@ $("#ver_evaluaciones").click(function() {
 				var table_row = '<div width="50%">';
 				table_row += '<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">';
 				table_row += '<thead>';
-				table_row += '<th>Valor evaluaci&oacute;n</th>';
-				table_row += '<th>Resultado</th>';
-				table_row += '<th>Fecha evaluaci&oacute;n</th>';
-				table_row += '<th>Intervalo evaluaci&oacute;n</th>';
+				table_row += '<th>Value</th>';
+				table_row += '<th>Result</th>';
+				table_row += '<th>Assessment date</th>';
+				table_row += '<th>Assessment interval</th>';
 				table_row += '</thead>';
 
 				//parseamos datos obtenidos
@@ -226,3 +226,4 @@ $("#ver_evaluaciones").click(function() {
 });
 </script>
 @stop
+

@@ -70,14 +70,12 @@ class SubprocesosController extends Controller
             {
                 $expiration_date = new DateTime($subprocess['expiration_date']);
                 $fecha_exp = date_format($expiration_date, 'd-m-Y');
-                $fecha_exp .= " a las ".date_format($expiration_date,"H:i:s");
             }
 
             //damos formato a fecha creación
             if ($subprocess['created_at'] != NULL)
             {
                 $fecha_creacion = date_format($subprocess['created_at'],"d-m-Y");
-                $fecha_creacion .= " a las ".date_format($subprocess['created_at'],"H:i:s");
             }
             else
                 $fecha_creacion = NULL;
@@ -86,7 +84,6 @@ class SubprocesosController extends Controller
             if ($subprocess['updated_at'] != NULL)
             {
                 $fecha_act = date_format($subprocess['updated_at'],"d-m-Y");
-                $fecha_act .= " a las ".date_format($subprocess['updated_at'],"H:i:s");
             }
             else
                 $fecha_act = NULL;

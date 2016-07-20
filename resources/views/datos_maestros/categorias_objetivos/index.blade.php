@@ -72,9 +72,23 @@
 		<tr>
 		<td>{{$objective_category['nombre']}}</td>
 		<td>{{$objective_category['descripcion']}}</td>
-		<td>{{$objective_category['fecha_creacion']}}</td>
-		<td>{{$objective_category['fecha_act']}}</td>
-		<td>{{$objective_category['fecha_exp']}}</td>
+		@if ($objective_category['fecha_creacion'] == NULL)
+			<td>Error al guardar fecha de creaci&oacute;n</td>
+		@else
+			<td>{{$objective_category['fecha_creacion']}}</td>
+		@endif
+
+		@if ($objective_category['fecha_act'] == NULL)
+			<td>Error al guardar fecha de &uacute;ltima actualizaci&oacute;n</td>
+		@else
+			<td>{{$objective_category['fecha_act']}}</td>
+		@endif
+
+		@if ($objective_category['fecha_exp'] == NULL)
+			<td>Ninguna</td>
+		@else
+			<td>{{$objective_category['fecha_exp']}}</td>
+		@endif
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
 		<td>

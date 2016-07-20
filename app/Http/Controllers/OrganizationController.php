@@ -55,7 +55,6 @@ class OrganizationController extends Controller
             {
                 $expiration_date = new DateTime($organizaciones['expiration_date']);
                 $fecha_exp = date_format($expiration_date, 'd-m-Y');
-                $fecha_exp .= " a las ".date_format($expiration_date,"H:i:s");
             }
 
             if ($organizaciones['mision'] == NULL || $organizaciones['mision'] == "")

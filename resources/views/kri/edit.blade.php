@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Crear KRI</span>
+					<span>Editar KRI</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">

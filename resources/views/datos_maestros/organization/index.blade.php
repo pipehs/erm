@@ -97,11 +97,36 @@
 		<tr>
 		<td>{{$organization['nombre']}}</td>
 		<td>{{$organization['descripcion']}}</td>
-		<td>{{$organization['mision']}}</td>
-		<td>{{$organization['vision']}}</td>
-		<td>{{$organization['target_client']}}</td>
-		<td>{{$organization['fecha_exp']}}</td>
-		<td>{{$organization['serv_compartidos']}}</td>
+		@if ($organization['mision'] == NULL)
+			<td>No se ha especificado la misi&oacute;n</td>
+		@else
+			<td>{{$organization['mision']}}</td>
+		@endif
+		
+		@if ($organization['vision'] == NULL)
+			<td>No se ha especificado visi&oacute;n</td>
+		@else
+			<td>{{$organization['vision']}}</td>
+		@endif
+
+		@if ($organization['target_client'] == NULL)
+			<td>No se ha especificado el cliente objetivo</td>
+		@else
+			<td>{{$organization['target_client']}}</td>
+		@endif
+
+		@if ($organization['fecha_exp'] == NULL)
+			<td>Ninguna</td>
+		@else
+			<td>{{$organization['fecha_exp']}}</td>
+		@endif
+		
+		@if ($organization['serv_compartidos'] == 0)
+			<td>No</td>
+		@else
+			<td>Si</td>
+		@endif
+		
 		<td>
 		<ul>
 		@if ($org_dependientes == NULL)

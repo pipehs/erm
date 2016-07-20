@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Crear KRI')
+@section('title', 'Create KRI')
 
 @section('content')
 
@@ -9,7 +9,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li>{!!Html::link('kri','KRI')!!}</li>
-			<li>{!!Html::link('kri.create','Crear KRI')!!}</li>
+			<li>{!!Html::link('kri.create','Create KRI')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Crear KRI</span>
+					<span>Create KRI</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -46,21 +46,21 @@
 				</div>
 			@endif
 
-			Ingrese la informaci&oacute;n para el nuevo indicador.
+			Input the information for the new KRI.
 
 			{!!Form::open(['route'=>'kri.store','method'=>'POST','class'=>'form-horizontal'])!!}
-				@include('kri.form')
+				@include('en.kri.form')
 
 			{!!Form::close()!!}
 
 			@if(isset($risk_id))
 				<center>
-					{!! link_to_route('riesgo_kri', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('riesgo_kri', $title = 'Return', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 				</center>
 			@else
 				<center>
-					{!! link_to_route('kri', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('kri', $title = 'Return', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 			@endif
@@ -75,5 +75,5 @@
 
 
 @section('scripts2')
-{!!Html::script('assets/js/kri.js')!!}
+{!!Html::script('assets/js/en/kri.js')!!}
 @stop

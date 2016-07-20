@@ -42,7 +42,6 @@ class CategoriasObjetivosController extends Controller
             else
             {
                 $fecha_creacion = date_format($category['created_at'],"d-m-Y");
-                $fecha_creacion .= " at ".date_format($category['created_at'],"H:i:s");
             }
 
              //damos formato a fecha expiración
@@ -54,14 +53,12 @@ class CategoriasObjetivosController extends Controller
             {
                 $expiration_date = new DateTime($category['expiration_date']);
                 $fecha_exp = date_format($expiration_date, 'd-m-Y');
-                $fecha_exp .= " at ".date_format($expiration_date,"H:i:s");
             }
 
             //damos formato a fecha de actualización 
             if ($category['updated_at'] != NULL)
             {
                 $fecha_act = date_format($category['updated_at'],"d-m-Y");
-                $fecha_act .= " at ".date_format($category['updated_at'],"H:i:s");
             }
 
             else
