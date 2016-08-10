@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Controles')
+@section('title', 'Controls')
 
 @section('content')
 
@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="controles">Controles</a></li>
+			<li><a href="controles">Controls</a></li>
 		</ol>
 	</div>
 </div>
@@ -18,7 +18,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Controles</span>
+					<span>Controls</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -42,30 +42,30 @@
 		@endif
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
-		{!! link_to_route('controles.create', $title = 'Agregar Nuevo Control', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
+		{!! link_to_route('controles.create', $title = 'Create new control', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 	<?php break; ?>
 	@endif
 @endforeach
 
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 	<thead>
-	<th>Nombre</th>
-	<th>Descripci&oacute;n</th>
-	<th>Origen del Control</th>
-	<th>Riesgo(s)/Subproceso(s) - Riesgo(s)/Objetivo(s) </th>
-	<th>Tipo Control</th>
-	<th>Fecha Agregado</th>
-	<th>Fecha Actualizado</th>
-	<th>Responsable del Control</th>
-	<th>Evidencia</th>
-	<th>Prop&oacute;sito</th>
+	<th>Name</th>
+	<th>Description</th>
+	<th>Origin of the control</th>
+	<th>Risk(s)/Subprocess(es) - Risk(s)/Objective(s) </th>
+	<th>Control kind</th>
+	<th>Creation date</th>
+	<th>Update date</th>
+	<th>Control owner</th>
+	<th>Evidence</th>
+	<th>Purpose</th>
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
-	<th>Editar</th>
+	<th>Edit</th>
 	<?php break; ?>
 	@endif
 @endforeach
-	<th>Documentos</th>
+	<th>Documents</th>
 	</thead>
 
 	@foreach($controls as $control)
@@ -74,9 +74,9 @@
 			<td>{{ $control['description'] }}</td>
 			<td>
 			@if ($control['type2'] == 0)
-				De Proceso
+				Process
 			@elseif ($control['type2'] == 1)
-				De Negocio
+				Bussiness
 			@endif
 			</td>
 			<td><ul>
@@ -90,32 +90,36 @@
 			@if ($control['type'] == 0)
 				Manual
 			@elseif ($control['type'] == 1)
-				Semi-autom&aacute;tico
+				Semi-automatic
 			@elseif ($control['type'] == 2)
-				Autom&aacute;tico
+				Automatic
 			@endif	
 			</td>
 			<td>{{ $control['created_at'] }}</td>
 			<td>{{ $control['updated_at'] }}</td>
 			
 			<td>{{ $control['stakeholder'] }}</td>
-			<td>{{ $control['evidence'] }}</td>
+			@if ($control['evidence'] == NULL)
+				<td>No specified</td>
+			@else
+				<td>{{ $control['evidence'] }}</td>
+			@endif
 			<td>
 			@if ($control['purpose'] == 0)
-				Preventivo
+				Preventive
 			@elseif ($control['purpose'] == 1)
-				Detectivo
+				Detective
 			@elseif ($control['purpose'] == 2)
-				Correctivo
+				Corrective
 			@else
-				Error al ingresar prop&oacute;sito
+				Error storing purpose
 			@endif
 			</td>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)	
 			<td> 
 			<div>
-	            {!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'], $attributes = ['class'=>'btn btn-success']) !!}
+	            {!! link_to_route('controles.edit', $title = 'Edit', $parameters = $control['id'], $attributes = ['class'=>'btn btn-success']) !!}
 	        </div><!-- /btn-group -->
 			</td>
 		<?php break; ?>
@@ -123,7 +127,7 @@
 	@endforeach
 		<td>
 			<div>
-	            {!! link_to_route('controles.docs', $title = 'Ver', $parameters = $control['id'], $attributes = ['class'=>'btn btn-warning']) !!}
+	            {!! link_to_route('controles.docs', $title = 'View', $parameters = $control['id'], $attributes = ['class'=>'btn btn-warning']) !!}
 	        </div><!-- /btn-group -->
 		</td>
 		</tr>

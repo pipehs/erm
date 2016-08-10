@@ -72,7 +72,7 @@
 			<div>
 			<center>
 				{!! link_to_route('evaluacion_agregadas', $title = 'Return', $parameters = NULL,
-				 $attributes = ['class'=>'btn btn-success'])!!}
+				 $attributes = ['class'=>'btn btn-danger'])!!}
 			<center>
 			</div>
 		</div>

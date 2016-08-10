@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Agregar Plan de auditor&iacute;a')
+@section('title', 'Editar Plan de auditor&iacute;a')
 
 
 @section('content')

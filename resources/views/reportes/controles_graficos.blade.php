@@ -150,6 +150,10 @@
 						text += '<td>{{$control["description"]}}</td>';
 						text += '<td>{{$control["updated_at"]}}</td></tr>';
 					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.1">Exportar</a>'
+
 					swal({   
 						title: title,   
 						text: text,
@@ -168,6 +172,9 @@
 						text += '<td>{{$control["description"]}}</td>';
 						text += '<td>{{$control["updated_at"]}}</td></tr>';
 					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.2">Exportar</a>'
 					swal({   
 						title: title,   
 						text: text,
@@ -220,6 +227,10 @@
 							text += '<td>{{$control["updated_at"]}}</td></tr>';
 						@endif
 					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.3">Exportar</a>'
+
 					swal({   
 						title: title,   
 						text: text,
@@ -240,6 +251,10 @@
 							text += '<td>{{$control["updated_at"]}}</td></tr>';
 						@endif
 					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.4">Exportar</a>'
+
 					swal({   
 						title: title,   
 						text: text,

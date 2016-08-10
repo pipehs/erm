@@ -138,8 +138,9 @@
 	        </div><!-- /btn-group --></td>
 		<td><div>
 			@if ($proceso['estado'] == 0)
-	           <button class="btn btn-danger" onclick="bloquear({{ $proceso['id'] }},'{{ $proceso['nombre'] }}','procesos','the process')">Block</button>
+	           <button class="btn btn-danger" onclick="bloquear({{ $proceso['id'] }},'{{ $proceso['nombre'] }}','procesos','The process')">Block</button>
 	        @else
+	        	<button class="btn btn-danger" onclick="eliminar2({{ $proceso['id'] }},'{{ $proceso['nombre'] }}','procesos','The process')">Delete</button>
 	        @endif
 	        </div><!-- /btn-group -->
 	    </td>

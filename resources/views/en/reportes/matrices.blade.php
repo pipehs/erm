@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Matrices de control')
+@section('title', 'Control Matrix')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes B&aacute;sicos</a></li>
-			<li><a href="heatmap">Matriz de control</a></li>
+			<li><a href="#">Basic Reports</a></li>
+			<li><a href="heatmap">Control Matrix</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-table"></i>
-					<span>Matriz de control</span>
+					<span>Control Matrix</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -35,37 +35,34 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-      <p>En esta secci&oacute;n podr&aacute; ver la matriz de control para riesgos de negocio o de procesos. 
-      En caso de que desee ver la matriz de control para los riesgos de negocio, deber&aacute; especificar si desea ver
-      la matriz para todas las organizaciones o para alguna en espec&iacute;fica.</p>
-
+	<p>On this section you will be able to see the control matrix for the process or bussiness risks. In case that you want to see tha control matrix for bussiness risks, you must to specify if you want to see the matrix for all organizations or for a specific one.</p>
       	{!!Form::open(['route'=>'genmatriz','method'=>'GET','class'=>'form-horizontal'])!!}
 
       			<div class="form-group">
                  	<div class="row">
-                  		{!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
+                  		{!!Form::label('Select organization',null,['class'=>'col-sm-4 control-label'])!!}
                   		<div class="col-sm-3">
                     		{!!Form::select('organization_id',$organizations, 
                          		null, 
-                         	['id' => 'org','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+                         	['id' => 'org','placeholder'=>'- Select -','required'=>'true'])!!}
                   		</div>
                 	</div>
                 </div>
 
                 <div class="form-group" id="tipo">
 	                <div class="row">
-	                  {!!Form::label('Seleccione tipo de matriz',null,['class'=>'col-sm-4 control-label'])!!}
+	                  {!!Form::label('Matrix kind',null,['class'=>'col-sm-4 control-label'])!!}
 	                  <div class="col-sm-3">
-	                    {!!Form::select('kind',(['0'=>'Controles de proceso','1'=>'Controles de negocio']), 
+	                    {!!Form::select('kind',(['0'=>'Process Control','1'=>'Bussiness Control']), 
 	                         null, 
-	                         ['id' => 'kind','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+	                         ['id' => 'kind','placeholder'=>'- Select -','required'=>'true'])!!}
 	                  </div>
 	                </div>
 	            </div>
 
            		<div class="form-group">
 	                <center>
-	                {!!Form::submit('Seleccionar', ['class'=>'btn btn-primary'])!!}
+	                {!!Form::submit('Select', ['class'=>'btn btn-primary'])!!}
 	                </center>
 	              </div>
 				<br>
@@ -77,66 +74,66 @@
 
 			@if ($value == 0)
 				<thead>
-				<th>ID Control<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Control Id<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Description<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Tipo<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Periodicidad<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Costo control<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Evidencia<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Riesgo(s) / Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Kind<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Periodicity<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Purpose<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Expected cost<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Evidence<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Risk(s) / Subprocess(es)<label><input type="text" placeholder="Filtrar" /></label></th>
 				</thead>
 				
 				
 				@foreach ($datos as $dato)
 					<tr>
 						<td>{{$dato['Control']}}</td>
-						<td>{{$dato['Descripción']}}</td>
+						<td>{{$dato['Description']}}</td>
 						<td>{{$dato['Responsable']}}</td>
-						<td>{{$dato['Tipo']}}</td>
-						<td>{{$dato['Periodicidad']}}</td>
-						<td>{{$dato['Propósito']}}</td>
-						<td>{{$dato['Costo_control']}}</td>
-						<td>{{$dato['Evidencia']}}</td>
-						<td>{{$dato['Riesgo_Subproceso']}}</td>
+						<td>{{$dato['Kind']}}</td>
+						<td>{{$dato['Periodicity']}}</td>
+						<td>{{$dato['Purpose']}}</td>
+						<td>{{$dato['Expected_cost']}}</td>
+						<td>{{$dato['Evidence']}}</td>
+						<td>{{$dato['Risk_Subprocess']}}</td>
 					</tr>
 				@endforeach
 				</table>
 				<div id="boton_exportar">
-					{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "0,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
+					{!! link_to_route('genexcel', $title = 'Export', $parameters = "0,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
 				</div>
 
 			@elseif ($value == 1)
 				<thead>
-				<th>ID Control<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Control Id<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Description<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Tipo<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Periodicidad<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Costo control<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Evidencia<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Riesgo(s) / Objetivos(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Kind<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Periodicity<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Purpose<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Expected Cost<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Evidence<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Risk(s) / Objective(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 				</thead>
 				
 				
 				@foreach ($datos as $dato)
 					<tr>
 						<td>{{$dato['Control']}}</td>
-						<td>{{$dato['Descripción']}}</td>
+						<td>{{$dato['Description']}}</td>
 						<td>{{$dato['Responsable']}}</td>
-						<td>{{$dato['Tipo']}}</td>
-						<td>{{$dato['Periodicidad']}}</td>
-						<td>{{$dato['Propósito']}}</td>
-						<td>{{$dato['Costo_control']}}</td>
-						<td>{{$dato['Evidencia']}}</td>
-						<td>{{$dato['Riesgo_Objetivo']}}</td>
+						<td>{{$dato['Kind']}}</td>
+						<td>{{$dato['Periodicity']}}</td>
+						<td>{{$dato['Purpose']}}</td>
+						<td>{{$dato['Expected_cost']}}</td>
+						<td>{{$dato['Evidence']}}</td>
+						<td>{{$dato['Risk_Objective']}}</td>
 					</tr>
 				@endforeach
 				</table>
 				<div id="boton_exportar">
-					{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "1,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
+					{!! link_to_route('genexcel', $title = 'Export', $parameters = "1,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
 				</div>
 			@endif
 		@endif

@@ -132,9 +132,9 @@
 	        </div><!-- /btn-group --></td>
 		<td><div>
 			@if ($subproceso['estado'] == 0)
-	            <button class="btn btn-danger" onclick="bloquear({{ $subproceso['id'] }},'{{ $subproceso['nombre'] }}','subprocesos','el subproceso')">Bloquear</button>
+	            <button class="btn btn-danger" onclick="bloquear({{ $subproceso['id'] }},'{{ $subproceso['nombre'] }}','subprocesos','El subproceso')">Bloquear</button>
 	        @else
-	      
+	      		<button class="btn btn-danger" onclick="eliminar2({{ $subproceso['id'] }},'{{ $subproceso['nombre'] }}','subprocesos','El subproceso')">Eliminar</button>
 	        @endif
 	        </div><!-- /btn-group -->
 	    </td>

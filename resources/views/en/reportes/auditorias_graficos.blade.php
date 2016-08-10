@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Reporte de Gráficos')
+@section('title', 'Graphic Reports')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes B&aacute;sicos</a></li>
-			<li><a href="graficos_controles">Gr&aacute;ficos Auditor&iacute;as</a></li>
+			<li><a href="#">Basic Reports</a></li>
+			<li><a href="graficos_auditorias">Audit Graphics</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-table"></i>
-					<span>Auditor&iacute;as</span>
+					<span>Audits</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -35,7 +35,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-      		<p>En esta secci&oacute;n podr&aacute; ver distintos gr&aacute;ficos que permitan observar de mejor manera toda la informaci&oacute;n relacionada a las auditor&iacute;as ingresadas en el sistema.</p>
+			On this section you will be able to view different graphics that allow you to see on a better way all the information related to the audits.</p>
 
 		</div>
 	</div>
@@ -47,7 +47,7 @@
 		<div class="box-header">
 			<div class="box-name">
 				<i class="fa fa-circle"></i>
-				<span>Estado de planes de auditor&iacute;a</span>
+				<span>Audit Plans status</span>
 			</div>
 			<div class="box-icons">
 				<a class="collapse-link">
@@ -63,7 +63,7 @@
 			<div class="no-move"></div>
 		</div>
 		<div class="box-content">
-			<p align="justify">En este gr&aacute;fico podr&aacute; observar el universo de planes de auditor&iacute;a y el estado de estos, ya sea abierto, cerrado o en ejecuci&oacute;n.</p>
+			<p align="justify">On this graphic you will be able to view the universe of audit plans and the status of them, either open, closed or on execution.</p>
 			<p id="alternativo"></p>
 			<div id="piechart_3d" style="width: 500px; height: 300px;"></div>
 		</div>
@@ -88,16 +88,16 @@
       google.charts.setOnLoadCallback(chart2);
       function chart1() {
         var data = google.visualization.arrayToDataTable([
-          ['Planes de auditoría', 'Cantidad'],
-          ['En ejecución',     {{ $planes_ejec }}],
-          ['Abiertos',     {{ $planes_abiertos }}],
-          ['Cerrados',     {{ $planes_cerrados }}]
+          ['Audit Plans', 'Amount'],
+          ['On execution',     {{ $planes_ejec }}],
+          ['Open',     {{ $planes_abiertos }}],
+          ['Closed',     {{ $planes_cerrados }}]
         ]);
 
         var options = {
-          title: 'Estado de planes de auditoría',
+          title: 'Status of audit plans',
           is3D: false,
-          colors: ['#74DF00','#FF8000']
+          colors: ['#FFFF00','#FF8000','#74DF00']
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
@@ -114,9 +114,9 @@
 				//alert(sel[0].row);
 				if (sel[0].row == 1) //planes abiertos
 				{
-					var title = '<b>Planes Abiertos</b>';
+					var title = '<b>Open Plans</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Auditorías</th><th>Programas</th><th>Pruebas</th></thead>';
+					var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Audits</th><th>Programs</th><th>Tests</th></thead>';
 
 					@foreach ($audit_plans as $plan)
 						@if ($plan['abiertas'] > 0 && $plan['ejecucion'] == 0)
@@ -140,6 +140,8 @@
 							text += '</td></tr>';
 						@endif
 					@endforeach
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.5">Export</a>'
 					swal({   
 						title: title,   
 						text: text,
@@ -149,9 +151,9 @@
 				}
 				else if (sel[0].row == 0) //planes en ejecución
 				{
-					var title = '<b>Planes en ejecución</b>';
+					var title = '<b>On execution Plans</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Auditorías</th><th>Programas</th><th>Pruebas</th></thead>';
+					var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Audits</th><th>Programs</th><th>Tests</th></thead>';
 
 					@foreach ($audit_plans as $plan)
 						@if ($plan['ejecucion'] > 0)
@@ -175,6 +177,48 @@
 							text += '</td></tr>';
 						@endif
 					@endforeach
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.6">Export</a>'
+					swal({   
+						title: title,   
+						text: text,
+						customClass: 'swal-wide',   
+						html: true 
+					});
+				}
+				else if (sel[0].row == 2) //planes cerrados
+				{
+					var title = '<b>Closed Plans</b>';
+
+					var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Description</th><th>Audits</th><th>Programs</th><th>Tests</th></thead>';
+
+					@foreach ($audit_plans as $plan)
+						@if ($plan['status'] == 1)
+							text += '<tr><td>{{$plan["name"]}}</td>';
+							text += '<td>{{$plan["description"]}}</td>';
+							text += '<td>';
+							@foreach ($plan['audits'] as $audit)
+								text += '<li>{{$audit}}</li>';
+							@endforeach
+							text += '</td>';
+
+							text += '<td>';
+							@foreach ($plan['programs'] as $program)
+								text += '<li>{{$program}}</li>';
+							@endforeach
+							text += '</td>';
+
+							text += '<td>';
+							@foreach ($plan['tests'] as $test)
+								text += '<li>{{$test}}</li>';
+							@endforeach
+							text += '</td></tr>';
+						@endif
+					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.7">Export</a>'
+
 					swal({   
 						title: title,   
 						text: text,
@@ -189,12 +233,9 @@
 		}
       }
     @else
-    	$('#alternativo').html('<b>No existen planes de auditor&iacute;as pendientes ni en ejecuci&oacute;on</b>');
+    	$('#alternativo').html('<b>There are not pending or in execution audit plans</b>');
     	//$('#alternativo2').html('<b>Aun no se han ejecutado controles</b>');
     @endif
-
-    
-    
       
 </script>
 @stop

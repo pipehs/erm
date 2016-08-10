@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Reporte de Gráficos')
+@section('title', 'Graphic Reports')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes B&aacute;sicos</a></li>
-			<li><a href="graficos_controles">Gr&aacute;ficos Planes de Acci&oacute;n</a></li>
+			<li><a href="#">Basic Reports</a></li>
+			<li><a href="graficos_controles">Action Plan Graphics</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-table"></i>
-					<span>Planes de Acci&oacute;n</span>
+					<span>Action Plans</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -35,7 +35,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-      		<p>En esta secci&oacute;n podr&aacute; ver distintos gr&aacute;ficos que permitan observar de mejor manera toda la informaci&oacute;n relacionada a los planes de acci&oacute;n ingresados en el sistema.</p>
+			<p>On this section you will be able to see different graphics that allow you to see all the information related to action plans entered on the system.</p>
 
 		</div>
 	</div>
@@ -47,7 +47,7 @@
 		<div class="box-header">
 			<div class="box-name">
 				<i class="fa fa-circle"></i>
-				<span>Tipo de planes de acci&oacute;n</span>
+				<span>Action Plans kind</span>
 			</div>
 			<div class="box-icons">
 				<a class="collapse-link">
@@ -63,7 +63,8 @@
 			<div class="no-move"></div>
 		</div>
 		<div class="box-content">
-			<p align="justify">En este gr&aacute;fico podr&aacute; observar del universo de planes de acci&oacute;n, de que tipo son estos, ya sean planes de acci&oacute;n para evaluaci&oacute;n de controles, auditor&iacute;s u otros.</p>
+			<p align="justify">
+			On this graphic yo will see the universe of action plans with their kind, whether if it are of controls assessment, audits or others.</p>
 			<p id="alternativo"></p>
 			<div id="piechart_3d" style="width: 500px; height: 300px;"></div>
 		</div>
@@ -77,7 +78,7 @@
 		<div class="box-header">
 			<div class="box-name">
 				<i class="fa fa-circle"></i>
-				<span>Clasificaci&oacute;n de hallazgos</span>
+				<span>Issues Classification</span>
 			</div>
 			<div class="box-icons">
 				<a class="collapse-link">
@@ -93,7 +94,8 @@
 			<div class="no-move"></div>
 		</div>
 		<div class="box-content">
-			<p align="justify">En este gr&aacute;fico podr&aacute; observar los distintos hallazgos registrados en el sistema, además de la informaci&oacute;n correspondiente a los planes de acci&oacute;n enlazados a los mismos (siempre que estos tengan un plan de acci&oacute;n registrado).</p>
+			<p align="justify">
+			On this graphic you will see the different issues registered on the system with their correspondant information, and with their action plans (if their have).</p>
 			<p id="alternativo2"></p>
 			<div id="piechart2" style="width: 500px; height: 300px;"></div>
 		</div>
@@ -107,7 +109,7 @@
 		<div class="box-header">
 			<div class="box-name">
 				<i class="fa fa-circle"></i>
-				<span>Estado de planes de acción</span>
+				<span>Action plan status</span>
 			</div>
 			<div class="box-icons">
 				<a class="collapse-link">
@@ -123,7 +125,8 @@
 			<div class="no-move"></div>
 		</div>
 		<div class="box-content">
-			<p align="justify">En este gr&aacute;fico podr&aacute; observar el estado de los distintos planes de acci&oacute;n, si es que est&aacute;n cerrados, pr&oacute;ximos a cerrar, o aquellos que est&aacute;n pasados en su fecha final y aun no se han cerrado.</p>
+			<p align="justify">
+			On this graphic you will observe the status of each action plan (open, close, next to close, deadline passed and still open).</p>
 			<p id="alternativo3"></p>
 			<div id="piechart3" style="width: 500px; height: 300px;"></div>
 		</div>
@@ -141,14 +144,14 @@
       google.charts.setOnLoadCallback(chart1);
       function chart1() {
         var data = google.visualization.arrayToDataTable([
-          ['Planes de acción', 'Cantidad'],
-          ['Evaluación de controles',     {{ $cont_ctrl }}],
-          ['Ejecución de auditoría',     {{ $cont_audit }}],
-          ['Otros',     {{ $others }}]
+          ['Action Plans', 'Amount'],
+          ['Controls Assesment',     {{ $cont_ctrl }}],
+          ['Audit Execution',     {{ $cont_audit }}],
+          ['Others',     {{ $others }}]
         ]);
 
         var options = {
-          title: 'Tipo de planes de acción',
+          title: 'Kind of action plan',
           is3D: false,
           colors: ['#0431B4', '#5882FA']
         };
@@ -167,9 +170,9 @@
 				//alert(sel[0].row);
 				if (sel[0].row == 0) //controles
 				{
-					var title = '<b>Planes de acción creados al evaluar controles</b>';
+					var title = '<b>Actions plan created on control assessment</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Control</th><th>Hallazgo</th><th>Recomendaciones</th><th>Plan</th><th>Estado</th><th>Fecha final</th><th>Responsable</th></thead>';
+					var text ='<table class="table table-striped table-datatable"><thead><th>Control</th><th>Issue</th><th>Recommendations</th><th>Plan</th><th>Status</th><th>Plan Deadline</th><th>Responsable</th></thead>';
 
 					@foreach ($action_plans_ctrl as $plan)
 							text += '<tr><td>{{$plan["control"]}}</td>';
@@ -181,6 +184,8 @@
 							text += '<td>{{ $plan["stakeholder"] }}</td>';
 							text += '</tr>';
 					@endforeach
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.8">Export</a>'
 					swal({   
 						title: title,   
 						text: text,
@@ -190,9 +195,9 @@
 				}
 				else if (sel[0].row == 1) //auditorías
 				{
-					var title = '<b>Planes de acción creados al ejecutar auditoría</b>';
+					var title = '<b>Action plans created on audit execution</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Plan de auditoría</th><th>Auditoría</th><th>Programa</th><th>Prueba</th><th>Hallazgo</th><th>Recomendaciones</th><th>Plan</th><th>Estado</th><th>Fecha final</th><th>Responsable</th></thead>';
+					var text ='<table class="table table-striped table-datatable"><thead><th>Audit Plan</th><th>Audit</th><th>Program</th><th>Test</th><th>Issue</th><th>Recommendations</th><th>Plan</th><th>Status</th><th>Plan Deadline</th><th>Responsable</th></thead>';
 
 					@foreach ($action_plans_audit as $plan)
 							text += '<tr><td>{{$plan["audit_plan"]}}</td>';
@@ -207,6 +212,8 @@
 							text += '<td>{{ $plan["stakeholder"] }}</td>';
 							text += '</tr>';
 					@endforeach
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.9">Export</a>'
 					swal({   
 						title: title,   
 						text: text,
@@ -221,7 +228,7 @@
 		}
       }
     @else
-    	$('#alternativo').html('<b>No existen planes de auditor&iacute;as pendientes ni en ejecuci&oacute;on</b>');
+    	$('#alternativo').html('<b>There are no audit plans pending or on execution</b>');
     	//$('#alternativo2').html('<b>Aun no se han ejecutado controles</b>');
     @endif
 
@@ -230,14 +237,14 @@
     	google.charts.setOnLoadCallback(chart2);
       function chart2() {
         var data = google.visualization.arrayToDataTable([
-          ['Clasificación', 'Cantidad'],
-          ['Oportunidad de mejora',     {{ $op_mejora }}],
-          ['Deficiencia',     {{ $deficiencia }}],
-          ['Debilidad significativa',     {{ $deb_significativa }}]
+          ['Classification', 'Amount'],
+          ['Improvement Opportunity',     {{ $op_mejora }}],
+          ['Deficience',     {{ $deficiencia }}],
+          ['Significant Weakness',     {{ $deb_significativa }}]
         ]);
 
         var options = {
-          title: 'Clasificación de hallazgos',
+          title: 'Issues Classification',
           is3D: false,
           colors: ['#74DF00', '#FF8000', '#FF0000']
         };
@@ -255,9 +262,9 @@
 			{
 	      		if (sel[0].row == 0) //op_mejora
 				{
-					var title = '<b>Oportunidades de mejora</b>';
+					var title = '<b>Improvement Opportunities</b>';
 
-						var text ='<table class="table table-striped table-datatable"><thead><th>Nombre</th><th>Descripci&oacute;n</th><th>Recomendaciones</th><th>Actualizado</th><th>Plan de acción</th><th>Fecha final plan</th><th>Estado plan</th><th>Responsable plan</th></thead>';
+						var text ='<table class="table table-striped table-datatable"><thead><th>Name</th><th>Description</th><th>Recommendations</th><th>Updated</th><th>Action Plan</th><th>Plan Deadline</th><th>Status</th><th>Responsable</th></thead>';
 
 						@foreach ($issues_om as $issue)
 								text += '<tr><td>{{$issue["name"]}}</td>';
@@ -266,10 +273,10 @@
 								text += '<td>{{$issue["updated_at"]}}</td>';
 
 								@if ($issue['action_plan'] == NULL)
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
+									text += '<td>Plan has not been added</td>';
+									text += '<td>Plan has not been added</td>';
+									text += '<td>Plan has not been added</td>';
+									text += '<td>Plan has not been added</td>';
 								@else
 									text += '<td>{{$issue["action_plan"]["description"]}}</td>';
 									text += '<td>{{$issue["action_plan"]["final_date"]}}</td>';
@@ -279,6 +286,8 @@
 
 								text += '</tr>';
 						@endforeach
+						text += '</table>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.10">Export</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -289,9 +298,9 @@
 				}
 	      		else if (sel[0].row == 1) //deficiencia
 				{
-					var title = '<b>Deficiencias</b>';
+					var title = '<b>Deficiences</b>';
 
-						var text ='<table class="table table-striped table-datatable"><thead><th>Nombre</th><th>Descripci&oacute;n</th><th>Recomendaciones</th><th>Actualizado</th><th>Plan de acción</th><th>Fecha final plan</th><th>Estado plan</th><th>Responsable plan</th></thead>';
+						var text ='<table class="table table-striped table-datatable"><thead><th>Name</th><th>Description</th><th>Recommendations</th><th>Updated</th><th>Action plan</th><th>Plan Deadline</th><th>Status</th><th>Responsable</th></thead>';
 
 						@foreach ($issues_def as $issue)
 								text += '<tr><td>{{$issue["name"]}}</td>';
@@ -300,10 +309,10 @@
 								text += '<td>{{$issue["updated_at"]}}</td>';
 
 								@if ($issue['action_plan'] == NULL)
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
+									text += '<td>Plan has not been added</td>';
+									text += '<td>Plan has not been added</td>';
+									text += '<td>Plan has not been added</td>';
+									text += '<td>Plan has not been added</td>';
 								@else
 									text += '<td>{{$issue["action_plan"]["description"]}}</td>';
 									text += '<td>{{$issue["action_plan"]["final_date"]}}</td>';
@@ -313,6 +322,8 @@
 
 								text += '</tr>';
 						@endforeach
+						text += '</table>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.11">Export</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -323,9 +334,9 @@
 				}
 				else if (sel[0].row == 2) //debilidad
 				{
-					var title = '<b>Debilidades significativas</b>';
+					var title = '<b>Significant Weakness</b>';
 
-						var text ='<table class="table table-striped table-datatable"><thead><th>Nombre</th><th>Descripci&oacute;n</th><th>Recomendaciones</th><th>Actualizado</th><th>Plan de acción</th><th>Fecha final plan</th><th>Estado plan</th><th>Responsable plan</th></thead>';
+						var text ='<table class="table table-striped table-datatable"><thead><th>Name</th><th>Description</th><th>Recommendations</th><th>Updated</th><th>Action Plan</th><th>Plan deadline</th><th>Status</th><th>Responsable</th></thead>';
 
 						@foreach ($issues_deb as $issue)
 								text += '<tr><td>{{$issue["name"]}}</td>';
@@ -334,10 +345,10 @@
 								text += '<td>{{$issue["updated_at"]}}</td>';
 
 								@if ($issue['action_plan'] == NULL)
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
+									text += '<td>Plan has not been added</td>';
+									text += '<td>Plan has not been added</td>';
+									text += '<td>Plan has not been added</td>';
+									text += '<td>Plan has not been added</td>';
 								@else
 									text += '<td>{{$issue["action_plan"]["description"]}}</td>';
 									text += '<td>{{$issue["action_plan"]["final_date"]}}</td>';
@@ -347,6 +358,8 @@
 
 								text += '</tr>';
 						@endforeach
+						text += '</table>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.12">Export</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -356,14 +369,12 @@
 						});
 				}
 			}
-
-
       		//console.log(sel);
 		}
 		
       }
     @else
-    	$('#alternativo2').html('<b>No existen hallazgos en el sistema</b>');
+    	$('#alternativo2').html('<b>No issues on the system</b>');
     @endif
 
 
@@ -372,15 +383,15 @@
     	google.charts.setOnLoadCallback(chart3);
       function chart3() {
         var data = google.visualization.arrayToDataTable([
-          ['Estado', 'Cantidad'],
-          ['Abierto',     {{ $cont_open }}],
-          ['Cerca de fecha final',     {{ $cont_warning }}],
-          ['Fecha final terminada y aun abierto',     {{ $cont_danger }}],
-          ['Cerrado',     {{ $cont_closed }}],
+          ['Status', 'Amount'],
+          ['Open',     {{ $cont_open }}],
+          ['Close to deadline',     {{ $cont_warning }}],
+          ['Deadline passed and still open',     {{ $cont_danger }}],
+          ['Closed',     {{ $cont_closed }}],
         ]);
 
         var options = {
-          title: 'Estado de planes de acción',
+          title: 'Action plan status',
           is3D: false,
           colors: ['#D7DF01', '#FF8000', '#FF0000','#74DF00']
         };
@@ -398,9 +409,9 @@
 			{
 	      		if (sel[0].row == 0) //planes abierto
 				{
-					var title = '<b>Planes de acci&oacute;n abierto</b>';
+					var title = '<b>Action Plans open</b>';
 
-						var text ='<table class="table table-striped table-datatable"><thead><th>Hallazgo</th><th>Recomendaciones</th><th>Plan de acci&oacute;n</th><th>Estado</th><th>Fecha actualizado</th><th>Fecha final</th><th>Responsable</th></thead>';
+						var text ='<table class="table table-striped table-datatable"><thead><th>Issue</th><th>Recommendations</th><th>Action Plans</th><th>Status</th><th>Updated date</th><th>Plan Deadline</th><th>Responsable</th></thead>';
 
 						@foreach ($action_plans_open as $plan)
 								text += '<tr><td>{{$plan["issue"]}}</td>';
@@ -413,6 +424,8 @@
 
 								text += '</tr>';
 						@endforeach
+						text += '</table>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.13">Export</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -423,9 +436,9 @@
 				}
 	      		else if (sel[0].row == 1) //planes warning
 				{
-					var title = '<b>Planes de acci&oacute;n cercanos a cerrar</b>';
+					var title = '<b>Action plans near to closed</b>';
 
-						var text ='<table class="table table-striped table-datatable"><thead><th>Hallazgo</th><th>Recomendaciones</th><th>Plan de acci&oacute;n</th><th>Estado</th><th>Fecha actualizado</th><th>Fecha final</th><th>Responsable</th></thead>';
+						var text ='<table class="table table-striped table-datatable"><thead><th>Issue</th><th>Recommendations</th><th>Action plan</th><th>Status</th><th>Updated date</th><th>Plan Deadline</th><th>Responsable</th></thead>';
 
 						@foreach ($action_plans_warning as $plan)
 								text += '<tr><td>{{$plan["issue"]}}</td>';
@@ -435,9 +448,10 @@
 								text += '<td>{{$plan["updated_at"]}}</td>';
 								text += '<td>{{$plan["final_date"]}}</td>';
 								text += '<td>{{$plan["stakeholder"]}}</td>';
-
 								text += '</tr>';
 						@endforeach
+						text += '</table>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.14">Export</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -448,9 +462,9 @@
 				}
 				else if (sel[0].row == 2) //planes danger
 				{
-					var title = '<b>Planes de acci&oacute;n fecha terminada aun abiertos</b>';
+					var title = '<b>Action Plans Deadline passed and still open</b>';
 
-						var text ='<table class="table table-striped table-datatable"><thead><th>Hallazgo</th><th>Recomendaciones</th><th>Plan de acci&oacute;n</th><th>Estado</th><th>Fecha actualizado</th><th>Fecha final</th><th>Responsable</th></thead>';
+						var text ='<table class="table table-striped table-datatable"><thead><th>Issue</th><th>Recommendations</th><th>Action Plan</th><th>Status</th><th>Updated date</th><th>Plan deadline</th><th>Responsable</th></thead>';
 
 						@foreach ($action_plans_danger as $plan)
 								text += '<tr><td>{{$plan["issue"]}}</td>';
@@ -463,6 +477,8 @@
 
 								text += '</tr>';
 						@endforeach
+						text += '</table>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.15">Export</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -473,9 +489,9 @@
 				}
 				else if (sel[0].row == 3) //op_mejora
 				{
-					var title = '<b>Planes de acci&oacute;n cerrados</b>';
+					var title = '<b>Action Plans Closed</b>';
 
-						var text ='<table class="table table-striped table-datatable"><thead><th>Hallazgo</th><th>Recomendaciones</th><th>Plan de acci&oacute;n</th><th>Estado</th><th>Fecha actualizado</th><th>Fecha final</th><th>Responsable</th></thead>';
+						var text ='<table class="table table-striped table-datatable"><thead><th>Issue</th><th>Recommendations</th><th>Action Plan</th><th>Status</th><th>Updated date</th><th>Plan Deadline</th><th>Responsable</th></thead>';
 
 						@foreach ($action_plans_closed as $plan)
 								text += '<tr><td>{{$plan["issue"]}}</td>';
@@ -485,9 +501,10 @@
 								text += '<td>{{$plan["updated_at"]}}</td>';
 								text += '<td>{{$plan["final_date"]}}</td>';
 								text += '<td>{{$plan["stakeholder"]}}</td>';
-
 								text += '</tr>';
 						@endforeach
+						text += '</table>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.16">Export</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -502,7 +519,7 @@
 		
       }
     @else
-    	$('#alternativo3').html('<b>No existen planes de acci&oacute;n</b>');
+    	$('#alternativo3').html('<b>No action plans have been created</b>');
     @endif
     
       

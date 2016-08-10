@@ -62,12 +62,16 @@ Route::get('organization.verbloqueados', [
 	'as' => 'organization.verbloqueados', 'uses' => 'OrganizationController@index'
 ]);
 
-Route::get('organization.desbloquear{id}', [
+Route::get('organization.desbloquear.{id}', [
 	'as' => 'organization.desbloquear', 'uses' => 'OrganizationController@desbloquear'
 ]);
 
 Route::put('organization.update.{id}', [
     'as' => 'organization.update', 'uses' => 'OrganizationController@update'
+]);
+
+Route::get('organization.destroy.{id}', [
+	'as' => 'organization.destroy', 'uses' => 'OrganizationController@destroy'
 ]);
 
 	//Rutas para CRUD + bloquear Objetivos//
@@ -98,6 +102,10 @@ Route::put('objetivos.update.{id}', [
     'as' => 'objetivos.update', 'uses' => 'ObjetivosController@update'
 ]);
 
+Route::get('objetivos.destroy.{id}', [
+    'as' => 'objetivos.destroy', 'uses' => 'ObjetivosController@destroy'
+]);
+
 //Rutas para CRUD + bloquear Procesos//
 
 Route::resource('procesos','ProcesosController');
@@ -124,6 +132,10 @@ Route::get('procesos.desbloquear.{id}', [
 
 Route::put('procesos.update.{id}', [
 	'as' => 'procesos.update', 'uses' => 'ProcesosController@update'
+]);
+
+Route::get('procesos.destroy.{id}', [
+	'as' => 'procesos.destroy', 'uses' => 'ProcesosController@destroy'
 ]);
 
 //Rutas para CRUD + bloquear Subprocesos//
@@ -154,6 +166,10 @@ Route::put('subprocesos.update.{id}', [
 	'as' => 'subprocesos.update', 'uses' => 'SubprocesosController@update'
 ]);
 
+Route::get('subprocesos.destroy.{id}', [
+	'as' => 'subprocesos.destroy', 'uses' => 'SubprocesosController@destroy'
+]);
+
 //Rutas para CRUD + bloquear Categorías de Riesgo//
 
 Route::resource('categorias_risks','CategoriasRiesgosController');
@@ -180,6 +196,10 @@ Route::get('categorias_risks.desbloquear.{id}', [
 
 Route::put('categorias_risks.update.{id}', [
 	'as' => 'categorias_risks.update', 'uses' => 'CategoriasRiesgosController@update'
+]);
+
+Route::get('categorias_risks.destroy.{id}', [
+	'as' => 'categorias_risks.destroy', 'uses' => 'CategoriasRiesgosController@destroy'
 ]);
 
 //Rutas para CRUD + bloquear Categorías de Objetivo//
@@ -210,6 +230,10 @@ Route::put('categorias_objetivos.update.{id}', [
 	'as' => 'categorias_objetivos.update', 'uses' => 'CategoriasObjetivosController@update'
 ]);
 
+Route::get('categorias_objetivos.destroy.{id}', [
+	'as' => 'categorias_objetivos.destroy', 'uses' => 'CategoriasObjetivosController@destroy'
+]);
+
 //Rutas para CRUD + bloquear Riesgos tipo//
 
 Route::resource('riskstype','RiesgosTipoController');
@@ -238,6 +262,10 @@ Route::put('riskstype.update.{id}', [
 	'as' => 'riskstype.update', 'uses' => 'RiesgosTipoController@update'
 ]);
 
+Route::get('riskstype.destroy.{id}', [
+	'as' => 'riskstype.destroy', 'uses' => 'RiesgosTipoController@destroy'
+]);
+
 //Rutas para CRUD + bloquear Stakeholders//
 
 Route::resource('roles','RolesController');
@@ -264,6 +292,10 @@ Route::get('roles.desbloquear.{id}', [
 
 Route::put('roles.update.{id}', [
 	'as' => 'roles.update', 'uses' => 'RolesController@update'
+]);
+
+Route::get('roles.destroy.{id}', [
+	'as' => 'roles.destroy', 'uses' => 'RolesController@destroy'
 ]);
 
 //Rutas para CRUD + bloquear Stakeholders//
@@ -298,6 +330,11 @@ Route::get('get_stakeholders.{org}', [
 	'as' => 'get_stakeholders', 'uses' => 'StakeholdersController@getStakeholders'
 ]);
 
+Route::get('stakeholders.destroy.{id}', [
+	'as' => 'stakeholders.destroy', 'uses' => 'StakeholdersController@destroy'
+]);
+
+
 //Rutas para CRUD + bloquear Causas//
 
 Route::resource('causas','CausasController');
@@ -326,6 +363,10 @@ Route::put('causas.update.{id}', [
 	'as' => 'causas.update', 'uses' => 'CausasController@update'
 ]);
 
+Route::get('causas.destroy.{id}', [
+	'as' => 'causas.destroy', 'uses' => 'CausasController@destroy'
+]);
+
 //Rutas para CRUD + bloquear Efectos//
 
 Route::resource('efectos','EfectosController');
@@ -352,6 +393,10 @@ Route::get('efectos.desbloquear.{id}', [
 
 Route::put('efectos.update.{id}', [
 	'as' => 'efectos.update', 'uses' => 'EfectosController@update'
+]);
+
+Route::get('efectos.destroy.{id}', [
+	'as' => 'efectos.destroy', 'uses' => 'EfectosController@destroy'
 ]);
 
 // ---- FIN RUTAS PARA GESTIÓN DE DATOS MAESTROS---- //
@@ -404,6 +449,10 @@ Route::get('encuestas.show.{id}', [
 // ---- RUTAS PARA IDENTIFICACIÓN DE RIESGO ---- //
 
 Route::resource('riesgos','RiesgosController');
+
+Route::get('riesgos.index2', [
+	'as' => 'riesgos.index2', 'uses' => 'RiesgosController@index2'
+]);
 
 Route::get('riesgos.create', [
 	'as' => 'riesgos.create', 'uses' => 'RiesgosController@create'
@@ -535,13 +584,13 @@ Route::get('heatmap.{id}', [
 Route::get('matrices', [
 	'as' => 'matrices', 'uses' => 'ControlesController@matrices']);
 
-Route::get('matriz_riesgos', [
-	'as' => 'matriz_riesgos', 'uses' => 'RiesgosController@matrices']);
+Route::get('risk_matrix', [
+	'as' => 'risk_matrix', 'uses' => 'RiesgosController@matrices']);
 
 // Nuevos enlaces para matrices de riesgos divididas: matriz de riesgos de proceso y corporativos
 
-Route::get('genmatrizriesgos.{value},{org}', [
-	'as' => 'genmatrizriesgos', 'uses' => 'RiesgosController@generarMatriz']);
+Route::get('genriskmatrix.{value},{org}', [
+	'as' => 'genriskmatrix', 'uses' => 'RiesgosController@generarMatriz']);
 
 //ruta para generar matriz de control a través de JSON
 Route::get('genmatriz.{value},{org}', [
@@ -553,15 +602,24 @@ Route::get('reporte_planes', [
 Route::get('reporte_hallazgos', [
 	'as' => 'reporte_hallazgos', 'uses' => 'IssuesController@issuesReport']);
 
-Route::get('graficos_controles', [
+Route::get('graficos_controles.{id}', [
 	'as' => 'graficos_controles', 'uses' => 'ControlesController@indexGraficos']);
 
-Route::get('graficos_auditorias', [
+Route::get('graficos_auditorias.{id}', [
 	'as' => 'graficos_auditorias', 'uses' => 'AuditoriasController@indexGraficos']);
 
-Route::get('graficos_planes_accion', [
+Route::get('graficos_planes_accion.{id}', [
 	'as' => 'graficos_planes_accion', 'uses' => 'PlanesAccionController@indexGraficos']);
 
+Route::get('reporte_audits', [
+	'as' => 'reporte_audits', 'uses' => 'AuditoriasController@AuditsReport']);
+
+Route::get('genauditreports.{org}', [
+	'as' => 'genauditreports', 'uses' => 'AuditoriasController@generarReporteAuditorias']);
+
+//obtiene datos de auditoría por JSON (a mostrar en reporte de planes de auditoría)
+Route::get('get_audit.{id}', [
+	'as' => 'get_audit', 'uses' => 'AuditoriasController@getAudit']);
 
 //------ Rutas para auditoría de riesgos ------//
 
@@ -676,6 +734,12 @@ Route::get('genexcelplan.{org}', [
 Route::get('genexcelissues.{type},{org}', [
 	'as' => 'genexcelissues', 'uses' => 'ExcelController@generarExcelIssue']);
 
+Route::get('genexcelaudit.{org}', [
+	'as' => 'genexcelaudit', 'uses' => 'ExcelController@generarExcelAudit']);
+
+Route::get('genexcelgraficos.{id}', [
+	'as' => 'genexcelgraficos', 'uses' => 'ExcelController@generarExcelGraficos']);
+
 
 //------ RUTAS PARA ENLACES A TRAVÉS DE JSON --------//
 
@@ -708,13 +772,13 @@ Route::get('auditorias.get_audit_plan.{org}', [
 Route::get('auditorias.objetivos.{org}', [
 	'as' => 'auditorias.objetivos', 'uses' => 'AuditoriasController@getObjetivos']);
 
-//ruta para obtener riesgos de negocio al crear un plan de auditoría
-Route::get('auditorias.objective_risk.{org}', [
-	'as' => 'auditorias.objective_risk', 'uses' => 'AuditoriasController@getRiesgosObjetivos']);
+//ruta para obtener riesgos de negocio de una organización (al crear plan o evaluar riesgos)
+Route::get('get_objective_risk.{org}', [
+	'as' => 'get_objective_risk', 'uses' => 'AuditoriasController@getRiesgosObjetivos']);
 
-//ruta para obtener riesgos de negocio al crear un plan de auditoría
-Route::get('auditorias.risk_subprocess.{org}', [
-	'as' => 'auditorias.risk_subprocess', 'uses' => 'AuditoriasController@getRiesgosProcesos']);
+//ruta para obtener riesgos de negocio de una organización (al crear plan o evaluar riesgos)
+Route::get('get_risk_subprocess.{org}', [
+	'as' => 'get_risk_subprocess', 'uses' => 'AuditoriasController@getRiesgosProcesos']);
 
 //ruta para obtener todos los stakeholders menos el auditor resposable al crear un plan de auditoría
 Route::get('auditorias.stakeholders.{id}', [

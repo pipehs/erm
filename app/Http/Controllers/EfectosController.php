@@ -7,6 +7,8 @@ use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
+use Auth;
+use DB;
 
 
 class EfectosController extends Controller
@@ -18,52 +20,59 @@ class EfectosController extends Controller
      */
     public function index()
     {
-        $efectos = array();
-        if (isset($_GET['verbloqueados']))
+        if (Auth::guest())
         {
-            $efectos2 = \Ermtool\Effect::where('status',1)->get(); //select efectos bloqueados  
+            return view('login');
         }
         else
         {
-            $efectos2 = \Ermtool\Effect::where('status',0)->get(); //select efectos desbloqueados
-        }
-
-        $i = 0;
-
-        // ---recorremos todas las efectos para asignar formato de datos correspondientes--- //
-        foreach ($efectos2 as $efecto)
-        {
-            //damos formato a fecha de creación
-            if ($efecto['created_at'] != NULL)
+            $efectos = array();
+            if (isset($_GET['verbloqueados']))
             {
-                $fecha_creacion = date_format($efecto['created_at'],"d-m-Y");
+                $efectos2 = \Ermtool\Effect::where('status',1)->get(); //select efectos bloqueados  
             }
             else
-                $fecha_creacion = NULL;
-
-            //damos formato a fecha de actualización
-            if ($efecto['updated_at'] != NULL)
             {
-                $fecha_act = date_format($efecto['updated_at'],"d-m-Y");
+                $efectos2 = \Ermtool\Effect::where('status',0)->get(); //select efectos desbloqueados
+            }
+
+            $i = 0;
+
+            // ---recorremos todas las efectos para asignar formato de datos correspondientes--- //
+            foreach ($efectos2 as $efecto)
+            {
+                //damos formato a fecha de creación
+                if ($efecto['created_at'] != NULL)
+                {
+                    $fecha_creacion = date_format($efecto['created_at'],"d-m-Y");
+                }
+                else
+                    $fecha_creacion = NULL;
+
+                //damos formato a fecha de actualización
+                if ($efecto['updated_at'] != NULL)
+                {
+                    $fecha_act = date_format($efecto['updated_at'],"d-m-Y");
+                }
+                else
+                    $fecha_act = NULL;
+
+                $efectos[$i] = array('id'=>$efecto['id'],
+                                    'nombre'=>$efecto['name'],
+                                    'descripcion'=>$efecto['description'],
+                                    'fecha_creacion'=>$fecha_creacion,
+                                    'fecha_act'=>$fecha_act,
+                                    'estado'=>$efecto['status']);
+                $i += 1;
+            }
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.efectos.index',['efectos'=>$efectos]);
             }
             else
-                $fecha_act = NULL;
-
-            $efectos[$i] = array('id'=>$efecto['id'],
-                                'nombre'=>$efecto['name'],
-                                'descripcion'=>$efecto['description'],
-                                'fecha_creacion'=>$fecha_creacion,
-                                'fecha_act'=>$fecha_act,
-                                'estado'=>$efecto['status']);
-            $i += 1;
-        }
-        if (Session::get('languaje') == 'en')
-        {
-            return view('en.datos_maestros.efectos.index',['efectos'=>$efectos]);
-        }
-        else
-        {
-            return view('datos_maestros.efectos.index',['efectos'=>$efectos]);
+            {
+                return view('datos_maestros.efectos.index',['efectos'=>$efectos]);
+            }
         }
     }
 
@@ -74,13 +83,20 @@ class EfectosController extends Controller
      */
     public function create()
     {
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            return view('en.datos_maestros.efectos.create');
+            return view('login');
         }
         else
         {
-            return view('datos_maestros.efectos.create');
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.efectos.create');
+            }
+            else
+            {
+                return view('datos_maestros.efectos.create');
+            }
         }
     }
 
@@ -92,10 +108,16 @@ class EfectosController extends Controller
      */
     public function store(Request $request)
     {
-        \Ermtool\Effect::create([
-            'name' => $request['name'],
-            'description' => $request['description'],
-            ]);
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            \Ermtool\Effect::create([
+                'name' => $request['name'],
+                'description' => $request['description'],
+                ]);
 
             if (Session::get('languaje') == 'en')
             {
@@ -107,6 +129,7 @@ class EfectosController extends Controller
             }
 
             return Redirect::to('/efectos');
+        }
     }
 
     /**
@@ -117,15 +140,22 @@ class EfectosController extends Controller
      */
     public function edit($id)
     {
-        $efecto = \Ermtool\Effect::find($id);
-
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            return view('en.datos_maestros.efectos.edit',['efecto'=>$efecto]);
+            return view('login');
         }
         else
         {
-            return view('datos_maestros.efectos.edit',['efecto'=>$efecto]);
+            $efecto = \Ermtool\Effect::find($id);
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.efectos.edit',['efecto'=>$efecto]);
+            }
+            else
+            {
+                return view('datos_maestros.efectos.edit',['efecto'=>$efecto]);
+            }
         }
     }
 
@@ -138,59 +168,80 @@ class EfectosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $efecto = \Ermtool\Effect::find($id);
-
-        $efecto->name = $request['name'];
-        $efecto->description = $request['description'];
-
-        $efecto->save();
-
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            Session::flash('message','Effect successfully updated');
+            return view('login');
         }
         else
         {
-            Session::flash('message','Efecto actualizado correctamente');
-        }
+            $efecto = \Ermtool\Effect::find($id);
 
-        return Redirect::to('/efectos');
+            $efecto->name = $request['name'];
+            $efecto->description = $request['description'];
+
+            $efecto->save();
+
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Effect successfully updated');
+            }
+            else
+            {
+                Session::flash('message','Efecto actualizado correctamente');
+            }
+
+            return Redirect::to('/efectos');
+        }
     }
 
     public function bloquear($id)
     {
-        $efecto = \Ermtool\Effect::find($id);
-        $efecto->status = 1;
-        $efecto->save();
-
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            Session::flash('message','Effect successfully blocked');
+            return view('login');
         }
         else
         {
-            Session::flash('message','Efecto bloqueado correctamente');
-        }
+            $efecto = \Ermtool\Effect::find($id);
+            $efecto->status = 1;
+            $efecto->save();
 
-        return Redirect::to('/efectos');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Effect successfully blocked');
+            }
+            else
+            {
+                Session::flash('message','Efecto bloqueado correctamente');
+            }
+
+            return Redirect::to('/efectos');
+        }
     }
 
     public function desbloquear($id)
     {
-        $efecto = \Ermtool\Effect::find($id);
-        $efecto->status = 0;
-        $efecto->save();
-
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            Session::flash('message','Effect successfully unblocked');
+            return view('login');
         }
         else
         {
-            Session::flash('message','Efecto desbloqueado correctamente');
-        }
+            $efecto = \Ermtool\Effect::find($id);
+            $efecto->status = 0;
+            $efecto->save();
 
-        return Redirect::to('/efectos');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Effect successfully unblocked');
+            }
+            else
+            {
+                Session::flash('message','Efecto desbloqueado correctamente');
+            }
+
+            return Redirect::to('/efectos');
+        }
     }
 
     /**
@@ -201,6 +252,26 @@ class EfectosController extends Controller
      */
     public function destroy($id)
     {
-        //
+        global $id1;
+        $id1 = $id;
+        global $res;
+        $res = 1;
+
+        DB::transaction(function() {
+
+            //eliminamos primero de effect_risk
+            DB::table('effect_risk')
+                ->where('effect_id','=',$GLOBALS['id1'])
+                ->delete();
+
+            //ahora eliminamos efecto
+            DB::table('effects')
+                ->where('id','=',$GLOBALS['id1'])
+                ->delete();
+
+            $GLOBALS['res'] = 0;
+        });
+
+        return $res;
     }
 }

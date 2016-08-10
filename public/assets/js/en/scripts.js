@@ -47,6 +47,50 @@ function bloquear(id,name,kind,type)
 		   	});
 }
 
+//función para bloquear o desbloquear (primeramente para datos maestros)
+function eliminar2(id,name,kind,type)
+{
+	swal({   title: "Warning!",
+		   text: "Are you sure to delete "+type+" "+name+"?",
+		   type: "warning",   
+		   showCancelButton: true,   
+		   confirmButtonColor: "#31B404",   
+		   confirmButtonText: "Delete",
+		   cancelButtonText: "Cancel",   
+		   closeOnConfirm: false }, 
+		   function(){
+		   		$.get(kind+'.destroy.'+id, function (result) {
+		   			if (result == 0)
+		   			{
+		   				swal({   title: "",
+			   			   text: ""+type+" "+name+" was successfully deleted ",
+			   			   type: "success",   
+			   			   showCancelButton: false,   
+			   			   confirmButtonColor: "#31B404",   
+			   			   confirmButtonText: "Accept",   
+			   			   closeOnConfirm: false }, 
+			   			   function(){   
+			   			   	location.reload();
+			   			});
+		   			}
+		   			else
+		   			{
+		   				swal({   title: "",
+			   			   text: ""+type+" "+name+" could not be deleted. Perhaps it have associated data.",
+			   			   type: "error",   
+			   			   showCancelButton: false,   
+			   			   confirmButtonColor: "#31B404",   
+			   			   confirmButtonText: "Accept",   
+			   			   closeOnConfirm: false }, 
+			   			   function(){   
+			   			   	location.reload();
+			   			});
+		   			}
+
+		   		});	 
+		   });
+}
+
 //función para validar un KPI
 function validatekpi(id,name)
 {
@@ -76,7 +120,7 @@ function validatekpi(id,name)
 		   	});
 }
 
-//función para eliminar datos
+//eliminar issue (por ahora será distinto a la funcion eliminar2 simplemente por el texto del mensaje)
 function eliminar(id,name,kind,type)
 {
 	swal({   title: "Atención!",

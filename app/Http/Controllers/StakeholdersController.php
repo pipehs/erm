@@ -8,6 +8,7 @@ use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
 use DB;
+use Auth;
 
 class StakeholdersController extends Controller
 {
@@ -18,94 +19,100 @@ class StakeholdersController extends Controller
      */
     public function index()
     {
-        //definimos por si no hay
-        $stakeholder = array();
-        $organizaciones = array(); 
-        $roles = array(); 
-        
-        if (isset($_GET['verbloqueados']))
+        if (Auth::guest())
         {
-            $stakeholders = \Ermtool\Stakeholder::where('status',1)->get(); //select stakeholders bloqueadas  
+            return view('login');
         }
         else
         {
-            $stakeholders = \Ermtool\Stakeholder::where('status',0)->get(); //select stakeholders desbloqueadas
-        }
-
-        $i = 0;
-        $j = 0; //contador de organizaciones relacionadas 
-        $k = 0; //contador de roles
-        // ---recorremos todas los stakeholders para asignar formato de datos correspondientes--- //
-        foreach ($stakeholders as $persona)
-        {
-            //ahora obtenemos todas las organizaciones a las que pertenece cada persona
-            $orgs = \Ermtool\Stakeholder::find($persona['id'])->organizations;
-           
-
-            foreach ($orgs as $organization)
+            //definimos por si no hay
+            $stakeholder = array();
+            $organizaciones = array(); 
+            $roles = array(); 
+            
+            if (isset($_GET['verbloqueados']))
             {
-                 $organizaciones[$j] = array('stakeholder_id'=>$persona['id'],
-                                             'id'=>$organization['id'],
-                                             'nombre'=>$organization['name']);
-
-                 $j += 1;
-            }
-
-            //obtenemos todos los roles a los que pertenece una persona
-            $roles_temp = \Ermtool\Stakeholder::find($persona['id'])->roles;
-           
-
-            foreach ($roles_temp as $role)
-            {
-                 $roles[$k] = array('stakeholder_id'=>$persona['id'],
-                                             'id'=>$role['id'],
-                                             'nombre'=>$role['name']);
-
-                 $k += 1;
-            }
-
-            if ($persona['position'] == NULL)
-                $cargo = NULL;
-            else
-                $cargo = $persona['position'];
-
-             //damos formato a fecha creación
-            if ($persona['created_at'] != NULL)
-            {
-                $fecha_creacion = date_format($persona['created_at'],"d-m-Y");
+                $stakeholders = \Ermtool\Stakeholder::where('status',1)->get(); //select stakeholders bloqueadas  
             }
             else
-                $fecha_creacion = NULL;
-
-            //damos formato a fecha de actualización 
-            if ($persona['updated_at'] != NULL)
             {
-                $fecha_act = date_format($persona['updated_at'],"d-m-Y");;
+                $stakeholders = \Ermtool\Stakeholder::where('status',0)->get(); //select stakeholders desbloqueadas
             }
 
-            else
-                $fecha_act = NULL;
+            $i = 0;
+            $j = 0; //contador de organizaciones relacionadas 
+            $k = 0; //contador de roles
+            // ---recorremos todas los stakeholders para asignar formato de datos correspondientes--- //
+            foreach ($stakeholders as $persona)
+            {
+                //ahora obtenemos todas las organizaciones a las que pertenece cada persona
+                $orgs = \Ermtool\Stakeholder::find($persona['id'])->organizations;
+               
 
-            $stakeholder[$i] = array('id'=>$persona['id'],
-                                'dv'=>$persona['dv'],
-                                'nombre'=>$persona['name'],
-                                'apellidos'=>$persona['surnames'],
-                                'fecha_creacion'=>$fecha_creacion,
-                                'fecha_act'=>$fecha_act,
-                                'cargo'=>$cargo,
-                                'correo'=>$persona['mail'],
-                                'estado'=>$persona['status']);
-            $i += 1;
-        }
-        if (Session::get('languaje') == 'en')
-        {
-            return view('en.datos_maestros.stakeholders.index',['stakeholders'=>$stakeholder,
-                                            'organizaciones'=>$organizaciones,'roles'=>$roles]);
-        }
-        else
-        {
-            return view('datos_maestros.stakeholders.index',['stakeholders'=>$stakeholder,
-                                            'organizaciones'=>$organizaciones,'roles'=>$roles]); 
+                foreach ($orgs as $organization)
+                {
+                     $organizaciones[$j] = array('stakeholder_id'=>$persona['id'],
+                                                 'id'=>$organization['id'],
+                                                 'nombre'=>$organization['name']);
+
+                     $j += 1;
+                }
+
+                //obtenemos todos los roles a los que pertenece una persona
+                $roles_temp = \Ermtool\Stakeholder::find($persona['id'])->roles;
+                
+                foreach ($roles_temp as $role)
+                {
+                     $roles[$k] = array('stakeholder_id'=>$persona['id'],
+                                                 'id'=>$role['id'],
+                                                 'nombre'=>$role['name']);
+
+                     $k += 1;
+                }
+
+                if ($persona['position'] == NULL)
+                    $cargo = NULL;
+                else
+                    $cargo = $persona['position'];
+
+                 //damos formato a fecha creación
+                if ($persona['created_at'] != NULL)
+                {
+                    $fecha_creacion = date_format($persona['created_at'],"d-m-Y");
+                }
+                else
+                    $fecha_creacion = NULL;
+
+                //damos formato a fecha de actualización 
+                if ($persona['updated_at'] != NULL)
+                {
+                    $fecha_act = date_format($persona['updated_at'],"d-m-Y");;
+                }
+
+                else
+                    $fecha_act = NULL;
+
+                $stakeholder[$i] = array('id'=>$persona['id'],
+                                    'dv'=>$persona['dv'],
+                                    'nombre'=>$persona['name'],
+                                    'apellidos'=>$persona['surnames'],
+                                    'fecha_creacion'=>$fecha_creacion,
+                                    'fecha_act'=>$fecha_act,
+                                    'cargo'=>$cargo,
+                                    'correo'=>$persona['mail'],
+                                    'estado'=>$persona['status']);
+                $i += 1;
+            }
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.stakeholders.index',['stakeholders'=>$stakeholder,
+                                                'organizaciones'=>$organizaciones,'roles'=>$roles]);
+            }
+            else
+            {
+                return view('datos_maestros.stakeholders.index',['stakeholders'=>$stakeholder,
+                                                'organizaciones'=>$organizaciones,'roles'=>$roles]); 
+            }
         } 
     }
 
@@ -116,20 +123,27 @@ class StakeholdersController extends Controller
      */
     public function create()
     {
-        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-        $roles = \Ermtool\Role::all()->lists('name','id');
-
-        $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
-        //si es create, campo rut estara desbloqueado
-        $required = 'required';
-        $disabled = "";
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            return view('en.datos_maestros.stakeholders.create',['organizations'=>$organizations,'disabled'=>$disabled,'required'=>$required,'roles'=>$roles,'dv'=>$dv]);
+            return view('login');
         }
         else
         {
-            return view('datos_maestros.stakeholders.create',['organizations'=>$organizations,'disabled'=>$disabled,'required'=>$required,'roles'=>$roles,'dv'=>$dv]);
+            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+            $roles = \Ermtool\Role::all()->lists('name','id');
+
+            $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
+            //si es create, campo rut estara desbloqueado
+            $required = 'required';
+            $disabled = "";
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.stakeholders.create',['organizations'=>$organizations,'disabled'=>$disabled,'required'=>$required,'roles'=>$roles,'dv'=>$dv]);
+            }
+            else
+            {
+                return view('datos_maestros.stakeholders.create',['organizations'=>$organizations,'disabled'=>$disabled,'required'=>$required,'roles'=>$roles,'dv'=>$dv]);
+            }
         }
     }
 
@@ -141,93 +155,97 @@ class StakeholdersController extends Controller
      */
     public function store(Request $request)
     {
-        //validamos rut
-        $rut = $_POST['id'].'-'.$_POST['dv'];
-        $res = validaRut($rut);
-
-        if ($res)
+        if (Auth::guest())
         {
-            //Validación: Si la validación es pasada, el código continua
-            $this->validate($request, [
-                'id' => 'unique:stakeholders|min:7',
-                'name' => 'required|max:45|min:4',
-                'surnames' => 'required|min:4',
-                'mail' => 'unique:stakeholders',
-            ]);
-            DB::transaction(function()
-            {
-                \Ermtool\Stakeholder::create([
-                    'id' => $_POST['id'],
-                    'dv' => $_POST['dv'],
-                    'name' => $_POST['name'],
-                    'surnames' => $_POST['surnames'],
-                    'position' => $_POST['position'],
-                    'mail' => $_POST['mail']
-                    ]);
-
-                //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
-                foreach($_POST['organization_id'] as $organization_id)
-                {
-                    DB::table('organization_stakeholder')->insert([
-                        'organization_id'=>$organization_id,
-                        'stakeholder_id'=>$_POST['id']
-                        ]);
-                }
-
-                //INSERTAMOS ROLES
-                    //primero verificamos si es que se está agregando un nuevo rol
-                    if (isset($_POST['rol_nuevo']))
-                    {
-                        $role = \Ermtool\Role::create([
-                            'name' => $_POST['rol_nuevo'],
-                            'status' => 0
-                        ]);
-
-                        //insertamos relación
-                        DB::table('role_stakeholder')->insert([
-                                'stakeholder_id' => $_POST['id'],
-                                'role_id' => $role->id
-                                ]);
-                    }
-
-                    else //se están seleccionando roles existentes
-                    {
-                        foreach ($_POST['role_id'] as $role_id) //insertamos cada rol seleccionado
-                        {
-                            DB::table('role_stakeholder')->insert([
-                                'stakeholder_id' => $_POST['id'],
-                                'role_id' => $role_id
-                                ]);
-                        }
-                    }
-
-                    if (Session::get('languaje') == 'en')
-                    {
-                        Session::flash('message','Stakeholder successfully created');
-                    }
-                    else
-                    {
-                        Session::flash('message','Usuario agregado correctamente');
-                    }
-            });
-
-            return Redirect::to('/stakeholders');
+            return view('login');
         }
         else
         {
-            if (Session::get('languaje') == 'en')
+            //validamos rut
+            $rut = $_POST['id'].'-'.$_POST['dv'];
+            $res = validaRut($rut);
+
+            if ($res)
             {
-                Session::flash('message','The Id that you entered was incorrect. Please try again.');
+                //Validación: Si la validación es pasada, el código continua
+                $this->validate($request, [
+                    'id' => 'unique:stakeholders|min:7',
+                    'name' => 'required|max:45|min:4',
+                    'surnames' => 'required|min:4',
+                    'mail' => 'unique:stakeholders',
+                ]);
+                DB::transaction(function()
+                {
+                    \Ermtool\Stakeholder::create([
+                        'id' => $_POST['id'],
+                        'dv' => $_POST['dv'],
+                        'name' => $_POST['name'],
+                        'surnames' => $_POST['surnames'],
+                        'position' => $_POST['position'],
+                        'mail' => $_POST['mail']
+                        ]);
+
+                    //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
+                    foreach($_POST['organization_id'] as $organization_id)
+                    {
+                        DB::table('organization_stakeholder')->insert([
+                            'organization_id'=>$organization_id,
+                            'stakeholder_id'=>$_POST['id']
+                            ]);
+                    }
+
+                    //INSERTAMOS ROLES
+                        //primero verificamos si es que se está agregando un nuevo rol
+                        if (isset($_POST['rol_nuevo']))
+                        {
+                            $role = \Ermtool\Role::create([
+                                'name' => $_POST['rol_nuevo'],
+                                'status' => 0
+                            ]);
+
+                            //insertamos relación
+                            DB::table('role_stakeholder')->insert([
+                                    'stakeholder_id' => $_POST['id'],
+                                    'role_id' => $role->id
+                                    ]);
+                        }
+
+                        else //se están seleccionando roles existentes
+                        {
+                            foreach ($_POST['role_id'] as $role_id) //insertamos cada rol seleccionado
+                            {
+                                DB::table('role_stakeholder')->insert([
+                                    'stakeholder_id' => $_POST['id'],
+                                    'role_id' => $role_id
+                                    ]);
+                            }
+                        }
+
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('message','Stakeholder successfully created');
+                        }
+                        else
+                        {
+                            Session::flash('message','Usuario agregado correctamente');
+                        }
+                });
+
+                return Redirect::to('/stakeholders');
             }
             else
             {
-               Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente'); 
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','The Id that you entered was incorrect. Please try again.');
+                }
+                else
+                {
+                   Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente'); 
+                }
+                return Redirect::to('/stakeholders.create')->withInput();
             }
-            return Redirect::to('/stakeholders.create')->withInput();
-        }
-        
-
-            
+        }   
     }
 
     /**
@@ -249,47 +267,54 @@ class StakeholdersController extends Controller
      */
     public function edit($id)
     {
-        $types_selected = array();
-        $orgs_selected = array();
-        $stakeholder = \Ermtool\Stakeholder::find($id);
-        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-        $roles = \Ermtool\Role::all()->lists('name','id');
-        $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
-
-        //buscamos el o los tipos del stakeholder
-        $types = DB::table('role_stakeholder')
-                    ->where('stakeholder_id','=',$stakeholder->id)
-                    ->select('role_id')
-                    ->get();
-
-        $i = 0;
-        foreach ($types as $type)
+        if (Auth::guest())
         {
-            $types_selected[$i] = $type->role_id;
-            $i += 1;
-        }
-
-        //buscamos organizaciones del stakeholder
-        $orgs = DB::table('organization_stakeholder')
-                    ->where('stakeholder_id','=',$stakeholder->id)
-                    ->select('organization_id')
-                    ->get();
-
-        $i = 0;
-        foreach ($orgs as $org)
-        {
-            $orgs_selected[$i] = $org->organization_id;
-            $i += 1;
-        }
-        //si es edit, campo rut estara bloqueado y no habrá required
-        $disabled = 'disabled';
-        if (Session::get('languaje') == 'en')
-        {
-            return view('en.datos_maestros.stakeholders.edit',['stakeholder'=>$stakeholder,'organizations'=>$organizations,'disabled'=>$disabled,'required'=>'','roles'=>$roles,'dv'=>$dv,'types_selected' => $types_selected,'orgs_selected' => $orgs_selected]);
+            return view('login');
         }
         else
         {
-            return view('datos_maestros.stakeholders.edit',['stakeholder'=>$stakeholder,'organizations'=>$organizations,'disabled'=>$disabled,'required'=>'','roles'=>$roles,'dv'=>$dv,'types_selected' => $types_selected,'orgs_selected' => $orgs_selected]);
+            $types_selected = array();
+            $orgs_selected = array();
+            $stakeholder = \Ermtool\Stakeholder::find($id);
+            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+            $roles = \Ermtool\Role::all()->lists('name','id');
+            $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
+
+            //buscamos el o los tipos del stakeholder
+            $types = DB::table('role_stakeholder')
+                        ->where('stakeholder_id','=',$stakeholder->id)
+                        ->select('role_id')
+                        ->get();
+
+            $i = 0;
+            foreach ($types as $type)
+            {
+                $types_selected[$i] = $type->role_id;
+                $i += 1;
+            }
+
+            //buscamos organizaciones del stakeholder
+            $orgs = DB::table('organization_stakeholder')
+                        ->where('stakeholder_id','=',$stakeholder->id)
+                        ->select('organization_id')
+                        ->get();
+
+            $i = 0;
+            foreach ($orgs as $org)
+            {
+                $orgs_selected[$i] = $org->organization_id;
+                $i += 1;
+            }
+            //si es edit, campo rut estara bloqueado y no habrá required
+            $disabled = 'disabled';
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.stakeholders.edit',['stakeholder'=>$stakeholder,'organizations'=>$organizations,'disabled'=>$disabled,'required'=>'','roles'=>$roles,'dv'=>$dv,'types_selected' => $types_selected,'orgs_selected' => $orgs_selected]);
+            }
+            else
+            {
+                return view('datos_maestros.stakeholders.edit',['stakeholder'=>$stakeholder,'organizations'=>$organizations,'disabled'=>$disabled,'required'=>'','roles'=>$roles,'dv'=>$dv,'types_selected' => $types_selected,'orgs_selected' => $orgs_selected]);
+            }
         }
     }
 
@@ -302,96 +327,117 @@ class StakeholdersController extends Controller
      */
     public function update(Request $request, $id)
     {
-        global $id1;
-        $id1 = $id;
-        DB::transaction(function()
+        if (Auth::guest())
         {
-            $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
-
-            $stakeholder->name = $_POST['name'];
-            $stakeholder->surnames = $_POST['surnames'];
-            $stakeholder->position = $_POST['position'];
-            $stakeholder->mail = $_POST['mail'];
-    
-            $stakeholder->save();
-
-            //primero que todo, eliminaremos las organizaciones anteriores del stakeholder para evitar repeticiones
-            DB::table('organization_stakeholder')->where('stakeholder_id',$GLOBALS['id1'])->delete();
-
-            //ahora, agregamos posibles nuevas relaciones
-            foreach($_POST['organization_id'] as $organization_id)
+            return view('login');
+        }
+        else
+        {
+            global $id1;
+            $id1 = $id;
+            DB::transaction(function()
             {
-                DB::table('organization_stakeholder')->insert([
-                    'organization_id'=>$organization_id,
-                    'stakeholder_id'=>$GLOBALS['id1']
-                    ]);
-            }
+                $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
 
-            //nuevamente eliminaremos los roles anteriores del stakeholder para evitar repeticiones
-            DB::table('role_stakeholder')->where('stakeholder_id',$GLOBALS['id1'])->delete();
+                $stakeholder->name = $_POST['name'];
+                $stakeholder->surnames = $_POST['surnames'];
+                $stakeholder->position = $_POST['position'];
+                $stakeholder->mail = $_POST['mail'];
+        
+                $stakeholder->save();
 
-            //ahora, agregamos posibles nuevas relaciones
-            foreach($_POST['role_id'] as $role_id)
-            {
-                DB::table('role_stakeholder')->insert([
-                    'role_id'=>$role_id,
-                    'stakeholder_id'=>$GLOBALS['id1']
-                    ]);
-            }
+                //primero que todo, eliminaremos las organizaciones anteriores del stakeholder para evitar repeticiones
+                DB::table('organization_stakeholder')->where('stakeholder_id',$GLOBALS['id1'])->delete();
 
-            if (Session::get('languaje') == 'en')
-            {
-                Session::flash('message','Stakeholder successfully updated');
-            }
-            else
-            {
-                Session::flash('message','Usuario actualizado correctamente');
-            }
-        });
-            return Redirect::to('/stakeholders');
+                //ahora, agregamos posibles nuevas relaciones
+                foreach($_POST['organization_id'] as $organization_id)
+                {
+                    DB::table('organization_stakeholder')->insert([
+                        'organization_id'=>$organization_id,
+                        'stakeholder_id'=>$GLOBALS['id1']
+                        ]);
+                }
+
+                //nuevamente eliminaremos los roles anteriores del stakeholder para evitar repeticiones
+                DB::table('role_stakeholder')->where('stakeholder_id',$GLOBALS['id1'])->delete();
+
+                //ahora, agregamos posibles nuevas relaciones
+                foreach($_POST['role_id'] as $role_id)
+                {
+                    DB::table('role_stakeholder')->insert([
+                        'role_id'=>$role_id,
+                        'stakeholder_id'=>$GLOBALS['id1']
+                        ]);
+                }
+
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Stakeholder successfully updated');
+                }
+                else
+                {
+                    Session::flash('message','Usuario actualizado correctamente');
+                }
+            });
+                return Redirect::to('/stakeholders');
+        }
     }
 
     public function bloquear($id)
     {
-        global $id1;
-        $id1 = $id;
-        DB::transaction(function()
+        if (Auth::guest())
         {
-            $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
-            $stakeholder->status = 1;
-            $stakeholder->save();
+            return view('login');
+        }
+        else
+        {
+            global $id1;
+            $id1 = $id;
+            DB::transaction(function()
+            {
+                $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
+                $stakeholder->status = 1;
+                $stakeholder->save();
 
-            if (Session::get('languaje') == 'en')
-            {
-                Session::flash('message','Stakeholder successfully blocked');
-            }
-            else
-            {
-                Session::flash('message','Usuario bloqueado correctamente');
-            }
-        });
-        return Redirect::to('/stakeholders');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Stakeholder successfully blocked');
+                }
+                else
+                {
+                    Session::flash('message','Usuario bloqueado correctamente');
+                }
+            });
+            return Redirect::to('/stakeholders');
+        }
     }
 
     public function desbloquear($id)
     {
-        global $id1;
-        $id1 = $id;
-        DB::transaction(function()
+        if (Auth::guest())
         {
-            $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
-            $stakeholder->status = 0;
-            $stakeholder->save();
-            if (Session::get('languaje') == 'en')
+            return view('login');
+        }
+        else
+        {
+            global $id1;
+            $id1 = $id;
+            DB::transaction(function()
             {
-                Session::flash('message','Stakeholder successfully unblocked');
-            }
-            else
-            {
-                Session::flash('message','Usuario desbloqueado correctamente');
-            }
-        });
-        return Redirect::to('/stakeholders');
+                $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
+                $stakeholder->status = 0;
+                $stakeholder->save();
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Stakeholder successfully unblocked');
+                }
+                else
+                {
+                    Session::flash('message','Usuario desbloqueado correctamente');
+                }
+            });
+            return Redirect::to('/stakeholders');
+        }
     }
 
     /**
@@ -402,7 +448,141 @@ class StakeholdersController extends Controller
      */
     public function destroy($id)
     {
-        //
+        /*Se debe verificar que no exista en cada tabla en que se necesita un stakeholder, estas son por el momento (08-08-2016):
+            - evaluation_risk_stakeholder
+            - poll_stakeholder
+            - answers
+            - evaluation_stakeholder
+            - audit_plan_stakeholder
+            - audit_tests
+            - audit_audit_plan_audit_program
+            - action_plans
+            - controls
+            - risks
+            - kpi
+
+        Donde se puede eliminar es:
+            - organization_stakeholder
+            - role_stakeholder
+        */
+        
+         global $id1;
+        $id1 = $id;
+        global $res;
+        $res = 1;
+
+        DB::transaction(function() {
+
+            //evaluation_risk_stakeholder
+            $rev = DB::table('evaluation_risk_stakeholder')
+                    ->where('stakeholder_id','=',$GLOBALS['id1'])
+                    ->select('id')
+                    ->get();
+
+            if (empty($rev))
+            {
+                //pol_stakeholder
+                $rev = DB::table('poll_stakeholder')
+                        ->where('stakeholder_id','=',$GLOBALS['id1'])
+                        ->select('id')
+                        ->get();
+
+                if (empty($rev))
+                {
+                    //answers
+                    $rev = DB::table('answers')
+                            ->where('stakeholder_id','=',$GLOBALS['id1'])
+                            ->select('id')
+                            ->get();
+
+                    if (empty($rev))
+                    {
+                        //evaluation_stakeholder
+                        $rev = DB::table('evaluation_stakeholder')
+                                ->where('stakeholder_id','=',$GLOBALS['id1'])
+                                ->select('id')
+                                ->get();
+
+                        if (empty($rev))
+                        {
+                            //audit_plan_stakeholder
+                            $rev = DB::table('audit_plan_stakeholder')
+                                    ->where('stakeholder_id','=',$GLOBALS['id1'])
+                                    ->select('id')
+                                    ->get();
+
+                            if (empty($rev))
+                            {
+                                $rev = DB::table('audit_tests')
+                                        ->where('stakeholder_id','=',$GLOBALS['id1'])
+                                        ->select('id')
+                                        ->get();
+
+                                if (empty($rev))
+                                {
+                                    $rev = DB::table('audit_audit_plan_audit_program')
+                                            ->where('stakeholder_id','=',$GLOBALS['id1'])
+                                            ->select('id')
+                                            ->get();
+
+                                    if (empty($rev))
+                                    {
+                                        $rev = DB::table('action_plans')
+                                            ->where('stakeholder_id','=',$GLOBALS['id1'])
+                                            ->select('id')
+                                            ->get();
+
+                                        if (empty($rev))
+                                        {
+                                            $rev = DB::table('controls')
+                                                ->where('stakeholder_id','=',$GLOBALS['id1'])
+                                                ->select('id')
+                                                ->get();
+
+                                            if (empty($rev))
+                                            {
+                                                $rev = DB::table('risks')
+                                                    ->where('stakeholder_id','=',$GLOBALS['id1'])
+                                                    ->select('id')
+                                                    ->get();
+
+                                                if (empty($rev))
+                                                {
+                                                    $rev = DB::table('kpi')
+                                                        ->where('stakeholder_id','=',$GLOBALS['id1'])
+                                                        ->select('id')
+                                                        ->get();
+
+                                                    if (empty($rev))
+                                                    {
+                                                        //ahora se puede borrar
+                                                        DB::table ('organization_stakeholder')
+                                                            ->where('stakeholder_id','=',$GLOBALS['id1'])
+                                                            ->delete();
+
+                                                        DB::table('role_stakeholder')
+                                                            ->where('stakeholder_id','=',$GLOBALS['id1'])
+                                                            ->delete();
+
+                                                        DB::table('stakeholders')
+                                                            ->where('id','=',$GLOBALS['id1'])
+                                                            ->delete();
+
+                                                        $GLOBALS['res'] = 0;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return $res;    
     }
 
     //obtiene stakeholders pertenecientes a una organización

@@ -93,9 +93,9 @@
 		<td>
 			<div>
 			@if ($rol['status'] == 0)
-	            <button class="btn btn-danger" onclick="bloquear({{ $rol['id'] }},'{{ $rol['nombre'] }}','roles','el rol')">Bloquear</button>
+	            <button class="btn btn-danger" onclick="bloquear({{ $rol['id'] }},'{{ $rol['nombre'] }}','roles','El rol')">Bloquear</button>
 	        @else
-	        	
+	        	<button class="btn btn-danger" onclick="eliminar2({{ $rol['id'] }},'{{ $rol['nombre'] }}','roles','El rol')">Eliminar</button>
 	        @endif
 	        </div><!-- /btn-group -->
 		</td>

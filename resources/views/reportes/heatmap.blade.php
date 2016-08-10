@@ -281,11 +281,23 @@
 
                          if ({{ $kind }} == 0)
                          {
-                            leyendas += "<li><b>Subproceso afectado: </b> {{ $riesgos[$k]['subobj'] }}</li>";
+                            leyendas += "<li><b>Subproceso afectado: </b></li> "
+
+                            @foreach ($riesgos[$k]['subobj'] as $sub)
+                            {
+                              leyendas +="<li> {{ $sub->name }}</li>";
+                            }
+                            @endforeach
                          }
                          else
                          {
-                            leyendas += "<li><b>Objetivo afectado: </b> {{ $riesgos[$k]['subobj'] }}</li>";
+                            leyendas += "<li><b>Objetivo(s) afectado(s): </b>";
+
+                            @foreach ($riesgos[$k]['subobj'] as $obj)
+                            {
+                              leyendas += "<li> {{ $obj->name }} </li>";
+                            }
+                            @endforeach
                          }
 
                          leyendas += "</ul>";

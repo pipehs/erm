@@ -92,9 +92,9 @@
 	        </div><!-- /btn-group --></td>
 		<td><div>
 			@if ($causa['estado'] == 0)
-	             <button class="btn btn-danger" onclick="bloquear({{ $causa['id'] }},'{{ $causa['nombre'] }}','causas','la causa')">Bloquear</button>
+	            <button class="btn btn-danger" onclick="bloquear({{ $causa['id'] }},'{{ $causa['nombre'] }}','causas','La causa')">Bloquear</button>
 	        @else
-	        	
+	        	<button class="btn btn-danger" onclick="eliminar2({{ $causa['id'] }},'{{ $causa['nombre'] }}','causas','La causa')">Eliminar</button>
 	        @endif
 	        </div><!-- /btn-group -->
 	    </td>

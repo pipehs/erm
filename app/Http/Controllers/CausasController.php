@@ -7,7 +7,8 @@ use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
 use Session;
 use Redirect;
-
+use Auth;
+use DB;
 
 class CausasController extends Controller
 {
@@ -18,53 +19,60 @@ class CausasController extends Controller
      */
     public function index()
     {
-        $causas = array();
-        if (isset($_GET['verbloqueados']))
+        if (Auth::guest())
         {
-            $causas2 = \Ermtool\Cause::where('status',1)->get(); //select causas bloqueadas  
+            return view('login');
         }
         else
         {
-            $causas2 = \Ermtool\Cause::where('status',0)->get(); //select causas desbloqueadas
-        }
-
-        $i = 0;
-
-        // ---recorremos todas las causas para asignar formato de datos correspondientes--- //
-        foreach ($causas2 as $causa)
-        {
-            //damos formato a fecha de creación
-            if ($causa['created_at'] != NULL)
+            $causas = array();
+            if (isset($_GET['verbloqueados']))
             {
-                $fecha_creacion = date_format($causa['created_at'],"d-m-Y");
+                $causas2 = \Ermtool\Cause::where('status',1)->get(); //select causas bloqueadas  
             }
             else
-                $fecha_creacion = NULL;
-
-            //damos formato a fecha de actualización
-            if ($causa['updated_at'] != NULL)
             {
-                $fecha_act = date_format($causa['updated_at'],"d-m-Y");
+                $causas2 = \Ermtool\Cause::where('status',0)->get(); //select causas desbloqueadas
+            }
+
+            $i = 0;
+
+            // ---recorremos todas las causas para asignar formato de datos correspondientes--- //
+            foreach ($causas2 as $causa)
+            {
+                //damos formato a fecha de creación
+                if ($causa['created_at'] != NULL)
+                {
+                    $fecha_creacion = date_format($causa['created_at'],"d-m-Y");
+                }
+                else
+                    $fecha_creacion = NULL;
+
+                //damos formato a fecha de actualización
+                if ($causa['updated_at'] != NULL)
+                {
+                    $fecha_act = date_format($causa['updated_at'],"d-m-Y");
+                }
+                else
+                    $fecha_act = NULL;
+
+                $causas[$i] = array('id'=>$causa['id'],
+                                    'nombre'=>$causa['name'],
+                                    'descripcion'=>$causa['description'],
+                                    'fecha_creacion'=>$fecha_creacion,
+                                    'fecha_act'=>$fecha_act,
+                                    'estado'=>$causa['status']);
+                $i += 1;
+            }
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.causas.index',['causas'=>$causas]);
             }
             else
-                $fecha_act = NULL;
-
-            $causas[$i] = array('id'=>$causa['id'],
-                                'nombre'=>$causa['name'],
-                                'descripcion'=>$causa['description'],
-                                'fecha_creacion'=>$fecha_creacion,
-                                'fecha_act'=>$fecha_act,
-                                'estado'=>$causa['status']);
-            $i += 1;
-        }
-
-        if (Session::get('languaje') == 'en')
-        {
-            return view('en.datos_maestros.causas.index',['causas'=>$causas]);
-        }
-        else
-        {
-           return view('datos_maestros.causas.index',['causas'=>$causas]); 
+            {
+               return view('datos_maestros.causas.index',['causas'=>$causas]); 
+            }
         }
     }
 
@@ -75,13 +83,20 @@ class CausasController extends Controller
      */
     public function create()
     {
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            return view('en.datos_maestros.causas.create');
+            return view('login');
         }
         else
         {
-            return view('datos_maestros.causas.create'); 
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.causas.create');
+            }
+            else
+            {
+                return view('datos_maestros.causas.create'); 
+            }
         }
     }
 
@@ -93,11 +108,16 @@ class CausasController extends Controller
      */
     public function store(Request $request)
     {
-        
-        \Ermtool\Cause::create([
-            'name' => $request['name'],
-            'description' => $request['description'],
-            ]);
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            \Ermtool\Cause::create([
+                'name' => $request['name'],
+                'description' => $request['description'],
+                ]);
 
             if (Session::get('languaje') == 'en')
             {
@@ -108,6 +128,7 @@ class CausasController extends Controller
                 Session::flash('message','Causa agregada correctamente');
             }
             return Redirect::to('/causas');
+        }
     }
 
     /**
@@ -118,15 +139,22 @@ class CausasController extends Controller
      */
     public function edit($id)
     {
-        $causa = \Ermtool\Cause::find($id);
-
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            return view('en.datos_maestros.causas.edit',['causa'=>$causa]);
+            return view('login');
         }
         else
         {
-            return view('datos_maestros.causas.edit',['causa'=>$causa]);
+            $causa = \Ermtool\Cause::find($id);
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.causas.edit',['causa'=>$causa]);
+            }
+            else
+            {
+                return view('datos_maestros.causas.edit',['causa'=>$causa]);
+            }
         }
     }
 
@@ -139,59 +167,80 @@ class CausasController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $causa = \Ermtool\Cause::find($id);
-
-        $causa->name = $request['name'];
-        $causa->description = $request['description'];
-
-        $causa->save();
-
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            Session::flash('message','Cause successfully updated');
+            return view('login');
         }
         else
         {
-            Session::flash('message','Causa actualizada correctamente');
-        }
+            $causa = \Ermtool\Cause::find($id);
 
-        return Redirect::to('/causas');
+            $causa->name = $request['name'];
+            $causa->description = $request['description'];
+
+            $causa->save();
+
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Cause successfully updated');
+            }
+            else
+            {
+                Session::flash('message','Causa actualizada correctamente');
+            }
+
+            return Redirect::to('/causas');
+        }
     }
 
     public function bloquear($id)
     {
-        $causa = \Ermtool\Cause::find($id);
-        $causa->status = 1;
-        $causa->save();
-
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            Session::flash('message','Cause successfully blocked');
+            return view('login');
         }
         else
         {
-            Session::flash('message','Causa bloqueada correctamente');
-        }
+            $causa = \Ermtool\Cause::find($id);
+            $causa->status = 1;
+            $causa->save();
 
-        return Redirect::to('/causas');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Cause successfully blocked');
+            }
+            else
+            {
+                Session::flash('message','Causa bloqueada correctamente');
+            }
+
+            return Redirect::to('/causas');
+        }
     }
 
     public function desbloquear($id)
     {
-        $causa = \Ermtool\Cause::find($id);
-        $causa->status = 0;
-        $causa->save();
-
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            Session::flash('message','Cause successfully unblocked');
+            return view('login');
         }
         else
         {
-            Session::flash('message','Causa desbloqueada correctamente');
-        }
+            $causa = \Ermtool\Cause::find($id);
+            $causa->status = 0;
+            $causa->save();
 
-        return Redirect::to('/causas');
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Cause successfully unblocked');
+            }
+            else
+            {
+                Session::flash('message','Causa desbloqueada correctamente');
+            }
+
+            return Redirect::to('/causas');
+        }
     }
 
     /**
@@ -202,6 +251,26 @@ class CausasController extends Controller
      */
     public function destroy($id)
     {
-        //
+        global $id1;
+        $id1 = $id;
+        global $res;
+        $res = 1;
+
+        DB::transaction(function() {
+
+            //eliminamos primero de cause_risk
+            DB::table('cause_risk')
+                ->where('cause_id','=',$GLOBALS['id1'])
+                ->delete();
+
+            //ahora eliminamos causa
+            DB::table('causes')
+                ->where('id','=',$GLOBALS['id1'])
+                ->delete();
+
+            $GLOBALS['res'] = 0;
+        });
+
+        return $res;
     }
 }

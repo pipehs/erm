@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Auditor&iacute;a de Riesgos')
+@section('title', 'Risks Audit')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Auditor&iacute;a de Riesgos</a></li>
-			<li><a href="show_program.{{$program['id']}}">Ver Programa</a></li>
+			<li><a href="#">Risks Audit</a></li>
+			<li><a href="show_program.{{$program['id']}}">Show Program</a></li>
 		</ol>
 	</div>
 </div>
@@ -20,7 +20,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-check"></i>
-					<span>Programa: {{ $program['name'] }}</span>
+					<span>Program: {{ $program['name'] }}</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -44,18 +44,22 @@
 			@endif
 
 			<ul style="text-align: left;">
-			<li><b>Descripci&oacute;n: {{ $program['description'] }}</b></li>
-			<li><b>Fecha creaci&oacute;n: {{ $program['created_at'] }}</b></li>
-			<li><b>Fecha fin: {{ $program['expiration_date'] }}</b></li>
-			<li><b>Documento asociado: 
+			<li><b>Description: {{ $program['description'] }}</b></li>
+			<li><b>Creation date: {{ $program['created_at'] }}</b></li>
+			@if ($program['expiration_date'] == NULL)
+				<li><b>Final date: Not specified</b></li>
+			@else
+				<li><b>Final date: {{ $program['expiration_date'] }}</b></li>
+			@endif
+			<li><b>Associated document: 
 
 			@if ($program['evidence'] == NULL)
-				El programa no tiene ning&uacute;n documento asociado
+				The program doesn't have any associated document
 			@else
 			<table>
 			<tr>
 			<td>
-				<div style="cursor:hand" id="descargar_{{ $program['id'] }}" onclick="descargar(4,'{{$program['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Descargar</u></font></div>
+				<div style="cursor:hand" id="descargar_{{ $program['id'] }}" onclick="descargar(4,'{{$program['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Download</u></font></div>
 			</td>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
@@ -72,16 +76,16 @@
 			</b></li>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)		
-			<li>{!! link_to_route('programas_auditoria.edit', $title = 'Editar programa', $parameters = $program['id'],
+			<li>{!! link_to_route('programas_auditoria.edit', $title = 'Edit program', $parameters = $program['id'],
 				 $attributes = ['class'=>'btn btn-info'])!!}</li>
 		<?php break; ?>
 		@endif
 	@endforeach
 			<hr>
-			<li><b><u>Pruebas del programa</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<li><b><u>Audit tests on the program</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
-			{!! link_to_route('programas_auditoria.create_test', $title = 'Agregar prueba', $parameters = $program['id'],
+			{!! link_to_route('programas_auditoria.create_test', $title = 'Create test', $parameters = $program['id'],
 				 $attributes = ['class'=>'btn btn-success'])!!}
 			<?php break; ?>
 			@endif
@@ -91,19 +95,19 @@
 			<hr>
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
 			<tr>
-				<th>Nombre</th>
-				<th>Descripci&oacute;n</th>
-				<th>Fecha creaci&oacute;n</th>
-				<th>Fecha actualizaci&oacute;n</th>
-				<th>Tipo</th>
-				<th>Estado</th>
-				<th>Resultado</th>
+				<th>Name</th>
+				<th>Description</th>
+				<th>Creation date</th>
+				<th>Update date</th>
+				<th>Kind</th>
+				<th>Status</th>
+				<th>Result</th>
 				<th>Responsable</th>
-				<th>Horas / Hombre</th>
-				<th>Documento</th>
+				<th>Hours / Man</th>
+				<th>Document</th>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
-				<th>Acci&oacute;n</th>
+				<th>Action</th>
 			<?php break; ?>
 			@endif
 		@endforeach
@@ -114,27 +118,77 @@
 
 					<td>{{ $test['name'] }}</td>
 
-					<td>{{ $test['description'] }}</td>
+					<td>
+					@if ($test['description'] == NULL)
+						Without description
+					@else
+						{{ $test['description'] }}
+					@endif
+					</td>
 
 					<td>{{ $test['created_at'] }}</td>
 
 					<td>{{ $test['updated_at'] }}</td>
 
-					<td>{{ $test['type'] }}</td>
+					<td>
+					@if ($test['type'] == 0)
+						Design test
+					@elseif ($test['type'] == 1)
+						Operational effectiveness test
+					@elseif ($test['type'] == 2)
+						Compliance test
+					@elseif ($test['type'] == 1)
+						Substantive test
+					@else
+						Not specified
+					@endif
+					</td>
 
-					<td>{{ $test['status'] }}</td>				
+					<td>
+					@if ($test['status'] == 0)
+						Open
+					@elseif($test['status'] == 1)
+						In execution
+					@elseif($test['status'] == 2)
+						Closed
+					@else
+						Not specified
+					@endif
+					</td>				
 					
-					<td>{{ $test['results'] }}</td>
+					<td>
+					@if ($test['results'] == 0)
+						Ineffective
+					@elseif($test['results'] == 1)
+						Effective
+					@elseif($test['results'] == 2)
+						In process
+					@else
+						Not specified
+					@endif
+					</td>
 
-					<td>{{ $test['stakeholder'] }}</td>
+					<td>
+					@if ($test['stakeholder'] == NULL)
+						Not assigned
+					@else
+						{{ $test['stakeholder'] }}
+					@endif
+					</td>
 
-					<td>{{ $test['hh'] }}</td>
+					<td>
+					@if ($test['hh'] == NULL)
+						Without Hours / Man assigned
+					@else
+						{{ $test['hh'] }}
+					@endif
+					</td>
 
 					<td>
 					@if ($test['evidence'] == NULL)
-						No tiene documentos
+						No documents
 					@else
-						<div style="cursor:hand" id="descargar_{{ $test['id'] }}" onclick="descargar(5,'{{$test['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Descargar</u></font></div>
+						<div style="cursor:hand" id="descargar_{{ $test['id'] }}" onclick="descargar(5,'{{$test['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Download</u></font></div>
 					@foreach (Session::get('roles') as $role)
 						@if ($role != 6)
 						<img src="assets/img/btn_eliminar.png" height="40px" width="40px" onclick="eliminar_ev({{ $test['id'] }},0)">
@@ -147,7 +201,7 @@
 					</td>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
-					<td>{!! link_to_route('programas_auditoria.edit_test', $title = 'Editar', $parameters = $test['id'],
+					<td>{!! link_to_route('programas_auditoria.edit_test', $title = 'Edit', $parameters = $test['id'],
 				 $attributes = ['class'=>'btn btn-success'])!!}</td>
 			<?php break; ?>
 			@endif
@@ -158,7 +212,7 @@
 			</table>
 
 			<center>
-				{!! link_to_route('programas_auditoria', $title = 'Volver', $parameters = NULL,
+				{!! link_to_route('programas_auditoria', $title = 'Return', $parameters = NULL,
 				 $attributes = ['class'=>'btn btn-danger'])!!}
 			<center>
 			</div>

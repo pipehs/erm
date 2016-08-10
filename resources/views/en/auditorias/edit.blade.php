@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Agregar Plan de auditor&iacute;a')
+@section('title', 'Edit audit Plan')
 
 
 @section('content')
@@ -10,7 +10,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="plan_auditoria">Auditor&iacute;as</a></li>
-			<li><a href="plan_auditoria.edit.{{ $audit_plan['id'] }}">Plan de auditor&iacute;as</a></li>
+			<li><a href="plan_auditoria.edit.{{ $audit_plan['id'] }}">Edit Audit Plan</a></li>
 		</ol>
 	</div>
 </div>
@@ -20,7 +20,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Editar Plan de Auditor&iacute;as</span>
+					<span>Edit Audit Plan</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -47,15 +47,15 @@
 				</div>
 			@endif
 
-			Modifique la informaci&oacute;n que desee del plan de auditor&iacute;a <b>{{ $audit_plan['name'] }}</b>.
+			Change the data that you want to update from the audit plan <b>{{ $audit_plan['name'] }}</b>.
 				<div id="cargando"><br></div>
 
 				{!!Form::model($audit_plan,['route'=>['auditorias.update',$audit_plan->id],'method'=>'PUT','class'=>'form-horizontal','name'=>'form'])!!}
-					@include('auditorias.form')
+					@include('en.auditorias.form')
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('plan_auditoria', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('plan_auditoria', $title = 'Return', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 			</div>
@@ -66,7 +66,7 @@
 @stop
 
 @section('scripts2')
-{!!Html::script('assets/js/create_edit_audit_plan.js')!!}
+{!!Html::script('assets/js/en/create_edit_audit_plan.js')!!}
 
 <script>
 $("#orgs").ready(function() {

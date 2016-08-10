@@ -17,12 +17,34 @@
 							{!!Form::date('expiration_date',null,['class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)'])!!}
 						</div>
 					</div>
+					<div class="form-group">
 						{!!Form::label('Organization(s)',null,['class'=>'col-sm-4 control-label'])!!}
-					<div class="row form-group">
 						<div class="col-sm-3">
-							{!!Form::select('organization_id[]',$organizaciones,
-							 	   null, 
-							 	   ['id' => 'el2','multiple'=>'true','required'=>'true'])!!}
+						@if (strstr($_SERVER["REQUEST_URI"],'edit'))
+								<select name="organization_id[]" multiple required id="el3">
+								@foreach ($organizaciones as $id=>$name)
+
+									<?php $i = 0; //contador de orgs del subproceso 
+										  $cont = 0; //contador para ver si es que una org está seleccionada ?>
+									@while (isset($orgs_selected[$i]))
+										@if ($orgs_selected[$i] == $id)
+											<option value="{{ $id }}" selected>{{ $name }}</option>
+											<?php $cont += 1; ?>
+										@endif
+										<?php $i += 1; ?>
+									@endwhile
+
+									@if ($cont == 0) //no estaba seleccionada
+										<option value="{{ $id }}">{{ $name }}</option>
+									@endif
+
+								@endforeach
+								</select>
+						@else
+							{!!Form::select('organization_id[]',$organizaciones, 
+						 	   null, 
+						 	   ['id' => 'el3','multiple'=>'true','required'=>'true'])!!}
+						@endif
 						</div>
 					</div>
 					<div class="form-group">

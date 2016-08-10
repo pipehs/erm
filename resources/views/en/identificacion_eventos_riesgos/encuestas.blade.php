@@ -109,7 +109,7 @@
 					<td>This user has not yet answered</td>
 				@else
 					<td>
-						{!! link_to_route('encuestas.show', $title = 'Ver',
+						{!! link_to_route('encuestas.show', $title = 'Show',
 					 $parameters = ['poll_id'=>$poll_id,'stakeholder_id'=>$stakeholder['id']],
 					  $attributes = ['class'=>'btn btn-success']) !!}
 					</td>

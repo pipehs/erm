@@ -97,7 +97,7 @@
         var options = {
           title: 'Estado de planes de auditoría',
           is3D: false,
-          colors: ['#74DF00','#FF8000']
+          colors: ['#FFFF00','#FF8000','#74DF00'] 
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
@@ -116,11 +116,12 @@
 				{
 					var title = '<b>Planes Abiertos</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Auditorías</th><th>Programas</th><th>Pruebas</th></thead>';
+					var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Descripción</th><th>Auditorías</th><th>Programas</th><th>Pruebas</th></thead>';
 
 					@foreach ($audit_plans as $plan)
-						@if ($plan['abiertas'] > 0 && $plan['ejecucion'] == 0)
+						@if ($plan['abiertas'] > 0 && $plan['ejecucion'] == 0 && $plan['status'] == 0)
 							text += '<tr><td>{{$plan["name"]}}</td>';
+							text += '<td>{{$plan["description"]}}</td>';
 							text += '<td>';
 							@foreach ($plan['audits'] as $audit)
 								text += '<li>{{$audit}}</li>';
@@ -140,6 +141,10 @@
 							text += '</td></tr>';
 						@endif
 					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.5">Exportar</a>'
+
 					swal({   
 						title: title,   
 						text: text,
@@ -151,11 +156,12 @@
 				{
 					var title = '<b>Planes en ejecución</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Auditorías</th><th>Programas</th><th>Pruebas</th></thead>';
+					var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Descripción</th><th>Auditorías</th><th>Programas</th><th>Pruebas</th></thead>';
 
 					@foreach ($audit_plans as $plan)
-						@if ($plan['ejecucion'] > 0)
+						@if ($plan['ejecucion'] > 0 && $plan['status'] == 0)
 							text += '<tr><td>{{$plan["name"]}}</td>';
+							text += '<td>{{$plan["description"]}}</td>';
 							text += '<td>';
 							@foreach ($plan['audits'] as $audit)
 								text += '<li>{{$audit}}</li>';
@@ -175,6 +181,10 @@
 							text += '</td></tr>';
 						@endif
 					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.6">Exportar</a>'
+
 					swal({   
 						title: title,   
 						text: text,
@@ -183,6 +193,46 @@
 					});
 				}
 
+				else if (sel[0].row == 2) //planes cerrados
+				{
+					var title = '<b>Planes Cerrados</b>';
+
+					var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Descripción</th><th>Auditorías</th><th>Programas</th><th>Pruebas</th></thead>';
+
+					@foreach ($audit_plans as $plan)
+						@if ($plan['status'] == 1)
+							text += '<tr><td>{{$plan["name"]}}</td>';
+							text += '<td>{{$plan["description"]}}</td>';
+							text += '<td>';
+							@foreach ($plan['audits'] as $audit)
+								text += '<li>{{$audit}}</li>';
+							@endforeach
+							text += '</td>';
+
+							text += '<td>';
+							@foreach ($plan['programs'] as $program)
+								text += '<li>{{$program}}</li>';
+							@endforeach
+							text += '</td>';
+
+							text += '<td>';
+							@foreach ($plan['tests'] as $test)
+								text += '<li>{{$test}}</li>';
+							@endforeach
+							text += '</td></tr>';
+						@endif
+					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.7">Exportar</a>'
+
+					swal({   
+						title: title,   
+						text: text,
+						customClass: 'swal-wide',   
+						html: true 
+					});
+				}
 
 			}
       		//console.log(sel);

@@ -88,7 +88,7 @@
 
 		<center>
 			{!! link_to_route('encuestas', $title = 'Return', 
-				$parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
+				$parameters = NULL, $attributes = ['class'=>'btn btn-danger']) !!}
 		</center>
 
 			</div>

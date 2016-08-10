@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Controles')
+@section('title', 'Controls')
 
 @section('content')
 
@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="evaluar_controles">Evaluar Controles</a></li>
+			<li><a href="evaluar_controles">Assess Control</a></li>
 		</ol>
 	</div>
 </div>
@@ -18,7 +18,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Evaluar Controles</span>
+					<span>Assess Control</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -47,10 +47,10 @@
 				<div id="cargando"><br></div>
 
 					<div class="form-group">
-						{!!Form::label('Seleccione control',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Select control',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('control_id',$controls,null, 
-							 	   ['id' => 'control_id','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+							 	   ['id' => 'control_id','required'=>'true','placeholder'=>'- Select -'])!!}
 						</div>
 					</div>
 
@@ -83,11 +83,11 @@ $("#control_id").change(function() {
 
 				$('#table_evaluacion').empty();
 				$('#boton-guardar').empty();
-				var table_row = '<center><b>Indique si desea modificar su última evaluación (si es que existe) o si desea agregar una nueva</b></center>';
+				var table_row = '<center><b>Specify if you want to update the lats assessment (if it exist) or if you want to add a new assessment.</b></center>';
 
-				table_row += '<br><center><button type="button" name="new_eval" class="btn btn-success" onclick="newEval()">Nueva evaluación</button>';
+				table_row += '<br><center><button type="button" name="new_eval" class="btn btn-success" onclick="newEval()">New assessment</button>';
 				table_row += '&nbsp;&nbsp;&nbsp;&nbsp;';
-				table_row += '<button type="button" name="edit_eval" class="btn btn-primary" onclick="editEval('+$("#control_id").val()+')">Editar evaluación</button></center>';
+				table_row += '<button type="button" name="edit_eval" class="btn btn-primary" onclick="editEval('+$("#control_id").val()+')">Edit assessment</button></center>';
 
 				$('#table_evaluacion').append(table_row);
 				$('#table_evaluacion').fadeIn(500);
@@ -158,18 +158,18 @@ function agregarCampos(prueba,eval)
 			{	
 				inefectivo = '<br>';
 				inefectivo += "<select name='clasificacion_"+prueba+"' style='width:180px;' class='form-control'>";
-				inefectivo += "<option value='' disabled selected>Seleccione Clasificación</option>";
-				inefectivo += "<option value='0'>Oportunidad de mejora</option>";
-				inefectivo += "<option value='1'>Deficiencia</option>";
-				inefectivo += "<option value='2'>Debilidad significativa</option></select><br>";
+				inefectivo += "<option value='' disabled selected>Select classification</option>";
+				inefectivo += "<option value='0'>Improvement opportunity</option>";
+				inefectivo += "<option value='1'>Deficiency/option>";
+				inefectivo += "<option value='2'>Significant weakness</option></select><br>";
 
-				inefectivo += '<input type="text" name="name_hallazgo_'+prueba+'" class="form-control" style="width:180px" placeholder="Nombre hallazgo"><br>';
-				inefectivo += '<textarea name="description_hallazgo_'+prueba+'" class="form-control" style="width:180px" placeholder="Descripción hallazgo"></textarea><br>';
-				inefectivo += '<textarea name="recomendaciones_'+prueba+'" class="form-control" style="width:180px" placeholder="Ingrese recomendaciones"></textarea><br>';
-				inefectivo += '<b><span style="float: left;">Plan de acción: </span></b><br>';
-				inefectivo += '<textarea name="plan_accion_'+prueba+'" class="form-control" style="width:180px" placeholder="Ingrese plan de acción"></textarea><br>';
+				inefectivo += '<input type="text" name="name_hallazgo_'+prueba+'" class="form-control" style="width:180px" placeholder="Issue name"><br>';
+				inefectivo += '<textarea name="description_hallazgo_'+prueba+'" class="form-control" style="width:180px" placeholder="Issue description"></textarea><br>';
+				inefectivo += '<textarea name="recomendaciones_'+prueba+'" class="form-control" style="width:180px" placeholder="Input recommendations"></textarea><br>';
+				inefectivo += '<b><span style="float: left;">Action plan: </span></b><br>';
+				inefectivo += '<textarea name="plan_accion_'+prueba+'" class="form-control" style="width:180px" placeholder="Input action plan"></textarea><br>';
 
-				inefectivo += '<input type="date" name="fecha_plan_'+prueba+'" class="form-control" style="width:180px" title="Ingrese fecha de término del plan"></textarea><br>';
+				inefectivo += '<input type="date" name="fecha_plan_'+prueba+'" class="form-control" style="width:180px" title="Input the final date for the plan"></textarea><br>';
 
 				inefectivo += '<select name="responsable_plan_'+prueba+'" class="form-control" style="width:180px">';
 				inefectivo += '<option value="" disabled selected>Responsable</option>';
@@ -181,7 +181,7 @@ function agregarCampos(prueba,eval)
 				inefectivo += '</select>';
 
 				inefectivo += '<br><input type="file" name="file_'+prueba+'" id="file'+prueba+'" class="inputfile" />';
-				inefectivo += '<label for="file'+prueba+'">Cargue evidencia</label></div>';
+				inefectivo += '<label for="file'+prueba+'">Upload Evidence</label></div>';
 
 				identificador = "#datos_"+prueba;
 				$(identificador).html(inefectivo);
@@ -198,36 +198,36 @@ function agregarCampos(prueba,eval)
 
 						if (this.issue.classification == 0)
 						{
-							inefectivo += "<option value='' disabled selected>Seleccione Clasificación</option>";
-							inefectivo += "<option value='0' selected>Oportunidad de mejora</option>";
-							inefectivo += "<option value='1'>Deficiencia</option>";
-							inefectivo += "<option value='2'>Debilidad significativa</option></select><br>";
+							inefectivo += "<option value='' disabled selected>Select classification</option>";
+							inefectivo += "<option value='0' selected>Improvement opportunity</option>";
+							inefectivo += "<option value='1'>Deficiency/option>";
+							inefectivo += "<option value='2'>Significant weakness</option></select><br>";
 						}
 						else if (this.issue.classification == 1)
 						{
-							inefectivo += "<option value='' disabled selected>Seleccione Clasificación</option>";
-							inefectivo += "<option value='0'>Oportunidad de mejora</option>";
-							inefectivo += "<option value='1' selected>Deficiencia</option>";
-							inefectivo += "<option value='2'>Debilidad significativa</option></select><br>";
+							inefectivo += "<option value='' disabled selected>Select classification</option>";
+							inefectivo += "<option value='0'>Improvement opportunity</option>";
+							inefectivo += "<option value='1' selected>Deficiency/option>";
+							inefectivo += "<option value='2'>Significant weakness</option></select><br>";
 						}
 						else if (this.issue.classification == 2)
 						{
-							inefectivo += "<option value='' disabled selected>Seleccione Clasificación</option>";
-							inefectivo += "<option value='0'>Oportunidad de mejora</option>";
-							inefectivo += "<option value='1'>Deficiencia</option>";
-							inefectivo += "<option value='2' selected>Debilidad significativa</option></select><br>";
+							inefectivo += "<option value='' disabled selected>Select classification</option>";
+							inefectivo += "<option value='0'>Improvement opportunity</option>";
+							inefectivo += "<option value='1'>Deficiency/option>";
+							inefectivo += "<option value='2' selected>Significant weakness</option></select><br>";
 						}
 						else
 						{
-							inefectivo += "<option value='' disabled selected>Seleccione Clasificación</option>";
-							inefectivo += "<option value='0'>Oportunidad de mejora</option>";
-							inefectivo += "<option value='1'>Deficiencia</option>";
-							inefectivo += "<option value='2'>Debilidad significativa</option></select><br>";
+							inefectivo += "<option value='' disabled selected>Select classification</option>";
+							inefectivo += "<option value='0'>Improvement opportunity</option>";
+							inefectivo += "<option value='1'>Deficiency/option>";
+							inefectivo += "<option value='2'>Significant weakness</option></select><br>";
 						}
 
-						inefectivo += '<input type="text" name="name_hallazgo_'+prueba+'" class="form-control" style="width:180px" value="'+this.issue.name+'" placeholder="Nombre hallazgo"><br>';
-						inefectivo += '<textarea name="description_hallazgo_'+prueba+'" class="form-control" style="width:180px" placeholder="Descripción hallazgo">'+this.issue.description+'</textarea><br>';
-						inefectivo += '<textarea name="recomendaciones_'+prueba+'" class="form-control" style="width:180px"  placeholder="Recomendaciones hallazgo">'+this.issue.recommendations+'</textarea><br>';
+						inefectivo += '<input type="text" name="name_hallazgo_'+prueba+'" class="form-control" style="width:180px" value="'+this.issue.name+'" placeholder="Issue name"><br>';
+						inefectivo += '<textarea name="description_hallazgo_'+prueba+'" class="form-control" style="width:180px" placeholder="Issue description">'+this.issue.description+'</textarea><br>';
+						inefectivo += '<textarea name="recomendaciones_'+prueba+'" class="form-control" style="width:180px"  placeholder="Issue recommendations">'+this.issue.recommendations+'</textarea><br>';
 
 						identificador = "#datos_"+prueba;
 						$(identificador).html(inefectivo);
@@ -238,10 +238,10 @@ function agregarCampos(prueba,eval)
 							//alert(result2);
 							if (result2 == "null")
 							{
-									inefectivo2 = '<b><span style="float: left;">Plan de acción: </span></b><br>';
-									inefectivo2 += '<textarea name="plan_accion_'+prueba+'" class="form-control" rows="3"	 style="width:180px" placeholder="Ingrese plan de acción"></textarea><br>';
+									inefectivo2 = '<b><span style="float: left;">Action plan: </span></b><br>';
+									inefectivo2 += '<textarea name="plan_accion_'+prueba+'" class="form-control" rows="3"	 style="width:180px" placeholder="Input action plan"></textarea><br>';
 
-									inefectivo2 += '<input type="date" name="fecha_plan_'+prueba+'" class="form-control" style="width:180px" title="Ingrese fecha de término del plan"><br>';
+									inefectivo2 += '<input type="date" name="fecha_plan_'+prueba+'" class="form-control" style="width:180px" title="Input final date for the plan"><br>';
 
 									inefectivo2 += '<select name="responsable_plan_'+prueba+'" class="form-control" style="width:180px">';
 									inefectivo2 += '<option value="" disabled selected>Responsable</option>';
@@ -256,10 +256,10 @@ function agregarCampos(prueba,eval)
 							{
 
 								datos2 = JSON.parse(result2);
-								inefectivo2 = '<b><span style="float: left;">Plan de acción: </span></b><br>';
-								inefectivo2 += '<textarea name="plan_accion_'+prueba+'" class="form-control" style="width:180px" rows="3" placeholder="Ingrese plan de acción">'+datos2.description+'</textarea><br>';
+								inefectivo2 = '<b><span style="float: left;">Action plan: </span></b><br>';
+								inefectivo2 += '<textarea name="plan_accion_'+prueba+'" class="form-control" style="width:180px" rows="3" placeholder="Input action plan">'+datos2.description+'</textarea><br>';
 
-								inefectivo2 += '<input type="date" name="fecha_plan_'+prueba+'" class="form-control" style="width:180px" value="'+datos2.final_date+'" title="Ingrese fecha de término del plan"><br>';
+								inefectivo2 += '<input type="date" name="fecha_plan_'+prueba+'" class="form-control" style="width:180px" value="'+datos2.final_date+'" title="Input final date for the plan"><br>';
 
 								inefectivo2 += '<select name="responsable_plan_'+prueba+'" class="form-control" style="width:180px">';
 								inefectivo2 += '<option value="" disabled>Responsable</option>';
@@ -290,11 +290,11 @@ function agregarCampos(prueba,eval)
 							//if (this.evidence == null)
 							{
 								inefectivo3 = '<br><input type="file" name="file_'+prueba+'" id="file'+prueba+'" class="inputfile" />';
-								inefectivo3 += '<label for="file'+prueba+'">Cargue evidencia</label></div>';
+								inefectivo3 += '<label for="file'+prueba+'">Upload Evidence</label></div>';
 							}
 							else
 							{
-								inefectivo3 = '<div style="cursor:hand" id="descargar_'+arc.id+'" onclick="descargar(3,\''+arc.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia</u></font></div><br>';
+								inefectivo3 = '<div style="cursor:hand" id="descargar_'+arc.id+'" onclick="descargar(3,\''+arc.url+'\')"><font color="CornflowerBlue"><u>Download Evidence</u></font></div><br>';
 							}
 
 							identificador = "#datos_"+prueba;
@@ -318,11 +318,11 @@ function agregarCampos(prueba,eval)
 				datos = JSON.parse(result);
 				if (datos.comments == null)
 				{
-					var efectivo = '<br><textarea name="comentarios_'+prueba+'" class="form-control" style="width:180px" rows="3" placeholder="Ingrese comentarios (opcional)"></textarea><br>';
+					var efectivo = '<br><textarea name="comentarios_'+prueba+'" class="form-control" style="width:180px" rows="3" placeholder="Add comments (optional)"></textarea><br>';
 				}
 				else
 				{
-					var efectivo = '<br><textarea name="comentarios_'+prueba+'" class="form-control" style="width:180px" rows="3" placeholder="Ingrese comentarios (opcional)">'+datos.comments+'</textarea><br>';
+					var efectivo = '<br><textarea name="comentarios_'+prueba+'" class="form-control" style="width:180px" rows="3" placeholder="Add comments (optional)">'+datos.comments+'</textarea><br>';
 				}
 				
 				$(datos.evidence).each(function(i,arc) {
@@ -330,19 +330,19 @@ function agregarCampos(prueba,eval)
 					if (arc == null) 				
 					{
 						efectivo += '<br><input type="file" name="file_'+prueba+'" id="file'+prueba+'" class="inputfile" />';
-						efectivo += '<label for="file'+prueba+'">Cargue evidencia</label></div>';
+						efectivo += '<label for="file'+prueba+'">Upload Evidence</label></div>';
 					}
 					else
 					{
-						efectivo += '<div style="cursor:hand" id="descargar_'+arc.id+'" onclick="descargar(3,\''+arc.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia</u></font></div><br>';
+						efectivo += '<div style="cursor:hand" id="descargar_'+arc.id+'" onclick="descargar(3,\''+arc.url+'\')"><font color="CornflowerBlue"><u>Download Evidence</u></font></div><br>';
 					}
 				});
 			}
 			else
 			{
-				var efectivo = '<br><textarea name="comentarios_'+prueba+'" class="form-control" style="width:180px" rows="3" placeholder="Ingrese comentarios (opcional)"></textarea><br>';
+				var efectivo = '<br><textarea name="comentarios_'+prueba+'" class="form-control" style="width:180px" rows="3" placeholder="Add Comments (optional)"></textarea><br>';
 				efectivo += '<br><input type="file" name="file_'+prueba+'" id="file'+prueba+'" class="inputfile" />';
-				efectivo += '<label for="file'+prueba+'">Cargue evidencia</label></div>';
+				efectivo += '<label for="file'+prueba+'">Download Evidence</label></div>';
 			}
 			
 			identificador = "#datos_"+prueba;
@@ -364,40 +364,40 @@ function editEval(control_id)
 
 		if (result == "null")
 		{
-			swal('Error','No hay evaluaciones previas');
+			swal('Error','No previous assessments');
 		}
 		else
 		{
 			$('#table_evaluacion').empty();
 			//Seteamos cabecera
 			var table_head = "<thead>";
-			table_head += "<th>Diseño</th><th>Efectividad operativa</th><th>Prueba sustantiva</th><th>Prueba de cumplimiento</th>";
+			table_head += "<th>Design</th><th>Operational effectiveness</th><th>Substantive test</th><th>Compliance test</th>";
 			table_head += "</thead>";
 			//seteremos todas las variables de cada una de las pruebas, para ver cuales tienen respuestas y cuales no
 
 
 				diseno2 = "<td><select name='diseno' id='diseno' style='width:180px; vertical-align:top' class='form-control' onchange='test_diseno()'>";
-				diseno2 += "<option value=''>Seleccione Resultado</option>";
-				diseno2 += "<option value='1'>Efectivo</option>";
-				diseno2 += "<option value='2'>Inefectivo</option></select>";
+				diseno2 += "<option value=''>Select results</option>";
+				diseno2 += "<option value='1'>Effective</option>";
+				diseno2 += "<option value='2'>Ineffective</option></select>";
 				diseno2 += "<div id='datos_diseno' style='display: none;'></div></td>";
 
 				efectividad2 = "<td><select name='efectividad' style='width:180px' class='form-control' id='efectividad' onchange='test_efectividad()'>";
-				efectividad2 += "<option value=''>Seleccione Resultado</option>";
-				efectividad2 += "<option value='1'>Efectivo</option>";
-				efectividad2 += "<option value='2'>Inefectivo</option></select>";
+				efectividad2 += "<option value=''>Select results</option>";
+				efectividad2 += "<option value='1'>Effective</option>";
+				efectividad2 += "<option value='2'>Ineffective</option></select>";
 				efectividad2 += "<div id='datos_efectividad' style='display: none;'></div></td>";
 
-				sustantiva2 = "<td><select name='sustantiva' style='width:180px' class='form-control' id='sustantiva' onchange='test_efectividad()'>";
-				sustantiva2 += "<option value=''>Seleccione Resultado</option>";
-				sustantiva2 += "<option value='1'>Efectivo</option>";
-				sustantiva2 += "<option value='2'>Inefectivo</option></select>";
+				sustantiva2 = "<td><select name='sustantiva' style='width:180px' class='form-control' id='sustantiva' onchange='test_sustantiva()'>";
+				sustantiva2 += "<option value=''>Select results</option>";
+				sustantiva2 += "<option value='1'>Effective</option>";
+				sustantiva2 += "<option value='2'>Ineffective</option></select>";
 				sustantiva2 += "<div id='datos_sustantiva' style='display: none;'></div></td>";
 
 				cumplimiento2 = "<td><select name='cumplimiento' style='width:180px' class='form-control' id='cumplimiento' onchange='test_cumplimiento()'>";
-				cumplimiento2 += "<option value=''>Seleccione Resultado</option>";
-				cumplimiento2 += "<option value='1'>Efectivo</option>";
-				cumplimiento2 += "<option value='2'>Inefectivo</option></select>";
+				cumplimiento2 += "<option value=''>Select results</option>";
+				cumplimiento2 += "<option value='1'>Effective</option>";
+				cumplimiento2 += "<option value='2'>Ineffective</option></select>";
 				cumplimiento2 += "<div id='datos_cumplimiento' style='display: none;'></div></td>";
 			
 
@@ -410,21 +410,21 @@ function editEval(control_id)
 
 						if (this.results == 1)
 						{
-							diseno2  += "<option value=''>Seleccione Resultado</option>";
-							diseno2 += "<option value='1' selected>Efectivo</option>";
-							diseno2  += "<option value='2'>Inefectivo</option></select>";
+							diseno2  += "<option value=''>Select results</option>";
+							diseno2 += "<option value='1' selected>Effective</option>";
+							diseno2  += "<option value='2'>Ineffective</option></select>";
 						}
 						else if (this.results == 2)
 						{
-							diseno2 += "<option value=''>Seleccione Resultado</option>";
-							diseno2 += "<option value='1'>Efectivo</option>";
-							diseno2 += "<option value='2' selected>Inefectivo</option></select>";
+							diseno2 += "<option value=''>Select results</option>";
+							diseno2 += "<option value='1'>Effective</option>";
+							diseno2 += "<option value='2' selected>Ineffective</option></select>";
 						}
 						else
 						{
-							diseno2 += "<option value=''>Seleccione Resultado</option>";
-							diseno2 += "<option value='1'>Efectivo</option>";
-							diseno2 += "<option value='2'>Inefectivo</option></select>";
+							diseno2 += "<option value=''>Select results</option>";
+							diseno2 += "<option value='1'>Effective</option>";
+							diseno2 += "<option value='2'>Ineffective</option></select>";
 						}
 
 						diseno2 += "<div id='datos_diseno' style='display: none;'></div></td>";
@@ -437,21 +437,21 @@ function editEval(control_id)
 
 						if (this.results == 1)
 						{
-							efectividad2 += "<option value=''>Seleccione Resultado</option>";
-							efectividad2 += "<option value='1' selected>Efectivo</option>";
-							efectividad2 += "<option value='2'>Inefectivo</option></select>";
+							efectividad2 += "<option value=''>Select results</option>";
+							efectividad2 += "<option value='1' selected>Effective</option>";
+							efectividad2 += "<option value='2'>Ineffective</option></select>";
 						}
 						else if (this.results == 2)
 						{
-							efectividad2 += "<option value=''>Seleccione Resultado</option>";
-							efectividad2+= "<option value='1'>Efectivo</option>";
-							efectividad2+= "<option value='2' selected>Inefectivo</option></select>";
+							efectividad2 += "<option value=''>Select results</option>";
+							efectividad2 += "<option value='1'>Effective</option>";
+							efectividad2 += "<option value='2' selected>Ineffective</option></select>";
 						}
 						else
 						{
-							efectividad2+= "<option value=''>Seleccione Resultado</option>";
-							efectividad2+= "<option value='1'>Efectivo</option>";
-							efectividad2+= "<option value='2'>Inefectivo</option></select>";
+							efectividad2 += "<option value=''>Select results</option>";
+							efectividad2 += "<option value='1'>Effective</option>";
+							efectividad2 += "<option value='2'>Ineffective</option></select>";
 						}
 
 						efectividad2 += "<div id='datos_efectividad' style='display: none;'></div></td>";
@@ -463,21 +463,21 @@ function editEval(control_id)
 
 						if (this.results == 1)
 						{
-							sustantiva2  += "<option value=''>Seleccione Resultado</option>";
-							sustantiva2  += "<option value='1' selected>Efectivo</option>";
-							sustantiva2  += "<option value='2'>Inefectivo</option></select>";
+							sustantiva2  += "<option value=''>Select results</option>";
+							sustantiva2  += "<option value='1' selected>Effective</option>";
+							sustantiva2  += "<option value='2'>Ineffective</option></select>";
 						}
 						else if (this.results == 2)
 						{
-							sustantiva2 += "<option value=''>Seleccione Resultado</option>";
-							sustantiva2 += "<option value='1'>Efectivo</option>";
-							sustantiva2 += "<option value='2' selected>Inefectivo</option></select>";
+							sustantiva2  += "<option value=''>Select results</option>";
+							sustantiva2  += "<option value='1'>Effective</option>";
+							sustantiva2  += "<option value='2' selected>Ineffective</option></select>";
 						}
 						else
 						{
-							sustantiva2 += "<option value=''>Seleccione Resultado</option>";
-							sustantiva2 += "<option value='1'>Efectivo</option>";
-							sustantiva2 += "<option value='2'>Inefectivo</option></select>";
+							sustantiva2  += "<option value=''>Select results</option>";
+							sustantiva2  += "<option value='1'>Effective</option>";
+							sustantiva2  += "<option value='2'>Ineffective</option></select>";
 						}
 
 						sustantiva2 += "<div id='datos_sustantiva' style='display: none;'></div></td>";
@@ -489,30 +489,30 @@ function editEval(control_id)
 
 						if (this.results == 1)
 						{
-							cumplimiento2 += "<option value=''>Seleccione Resultado</option>";
-							cumplimiento2 += "<option value='1' selected>Efectivo</option>";
-							cumplimiento2 += "<option value='2'>Inefectivo</option></select>";
+							cumplimiento2 += "<option value=''>Select results</option>";
+							cumplimiento2 += "<option value='1' selected>Effective</option>";
+							cumplimiento2 += "<option value='2'>Ineffective</option></select>";
 						}
 						else if (this.results == 2)
 						{
-							cumplimiento2 += "<option value=''>Seleccione Resultado</option>";
-							cumplimiento2 += "<option value='1'>Efectivo</option>";
-							cumplimiento2 += "<option value='2' selected>Inefectivo</option></select>";
+							cumplimiento2 += "<option value=''>Select results</option>";
+							cumplimiento2 += "<option value='1'>Effective</option>";
+							cumplimiento2 += "<option value='2' selected>Ineffective</option></select>";
 						}
 						else
 						{
-							cumplimiento2 += "<option value=''>Seleccione Resultado</option>";
-							cumplimiento2 += "<option value='1'>Efectivo</option>";
-							cumplimiento2 += "<option value='2'>Inefectivo</option></select>";
+							cumplimiento2 += "<option value=''>Select results</option>";
+							cumplimiento2 += "<option value='1'>Effective</option>";
+							cumplimiento2 += "<option value='2'>Ineffective</option></select>";
 						}
 
 						cumplimiento2 += "<div id='datos_cumplimiento' style='display: none;'></div></td>";
 					}
 
 				$('#table_evaluacion').html(table_head);
-				var boton = '<center><button name="guardar" value=1 class="btn btn-success">Guardar actualización</button>';
+				var boton = '<center><button name="guardar" value=1 class="btn btn-success">Save update</button>';
 				boton += '&nbsp;&nbsp;&nbsp;';
-				boton += '<button name="nueva" value=1 class="btn btn-danger" onclick="newEval()">Agregar nueva evaluación</button></center>';
+				boton += '<button name="nueva" value=1 class="btn btn-danger" onclick="newEval()">Add new assessment</button></center>';
 				$('#boton-guardar').html(boton);
 
 				var pruebas = '<tr>';
@@ -553,39 +553,39 @@ function newEval()
 	$('#table_evaluacion').empty();
 	//Seteamos cabecera
 	var table_head = "<thead>";
-	table_head += "<th>Diseño</th><th>Efectividad operativa</th><th>Prueba sustantiva</th><th>Prueba de cumplimiento</th>";
+	table_head += "<th>Design</th><th>Operational effectiveness</th><th>Substantive test</th><th>Compliance test</th>";
 	table_head += "</thead>";
 	var table_row = "<tr>";
 						
 	table_row += "<td><select name='diseno' id='diseno' style='width:180px; vertical-align:top' class='form-control' onchange='test_diseno()'>";
-	table_row += "<option value=''>Seleccione Resultado</option>";
-	table_row += "<option value='1'>Efectivo</option>";
-	table_row += "<option value='2'>Inefectivo</option></select>";
+	table_row += "<option value=''>Select results</option>";
+	table_row += "<option value='1'>Effective</option>";
+	table_row += "<option value='2'>Ineffective</option></select>";
 	table_row += "<div id='datos_diseno' style='display: none;'></div></td>";
 
 	table_row += "<td><select name='efectividad' style='width:180px' class='form-control' id='efectividad' onchange='test_efectividad()'>";
-	table_row += "<option value='' selected>Seleccione Resultado</option>";
-	table_row += "<option value='1'>Efectivo</option>";
-	table_row += "<option value='2'>Inefectivo</option></select>";
+	table_row += "<option value='' selected>Select results</option>";
+	table_row += "<option value='1'>Effective</option>";
+	table_row += "<option value='2'>Ineffective</option></select>";
 	table_row += "<div id='datos_efectividad' style='display: none;'></div></td>";
 
 	table_row += "<td><select name='sustantiva' style='width:180px' class='form-control' id='sustantiva' onchange='test_sustantiva()'>";
-	table_row += "<option value='' selected>Seleccione Resultado</option>";
-	table_row += "<option value='1'>Efectivo</option>";
-	table_row += "<option value='2'>Inefectivo</option></select>";
+	table_row += "<option value='' selected>Select results</option>";
+	table_row += "<option value='1'>Effective</option>";
+	table_row += "<option value='2'>Ineffective</option></select>";
 	table_row += "<div id='datos_sustantiva' style='display: none;'></div></td>";
 
 	table_row += "<td><select name='cumplimiento' style='width:180px' class='form-control' id='cumplimiento' onchange='test_cumplimiento()'>";
-	table_row += "<option value='' selected>Seleccione Resultado</option>";
-	table_row += "<option value='1'>Efectivo</option>";
-	table_row += "<option value='2'>Inefectivo</option></select>";
+	table_row += "<option value='' selected>Select results</option>";
+	table_row += "<option value='1'>Effective</option>";
+	table_row += "<option value='2'>Ineffective</option></select>";
 	table_row += "<div id='datos_cumplimiento' style='display: none;'></div></td>";
 	table_row += "</tr>";
 
 	$('#table_evaluacion').html(table_head);
-	var boton = '<center><button name="guardar" value=0 class="btn btn-success">Guardar evaluación</button>'
+	var boton = '<center><button name="guardar" value=0 class="btn btn-success">Save assessment</button>'
 	boton += '&nbsp;&nbsp;&nbsp;';
-	boton += '<button type="button" name="nueva" value=1 class="btn btn-danger" onclick="editEval('+$("#control_id").val()+')">Editar última evaluación</button></center>';
+	boton += '<button type="button" name="nueva" value=1 class="btn btn-danger" onclick="editEval('+$("#control_id").val()+')">Edit last assessment</button></center>';
 	$('#boton-guardar').html(boton);
 	$('#table_evaluacion').append(table_row);
 	$('#table_evaluacion').fadeIn(500)

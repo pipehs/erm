@@ -104,9 +104,9 @@
 		<td>
 			<div>
 			@if ($objective_category['estado'] == 0)
-	            <button class="btn btn-danger" onclick="bloquear({{ $objective_category['id'] }},'{{ $objective_category['nombre'] }}','categorias_objetivos','the objective category')">Block</button>
+	            <button class="btn btn-danger" onclick="bloquear({{ $objective_category['id'] }},'{{ $objective_category['nombre'] }}','categorias_objetivos','The objective category')">Block</button>
 	        @else
-	       
+	       		<button class="btn btn-danger" onclick="eliminar2({{ $objective_category['id'] }},'{{ $objective_category['nombre'] }}','categorias_objetivos','The objective category')">Delete</button>
 	        @endif
 	        </div><!-- /btn-group -->
 		</td>

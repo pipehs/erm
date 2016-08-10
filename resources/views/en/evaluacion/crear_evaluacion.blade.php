@@ -1,4 +1,4 @@
-@extends('master')
+@extends('en.master')
 
 @section('title', 'Risk Assessments')
 
@@ -68,20 +68,31 @@ On this section you will be able to create polls for the risk assessments.
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Select subprocess risks',
-						null,['class'=>'col-sm-4 control-label'])!!}
+	                 	<div class="row">
+	                  		{!!Form::label('Select Organization',null,['class'=>'col-sm-4 control-label'])!!}
+	                  		<div class="col-sm-3">
+	                    		{!!Form::select('organization_id',$organizations, 
+	                         		null, 
+	                         	['id' => 'org','placeholder'=>'- Select -','required'=>'true'])!!}
+	                  		</div>
+	                	</div>
+	                </div>
+
+					<div class="form-group" id="riesgos_objetivos" style="display: none;">
+						{!!Form::label('Bussiness risks',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::select('risk_subprocess_id[]',$riesgos_sub,null, 
-							 	   ['id' => 'el2','multiple'=>'true'])!!}
+							<select name="objective_risk_id[]" id="objective_risk_id" multiple="multiple">
+								<!-- Aquí se agregarán los riesgos de negocio de la org seleccionada a través de Jquery -->
+							</select>
 						</div>
 					</div>
 
-					<div class="form-group">
-						{!!Form::label('Select bussiness risks',
-						null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="form-group" id="riesgos_procesos" style="display: none;">
+						{!!Form::label('Process risks',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::select('objective_risk_id[]',$riesgos_obj,null, 
-							 	   ['id' => 'el2','multiple'=>'true'])!!}
+							<select name="risk_subprocess_id[]" id="risk_subprocess_id" multiple="multiple">
+								<!-- Aquí se agregarán los riesgos de proceso de la org seleccionada a través de Jquery -->
+							</select>
 						</div>
 					</div>
 
@@ -94,5 +105,9 @@ On this section you will be able to create polls for the risk assessments.
 		</div>
 	</div>
 </div>
+@stop
+
+@section('scripts2')
+{!!Html::script('assets/js/get_risks.js')!!}
 @stop
 

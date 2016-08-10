@@ -80,11 +80,17 @@
 			<td>{{ $stakeholder['nombre'] }}</td>
 			<td>{{ $stakeholder['apellidos']}}</td>
 			<td><ul>
+			<?php $cont = 0; ?>
 			@foreach ($roles as $role)
 				@if ($role['stakeholder_id'] == $stakeholder['id'])
 					<li>{{ $role['nombre'] }}</li>
+					<?php $cont += 1; //contador para ver si existen roles?>
 				@endif
 			@endforeach
+
+			@if ($cont == 0)
+				No roles was added
+			@endif
 			</ul></td>
 			<td>{{ $stakeholder['fecha_creacion'] }}</td>
 			<td>{{ $stakeholder['fecha_act'] }}</td>
@@ -116,9 +122,9 @@
 		<td>
 			<div>
 			@if ($stakeholder['estado'] == 0)
-	             <button class="btn btn-danger" onclick="bloquear({{ $stakeholder['id'] }},'{{ $stakeholder['nombre']." ".$stakeholder['apellidos'] }}','stakeholders','the stakeholder')">Block</button>
+	             <button class="btn btn-danger" onclick="bloquear({{ $stakeholder['id'] }},'{{ $stakeholder['nombre']." ".$stakeholder['apellidos'] }}','stakeholders','The stakeholder')">Block</button>
 	        @else
-	        	
+	        	 <button class="btn btn-danger" onclick="eliminar2({{ $stakeholder['id'] }},'{{ $stakeholder['nombre']." ".$stakeholder['apellidos'] }}','stakeholders','The stakeholder')">Delete</button>
 	        @endif
 	        </div><!-- /btn-group -->
 		</td>

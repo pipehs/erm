@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Planes de acci&oacute;n')
+@section('title', 'Action Plans')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes B&aacute;sicos</a></li>
-			<li><a href="planes_accion">Planes de acci&oacute;n</a></li>
+			<li><a href="#">Basic Reports</a></li>
+			<li><a href="planes_accion">Action Plans</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-table"></i>
-					<span>Planes de acci&oacute;n</span>
+					<span>Action Plans</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -35,15 +35,15 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-      <p>En esta secci&oacute;n podr&aacute; ver los planes de acci&oacute;n de cada organización con su información correspondiente.</p>
+	<p>On this section you will be able to see the action plans for each organization with their corresponding information</p>
 
       	{!!Form::open()!!}
 				<div class="form-group">
-							{!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
+							{!!Form::label('Select organization',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-3">
 								{!!Form::select('organization',$organizations,
 								 	   null, 
-								 	   ['id' => 'organization','placeholder'=>'- Seleccione -'])!!}
+								 	   ['id' => 'organization','placeholder'=>'- Select -'])!!}
 							</div>
 				</div>
 
@@ -62,8 +62,6 @@
 	</div>
 </div>
 
-				
-
 @stop
 @section('scripts2')
 <script>
@@ -75,13 +73,12 @@
 			if ($("#organization").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 			{
 					//reseteamos matriz
-
 					$("#planesaccion").removeAttr("style").show();
 
 					//Seteamos cabecera
 					var table_head = "<thead>";
-					table_head += "<th>Plan de auditoría</th><th>Auditoría</th><th>Debilidad encontrada</th>";
-					table_head += "<th>Plan de acción</th><th>Estado</th><th>Fecha creación</th><th>Fecha final</th>";
+					table_head += "<th>Audit Plan</th><th>Audit</th><th>Issue founded</th>";
+					table_head += "<th>Action Plan</th><th>Status</th><th>Creation date</th><th>Plan Deadline</th>";
 					table_head += "</thead>";
 
 					//Añadimos la imagen de carga en el contenedor
@@ -116,7 +113,7 @@
 					var value = $("#organization").val();
 					//agregamos botón para exportar y array con datos
 					var insert = "<input type='hidden' name='datos[]' value='" + $("#organization").val() + "'>";
-					insert += '<button type="button" id="btnExport" class="btn btn-success">Exportar Excel</button>';
+					insert += '<button type="button" id="btnExport" class="btn btn-success">Export Excel</button>';
 					$("#boton_exportar").html(insert);
 
 

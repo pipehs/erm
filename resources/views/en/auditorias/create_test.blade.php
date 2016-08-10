@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Agregar programa de auditor&iacute;a')
+@section('title', 'Create Audit Program')
 
 
 @section('content')
@@ -10,7 +10,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li>{!!Html::link('#','Auditor&iacute;as')!!}</li>
-			<li>{!!Html::link('crear_pruebas','Agregar programa de auditor&iacute;a')!!}</li>
+			<li>{!!Html::link('crear_pruebas','Create Audit Program')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -20,7 +20,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Agregar Programa de Auditor&iacute;a</span>
+					<span>Create Audit Program</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -53,13 +53,13 @@
 				</div>
 			@endif
 
-			Seleccione el plan, y luego seleccione si desea crear un nuevo programa de auditoría o reutilizar uno existente.
+			Select plan, and then select if you want to create a new audit program or reuse existing one.
 				{!!Form::open(['route'=>'agregar_prueba','method'=>'POST','class'=>'form-horizontal','id'=>'form','enctype'=>'multipart/form-data'])!!}
 
 					<div id="cargando"><br></div>
 
 					<div class="form-group">
-						{!!Form::label('Plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Audit Plan',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('audit_plan_id',$audit_plans,null, 
 							 	   ['id' => 'audit_plans','required'=>'true','placeholder'=>'- Seleccione -'])!!}
@@ -67,7 +67,7 @@
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Seleccione auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Select audit',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							<select name="audit" id="audit" required="true">
 								<!-- Aquí se agregarán las auditorías relacionadas al plan seleccionado a través de Jquery -->
@@ -76,27 +76,27 @@
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Seleccione si desea crear un nuevo programa o crear en base a alguno previo',
+						{!!Form::label('Select if you want to create a new program or reuse existing one',
 						null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('kind',$audit_programs,null,
-							 	   ['id' => 'kind','placeholder'=>'Nueva'])!!}
+							 	   ['id' => 'kind','placeholder'=>'New'])!!}
 						</div>
 					</div>
 
-					@include('auditorias.form_program')
+					@include('en.auditorias.form_program')
 
 			<div id="super_tests">		
 
-			<center><b><font color="blue">Informaci&oacute;n de pruebas de auditor&iacute;a</font></b></center><hr>
+			<center><b><font color="blue">Information about audit tests</font></b></center><hr>
 
 					<div id="category" style="display:none;">
 							<div class="form-group">
-								{!!Form::label('Categor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
+								{!!Form::label('Category',null,['class'=>'col-sm-4 control-label'])!!}
 								<div class="col-sm-4">
-									{!!Form::select('type2_test_1',['1'=>'Prueba de control','2'=>'Prueba de riesgo',
-																'3'=>'Prueba de subproceso'],null,
-																['id'=>'type2_test_1','required'=>'true','onchange'=>'getType(1)','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+									{!!Form::select('type2_test_1',['1'=>'Control test','2'=>'Risk test',
+																'3'=>'Subprocess test'],null,
+																['id'=>'type2_test_1','required'=>'true','onchange'=>'getType(1)','placeholder'=>'- Select -','required'=>'true'])!!}
 								</div>
 							</div>
 					</div>	
@@ -105,7 +105,7 @@
 					<div id="tests">
 						
 						<div class="form-group">
-								{!!Form::label('Prueba 1: Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+								{!!Form::label('Test 1: Name',null,['class'=>'col-sm-4 control-label'])!!}
 								<div class="col-sm-4">
 									{!!Form::text('name_test_1',null,['id'=>'name_test_1','class'=>'form-control',
 																'required'=>'true'])!!}
@@ -114,7 +114,7 @@
 
 						<div class="form-group">
 
-								{!!Form::label('Descripción',null,['class'=>'col-sm-4 control-label'])!!}	
+								{!!Form::label('Description',null,['class'=>'col-sm-4 control-label'])!!}	
 								<div class="col-sm-4">
 									{!!Form::textarea('description_test_1',null,['id'=>'description_test_1','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 								</div>
@@ -122,50 +122,44 @@
 						</div>
 
 						<div class="form-group">
-							{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
+							{!!Form::label('Kind',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-4">
-								{!!Form::select('type_test_1',['0'=>'Prueba de diseño','1'=>'Prueba de efectividad operativa',
-															'2'=>'Prueba de cumplimiento','3'=>'Prueba sustantiva'],null,
-															['id'=>'type','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+								{!!Form::select('type_test_1',['0'=>'Design test','1'=>'Operational effectiveness test','2'=>'Compliance test','3'=>'Substantive test'],null,
+								['id'=>'type','required'=>'true','placeholder'=>'- Select -'])!!}
 							</div>
 						</div>
 
 						<div class="form-group">
-
 							{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-4">
 								{!!Form::select('stakeholder_test_1',$stakeholders,null,['required'=>'true',
-								'placeholder'=>'- Seleccione -','id'=>'stakeholder_test_1','class'=>'first-disabled'])!!}
+								'placeholder'=>'- Select  -','id'=>'stakeholder_test_1','class'=>'first-disabled'])!!}
 							</div>
-
 						</div>
 
 						<div class="form-group">
-
-								{!!Form::label('Horas-hombre',null,['class'=>'col-sm-4 control-label'])!!}
+								{!!Form::label('Hours-Man',null,['class'=>'col-sm-4 control-label'])!!}
 								<div class="col-sm-4">
 									{!!Form::number('hh_test_1',null,['id'=>'hh_test_1','class'=>'form-control','min'=>'1'])!!}
 								</div>
-
 						</div>
 
 						<div class="form-group">
 
-							<label for="file_1" class="col-sm-4 control-label">Para mayor detalle de la prueba, puede agregar un archivo (opcional)</label>
+							<label for="file_1" class="col-sm-4 control-label">For more detail of the test, you can add a file (optional)</label>
 
 							<div class="col-sm-4">
 								<input type="file" name="file_1" id="file1" class="inputfile" />
-								<label for="file1">Cargue evidencia</label>
+								<label for="file1">Upload Evidence</label>
 							</div>
 						</div>
 
 					</div>
 					<hr>
 					<div id="new_pruebas">
-						
 					</div>
 					<center>
-					<div style="cursor:hand; margin:auto; " id="agregar_prueba"><font color="CornflowerBlue"><u>Agregar m&aacute;s pruebas</u></font></div>
+					<div style="cursor:hand; margin:auto; " id="agregar_prueba"><font color="CornflowerBlue"><u>Add More Tests</u></font></div>
 					</center>
 			</div>
 
@@ -173,14 +167,14 @@
 
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Save', ['class'=>'btn btn-primary'])!!}
 						</center>
 					</div>
 
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('programas_auditoria', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('programas_auditoria', $title = 'Return', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 			</div>
@@ -239,77 +233,77 @@ $("#kind").change(function() {
 									var prueba = '<div class="form-group">';
 									
 									//categoría
-									prueba += '<label for="type2_test_'+(i+1)+'" class="col-sm-4 control-label">Categor&iacute;a</label>';
+									prueba += '<label for="type2_test_'+(i+1)+'" class="col-sm-4 control-label">Category</label>';
 									prueba += '<div class="col-sm-4"><select name="type2_test_'+(i+1)+'" class="form-control" onchange="getType('+(i+1)+')">>';
 									
 									if (test.category == 1)
 									{
-										prueba += '<option value="1" selected>Prueba de control</option>';
-										prueba += '<option value="2">Prueba de riesgo</option>';
-										prueba += '<option value="3">Prueba de subproceso</option>';
+										prueba += '<option value="1" selected>Control test</option>';
+										prueba += '<option value="2">Risk test</option>';
+										prueba += '<option value="3">Subprocess test</option>';
 									}
 									else if (test.category == 2)
 									{
-										prueba += '<option value="1">Prueba de control</option>';
-										prueba += '<option value="2" selected>Prueba de riesgo</option>';
-										prueba += '<option value="3">Prueba de subproceso</option>';
+										prueba += '<option value="1">Control test</option>';
+										prueba += '<option value="2" selected>Risk test</option>';
+										prueba += '<option value="3">Subprocess test</option>';
 									}
 									else if (test.category == 3)
 									{
-										prueba += '<option value="1">Prueba de control</option>';
-										prueba += '<option value="2">Prueba de riesgo</option>';
-										prueba += '<option value="3" selected>Prueba de subproceso</option>';
+										prueba += '<option value="1">Control test</option>';
+										prueba += '<option value="2">Risk test</option>';
+										prueba += '<option value="3" selected>Subprocess test</option>';
 									}
 
 									prueba += '</select></div></div>';
 
 									//nombre
 									prueba += '<div class="form-group">';
-									prueba += '<label for="name_test_'+(i+1)+'" class="col-sm-4 control-label">Prueba '+(i+1)+': Nombre</label>';
+									prueba += '<label for="name_test_'+(i+1)+'" class="col-sm-4 control-label">Test '+(i+1)+': Name</label>';
 									prueba += '<div class="col-sm-4">';
 									prueba += '<input type="text" name="name_test_'+(i+1)+'" value="'+test.name+'" class="form-control"></div></div>';
 									
 									//descripción
 									prueba += '<div class="form-group">';
-									prueba += '<label for="description_test_'+(i+1)+'" class="col-sm-4 control-label">Descripción</label>';
+									prueba += '<label for="description_test_'+(i+1)+'" class="col-sm-4 control-label">Description</label>';
 									prueba += '<div class="col-sm-4"><textarea name="description_test_'+(i+1)+'" class="form-control" cols="4" rows="3">'+test.description+'</textarea></div></div>';
 
 									//tipo
 									prueba += '<div class="form-group">';
-									prueba += '<label for="type_test_'+(i+1)+'" class="col-sm-4 control-label">Tipo</label>';
+									prueba += '<label for="type_test_'+(i+1)+'" class="col-sm-4 control-label">Kind</label>';
 									prueba += '<div class="col-sm-4"><select name="type_test_'+(i+1)+'" class="form-control">';
 
 									if (test.type == 0)
 									{
-										prueba += '<option value="" disabled selected>- Seleccione -</option>';
-										prueba += '<option value="0" selected>Prueba de diseño</option>';
-										prueba += '<option value="1">Prueba de efectividad operativa</option>';
-										prueba += '<option value="2">Prueba de cumplimiento</option>';
-										prueba += '<option value="3">Prueba sustantiva</option>';
+										prueba += '<option value="" disabled selected>- Select -</option>';
+										prueba += '<option value="0" selected>Design test</option>';
+										prueba += '<option value="1">Operational effectiveness test</option>';
+										prueba += '<option value="2">Compliance test</option>';
+										prueba += '<option value="3">Substantive test</option>';
 									}
 									else if (test.type == 1)
 									{
-										prueba += '<option value="" disabled selected>- Seleccione -</option>';
-										prueba += '<option value="0">Prueba de diseño</option>';
-										prueba += '<option value="1" selected>Prueba de efectividad operativa</option>';
-										prueba += '<option value="2">Prueba de cumplimiento</option>';
-										prueba += '<option value="3">Prueba sustantiva</option>';
+										prueba += '<option value="" disabled selected>- Select -</option>';
+										prueba += '<option value="0">Design test</option>';
+										prueba += '<option value="1" selected>Operational effectiveness test</option>';
+										prueba += '<option value="2">Compliance test</option>';
+										prueba += '<option value="3">Substantive test</option>';
 									}
 									else if (test.type == 2)
 									{
-										prueba += '<option value="" disabled selected>- Seleccione -</option>';
-										prueba += '<option value="0">Prueba de diseño</option>';
-										prueba += '<option value="1" selected>Prueba de efectividad operativa</option>';
-										prueba += '<option value="2" selected>Prueba de cumplimiento</option>';
-										prueba += '<option value="3">Prueba sustantiva</option>';
+										prueba += '<option value="" disabled selected>- Select -</option>';
+										prueba += '<option value="0">Design test</option>';
+										prueba += '<option value="1">Operational effectiveness test</option>';
+										prueba += '<option value="2" selected>Compliance test</option>';
+										prueba += '<option value="3">Substantive test</option>';
 									}
 									else if (test.type == 3)
 									{
-										prueba += '<option value="" disabled selected>- Seleccione -</option>';
-										prueba += '<option value="0">Prueba de diseño</option>';
-										prueba += '<option value="1" selected>Prueba de efectividad operativa</option>';
-										prueba += '<option value="2">Prueba de cumplimiento</option>';
-										prueba += '<option value="3" selected>Prueba sustantiva</option>';
+										prueba += '<option value="" disabled selected>- Select -</option>';
+										prueba += '<option value="0">Design test</option>';
+										prueba += '<option value="1">Operational effectiveness test</option>';
+										prueba += '<option value="2">Compliance test</option>';
+										prueba += '<option value="3" selected>Substantive test</option>';;
 									}
 									
 									prueba += '</select>';
@@ -317,15 +311,15 @@ $("#kind").change(function() {
 
 									//hh
 									prueba += '<div class="form-group">';
-									prueba += '<label for="hh_test_'+(i+1)+'" class="col-sm-4 control-label">Horas-hombre</label>';
+									prueba += '<label for="hh_test_'+(i+1)+'" class="col-sm-4 control-label">Hours-Man</label>';
 									prueba += '<div class="col-sm-4">';
 									prueba += '<input type="number" name="hh_test_'+(i+1)+'" value="'+test.hh+'" class="form-control" min="1"></div></div>';
 
 									prueba += '<div class="form-group">';
-									prueba += '<label for="file_'+(i+1)+'" class="col-sm-4 control-label">Para mayor detalle de la prueba, puede agregar un archivo (opcional)</label>';
+									prueba += '<label for="file_'+(i+1)+'" class="col-sm-4 control-label">For more detail of the test, you can add a file (optional)</label>';
 									prueba += '<div class="col-sm-4">';
 									prueba += '<input type="file" name="file_'+(i+1)+'" id="file'+(i+1)+'" class="inputfile" />';
-									prueba += '<label for="file'+(i+1)+'">Cargue evidencia</label>';
+									prueba += '<label for="file'+(i+1)+'">Upload Evidence</label>';
 									prueba += '</div></div>';
 
 									$('#tests').append(prueba);
@@ -348,24 +342,24 @@ $("#kind").change(function() {
 
 				//descripción
 				prueba += '<div class="form-group">';
-				prueba += '<label for="description_test_1" class="col-sm-4 control-label">Descripción</label>';
+				prueba += '<label for="description_test_1" class="col-sm-4 control-label">Description</label>';
 				prueba += '<div class="col-sm-4"><textarea name="description_test_1" class="form-control" cols="4" rows="3"></textarea></div></div>';
 
 				//tipo
 				prueba += '<div class="form-group">';
 				prueba += '<label for="type_test_1" class="col-sm-4 control-label">Tipo</label>';
 				prueba += '<div class="col-sm-4"><select name="type_test_1" class="form-control">';
-				prueba += '<option value="" disabled selected>- Seleccione -</option>';
-				prueba += '<option value="0">Prueba de diseño</option>';
-				prueba += '<option value="1">Prueba de efectividad operativa</option>';
-				prueba += '<option value="2">Prueba de cumplimiento</option>';
-				prueba += '<option value="3">Prueba sustantiva</option>';
+				prueba += '<option value="" disabled selected>- Select -</option>';
+				prueba += '<option value="0">Design test</option>';
+				prueba += '<option value="1">Operational effectiveness test</option>';
+				prueba += '<option value="2">Compliance test</option>';
+				prueba += '<option value="3">Substantive test</option>';
 				prueba += '</select>';
 				prueba += '</div></div>';
 
 				//hh
 				prueba += '<div class="form-group">';
-				prueba += '<label for="hh_test_1" class="col-sm-4 control-label">Horas-hombre</label>';
+				prueba += '<label for="hh_test_1" class="col-sm-4 control-label">Hours-Man</label>';
 				prueba += '<div class="col-sm-4">';
 				prueba += '<input type="number" name="hh_test_1" class="form-control" min="1"></div></div>';
 
@@ -435,7 +429,7 @@ $("#audit_plans").change(function() {
 
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
-							audit = '<option value="" selected disabled>- Seleccione </option>';
+							audit = '<option value="" selected disabled>- Select </option>';
 							//seteamos datos en select de auditorías
 							$(datos).each( function() {
 								audit += '<option value="' + this.id + '">' + this.name +'</option>';
@@ -444,7 +438,6 @@ $("#audit_plans").change(function() {
 							$("#audit").append(audit);
 	
 					});
-
 			}
 			else
 			{
@@ -464,13 +457,13 @@ $("#agregar_prueba").click(function() {
 
 				//tipo
 				prueba += '<div class="form-group">';
-				prueba += '<label for="type2_test_'+cont+'" class="col-sm-4 control-label">Categor&iacute;a</label>';
+				prueba += '<label for="type2_test_'+cont+'" class="col-sm-4 control-label">Category</label>';
 				prueba += '<div class="col-sm-4">';
 				prueba += '<select name="type2_test_'+cont+'" id="type2_test_'+cont+'" onchange="getType('+cont+')" class="form-control">';
-				prueba += '<option value="" disabled selected>- Seleccione -</option>';
-				prueba += '<option value="1">Prueba de control</option>';
-				prueba += '<option value="2">Prueba de riesgo</option>';
-				prueba += '<option value="3">Prueba de subproceso</option>';
+				prueba += '<option value="" disabled selected>- Select -</option>';
+				prueba += '<option value="1">Control test</option>';
+				prueba += '<option value="2">Risk test</option>';
+				prueba += '<option value="3">Subprocess test</option>';
 				prueba += '</select>';
 				prueba += '</div></div>';
 
@@ -478,24 +471,24 @@ $("#agregar_prueba").click(function() {
 
 				//insertamos nombre
 				prueba += '<div class="form-group">';
-				prueba += '<label for="name_test_'+cont+'" class="col-sm-4 control-label">Prueba '+cont+': Nombre</label>';
+				prueba += '<label for="name_test_'+cont+'" class="col-sm-4 control-label">Test '+cont+': Name</label>';
 				prueba += '<div class="col-sm-4">';
 				prueba += '<input type="text" name="name_test_'+cont+'" class="form-control"></div></div>';
 
 				//descripción
 				prueba += '<div class="form-group">';
-				prueba += '<label for="description_test_'+cont+'" class="col-sm-4 control-label">Descripción</label>';
+				prueba += '<label for="description_test_'+cont+'" class="col-sm-4 control-label">Description</label>';
 				prueba += '<div class="col-sm-4"><textarea name="description_test_'+cont+'" class="form-control" cols="4" rows="3"></textarea></div></div>';
 
 				//tipo
 				prueba += '<div class="form-group">';
-				prueba += '<label for="type_test_'+cont+'" class="col-sm-4 control-label">Tipo</label>';
+				prueba += '<label for="type_test_'+cont+'" class="col-sm-4 control-label">Kind</label>';
 				prueba += '<div class="col-sm-4"><select name="type_test_'+cont+'" class="form-control">';
-				prueba += '<option value="" disabled selected>- Seleccione -</option>';
-				prueba += '<option value="0">Prueba de diseño</option>';
-				prueba += '<option value="1">Prueba de efectividad operativa</option>';
-				prueba += '<option value="2">Prueba de cumplimiento</option>';
-				prueba += '<option value="3">Prueba sustantiva</option>';
+				prueba += '<option value="" disabled selected>- Select -</option>';
+				prueba += '<option value="0">Design test</option>';
+				prueba += '<option value="1">Operational effectiveness test</option>';
+				prueba += '<option value="2">Compliance test</option>';
+				prueba += '<option value="3">Substantive test</option>';
 				prueba += '</select>';
 				prueba += '</div></div>';
 
@@ -507,7 +500,7 @@ $("#agregar_prueba").click(function() {
 				//prueba += '{!!Form::select("stakeholder_test_'+cont+'",$stakeholders,null,["placeholder"=>"- Seleccione -","class"=>"form-control first-disabled"])!!}';
 
 				prueba += '<select name="stakeholder_test_'+cont+'" class="form-control">';
-				prueba += '<option value="" disabled selected>- Seleccione -</option>';
+				prueba += '<option value="" disabled selected>- Select -</option>';
 				@foreach ($stakeholders as $rut=>$name)
 					prueba += '<option value="{{$rut}}">{{$name}}</option>';
 				@endforeach
@@ -519,15 +512,15 @@ $("#agregar_prueba").click(function() {
 
 				//hh
 				prueba += '<div class="form-group">';
-				prueba += '<label for="hh_test_'+cont+'" class="col-sm-4 control-label">Horas-hombre</label>';
+				prueba += '<label for="hh_test_'+cont+'" class="col-sm-4 control-label">Hours-Man</label>';
 				prueba += '<div class="col-sm-4">';
 				prueba += '<input type="number" name="hh_test_'+cont+'" class="form-control" min="1"></div></div>';
 
 				prueba += '<div class="form-group">';
-				prueba += '<label for="file_'+cont+'" class="col-sm-4 control-label">Para mayor detalle de la prueba, puede agregar un archivo (opcional)</label>';
+				prueba += '<label for="file_'+cont+'" class="col-sm-4 control-label">>For more detail of the test, you can add a file (optional)</label>';
 				prueba += '<div class="col-sm-4">';
 				prueba += '<input type="file" name="file_'+cont+'" id="file'+cont+'" class="inputfile" />';
-				prueba += '<label for="file'+cont+'">Cargue evidencia</label>';
+				prueba += '<label for="file'+cont+'">Upload Evidence</label>';
 				prueba += '</div></div>';
 
 				prueba += '</div>';
@@ -540,12 +533,12 @@ $("#agregar_prueba").click(function() {
 			}
 			else
 			{
-				swal("Error","Primero debe seleccionar el plan de auditoría","error");
+				swal("Error","First you have to choose audit plan","error");
 			}
 	});
 
 </script>
 
-{!!Html::script('assets/js/type_audit_test.js')!!}
+{!!Html::script('assets/js/en/type_audit_test.js')!!}
 
 @stop

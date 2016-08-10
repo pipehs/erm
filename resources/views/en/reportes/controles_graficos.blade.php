@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Reporte de Gráficos')
+@section('title', 'Graphic Reports')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes B&aacute;sicos</a></li>
-			<li><a href="graficos_controles">Gr&aacute;ficos Controles</a></li>
+			<li><a href="#">Basic Reports</a></li>
+			<li><a href="graficos_controles">Control Graphics</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-table"></i>
-					<span>Controles</span>
+					<span>Controls</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -35,7 +35,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-      		<p>En esta secci&oacute;n podr&aacute; ver distintos gr&aacute;ficos que permitan observar de mejor manera la ejecuci&oacute;n del control interno en la empresa.</p>
+      		<p>On this section you will be able to view different graphics that allow to you see on different ways the execution of the internal control on the organization.</p>
 
 		</div>
 	</div>
@@ -47,7 +47,7 @@
 		<div class="box-header">
 			<div class="box-name">
 				<i class="fa fa-circle"></i>
-				<span>Controles ejecutados v/s No ejecutados</span>
+				<span>Executed v/s Non Executed Controls</span>
 			</div>
 			<div class="box-icons">
 				<a class="collapse-link">
@@ -63,7 +63,8 @@
 			<div class="no-move"></div>
 		</div>
 		<div class="box-content">
-			<p align="justify">En este gr&aacute;fico podr&aacute; observar la cantidad de controles que han sido ejecutados a trav&eacute;s de una evaluaci&oacute;n de controles o de una prueba de auditor&iacute;a. Haga click en el gr&aacute;fico si desea observar la informaci&oacute;n de los controles ejecutados o pendientes.</p>
+			<p align="justify">
+			On this graphic you will observe the amount of controls which have been executed through a control evaluation or an audit test. Click on the graphic if you want to observe the information of the controls executed or pending.</p>
 			<p id="alternativo"></p>
 			<div id="piechart_3d" style="width: 500px; height: 300px;"></div>
 		</div>
@@ -77,7 +78,7 @@
 		<div class="box-header">
 			<div class="box-name">
 				<i class="fa fa-circle"></i>
-				<span>Controles efectivos v/s inefectivos</span>
+				<span>Effective v/s Ineffective Controls</span>
 			</div>
 			<div class="box-icons">
 				<a class="collapse-link">
@@ -93,7 +94,8 @@
 			<div class="no-move"></div>
 		</div>
 		<div class="box-content">
-			<p align="justify">En este gr&aacute;fico podr&aacute; observar los resultados obtenidos en los controles que han sido ejecutados en el sistema. Haga click en el gr&aacute;fico si desea observar la informaci&oacute;n de los controles efectivos o inefectivos.</p>
+			<p align="justify">
+			On this graphic you will observe the results obtained on the controls that have been executed on the system. Click on the graphic if you want to observe the information of the effective or ineffective controls.</p>
 			<p id="alternativo2"></p>
 			<div id="piechart2" style="width: 500px; height: 300px;"></div>
 		</div>
@@ -116,13 +118,13 @@
       google.charts.setOnLoadCallback(chart2);
       function chart1() {
         var data = google.visualization.arrayToDataTable([
-          ['Controles', 'Cantidad'],
-          ['Ejecutados',     {{ $cont_ejec }}],
-          ['Pendientes',     {{ $cont_no_ejec }}]
+          ['Controls', 'Amount'],
+          ['Executed',     {{ $cont_ejec }}],
+          ['Pending',     {{ $cont_no_ejec }}]
         ]);
 
         var options = {
-          title: 'Ejecutados v/s Pendientes',
+          title: 'Executed v/s Pending',
           is3D: false,
           colors: ['#74DF00','#FF0000']
         };
@@ -141,15 +143,17 @@
 				//alert(sel[0].row);
 				if (sel[0].row == 0) //mostramos controles ejecutados
 				{
-					var title = '<b>Controles Ejecutados</b>';
+					var title = '<b>Controls Executed</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Nombre</th><th>Descripci&oacute;n</th><th>Actualizado</th></thead>';
+					var text ='<table class="table table-striped table-datatable"><thead><th>Name</th><th>Description</th><th>Updated</th></thead>';
 
 					@foreach ($controls as $control)
 						text += '<tr><td>{{$control["name"]}}</td>';
 						text += '<td>{{$control["description"]}}</td>';
 						text += '<td>{{$control["updated_at"]}}</td></tr>';
 					@endforeach
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.1">Export</a>'
 					swal({   
 						title: title,   
 						text: text,
@@ -159,15 +163,17 @@
 				}
 				else if (sel[0].row == 1) //mostramos controles no ejecutados
 				{
-					var title = '<b>Controles Pendientes</b>';
+					var title = '<b>Controls Pending</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Nombre</th><th>Descripci&oacute;n</th><th>Actualizado</th></thead>';
+					var text ='<table class="table table-striped table-datatable"><thead><th>Name</th><th>Description</th><th>Updated</th></thead>';
 
 					@foreach ($no_ejecutados as $control)
 						text += '<tr><td>{{$control["name"]}}</td>';
 						text += '<td>{{$control["description"]}}</td>';
 						text += '<td>{{$control["updated_at"]}}</td></tr>';
 					@endforeach
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.2">Export</a>'
 					swal({   
 						title: title,   
 						text: text,
@@ -184,13 +190,13 @@
 
       function chart2() {
         var data = google.visualization.arrayToDataTable([
-          ['Resultado', 'Cantidad'],
-          ['Efectivos',     {{ $efectivos }}],
-          ['Inefectivos',     {{ $inefectivos }}]
+          ['Result', 'Amount'],
+          ['Effective',     {{ $efectivos }}],
+          ['Ineffective',     {{ $inefectivos }}]
         ]);
 
         var options = {
-          title: 'Efectivos v/s Inefectivos',
+          title: 'Effective v/s Ineffective',
           is3D: false,
           colors: ['#74DF00','#FF0000']
         };
@@ -209,9 +215,9 @@
 				//alert(sel[0].row);
 				if (sel[0].row == 0) //mostramos controles efectivos
 				{
-					var title = '<b>Controles Efectivos</b>';
+					var title = '<b>Effective Controls</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Nombre</th><th>Descripci&oacute;n</th><th>Actualizado</th></thead>';
+					var text ='<table class="table table-striped table-datatable"><thead><th>Name</th><th>Description</th><th>Updated</th></thead>';
 
 					@foreach ($controls as $control)
 						@if ($control['results'] == 2)
@@ -220,6 +226,8 @@
 							text += '<td>{{$control["updated_at"]}}</td></tr>';
 						@endif
 					@endforeach
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.3">Export</a>'
 					swal({   
 						title: title,   
 						text: text,
@@ -229,9 +237,9 @@
 				}
 				else if (sel[0].row == 1) //mostramos controles no ejecutados
 				{
-					var title = '<b>Controles Inefectivos</b>';
+					var title = '<b>Ineffective Controls</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Nombre</th><th>Descripci&oacute;n</th><th>Actualizado</th></thead>';
+					var text ='<table class="table table-striped table-datatable"><thead><th>Name</th><th>Description</th><th>Updated</th></thead>';
 
 					@foreach ($controls as $control)
 						@if ($control['results'] == 1)
@@ -240,6 +248,8 @@
 							text += '<td>{{$control["updated_at"]}}</td></tr>';
 						@endif
 					@endforeach
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.4">Export</a>'
 					swal({   
 						title: title,   
 						text: text,
@@ -254,8 +264,8 @@
 		}
       }
     @else
-    	$('#alternativo').html('<b>Aun no se han ejecutado controles</b>');
-    	$('#alternativo2').html('<b>Aun no se han ejecutado controles</b>');
+    	$('#alternativo').html('<b>Still have not implemented controls</b>');
+    	$('#alternativo2').html('<b>Still have not implemented controls</b>');
     @endif
       
 </script>

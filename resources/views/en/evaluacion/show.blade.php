@@ -76,7 +76,7 @@
 				<tr>
 				</table>
 
-				<h5><b>Users who sent them this poll</b></h5>
+				<h5><b>Users who was sent this poll</b></h5>
 
 				@if (!empty($stakeholders))
 					<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">

@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Agregar Plan de auditor&iacute;a')
+@section('title', 'Create Audit Plan')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="plan_auditoria">Auditor&iacute;as</a></li>
-			<li><a href="plan_auditoria.create">Agregar plan de auditor&iacute;a</a></li>
+			<li><a href="plan_auditoria">Audits</a></li>
+			<li><a href="plan_auditoria.create">Create Audit Plan</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Agregar Plan de Auditor&iacute;as</span>
+					<span>Create Audit Plan</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -45,15 +45,14 @@
 					</ul>
 				</div>
 			@endif
-
-			Ingrese la informaci&oacute;n asociada al nuevo plan de auditor&iacute;a.
+			Input the information associated for the new audit plan.
 				<div id="cargando"><br></div>
 				{!!Form::open(['route'=>'agregar_plan','method'=>'POST','class'=>'form-horizontal','name'=>'form'])!!}
-					@include('auditorias.form')
+					@include('en.auditorias.form')
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('plan_auditoria', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('plan_auditoria', $title = 'Return', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-success'])!!}
 				<center>
 			</div>
@@ -64,7 +63,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Informaci&oacute;n de riesgos asociados a una organizaci&oacute;n</span>
+					<span>Risk information associated to an organization</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -89,7 +88,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Informaci&oacute;n hist&oacute;rica de &uacute;ltimo plan de auditor&iacute;a</span>
+					<span>Historic information to the last audit plan</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -106,7 +105,7 @@
 			</div>
 			<div class="box-content">
 
-				<div id="informacion">Sin informaci&oacute;n</div>
+				<div id="informacion">Without information</div>
 			</div>
 		</div>
 	</div>
@@ -115,5 +114,5 @@
 @stop
 
 @section('scripts2')
-{!!Html::script('assets/js/create_edit_audit_plan.js')!!}
+{!!Html::script('assets/js/en/create_edit_audit_plan.js')!!}
 @stop

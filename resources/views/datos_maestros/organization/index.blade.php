@@ -153,9 +153,9 @@
 			<td>
 				<div>
 				@if ($organization['estado'] == 0)
-					<button class="btn btn-danger" onclick="bloquear({{ $organization['id'] }},'{{ $organization['nombre'] }}','organization','la organización')">Bloquear</button>
+					<button class="btn btn-danger" onclick="bloquear({{ $organization['id'] }},'{{ $organization['nombre'] }}','organization','La organización')">Bloquear</button>
 		        @else
-		        	
+		        	<button class="btn btn-danger" onclick="eliminar2({{ $organization['id'] }},'{{ $organization['nombre'] }}','organization','La organización')">Eliminar</button>
 		        @endif
 		        </div><!-- /btn-group -->
 			</td>

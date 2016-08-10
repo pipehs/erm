@@ -1,4 +1,3 @@
-
 						{!!Form::hidden('audit_plans',$audit_plan,['id'=>'audit_plans'])!!}
 
 						<div class="form-group">

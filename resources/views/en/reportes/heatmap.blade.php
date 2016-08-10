@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Mapa de calor')
+@section('title', 'Heat Map')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes B&aacute;sicos</a></li>
-			<li><a href="heatmap">Mapa de Calor</a></li>
+			<li><a href="#">Basic Reports</a></li>
+			<li><a href="heatmap">Heat Map</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-table"></i>
-					<span>Mapa de Calor</span>
+					<span>Heat Map</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -35,8 +35,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-
-      <p>En esta secci&oacute;n podr&aacute; ver los riesgos asociados a alguna encuesta de evaluaci&oacute;n o a alguna organizaci&oacute;n en particular. </p>
+      <p>On this section you will be able to see the heat map for the risk assessment of each organization on the system.</p>
       @if (!isset($riesgos))
             {!!Form::open(['route'=>'heatmap2','method'=>'GET','class'=>'form-horizontal'])!!}
 				   	<!--
@@ -60,45 +59,44 @@
 
             <div class="form-group">
                 <div class="row">
-                  {!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
+                  {!!Form::label('Select organization',null,['class'=>'col-sm-4 control-label'])!!}
                   <div class="col-sm-3">
                     {!!Form::select('organization_id',$organizaciones, 
                          null, 
-                         ['id' => 'org','placeholder'=>'- Seleccione -'])!!}
+                         ['id' => 'org','placeholder'=>'- Select -'])!!}
                   </div>
                 </div>
             </div>
 
             <div class="form-group" id="tipo" style="display: none;">
                 <div class="row">
-                  {!!Form::label('Seleccione tipo de heatmap',null,['class'=>'col-sm-4 control-label'])!!}
+                  {!!Form::label('Kind of heat map',null,['class'=>'col-sm-4 control-label'])!!}
                   <div class="col-sm-3">
-                    {!!Form::select('kind',(['0'=>'Riesgos de proceso','1'=>'Riesgos de negocio']), 
+                    {!!Form::select('kind',(['0'=>'Process Risk','1'=>'Bussiness Risks']), 
                          null, 
-                         ['id' => 'kind','placeholder'=>'- Seleccione -'])!!}
+                         ['id' => 'kind','placeholder'=>'- Select -'])!!}
                   </div>
                 </div>
             </div>
 
             <div class="form-group" id="tipo2" style="display: none;">
                 <div class="row">
-                  {!!Form::label('Riesgos inherentes o controlados',null,['class'=>'col-sm-4 control-label'])!!}
+                  {!!Form::label('Inherent or controlled Risks',null,['class'=>'col-sm-4 control-label'])!!}
                   <div class="col-sm-3">
-                    {!!Form::select('kind2',(['0'=>'Riesgos inherentes','1'=>'Riesgos inherentes v/s Riesgos controlados']), 
+                    {!!Form::select('kind2',(['0'=>'Inherent Risks','1'=>'Inherent Risks v/s Controlled Risks']), 
                          null, 
-                         ['id' => 'kind2','placeholder'=>'- Seleccione -'])!!}
+                         ['id' => 'kind2','placeholder'=>'- Select -'])!!}
                   </div>
                 </div>
             </div>
 
                 <div class="row">
                   <div class="form-group">
-                    {!!Form::label('Seleccione mes Y año (si desea ver heatmap de todo un año el mes debe quedar en blanco)',
-                    null,['class'=>'col-sm-4 control-label'])!!}
+                    {!!Form::label('Select month and year (if you want to see the heat map of a whole year month must be blank)',null,['class'=>'col-sm-4 control-label'])!!}
                     <div class="col-sm-2">
                       {!!Form::number('ano',null,
                       ['id'=>'ano','class'=>'form-control','input maxlength'=>'4',
-                       'placeholder'=>'AAAA','min'=>'2016','required'=>'true'])!!}
+                       'placeholder'=>'YYYY','min'=>'2016','required'=>'true'])!!}
                     </div>
                     <div class="col-sm-1">
                     {!!Form::number('mes',null,
@@ -112,45 +110,42 @@
 
               <div class="form-group">
                 <center>
-                {!!Form::submit('Seleccionar', ['class'=>'btn btn-primary'])!!}
+                {!!Form::submit('Select', ['class'=>'btn btn-primary'])!!}
                 </center>
               </div>
 				    {!!Form::close()!!}
-<!--
-                <div id="container">
-                </div>
--->
+
       @else
 
         <div class="row">
-           <p><b> Nombre:</b> {{ $nombre }}.</p>
-           <p><b> Descripci&oacute;n:</b> {{ $descripcion }}.</p>
+           <p><b> Name:</b> {{ $nombre }}.</p>
+           <p><b> Description:</b> {{ $descripcion }}.</p>
             <center>
                <!-- Heatmap riesgo inherente -->
               <div class="row">
                 <div class="col-sm-6">
-                  <h4><b>Evaluación de Riesgos Inherentes</b></h4>
+                  <h4><b>Inherent Risk Assessment</b></h4>
                 </div>
               @if ($kind2 == 1)
                 <div class="col-sm-6">
-                  <h4><b>Evaluación de Riesgos Controlados</b></h4>
+                  <h4><b>Controlled Risk Assessment</b></h4>
                 </div>
               @endif
               </div>
 
               <div style="width: 3%; float:left; padding-top: 10%;">
-                  <div style="width: 1px; word-wrap: break-word; text-align: center">Impacto</div>
+                  <div style="width: 1px; word-wrap: break-word; text-align: center">Impact</div>
               </div>
               <div style="width: 47%; float: left;">
                   <table style="text-align: center; font-weight: bold; float: left;">
                       <tr>
                         <td width="15%" bgcolor="#CCCCCC">
                           <table height="395px" width="100%" border="1">
-                            <tr><td>5<br>Cr&iacute;tico</td></tr>
-                            <tr><td>4<br>Alto</td></tr>
-                            <tr><td>3<br>Moderado</td></tr>
-                            <tr><td>2<br>Bajo</td></tr>
-                            <tr><td>1<br>Menor</td></tr>
+                            <tr><td>5<br>Very high</td></tr>
+                            <tr><td>4<br>High</td></tr>
+                            <tr><td>3<br>Medium</td></tr>
+                            <tr><td>2<br>Low</td></tr>
+                            <tr><td>1<br>Very low</td></tr>
                           </table>
                         </td>
                         <td width="85%">
@@ -174,35 +169,35 @@
                         <td width="15%"></td>
                         <td width="85%" bgcolor="#CCCCCC">
                             <table height="50px" width="100%" border="1">
-                                <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
-                                <td width="20%" style="vertical-align:top;">2<br>No probable</td>
-                                <td width="20%" style="vertical-align:top;">3<br>Probable</td>
-                                <td width="20%" style="vertical-align:top;">4<br>Altamente probable</td>
-                                <td width="20%" style="vertical-align:top;">5<br>Esperado</td>
+                                <td width="20%" style="vertical-align:top;">1<br>Very low</td>
+                                <td width="20%" style="vertical-align:top;">2<br>Low</td>
+                                <td width="20%" style="vertical-align:top;">3<br>Medium</td>
+                                <td width="20%" style="vertical-align:top;">4<br>High</td>
+                                <td width="20%" style="vertical-align:top;">5<br>Very high</td>
                             </table>
                         </td>
                       </tr>
                   </table>
                   <br>
-                  <div style="letter-spacing:5px; text-align: center;"><br>Probabilidad</div>
+                  <div style="letter-spacing:5px; text-align: center;"><br>Probability</div>
               </div>
 
     @if ($kind2)
                <!-- Heatmap riesgo controlado -->
 
               <div style="width: 3%; float: left; padding-top: 10%;">
-                  <div style="width: 1px; word-wrap: break-word; text-align: center;">Impacto</div>
+                  <div style="width: 1px; word-wrap: break-word; text-align: center;">Impact</div>
               </div>
               <div style="width: 47%; float: left;">
                   <table style="text-align: center; font-weight: bold; float:left;">
                   <tr>
                     <td width="15%" bgcolor="#CCCCCC">
                       <table height="395px" width="100%" border="1">
-                        <tr><td>5<br>Cr&iacute;tico</td></tr>
-                        <tr><td>4<br>Alto</td></tr>
-                        <tr><td>3<br>Moderado</td></tr>
-                        <tr><td>2<br>Bajo</td></tr>
-                        <tr><td>1<br>Menor</td></tr>
+                        <tr><td>5<br>Very high</td></tr>
+                        <tr><td>4<br>High</td></tr>
+                        <tr><td>3<br>Medium</td></tr>
+                        <tr><td>2<br>Low</td></tr>
+                        <tr><td>1<br>Very low</td></tr>
                       </table>
                     </td>
                     <td width="85%">
@@ -226,17 +221,17 @@
                   <td width="15%"></td>
                   <td width="85%" bgcolor="#CCCCCC">
                       <table height="50px" width="100%" border="1">
-                          <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
-                          <td width="20%" style="vertical-align:top;">2<br>No probable</td>
-                          <td width="20%" style="vertical-align:top;">3<br>Probable</td>
-                          <td width="20%" style="vertical-align:top;">4<br>Altamente probable</td>
-                          <td width="20%" style="vertical-align:top;">5<br>Esperado</td>
+                          <td width="20%" style="vertical-align:top;">1<br>Very low</td>
+                          <td width="20%" style="vertical-align:top;">2<br>Low</td>
+                          <td width="20%" style="vertical-align:top;">3<br>Medium</td>
+                          <td width="20%" style="vertical-align:top;">4<br>High</td>
+                          <td width="20%" style="vertical-align:top;">5<br>Very high</td>
                       </table>
                   </td>
                   </tr>
                   </table>
                   <br>
-                  <div style="letter-spacing:5px; text-align: center;">Probabilidad</div>
+                  <div style="letter-spacing:5px; text-align: center;">Probability</div>
               </div>
             </div>
 
@@ -253,8 +248,8 @@
             <hr>
             <br>
             
-                {!! link_to_route('heatmap', $title = 'Volver', $parameters = NULL,
-                 $attributes = ['class'=>'btn btn-success'])!!}
+                {!! link_to_route('heatmap', $title = 'Return', $parameters = NULL,
+                 $attributes = ['class'=>'btn btn-danger'])!!}
             <center>
       @endif
 			   </div>
@@ -275,20 +270,32 @@
                   @if (intval($prom_criticidad_in[$k]) == (5-$i))
                       @if (intval($prom_proba_in[$k]) == (5-$j))
                         riesgo = "<span class='circulo'";
-                        riesgo = "title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_in[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_in[$k],1) }}'>{{ $cont }}</span>";
+                        riesgo += "title='{{ $riesgos[$k]['description'] }}. Probability: {{ number_format($prom_proba_in[$k],1) }} &nbsp; Impact: {{ number_format($prom_criticidad_in[$k],1) }}'>{{ $cont }}</span>";
 
                          $('#{{(5-$i)}}_{{(5-$j)}}').append(riesgo);
 
-                         var leyendas = "<p><ul><li><small><span class='circulo-small'>{{ $cont }}</span> : <b>Riesgo:</b>";
+                         var leyendas = "<p><ul><li><small><span class='circulo-small'>{{ $cont }}</span> : <b>Risk:</b>";
                          leyendas += "{{ $riesgos[$k]['name'] }}</li>";
 
                          if ({{ $kind }} == 0)
                          {
-                            leyendas += "<li><b>Subproceso afectado: </b> {{ $riesgos[$k]['subobj'] }}</li>";
+                            leyendas += "<li><b>Subprocess(es) involved: </b></li> "
+
+                            @foreach ($riesgos[$k]['subobj'] as $sub)
+                            {
+                              leyendas +="<li> {{ $sub }}</li>";
+                            }
+                            @endforeach
                          }
                          else
                          {
-                            leyendas += "<li><b>Objetivo afectado: </b> {{ $riesgos[$k]['subobj'] }}</li>";
+                            leyendas += "<li><b>Objective(s) involved: </b>";
+
+                            @foreach ($riesgos[$k]['subobj'] as $obj)
+                            {
+                              leyendas += "<li> {{ $obj->name }} </li>";
+                            }
+                            @endforeach
                          }
 
                          leyendas += "</ul>";
@@ -300,7 +307,7 @@
                   //controlado
                   @if (intval($prom_criticidad_ctrl[$k]) == (5-$i))
                       @if (intval($prom_proba_ctrl[$k]) == (5-$j))
-                         $('#{{(5-$i)}}_{{(5-$j)}}_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_ctrl[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_ctrl[$k],1) }}'>{{ $cont }}</span>");
+                         $('#{{(5-$i)}}_{{(5-$j)}}_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probability: {{ number_format($prom_proba_ctrl[$k],1) }} &nbsp; Impact: {{ number_format($prom_criticidad_ctrl[$k],1) }}'>{{ $cont }}</span>");
                       @endif
                   @endif
                 @endif
@@ -309,9 +316,6 @@
 
           <?php $cont += 1; ?>
       @endfor
-
-      
-      
   @endif
 
   $(function() {

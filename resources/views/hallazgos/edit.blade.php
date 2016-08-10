@@ -18,7 +18,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Crear Hallazgos</span>
+					<span>Editar Hallazgos</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">

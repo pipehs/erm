@@ -41,9 +41,7 @@
 				{!!Form::close()!!}
 
 				<center>
-				{!!Form::open(['url'=>'riesgos','method'=>'GET'])!!}
-					{!!Form::submit('Return', ['class'=>'btn btn-danger'])!!}
-				{!!Form::close()!!}
+					{!! link_to_route('riesgos.index2', $title = 'Return', $parameters = ['organization_id' => $org_id], $attributes = ['class'=>'btn btn-danger']) !!}
 				<center>
 			</div>
 		</div>

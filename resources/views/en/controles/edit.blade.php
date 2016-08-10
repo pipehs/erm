@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Editar Control')
+@section('title', 'Edit Control')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('controles','Controles')!!}</li>
-			<li>{!!Html::link('controles.edit','Editar Control')!!}</li>
+			<li>{!!Html::link('controles','Controls')!!}</li>
+			<li>{!!Html::link('controles.edit','Edit Control')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Editar Control</span>
+					<span>Edit Control</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -46,15 +46,15 @@
 				</div>
 			@endif
 
-			Ingrese la informaci&oacute;n que desea modificar del control.
+			Change the data that you want to update from the control.
 				{!!Form::model($control,['route'=>['controles.update',$control->id],'method'=>'PUT','class'=>'form-horizontal',
 				'enctype'=>'multipart/form-data'])!!}
-					@include('controles.form')
+					@include('en.controles.form')
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('controles', $title = 'Volver', $parameters = NULL,
-                 		$attributes = ['class'=>'btn btn-success'])!!}
+					{!! link_to_route('controles', $title = 'Return', $parameters = NULL,
+                 		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 			</div>
 		</div>

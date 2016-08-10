@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Auditor&iacute;as - Supervisi&oacute;n de auditor&iacute;as')
+@section('title', 'Audits - Audits Supervision')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="auditorias">Auditor&iacute;as</a></li>
-			<li><a href="supervisar">Supervisi&oacute;n de auditor&iacute;as</a></li>
+			<li><a href="auditorias">Audits</a></li>
+			<li><a href="supervisar">Audits Supervision</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-table"></i>
-					<span>Supervisi&oacute;n de auditor&iacute;as</span>
+					<span>Audits Supervision</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -35,7 +35,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-	      	<p>En esta secci&oacute;n podr&aacute; supervisar los pruebas de auditor&iacute;a generadas anteriormente.</p>
+			<p>On this section you will be able to supervise the audit tests generated on the system.</p>
 
 				@if(Session::has('message'))
 					<div class="alert alert-success alert-dismissible" role="alert">
@@ -53,7 +53,7 @@
 				{!!Form::open(['route'=>'agregar_supervision','method'=>'POST','class'=>'form-horizontal','id'=>'form',
 				'enctype'=>'multipart/form-data'])!!}
 	      			<div class="form-group">
-						{!!Form::label('Plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Audit plan',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('audit_plan_id',$audit_plans,null, 
 							 	   ['id' => 'audit_plans','required'=>'true','placeholder'=>'- Seleccione -'])!!}
@@ -61,7 +61,7 @@
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Audit',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							<select name="audit" id="audit" required>
 								<!-- Aquí se agregarán las auditorías relacionadas al plan seleccionado a través de Jquery -->
@@ -98,7 +98,7 @@ $("#audit_plans").change(function() {
 
 						//parseamos datos obtenidos
 						var datos = JSON.parse(result);
-						$("#audit").append('<option value="" disabled selected>- Seleccione -</option>');
+						$("#audit").append('<option value="" disabled selected>- Select -</option>');
 						//seteamos datos en select de auditorías
 						$(datos).each( function() {
 							$("#audit").append('<option value="' + this.id + '">' + this.name +'</option>');
@@ -140,74 +140,33 @@ $("#audit").change(function() {
 								$(this.audit_tests).each( function(i,test) {
 									tests_id.push(test.id)
 									var audit_test = '<h4><b>' + test.name +'</b></h4>';
-									audit_test += '<b>Descripci&oacute;n: '+test.description+'</b><br>';
+									audit_test += '<b>Description: '+test.description+'</b><br>';
 									audit_test += '<b>Responsable: '+test.stakeholder+'</b><br>';
-									audit_test += '<b>Estado: '+test.status_name+'</b><br>';
-									audit_test += '<b>Resultado: '+test.results_name+'</b><br><hr>';
-									audit_test += '<b>Hallazgos encontrados</b><hr>';
+									audit_test += '<b>Status: '+test.status_name+'</b><br>';
+									audit_test += '<b>Result: '+test.results_name+'</b><br><hr>';
+									audit_test += '<b>Issues founded</b><hr>';
 									cont = 1; //contador de hallazgos
 									$(test.issues).each( function(i,issue) {
 										//alert(issue.name);
-										audit_test += '<ul><b>Hallazgo '+cont+'</b>'
-										audit_test += '<li>Clasificación: '+issue.classification+'</li>';
-										audit_test += '<li>Nombre: '+issue.name+'</li>';
-										audit_test += '<li>Descripción: '+issue.description+'</li>';
-										audit_test += '<li>Recomendaciones: '+issue.recommendations+'</li></ul><hr>';
+										audit_test += '<ul><b>Issue '+cont+'</b>'
+										audit_test += '<li>Classification: '+issue.classification+'</li>';
+										audit_test += '<li>Name: '+issue.name+'</li>';
+										audit_test += '<li>Description: '+issue.description+'</li>';
+										audit_test += '<li>Recommendations: '+issue.recommendations+'</li></ul><hr>';
 
 									});
 
 									audit_test += '<div id="nota_cerrada_'+test.id+'"></div>';
-									audit_test += '<div style="cursor:hand" id="btn_notas_'+test.id+'" onclick="notas('+test.id+')" class="btn btn-success">Notas</div><hr> ';
+									audit_test += '<div style="cursor:hand" id="btn_notas_'+test.id+'" onclick="notas('+test.id+')" class="btn btn-success">Notes</div><hr> ';
 
 									$("#audit_programs").append(audit_test);
 
 									$("#audit_programs").append('<div id="notas_'+test.id+'" style="display: none;"></div>');
 
 								});
-								/*
-								//agregamos las actividades con sus estados y posibles resultados
-								var actividades = '<div id="activities_'+this.id+'">';
-								actividades += '<table class="table table-bordered table-striped table-hover table-heading table-datatable">';
-								actividades += '<thead><th>Actividad</th><th>Estado</th><th>Resultado</th></thead>';
-								$(this.activities).each( function(i, activity) {
-									activities_id.push(this.id);
-									actividades += '<tr><td>'+activity.name+'</td>';
-
-									//estado de actividades
-									if (activity.status == 0)
-									{
-										actividades += '<td>Abierta</td>';
-									}
-									else if (activity.status == 1)
-									{
-										actividades += '<td>En ejecución</td>';
-									}
-									else if (activity.status == 2)
-									{
-										actividades += '<td>Cerrada</td>';
-									}
-									
-									//resultado de actividades
-									actividades += '<td>'+activity.result+'</td>';
-
-								});
-
-								$('#audit_tests').append(actividades);
-
-								//cont = cont+1;
-								*/
-
+								
 							});
 
-							//agregamos id de activities
-							//input_actividades = '<input type="hidden" value="'+activities_id+'" name="id_activities[]">';
-
-							//agregamos id de pruebas
-							//input_pruebas = '<input type="hidden" value="'+tests_id+'" name="tests_id[]">';
-
-							//$('#audit_tests').append(input_actividades);
-							//$('#audit_tests').append(input_pruebas);
-	
 					});
 
 			}
@@ -218,11 +177,6 @@ $("#audit").change(function() {
 
 });
 
-function evidencias(id)
-{
-	alert("Hola evidencias "+id);
-}
-
 function ocultar_notas(id)
 {
 	$("#notas_"+id).hide(500);
@@ -232,21 +186,21 @@ function ocultar_notas(id)
 function crear_nota(id)
 {
 	$("#crear_nota_"+id).empty();
-	$("#crear_nota_"+id).append('<div style="cursor:hand" id="crear_nota_'+id+'" onclick="ocultar_notas('+id+')">Ocultar</div>');
+	$("#crear_nota_"+id).append('<div style="cursor:hand" id="crear_nota_'+id+'" onclick="ocultar_notas('+id+')">Hide</div>');
 	//vaciamos por si existe ya algún formulario
 	$("#nueva_nota_"+id).empty();
 	var nota = '<div class="form-group col-sm-12">';
 	//agregamos atributo hidden que señalará que se está guardando una nota y otro para identificar el id de la prueba
 	nota += '<input type="hidden" name="test_id" value="'+id+'">';
 	nota += '<input type="hidden" name="type" value="0">'; //0 identifica nueva nota;
-	nota += '<input type="text" name="name_'+id+'" class="form-control" placeholder="Nombre de la nota" required></div>';
+	nota += '<input type="text" name="name_'+id+'" class="form-control" placeholder="Note name" required></div>';
 	nota += '<div class="form-group col-sm-12">';
-	nota += '<textarea name="description_'+id+'" rows="3" cols="4" class="form-control" placeholder="Nota" required></textarea></div>';
+	nota += '<textarea name="description_'+id+'" rows="3" cols="4" class="form-control" placeholder="Note" required></textarea></div>';
 	nota += '<div class="form-group col-sm-12">';
-	nota += '<label class="control-label">Cargar evidencia (opcional)</label>';
+	nota += '<label class="control-label">Upload evidence (opcional)</label>';
 	nota += '<input type="file" name="evidencia_'+id+'"></div>';
 	nota += '<div class="form-group col-sm-12">';
-	nota += '<button class="btn btn-success">Guardar</button></div><hr><br>';
+	nota += '<button class="btn btn-success">Save</button></div><hr><br>';
 	$("#nueva_nota_"+id).append(nota);
 	$("#nueva_nota_"+id).show(500);
 
@@ -263,7 +217,7 @@ function cerrar_nota(id,note_id)
 			$("#notas_"+note_id).hide(500);
 
 			var res = '<div class="alert alert-success alert-dismissible" role="alert">'
-			res += 'Nota cerrada exitosamente';
+			res += 'Note successfully closed';
 			$("#nota_cerrada_"+note_id).append(res);
 
 			//movemos pantalla a mensaje de nota cerrada
@@ -276,6 +230,6 @@ function cerrar_nota(id,note_id)
 }
 
 </script>
-{!!Html::script('assets/js/notas.js')!!}
+{!!Html::script('assets/js/en/notas.js')!!}
 {!!Html::script('assets/js/descargar.js')!!}
 @stop

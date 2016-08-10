@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Auditor&iacute;as - Planes de auditor&iacute;as')
+@section('title', 'Audit Programs')
 
 
 @section('content')
@@ -9,8 +9,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="auditorias">Auditor&iacute;as</a></li>
-			<li><a href="programas_auditoria">Programas de auditor&iacute;as</a></li>
+			<li><a href="auditorias">Audits</a></li>
+			<li><a href="programas_auditoria">Audit Programs</a></li>
 		</ol>
 	</div>
 </div>
@@ -20,7 +20,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-table"></i>
-					<span>Programas de auditor&iacute;as</span>
+					<span>Audit Programs</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -36,7 +36,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-	      <p>En esta secci&oacute;n podr&aacute; ver los programas de auditor&iacute;as de riesgos y generar nuevos programas.</p>
+	      <p>On this section you will be able to see and generate the audit programs.</p>
 
 				@if(Session::has('message'))
 					<div class="alert alert-success alert-dismissible" role="alert">
@@ -45,19 +45,19 @@
 				@endif
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
-		{!! link_to_route('crear_pruebas', $title = 'Agregar Nuevo Programa', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
+		{!! link_to_route('crear_pruebas', $title = 'Create New Program', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 	<?php break; ?>
 	@endif
 @endforeach
 
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 	<thead>
-		<th>Nombre</th>
-		<th>Descripci&oacute;n</th>
-		<th>Fecha Agregado</th>
-		<th>&Uacute;ltima actualizaci&oacute;n</th>
-		<th>Fecha fin programa</th>
-		<th>Ver</th>
+		<th>Name</th>
+		<th>Descripti&oacute;n</th>
+		<th>Creation date</th>
+		<th>Last update</th>
+		<th>Final date</th>
+		<th>View</th>
 	</thead>
 
 	@foreach($programs as $program)
@@ -66,10 +66,16 @@
 			<td>{{ $program['description'] }}</td>
 			<td>{{ $program['created_at'] }}</td>
 			<td>{{ $program['updated_at'] }}</td>
-			<td>{{ $program['expiration_date'] }}</td>
+			<td>
+			@if ($program['expiration_date'] == NULL)
+				None
+			@else
+				{{ $program['expiration_date'] }}
+			@endif
+			</td>
 			<td>
 				<div>
-		            {!! link_to_route('programas_auditoria.show', $title = 'Ver', $parameters = $program['id'], $attributes = ['class'=>'btn btn-warning']) !!}
+		            {!! link_to_route('programas_auditoria.show', $title = 'Show', $parameters = $program['id'], $attributes = ['class'=>'btn btn-warning']) !!}
 		        </div><!-- /btn-group -->
 			</td>
 		</tr>

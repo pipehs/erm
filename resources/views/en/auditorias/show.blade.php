@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Auditor&iacute;a de Riesgos')
+@section('title', 'Audit Plan')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Auditor&iacute;a de Riesgos</a></li>
-			<li><a href="ver_plan">Ver Plan</a></li>
+			<li><a href="#">Audit Plan</a></li>
+			<li><a href="ver_plan">Plan</a></li>
 		</ol>
 	</div>
 </div>
@@ -20,7 +20,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-check"></i>
-					<span>Plan de auditoría: {{ $plan_auditoria['name'] }}</span>
+					<span>Audit Plan: {{ $plan_auditoria['name'] }}</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -44,7 +44,7 @@
 			@endif
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
-			{!! link_to_route('plan_auditoria.edit', $title = 'Editar', $parameters = $plan_auditoria['id'],
+			{!! link_to_route('plan_auditoria.edit', $title = 'Edit', $parameters = $plan_auditoria['id'],
 				 $attributes = ['class'=>'btn btn-success'])!!}
 	<?php break; ?>
 	@endif
@@ -52,7 +52,7 @@
 
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
 			<tr>
-			<th>Auditor&iacute;a(s)</th>
+			<th>Audit(s)</th>
 			<td><ul>
 					@foreach ($auditorias as $audit)
 						<li>{{ $audit['name'] }} - {{ $audit['description'] }}</li>
@@ -61,19 +61,19 @@
 				</td>
 			</tr>
 			<tr>
-			<th width="30%">Descripci&oacute;n</th>
+			<th width="30%">Description</th>
 			<td>{{ $plan_auditoria['description'] }}</td>
 			</tr>
 			<tr>
-			<th>Objetivos del plan</th>
+			<th>Plan Objectives</th>
 			<td>{{ $plan_auditoria['objectives'] }}</td>
 			</tr>
 			<tr>
-			<th>Organizaci&oacute;n involucrada</th>
+			<th>Organization involved</th>
 			<td>{{ $organizacion }}</td>
 			</tr>
 			<tr>
-			<th>Objetivos Relacionados</th>
+			<th>Related Objectives</th>
 			<td>
 			@if($objetivos != NULL)
 					<ul>
@@ -82,7 +82,7 @@
 					@endforeach
 					</ul>
 			@else
-				No tiene
+				Doesn't have
 			@endif					
 			</td>
 			</tr>
@@ -96,12 +96,12 @@
 					@endforeach
 					</ul>
 			@else
-				No tiene
+				Doesn't have
 			@endif					
 			</td>
 			</tr>
 			<tr>
-			<th>Riesgos de proceso</th>
+			<th>Process risk</th>
 			<td>
 			@if($riesgos_proc != NULL)
 					<ul>
@@ -110,42 +110,48 @@
 					@endforeach
 					</ul>
 			@else
-				No tiene
+				Doesn't have
 			@endif					
 			</td>
 			</tr>
 			<tr>
-			<th>Alcances</th>
+			<th>Scopes</th>
 			<td>{{ $plan_auditoria['scopes'] }}</td>
 			</tr>
 			<tr>
-			<th>Estado</th>
-			<td>{{ $plan_auditoria['status'] }}</td>
+			<th>Status</th>
+			<td>
+			@if ($plan_auditoria['status'] == 0)
+				Open
+			@else if ($plan_auditoria['status'] == 1)
+				Closed
+			@endif
+			</td>
 			</tr>
 			<tr>
-			<th>Recursos</th>
+			<th>Resources</th>
 			<td>{{ $plan_auditoria['resources'] }}</td>
 			</tr>
 			<tr>
-			<th>Metodolog&iacute;a</th>
+			<th>Methodology</th>
 			<td>{{ $plan_auditoria['methodology'] }}</td>
 			</tr>
 			<tr>
-			<th>Fecha inicial</th>
+			<th>Initial date</th>
 			<td>{{ $plan_auditoria['initial_date'] }}</td>
 			</tr>
 			<tr>
-			<th>Fecha final</th>
+			<th>Final date</th>
 			<td>{{ $plan_auditoria['final_date'] }}</td>
 			</tr>
 			<tr>
-			<th>Norma(s)</th>
+			<th>Rule(s)</th>
 			<td>{{ $plan_auditoria['rules'] }}</td>
 			</tr>
 			</table>
 
 			<center>
-				{!! link_to_route('plan_auditoria', $title = 'Volver', $parameters = NULL,
+				{!! link_to_route('plan_auditoria', $title = 'Return', $parameters = NULL,
 				 $attributes = ['class'=>'btn btn-danger'])!!}
 			<center>
 			</div>

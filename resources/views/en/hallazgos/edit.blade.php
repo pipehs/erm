@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Mantenedor de Hallazgos')
+@section('title', 'Issues Management')
 
 @section('content')
 
@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('hallazgos','Hallazgos')!!}</li>
+			<li>{!!Html::link('hallazgos','Issues')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -18,7 +18,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Crear Hallazgos</span>
+					<span>Edit issue</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -41,10 +41,10 @@
 				</div>
 			@endif
 
-			Ingrese los datos del hallazgo para la organizaci&oacute;n <b>{{ $org }}</b> <br><br>
+			Change the data that you want to update from the issue <br><br>
 
 			{!!Form::model($issue,['route'=>['update_hallazgo',$issue->id],'method'=>'PUT','class'=>'form-horizontal','id'=>'form','enctype'=>'multipart/form-data'])!!}
-					@include('hallazgos.form')
+					@include('en.hallazgos.form')
 			{!!Form::close()!!}
 
 			</div>

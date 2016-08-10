@@ -173,9 +173,9 @@
 					<td>
 						<div>
 						@if ($objetivo['estado'] == 0)
-				            <button class="btn btn-danger" onclick="bloquear({{ $objetivo['id'] }},'{{ $objetivo['nombre'] }}','objetivos','the objective')">Block</button>
+				            <button class="btn btn-danger" onclick="bloquear({{ $objetivo['id'] }},'{{ $objetivo['nombre'] }}','objetivos','The objective')">Block</button>
 				        @else
-				    
+				    		<button class="btn btn-danger" onclick="eliminar2({{ $objetivo['id'] }},'{{ $objetivo['nombre'] }}','objetivos','The objective')">Delete</button>
 				        @endif
 				        </div><!-- /btn-group -->
 					</td>

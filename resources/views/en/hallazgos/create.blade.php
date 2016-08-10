@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Mantenedor de Hallazgos')
+@section('title', 'Management Issues')
 
 @section('content')
 
@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('hallazgos','Hallazgos')!!}</li>
+			<li>{!!Html::link('hallazgos','Issues')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -18,7 +18,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Crear Hallazgos</span>
+					<span>Create Issue</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -41,10 +41,10 @@
 				</div>
 			@endif
 
-			Ingrese los datos del hallazgo para la organizaci&oacute;n <b>{{ $org }}</b> <br><br>
+			Input data for the issue on the organization <b>{{ $org }}</b> <br><br>
 
 			{!!Form::open(['route'=>'store_hallazgo','method'=>'POST','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
-					@include('hallazgos.form')
+					@include('en.hallazgos.form')
 			{!!Form::close()!!}
 
 			</div>

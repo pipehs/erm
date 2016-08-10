@@ -40,7 +40,7 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
       <p>En esta secci&oacute;n podr&aacute; ver la matriz para los riesgos de negocio y/o de procesos de las distintas organizaciones ingresadas en el sistema. </p>
-      {!!Form::open(['route'=>'genmatrizriesgos','method'=>'GET','class'=>'form-horizontal'])!!}
+      {!!Form::open(['route'=>'genriskmatrix','method'=>'GET','class'=>'form-horizontal'])!!}
 
       			<div class="form-group">
                  	<div class="row">
@@ -69,9 +69,9 @@
 	                {!!Form::submit('Seleccionar', ['class'=>'btn btn-primary'])!!}
 	                </center>
 	              </div>
-			<!--{!! link_to_route('genmatrizriesgos', $title = 'Matriz Riesgos de Proceso', $parameters = 0, $attributes = ['class'=>'btn btn-primary']) !!}
+			<!--{!! link_to_route('genriskmatrix', $title = 'Matriz Riesgos de Proceso', $parameters = 0, $attributes = ['class'=>'btn btn-primary']) !!}
 					&nbsp;&nbsp;
-			{!! link_to_route('genmatrizriesgos', $title = 'Matriz Riesgos de Negocio', $parameters = 1, $attributes = ['class'=>'btn btn-success']) !!}
+			{!! link_to_route('genriskmatrix', $title = 'Matriz Riesgos de Negocio', $parameters = 1, $attributes = ['class'=>'btn btn-success']) !!}
 			-->
 
 	{!!Form::close()!!}

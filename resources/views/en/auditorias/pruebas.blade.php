@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Auditor&iacute;as - Pruebas de auditor&iacute;a')
+@section('title', 'Audit tests')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="plan_auditoria">Auditor&iacute;as</a></li>
-			<li><a href="pruebas">Pruebas de auditor&iacute;as</a></li>
+			<li><a href="plan_auditoria">Audits</a></li>
+			<li><a href="pruebas">Audit tests</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-table"></i>
-					<span>Pruebas de auditor&iacute;as</span>
+					<span>Audit tests</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -35,7 +35,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-	      <p>En esta secci&oacute;n podr&aacute; generar reportes de las pruebas de auditor&iacute;a generadas en el sistema.</p>
+	      <p>On this section you will be able to manage the audit tests on the system.</p>
 
 				@if(Session::has('message'))
 			<div class="alert alert-success alert-dismissible" role="alert">
@@ -43,21 +43,21 @@
 			</div>
 		@endif
 
-		{!! link_to_route('crear_pruebas', $title = 'Agregar Nueva prueba', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
+		{!! link_to_route('crear_pruebas', $title = 'Add new test', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 
 	{!!Form::open()!!}
 				<div id="cargando"><br></div>
 
 					<div class="form-group">
-						{!!Form::label('Seleccione plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Select audit plan',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('audit_plan_id',$audit_plans,null, 
-							 	   ['id' => 'audit_plans','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+							 	   ['id' => 'audit_plans','required'=>'true','placeholder'=>'- Select -'])!!}
 						</div>
 					</div>
 					<br>
 					<div class="form-group">
-						{!!Form::label('Seleccione auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Select audit',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							<select name="audit" id="audit">
 								<!-- Aquí se agregarán las auditorías relacionadas al plan seleccionado a través de Jquery -->
@@ -124,8 +124,8 @@ $("#audit").change(function() {
 
 					//Seteamos cabecera
 					var table_head = "<thead>";
-					table_head += "<th>Plan de auditor&iacute;a</th><th>Auditor&iacute;a</th><th>Nombre prueba</th>";
-					table_head += "<th>Descripci&oacute;n</th>Actividades</th>";
+					table_head += "<th>Audit Plan</th><th>Audit</th><th>Test</th>";
+					table_head += "<th>Description</th>Activities</th>";
 					table_head += "</thead>";
 
 					//Añadimos la imagen de carga en el contenedor
@@ -156,4 +156,4 @@ $("#audit").change(function() {
 			}
 });
 </script>
-@stop
+@stop 

@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Encuestas de evaluación de Riesgos')
+@section('title', 'Risk Assessment polls')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes básicos</a></li>
-			<li><a href="encuestas">Encuestas</a></li>
+			<li><a href="#">Basic Reports</a></li>
+			<li><a href="encuestas">Polls</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-check"></i>
-					<span>Encuesta {{ $encuesta }}</span>
+					<span>Poll {{ $encuesta }}</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -44,17 +44,17 @@
 
 			<div class="row">
 				<div class="col-sm-6">
-				<p><b>Datos de stakeholder</b></p>
+				<p><b>Info of stakeholder</b></p>
 				
 					<table class="table table-striped" style="font-size:11px">
 					<tr>
-					<td>Rut: </td><td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
+					<td>Id: </td><td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
 					</tr>
 					<tr>
-					<td>Nombre: </td><td>{{ $stakeholder['name']}} {{ $stakeholder['surnames'] }}</td>
+					<td>Name: </td><td>{{ $stakeholder['name']}} {{ $stakeholder['surnames'] }}</td>
 					</tr>
 					<tr>
-					<td>Rol(es): </td>
+					<td>Role(s): </td>
 					<td><ul>
 					@foreach ($roles as $role)
 						<li>{{ $role['name'] }}</li>
@@ -62,7 +62,7 @@
 					</ul></td>
 					</tr>
 					<tr>
-					<td>Correo: </td><td>{{ $stakeholder['mail'] }}</td>
+					<td>E-Mail: </td><td>{{ $stakeholder['mail'] }}</td>
 					</tr>
 					</table>
 				</div>
@@ -87,7 +87,7 @@
 		@endforeach
 
 		<center>
-			{!! link_to_route('encuestas', $title = 'Volver', 
+			{!! link_to_route('encuestas', $title = 'Return', 
 				$parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
 		</center>
 

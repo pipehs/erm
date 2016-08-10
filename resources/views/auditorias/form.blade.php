@@ -1,4 +1,4 @@
-
+					
 					<div class="form-group">
 						{!!Form::label('Seleccione organizaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
@@ -193,3 +193,4 @@
 						{!!Form::submit('Guardar', ['class'=>'btn btn-success','id'=>'guardar','disabled'=>'true'])!!}
 						</center>
 					</div>
+					

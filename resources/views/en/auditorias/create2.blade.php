@@ -1,4 +1,4 @@
-@extends('master')
+@extends('en.master')
 
 @section('title', 'Agregar Plan de auditor&iacute;a')
 

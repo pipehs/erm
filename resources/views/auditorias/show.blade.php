@@ -120,7 +120,13 @@
 			</tr>
 			<tr>
 			<th>Estado</th>
-			<td>{{ $plan_auditoria['status'] }}</td>
+			<td>
+			@if ($plan_auditoria['status'] == 0)
+				Abierto
+			@else if ($plan_auditoria['status'] == 1)
+				Cerrado
+			@endif
+			</td>
 			</tr>
 			<tr>
 			<th>Recursos</th>

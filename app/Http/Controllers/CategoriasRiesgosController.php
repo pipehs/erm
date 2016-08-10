@@ -8,6 +8,7 @@ use Session;
 use Redirect;
 use DateTime;
 use DB;
+use Auth;
 
 class CategoriasRiesgosController extends Controller
 {
@@ -18,71 +19,79 @@ class CategoriasRiesgosController extends Controller
      */
     public function index()
     {
-        $risk_category = array();
-        if (isset($_GET['verbloqueados']))
+        if (Auth::guest())
         {
-            $risk_categories = \Ermtool\Risk_category::where('status',1)->get(); //select categorias bloqueadas  
+            return view('login');
         }
         else
         {
-            $risk_categories = \Ermtool\Risk_category::where('status',0)->get(); //select categorias desbloqueadas
-        }
-
-        $i = 0;
-        $categorias_dependientes = array();
-        // ---recorremos todas las categorias para asignar formato de datos correspondientes--- //
-        foreach ($risk_categories as $category)
-        {
-
-            //buscamos categorias que dependen de ésta
-            $cat_dependientes = \Ermtool\Risk_category::where('risk_category_id',$category['id'])->get();
-            
-            $j = 0;
-            foreach ($cat_dependientes as $hijos)
+            $risk_category = array();
+            if (isset($_GET['verbloqueados']))
             {
-                $categorias_dependientes[$j] = array('risk_category_id'=>$category['id'],
-                                             'id'=>$hijos['id'],
-                                             'nombre'=>$hijos['name']);
-                $j += 1;
-            }
-
-            //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
-            if ($category['created_at'] == NULL OR $category['created_at'] == "0000-00-00" OR $category['created_at'] == "")
-            {
-                $fecha_creacion = NULL;
+                $risk_categories = \Ermtool\Risk_category::where('status',1)->get(); //select categorias bloqueadas  
             }
             else
             {
-                $fecha_creacion = date_format($category['created_at'],"d-m-Y");
+                $risk_categories = \Ermtool\Risk_category::where('status',0)->get(); //select categorias desbloqueadas
             }
 
-             //damos formato a fecha expiración
-            if ($category['expiration_date'] == NULL OR $category['expiration_date'] == "0000-00-00")
+            $i = 0;
+            $categorias_dependientes = array();
+            $j = 0;
+            // ---recorremos todas las categorias para asignar formato de datos correspondientes--- //
+            foreach ($risk_categories as $category)
             {
-                $fecha_exp = NULL;
+
+                //buscamos categorias que dependen de ésta
+                $cat_dependientes = \Ermtool\Risk_category::where('risk_category_id',$category['id'])->get();
+                
+                
+                foreach ($cat_dependientes as $hijos)
+                {
+                    $categorias_dependientes[$j] = array('risk_category_id'=>$category['id'],
+                                                 'id'=>$hijos['id'],
+                                                 'nombre'=>$hijos['name']);
+                    $j += 1;
+                }
+
+                //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
+                if ($category['created_at'] == NULL OR $category['created_at'] == "0000-00-00" OR $category['created_at'] == "")
+                {
+                    $fecha_creacion = NULL;
+                }
+                else
+                {
+                    $fecha_creacion = date_format($category['created_at'],"d-m-Y");
+                }
+
+                 //damos formato a fecha expiración
+                if ($category['expiration_date'] == NULL OR $category['expiration_date'] == "0000-00-00")
+                {
+                    $fecha_exp = NULL;
+                }
+                else 
+                {
+                    $expiration_date = new DateTime($category['expiration_date']);
+                    $fecha_exp = date_format($expiration_date, 'd-m-Y');
+                }
+
+                $risk_category[$i] = array('id'=>$category['id'],
+                                    'nombre'=>$category['name'],
+                                    'descripcion'=>$category['description'],
+                                    'fecha_creacion'=>$fecha_creacion,
+                                    'fecha_exp'=>$fecha_exp,
+                                    'estado'=>$category['status']);
+                $i += 1;
             }
-            else 
+
+            if (Session::get('languaje') == 'en')
             {
-                $expiration_date = new DateTime($category['expiration_date']);
-                $fecha_exp = date_format($expiration_date, 'd-m-Y');
+                return view('en.datos_maestros.categorias_riesgos.index',['risk_categories'=>$risk_category,'categorias_dependientes'=>$categorias_dependientes]);
             }
-
-            $risk_category[$i] = array('id'=>$category['id'],
-                                'nombre'=>$category['name'],
-                                'descripcion'=>$category['description'],
-                                'fecha_creacion'=>$fecha_creacion,
-                                'fecha_exp'=>$fecha_exp,
-                                'estado'=>$category['status']);
-            $i += 1;
-        }
-
-        if (Session::get('languaje') == 'en')
-        {
-            return view('en.datos_maestros.categorias_riesgos.index',['risk_categories'=>$risk_category,'categorias_dependientes'=>$categorias_dependientes]);
-        }
-        else
-        {
-            return view('datos_maestros.categorias_riesgos.index',['risk_categories'=>$risk_category,'categorias_dependientes'=>$categorias_dependientes]);
+            else
+            {
+                return view('datos_maestros.categorias_riesgos.index',['risk_categories'=>$risk_category,'categorias_dependientes'=>$categorias_dependientes]);
+            }
         } 
     }
 
@@ -93,15 +102,22 @@ class CategoriasRiesgosController extends Controller
      */
     public function create()
     {
-        //Seleccionamos categorías que pueden ser padres
-        $categorias = \Ermtool\Risk_category::where('risk_category_id',NULL)->where('status',0)->lists('name','id');
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            return view('en.datos_maestros.categorias_riesgos.create',['categorias'=>$categorias]);
+            return view('login');
         }
         else
         {
-            return view('datos_maestros.categorias_riesgos.create',['categorias'=>$categorias]);
+            //Seleccionamos categorías que pueden ser padres
+            $categorias = \Ermtool\Risk_category::where('risk_category_id',NULL)->where('status',0)->lists('name','id');
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.categorias_riesgos.create',['categorias'=>$categorias]);
+            }
+            else
+            {
+                return view('datos_maestros.categorias_riesgos.create',['categorias'=>$categorias]);
+            }
         }
     }
 
@@ -113,36 +129,42 @@ class CategoriasRiesgosController extends Controller
      */
     public function store(Request $request)
     {
-        DB::transaction(function()
+        if (Auth::guest())
         {
-
-            if ($_POST['risk_category_id'] == NULL)
+            return view('login');
+        }
+        else
+        {
+            DB::transaction(function()
             {
-                $risk_category_id = NULL;
-            }
-            else
-            {
-                $risk_category_id = $_POST['risk_category_id'];
-            }
-
-            \Ermtool\Risk_category::create([
-                'name' => $_POST['name'],
-                'description' => $_POST['description'],
-                'expiration_date' => $_POST['expiration_date'],
-                'risk_category_id' => $risk_category_id,
-                ]);
-
-                if (Session::get('languaje') == 'en')
+                if ($_POST['risk_category_id'] == NULL)
                 {
-                    Session::flash('message','Risk category successfully created');
+                    $risk_category_id = NULL;
                 }
                 else
                 {
-                    Session::flash('message','Categor&iacute;a agregada correctamente');
+                    $risk_category_id = $_POST['risk_category_id'];
                 }
-        });
+
+                \Ermtool\Risk_category::create([
+                    'name' => $_POST['name'],
+                    'description' => $_POST['description'],
+                    'expiration_date' => $_POST['expiration_date'],
+                    'risk_category_id' => $risk_category_id,
+                    ]);
+
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','Risk category successfully created');
+                    }
+                    else
+                    {
+                        Session::flash('message','Categor&iacute;a agregada correctamente');
+                    }
+            });
 
             return Redirect::to('/categorias_risks');
+        }
     }
 
     /**
@@ -164,25 +186,31 @@ class CategoriasRiesgosController extends Controller
      */
     public function edit($id)
     {
-        $risk_category = \Ermtool\Risk_category::find($id);
-
-        //Seleccionamos categorias que pueden ser padres
-        $categorias = \Ermtool\Risk_category::where('risk_category_id',NULL)
-                                            ->where('status',0)
-                                            ->where('id','<>',$id)
-                                            ->lists('name','id');
-
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            return view('en.datos_maestros.categorias_riesgos.edit',['risk_category'=>$risk_category,
-            'categorias'=>$categorias]); 
+            return view('login');
         }
         else
         {
-            return view('datos_maestros.categorias_riesgos.edit',['risk_category'=>$risk_category,
-            'categorias'=>$categorias]); 
-        }
-            
+            $risk_category = \Ermtool\Risk_category::find($id);
+
+            //Seleccionamos categorias que pueden ser padres
+            $categorias = \Ermtool\Risk_category::where('risk_category_id',NULL)
+                                                ->where('status',0)
+                                                ->where('id','<>',$id)
+                                                ->lists('name','id');
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.datos_maestros.categorias_riesgos.edit',['risk_category'=>$risk_category,
+                'categorias'=>$categorias]); 
+            }
+            else
+            {
+                return view('datos_maestros.categorias_riesgos.edit',['risk_category'=>$risk_category,
+                'categorias'=>$categorias]); 
+            }
+        } 
     }
 
     /**
@@ -194,83 +222,104 @@ class CategoriasRiesgosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        global $id1;
-        $id1 = $id;
-        DB::transaction(function()
+        if (Auth::guest())
         {
-            $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
-            $fecha_exp = NULL;
-
-            //vemos si tiene categoría padre
-            if($_POST['risk_category_id'] != "")
+            return view('login');
+        }
+        else
+        {
+            global $id1;
+            $id1 = $id;
+            DB::transaction(function()
             {
-                $risk_category_id = $_POST['risk_category_id'];
-            }
-            else
-            {
-                $risk_category_id = NULL;
-            }
+                $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
+                $fecha_exp = NULL;
 
-            $risk_category->name = $_POST['name'];
-            $risk_category->description = $_POST['description'];
-            $risk_category->expiration_date = $_POST['expiration_date'];
-            $risk_category->risk_category_id = $risk_category_id;
+                //vemos si tiene categoría padre
+                if($_POST['risk_category_id'] != "")
+                {
+                    $risk_category_id = $_POST['risk_category_id'];
+                }
+                else
+                {
+                    $risk_category_id = NULL;
+                }
 
-            $risk_category->save();
-            if (Session::get('languaje') == 'en')
-            {
-                Session::flash('message','Risk category succcessfully updated');
-            }
-            else
-            {
-                Session::flash('message','Categor&iacute;a de riesgo actualizada correctamente');
-            }
-        });
+                $risk_category->name = $_POST['name'];
+                $risk_category->description = $_POST['description'];
+                $risk_category->expiration_date = $_POST['expiration_date'];
+                $risk_category->risk_category_id = $risk_category_id;
 
-        return Redirect::to('/categorias_risks');
+                $risk_category->save();
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Risk category succcessfully updated');
+                }
+                else
+                {
+                    Session::flash('message','Categor&iacute;a de riesgo actualizada correctamente');
+                }
+            });
+
+            return Redirect::to('/categorias_risks');
+        }
     }
 
     public function bloquear($id)
     {
-        global $id1;
-        $id1 = $id;
-        DB::transaction(function()
+        if (Auth::guest())
         {
-            $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
-            $risk_category->status = 1;
-            $risk_category->save();
+            return view('login');
+        }
+        else
+        {
+            global $id1;
+            $id1 = $id;
+            DB::transaction(function()
+            {
+                $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
+                $risk_category->status = 1;
+                $risk_category->save();
 
-            if (Session::get('languaje') == 'en')
-            {
-                Session::flash('message','Risk category successfully blocked');
-            }
-            else
-            {
-                Session::flash('message','Categor&iacute;a de riesgo bloqueada correctamente');
-            }
-        });
-        return Redirect::to('/categorias_riesgos');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Risk category successfully blocked');
+                }
+                else
+                {
+                    Session::flash('message','Categor&iacute;a de riesgo bloqueada correctamente');
+                }
+            });
+            return Redirect::to('/categorias_risks');
+        }
     }
 
     public function desbloquear($id)
     {
-        global $id1;
-        $id1 = $id;
-        DB::transaction(function()
+        if (Auth::guest())
         {
-            $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
-            $risk_category->status = 0;
-            $risk_category->save();
-            if (Session::get('languaje') == 'en')
+            return view('login');
+        }
+        else
+        {
+            global $id1;
+            $id1 = $id;
+            DB::transaction(function()
             {
-                Session::flash('message','Risk category successfully unblocked');
-            }
-            else
-            {
-                Session::flash('message','Categor&iacute;a de riesgo desbloqueada correctamente');
-            }
-        });
-        return Redirect::to('/categorias_riesgos');
+                $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
+                $risk_category->status = 0;
+                $risk_category->save();
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Risk category successfully unblocked');
+                }
+                else
+                {
+                    Session::flash('message','Categor&iacute;a de riesgo desbloqueada correctamente');
+                }
+            });
+            return Redirect::to('/categorias_risks');
+        }
     }
 
     /**
@@ -281,6 +330,30 @@ class CategoriasRiesgosController extends Controller
      */
     public function destroy($id)
     {
-        //
+        global $id1;
+        $id1 = $id;
+        global $res;
+        $res = 1;
+        DB::transaction(function() {
+            //borramos de riesgo (si es que existe)
+            DB::table('risks')
+            ->where('risk_category_id','=',$GLOBALS['id1'])
+            ->update(['risk_category_id' => NULL]);
+
+            //actualizamos otras posibles categorías de riesgo donde se encuentre esta categoría
+            DB::table('risk_categories')
+                ->where('risk_category_id','=',$GLOBALS['id1'])
+                ->update(['risk_category_id' => NULL]);
+
+            //eliminamos categoría
+            DB::table('risk_categories')
+                ->where('id','=',$GLOBALS['id1'])
+                ->delete();
+
+            //Si todo pasa, res se asigna como 0
+            $GLOBALS['res'] = 0;
+        });
+        
+        return $res;
     }
 }

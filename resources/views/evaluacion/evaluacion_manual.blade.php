@@ -45,24 +45,36 @@
 		<p>Seleccione los riesgos que desee evaluar agregando impacto y probabilidad del mismo manualmente.</p>
 			
 			{!!Form::open(['url'=>'evaluacion.store','method'=>'POST','class'=>'form-horizontal'])!!}
-
 					<div class="form-group">
-						{!!Form::label('Seleccione riesgos de subprocesos',
-						null,['class'=>'col-sm-4 control-label'])!!}
+	                 	<div class="row">
+	                  		{!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
+	                  		<div class="col-sm-6">
+	                    		{!!Form::select('organization_id',$organizations, 
+	                         		null, 
+	                         	['id' => 'org','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+	                  		</div>
+	                	</div>
+	                </div>
+
+					<div class="form-group" id="riesgos_objetivos" style="display: none;">
+						{!!Form::label('Riesgos de negocio',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-6">
-							{!!Form::select('risk_subprocess_id[]',$riesgos_sub,null, 
-							 	   ['id' => 'el2','multiple'=>'true'])!!}
+							<select name="objective_risk_id[]" id="objective_risk_id" multiple="multiple">
+								<!-- Aquí se agregarán los riesgos de negocio de la org seleccionada a través de Jquery -->
+							</select>
 						</div>
 					</div>
 
-					<div class="form-group">
-						{!!Form::label('Seleccione riesgos de negocio',
-						null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="form-group" id="riesgos_procesos" style="display: none;">
+						{!!Form::label('Riesgos de proceso',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-6">
-							{!!Form::select('objective_risk_id[]',$riesgos_obj,null, 
-							 	   ['id' => 'el2','multiple'=>'true'])!!}
+							<select name="risk_subprocess_id[]" id="risk_subprocess_id" multiple="multiple">
+								<!-- Aquí se agregarán los riesgos de proceso de la org seleccionada a través de Jquery -->
+							</select>
 						</div>
 					</div>
+
+					<br>
 
 					<div class="form-group">
 						<center>
@@ -76,4 +88,8 @@
 		</div>
 	</div>
 </div>
+@stop
+
+@section('scripts2')
+{!!Html::script('assets/js/get_risks.js')!!}
 @stop

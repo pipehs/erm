@@ -116,9 +116,9 @@
 		<td>
 			<div>
 			@if ($stakeholder['estado'] == 0)
-	             <button class="btn btn-danger" onclick="bloquear({{ $stakeholder['id'] }},'{{ $stakeholder['nombre']." ".$stakeholder['apellidos'] }}','stakeholders','el usuario')">Bloquear</button>
+	            <button class="btn btn-danger" onclick="bloquear({{ $stakeholder['id'] }},'{{ $stakeholder['nombre']." ".$stakeholder['apellidos'] }}','stakeholders','El usuario')">Bloquear</button>
 	        @else
-	        	
+	        	<button class="btn btn-danger" onclick="eliminar2({{ $stakeholder['id'] }},'{{ $stakeholder['nombre']." ".$stakeholder['apellidos'] }}','stakeholders','El usuario')">Eliminar</button>
 	        @endif
 	        </div><!-- /btn-group -->
 		</td>

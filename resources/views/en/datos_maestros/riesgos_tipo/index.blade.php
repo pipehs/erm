@@ -130,9 +130,9 @@
 	        </div><!-- /btn-group --></td>
 		<td><div>
 			@if ($riesgo['estado'] == 0)
-	             <button class="btn btn-danger" onclick="bloquear({{ $riesgo['id'] }},'{{ $riesgo['nombre'] }}','riskstype','the template risk')">Block</button>
+	            <button class="btn btn-danger" onclick="bloquear({{ $riesgo['id'] }},'{{ $riesgo['nombre'] }}','riskstype','The template risk')">Block</button>
 	        @else
-	    
+	    		<button class="btn btn-danger" onclick="eliminar2({{ $riesgo['id'] }},'{{ $riesgo['nombre'] }}','riskstype','The template risk')">Delete</button>
 	        @endif
 	        </div><!-- /btn-group -->
 	<?php break; ?>

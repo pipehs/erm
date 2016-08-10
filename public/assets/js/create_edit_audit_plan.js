@@ -41,16 +41,28 @@
 								})
 								$("#informacion").append('</br><b>Fecha inicial:</b> ' + datos.initial_date + '</br>');
 								$("#informacion").append('<b>Fecha final:</b> ' + datos.final_date + '</br>');
-								$("#informacion").append('<b>Estado:</b> ' + datos.status + '</br></br>');
+								if (datos.status == 0)
+									$("#informacion").append('<b>Estado:</b> Abierto </br></br>');
+								else if (datos.status == 1)
+									$("#informacion").append('<b>Estado:</b> Cerrado </br></br>');
 
-								$("#informacion").append('<h4><b>Auditor&iacute;as realizadas</b></h4><hr>');
+								$("#informacion").append('<h4><b>Auditor&iacute;as Realizadas</b></h4><hr>');
 
 							//seteamos datos de cada auditoría
 							$(datos.audits).each( function(i, audit) {
 								$("#informacion").append('<ul><li><h4><b> ' + audit.name + '</b></h4>');
 								$("#informacion").append('<small>Descripci&oacute;n: ' + audit.description +'</br>');
+							if (audit.initial_date == null)
+								$("#informacion").append('<small>Fecha inicial: Sin definir</br>');
+							else
 								$("#informacion").append('<small>Fecha inicial: ' + audit.initial_date +'</br>');
+							if (audit.final_date == null)
+								$("#informacion").append('<small>Fecha final: Sin definir </br>');
+							else
 								$("#informacion").append('<small>Fecha final: ' + audit.final_date +'</br>');
+							if (audit.resources == null)
+								$("#informacion").append('<small>Recursos: Sin definir </br>');
+							else
 								$("#informacion").append('<small>Recursos: ' + audit.resources +'</br>');
 								
 								if (audit.obj_risks.length > 0)
@@ -106,7 +118,7 @@
 							
 							$("#riesgos").html(table_head);
 
-					$.get('auditorias.objective_risk.'+$("#orgs").val(), function (result) {
+					$.get('get_objective_risk.'+$("#orgs").val(), function (result) {
 							$("#cargando").html('<br>');
 							$("#objective_risk_id").empty();
 							$("#objective_risk_id").change();
@@ -122,7 +134,7 @@
 					});
 
 					//se obtienen riesgos de proceso para la organización seleccionada
-					$.get('auditorias.risk_subprocess.'+$("#orgs").val(), function (result) {
+					$.get('get_risk_subprocess.'+$("#orgs").val(), function (result) {
 							$("#cargando").html('<br>');
 							$("#risk_subprocess_id").empty();
 							$("#risk_subprocess_id").change();

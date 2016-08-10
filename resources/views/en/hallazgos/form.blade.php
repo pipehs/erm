@@ -1,60 +1,60 @@
 				@if (isset($processes))
 					<div class="form-group">
-						{!!Form::label('Seleccione proceso involucrado',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Select process involved',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('process_id',$processes,
-							null,['placeholder'=>'- Seleccione -'])!!}
+							null,['placeholder'=>'- Select -'])!!}
 						</div>
 					</div>
 				@elseif (isset($subprocesses))
 					<div class="form-group">
-						{!!Form::label('Seleccione subproceso involucrado',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Select subprocess involved',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('subprocess_id',$subprocesses,
-							null,['placeholder'=>'- Seleccione -'])!!}
+							null,['placeholder'=>'- Select -'])!!}
 						</div>
 					</div>
 				@elseif(isset($controls))
 					<div class="form-group">
-						{!!Form::label('Seleccione control involucrado',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Select control involved',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('control_id',$controls,
-							null,['placeholder'=>'- Seleccione -'])!!}
+							null,['placeholder'=>'- Select -'])!!}
 						</div>
 					</div>
 				@elseif(isset($audit_programs))
 					<div class="form-group">
-						{!!Form::label('Seleccione programa de auditoría involucrado',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Seleccione audit program involved',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('audit_audit_plan_audit_program_id',$audit_programs,
-							null,['placeholder'=>'- Seleccione -'])!!}
+							null,['placeholder'=>'- Select -'])!!}
 						</div>
 					</div>
 				@elseif(isset($audits))
 					<div class="form-group">
-						{!!Form::label('Seleccione auditoría involucrada',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Seleccione audit involved',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('audit_audit_plan_id',$audits,
-							null,['placeholder'=>'- Seleccione -'])!!}
+							null,['placeholder'=>'- Select -'])!!}
 						</div>
 					</div>
 				@endif
 					<div class="form-group">
-						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Name',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::text('name',null,['id'=>'nombre','class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Description',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Recomendaciones',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Recommendations',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::textarea('recommendations',null,['id'=>'recommendations','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
 						</div>
@@ -62,10 +62,10 @@
 				
 
 					<div class="form-group">
-						{!!Form::label('Clasificaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Classification',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::select('classification',['0'=>'Oportunidad de mejora','1'=>'Deficiencia','2'=>'Debilidad significativa'],null,
-													['placeholder'=>'- Seleccione -'])!!}
+							{!!Form::select('classification',['0'=>'Oportunidad de mejora','1'=>'Deficience','2'=>'Significant weakness'],null,
+													['placeholder'=>'- Select -'])!!}
 						</div>
 					</div>
 
@@ -78,33 +78,33 @@
 				@endif
 
 					<div class="form-group">
-						<label for="file_1" class="col-sm-4 control-label">Para mayor detalle del hallazgo, puede agregar un archivo (opcional)</label>
+						<label for="file_1" class="col-sm-4 control-label">For more detail on the issue, you could add a file (optional)</label>
 						<div class="col-sm-4">
-							<input type="file" name="evidence_doc" id="evidence_doc" class="inputfile" /><label for="evidence_doc">Cargue evidencia</label>
+							<input type="file" name="evidence_doc" id="evidence_doc" class="inputfile" /><label for="evidence_doc">Upload Evidence</label>
 						</div>
 						
 					</div>
 
 				@if (!isset($action_plan) || $action_plan == NULL)
-					<center><b><font color="blue">Opcionalmente puede agregar plan de acci&oacute;n</font></b></center><hr>
+					<center><b><font color="blue">You can optionally create an action plan</font></b></center><hr>
 
 					<div class="form-group">
-						{!!Form::label('Descripci&oacute;n del plan',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Plan description',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::textarea('description_plan',null,['id'=>'descripcion_plan','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Seleccione responsable',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Select responsable',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('stakeholder_id',$stakeholders,
-							null,['placeholder'=>'- Seleccione -'])!!}
+							null,['placeholder'=>'- Select -'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Fecha límite del plan',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Plan deadline',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::date('final_date',
 							null,['id'=>'final_date','class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)'])!!}
@@ -112,32 +112,32 @@
 					</div>
 
 				@else
-					<center><b><font color="blue">Opcionalmente puede agregar (o editar) plan de acci&oacute;n</font></b></center><hr>
+					<center><b><font color="blue">Optionally you can add (or edit) an action plan</font></b></center><hr>
 
 					<div class="form-group">
-						{!!Form::label('Descripci&oacute;n del plan',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Plan description',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							<textarea rows="3" cols="4" name="description_plan" class="form-control" id="description_plan">{{ $action_plan->description }}</textarea>
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Seleccione responsable',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Select responsable',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('stakeholder_id',$stakeholders,
-							null,['placeholder'=>'- Seleccione -','id'=>'stakeholder_id'])!!}
+							null,['placeholder'=>'- Select -','id'=>'stakeholder_id'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Fecha límite del plan',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Plan deadline',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::date('final_date',$action_plan->final_date,['id'=>'final_date','class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						<label for="status" class="control-label col-sm-4">Estado del plan</label>
+						<label for="status" class="control-label col-sm-4">Plan status</label>
 						<div class="col-sm-4">
 							<input type="checkbox" name="status" id="status" data-toggle="toggle" data-on="Cerrado" data-off="Abierto" data-width="100" data-offstyle="primary" data-onstyle="danger">
 						</div>
@@ -152,10 +152,10 @@
 
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Save', ['class'=>'btn btn-primary'])!!}
 						</center>
 					</div>
 
 				<center>
-					{!! link_to_route('hallazgos', $title = 'Volver', $parameters = NULL, $attributes = ['class'=>'btn btn-danger'])!!}
+					{!! link_to_route('hallazgos', $title = 'Return', $parameters = NULL, $attributes = ['class'=>'btn btn-danger'])!!}
 				<center>

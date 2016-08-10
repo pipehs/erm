@@ -41,7 +41,7 @@
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
       <p>On this section you will be able to view a matrix for subprocesses or bussiness risks for the different organizations on the system.</p>
 
-      {!!Form::open(['route'=>'genmatrizriesgos','method'=>'GET','class'=>'form-horizontal'])!!}
+      {!!Form::open(['route'=>'genriskmatrix','method'=>'GET','class'=>'form-horizontal'])!!}
 
       			<div class="form-group">
                  	<div class="row">
@@ -70,10 +70,6 @@
 	                {!!Form::submit('Select', ['class'=>'btn btn-primary'])!!}
 	                </center>
 	              </div>
-			<!--{!! link_to_route('genmatrizriesgos', $title = 'Matriz Riesgos de Proceso', $parameters = 0, $attributes = ['class'=>'btn btn-primary']) !!}
-					&nbsp;&nbsp;
-			{!! link_to_route('genmatrizriesgos', $title = 'Matriz Riesgos de Negocio', $parameters = 1, $attributes = ['class'=>'btn btn-success']) !!}
-			-->
 
 	{!!Form::close()!!}
 
@@ -119,7 +115,7 @@
 				</table>
 		
 				<div id="boton_exportar">
-					{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "3,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
+					{!! link_to_route('genexcel', $title = 'Export', $parameters = "3,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
 				</div>
 			@elseif ($value == 1)
 				<thead>

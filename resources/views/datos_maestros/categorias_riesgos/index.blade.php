@@ -110,9 +110,9 @@
 		<td>
 			<div>
 			@if ($risk_category['estado'] == 0)
-	            <button class="btn btn-danger" onclick="bloquear({{ $risk_category['id'] }},'{{ $risk_category['nombre'] }}','categorias_riesgos','la categoría de riesgo')">Bloquear</button>
+	            <button class="btn btn-danger" onclick="bloquear({{ $risk_category['id'] }},'{{ $risk_category['nombre'] }}','categorias_riesgos','La categoría de riesgo')">Bloquear</button>
 	        @else
-	        	
+	        	<button class="btn btn-danger" onclick="eliminar2({{ $risk_category['id'] }},'{{ $risk_category['nombre'] }}','categorias_riesgos','La categoría de riesgo')">Eliminar</button>
 	        @endif
 	        </div><!-- /btn-group -->
 		</td>
