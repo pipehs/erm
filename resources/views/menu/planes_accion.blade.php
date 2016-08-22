@@ -1,0 +1,1 @@
+<li><a href="action_plans" class="{{ activeMenu('mantenplanesaccion') }}"><i class="fa fa-search-minus"></i>Mantenedor Planes Acci&oacute;n</a></li>

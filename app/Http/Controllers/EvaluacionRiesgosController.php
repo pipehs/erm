@@ -1446,47 +1446,46 @@ class EvaluacionRiesgosController extends Controller
             {
                 return view('evaluacion.consolidar',['evaluations_risks' => $evaluations_risks,'evaluation_id' => $id]);
             }
-            //print_r($evaluations_risks);
-
         }
+    }
 
-        //Función que consolida encuesta (cambia estado consolidation = 1)
-        public function consolidar(Request $request)
-        {
+    //Función que consolida encuesta (cambia estado consolidation = 1)
+    public function consolidar(Request $request)
+    {
             //print_r($_POST);
 
-            //primero obtenemos id de riesgos (evaluation_risk) de la encuesta
-            $evaluation_risks = DB::table('evaluation_risk')
-                                    ->where('evaluation_risk.evaluation_id',$request['evaluation_id'])
-                                    ->select('evaluation_risk.id as id')
-                                    ->get();
+        //primero obtenemos id de riesgos (evaluation_risk) de la encuesta
+        $evaluation_risks = DB::table('evaluation_risk')
+                                ->where('evaluation_risk.evaluation_id',$request['evaluation_id'])
+                                ->select('evaluation_risk.id as id')
+                                ->get();
 
-            foreach ($evaluation_risks as $evaluation_risk)
-            {
-                //actualizaremos probabilidad e impacto para cada evaluation_risk
-                DB::table('evaluation_risk')
-                    ->where('evaluation_risk.id',$evaluation_risk->id)
-                    ->update([
-                        'avg_probability' => $request['probability_'.$evaluation_risk->id],
-                        'avg_impact' => $request['impact_'.$evaluation_risk->id]
-                        ]);
+        foreach ($evaluation_risks as $evaluation_risk)
+        {
+            //actualizaremos probabilidad e impacto para cada evaluation_risk
+            DB::table('evaluation_risk')
+                ->where('evaluation_risk.id',$evaluation_risk->id)
+                ->update([
+                    'avg_probability' => $request['probability_'.$evaluation_risk->id],
+                    'avg_impact' => $request['impact_'.$evaluation_risk->id]
+                    ]);
 
-                //actualizamos atributo consolidation en tabla evaluations
-                \Ermtool\Evaluation::where('id',$request['evaluation_id'])
+            //actualizamos atributo consolidation en tabla evaluations
+            \Ermtool\Evaluation::where('id',$request['evaluation_id'])
                                     ->update(['consolidation' => 1]);
-            }
-
-            if (Session::get('languaje') == 'en')
-            {
-                Session::flash('message','Poll successfully consolidated');
-            }
-            else
-            {
-                Session::flash('message','Encuesta de evaluación consolidada correctamente');
-            }
-
-            return Redirect::to('/evaluacion_agregadas');
         }
+
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Poll successfully consolidated');
+        }
+        else
+        {
+            Session::flash('message','Encuesta de evaluación consolidada correctamente');
+        }
+
+        return Redirect::to('/evaluacion_agregadas');
+        
     }
 
     //eliminará una encuesta (que no sea manual), en caso de que esta no haya sido respondida por nadie

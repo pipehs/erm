@@ -65,9 +65,15 @@
 			<td>{{ $plan['description'] }}</td>
 			<td>{{ $plan['created_at'] }}</td>
 			<td>{{ $plan['updated_at'] }}</td>
+			@if ($plan['status'] == 0)
+				<td><button class="btn btn-danger" onclick="closer({{ $plan['id'] }},'{{ $plan['name'] }}','audit_plan','El plan de auditoría')">Cerrar</button></td>
+			@else
+				<td>El plan de auditor&iacute;a se encuentra cerrado.<br>
+				<button class="btn btn-warning" onclick="opening({{ $plan['id'] }},'{{ $plan['name'] }}','audit_plan','El plan de auditoría')">Re-abrir</button></td>
+			@endif
 			<td>
 				<div>
-		            {!! link_to_route('plan_auditoria.show', $title = 'Ver', $parameters = $plan['id'], $attributes = ['class'=>'btn btn-warning']) !!}
+		            {!! link_to_route('plan_auditoria.show', $title = 'Ver', $parameters = $plan['id'], $attributes = ['class'=>'btn btn-success']) !!}
 		        </div><!-- /btn-group -->
 			</td>
 		</tr>

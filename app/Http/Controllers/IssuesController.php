@@ -2105,7 +2105,8 @@ class IssuesController extends Controller
         {
             global $id1;
             $id1 = $id;
-            
+            global $res;
+            $res = 1;
             DB::transaction(function() {
 
                 //primero que todo, eliminamos plan de acción (si es que hay)
@@ -2123,7 +2124,9 @@ class IssuesController extends Controller
                 ->where('id','=',$GLOBALS['id1'])
                 ->delete();
 
-                $res = 0;
+                //eliminamos evidencia si es que existe
+
+                $GLOBALS['res'] = 0;
             });
 
             return $res;

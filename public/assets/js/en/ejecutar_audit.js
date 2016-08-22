@@ -68,7 +68,14 @@ $("#audit").change(function() {
 											audit_tests_id.push(this.id);
 											pruebas += '<tr><td>'+test.name+'</td>';
 											pruebas += '<td>'+test.description+'</td>';
-											pruebas += '<td>'+test.stakeholder+'</td>';
+											if (test.stakeholder == null)
+											{
+												pruebas += '<td>No stakeholder added</td>';
+											}
+											else
+											{
+												pruebas += '<td>'+test.stakeholder+'</td>';
+											}
 											pruebas += '<td><div class="col-sm-8"><select class="form-control" name="status_'+test.id+'" id="status_'+test.id+'" onchange="result('+test.id+','+test.results+')">';
 
 											if (test.status == 0)

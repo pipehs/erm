@@ -113,7 +113,7 @@
 							@elseif ($k['eval'] == 2)
 								<ul class="semaforo rojo"><li></li><li></li><li></li></ul>
 							@elseif ($k['eval'] == 3)
-								None
+								Ninguna
 							@endif
 							</td>
 							<td>{{ $k['description_eval'] }}</td>

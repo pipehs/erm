@@ -290,11 +290,11 @@ class KriController extends Controller
 
             if (Session::get('languaje') == 'en')
             {
-                return view('kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
+                return view('en.kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
             }
             else
             {
-                return view('en.kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
+                return view('kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
             }
         }
     }

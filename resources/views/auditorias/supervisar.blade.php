@@ -141,18 +141,79 @@ $("#audit").change(function() {
 									tests_id.push(test.id)
 									var audit_test = '<h4><b>' + test.name +'</b></h4>';
 									audit_test += '<b>Descripci&oacute;n: '+test.description+'</b><br>';
-									audit_test += '<b>Responsable: '+test.stakeholder+'</b><br>';
-									audit_test += '<b>Estado: '+test.status_name+'</b><br>';
-									audit_test += '<b>Resultado: '+test.results_name+'</b><br><hr>';
+
+									if (test.stakeholder == null)
+									{
+										audit_test += '<b>Responsable: No definido</b></br>';
+									}
+									else
+									{
+										audit_test += '<b>Responsable: '+test.stakeholder+'</b><br>';
+									}
+
+									if (test.status == 0)
+									{
+										audit_test += '<b>Estado: Abierta</b><br>';
+									}
+									else if (test.status == 1)
+									{
+										audit_test += '<b>Estado: En ejecución</b><br>';
+									}
+									else if (test.status == 2)
+									{
+										audit_test += '<b>Estado: Cerrada</b><br>';	
+									}
+									
+									if (test.results == 0)
+									{
+										audit_test += '<b>Estado: Inefectiva</b><br>';
+									}
+									else if (test.results == 1)
+									{
+										audit_test += '<b>Estado: Efectiva</b><br>';
+									}
+									else if (test.results == 2)
+									{
+										audit_test += '<b>Estado: En proceso</b><br>';	
+									}
+
 									audit_test += '<b>Hallazgos encontrados</b><hr>';
 									cont = 1; //contador de hallazgos
 									$(test.issues).each( function(i,issue) {
 										//alert(issue.name);
 										audit_test += '<ul><b>Hallazgo '+cont+'</b>'
-										audit_test += '<li>Clasificación: '+issue.classification+'</li>';
+
+										if (issue.classification == 0)
+										{
+											audit_test += '<li>Clasificación: Oportunidad de mejora</li>';
+										}
+										else if (issue.classification == 1)
+										{
+											audit_test += '<li>Clasificación: Deficiencia</li>';
+										}
+										else if (issue.classification == 2)
+										{	
+											audit_test += '<li>Clasificación: Debilidad significativa</li>';
+										}
 										audit_test += '<li>Nombre: '+issue.name+'</li>';
-										audit_test += '<li>Descripción: '+issue.description+'</li>';
-										audit_test += '<li>Recomendaciones: '+issue.recommendations+'</li></ul><hr>';
+
+										if (issue.description == '' || issue.description == null)
+										{
+											audit_test += '<li>Descripción: No se ha agregado descripción</li>';
+										}
+										else
+										{
+											audit_test += '<li>Descripción: '+issue.description+'</li>';
+										}
+
+										if (issue.recommendations == '' || issue.recommendations == null)
+										{
+											audit_test += '<li>Recomendaciones: No se han agregado recomendaciones</li></ul><hr>';
+										}
+										else
+										{
+											audit_test += '<li>Recomendaciones: '+issue.recommendations+'</li></ul><hr>';
+										}
 
 									});
 

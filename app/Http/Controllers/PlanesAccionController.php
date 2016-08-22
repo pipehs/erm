@@ -86,15 +86,71 @@ class PlanesAccionController extends Controller
      */
     public function index()
     {
-        //obtenemos lista de organizaciones
-        //$organizations = \Ermtool\Organization::lists('name','id');
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            //obtenemos lista de organizaciones
+            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
-        //return view('planes_accion.index',['organizations'=>$organizations]);
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.planes_accion.index',['organizations'=>$organizations]);
+            }
+            else
+            {
+                return view('planes_accion.index',['organizations'=>$organizations]);
+            }
+        }
     }
 
     public function index2()
     {
-        //print_r($_POST);
+        $id = $_GET['organization_id'];
+        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
+        $action_plans = array();
+        $i = 0;
+        //primero obtenemos los planes de acción para los hallazgos que son directamente de la organización
+        $planes = DB::table('issues')
+                    ->join('action_plans','action_plans.issue_id','=','issues.id')
+                    ->where('issues.organization_id','=',$id)
+                    ->select('action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                            'action_plans.status','action_plans.stakeholder_id','issues.name as issue')
+                    ->get();
+
+        foreach ($planes as $plan)
+        {
+            $final_date = new DateTime($plan->final_date);
+            $final_date = date_format($final_date,"d-m-Y");
+
+            //obtenemos datos de responsable
+            $resp = \Ermtool\Stakeholder::find($plan->stakeholder_id);
+
+            $action_plans[$i] = [
+                'origin' => 'Hallazgo de organización',
+                'issue' => $plan->issue,
+                'description' => $plan->description,
+                'stakeholder' => $resp->name.' '.$resp->surnames,
+                'stakeholder_mail' => $resp->mail,
+                'final_date' => $final_date,
+                'status' => $plan->status
+            ];
+
+            $i += 1;
+            //
+        }
+        //print_r($_GET);
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.planes_accion.index',['action_plans'=>$action_plans,'organizations' => $organizations]);
+        }
+        else
+        {
+            return view('planes_accion.index',['action_plans'=>$action_plans,'organizations' => $organizations]);
+        }
     }
 
     /**

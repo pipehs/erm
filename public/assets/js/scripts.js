@@ -47,7 +47,65 @@ function bloquear(id,name,kind,type)
 		   	});
 }
 
-//función para bloquear o desbloquear (primeramente para datos maestros)
+//función para cerrar plan de auditoría (se dejará los atributos kind y type para el caso en que se necesite)
+function closer(id,name,kind,type)
+{
+	swal({   title: "Atención!",
+		   text: "Está seguro que desea cerrar el "+type+" "+name+"?",
+		   type: "warning",   
+		   showCancelButton: true,   
+		   confirmButtonColor: "#31B404",   
+		   confirmButtonText: "Cerrar",
+		   cancelButtonText: "Cancelar",   
+		   closeOnConfirm: false }, 
+		   function(){
+		   		$.get(kind+'.close.'+id, function (result) {
+		   			swal({   title: "",
+		   			   text: ""+type+" "+name+" fue cerrado exitosamente ",
+		   			   type: "success",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Aceptar",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	location.reload();
+		   			   });
+
+		   			});
+		   		 
+		   	});
+}
+
+//función para abrir plan de auditoría (se dejará los atributos kind y type para el caso en que se necesite)
+function opening(id,name,kind,type)
+{
+	swal({   title: "Atención!",
+		   text: "Está seguro que desea abrir el "+type+" "+name+"?",
+		   type: "warning",   
+		   showCancelButton: true,   
+		   confirmButtonColor: "#31B404",   
+		   confirmButtonText: "Abrir",
+		   cancelButtonText: "Cancelar",   
+		   closeOnConfirm: false }, 
+		   function(){
+		   		$.get(kind+'.open.'+id, function (result) {
+		   			swal({   title: "",
+		   			   text: ""+type+" "+name+" fue reabierto exitosamente ",
+		   			   type: "success",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Aceptar",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	location.reload();
+		   			   });
+
+		   			});
+		   		 
+		   	});
+}
+
+//función para eliminar datos (sustituye antigua funcion eliminar)
 function eliminar2(id,name,kind,type)
 {
 	swal({   title: "Warning!",
@@ -120,7 +178,7 @@ function validatekpi(id,name)
 		   	});
 }
 
-//función para eliminar datos
+//función para eliminar datos (primeramente solo hallazgos)
 function eliminar(id,name,kind,type)
 {
 	swal({   title: "Atención!",

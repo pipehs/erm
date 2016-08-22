@@ -83,7 +83,8 @@ $("#control_id").change(function() {
 
 				$('#table_evaluacion').empty();
 				$('#boton-guardar').empty();
-				var table_row = '<center><b>Indique si desea modificar su última evaluación (si es que existe) o si desea agregar una nueva</b></center>';
+				var table row = 'Descripción: ' 
+				table_row += '<center><b>Indique si desea modificar su última evaluación (si es que existe) o si desea agregar una nueva</b></center>';
 
 				table_row += '<br><center><button type="button" name="new_eval" class="btn btn-success" onclick="newEval()">Nueva evaluación</button>';
 				table_row += '&nbsp;&nbsp;&nbsp;&nbsp;';

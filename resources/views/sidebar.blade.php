@@ -34,6 +34,7 @@
 		@endforeach
 
 		@include('menu.hallazgos')
+		@include('menu.planes_accion')
 		@include('menu.reportes')
 	@endif
 @else

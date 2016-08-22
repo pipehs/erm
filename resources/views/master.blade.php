@@ -22,8 +22,8 @@
  	{!!Html::style('assets/plugins/bootstrap/bootstrap.css')!!}
  	{!!Html::style('assets/css/bootstrap-min.css')!!}
  	{!!Html::style('assets/plugins/jquery-ui/jquery-ui.min.css')!!}
- 	{!!Html::style('assets/css/font-awesome.css')!!}
- 	{!!Html::style('assets/css/Righteous.css')!!}
+ 	{!!Html::style('assets/fonts/fontawesome.css')!!}
+ 	{!!Html::style('assets/fonts/righteous.css')!!}
  	{!!Html::style('assets/plugins/fancybox/jquery.fancybox.css')!!}
  	{!!Html::style('assets/plugins/fullcalendar/fullcalendar.css')!!}
  	{!!Html::style('assets/plugins/xcharts/xcharts.min.css')!!}
@@ -40,8 +40,8 @@
 
  	{!!Html::style('assets/bootstrap-toggle-master/css/bootstrap2-toggle.min.css')!!}
 
- 	<link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-	<link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
+ 	<!--<link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+	<link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>-->
 <!--
 	<link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 	<link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>

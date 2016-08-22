@@ -52,6 +52,8 @@
 
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 	<thead>
+		<th>Audit Plan</th>
+		<th>Audit</th>
 		<th>Name</th>
 		<th>Descripti&oacute;n</th>
 		<th>Creation date</th>
@@ -62,6 +64,8 @@
 
 	@foreach($programs as $program)
 		<tr>
+			<td>{{ $program['audit_plan'] }}</td>
+			<td>{{ $program['audit'] }}</td>
 			<td>{{ $program['name'] }}</td>
 			<td>{{ $program['description'] }}</td>
 			<td>{{ $program['created_at'] }}</td>

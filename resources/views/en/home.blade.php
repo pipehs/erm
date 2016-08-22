@@ -93,9 +93,13 @@
                   </table>
               </td>
               </tr>
+                <tr>
+                <td width="15%">
+                    </td>
+                    <td width="85%" bgcolor="#000000" style="letter-spacing:5px; text-align: center; color:white;">Probability
+                    </td>
+                </tr>
               </table>
-                <br>
-                <div style="letter-spacing:5px; text-align: center">Probability</div>
                 </center>
               
               

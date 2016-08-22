@@ -9,7 +9,7 @@ function notas(id)
 
 			if (str2.indexOf(str1) > 0)
 			{
-				var resultado = '<div style="cursor:hand" id="crear_nota_'+id+'" onclick="crear_nota('+id+')" class="btn btn-primary">Agregar nota</div><br>';
+				var resultado = '<div style="cursor:hand" id="crear_nota_'+id+'" onclick="crear_nota('+id+')" class="btn btn-primary">Add Note</div><br>';
 			
 				//agregamos div para formulario de creación de nota
 				resultado += '<div id="nueva_nota_'+id+'"  style="display: none; float: left;"><br><br></div>';
@@ -26,7 +26,7 @@ function notas(id)
 
 			if (result == "null") //no existen notas
 			{
-				resultado += 'Aun no se han creado notas para esta prueba.<br><hr>';
+				resultado += 'Still have not created notes for this test.<br><hr>';
 				resultado += '</div>';
 			}
 
@@ -38,45 +38,58 @@ function notas(id)
 				//seteamos datos en select de auditorías
 				
 				$(datos).each( function() {
-					resultado += '<b>Nombre: '+this.name+'</b><br>';
-					resultado += 'Fecha creación: '+this.created_at+'<br>';
-					resultado += 'Estado: '+this.status+'<br>'
-					resultado += '<h4>Nota: '+this.description+'</h4>';
+					resultado += '<b>Name: '+this.name+'</b><br>';
+					resultado += 'Creation date: '+this.created_at+'<br>';
+
+					if (this.status == 0)
+					{
+						resultado += 'Status: Open<br>'
+					}
+					else if (this.status == 1)
+					{
+						resultado += 'On execution<br>'
+					}
+					else if (this.status == 2)
+					{
+						resultado += 'Status: closed<br>'
+					}
+					
+					resultado += '<h4>Note: '+this.description+'</h4>';
 
 					//agregamos evidencias
 					if (this.evidences == null)
 					{
-						resultado += '<font color="red">Esta nota no tiene evidencias agregadas</font><br>';
+						resultado += '<font color="red">This note does not have evidences added</font><br>';
 					}
 
 					else
 					{
 
 						$(this.evidences).each( function(i,evidence) {
-							resultado += '<div style="cursor:hand" id="descargar_'+id+'" onclick="descargar(0,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia</u></font></div><br>';
+							resultado += '<div style="cursor:hand" id="descargar_'+id+'" onclick="descargar(0,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Download Evidence</u></font></div><br>';
 						});
 					}
 
 					if (this.answers == null)
 					{
 						resultado += '<div class="alert alert-danger alert-dismissible" role="alert">'
-						resultado += 'Esta nota aun no tiene respuestas</div>';
+						resultado += 'This note does not have answers yet</div>';
 					}
 					else
 					{
 						$(this.answers).each( function(i,answer) {
 							resultado += '<div class="alert alert-success alert-dismissible" role="alert">'
-							resultado += '<b><u>Respuesta de auditor: </u></b><br>';
+							resultado += '<b><u>Auditor answer: </u></b><br>';
 							resultado += '<font color="black	">'+answer.answer+'</font><br>';
 							
 							if (answer.ans_evidences != null)
 							{
 								$(answer.ans_evidences).each( function(i,evidence) {
-									resultado += '<div style="cursor:hand" id="descargar_'+id+'" onclick="descargar(1,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia de respuesta</u></font></div><br>';
+									resultado += '<div style="cursor:hand" id="descargar_'+id+'" onclick="descargar(1,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Download Answer Evidence</u></font></div><br>';
 								});
 							}
 
-							resultado += 'Enviada el: '+answer.created_at+'</div>';
+							resultado += 'Sending date: '+answer.created_at+'</div>';
 
 						});
 					}
@@ -87,7 +100,7 @@ function notas(id)
 					{
 						if (this.status_origin == 0)
 						{
-							resultado += '<div style="cursor:hand" id="responder_nota_'+this.id+'" onclick="responder_nota('+this.id+','+this.test_id+')" class="btn btn-primary">Responder</div>';
+							resultado += '<div style="cursor:hand" id="responder_nota_'+this.id+'" onclick="responder_nota('+this.id+','+this.test_id+')" class="btn btn-primary">Answer</div>';
 							//agregamos div para formulario de creación de nota
 							resultado += '<div id="respuesta_nota_'+this.id+'"  style="display: none; clear: left;"><br><br></div>';
 						}
@@ -98,7 +111,7 @@ function notas(id)
 				
 			}
 
-			resultado += '<div style="cursor:hand" onclick="ocultar_notas('+id+')"><font color="CornflowerBlue"><u>Ocultar</u></font></div><hr><br>';
+			resultado += '<div style="cursor:hand" onclick="ocultar_notas('+id+')"><font color="CornflowerBlue"><u>Hide</u></font></div><hr><br>';
 			$("#notas_"+id).append(resultado).show(500);
 			
 		});

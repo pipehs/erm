@@ -14,7 +14,7 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-sm-12 col-m-12">
+	<div class="col-sm-12">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -92,7 +92,7 @@
 
                 <div class="row">
                   <div class="form-group">
-                    {!!Form::label('Select month and year (if you want to see the heat map of a whole year month must be blank)',null,['class'=>'col-sm-4 control-label'])!!}
+                    {!!Form::label('Select month and year (if you want to see the heat map of a whole year, month must be blank)',null,['class'=>'col-sm-4 control-label'])!!}
                     <div class="col-sm-2">
                       {!!Form::number('ano',null,
                       ['id'=>'ano','class'=>'form-control','input maxlength'=>'4',
@@ -134,7 +134,7 @@
               </div>
 
               <div style="width: 3%; float:left; padding-top: 10%;">
-                  <div style="width: 1px; word-wrap: break-word; text-align: center">Impact</div>
+                  <div style="width: 1px; word-wrap: break-word; text-align: center"><b>Impact</b></div>
               </div>
               <div style="width: 47%; float: left;">
                   <table style="text-align: center; font-weight: bold; float: left;">
@@ -177,16 +177,21 @@
                             </table>
                         </td>
                       </tr>
+                      <tr>
+                        <td width="15%">
+                        </td>
+                        <td width="85%" bgcolor="#000000" style="letter-spacing:5px; text-align: center; color:white;">Probability
+                        </td>
+                      </tr>
                   </table>
-                  <br>
-                  <div style="letter-spacing:5px; text-align: center;"><br>Probability</div>
+                  
               </div>
 
     @if ($kind2)
                <!-- Heatmap riesgo controlado -->
 
               <div style="width: 3%; float: left; padding-top: 10%;">
-                  <div style="width: 1px; word-wrap: break-word; text-align: center;">Impact</div>
+                  <div style="width: 1px; word-wrap: break-word; text-align: center;"><b>Impact</b></div>
               </div>
               <div style="width: 47%; float: left;">
                   <table style="text-align: center; font-weight: bold; float:left;">
@@ -229,9 +234,13 @@
                       </table>
                   </td>
                   </tr>
+                  <tr>
+                  <td width="15%">
+                  </td>
+                  <td width="85%" bgcolor="#000000" style="letter-spacing:5px; text-align: center; color:white;">Probability
+                  </td>
+                  </tr>
                   </table>
-                  <br>
-                  <div style="letter-spacing:5px; text-align: center;">Probability</div>
               </div>
             </div>
 
@@ -283,7 +292,7 @@
 
                             @foreach ($riesgos[$k]['subobj'] as $sub)
                             {
-                              leyendas +="<li> {{ $sub }}</li>";
+                              leyendas +="<li> {{ $sub->name }}</li>";
                             }
                             @endforeach
                          }

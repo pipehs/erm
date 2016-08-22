@@ -47,6 +47,64 @@ function bloquear(id,name,kind,type)
 		   	});
 }
 
+//función para cerrar plan de auditoría (se dejará los atributos kind y type para el caso en que se necesite)
+function closer(id,name,kind,type)
+{
+	swal({   title: "Warning!",
+		   text: "Are you sure to close "+type+" "+name+"?",
+		   type: "warning",   
+		   showCancelButton: true,   
+		   confirmButtonColor: "#31B404",   
+		   confirmButtonText: "Close",
+		   cancelButtonText: "Cancel",   
+		   closeOnConfirm: false }, 
+		   function(){
+		   		$.get(kind+'.close.'+id, function (result) {
+		   			swal({   title: "",
+		   			   text: ""+type+" "+name+" was closed successfully ",
+		   			   type: "success",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Accept",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	location.reload();
+		   			   });
+
+		   			});
+		   		 
+		   	});
+}
+
+//función para abrir plan de auditoría (se dejará los atributos kind y type para el caso en que se necesite)
+function opening(id,name,kind,type)
+{
+	swal({   title: "Warning!",
+		   text: "Are you sure to open "+type+" "+name+"?",
+		   type: "warning",   
+		   showCancelButton: true,   
+		   confirmButtonColor: "#31B404",   
+		   confirmButtonText: "Open",
+		   cancelButtonText: "Cancel",   
+		   closeOnConfirm: false }, 
+		   function(){
+		   		$.get(kind+'.open.'+id, function (result) {
+		   			swal({   title: "",
+		   			   text: ""+type+" "+name+" was opened successfully ",
+		   			   type: "success",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Accept",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	location.reload();
+		   			   });
+
+		   			});
+		   		 
+		   	});
+}
+
 //función para bloquear o desbloquear (primeramente para datos maestros)
 function eliminar2(id,name,kind,type)
 {

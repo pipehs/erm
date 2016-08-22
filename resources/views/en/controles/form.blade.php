@@ -31,14 +31,14 @@
 					<div class="form-group">
 						{!!Form::label('Name',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::text('name',null,['id'=>'nombre','class'=>'form-control'])!!}
+							{!!Form::text('name',null,['id'=>'nombre','class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
 						{!!Form::label('Description',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
+							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
 					

@@ -647,6 +647,14 @@ Route::get('plan_auditoria.show.{id}', [
 	'as' => 'plan_auditoria.show', 'uses' => 'AuditoriasController@show'
 ]);
 
+Route::get('audit_plan.close.{id}', [
+	'as' => 'audit_plan.close', 'uses' => 'AuditoriasController@close'
+]);
+
+Route::get('audit_plan.open.{id}', [
+	'as' => 'audit_plan.open', 'uses' => 'AuditoriasController@open'
+]);
+
 Route::get('auditorias', [
 	'as' =>'auditorias', 'uses' => 'AuditoriasController@indexAuditorias']);
 
@@ -694,6 +702,7 @@ Route::post('agregar_supervision', [
 
 Route::get('planes_accion', [
 	'as' => 'planes_accion', 'uses' => 'AuditoriasController@actionPlans']);
+
 
 Route::post('agregar_plan2', [
 	'as' => 'agregar_plan2', 'uses' => 'AuditoriasController@storePlan']);
@@ -784,11 +793,11 @@ Route::get('get_risk_subprocess.{org}', [
 Route::get('auditorias.stakeholders.{id}', [
 	'as' => 'auditorias.stakeholders', 'uses' => 'AuditoriasController@getStakeholders']);
 
-//ruta para obtener datos de prueba de auditoría seleccionada
+//ruta para obtener datos de programa de auditoría seleccionada
 Route::get('auditorias.get_audit_program.{id}', [
 	'as' => 'auditorias.get_audit_program', 'uses' => 'AuditoriasController@getAuditProgram']);
 
-//ruta para obtener datos de programa de auditoría seleccionado (al crear un nuevo programa)
+//ruta para obtener datos de prueba de auditoría seleccionada (al supervisar un plan de auditoria)
 Route::get('auditorias.get_audit_program2.{id}', [
 	'as' => 'auditorias.get_audit_program2', 'uses' => 'AuditoriasController@getAuditProgram2']);
 
@@ -932,8 +941,8 @@ Route::get('edit_hallazgo', [
 	'as' => 'edit_hallazgo', 'uses' => 'IssuesController@edit']);
 
 //ruta para eliminar  hallazgos
-Route::get('delete_hallazgo.{id}', [
-	'as' => 'delete_hallazgo', 'uses' => 'IssuesController@destroy']);
+Route::get('hallazgo.destroy.{id}', [
+	'as' => 'hallazgo.destroy', 'uses' => 'IssuesController@destroy']);
 
 Route::put('update_hallazgo.{id}', [
     'as' => 'update_hallazgo', 'uses' => 'IssuesController@update']);
@@ -983,14 +992,13 @@ Route::get('mapas2', [
 	'as' => 'mapas2', 'uses' => 'GestionEstrategicaController@mapas2']);
 
 //---- Rutas para mantenedor de Planes de acción ----//
-/*
+
 Route::get('action_plans', [
 	'as' => 'action_plans', 'uses' => 'PlanesAccionController@index']);
 
-//ruta para ver lista de hallazgos segun tipo
-Route::post('action_plans_lista', [
-	'as' => 'action_plans_lista', 'uses' => 'PlanesAccionController@index2']);
-*/
+//planes de acción para determinada organización
+Route::get('action_plans2', [
+	'as' => 'action_plans2', 'uses' => 'PlanesAccionController@index2']);
 
 //ruta para eliminar evidencias (llama a funcion helper)
 Route::get('evidences.delete.{id},{kind}', function($id,$kind) {
