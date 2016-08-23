@@ -1623,6 +1623,7 @@ class IssuesController extends Controller
                                 ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
                                 ->join('objectives','objectives.id','=','objective_risk.objective_id')
                                 ->where('objectives.organization_id','=',$_GET['org'])
+                                ->select('controls.*')
                                 ->lists('controls.name','controls.id');
 
                 if (Session::get('languaje') == 'en')

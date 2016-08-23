@@ -899,7 +899,7 @@ class KriController extends Controller
         return json_encode($kri);
     }
 
-    //obtiene evaluaciones anteriores de un riesgo
+    //obtiene evaluaciones anteriores de un riesgo (a través de evaluar)
     public function getEvaluations($id)
     {
         $evaluations = NULL;
@@ -965,5 +965,57 @@ class KriController extends Controller
         $r = $eval;
 
         return $r;
+    }
+
+    //lo mismo que getEvaluations solo que retorna vista en vez de JSON; por urgencia hice 2 funciones iguales en vez de buscar la forma de usar la misma en ambos casos
+    public function showEvals($id)
+    {
+        $evaluations = NULL;
+
+        //primero obtenemos cotas de semaforo
+        $cotas = DB::table('kri')
+                ->where('id','=',$id)
+                ->select('green_min','interval_min','interval_max','red_max','name','description')
+                ->first();
+
+        $evals = DB::table('measurements')
+                    ->where('kri_id','=',$id)
+                    ->select('value','created_at','date_min','date_max')
+                    ->orderBy('id','asc')
+                    ->get();
+
+        $i = 0;
+        foreach ($evals as $eval)
+        {
+            //calculamos evaluacion (color)
+            $res = $this->calc_sem($eval->value,$cotas->green_min,$cotas->interval_min,$cotas->interval_max,$cotas->red_max);    
+            $date = date('d-m-Y',strtotime($eval->created_at));
+            $date_min = date('d-m-Y',strtotime($eval->date_min));
+            $date_max = date('d-m-Y',strtotime($eval->date_max));
+
+            //date text
+            $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+            $fechamod = explode('-',$date);
+
+            $fecha_array = $fechamod[0].' de '.$meses[$fechamod[1]-1].' del '.$fechamod[2];
+            $evaluations[$i] = [
+                    'value' => $eval->value,
+                    'eval' => $res,
+                    'date' => $date,
+                    'date_min' => $date_min,
+                    'date_max' => $date_max,
+                    'fecha_array' => $fecha_array,
+            ];
+            $i += 1;
+        }
+
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.kri.anteriores',['evaluations' => $evaluations, 'name' => $cotas->name, 'description' => $cotas->description,'id' => $id]);
+        }
+        else
+        {
+            return view('kri.anteriores',['evaluations' => $evaluations, 'name' => $cotas->name, 'description' => $cotas->description, 'id' => $id]);
+        }
     }
 }

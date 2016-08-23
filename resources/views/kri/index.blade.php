@@ -68,6 +68,7 @@
 				@if ($role != 6)
 						<th style="vertical-align:top;">Acci&oacute;n</th>
 						<th style="vertical-align:top;">Acci&oacute;n</th>
+						<th style="vertical-align:top;">Acci&oacute;n</th>
 				<?php break; ?>
 				@endif
 			@endforeach
@@ -137,6 +138,7 @@
 				@if ($role != 6)
 							<td><a href="kri.edit.{{ $k['id'] }}" class="btn btn-primary">Editar</a></td>
 							<td><a href="kri.evaluar.{{ $k['id'] }}" class="btn btn-success">Evaluar</a></td>
+							<td><a href="kri.veranteriores.{{ $k['id'] }}" class="btn btn-info" id="ver_evaluaciones">Monitorear</a></td>
 				<?php break; ?>
 				@endif
 			@endforeach

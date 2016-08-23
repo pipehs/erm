@@ -913,6 +913,9 @@ Route::put('kri.update.{id}', [
 Route::post('kri.guardar_evaluacion', [
 	'as' => 'kri.guardar_evaluacion', 'uses' => 'KriController@storeEval']);
 
+Route::get('kri.veranteriores.{id}', [
+	'as' => 'kri.veranteriores', 'uses' => 'KriController@showEvals']);
+
 
 
 //ruta para obtener todas las causas de riesgo
