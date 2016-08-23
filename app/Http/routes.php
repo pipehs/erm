@@ -568,6 +568,10 @@ Route::get('controles.get_issue.{id}', [
 	'as' => 'controles.get_issue', 'uses' => 'ControlesController@getIssue'
 ]);
 
+Route::get('controles.get_description.{id}', [
+	'as' => 'controles.get_description', 'uses' => 'ControlesController@getDescription'
+]);
+
 Route::get('controles.get_evaluation2.{id_control}', [
 	'as' => 'controles.get_evaluation2', 'uses' => 'ControlesController@getEvaluacion2'
 ]);

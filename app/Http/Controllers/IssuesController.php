@@ -2124,7 +2124,7 @@ class IssuesController extends Controller
                 ->where('id','=',$GLOBALS['id1'])
                 ->delete();
 
-                //eliminamos evidencia si es que existe
+                //eliminamos evidencia si es que existe (SE DEBE AGREGAR)
 
                 $GLOBALS['res'] = 0;
             });

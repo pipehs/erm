@@ -21,7 +21,7 @@
 					<div class="form-group" id="negocios" style="display: none;">
 						{!!Form::label('Seleccione Riesgo(s)/Negocio(s)',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							<select multiple name="select_objetivos[]" id="select_objetivos">
+							<select name="select_objetivos[]" id="select_objetivos" multiple="multiple">
 								<option value="">-Seleccione-</option>
 								<!-- Aquí se agregarán los riesgos/objetivos a través de Jquery (en caso de que el usuario lo solicite) -->
 							</select>

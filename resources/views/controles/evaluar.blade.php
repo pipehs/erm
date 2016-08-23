@@ -72,9 +72,13 @@
 @section('scripts2')
 <script>
 $("#control_id").change(function() {
-	
+		
 			if ($("#control_id").val() != '') //Si es que se ha seleccionado valor válido de control
 			{
+				//obtenemos issue (si es que hay) de control seleccionado
+				$.get('controles.get_description.'+$("#control_id").val(), function (result) {
+					descripcion = JSON.parse(result);
+				
 				$('#cargando').fadeIn(1);
 				//Añadimos la imagen de carga en el contenedor
 				$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
@@ -83,7 +87,7 @@ $("#control_id").change(function() {
 
 				$('#table_evaluacion').empty();
 				$('#boton-guardar').empty();
-				var table row = 'Descripción: ' 
+				var table_row = '<b><p style="font-size:large; text-align:left;">Descripción: '+descripcion+'</p><hr><br>'; 
 				table_row += '<center><b>Indique si desea modificar su última evaluación (si es que existe) o si desea agregar una nueva</b></center>';
 
 				table_row += '<br><center><button type="button" name="new_eval" class="btn btn-success" onclick="newEval()">Nueva evaluación</button>';
@@ -92,6 +96,8 @@ $("#control_id").change(function() {
 
 				$('#table_evaluacion').append(table_row);
 				$('#table_evaluacion').fadeIn(500);
+
+				});
 			}
 
 			else

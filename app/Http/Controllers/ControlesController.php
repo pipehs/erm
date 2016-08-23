@@ -1256,6 +1256,14 @@ class ControlesController extends Controller
         return json_encode($issue);
     }
 
+    //obtiene descripción del control (al evaluar)
+    public function getDescription($control_id)
+    {
+        $description = \Ermtool\Control::where('id',$control_id)->value('description');
+
+        return json_encode($description);
+    }
+
      //guarda pruebas de diseño, sustantivas, efectividad y cumplimiento (y otros tipos si es que hubieran)
     public function storeTests($test,$kind)
     {

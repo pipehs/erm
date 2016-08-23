@@ -69,7 +69,7 @@ $(document).ready(function() {
 
 	if ({{ $control->type2 }} == 0) //control de proceso
 	{
-			$.get('controles.subneg.'+$("#subneg").val(), function (result) {
+			$.get('controles.subneg.0', function (result) {
 
 							$("#procesos").removeAttr("style").show(); //hacemos visible riesgos / procesos
 							$("#negocios").removeAttr("style").hide(); //ocultamos riesgos / objetivos
@@ -89,14 +89,15 @@ $(document).ready(function() {
 				var risks = JSON.parse('{{ $risks_selected }}');
 				$(risks).each( function() {
 					$("#select_procesos option[value='" + this + "']").attr("selected",true);
-					$("#select_procesos").change();
 				});
+
+				$("#select_procesos").change();
 
 			});
 	}
 	else if ({{ $control->type2 }} == 1) //riesgos de negocio
 	{
-			$.get('controles.subneg.'+$("#subneg").val(), function (result) {
+			$.get('controles.subneg.1', function (result) {
 
 							$("#negocios").removeAttr("style").show(); //hacemos visible riesgos / objetivos
 							$("#procesos").removeAttr("style").hide(); //ocultamos riesgos / procesos
@@ -111,13 +112,16 @@ $(document).ready(function() {
 							$(datos).each( function() {
 								$("#select_objetivos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.objective_name +' - ' + this.organization_name + '<option>');
 							});
-			});
+			
 
-			//riesgos seleccionados
-			var risks = JSON.parse('{{ $risks_selected }}');
-			$(risks).each( function() {
-				$("#select_objetivos option[value='" + this + "']").attr("selected",true);
+				//riesgos seleccionados
+				var risks = JSON.parse('{{ $risks_selected }}');
+				$(risks).each( function() {
+					$("#select_objetivos option[value='" + this + "']").attr("selected",true);
+				});
+
 				$("#select_objetivos").change();
+
 			});
 	}
 });
