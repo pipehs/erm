@@ -1,6 +1,6 @@
-@extends('master')
+@extends('en.master')
 
-@section('title', 'Mantenedor de Planes de Acci&oacute;n')
+@section('title', 'Action Plans')
 
 @section('content')
 
@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('hallazgos','Planes de Acci&oacute;n')!!}</li>
+			<li>{!!Html::link('hallazgos','Action Plans')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -18,7 +18,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-user"></i>
-					<span>Planes de acci&oacute;n</span>
+					<span>Action Plans</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -40,22 +40,21 @@
 				{{ Session::get('message') }}
 				</div>
 			@endif
-
-			En esta secci&oacute;n podr&aacute; ver y cerrar cualquier plan de acci&oacute;n ingresado en el sistema.<br><br>
+			On this section you will be able to manage any action plan entered on the system. <br><br>
 			<div id="cargando"><br></div>
 
 			{!!Form::open(['route'=>'action_plans2','method'=>'GET','class'=>'form-horizontal'])!!}
 			<div class="form-group">
-				{!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
+				{!!Form::label('Select Organization',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-3">
 					{!!Form::select('organization_id',$organizations,null, 
-							 	   ['id' => 'orgs','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+							 	   ['id' => 'orgs','required'=>'true','placeholder'=>'- Select -'])!!}
 				</div>
 			</div>
 
 			<div class="form-group">
 				<center>
-					{!!Form::submit('Seleccionar', ['class'=>'btn btn-success','id'=>'guardar'])!!}
+					{!!Form::submit('Select', ['class'=>'btn btn-success','id'=>'guardar'])!!}
 				</center>
 			</div>
 			{!!Form::close()!!}
@@ -66,7 +65,7 @@
 
 @if (isset($action_plans))
 
-	<h4><b>Planes de acci&oacute;n creados para {{ $org }}</b></h4>
+	<h4><b>Action plans created for {{ $org }}</b></h4>
 
 
 		@foreach (Session::get('roles') as $role)
@@ -77,17 +76,17 @@
 		@endforeach
 				<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 				<thead>
-					<th>Origen del hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
-					<th>Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
-					<th>Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Issue origin<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Issue<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Action plan<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
-					<th>Estado<label><input type="text" placeholder="Filtrar" /></label></th>
-					<th>Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Status<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Plan final date<label><input type="text" placeholder="Filtrar" /></label></th>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
-					<th>Editar</th>
-					<th>Cerrar</th>
-					<th>Eliminar</th>
+					<th>Edit</th>
+					<th>Close</th>
+					<th>Delete</th>
 				<?php break; ?>
 			@endif
 		@endforeach
@@ -103,14 +102,14 @@
 						<td>{{ $action_plan['final_date'] }}</td>
 				@foreach (Session::get('roles') as $role)
 					@if ($role != 6)
-						<td>{!! link_to_route('edit_hallazgo', $title = 'Editar', $parameters = ['org'=>$org_id,'id'=>$action_plan['id']],$attributes = ['class'=>'btn btn-success'])!!}</td>
+						<td>{!! link_to_route('edit_hallazgo', $title = 'Edit', $parameters = ['org'=>$org_id,'id'=>$action_plan['id']],$attributes = ['class'=>'btn btn-success'])!!}</td>
 						<td>
 						@if ($action_plan['status_number'] == 1)
-							Plan se encuentra cerrado.
+							The plan is closed.
 						@else
-							<button class="btn btn-info" onclick="closer({{ $action_plan['id'] }},'{{ $action_plan['description'] }}','action_plan','El plan de acción')">Cerrar</button></td>
+							<button class="btn btn-info" onclick="closer({{ $action_plan['id'] }},'{{ $action_plan['description'] }}','action_plan','El plan de acción')">Close</button></td>
 						@endif
-						<td><button class="btn btn-danger" onclick="eliminar2({{ $action_plan['id'] }},'{{ $action_plan['description'] }}','action_plan','El plan de acción')">Eliminar</button></td>
+						<td><button class="btn btn-danger" onclick="eliminar2({{ $action_plan['id'] }},'{{ $action_plan['description'] }}','action_plan','El plan de acción')">Delete</button></td>
 					<?php break; ?>
 					@endif
 				@endforeach

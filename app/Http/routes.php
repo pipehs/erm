@@ -1007,6 +1007,13 @@ Route::get('action_plans', [
 Route::get('action_plans2', [
 	'as' => 'action_plans2', 'uses' => 'PlanesAccionController@index2']);
 
+Route::get('action_plan.destroy.{id}', [
+	'as' => 'action_plan.destroy', 'uses' => 'PlanesAccionController@destroy']);
+
+Route::get('action_plan.close.{id}', [
+	'as' => 'action_plan.close', 'uses' => 'PlanesAccionController@close'
+]);
+
 //ruta para eliminar evidencias (llama a funcion helper)
 Route::get('evidences.delete.{id},{kind}', function($id,$kind) {
 	return eliminarArchivo($id,$kind);

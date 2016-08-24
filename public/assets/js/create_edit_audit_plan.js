@@ -441,7 +441,7 @@ var pathname = window.location.pathname;
 										objective_risk_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
 									})
 									$('#info_new_auditorias').append('<div class="form-group">');
-									$('#info_new_auditorias').append('<label for="audit_new'+cont+'_objective_risks" class="col-sm-4 control-label">Riesgos de negocio (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" required="required" name="audit_new'+cont+'_objective_risks[]">' + objective_risk_options + '</select></div></div></br>');
+									$('#info_new_auditorias').append('<label for="audit_new'+cont+'_objective_risks" class="col-sm-4 control-label">Riesgos de negocio (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_new'+cont+'_objective_risks[]">' + objective_risk_options + '</select></div></div></br>');
 
 									//riesgos de proceso
 									var risk_subprocess_options = null;
@@ -449,7 +449,7 @@ var pathname = window.location.pathname;
 										risk_subprocess_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
 									})
 									$('#info_new_auditorias').append('<div class="form-group">');
-									$('#info_new_auditorias').append('<label for="Riesgos de proceso (ctrl + click para seleccionar varios)" class="col-sm-4 control-label">Riesgos de proceso (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" required="required" name="audit_new'+cont+'_risk_subprocesses[]">' + risk_subprocess_options + '</select></div></div>');
+									$('#info_new_auditorias').append('<label for="Riesgos de proceso (ctrl + click para seleccionar varios)" class="col-sm-4 control-label">Riesgos de proceso (ctrl + click para seleccionar varios)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_new'+cont+'_risk_subprocesses[]">' + risk_subprocess_options + '</select></div></div>');
 								}
 								
 								$('#info_new_auditorias').append('</br></br>');
@@ -457,7 +457,7 @@ var pathname = window.location.pathname;
 								//recursos
 								$('#info_new_auditorias').append('<div class="form-group">');
 								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_resources" class="col-sm-4 control-label">Recursos</label>');
-								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_new'+cont+'_resources" class="form-control" required="required" ></div>');
+								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_new'+cont+'_resources" class="form-control" ></div>');
 
 								//HH
 								$('#info_new_auditorias').append('<div class="form-group">');

@@ -108,48 +108,262 @@ class PlanesAccionController extends Controller
 
     public function index2()
     {
-        $id = $_GET['organization_id'];
-        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
-        $action_plans = array();
-        $i = 0;
-        //primero obtenemos los planes de acción para los hallazgos que son directamente de la organización
-        $planes = DB::table('issues')
-                    ->join('action_plans','action_plans.issue_id','=','issues.id')
-                    ->where('issues.organization_id','=',$id)
-                    ->select('action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
-                            'action_plans.status','action_plans.stakeholder_id','issues.name as issue')
-                    ->get();
-
-        foreach ($planes as $plan)
+        if (Auth::guest())
         {
-            $final_date = new DateTime($plan->final_date);
-            $final_date = date_format($final_date,"d-m-Y");
-
-            //obtenemos datos de responsable
-            $resp = \Ermtool\Stakeholder::find($plan->stakeholder_id);
-
-            $action_plans[$i] = [
-                'origin' => 'Hallazgo de organización',
-                'issue' => $plan->issue,
-                'description' => $plan->description,
-                'stakeholder' => $resp->name.' '.$resp->surnames,
-                'stakeholder_mail' => $resp->mail,
-                'final_date' => $final_date,
-                'status' => $plan->status
-            ];
-
-            $i += 1;
-            //
-        }
-        //print_r($_GET);
-        if (Session::get('languaje') == 'en')
-        {
-            return view('en.planes_accion.index',['action_plans'=>$action_plans,'organizations' => $organizations]);
+            return view('login');
         }
         else
         {
-            return view('planes_accion.index',['action_plans'=>$action_plans,'organizations' => $organizations]);
+            $id = $_GET['organization_id'];
+
+            $org = \Ermtool\Organization::where('id',$id)->value('name');
+            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
+            $action_plans = array();
+            $i = 0;
+            //primero obtenemos los planes de acción para los hallazgos que son directamente de la organización
+            $planes = DB::table('issues')
+                        ->join('action_plans','action_plans.issue_id','=','issues.id')
+                        ->where('issues.organization_id','=',$id)
+                        ->groupBy('action_plans.id')
+                        ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.organization_id as org_id')
+                        ->get();
+
+            //ahora los planes de acción para los planes de auditoría que corresponden a la organización
+            $planes2 = DB::table('issues')
+                        ->join('action_plans','action_plans.issue_id','=','issues.id')
+                        ->join('audit_audit_plan','audit_audit_plan.id','=','issues.audit_audit_plan_id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->where('audit_plans.organization_id','=',$id)
+                        ->groupBy('action_plans.id')
+                        ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.audit_audit_plan_id as audit_plan_id')
+                        ->get();
+
+            //planes de accion asociados a programa de auditoría (que corresponde a un plan de auditoría asociado a una organización)
+            $planes3 = DB::table('issues')
+                        ->join('action_plans','action_plans.issue_id','=','issues.id')
+                        ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','issues.audit_audit_plan_audit_program_id')
+                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->where('audit_plans.organization_id','=',$id)
+                        ->groupBy('action_plans.id')
+                        ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.audit_audit_plan_audit_program_id as program_id')
+                        ->get();
+
+            //asociados a una prueba de un plan de auditoría
+            $planes4 = DB::table('issues')
+                        ->join('action_plans','action_plans.issue_id','=','issues.id')
+                        ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                        ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->where('audit_plans.organization_id','=',$id)
+                        ->groupBy('action_plans.id')
+                        ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.audit_test_id as test_id')
+                        ->get();
+
+            //planes de control de entidad asociados a la organización
+            $planes5 = DB::table('issues')
+                        ->join('action_plans','action_plans.issue_id','=','issues.id')
+                        ->join('control_objective_risk','control_objective_risk.control_id','=','issues.control_id')
+                        ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                        ->join('objectives','objectives.id','=','objective_risk_id')
+                        ->where('objectives.organization_id','=',$id)
+                        ->groupBy('action_plans.id')
+                        ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name as issue','control_objective_risk.control_id as control_objective_risk_id')
+                        ->get();
+
+            //planes de control de proceso asociados a la organización
+            $planes6 = DB::table('issues')
+                        ->join('action_plans','action_plans.issue_id','=','issues.id')
+                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','issues.control_id')
+                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                        ->where('organization_subprocess.organization_id','=',$id)
+                        ->groupBy('action_plans.id')
+                        ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name as issue','control_risk_subprocess.control_id as control_risk_subprocess_id')
+                        ->get();
+
+            //planes asociados a un subproceso perteneciente a la organización
+            $planes7 = DB::table('issues')
+                        ->join('action_plans','action_plans.issue_id','=','issues.id')
+                        ->join('subprocesses','subprocesses.id','=','issues.subprocess_id')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('organization_subprocess.organization_id','=',$id)
+                        ->groupBy('action_plans.id')
+                        ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.subprocess_id as subprocess_id')
+                        ->get(); 
+            //planes asociados a un proceso perteneciente a la organización
+            $planes8 = DB::table('issues')
+                        ->join('action_plans','action_plans.issue_id','=','issues.id')
+                        ->join('processes','processes.id','=','issues.process_id')
+                        ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('organization_subprocess.organization_id','=',$id)
+                        ->groupBy('action_plans.id')
+                        ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.process_id as process_id')
+                        ->get(); 
+
+            $plans = array_merge($planes,$planes2,$planes3,$planes4,$planes5,$planes6,$planes7,$planes8);
+
+            foreach ($plans as $plan)
+            {
+                $final_date = new DateTime($plan->final_date);
+                $final_date = date_format($final_date,"d-m-Y");
+
+                
+                if (Session::get('languaje') == 'en')
+                {
+                    //obtenemos datos de responsable
+                    if ($plan->stakeholder_id != NULL)
+                    {
+                        $resp = \Ermtool\Stakeholder::find($plan->stakeholder_id);
+                        $resp_mail = $resp->mail;
+                        $resp = $resp->name.' '.$resp->surnames;
+                    }
+                    else
+                    {
+                        $resp = 'Responsable is not defined';
+                        $resp_mail = '';
+                    }
+                    if ($plan->status === 0)
+                    {
+                        $status = 'In progress';
+                    }
+                    else if ($plan->status == 1)
+                    {
+                        $status = 'Closed';
+                    }
+                    else if ($plan->status === NULL)
+                    {
+                        $status = 'Status is not defined';
+                    }
+                    //seteamos origen
+                    if (isset($plan->org_id))
+                    {
+                        $origin = 'Organization issue';
+                    }
+                    else if (isset($plan->audit_plan_id))
+                    {
+                        $origin = 'Audit plan issue';
+                    }
+                    else if (isset($plan->program_id))
+                    {
+                        $origin = 'Audit program issue';
+                    }
+                    else if (isset($plan->test_id))
+                    {
+                        $origin = 'Audit test issue';
+                    }
+                    else if (isset($plan->control_objective_risk_id))
+                    {
+                        $origin = 'Entity control issue';
+                    }
+                    else if (isset($plan->control_risk_subprocess_id))
+                    {
+                        $origin = 'Process control issue';
+                    }
+                    else if (isset($plan->subprocess_id))
+                    {
+                        $origin = 'Subprocess issue';
+                    }
+                    else if (isset($plan->process_id))
+                    {
+                        $origin = 'Process issue';
+                    }
+                }
+                else
+                {
+                    //obtenemos datos de responsable
+                    if ($plan->stakeholder_id != NULL)
+                    {
+                        $resp = \Ermtool\Stakeholder::find($plan->stakeholder_id);
+                        $resp_mail = $resp->mail;
+                        $resp = $resp->name.' '.$resp->surnames;
+                    }
+                    else
+                    {
+                        $resp = 'No se ha definido responsable';
+                        $resp_mail = '';
+                    }
+                    if ($plan->status === 0)
+                    {
+                        $status = 'En progreso';
+                    }
+                    else if ($plan->status == 1)
+                    {
+                        $status = 'Cerrado';
+                    }
+                    else if ($plan->status === NULL)
+                    {
+                        $status = 'Estado no definido';
+                    }
+                    //seteamos origen
+                    if (isset($plan->org_id))
+                    {
+                        $origin = 'Hallazgo de organización';
+                    }
+                    else if (isset($plan->audit_plan_id))
+                    {
+                        $origin = 'Hallazgo de plan de auditoría';
+                    }
+                    else if (isset($plan->program_id))
+                    {
+                        $origin = 'Hallazgo de programa de auditoría';
+                    }
+                    else if (isset($plan->test_id))
+                    {
+                        $origin = 'Hallazgo de prueba de auditoría';
+                    }
+                    else if (isset($plan->control_objective_risk_id))
+                    {
+                        $origin = 'Hallazgo de control de entidad';
+                    }
+                    else if (isset($plan->control_risk_subprocess_id))
+                    {
+                        $origin = 'Hallazgo de control de proceso';
+                    }
+                    else if (isset($plan->subprocess_id))
+                    {
+                        $origin = 'Hallazgo asociado a subproceso';
+                    }
+                    else if (isset($plan->process_id))
+                    {
+                        $origin = 'Hallazgo asociado a proceso';
+                    }
+                }
+                $action_plans[$i] = [
+                    'origin' => $origin,
+                    'id' => $plan->id,
+                    'issue' => $plan->issue,
+                    'description' => $plan->description,
+                    'stakeholder' => $resp,
+                    'stakeholder_mail' => $resp_mail,
+                    'final_date' => $final_date,
+                    'status' => $status,
+                    'status_number' => $plan->status,
+                ];
+
+                $i += 1;
+                //
+            }
+            //print_r($_GET);
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.planes_accion.index',['action_plans'=>$action_plans,'organizations' => $organizations, 'org' => $org, 'org_id' => $id]);
+            }
+            else
+            {
+                return view('planes_accion.index',['action_plans'=>$action_plans,'organizations' => $organizations, 'org' => $org, 'org_id' => $id]);
+            }
         }
     }
 
@@ -226,7 +440,29 @@ class PlanesAccionController extends Controller
      */
     public function destroy($id)
     {
-        //
+        //action plan está enlazado con stakeholders e issues, pero ninguno de ellos depende de éste, por lo que simplemente se borarrá
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            global $id1;
+            $id1 = $id;
+            global $res;
+            $res = 1;
+            DB::transaction(function() {
+
+                //primero que todo, eliminamos plan de acción (si es que hay)
+                DB::table('action_plans')
+                ->where('id','=',$GLOBALS['id1'])
+                ->delete();
+
+                $GLOBALS['res'] = 0;
+            });
+
+            return $res;
+        }
     }
 
     //obtiene plan de acción para un issue dado
@@ -1467,6 +1703,41 @@ class PlanesAccionController extends Controller
                                                             'cont_danger' => $cont_danger,
                                                             'cont_closed' => $cont_closed]);
             }
+        }
+    }
+
+    //función para cerrar plan de acción
+    public function close($id)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            global $id1;
+            $id1 = $id;
+            global $res;
+            $res = 1;
+            DB::transaction(function() 
+            {
+                $action_plan = \Ermtool\Action_plan::find($GLOBALS['id1']);
+                $action_plan->status = 1;
+                $action_plan->save();
+
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Action Plan successfully closed');
+                }
+                else
+                {
+                    Session::flash('message','Plan de acción cerrado correctamente');
+                }
+
+                $GLOBALS['res'] = 0;
+            });
+
+            return $res;
         }
     }
 }

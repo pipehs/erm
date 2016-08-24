@@ -441,7 +441,7 @@ var pathname = window.location.pathname;
 										objective_risk_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
 									})
 									$('#info_new_auditorias').append('<div class="form-group">');
-									$('#info_new_auditorias').append('<label for="audit_new'+cont+'_objective_risks" class="col-sm-4 control-label">Bussiness risks (ctrl + click to select multiple)</label><div class="col-sm-8"><select multiple class="form-control" required="required" name="audit_new'+cont+'_objective_risks[]">' + objective_risk_options + '</select></div></div></br>');
+									$('#info_new_auditorias').append('<label for="audit_new'+cont+'_objective_risks" class="col-sm-4 control-label">Bussiness risks (ctrl + click to select multiple)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_new'+cont+'_objective_risks[]">' + objective_risk_options + '</select></div></div></br>');
 
 									//riesgos de proceso
 									var risk_subprocess_options = null;
@@ -449,7 +449,7 @@ var pathname = window.location.pathname;
 										risk_subprocess_options += "<option value='" + $(this).val() + "'>" + $(this).text() + "</option>";
 									})
 									$('#info_new_auditorias').append('<div class="form-group">');
-									$('#info_new_auditorias').append('<label for="Process risks (ctrl + click to select multiple)" class="col-sm-4 control-label">Process risks (ctrl + click to select multiple)</label><div class="col-sm-8"><select multiple class="form-control" required="required" name="audit_new'+cont+'_risk_subprocesses[]">' + risk_subprocess_options + '</select></div></div>');
+									$('#info_new_auditorias').append('<label for="Process risks (ctrl + click to select multiple)" class="col-sm-4 control-label">Process risks (ctrl + click to select multiple)</label><div class="col-sm-8"><select multiple class="form-control" name="audit_new'+cont+'_risk_subprocesses[]">' + risk_subprocess_options + '</select></div></div>');
 								}
 								
 								$('#info_new_auditorias').append('</br></br>');
