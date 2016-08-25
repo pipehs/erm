@@ -743,7 +743,7 @@ class EncuestasController extends Controller
                 }
                 else
                 {
-                    return view('en.identificacion_eventos_riesgos.encuestas',['stakeholders'=>$stakeholders,'poll_id'=>$_GET['encuesta'],'answers'=>$answers]);
+                    return view('identificacion_eventos_riesgos.encuestas',['stakeholders'=>$stakeholders,'poll_id'=>$_GET['encuesta'],'answers'=>$answers]);
                 }
             }
             else

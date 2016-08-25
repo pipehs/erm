@@ -133,7 +133,8 @@
 
 @stop
 @section('scripts2')
-<script type="text/javascript" src="assets/js/loader.js"></script>
+<!--<script type="text/javascript" src="assets/js/loader.js"></script>-->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
 
 	@if ($cont_ctrl > 0 || $cont_audit > 0 || $others > 0)

@@ -312,6 +312,9 @@ class ExcelController extends Controller
         14 = Planes estado - próximos a cerrar
         15 = Planes estado - Fecha final terminada y aun abierto
         16 = Planes estado - Cerrado
+        17 = Pruebas de auditoría abiertas
+        18 = Pruebas de auditoría en ejecución
+        19 = Pruebas de auditoría cerradas
         */
         global $id2;
         $id2 = $id;
@@ -710,6 +713,93 @@ class ExcelController extends Controller
                     $datos = $plan->indexGraficos($GLOBALS['id2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:G1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                    $sheet->freezeFirstRow();
+                });
+
+            })->export('xls');
+        }
+    }
+
+    //graficos de excel dinámicos (en una primera instancia, solo para el gráfico de pruebas de auditoría)
+    public function generarExcelGraficosDinamicos ($kind,$id)
+    {
+        global $id2;
+        $id2 = $id;
+        global $kind2;
+        $kind2 = $kind;
+
+        if ($GLOBALS['kind2'] == 1)
+        {
+            Excel::create('Pruebas de auditoría abiertas '.date("d-m-Y"), function($excel) {
+
+                $excel->setTitle('Pruebas de auditoría abiertas');
+                $excel->setCreator('Administrador B-GRC')
+                      ->setCompany('B-GRC - IXUS Consulting');
+                $excel->setDescription('Reporte de pruebas de auditoría que se encuentran abiertas para el plan seleccionado');
+                $excel->sheet('Pruebas de auditoría', function($sheet) {
+                    $audit = new Audits;
+                    $datos = $audit->getTests($GLOBALS['kind2'],$GLOBALS['id2']);
+                    $sheet->fromArray($datos);
+                    $sheet->cells('A1:J1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                    $sheet->freezeFirstRow();
+                });
+
+            })->export('xls');
+        }
+
+        else if ($GLOBALS['kind2'] == 2)
+        {
+            Excel::create('Pruebas de auditoría en ejecución '.date("d-m-Y"), function($excel) {
+
+                $excel->setTitle('Pruebas de auditoría en ejecución');
+                $excel->setCreator('Administrador B-GRC')
+                      ->setCompany('B-GRC - IXUS Consulting');
+                $excel->setDescription('Reporte de pruebas de auditoría que se encuentran en ejecución para el plan seleccionado');
+                $excel->sheet('Pruebas de auditoría', function($sheet) {
+                    $audit = new Audits;
+                    $datos = $audit->getTests($GLOBALS['kind2'],$GLOBALS['id2']);
+                    $sheet->fromArray($datos);
+                    $sheet->cells('A1:J1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                    $sheet->freezeFirstRow();
+                });
+
+            })->export('xls');
+        }
+
+        if ($GLOBALS['kind2'] == 3)
+        {
+            Excel::create('Pruebas de auditoría cerradas '.date("d-m-Y"), function($excel) {
+
+                $excel->setTitle('Pruebas de auditoría cerradas');
+                $excel->setCreator('Administrador B-GRC')
+                      ->setCompany('B-GRC - IXUS Consulting');
+                $excel->setDescription('Reporte de pruebas de auditoría que se encuentran cerradas para el plan seleccionado');
+                $excel->sheet('Pruebas de auditoría', function($sheet) {
+                    $audit = new Audits;
+                    $datos = $audit->getTests($GLOBALS['kind2'],$GLOBALS['id2']);
+                    $sheet->fromArray($datos);
+                    $sheet->cells('A1:J1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');

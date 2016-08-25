@@ -35,7 +35,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-			<p>On this section you will be able to see different graphics that allow you to see all the information related to action plans entered on the system.</p>
+			<p>On this section you will be able to see different charts that allow you to see all the information related to action plans entered on the system.</p>
 
 		</div>
 	</div>
@@ -64,7 +64,7 @@
 		</div>
 		<div class="box-content">
 			<p align="justify">
-			On this graphic yo will see the universe of action plans with their kind, whether if it are of controls assessment, audits or others.</p>
+			On this chart you will see the universe of action plans with their kind, whether if it are of controls assessment, audits or others.</p>
 			<p id="alternativo"></p>
 			<div id="piechart_3d" style="width: 500px; height: 300px;"></div>
 		</div>
@@ -95,7 +95,7 @@
 		</div>
 		<div class="box-content">
 			<p align="justify">
-			On this graphic you will see the different issues registered on the system with their correspondant information, and with their action plans (if their have).</p>
+			On this chart you will see the different issues registered on the system with their correspondant information, and with their action plans (if their have).</p>
 			<p id="alternativo2"></p>
 			<div id="piechart2" style="width: 500px; height: 300px;"></div>
 		</div>
@@ -126,7 +126,7 @@
 		</div>
 		<div class="box-content">
 			<p align="justify">
-			On this graphic you will observe the status of each action plan (open, close, next to close, deadline passed and still open).</p>
+			On this chart you will observe the status of each action plan (open, close, next to close, deadline passed and still open).</p>
 			<p id="alternativo3"></p>
 			<div id="piechart3" style="width: 500px; height: 300px;"></div>
 		</div>
@@ -136,7 +136,7 @@
 
 @stop
 @section('scripts2')
-<script type="text/javascript" src="assets/js/loader.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
 
 	@if ($cont_ctrl > 0 || $cont_audit > 0 || $others > 0)

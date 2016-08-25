@@ -753,6 +753,9 @@ Route::get('genexcelaudit.{org}', [
 Route::get('genexcelgraficos.{id}', [
 	'as' => 'genexcelgraficos', 'uses' => 'ExcelController@generarExcelGraficos']);
 
+Route::get('genexcelgraficosdinamicos.{kind},{id}', [
+	'as' => 'genexcelgraficosdinamicos', 'uses' => 'ExcelController@generarExcelGraficosDinamicos']);
+
 
 //------ RUTAS PARA ENLACES A TRAVÉS DE JSON --------//
 
@@ -820,7 +823,7 @@ Route::get('auditorias.auditorias.{id}', [
 	'as' => 'auditorias.auditorias', 'uses' => 'AuditoriasController@getAudits']);
 
 //ruta para obtener pruebas segun plan + auditoría
-Route::get('auditorias.getpruebas.{id}', [
+Route::get('auditorias.getpruebas.{kind},{id}', [
 	'as' => 'auditorias.getpruebas', 'uses' => 'AuditoriasController@getTests']);
 
 //ruta para obtener issues de una prueba (si es que tiene)

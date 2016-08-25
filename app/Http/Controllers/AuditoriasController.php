@@ -3647,37 +3647,492 @@ class AuditoriasController extends Controller
         }
     }
 
-    /* ESTÁ MALA, CORREGIR SI ES QUE ES NECESARIO 
-    //obtiene pruebas asociadas a una plan auditoria + auditoria
-    public function getTests($id)
+    // ESTÁ MALA, CORREGIR SI ES QUE ES NECESARIO 
+    // ACTUALIZACIÓN 24-08: LA UTILIZAREMOS PARA GENERAR EL GRÁFICO DE PRUEBAS DE AUDITORÍA
+    //obtiene pruebas asociadas a una plan auditoria
+    public function getTests($kind,$id)
     {
-        $results = array();
         $i = 0; //contador de pruebas
-
-        //obtenemos pruebas
-        $tests = DB::table('audit_audit_plan_audit_test')
-                    ->join('audit_audit_plan','audit_audit_plan_audit_test.audit_audit_plan_id','=',$id)
+        $audit_plan = \Ermtool\Audit_plan::where('id',$id)->value('name');
+        $pruebas_ejec = 0; //pruebas en ejecución
+        $pruebas_abiertas = 0; //pruebas abiertas
+        $pruebas_cerradas = 0; //pruebas cerradas
+        $type = NULL; //identifica si es una prueba asociada a un riesgo, subproceso o control (1=Riesgo, 2=Subproceso, 3=Control)
+        $audit_tests = array();
+        $tests = DB::table('audit_tests')
+                    ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                    ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                    ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
                     ->join('audits','audits.id','=','audit_audit_plan.audit_id')
-                    ->join('audit_plans','audit_audit_plan.audit_plan_id','=','audit_plans.id')
-                    ->join('audit_tests','audit_tests.id','=','audit_audit_plan_audit_test.audit_test_id')
-                    ->select('audit_tests.name AS name','audit_plans.name AS audit_plan_name',
-                            'audits.name AS audit_name','audit_tests.description AS description',
-                            'audit_tests.activities AS activities')
+                    ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                    ->where('audit_plans.id','=',$id)
+                    ->select('audit_plans.name AS audit_plan_name',
+                            'audits.name AS audit_name','audit_programs.name as audit_program_name','audit_tests.description AS description',
+                            'audit_tests.name AS name','audit_tests.type','audit_tests.status','audit_tests.results',
+                            'audit_tests.hh','audit_tests.control_id','audit_tests.subprocess_id','audit_tests.risk_id',
+                            'audit_tests.stakeholder_id')
                     ->get();
+
         foreach ($tests as $test)
         {
-            $results[$i] = [
-                    'audit_plan_name' => $test->audit_plan_name,
+            //sumamos a prueba ejec abierta o cerrada según el estado que posea
+            if ($test->status == 0)
+            {
+                $pruebas_abiertas += 1;
+            }
+            else if ($test->status == 1)
+            {
+                $pruebas_ejec += 1;
+            }
+            else if ($test->status == 2)
+            {
+                $pruebas_cerradas += 1;
+            }
+
+            //obtenemos nombre de stakeholder
+            $resp = \Ermtool\Stakeholder::find($test->stakeholder_id);
+            $resp = $resp['name'].' '.$resp['surnames'];
+
+            //obtenemos nombre de riesgo, control o subproceso según corresponda
+            if ($test->risk_id != NULL)
+            {
+                $relacionado = \Ermtool\Risk::where('id',$test->risk_id)->value('name');
+                $type = 1;
+            }
+            else if ($test->subprocess_id != NULL)
+            {
+                $relacionado = \Ermtool\Subprocess::where('id',$test->subprocess_id)->value('name');
+                $type = 2;
+            }
+            else if ($test->control_id != NULL)
+            {
+                $relacionado = \Ermtool\Control::where('id',$test->control_id)->value('name');
+                $type = 3;
+            }
+            
+            if (strstr($_SERVER["REQUEST_URI"],'genexcelgraficosdinamicos')) //si es excel debemos setear los datos aquí
+            {
+                if (Session::get('languaje') == 'en')
+                {
+                    if ($kind == 1 && $test->status == 0) //reporte de pruebas abiertas
+                    {
+                        //tipo
+                        if ($test->type == 0)
+                        {
+                            $test_type = 'Design test';
+                        }
+                        else if ($test->type == 1)
+                        {
+                            $test_type = 'Operationa effectiveness test';
+                        }
+                        else if ($test->type == 2)
+                        {
+                            $test_type = 'Compliance test';
+                        }
+                        else if ($test->type == 3)
+                        {
+                            $test_type = 'Sustantive tests';
+                        }
+                        else
+                        {
+                            $test_type = 'Not defined';
+                        }
+
+                        //resultado
+                        if ($test->results == 0)
+                        {
+                            $results = 'Ineffective';
+                        }
+                        else if ($test->results == 1)
+                        {
+                            $results = 'Effective';
+                        }
+                        else if ($test->results == 2)
+                        {
+                            $results = 'In process';
+                        }
+
+                        if ($type == 1)
+                        {
+                            $related = 'Risk: '.$relacionado;
+                        }
+                        else if ($type == 2)
+                        {
+                            $related = 'Subprocess: '.$relacionado;
+                        }
+                        else if ($type == 3)
+                        {
+                            $related = 'Control: '.$relacionado;
+                        }
+
+                        $audit_tests[$i] = [
+                            'Audit plan' => $audit_plan,
+                            'Audit' => $test->audit_name,
+                            'Program' => $test->audit_program_name,
+                            'Test' => $test->name,
+                            'Description' => $test->description,
+                            'Kind' => $test_type,
+                            'Results' => $results,
+                            'Hours-man' => $test->hh,
+                            'Responsable' => $resp,
+                            'Related object' => $related,
+                        ];  
+                    }
+                    else if ($kind == 2 && $test->status == 1) //pruebas en ejecución
+                    {
+                        //tipo
+                        if ($test->type == 0)
+                        {
+                            $test_type = 'Design test';
+                        }
+                        else if ($test->type == 1)
+                        {
+                            $test_type = 'Operationa effectiveness test';
+                        }
+                        else if ($test->type == 2)
+                        {
+                            $test_type = 'Compliance test';
+                        }
+                        else if ($test->type == 3)
+                        {
+                            $test_type = 'Sustantive tests';
+                        }
+                        else
+                        {
+                            $test_type = 'Not defined';
+                        }
+
+                        //resultado
+                        if ($test->results == 0)
+                        {
+                            $results = 'Ineffective';
+                        }
+                        else if ($test->results == 1)
+                        {
+                            $results = 'Effective';
+                        }
+                        else if ($test->results == 2)
+                        {
+                            $results = 'In process';
+                        }
+
+                        if ($type == 1)
+                        {
+                            $related = 'Risk: '.$relacionado;
+                        }
+                        else if ($type == 2)
+                        {
+                            $related = 'Subprocess: '.$relacionado;
+                        }
+                        else if ($type == 3)
+                        {
+                            $related = 'Control: '.$relacionado;
+                        }
+
+                        $audit_tests[$i] = [
+                            'Audit plan' => $audit_plan,
+                            'Audit' => $test->audit_name,
+                            'Program' => $test->audit_program_name,
+                            'Test' => $test->name,
+                            'Description' => $test->description,
+                            'Kind' => $test_type,
+                            'Results' => $results,
+                            'Hours-man' => $test->hh,
+                            'Responsable' => $resp,
+                            'Related object' => $related,
+                        ];   
+                    }
+                    else if ($kind == 3 && $test->status == 2) //pruebas cerradas
+                    {
+                        //tipo
+                        if ($test->type == 0)
+                        {
+                            $test_type = 'Design test';
+                        }
+                        else if ($test->type == 1)
+                        {
+                            $test_type = 'Operationa effectiveness test';
+                        }
+                        else if ($test->type == 2)
+                        {
+                            $test_type = 'Compliance test';
+                        }
+                        else if ($test->type == 3)
+                        {
+                            $test_type = 'Sustantive tests';
+                        }
+                        else
+                        {
+                            $test_type = 'Not defined';
+                        }
+
+                        //resultado
+                        if ($test->results == 0)
+                        {
+                            $results = 'Ineffective';
+                        }
+                        else if ($test->results == 1)
+                        {
+                            $results = 'Effective';
+                        }
+                        else if ($test->results == 2)
+                        {
+                            $results = 'In process';
+                        }
+
+                        if ($type == 1)
+                        {
+                            $related = 'Risk: '.$relacionado;
+                        }
+                        else if ($type == 2)
+                        {
+                            $related = 'Subprocess: '.$relacionado;
+                        }
+                        else if ($type == 3)
+                        {
+                            $related = 'Control: '.$relacionado;
+                        }
+
+                        $audit_tests[$i] = [
+                            'Audit plan' => $audit_plan,
+                            'Audit' => $test->audit_name,
+                            'Program' => $test->audit_program_name,
+                            'Test' => $test->name,
+                            'Description' => $test->description,
+                            'Kind' => $test_type,
+                            'Results' => $results,
+                            'Hours-man' => $test->hh,
+                            'Responsable' => $resp,
+                            'Related object' => $related,
+                        ];   
+                    }
+                }
+                else
+                {
+                    if ($kind == 1 && $test->status == 0) //reporte de pruebas abiertas
+                    {
+                        //tipo
+                        if ($test->type == 0)
+                        {
+                            $test_type = 'Prueba de diseño';
+                        }
+                        else if ($test->type == 1)
+                        {
+                            $test_type = 'Prueba de efectividad operativa';
+                        }
+                        else if ($test->type == 2)
+                        {
+                            $test_type = 'Prueba de cumplimiento';
+                        }
+                        else if ($test->type == 3)
+                        {
+                            $test_type = 'Prueba sustantiva';
+                        }
+                        else
+                        {
+                            $test_type = 'No definido';
+                        }
+
+                        //resultado
+                        if ($test->results == 0)
+                        {
+                            $results = 'Inefectiva';
+                        }
+                        else if ($test->results == 1)
+                        {
+                            $results = 'Efectiva';
+                        }
+                        else if ($test->results == 2)
+                        {
+                            $results = 'En proceso';
+                        }
+
+                        if ($type == 1)
+                        {
+                            $related = 'Riesgo: '.$relacionado;
+                        }
+                        else if ($type == 2)
+                        {
+                            $related = 'Subproceso: '.$relacionado;
+                        }
+                        else if ($type == 3)
+                        {
+                            $related = 'Control: '.$relacionado;
+                        }
+
+                        $audit_tests[$i] = [
+                            'Plan de auditoría' => $audit_plan,
+                            'Auditoría' => $test->audit_name,
+                            'Programa' => $test->audit_program_name,
+                            'Prueba' => $test->name,
+                            'Descripción' => $test->description,
+                            'Tipo' => $test_type,
+                            'Resultado' => $results,
+                            'Horas-hombre' => $test->hh,
+                            'Responsable' => $resp,
+                            'Objeto relacionado' => $related,
+                        ];  
+                    }
+                    else if ($kind == 2 && $test->status == 1) //pruebas en ejecución
+                    {
+                        //tipo
+                        if ($test->type == 0)
+                        {
+                            $test_type = 'Prueba de diseño';
+                        }
+                        else if ($test->type == 1)
+                        {
+                            $test_type = 'Prueba de efectividad operativa';
+                        }
+                        else if ($test->type == 2)
+                        {
+                            $test_type = 'Prueba de cumplimiento';
+                        }
+                        else if ($test->type == 3)
+                        {
+                            $test_type = 'Prueba sustantiva';
+                        }
+                        else
+                        {
+                            $test_type = 'No definido';
+                        }
+
+                        //resultado
+                        if ($test->results == 0)
+                        {
+                            $results = 'Inefectiva';
+                        }
+                        else if ($test->results == 1)
+                        {
+                            $results = 'Efectiva';
+                        }
+                        else if ($test->results == 2)
+                        {
+                            $results = 'En proceso';
+                        }
+
+                        if ($type == 1)
+                        {
+                            $related = 'Riesgo: '.$relacionado;
+                        }
+                        else if ($type == 2)
+                        {
+                            $related = 'Subproceso: '.$relacionado;
+                        }
+                        else if ($type == 3)
+                        {
+                            $related = 'Control: '.$relacionado;
+                        }
+
+                        $audit_tests[$i] = [
+                            'Plan de auditoría' => $audit_plan,
+                            'Auditoría' => $test->audit_name,
+                            'Programa' => $test->audit_program_name,
+                            'Prueba' => $test->name,
+                            'Descripción' => $test->description,
+                            'Tipo' => $test_type,
+                            'Resultado' => $results,
+                            'Horas-hombre' => $test->hh,
+                            'Responsable' => $resp,
+                            'Objeto relacionado' => $related,
+                        ];  
+                    }
+                    else if ($kind == 3 && $test->status == 2) //pruebas cerradas
+                    {
+                        //tipo
+                        if ($test->type == 0)
+                        {
+                            $test_type = 'Prueba de diseño';
+                        }
+                        else if ($test->type == 1)
+                        {
+                            $test_type = 'Prueba de efectividad operativa';
+                        }
+                        else if ($test->type == 2)
+                        {
+                            $test_type = 'Prueba de cumplimiento';
+                        }
+                        else if ($test->type == 3)
+                        {
+                            $test_type = 'Prueba sustantiva';
+                        }
+                        else
+                        {
+                            $test_type = 'No definido';
+                        }
+
+                        //resultado
+                        if ($test->results == 0)
+                        {
+                            $results = 'Inefectiva';
+                        }
+                        else if ($test->results == 1)
+                        {
+                            $results = 'Efectiva';
+                        }
+                        else if ($test->results == 2)
+                        {
+                            $results = 'En proceso';
+                        }
+
+                        if ($type == 1)
+                        {
+                            $related = 'Riesgo: '.$relacionado;
+                        }
+                        else if ($type == 2)
+                        {
+                            $related = 'Subproceso: '.$relacionado;
+                        }
+                        else if ($type == 3)
+                        {
+                            $related = 'Control: '.$relacionado;
+                        }
+
+                        $audit_tests[$i] = [
+                            'Plan de auditoría' => $audit_plan,
+                            'Auditoría' => $test->audit_name,
+                            'Programa' => $test->audit_program_name,
+                            'Prueba' => $test->name,
+                            'Descripción' => $test->description,
+                            'Tipo' => $test_type,
+                            'Resultado' => $results,
+                            'Horas-hombre' => $test->hh,
+                            'Responsable' => $resp,
+                            'Objeto relacionado' => $related,
+                        ];  
+                    }
+                }
+            }
+            else
+            {
+                $audit_tests[$i] = [
                     'audit_name' => $test->audit_name,
+                    'audit_program_name' => $test->audit_program_name,
                     'name' => $test->name,
                     'description' => $test->description,
-                    'activities' => $test->activities
-            ];
+                    'type' => $test->type,
+                    'status' => $test->status,
+                    'results' => $test->results,
+                    'hh' => $test->hh,
+                    'stakeholder' => $resp,
+                    'related' => $relacionado,
+                    'related_type' => $type,
+                ];
+            }
+            
             $i += 1;
         }
 
-        return json_encode($results);
-    } */
+        if (strstr($_SERVER["REQUEST_URI"],'genexcelgraficos')) //si es excel debemos solo enviamos audit_tests
+        {
+            return $audit_tests;
+        }
+        else
+        {
+            return json_encode(['audit_plan' => $audit_plan, 'audit_tests' => $audit_tests,'pruebas_abiertas' => $pruebas_abiertas, 'pruebas_ejec' => $pruebas_ejec, 'pruebas_cerradas' => $pruebas_cerradas]);
+        }
+        
+    }
 
     //obtiene datos asociados al último plan de auditoría generado para una organización
     public function getAuditPlan($org)
@@ -4097,6 +4552,8 @@ class AuditoriasController extends Controller
         }
         else
         {
+            //ACTUALIZACIÓN 24-08: Nuevo gráfico de pruebas de auditorías, por lo tanto debemos seleccionar el plan que se desea ver
+            $planes_auditoria = \Ermtool\Audit_plan::where('status',0)->lists('name','id');
             $planes_ejec = 0; //planes en ejecución
             $planes_abiertos = 0; //planes con al menos una prueba abierta
             $planes_cerrados = 0; //plan sin pruebas abiertas ni en ejecución, pero si cerradas 
@@ -4334,11 +4791,11 @@ class AuditoriasController extends Controller
             {
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.reportes.auditorias_graficos',['audit_plans'=>$audit_plans,'planes_ejec'=>$planes_ejec,'planes_abiertos'=>$planes_abiertos,'planes_cerrados'=>$planes_cerrados]);
+                    return view('en.reportes.auditorias_graficos',['audit_plans'=>$audit_plans,'planes_ejec'=>$planes_ejec,'planes_abiertos'=>$planes_abiertos,'planes_cerrados'=>$planes_cerrados,'planes_auditoria' => $planes_auditoria]);
                 }
                 else
                 {
-                    return view('reportes.auditorias_graficos',['audit_plans'=>$audit_plans,'planes_ejec'=>$planes_ejec,'planes_abiertos'=>$planes_abiertos,'planes_cerrados'=>$planes_cerrados]);
+                    return view('reportes.auditorias_graficos',['audit_plans'=>$audit_plans,'planes_ejec'=>$planes_ejec,'planes_abiertos'=>$planes_abiertos,'planes_cerrados'=>$planes_cerrados,'planes_auditoria' => $planes_auditoria]);
                 }
             }
         }    

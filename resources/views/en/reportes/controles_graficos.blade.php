@@ -35,7 +35,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-      		<p>On this section you will be able to view different graphics that allow to you see on different ways the execution of the internal control on the organization.</p>
+      		<p>On this section you will be able to view different charts that allow to you see on different ways the execution of the internal control on the organization.</p>
 
 		</div>
 	</div>
@@ -64,7 +64,7 @@
 		</div>
 		<div class="box-content">
 			<p align="justify">
-			On this graphic you will observe the amount of controls which have been executed through a control evaluation or an audit test. Click on the graphic if you want to observe the information of the controls executed or pending.</p>
+			On this chart you will observe the amount of controls which have been executed through a control evaluation or an audit test. Click on the graphic if you want to observe the information of the controls executed or pending.</p>
 			<p id="alternativo"></p>
 			<div id="piechart_3d" style="width: 500px; height: 300px;"></div>
 		</div>
@@ -95,7 +95,7 @@
 		</div>
 		<div class="box-content">
 			<p align="justify">
-			On this graphic you will observe the results obtained on the controls that have been executed on the system. Click on the graphic if you want to observe the information of the effective or ineffective controls.</p>
+			On this chart you will observe the results obtained on the controls that have been executed on the system. Click on the graphic if you want to observe the information of the effective or ineffective controls.</p>
 			<p id="alternativo2"></p>
 			<div id="piechart2" style="width: 500px; height: 300px;"></div>
 		</div>
@@ -109,7 +109,7 @@
 
 @stop
 @section('scripts2')
-<script type="text/javascript" src="assets/js/loader.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
 
 	@if ($cont_ejec > 0 || $cont_no_ejec > 0)

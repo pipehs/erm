@@ -63,7 +63,8 @@
 			<div class="no-move"></div>
 		</div>
 		<div class="box-content">
-			<p align="justify">En este gr&aacute;fico podr&aacute; observar el universo de planes de auditor&iacute;a y el estado de estos, ya sea abierto, cerrado o en ejecuci&oacute;n.</p>
+			<p align="justify">En este gr&aacute;fico podr&aacute; observar el universo de planes de auditor&iacute;a para todas las organizaciones en el sistema y el estado de estos, ya sea abierto, cerrado o en ejecuci&oacute;n.</p>
+			<br><br><br><br><br><br>
 			<p id="alternativo"></p>
 			<div id="piechart_3d" style="width: 500px; height: 300px;"></div>
 		</div>
@@ -71,21 +72,58 @@
 </div>
 <!-- FIN Gráfico de planes de auditoría abiertos, en ejecución o cerrados -->
 
+<!-- Gráfico de pruebas de auditoría -->
+<div class="col-xs-12 col-sm-6">
+	<div class="box">
+		<div class="box-header">
+			<div class="box-name">
+				<i class="fa fa-circle"></i>
+				<span>Gráfico Pruebas de auditoría</span>
+			</div>
+			<div class="box-icons">
+				<a class="collapse-link">
+					<i class="fa fa-chevron-up"></i>
+				</a>
+				<a class="expand-link">
+					<i class="fa fa-expand"></i>
+				</a>
+				<a class="close-link">
+					<i class="fa fa-times"></i>
+				</a>
+			</div>
+			<div class="no-move"></div>
+		</div>
+		<div class="box-content">
+			<p align="justify">En este gr&aacute;fico podr&aacute; observar la informaci&oacute;n de todas las pruebas de auditor&iacute;a para el plan seleccionado, con sus correspondientes estados de ejecuci&oacute;n.</p>
 
+			<div id="cargando"><br></div>
 
-      		
-
+			{!!Form::open()!!}
+	      			<div class="form-group">
+						{!!Form::label('Plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::select('audit_plan_id',$planes_auditoria,null, 
+							 	   ['id' => 'audit_plan_id','placeholder'=>'- Seleccione -'])!!}
+						</div>
+					</div>
+			{!!Form::close()!!}
+			<br><br><br>
+			<p id="alternativo2"><br></p>
+			<div id="piechart2" style="width: 500px; height: 300px;"></div>
+		</div>
+	</div>
+</div>
+<!-- FIN Gráfico de pruebas de auditoría -->
 				
 
 @stop
 @section('scripts2')
-<script type="text/javascript" src="assets/js/loader.js"></script>
+<!--<script type="text/javascript" src="assets/js/loader.js"></script>-->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
-
 	@if ($planes_ejec > 0 || $planes_abiertos > 0 || $planes_cerrados > 0)
       google.charts.load("visualization", "1", {packages:["corechart"]});
       google.charts.setOnLoadCallback(chart1);
-      google.charts.setOnLoadCallback(chart2);
       function chart1() {
         var data = google.visualization.arrayToDataTable([
           ['Planes de auditoría', 'Cantidad'],
@@ -97,7 +135,7 @@
         var options = {
           title: 'Estado de planes de auditoría',
           is3D: false,
-          colors: ['#FFFF00','#FF8000','#74DF00'] 
+          colors: ['#D7DF01','#FF8000','#74DF00'] 
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
@@ -244,7 +282,299 @@
     @endif
 
     
-    
+//script para agregar gráfico de pruebas de auditoría
+$("#audit_plan_id").change(function() {
+	if ($("#audit_plan_id").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
+	{
+		//Añadimos la imagen de carga en el contenedor
+		$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
+		
+		//se obtienen datos de pruebas de auditoría para el plan seleccionado
+		$.get('auditorias.getpruebas.0,'+$("#audit_plan_id").val(), function (result) {
+				$('#cargando').html('<br>')
+				//alert(result)
+				//parseamos datos obtenidos
+				var datos = JSON.parse(result);
+
+				if (datos.pruebas_abiertas > 0 || datos.pruebas_ejec > 0 || datos.pruebas_cerradas > 0)
+				{
+					$('#alternativo2').html('<br>')
+				    google.charts.setOnLoadCallback(chart2);
+				    function chart2() {
+				        var data = google.visualization.arrayToDataTable([
+				          ['Pruebas de auditoría', 'Cantidad'],
+				          ['En ejecución',     datos.pruebas_ejec],
+				          ['Abiertas',     datos.pruebas_abiertas],
+				          ['Cerradas',     datos.pruebas_cerradas]
+				        ]);
+
+				        var options = {
+				          title: 'Estado de pruebas de auditoría',
+				          is3D: false,
+				          colors: ['#D7DF01','#FF8000','#74DF00'] 
+				        };
+
+				        var chart2 = new google.visualization.PieChart(document.getElementById('piechart2'));
+				        chart2.draw(data, options);
+
+				        //agregamos evento de click
+				        google.visualization.events.addListener(chart2, 'select', clickHandler);
+
+				      	function clickHandler(e) {
+				      		var sel = chart2.getSelection();
+
+				      		if (sel.length > 0)
+							{
+					        	if (sel[0].row == 1) //pruebas abiertas
+								{
+									var title = '<b>Pruebas abiertas</b>';
+
+									var text ='<table class="table table-striped table-datatable"><thead><th>Auditoría</th><th>Programa</th><th>Prueba</th><th>Descripción</th><th>Tipo</th><th>Resultado</th><th>Horas-hombre</th><th>Responsable</th><th>Objeto involucrado</th></thead>';
+
+									$(datos.audit_tests).each( function(i,test) {
+										if (test.status == 0)
+										{
+											text += '<tr><td>'+test.audit_name+'</td>'
+											text += '<td>'+test.audit_program_name+'</td>'
+											text += '<td>'+test.name+'</td>'
+											text += '<td>'+test.description+'</td>'
+
+											if (test.type == 0)
+											{
+												text += '<td>Prueba de diseño</td>'
+											}
+											else if (test.type == 1)
+											{
+												text += '<td>Prueba de efectividad operativa</td>'
+											}
+											else if (test.type == 2)
+											{
+												text += '<td>Prueba de cumplimiento</td>'
+											}
+											else if (test.type == 3)
+											{
+												text += '<td>Prueba sustantiva</td>'
+											}
+											else
+											{
+												text += '<td>Tipo no definido</td>'
+											}
+											
+											if (test.results == 0)
+											{
+												text += '<td>Inefectiva</td>'
+											}
+											else if (test.results == 1)
+											{
+												text += '<td>Efectiva</td>'
+											}
+											else if (test.results == 2)
+											{
+												text += '<td>En proceso</td>'
+											}
+											
+											text += '<td>'+test.hh+'</td>'
+											text += '<td>'+test.stakeholder+'</td>'
+
+											if (test.related_type == 1)
+											{
+												text += '<td>Riesgo: '+test.related+'</td>'
+											}
+											else if (test.related_type == 2)
+											{
+												text += '<td>Subproceso: '+test.related+'</td>'
+											}
+											else if (test.related_type == 3)
+											{
+												text += '<td>Control: '+test.related+'</td>'
+											}
+											
+										}
+									});
+									
+
+									text += '</table>'
+									text += '<a class="btn btn-success" href="genexcelgraficosdinamicos.1,'+$("#audit_plan_id").val()+'">Exportar</a>'
+
+									swal({   
+										title: title,   
+										text: text,
+										customClass: 'swal-wide',   
+										html: true 
+									});
+								}
+								else if (sel[0].row == 0) //pruebas en ejecución
+								{
+									var title = '<b>Pruebas abiertas</b>';
+
+									var text ='<table class="table table-striped table-datatable"><thead><th>Auditoría</th><th>Programa</th><th>Prueba</th><th>Descripción</th><th>Tipo</th><th>Resultado</th><th>Horas-hombre</th><th>Responsable</th><th>Objeto involucrado</th></thead>';
+
+									$(datos.audit_tests).each( function(i,test) {
+										if (test.status == 1)
+										{
+											text += '<tr><td>'+test.audit_name+'</td>'
+											text += '<td>'+test.audit_program_name+'</td>'
+											text += '<td>'+test.name+'</td>'
+											text += '<td>'+test.description+'</td>'
+
+											if (test.type == 0)
+											{
+												text += '<td>Prueba de diseño</td>'
+											}
+											else if (test.type == 1)
+											{
+												text += '<td>Prueba de efectividad operativa</td>'
+											}
+											else if (test.type == 2)
+											{
+												text += '<td>Prueba de cumplimiento</td>'
+											}
+											else if (test.type == 3)
+											{
+												text += '<td>Prueba sustantiva</td>'
+											}
+											else
+											{
+												text += '<td>Tipo no definido</td>'
+											}
+											
+											if (test.results == 0)
+											{
+												text += '<td>Inefectiva</td>'
+											}
+											else if (test.results == 1)
+											{
+												text += '<td>Efectiva</td>'
+											}
+											else if (test.results == 2)
+											{
+												text += '<td>En proceso</td>'
+											}
+											else
+											{
+												text += '<td>Resultado no especificado</td>'
+											}
+											
+											text += '<td>'+test.hh+'</td>'
+											text += '<td>'+test.stakeholder+'</td>'
+
+											if (test.related_type == 1)
+											{
+												text += '<td>Riesgo: '+test.related+'</td>'
+											}
+											else if (test.related_type == 2)
+											{
+												text += '<td>Subproceso: '+test.related+'</td>'
+											}
+											else if (test.related_type == 3)
+											{
+												text += '<td>Control: '+test.related+'</td>'
+											}
+											
+										}
+									});
+									
+
+									text += '</table>'
+									text += '<a class="btn btn-success" href="genexcelgraficosdinamicos.2,'+$("#audit_plan_id").val()+'">Exportar</a>'
+
+									swal({   
+										title: title,   
+										text: text,
+										customClass: 'swal-wide',   
+										html: true 
+									});
+								}
+								else if (sel[0].row == 2) //pruebas cerradas
+								{
+									var title = '<b>Pruebas abiertas</b>';
+
+									var text ='<table class="table table-striped table-datatable"><thead><th>Auditoría</th><th>Programa</th><th>Prueba</th><th>Descripción</th><th>Tipo</th><th>Resultado</th><th>Horas-hombre</th><th>Responsable</th><th>Objeto involucrado</th></thead>';
+
+									$(datos.audit_tests).each( function(i,test) {
+										if (test.status == 2)
+										{
+											text += '<tr><td>'+test.audit_name+'</td>'
+											text += '<td>'+test.audit_program_name+'</td>'
+											text += '<td>'+test.name+'</td>'
+											text += '<td>'+test.description+'</td>'
+
+											if (test.type == 0)
+											{
+												text += '<td>Prueba de diseño</td>'
+											}
+											else if (test.type == 1)
+											{
+												text += '<td>Prueba de efectividad operativa</td>'
+											}
+											else if (test.type == 2)
+											{
+												text += '<td>Prueba de cumplimiento</td>'
+											}
+											else if (test.type == 3)
+											{
+												text += '<td>Prueba sustantiva</td>'
+											}
+											else
+											{
+												text += '<td>Tipo no definido</td>'
+											}
+											
+											if (test.results == 0)
+											{
+												text += '<td>Inefectiva</td>'
+											}
+											else if (test.results == 1)
+											{
+												text += '<td>Efectiva</td>'
+											}
+											else if (test.results == 2)
+											{
+												text += '<td>En proceso</td>'
+											}
+											
+											text += '<td>'+test.hh+'</td>'
+											text += '<td>'+test.stakeholder+'</td>'
+
+											if (test.related_type == 1)
+											{
+												text += '<td>Riesgo: '+test.related+'</td>'
+											}
+											else if (test.related_type == 2)
+											{
+												text += '<td>Subproceso: '+test.related+'</td>'
+											}
+											else if (test.related_type == 3)
+											{
+												text += '<td>Control: '+test.related+'</td>'
+											}
+											
+										}
+									});
+									
+
+									text += '</table>'
+									text += '<a class="btn btn-success" href="genexcelgraficosdinamicos.2,'+$("#audit_plan_id").val()+'">Exportar</a>'
+
+									swal({   
+										title: title,   
+										text: text,
+										customClass: 'swal-wide',   
+										html: true 
+									});
+								}
+							}
+						}
+					}
+				}
+				else
+				{
+					$('#piechart2').html('');
+					$('#alternativo2').html('<b>No existen pruebas de auditor&iacute;as para el plan '+datos.audit_plan+'</b>');
+				}	
+		});
+	}
+});    
       
 </script>
 @stop
