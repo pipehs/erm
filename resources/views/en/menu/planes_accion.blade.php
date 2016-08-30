@@ -1,1 +1,1 @@
-<li><a href="action_plans" class="{{ activeMenu('mantenplanesaccion') }}"><i class="fa fa-search-minus"></i>Action plans mantainer</a></li>
+<li><a href="action_plans" class="{{ activeMenu('mantenplanesaccion') }}"><i class="fa fa-plus-circle"></i>Action Plans Mantainer</a></li>

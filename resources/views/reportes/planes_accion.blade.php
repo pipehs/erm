@@ -74,14 +74,11 @@
 
 			if ($("#organization").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 			{
-					//reseteamos matriz
-
 					$("#planesaccion").removeAttr("style").show();
-
 					//Seteamos cabecera
 					var table_head = "<thead>";
-					table_head += "<th>Plan de auditoría</th><th>Auditoría</th><th>Debilidad encontrada</th>";
-					table_head += "<th>Plan de acción</th><th>Estado</th><th>Fecha creación</th><th>Fecha final</th>";
+					table_head += "<th>Origen de hallazgo</th><th>Hallazgo</th>";
+					table_head += "<th>Plan de acción</th><th>Responsable</th><th>Correo responsable</th><th>Estado</th><th>Fecha final</th>";
 					table_head += "</thead>";
 
 					//Añadimos la imagen de carga en el contenedor
@@ -105,9 +102,9 @@
 							//seteamos datos en tabla para riesgos a través de un ciclo por todos los controles de procesos
 							$(datos).each( function() {	
 								
-								table_row += '<tr><td>' + this.Plan_de_auditoría + '</td><td>' + this.Auditoría + '</td><td>';
-								table_row += this.Debilidad + '</td><td>' + this.Plan_de_acción + '</td><td>' + this.Estado;
-								table_row += '</td><td>' + this.Fecha_creación +'</td><td>' + this.Fecha_final + '</td></tr>';
+								table_row += '<tr><td>' + this.origin + '</td><td>' + this.issue + '</td><td>';
+								table_row += this.description + '</td><td>' + this.stakeholder + '</td><td>' + this.stakeholder_mail + '</td><td>' + this.status;
+								table_row += '</td><td>' + this.final_date +'</td></tr>';
 							});
 
 							$("#planesaccion").append(table_row);

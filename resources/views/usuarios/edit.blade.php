@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Agregar Usuario')
+@section('title', 'Editar Usuario')
 
 @section('content')
 
@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="crear_usuario">Agregar Usuario</a></li>
+			<li><a href="usuarios.edit">Editar Usuario</a></li>
 		</ol>
 	</div>
 </div>
@@ -18,7 +18,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-ticket"></i>
-					<span>Agregar Usuario</span>
+					<span>Editar Usuario</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -50,21 +50,22 @@
 				</div>
 			@endif
 
-			En esta secci&oacute;n podr&aacute; agregar usuarios con distintos privilegios al sistema.
-			{!!Form::open(['route'=>'usuario.store','method'=>'POST','class'=>'form-horizontal'])!!}
+			En esta secci&oacute;n podr&aacute; editar los datos del usuario.
+			{!!Form::model($user,['route'=>['usuarios.update',$user->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
 
 				@include('usuarios.form')
 					
 				<div class="form-group">
 					<center>
-					{!!Form::submit('Agregar', ['class'=>'btn btn-primary','id'=>'guardar'])!!}
+					{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'guardar'])!!}
 					</center>
 				</div>
 			{!!Form::close()!!}
 				<center>
-				{!! link_to_route('usuarios', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('usuarios', $title = 'Volver', $parameters = NULL,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
+
 			</div>
 		</div>
 	</div>

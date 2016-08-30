@@ -6,7 +6,7 @@
 	@if(Session::has('roles'))
 		<li>
 			<a href="home" class="{{ activeMenu('home') }}">
-				<i class="fa fa-dashboard"></i>
+				<i class="fa fa-home"></i>
 				<span class="hidden-xs">Inicio</span>
 			</a>
 		</li>
@@ -27,7 +27,7 @@
 				@include('menu.auditorias')
 			@elseif ($role == 5) <!-- Auditor -->
 				@include('menu.auditorias')
-			@elseif ($role == 6) <!-- Auditor -->
+			@elseif ($role == 6) <!-- Display -->
 				<!-- Ver como hacer el visitante que solo puede ver -->
 			@endif
 
@@ -36,6 +36,12 @@
 		@include('menu.hallazgos')
 		@include('menu.planes_accion')
 		@include('menu.reportes')
+
+		@foreach (Session::get('roles') as $role)
+			@if ($role == 1) {{-- Administración del sistema --}}
+				@include('menu.admin')
+			@endif
+		@endforeach
 	@endif
 @else
 					<li>&nbsp;</li>

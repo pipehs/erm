@@ -251,6 +251,31 @@ function dropDown7()
 	}
 }
 
+//dropdown de administración del sistema
+function dropDown8()
+{
+	$uri = array('usuarios','controlled_risk_criteria');
+
+	foreach ($uri as $uri)
+	{
+		if(Request::is(Request::segment(1) . '/' . $uri . '/*') || Request::is(Request::segment(1) . '/' . $uri) || Request::is($uri))
+		{
+			return 'display: block;';
+		}
+
+		//verificación para menús compuestos
+		$compuesto = explode(".",Request::segment(1));
+
+		foreach ($compuesto as $compuesto)
+		{
+			if(Request::is($compuesto . '/' . $uri . '/*') || Request::is($compuesto . '.' . $uri) || $compuesto == $uri)
+			{
+				return 'display: block;';
+			}
+		}
+	}
+}
+
 //helper para cargar archivos
 function upload_file($archivo,$dir,$id)
 {

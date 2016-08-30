@@ -13,114 +13,11 @@ use Auth;
 
 class PlanesAccionController extends Controller
 {
-
-    //función que obtiene planes de acción de auditoría
-    public function getActionPlanAudit($org)
+    //función que obtiene todos los planes de acción de una organización
+    public function getActionPlans($id)
     {
-        if ($org != NULL)
-        {
-            //obtenemos datos de plan de auditoría, auditoría, issue y plan de acción
-            $action_plans = DB::table('action_plans')
-                ->join('issues','issues.id','=','action_plans.issue_id')
-                ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
-                ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
-                ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
-                ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
-                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
-                ->join('audits','audits.id','=','audit_audit_plan.audit_id')
-                ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
-                ->where('audit_plans.organization_id','=',$org)
-                ->whereNotNull('issues.audit_test_id')
-                ->select('audit_plans.name as audit_plan_name',
-                         'audits.name as audit_name',
-                         'audit_programs.name as program_name',
-                         'audit_tests.name as test_name',
-                         'issues.name as issue_name',
-                         'issues.recommendations',
-                         'action_plans.id',
-                         'action_plans.description',
-                         'action_plans.final_date',
-                         'action_plans.updated_at',
-                         'action_plans.status',
-                         'action_plans.created_at',
-                         'stakeholders.name as user_name',
-                         'stakeholders.surnames as user_surnames')
-                ->get();;
-        }
-        else
-        {
-            //obtenemos datos de plan de auditoría, auditoría, issue y plan de acción
-            $action_plans = DB::table('action_plans')
-                ->join('issues','issues.id','=','action_plans.issue_id')
-                ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
-                ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
-                ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
-                ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
-                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
-                ->join('audits','audits.id','=','audit_audit_plan.audit_id')
-                ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
-                ->whereNotNull('issues.audit_test_id')
-                ->select('audit_plans.name as audit_plan_name',
-                         'audits.name as audit_name',
-                         'audit_programs.name as program_name',
-                         'audit_tests.name as test_name',
-                         'issues.name as issue_name',
-                         'issues.recommendations',
-                         'action_plans.id',
-                         'action_plans.description',
-                         'action_plans.final_date',
-                         'action_plans.updated_at',
-                         'action_plans.status',
-                         'action_plans.created_at',
-                         'stakeholders.name as user_name',
-                         'stakeholders.surnames as user_surnames')
-                ->get();;
-        }
-
-        return $action_plans;
-    }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
-            //obtenemos lista de organizaciones
-            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
-            if (Session::get('languaje') == 'en')
-            {
-                return view('en.planes_accion.index',['organizations'=>$organizations]);
-            }
-            else
-            {
-                return view('planes_accion.index',['organizations'=>$organizations]);
-            }
-        }
-    }
-
-    public function index2()
-    {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
-            $id = $_GET['organization_id'];
-
-            $org = \Ermtool\Organization::where('id',$id)->value('name');
-            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
-            $action_plans = array();
-            $i = 0;
+        $i = 0;
+        $action_plans = array();
             //primero obtenemos los planes de acción para los hallazgos que son directamente de la organización
             $planes = DB::table('issues')
                         ->join('action_plans','action_plans.issue_id','=','issues.id')
@@ -340,21 +237,147 @@ class PlanesAccionController extends Controller
                         $origin = 'Hallazgo asociado a proceso';
                     }
                 }
-                $action_plans[$i] = [
-                    'origin' => $origin,
-                    'id' => $plan->id,
-                    'issue' => $plan->issue,
-                    'description' => $plan->description,
-                    'stakeholder' => $resp,
-                    'stakeholder_mail' => $resp_mail,
-                    'final_date' => $final_date,
-                    'status' => $status,
-                    'status_number' => $plan->status,
-                ];
+                if (strstr($_SERVER["REQUEST_URI"],'genexcelplan')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
+                {
+                    $action_plans[$i] = [
+                        'Origen del hallazgo' => $origin,
+                        'Hallazgo' => $plan->issue,
+                        'Descripción' => $plan->description,
+                        'Responsable' => $resp,
+                        'Correo responsable' => $resp_mail,
+                        'Estado' => $status,
+                        'Fecha final' => $final_date,
+                    ];
+                }
+                else
+                {
+                    $action_plans[$i] = [
+                        'origin' => $origin,
+                        'id' => $plan->id,
+                        'issue' => $plan->issue,
+                        'description' => $plan->description,
+                        'stakeholder' => $resp,
+                        'stakeholder_mail' => $resp_mail,
+                        'final_date' => $final_date,
+                        'status' => $status,
+                        'status_number' => $plan->status,
+                    ];
+                }
 
                 $i += 1;
                 //
             }
+
+        return $action_plans;
+    }
+
+    //función que obtiene planes de acción de auditoría
+    public function getActionPlanAudit($org)
+    {
+        if ($org != NULL)
+        {
+            //obtenemos datos de plan de auditoría, auditoría, issue y plan de acción
+            $action_plans = DB::table('action_plans')
+                ->join('issues','issues.id','=','action_plans.issue_id')
+                ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
+                ->where('audit_plans.organization_id','=',$org)
+                ->whereNotNull('issues.audit_test_id')
+                ->select('audit_plans.name as audit_plan_name',
+                         'audits.name as audit_name',
+                         'audit_programs.name as program_name',
+                         'audit_tests.name as test_name',
+                         'issues.name as issue_name',
+                         'issues.recommendations',
+                         'action_plans.id',
+                         'action_plans.description',
+                         'action_plans.final_date',
+                         'action_plans.updated_at',
+                         'action_plans.status',
+                         'action_plans.created_at',
+                         'stakeholders.name as user_name',
+                         'stakeholders.surnames as user_surnames')
+                ->get();;
+        }
+        else
+        {
+            //obtenemos datos de plan de auditoría, auditoría, issue y plan de acción
+            $action_plans = DB::table('action_plans')
+                ->join('issues','issues.id','=','action_plans.issue_id')
+                ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                ->join('stakeholders','stakeholders.id','=','action_plans.stakeholder_id')
+                ->whereNotNull('issues.audit_test_id')
+                ->select('audit_plans.name as audit_plan_name',
+                         'audits.name as audit_name',
+                         'audit_programs.name as program_name',
+                         'audit_tests.name as test_name',
+                         'issues.name as issue_name',
+                         'issues.recommendations',
+                         'action_plans.id',
+                         'action_plans.description',
+                         'action_plans.final_date',
+                         'action_plans.updated_at',
+                         'action_plans.status',
+                         'action_plans.created_at',
+                         'stakeholders.name as user_name',
+                         'stakeholders.surnames as user_surnames')
+                ->get();;
+        }
+
+        return $action_plans;
+    }
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            //obtenemos lista de organizaciones
+            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.planes_accion.index',['organizations'=>$organizations]);
+            }
+            else
+            {
+                return view('planes_accion.index',['organizations'=>$organizations]);
+            }
+        }
+    }
+
+    public function index2()
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            $id = $_GET['organization_id'];
+
+            $org = \Ermtool\Organization::where('id',$id)->value('name');
+            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+            
+            //ACTUALIZACIÓN 25-08-2016: Función extraida para que esté disponible en el mantenedor y en el reporte de planes de acción
+            $action_plans = $this->getActionPlans($id);
             //print_r($_GET);
             if (Session::get('languaje') == 'en')
             {
@@ -510,66 +533,16 @@ class PlanesAccionController extends Controller
         return json_encode($results);
     }
 
-
+    //ACTUALIZACIÓN 25-08: Se deben mostrar los planes de acción para todos los tipos de hallazgo del sistema
     public function generarReportePlanes($org)
     {
         $results = array();
         $i = 0;
         
-        $action_plans = $this->getActionPlanAudit($org);
-
-        foreach ($action_plans as $action_plan)
-        {
-            $fecha_creacion = date('d-m-Y',strtotime($action_plan->created_at));
-            $fecha_creacion .= ' a las '.date('H:i:s',strtotime($action_plan->created_at));
-
-            //¡¡¡¡¡¡¡¡¡corregir problema del año 2038!!!!!!!!!!!! //
-            $fecha_final = date('d-m-Y',strtotime($action_plan->final_date));
-            $fecha_final .= ' a las 00:00:00';
-
-            if (Session::get('languaje') == 'en')
-            {
-                if ($action_plan->status == 0)
-                {
-                    $estado = 'Open';
-                }
-                else if ($action_plan->status == 1)
-                {
-                    $estado = 'Closed';
-                }
-                else
-                {
-                    $estado = 'Error obtaining status';
-                }
-            }
-            else
-            {
-                if ($action_plan->status == 0)
-                {
-                    $estado = 'Abierto';
-                }
-                else if ($action_plan->status == 1)
-                {
-                    $estado = 'Cerrado';
-                }
-                else
-                {
-                    $estado = 'Error al obtener estado';
-                }
-            }
-
-            $results[$i] = [
-                        'Plan_de_auditoría' => $action_plan->audit_plan_name,
-                        'Auditoría' => $action_plan->audit_name,
-                        'Debilidad' => $action_plan->issue_name,
-                        'Plan_de_acción' => $action_plan->description,
-                        'Estado' => $estado,
-                        'Fecha_creación' => $fecha_creacion,
-                        'Fecha_final' => $fecha_final,
-            ];
-
-            $i += 1;
-        }
+        //$action_plans = $this->getActionPlanAudit($org);
+            
+        //ACTUALIZACIÓN 25-08-2016: Función extraida para que esté disponible en el mantenedor y en el reporte de planes de acción
+        $results = $this->getActionPlans($org);
 
         if (strstr($_SERVER["REQUEST_URI"],'genexcelplan')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
         {

@@ -32,14 +32,39 @@ Route::get('home',[
 ]
 );
 
+// ----RUTAS PARA GESTIONAR CONTROLLED RISK CRITERIA ---- //
+Route::get('controlled_risk_criteria', [
+	'as' => 'controlled_risk_criteria', 'uses' => 'ControlesController@controlledRiskCriteria'
+	]);
+
+Route::post('criteria.update', [
+    'as' => 'criteria.update', 'uses' => 'ControlesController@updateControlledRiskCriteria'
+]);
 
 // ----RUTA PARA CREAR USUARIO---- //
-Route::get('crear_usuario','LogController@createUser');
+Route::get('usuario.create', [
+	'as' => 'usuario.create', 'uses' => 'LogController@createUser'
+	]);
 
 Route::post('usuario.store', [
 	'as' => 'usuario.store', 'uses' => 'LogController@storeUser'
 	]);
 
+Route::get('usuarios', [
+	'as' => 'usuarios', 'uses' => 'LogController@index'
+]);
+
+Route::get('usuarios.edit.{id}', [
+	'as' => 'usuarios.edit', 'uses' => 'LogController@edit'
+]);
+
+Route::get('usuarios.destroy.{id}', [
+	'as' => 'usuarios.destroy', 'uses' => 'LogController@destroy'
+]);
+
+Route::put('usuarios.update.{id}', [
+    'as' => 'usuarios.update', 'uses' => 'LogController@update'
+]);
 // ----RUTAS PARA GESTIÓN DE DATOS MAESTROS---- //
 
 	//Rutas para CRUD + bloquear Organización//

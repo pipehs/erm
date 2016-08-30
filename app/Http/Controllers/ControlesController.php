@@ -1872,4 +1872,75 @@ class ControlesController extends Controller
             }
         }
     }
+
+    public function controlledRiskCriteria()
+    {
+        if (Auth::guest())
+        {
+            return Redirect::route('/');
+        }
+        else
+        {
+            foreach (Session::get('roles') as $role)
+            {
+                if ($role != 1)
+                {
+                    return Redirect::route('home');
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        $tabla = DB::table('controlled_risk_criteria')->get();
+
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.controlled_risk_criteria.index',['tabla' => $tabla]);
+        }
+        else
+        {
+            return view('controlled_risk_criteria.index',['tabla' => $tabla]);
+        } 
+    }
+
+    public function updateControlledRiskCriteria()
+    {
+        global $i;
+        $i = 1;
+
+        //hacemos actualización de todos los campos
+        while (isset($_POST['eval_in_risk_'.$GLOBALS['i']]))
+        {
+            global $in;
+            global $ctrl;
+            $in = $_POST['eval_in_risk_'.$GLOBALS['i']];
+            $ctrl = $_POST['eval_ctrl_risk_'.$GLOBALS['i']];
+
+            DB::transaction(function() {
+                //actualizamos
+                DB::table('controlled_risk_criteria')
+                    ->where('id','=',$GLOBALS['i'])
+                    ->update([
+                        'eval_in_risk' => $GLOBALS['in'],
+                        'eval_ctrl_risk' => $GLOBALS['ctrl']
+                        ]);
+
+                $GLOBALS['i'] += 1;
+            }); 
+        }
+
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('message','Controlled risk criteria was successfully updated');
+        }
+        else
+        {
+            Session::flash('message','Criterio para riesgo controlado fue actualizado corrrectamente');
+        }
+
+        return Redirect::to('controlled_risk_criteria');  
+    }
 }

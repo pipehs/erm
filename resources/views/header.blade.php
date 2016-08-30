@@ -42,14 +42,11 @@
 					<div class="col-xs-4 col-sm-8 top-panel-right">
 						<p align="right">
 						@if (!Auth::guest())
-							{{ Auth::user()->name }}
-								<a href="logout">Cerrar Sesi&oacute;n</a>
-							@foreach (Session::get('roles') as $role)
-								@if ($role != 6)
-									<a href="crear_usuario">Crear Usuario</a>
-								<?php break; ?>
-								@endif
+							<b>Usuario: </b> {{ Auth::user()->name }} {{ Auth::user()->surnames }}. <b>Roles: </b> 
+							@foreach (Session::get('roles_name') as $role)
+								{{ $role }}.
 							@endforeach
+								<a href="logout">Cerrar Sesi&oacute;n</a>
 						</p>
 						@endif
 					</div>

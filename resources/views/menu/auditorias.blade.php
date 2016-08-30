@@ -1,6 +1,6 @@
 <li class="dropdown">
 					<a href="#" class="dropdown-toggle">
-						<i class="fa fa-check-circle"></i>
+						<i class="fa fa-pencil-square-o"></i>
 						<span class="hidden-xs">Gesti&oacute;n de Auditor&iacute;as</span>
 					</a>
 					<ul class="dropdown-menu" style="{{ dropDown6() }}">
