@@ -461,9 +461,16 @@ Route::post('identificacion.encuestaRespondida', [
 Route::get('encuestas', [
 	'as' => 'encuestas', 'uses' => 'EncuestasController@verEncuestas']);
 
+Route::get('encuestas.destroy.{id}', [
+	'as' => 'encuestas.destroy', 'uses' => 'EncuestasController@destroy']);
+
 //Lista de encuestas
 Route::get('ver_encuestas', [
 	'as' => 'ver_encuestas', 'uses' => 'EncuestasController@showEncuesta']);
+
+//encuesta seleccionada a ver
+Route::get('ver_encuesta.{id}', [
+	'as' => 'ver_encuesta', 'uses' => 'EncuestasController@showEncuesta2']);
 
 //Muestra encuesta y respuestas enviadas por un usuario
 Route::get('encuestas.show.{id}', [
@@ -494,6 +501,9 @@ Route::put('riesgos.update.{id}', [
 Route::get('riesgos.setriesgotipo.{id}', [
 	'as' => 'riesgos.setriesgotipo', 'uses' => 'RiesgosController@setRiesgoTipo'
 ]);
+
+Route::get('riesgos.destroy.{id}', [
+	'as' => 'riesgos.destroy', 'uses' => 'RiesgosController@destroy']);
 
 // ---- FIN RUTAS PARA IDENTIFICACIÓN DE RIESGO ---- //
 

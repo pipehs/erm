@@ -1,5 +1,7 @@
 <?php
+
 namespace Ermtool\Http\Controllers;
+
 use Illuminate\Http\Request;
 use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
@@ -9,7 +11,9 @@ use Redirect;
 use Storage;
 use DateTime;
 use Auth;
+
 //sleep(2);
+
 class ControlesController extends Controller
 {
     /**
@@ -30,10 +34,14 @@ class ControlesController extends Controller
                                     //(si es objetivos, además se almacena organización)
             $i = 0; //contador de controles
             $j = 0; //contador de riesgos y subprocesos u objetivos
+
             $controles = \Ermtool\Control::all();
+
             foreach ($controles as $control) //se recorre cada uno de los controles creados (de existir)
             {
+
                 //obtenemos todos los riesgos asociados al control (sean de subprocesos o de negocio)
+
                 if ($control['type2'] == 0) //el control está asociado a un riesgo de subproceso
                 {
                     $risks_subprocesses = DB::table('control_risk_subprocess')
@@ -43,6 +51,7 @@ class ControlesController extends Controller
                                 ->where('control_risk_subprocess.control_id','=',$control['id'])
                                 ->select('subprocesses.name as sub_name','risks.name as risk_name')
                                 ->get();
+
                     //almacenamos los nombres de los riesgos y subprocesos u objetivos asociados asociados al control
                     foreach ($risks_subprocesses as $risk_subprocess)
                     {
@@ -53,6 +62,7 @@ class ControlesController extends Controller
                         $j += 1;
                     }
                 }
+
                 else if ($control['type2'] == 1) //el control está asociado a un riesgo de negocio
                 {
                     $objectives_risks = DB::table('control_objective_risk')
@@ -63,6 +73,7 @@ class ControlesController extends Controller
                                 ->where('control_objective_risk.control_id','=',$control['id'])
                                 ->select('objectives.name as obj_name','risks.name as risk_name','organizations.name as org_name')
                                 ->get();
+
                     //almacenamos los nombres de los riesgos y subprocessos asociados al control
                     foreach ($objectives_risks as $objective_risk)
                     {
@@ -73,24 +84,30 @@ class ControlesController extends Controller
                         $j += 1;
                     }
                 }
+
                 //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
                 if ($control['created_at'] == NULL OR $control['created_at'] == "0000-00-00" OR $control['created_at'] == "")
                 {
                     $fecha_creacion = NULL;
                 }
+
                 else
                 {
                     $fecha_creacion = date_format($control['created_at'],"d-m-Y");
                 }
+
                 //damos formato a fecha de actualización 
                 if ($control['updated_at'] != NULL)
                 {
                     $fecha_act = date_format($control['updated_at'],"d-m-Y");
                 }
+
                 else
                     $fecha_act = NULL;
+
                 //obtenemos nombre de responsable
                 $stakeholder = \Ermtool\Stakeholder::find($control['stakeholder_id']);
+
                 if ($stakeholder)
                 {
                     $stakeholder2 = $stakeholder['name'].' '.$stakeholder['surnames'];
@@ -112,6 +129,7 @@ class ControlesController extends Controller
                                     'stakeholder'=>$stakeholder2);
                 $i += 1;
             }
+
             if (Session::get('languaje') == 'en')
             {
                 return view('en.controles.index',['controls' => $controls,'risk_subneg' => $risk_subneg]);
@@ -122,6 +140,7 @@ class ControlesController extends Controller
             }
         }
     }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -138,6 +157,7 @@ class ControlesController extends Controller
             $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
             ->orderBy('name')
             ->lists('full_name', 'id');
+
             if (Session::get('languaje') == 'en')
             {
                 return view('en.controles.create',['stakeholders'=>$stakeholders]);
@@ -148,6 +168,7 @@ class ControlesController extends Controller
             }
         }
     }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -167,17 +188,21 @@ class ControlesController extends Controller
                 'name' => 'required|max:255',
                 'description' => 'required',
             ]);
+
             //print_r($_POST);
             //guardamos variable global de evidencia
             global $evidence;
             $evidence = $request->file('evidence_doc');
+
             //creamos una transacción para cumplir con atomicidad
             DB::transaction(function()
             {
+
                     if ($_POST['stakeholder_id'] == NULL)
                         $stakeholder = NULL;
                     else
                         $stakeholder = $_POST['stakeholder_id'];
+
                     if ($_POST['periodicity'] == NULL || $_POST['periodicity'] == "")
                     {
                         $periodicity = NULL;
@@ -194,6 +219,7 @@ class ControlesController extends Controller
                     {
                         $purpose = $_POST['purpose'];
                     }
+
                     //insertamos control y obtenemos ID
                     $control_id = DB::table('controls')->insertGetId([
                             'name'=>$_POST['name'],
@@ -208,6 +234,7 @@ class ControlesController extends Controller
                             'updated_at'=>date('Y-m-d H:i:s'),
                             'expected_cost'=>$_POST['expected_cost']
                             ]);
+
                     //insertamos en control_risk_subprocess o control_objective_risk
                     if ($_POST['subneg'] == 0) //es control de proceso
                     {
@@ -231,11 +258,13 @@ class ControlesController extends Controller
                                     ]);
                         }
                     }
+
                     //guardamos archivo de evidencia (si es que hay)
                     if($GLOBALS['evidence'] != NULL)
                     {
                         upload_file($GLOBALS['evidence'],'controles',$control_id);
                     }
+
                     if (Session::get('languaje') == 'en')
                     {
                         Session::flash('message','Control successfully created');
@@ -245,9 +274,11 @@ class ControlesController extends Controller
                         Session::flash('message','Control agregado correctamente');
                     }
             });
+
             return Redirect::to('/controles');
         }
     }
+
     /**
      * Display the specified resource.
      *
@@ -258,6 +289,7 @@ class ControlesController extends Controller
     {
         //
     }
+
     /**
      * Show the form for editing the specified resource.
      *
@@ -277,6 +309,7 @@ class ControlesController extends Controller
             $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
             ->orderBy('name')
             ->lists('full_name', 'id');
+
             //seleccionamos riesgos de proceso u objetivo que fueron seleccionados previamente (según corresponda)
             if ($control->type2 == 0)
             {
@@ -294,6 +327,7 @@ class ControlesController extends Controller
                             ->select('objective_risk_id as id')
                             ->get();
             }
+
             $i = 0;
             foreach ($risks as $risk)
             {
@@ -315,6 +349,7 @@ class ControlesController extends Controller
             }
         }
     }
+
     /**
      * Update the specified resource in storage.
      *
@@ -337,15 +372,18 @@ class ControlesController extends Controller
             DB::transaction(function() 
             {
                 $control = \Ermtool\Control::find($GLOBALS['id1']);
+
                 if ($_POST['stakeholder_id'] == NULL)
                     $stakeholder = NULL;
                 else
                     $stakeholder = $_POST['stakeholder_id'];
+
                 //guardamos archivo de evidencia (si es que hay)
                 if($GLOBALS['evidence'] != NULL)
                 {
                     upload_file($GLOBALS['evidence'],'controles',$control->id);
                 }
+
                 $control->name = $_POST['name'];
                 $control->description = $_POST['description'];
                 $control->type = $_POST['type'];
@@ -354,7 +392,9 @@ class ControlesController extends Controller
                 $control->purpose = $_POST['purpose'];
                 $control->stakeholder_id = $stakeholder;
                 $control->expected_cost = $_POST['expected_cost'];
+
                 $control->save();
+
                 //guardamos riesgos de proceso o de negocio
                 if (isset($_POST['select_procesos']))
                 {
@@ -362,6 +402,7 @@ class ControlesController extends Controller
                     DB::table('control_risk_subprocess')
                         ->where('control_id','=',$control->id)
                         ->delete();
+
                     //ahora insertamos
                     foreach ($_POST['select_procesos'] as $subproceso)
                     {
@@ -378,6 +419,7 @@ class ControlesController extends Controller
                     DB::table('control_objective_risk')
                         ->where('control_id','=',$control->id)
                         ->delete();
+
                     foreach ($_POST['select_objetivos'] as $objetivo)
                     {
                         DB::table('control_objective_risk')
@@ -387,6 +429,7 @@ class ControlesController extends Controller
                                 ]);
                     }
                 }
+
                 if (Session::get('languaje') == 'en')
                 {
                     Session::flash('message','Control successfully updated');
@@ -396,9 +439,11 @@ class ControlesController extends Controller
                     Session::flash('message','Control actualizado correctamente');
                 }
             });
+
             return Redirect::to('/controles');
         }
     }
+
     /**
      * Remove the specified resource from storage.
      *
@@ -409,6 +454,7 @@ class ControlesController extends Controller
     {
         //
     }
+
     //index para evaluación de controles
     public function indexEvaluacion()
     {
@@ -420,6 +466,7 @@ class ControlesController extends Controller
         {
             $stakeholders = array();
             $controles = \Ermtool\Control::lists('name','id');
+
             //stakeholders posibles responsables plan de acción
             $stakes = DB::table('stakeholders')->select('id','name','surnames')->get();
             $i = 0;
@@ -429,8 +476,10 @@ class ControlesController extends Controller
                     'id' => $stake->id,
                     'name' => $stake->name.' '.$stake->surnames,
                 ];
+
                 $i += 1;
             }
+
             if (Session::get('languaje') == 'en')
             {
                 return view('en.controles.evaluar',['controls'=>$controles,'stakeholders'=>$stakeholders]);
@@ -441,6 +490,7 @@ class ControlesController extends Controller
             }
         }
     }
+
     //guarda evaluación de un control
     public function storeEvaluacion(Request $request)
     {
@@ -463,6 +513,7 @@ class ControlesController extends Controller
             $file_sustantiva = $request->file('file_sustantiva');
             $file_cumplimiento = $request->file('file_cumplimiento');
             //echo "Diseño: ".$file_diseno."Efectividad: ".$file_efectividad."Sustantiva: ".$file_sustantiva."Cumplimiento: ".$file_cumplimiento;
+
             //vemos si se está guardando una nueva evaluación o si se está editando una previa
             //print_r($_POST);
             
@@ -475,6 +526,7 @@ class ControlesController extends Controller
                                 ->where('status','=',1)
                                 ->select('control_evaluation.id')
                                 ->get();
+
                     //sólo si se que hay hará la actualización
                     foreach ($last_eval as $eval)
                     {
@@ -483,6 +535,7 @@ class ControlesController extends Controller
                             ->where('id','=',$eval->id)
                             ->update([ 'status'=>2 ]);
                     }
+
                     //si es que se evaluó diseño
                     if ($_POST['diseno'] != "")
                     {
@@ -503,6 +556,7 @@ class ControlesController extends Controller
                     {
                         $this->storeTests('cumplimiento',3);
                     }
+
                     if (Session::get('languaje') == 'en')
                     {
                         Session::flash('message','Assessment successfully done');
@@ -536,6 +590,7 @@ class ControlesController extends Controller
                     {
                         $this->editTests('cumplimiento',3);
                     }
+
                     if (Session::get('languaje') == 'en')
                     {
                         Session::flash('message','Assessment successfully updated');
@@ -545,10 +600,53 @@ class ControlesController extends Controller
                         Session::flash('message','Evaluación actualizada correctamente');
                     }
                 });
-            } 
+            }
+
+            $res = 0;
+            //si el resultado de cualquier prueba es efectiva, se calcula el riesgo controlado
+            if ($_POST['diseno'] == 1)
+            {
+                $res = calc_controlled_risk($_POST['control_id'],$_POST['diseno']);
+            }
+            else if ($_POST['efectividad'] == 1)
+            {
+                $res = calc_controlled_risk($_POST['control_id'],$_POST['efectividad']);
+            }
+            else if ($_POST['sustantiva'] == 1)
+            {
+                $res = calc_controlled_risk($_POST['control_id'],$_POST['sustantiva']);
+            }
+            else if ($_POST['cumplimiento'] == 1)
+            {
+                $res = calc_controlled_risk($_POST['control_id'],$_POST['cumplimiento']);
+            }
+                if (Session::get('languaje') == 'en')
+                {
+                    if ($res == 0)
+                    {
+                        Session::flash('message','Assessment successfully conducted');
+                    }
+                    else if ($res == 1)
+                    {
+                        Session::flash('message','Error storing the assessment');
+                    }
+                }
+                else
+                {
+                    if ($res == 0)
+                    {
+                        Session::flash('message','Evaluación realizada correctamente');
+                    }
+                    else if ($res == 1)
+                    {
+                        Session::flash('message','Error al realizar la evaluación');
+                    }
+                }
+
             return Redirect::to('/evaluar_controles');
         }
     }
+
     /*
     función identifica si se seleccionarán riesgos/subprocesos o riesgos/objetivos
     al momento de crear un control */
@@ -570,6 +668,7 @@ class ControlesController extends Controller
                                         ->select('risk_subprocess.id as id','risks.name as risk_name',
                                                 'subprocesses.name as subprocess_name')
                                         ->get();
+
                 foreach ($risks_subprocesses as $risk_subprocess)
                 {
                     $datos[$i] = ['id' => $risk_subprocess->id,
@@ -589,6 +688,7 @@ class ControlesController extends Controller
                                                 'objectives.name as objective_name',
                                                 'organizations.name as organization_name')
                                         ->get();
+
                 foreach ($objectives_risks as $objective_risk)
                 {
                     $datos[$i] = ['id' => $objective_risk->id,
@@ -598,21 +698,27 @@ class ControlesController extends Controller
                     $i += 1;
                 }
             }
+
             return json_encode($datos);
         }
     }
+
     //función que retornará documento de evidencia subidos, junto al control que corresponden
     public function docs($id)
     {
         //obtenemos todos los archivos
         $files = Storage::files('controles');
+
         foreach ($files as $file)
         {
             //echo $file."<br>";
+
             //vemos buscamos por id del archivo que se esta buscando
             $file_temp = explode('___',$file);
+
             //sacamos la extensión
             $file_temp2 = explode('.',$file_temp[1]);
+
             if ($file_temp2[0] == $id)
             {
                 //$file = Storage::get($file);
@@ -625,6 +731,7 @@ class ControlesController extends Controller
         
      //   return response()->download('../storage/app/controles/'.$name);
     }
+
     //función para reportes básicos->matriz de control
     public function matrices()
     {
@@ -635,6 +742,7 @@ class ControlesController extends Controller
         else
         {
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
             if (Session::get('languaje') == 'en')
             {
                 return view('en.reportes.matrices',['organizations'=>$organizations]);
@@ -645,6 +753,7 @@ class ControlesController extends Controller
             }
         }
     }
+
     /***********
     * función generadora de matriz de control
     ***********/
@@ -658,16 +767,20 @@ class ControlesController extends Controller
         {
             $i = 0; //contador de controles/subprocesos o controles/objetivos
             $datos = array();
+
             
             if (!strstr($_SERVER["REQUEST_URI"],'genexcel'))
             {
                 $value = $_GET['kind'];
                 $org = $_GET['organization_id'];
             }
+
             //obtenemos controles
             $controls = DB::table('controls')                                    
                                     ->select('controls.*')
                                     ->get();
+
+
             foreach ($controls as $control)
             {
             
@@ -695,6 +808,7 @@ class ControlesController extends Controller
                                 $type = "Automatic";
                         }
                     }
+
                     if ($control->periodicity === NULL)
                     {
                         $periodicity = "Not defined";
@@ -724,6 +838,7 @@ class ControlesController extends Controller
                                 break;
                         }
                     }
+
                     if ($control->purpose === NULL)
                     {
                         $purpose = "Not defined";
@@ -741,6 +856,7 @@ class ControlesController extends Controller
                                 $purpose = "Corrective";
                         }
                     }
+
                     if ($control->expected_cost === NULL)
                     {
                         $expected_cost = "Not defined";
@@ -749,6 +865,7 @@ class ControlesController extends Controller
                     {
                         $expected_cost = $control->expected_cost;
                     }
+
                     if ($control->evidence === NULL || $control->evidence == "")
                     {
                         $evidence = "Without evidence";
@@ -758,8 +875,10 @@ class ControlesController extends Controller
                         $evidence = $control->evidence;
                     }
                     
+
                     //Seteamos responsable del control
                     $stakeholder = \Ermtool\Stakeholder::find($control->stakeholder_id);
+
                     if ($stakeholder)
                     {
                         $stakeholder2 = $stakeholder['name'].' '.$stakeholder['surnames'];
@@ -790,6 +909,7 @@ class ControlesController extends Controller
                                 $type = "Autom&aacute;tico";
                         }
                     }
+
                     if ($control->periodicity === NULL)
                     {
                         $periodicity = "No definido";
@@ -819,6 +939,7 @@ class ControlesController extends Controller
                                 break;
                         }
                     }
+
                     if ($control->purpose === NULL)
                     {
                         $purpose = "No definido";
@@ -836,6 +957,7 @@ class ControlesController extends Controller
                                 $purpose = "Correctivo";
                         }
                     }
+
                     if ($control->expected_cost === NULL)
                     {
                         $expected_cost = "No definido";
@@ -844,6 +966,7 @@ class ControlesController extends Controller
                     {
                         $expected_cost = $control->expected_cost;
                     }
+
                     if ($control->evidence === NULL || $control->evidence == "")
                     {
                         $evidence = "Sin evidencia";
@@ -853,8 +976,10 @@ class ControlesController extends Controller
                         $evidence = $control->evidence;
                     }
                     
+
                     //Seteamos responsable del control
                     $stakeholder = \Ermtool\Stakeholder::find($control->stakeholder_id);
+
                     if ($stakeholder)
                     {
                         $stakeholder2 = $stakeholder['name'].' '.$stakeholder['surnames'];
@@ -883,6 +1008,7 @@ class ControlesController extends Controller
                                                 ->select('subprocesses.name as subprocess_name',
                                                     'risks.name as risk_name')
                                                 ->get();
+
                             if ($risk_subprocess != NULL) //si es NULL, significa que el control que se está recorriendo es de negocio
                             {
                                 $last = end($risk_subprocess);
@@ -946,6 +1072,7 @@ class ControlesController extends Controller
                                                 ->select('objectives.name as objective_name',
                                                     'risks.name as risk_name')
                                                 ->get();
+
                             if ($objective_risk != NULL) //si es NULL, significa que el control que se está recorriendo es de proceso
                             {
                                 $last = end($objective_risk);
@@ -992,11 +1119,13 @@ class ControlesController extends Controller
                                                 'Evidencia' => $evidence,
                                                 'Riesgo_Objetivo' => $risk_obj,];
                                 }
+
                                 $i += 1;
                             }
                         }
             }        
             
+
             if (strstr($_SERVER["REQUEST_URI"],'genexcel')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
             {
                 return $datos;
@@ -1004,6 +1133,7 @@ class ControlesController extends Controller
             else
             {
                 $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
                 if (Session::get('languaje') == 'en')
                 { 
                     return view('en.reportes.matrices',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org]);
@@ -1015,10 +1145,12 @@ class ControlesController extends Controller
             }
         }
     }
+
     //obtiene los controles de una organización
     public function getControls($org)
     {
         $controls = array();
+
         //controles de negocio
         $controles = DB::table('controls')
                     ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
@@ -1028,15 +1160,19 @@ class ControlesController extends Controller
                     ->select('controls.id','controls.name')
                     ->distinct('controls.id')
                     ->get();
+
         $i = 0;
+
         foreach ($controles as $control)
         {
             $controls[$i] = [
                 'id' => $control->id,
                 'name' => $control->name
             ];
+
             $i += 1;
         }
+
         //controles de proceso
         $controles = DB::table('controls')
                     ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
@@ -1047,25 +1183,31 @@ class ControlesController extends Controller
                     ->select('controls.id','controls.name')
                     ->distinct('controls.id')
                     ->get();
+
         foreach ($controles as $control)
         {
             $controls[$i] = [
                 'id' => $control->id,
                 'name' => $control->name
             ];
+
             $i += 1;
         }
+
         return json_encode($controls);
     }
+
     //obtiene evaluación de control de id = $id
     public function getEvaluacion($id)
     {
         $evaluation = array();
         $max_update = NULL;
+
         //primero obtenemos fecha máxima de actualización de evaluaciones para el control
         $max_update = DB::table('control_evaluation')
                     ->where('control_id','=',$id)
                     ->max('updated_at');
+
         if ($max_update != NULL)
         {
             //ahora obtenemos los datos de la evaluación de fecha máxima
@@ -1075,10 +1217,12 @@ class ControlesController extends Controller
                         ->where('status','=',1)
                         ->select('*')
                         ->get();
+
             $i = 0;
             foreach ($evals as $eval)
             {
                 $evidence = getEvidences(3,$eval->id);
+
                 $evaluation[$i] = [
                         'id' => $eval->id,
                         'kind' => $eval->kind,
@@ -1086,8 +1230,10 @@ class ControlesController extends Controller
                         'evidence' => $evidence, 
                     //    'comments' => $eval->comments,
                     ];
+
                 $i += 1;
             }
+
             return json_encode($evaluation);
         }
         else //retornamos NULL (max update será null si no hay evaluaciones)
@@ -1095,6 +1241,7 @@ class ControlesController extends Controller
             return json_encode($max_update);
         }
     }
+
     //función obtiene datos de evaluación a través de id de la eval
     public function getEvaluacion2($id)
     {
@@ -1105,6 +1252,7 @@ class ControlesController extends Controller
                         ->where('id','=',$id)
                         ->select('id','comments')
                         ->first();
+
         if ($eval != NULL)
         {
             if ($id != NULL)
@@ -1115,6 +1263,7 @@ class ControlesController extends Controller
             {
                 $evidence = NULL;
             }
+
             $evaluation = [
                 'id' => $eval->id,
                 'comments' => $eval->comments,
@@ -1123,15 +1272,18 @@ class ControlesController extends Controller
         }
             return json_encode($evaluation);
     }
+
     //función obtiene issue (si es que hay) a través de id de la eval
     public function getIssue($eval_id)
     {
         $issue = NULL;
+
         $eval = DB::table('control_evaluation')
                         ->where('id','=',$eval_id)
                         ->where('status','=',1)
                         ->select('issue_id')
                         ->first();
+
         $evidence = getEvidences(3,$eval_id);
         if($eval) //si es que hay evaluación => Puede ser que se esté agregando una nueva   
         {
@@ -1141,14 +1293,18 @@ class ControlesController extends Controller
                 'evidence' => $evidence,
             ];    
         }   
+
         return json_encode($issue);
     }
+
     //obtiene descripción del control (al evaluar)
     public function getDescription($control_id)
     {
         $description = \Ermtool\Control::where('id',$control_id)->value('description');
+
         return json_encode($description);
     }
+
      //guarda pruebas de diseño, sustantivas, efectividad y cumplimiento (y otros tipos si es que hubieran)
     public function storeTests($test,$kind)
     {
@@ -1187,6 +1343,7 @@ class ControlesController extends Controller
                                     'created_at' => $GLOBALS['date'],
                                     'updated_at' => $GLOBALS['date'],
                                 ]);
+
                          //vemos si existe responsable de diseño
                         if (isset($_POST['responsable_plan_'.$test]))
                         {
@@ -1212,6 +1369,7 @@ class ControlesController extends Controller
             {
                 $issue_id = NULL;
             }
+
                         
             //si es inefectiva issue_id tendrá valor, si no será NULL
             $id_eval = DB::table('control_evaluation')
@@ -1231,10 +1389,12 @@ class ControlesController extends Controller
             {
                 upload_file($GLOBALS['file_'.$test],'eval_controles',$id_eval);    
             }
+
             //si es que la prueba es de efectividad operativa, actualizamos riesgo controlado
             if ($kind == 1)
             {
                 $res = calc_controlled_risk($_POST['control_id'],$_POST[$test]);
+
                 if (Session::get('languaje') == 'en')
                 {
                     if ($res == 0)
@@ -1260,6 +1420,7 @@ class ControlesController extends Controller
             }
         }       
     }
+
      //guarda nueva versión (o primera si es que no existia) de pruebas de diseño, sustantivas, efectividad y cumplimiento (y otros tipos si es que hubieran)
     public function editTests($test,$kind)
     {
@@ -1276,6 +1437,7 @@ class ControlesController extends Controller
                             ->where('kind','=',$kind)
                             ->select('id','results','issue_id')
                             ->first();
+
             if (isset($_POST['comentarios_'.$test]))
             {
                 $comments = $_POST['comentarios_'.$test];
@@ -1322,12 +1484,14 @@ class ControlesController extends Controller
                             'updated_at' => $GLOBALS['date'],
                         ]);
                 }
+
                 $action_plan = NULL;
                 //ahora vemos si existe un plan de acción para el issue 
                 $action_plan = DB::table('action_plans')
                             ->where('issue_id','=',$issue_id)
                             ->select('id')
                             ->first();
+
                 if ($action_plan == NULL) //agregamos nuevo plan de acción
                 {
                     //vemos si existe responsable de diseño
@@ -1379,6 +1543,7 @@ class ControlesController extends Controller
             {
                 $issue_id = NULL;
             }
+
             //vemos ahora si la evaluación existia anteriormente o es nueva (se pueden haber creado una nueva prueba para una evaluación de un control)
             $id_eval_prev = NULL;
             $id_eval_prev = DB::table('control_evaluation')
@@ -1387,6 +1552,7 @@ class ControlesController extends Controller
                         ->where('status','=',1)
                         ->select('id')
                         ->first();
+
             if ($id_eval_prev == NULL)
             {
                 //si es inefectiva issue_id tendrá valor, si no será NULL
@@ -1427,7 +1593,9 @@ class ControlesController extends Controller
             {
                 upload_file($GLOBALS['file_'.$test],'eval_controles',$id_eval);    
             }
+
             //si es que la prueba es de efectividad operativa, actualizamos riesgo controlado
+            /* ACTUALIZACIÓN 30-08: El cálculo de riesgo controlado se hará cada vez que se hace una evaluación, independiente de su resultado o del tipo de ésta
             if ($kind == 1)
             {
                 $res = calc_controlled_risk($_POST['control_id'],$_POST[$test]);
@@ -1453,9 +1621,10 @@ class ControlesController extends Controller
                         echo "Error al actualizar valor de riesgo controlado";
                     }
                 }
-            }
+            } */
         }         
     }
+
     public function indexGraficos($value)
     {
         if (Auth::guest())
@@ -1477,16 +1646,19 @@ class ControlesController extends Controller
                             //->where('control_evaluation.status','=',2)
                             ->distinct()
                             ->get(['control_id as id']);
+
             $i = 0;
             foreach ($controles as $control)
             {
                 $controls_temp[$i] = $control->id;
                 $i += 1;
+
                 //para cada uno vemos si son efectivos o inefectivos: Si al menos una de las pruebas es inefectiva, el control es inefectivo
                 $res = DB::table('control_evaluation')
                             ->where('control_id','=',$control->id)
                             ->where('results','=',2)
                             ->first();
+
                 if ($res)
                 {
                     array_push($id_inefectivos,$control->id);
@@ -1498,6 +1670,7 @@ class ControlesController extends Controller
                     $efectivos += 1;
                 }
             }
+
             //ahora en audit_tests y que no hayan sido encontrados en control_evaluation
             $controles = DB::table('audit_tests')
                             ->where('audit_tests.status','=',2)
@@ -1505,10 +1678,12 @@ class ControlesController extends Controller
                             ->whereNotIn('audit_tests.control_id',$controls_temp)
                             ->distinct()
                             ->get(['control_id as id','results']);
+
             foreach ($controles as $control)
             {
                 $controls_temp[$i] = $control->id;
                 $i += 1;
+
                 if ($control->results == 0)
                 {
                     $inefectivos += 1;
@@ -1520,16 +1695,20 @@ class ControlesController extends Controller
                     array_push($id_efectivos,$control->id);
                 }
             }
+
             //ahora obtenemos los datos de los controles seleccionados
             $i = 0;
             foreach ($controls_temp as $id)
             {
                 $control = \Ermtool\Control::find($id);
+
                 //obtenemos resultado del control
                 //fecha de actualización del control
                 $updated_at = new DateTime($control->updated_at);
                 $updated_at = date_format($updated_at, 'd-m-Y');
+
                 $description = preg_replace("[\n|\r|\n\r]", ' ', $control->description); 
+
                 foreach ($id_efectivos as $id_ef)
                 {
                     if ($id_ef == $control->id)
@@ -1541,9 +1720,11 @@ class ControlesController extends Controller
                             'updated_at' => $updated_at,
                             'results' => 2
                         ];
+
                         $i += 1;
                     }
                 }
+
                 foreach ($id_inefectivos as $id_inef)
                 {
                     if ($id_inef == $control->id)
@@ -1555,6 +1736,7 @@ class ControlesController extends Controller
                             'updated_at' => $updated_at,
                             'results' => 1
                         ];
+
                         $i += 1;
                     }
                 }
@@ -1562,11 +1744,13 @@ class ControlesController extends Controller
             }
             //guardamos cantidad de ejecutados
             $cont_ejec = $i;
+
             //ahora obtenemos el resto de controles (para obtener los no ejecutados)
             $controles = DB::table('controls')
                             ->whereNotIn('controls.id',$controls_temp)
                             ->select('id','name','description','updated_at')
                             ->get();
+
             //guardamos en array
             $i = 0;
             foreach ($controles as $control)
@@ -1578,10 +1762,14 @@ class ControlesController extends Controller
                             'description' => $description,
                             'updated_at' => $updated_at,
                         ];
+
                 $i += 1;
             }
+
             //guardamos cantidad de no ejecutados
             $cont_no_ejec = $i;
+
+
             //return json_encode($controls);
             //echo $cont_ejec.' y '.$cont_no_ejec;
             //echo $efectivos. ' y '.$inefectivos;
@@ -1611,10 +1799,13 @@ class ControlesController extends Controller
                                 'Actualizado' => $control['updated_at'],
                             ];
                         }
+
                         $i += 1;
                     }
+
                     return $res;
                 }
+
                 else if ($value == 2) //reporte excel de controles no ejecutados
                 {
                     $i = 0;
@@ -1636,10 +1827,13 @@ class ControlesController extends Controller
                                 'Actualizado' => $control['updated_at'],
                             ];
                         }
+
                         $i += 1;
                     }
+
                     return $res;
                 }
+
                 else if ($value == 3) //reporte excel de controles efectivos
                 {
                     $i = 0;
@@ -1664,10 +1858,13 @@ class ControlesController extends Controller
                                 ];
                             }    
                         }
+
                         $i += 1;
                     }
+
                     return $res;
                 }
+
                 else if ($value == 4) //reporte excel de controles no efectivos
                 {
                     $i = 0;
@@ -1692,8 +1889,10 @@ class ControlesController extends Controller
                                 ];
                             }    
                         }
+
                         $i += 1;
                     }
+
                     return $res;
                 }
                 
@@ -1715,6 +1914,7 @@ class ControlesController extends Controller
             }
         }
     }
+
     public function controlledRiskCriteria()
     {
         if (Auth::guest())
@@ -1735,7 +1935,9 @@ class ControlesController extends Controller
                 }
             }
         }
+
         $tabla = DB::table('controlled_risk_criteria')->get();
+
         if (Session::get('languaje') == 'en')
         {
             return view('en.controlled_risk_criteria.index',['tabla' => $tabla]);
@@ -1745,10 +1947,12 @@ class ControlesController extends Controller
             return view('controlled_risk_criteria.index',['tabla' => $tabla]);
         } 
     }
+
     public function updateControlledRiskCriteria()
     {
         global $i;
         $i = 1;
+
         //hacemos actualización de todos los campos
         while (isset($_POST['eval_in_risk_'.$GLOBALS['i']]))
         {
@@ -1756,6 +1960,7 @@ class ControlesController extends Controller
             global $ctrl;
             $in = $_POST['eval_in_risk_'.$GLOBALS['i']];
             $ctrl = $_POST['eval_ctrl_risk_'.$GLOBALS['i']];
+
             DB::transaction(function() {
                 //actualizamos
                 DB::table('controlled_risk_criteria')
@@ -1764,9 +1969,11 @@ class ControlesController extends Controller
                         'eval_in_risk' => $GLOBALS['in'],
                         'eval_ctrl_risk' => $GLOBALS['ctrl']
                         ]);
+
                 $GLOBALS['i'] += 1;
             }); 
         }
+
         if (Session::get('languaje') == 'en')
         {
             Session::flash('message','Controlled risk criteria was successfully updated');
@@ -1775,6 +1982,7 @@ class ControlesController extends Controller
         {
             Session::flash('message','Criterio para riesgo controlado fue actualizado corrrectamente');
         }
+
         return Redirect::to('controlled_risk_criteria');  
     }
 }

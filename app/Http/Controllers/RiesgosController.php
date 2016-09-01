@@ -1189,7 +1189,37 @@ class RiesgosController extends Controller
      */
     public function destroy($id)
     {
-        //
+        global $id1;
+        $id1 = $id;
+        global $res;
+        $res = 1;
+
+        DB::transaction(function() {
+            //primero vemos si contiene algún objetivo asociado
+            $rev = DB::table('objective_risk')
+                ->where('risk_id','=',$id)
+                ->select('id')
+                ->get();
+
+            if (empty($rev))
+            {
+                //ahora vemos si es que tiene risk subprocess
+                $rev = DB::table('risk_subprocess')
+                    ->where('risk_id','=')
+                    ->select('id')
+                    ->get();
+
+                if (empty($rev))
+                {
+                    //$rev = DB::table('action_plans')
+                    //    ->where('')
+                    //Esta consulta es más brigida, ver mañana
+                    //Hay que ver subprocesos o planes de auditoría que tengan hallazgos en los que pueda estar el riesgo (quizas sea mejor solo ver issue ya que si tiene issue automáticamente se descarta)
+                }
+            }
+
+        });
+        
     }
 
     //función para obtener riesgos de una organización

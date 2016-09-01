@@ -48,14 +48,12 @@
     <p><b> Nombre Evaluaci&oacute;n:</b> {{ $nombre }}.</p>
            <p><b> Descripci&oacute;n:</b> {{ $descripcion }}.</p>
             <center>
-            
-               <div style="width: 3%; float:left; padding-top: 10%;">
-                  <div style="width: 1px; word-wrap: break-word; text-align: center">Impacto</div>
-              </div>
-              <div class="col-sm-5">
-              <table style="text-align: center; font-weight: bold; float: left;">
-              <tr>
-                <td width="15%" bgcolor="#CCCCCC">
+      <div class="col-sm-5">
+            <table style="text-align: center; font-weight: bold; float: left;">
+            <tr><td bgcolor="#000000" style="padding:5px;">
+              <div  style="width: 12px; background-color:#000000; word-wrap: break-word; text-align: center; color:white;">Impacto
+                    </div></td>
+                <td  bgcolor="#CCCCCC">
                   <table height="395px" width="100%" border="1">
                     <tr><td>5<br>Cr&iacute;tico</td></tr>
                     <tr><td>4<br>Alto</td></tr>
@@ -64,7 +62,7 @@
                     <tr><td>1<br>Menor</td></tr>
                   </table>
                 </td>
-                <td width="85%">
+                <td >
                   <table class="heatmap1" border="1">
 
                   <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
@@ -77,26 +75,26 @@
                     </tr>
                     
                   @endfor
-
-                </table>
+                  </table>
                 </td>
               </tr>
               <tr>
-              <td width="15%"></td>
-              <td width="85%" bgcolor="#CCCCCC">
-                  <table height="50px" width="100%" border="1">
-                      <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
-                      <td width="20%" style="vertical-align:top;">2<br>No probable</td>
-                      <td width="20%" style="vertical-align:top;">3<br>Probable</td>
-                      <td width="20%" style="vertical-align:top;">4<br>Altamente probable</td>
-                      <td width="20%" style="vertical-align:top;">5<br>Esperado</td>
-                  </table>
-              </td>
+                    <td ></td>
+                    <td ></td>
+                    <td  bgcolor="#CCCCCC">
+                        <table height="50px" width="100%" border="1">
+                            <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
+                            <td width="20%" style="vertical-align:top;">2<br>No probable</td>
+                            <td width="20%" style="vertical-align:top;">3<br>Probable</td>
+                            <td width="20%" style="vertical-align:top;">4<br>Altamente probable</td>
+                            <td width="20%" style="vertical-align:top;">5<br>Esperado</td>
+                        </table>
+                    </td>
               </tr>
                 <tr>
-                <td width="15%">
-                    </td>
-                    <td width="85%" bgcolor="#000000" style="letter-spacing:5px; text-align: center; color:white;">Probabilidad
+                    <td ></td>
+                    <td ></td>
+                    <td bgcolor="#000000" style="letter-spacing:5px; text-align: center; color:white;">Probabilidad
                     </td>
                 </tr>
               </table>

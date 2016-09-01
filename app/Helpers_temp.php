@@ -425,15 +425,19 @@ function calc_controlled_risk($control_id,$efectividad)
 {
 	global $id;
 	$id = $control_id;
+
 	global $eval;
 	$eval = $efectividad;
+
 	DB::transaction(function() {
+
 		 //primero que todo guardamos evaluación y obtenemos id de la misma
 		$evaluation = \Ermtool\Evaluation::create([
 					'name'=>'Riesgos controlados',
 					'type'=>2,
 					'consolidation'=>1,
 					]);
+
 		//ahora obtenemos todos los riesgos a los que este control está afectando
 		//primero probaremos si el control es de proceso
 		$risks = DB::table('control_risk_subprocess')
@@ -443,6 +447,7 @@ function calc_controlled_risk($control_id,$efectividad)
 					->select('risk_subprocess.id')
 					->get();
 		$type = 0; //identifica que es un riesgo de proceso
+
 		
 		if (empty($risks)) //entonces es un control de riesgo de negocio
 		{
@@ -453,12 +458,14 @@ function calc_controlled_risk($control_id,$efectividad)
 						->select('objective_risk.id')
 						->get();
 			$type = 1; //identifica que es un riesgo de negocio
+
 			
 			if (empty($risks)) //retornamos error ya que hubo un problema para encontrar los riesgos asociados al control
 			{
 				return 1;
 			}
 		}
+
 		foreach ($risks as $risk)
 		{
 			if ($type == 0) //en evaluation risk se se usará risk_subprocess_id
@@ -471,6 +478,7 @@ function calc_controlled_risk($control_id,$efectividad)
 								->where('risk_subprocess_id','=',$risk->id)
 								->max('evaluations.updated_at');
 			}
+
 			else if ($type == 1)
 			{
 				$max_fecha = DB::table('evaluation_risk')
@@ -479,6 +487,7 @@ function calc_controlled_risk($control_id,$efectividad)
 								->where('objective_risk_id','=',$risk->id)
 								->max('evaluations.updated_at');
 			}
+
 				
 			if ($max_fecha) //si es que no hay fecha, significa que no hay evaluación inherente por lo que la función termina
 			{
@@ -501,8 +510,10 @@ function calc_controlled_risk($control_id,$efectividad)
 									->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
 									->first();
 					}
+
 					if (!empty($evals)) //segunda verificación de que la evaluación inherente exista, puede haberse guardado mal (como NULL en valores de avg_probability y/o avg_impact)
 					{
+
 						//debemos buscar en la tabla controlled_risk_criteria el valor del riesgo controlado según el resultado de efectividad
 						//OBS: Por ahora, el impacto se mantendrá igual en caso de que la evaluación sea efectiva o negativa, por lo que solo veremos probabilidad
 						$val = DB::table('controlled_risk_criteria')
@@ -511,6 +522,7 @@ function calc_controlled_risk($control_id,$efectividad)
 									->where('dim_eval','=',1)
 									->select('eval_ctrl_risk')
 									->first();
+
 						if ($type == 0) //risk_subprocess_id
 						{
 							//agregamos a evaluation_risk
@@ -537,12 +549,14 @@ function calc_controlled_risk($control_id,$efectividad)
 					{
 						return 1;
 					}
+
 			}
 			else
 			{
 				return 1;
 			}
 		}
+
 		return 0; //fin correcto	
 	});
 }

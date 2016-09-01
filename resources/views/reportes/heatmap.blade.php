@@ -125,11 +125,11 @@
         <div class="row">
            <p><b> Nombre:</b> {{ $nombre }}.</p>
            <p><b> Descripci&oacute;n:</b> {{ $descripcion }}.</p>
-            <center>
+           
                <!-- Heatmap riesgo inherente -->
               <div class="row">
                 <div class="col-sm-6">
-                  <h4><b>Evaluación de Riesgos Inherentes</b></h4>
+                  <h4><b>&nbsp;&nbsp;Evaluación de Riesgos Inherentes</b></h4>
                 </div>
               @if ($kind2 == 1)
                 <div class="col-sm-6">
@@ -137,114 +137,113 @@
                 </div>
               @endif
               </div>
-
-              <div style="width: 3%; float:left; padding-top: 10%;">
-                  <div style="width: 1px; word-wrap: break-word; text-align: center">Impacto</div>
-              </div>
-              <div style="width: 47%; float: left;">
-                  <table style="text-align: center; font-weight: bold; float: left;">
-                      <tr>
-                        <td width="15%" bgcolor="#CCCCCC">
-                          <table height="395px" width="100%" border="1">
-                            <tr><td>5<br>Cr&iacute;tico</td></tr>
-                            <tr><td>4<br>Alto</td></tr>
-                            <tr><td>3<br>Moderado</td></tr>
-                            <tr><td>2<br>Bajo</td></tr>
-                            <tr><td>1<br>Menor</td></tr>
-                          </table>
-                        </td>
-                        <td width="85%">
-                          <table class="heatmap1" border="1">
-
-                          <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
-                          @for ($i=0; $i<5; $i++)
-
-                            <tr style="height: 20%; ">
-                            @for ($j=1; $j<=5; $j++)
-                                <td id="{{(5-$i)}}_{{($j)}}" style="width: 20%; text-align: center;"></td>
-                            @endfor
-                            </tr>
-                            
-                          @endfor
-
-                        </table>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td width="15%"></td>
-                        <td width="85%" bgcolor="#CCCCCC">
-                            <table height="50px" width="100%" border="1">
-                                <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
-                                <td width="20%" style="vertical-align:top;">2<br>No probable</td>
-                                <td width="20%" style="vertical-align:top;">3<br>Probable</td>
-                                <td width="20%" style="vertical-align:top;">4<br>Altamente probable</td>
-                                <td width="20%" style="vertical-align:top;">5<br>Esperado</td>
-                            </table>
-                        </td>
-                      </tr>
-                      <td width="15%">
-                    </td>
-                    <td width="85%" bgcolor="#000000" style="letter-spacing:5px; text-align: center; color:white;">Probabilidad
-                    </td>
-                    </tr>
+               <center>
+            <div class="col-sm-5">
+            <table style="text-align: center; font-weight: bold; float: left;">
+            <tr><td bgcolor="#000000" style="padding:5px;">
+              <div  style="width: 12px; background-color:#000000; word-wrap: break-word; text-align: center; color:white;">Impacto
+                    </div></td>
+                <td  bgcolor="#CCCCCC">
+                  <table height="395px" width="100%" border="1">
+                    <tr><td>5<br>Cr&iacute;tico</td></tr>
+                    <tr><td>4<br>Alto</td></tr>
+                    <tr><td>3<br>Moderado</td></tr>
+                    <tr><td>2<br>Bajo</td></tr>
+                    <tr><td>1<br>Menor</td></tr>
                   </table>
+                </td>
+                <td >
+                  <table class="heatmap1" border="1">
+
+                  <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
+                  @for ($i=0; $i<5; $i++)
+
+                    <tr style="height: 20%; ">
+                    @for ($j=1; $j<=5; $j++)
+                        <td id="{{(5-$i)}}_{{($j)}}" style="width: 20%; text-align: center;"></td>
+                    @endfor
+                    </tr>
+                    
+                  @endfor
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                    <td ></td>
+                    <td ></td>
+                    <td  bgcolor="#CCCCCC">
+                        <table height="50px" width="100%" border="1">
+                            <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
+                            <td width="20%" style="vertical-align:top;">2<br>No probable</td>
+                            <td width="20%" style="vertical-align:top;">3<br>Probable</td>
+                            <td width="20%" style="vertical-align:top;">4<br>Altamente probable</td>
+                            <td width="20%" style="vertical-align:top;">5<br>Esperado</td>
+                        </table>
+                    </td>
+              </tr>
+                <tr>
+                    <td ></td>
+                    <td ></td>
+                    <td bgcolor="#000000" style="letter-spacing:5px; text-align: center; color:white;">Probabilidad
+                    </td>
+                </tr>
+              </table>
 
               </div>
 
     @if ($kind2)
                <!-- Heatmap riesgo controlado -->
 
-              <div style="width: 3%; float: left; padding-top: 10%;">
-                  <div style="width: 1px; word-wrap: break-word; text-align: center;">Impacto</div>
-              </div>
-              <div style="width: 47%; float: left;">
-                  <table style="text-align: center; font-weight: bold; float:left;">
-                  <tr>
-                    <td width="15%" bgcolor="#CCCCCC">
-                      <table height="395px" width="100%" border="1">
-                        <tr><td>5<br>Cr&iacute;tico</td></tr>
-                        <tr><td>4<br>Alto</td></tr>
-                        <tr><td>3<br>Moderado</td></tr>
-                        <tr><td>2<br>Bajo</td></tr>
-                        <tr><td>1<br>Menor</td></tr>
-                      </table>
-                    </td>
-                    <td width="85%">
-                      <table class="heatmap1" border="1">
-
-                      <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
-                      @for ($i=0; $i<5; $i++)
-
-                        <tr style="height: 20%; ">
-                        @for ($j=1; $j<=5; $j++)
-                            <td id="{{(5-$i)}}_{{($j)}}_ctrl" style="width: 20%; text-align: center;"></td>
-                        @endfor
-                        </tr>
-                        
-                      @endfor
-
-                    </table>
-                    </td>
-                  </tr>
-                  <tr>
-                  <td width="15%"></td>
-                  <td width="85%" bgcolor="#CCCCCC">
-                      <table height="50px" width="100%" border="1">
-                          <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
-                          <td width="20%" style="vertical-align:top;">2<br>No probable</td>
-                          <td width="20%" style="vertical-align:top;">3<br>Probable</td>
-                          <td width="20%" style="vertical-align:top;">4<br>Altamente probable</td>
-                          <td width="20%" style="vertical-align:top;">5<br>Esperado</td>
-                      </table>
-                  </td>
-                  </tr>
-                  <tr>
-                    <td width="15%">
-                    </td>
-                    <td width="85%" bgcolor="#000000" style="letter-spacing:5px; text-align: center; color:white;">Probabilidad
-                    </td>
-                  </tr>
+              <div class="col-sm-5">
+            <table style="text-align: center; font-weight: bold; float: left;">
+            <tr><td bgcolor="#000000" style="padding:5px;">
+              <div  style="width: 12px; background-color:#000000; word-wrap: break-word; text-align: center; color:white;">Impacto
+                    </div></td>
+                <td  bgcolor="#CCCCCC">
+                  <table height="395px" width="100%" border="1">
+                    <tr><td>5<br>Cr&iacute;tico</td></tr>
+                    <tr><td>4<br>Alto</td></tr>
+                    <tr><td>3<br>Moderado</td></tr>
+                    <tr><td>2<br>Bajo</td></tr>
+                    <tr><td>1<br>Menor</td></tr>
                   </table>
+                </td>
+                <td >
+                  <table class="heatmap1" border="1">
+
+                  <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
+                  @for ($i=0; $i<5; $i++)
+
+                    <tr style="height: 20%; ">
+                    @for ($j=1; $j<=5; $j++)
+                        <td id="{{(5-$i)}}_{{($j)}}_ctrl" style="width: 20%; text-align: center;"></td>
+                    @endfor
+                    </tr>
+                    
+                  @endfor
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                    <td ></td>
+                    <td ></td>
+                    <td  bgcolor="#CCCCCC">
+                        <table height="50px" width="100%" border="1">
+                            <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
+                            <td width="20%" style="vertical-align:top;">2<br>No probable</td>
+                            <td width="20%" style="vertical-align:top;">3<br>Probable</td>
+                            <td width="20%" style="vertical-align:top;">4<br>Altamente probable</td>
+                            <td width="20%" style="vertical-align:top;">5<br>Esperado</td>
+                        </table>
+                    </td>
+              </tr>
+                <tr>
+                    <td ></td>
+                    <td ></td>
+                    <td bgcolor="#000000" style="letter-spacing:5px; text-align: center; color:white;">Probabilidad
+                    </td>
+                </tr>
+              </table>
               </div>
             </div>
 
@@ -262,7 +261,7 @@
             <br>
             
                 {!! link_to_route('heatmap', $title = 'Volver', $parameters = NULL,
-                 $attributes = ['class'=>'btn btn-success'])!!}
+                 $attributes = ['class'=>'btn btn-danger'])!!}
             <center>
       @endif
 			   </div>

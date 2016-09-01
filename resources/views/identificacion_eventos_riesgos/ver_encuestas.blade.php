@@ -61,25 +61,35 @@
 <p>En esta secci&oacute;n podr&aacute; revisar el formato de todas las encuestas de identificaci&oacute;n de eventos de riesgos agregadas.</p>
 
 @if (isset($polls))
+	
+	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="margin: 0 auto; width:50% ">
+			<thead>
+			<th>Nombre</th>
+			<th>Fecha de creaci&oacute;n</th>
+			<th>Ver</th>
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)
+			<th>Eliminar</th>
+		<?php break; ?>
+		@endif
+	@endforeach
+			</thead>
+	@foreach ($polls as $poll)
+		<tr>
+			<td>{{ $poll['name'] }}</td>
+			<td>{{ $poll['created_at'] }}</td>
+			<td>{!! link_to_route('ver_encuesta', $title = 'Ver', $parameters = $poll['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
+			@foreach (Session::get('roles') as $role)
+			@if ($role != 6)
+				<td><button class="btn btn-danger" onclick="eliminar2({{ $poll['id'] }},'{{ $poll['name'] }}','encuestas','La encuesta')">Eliminar</button></td>
+			<?php break; ?>
+			@endif
+			@endforeach
+		</tr>
+	@endforeach
+	</table>
+<br><br><br><br><br>
 
-	{!!Form::open(['url'=>'ver_encuestas','method'=>'GET','class'=>'form-horizontal'])!!}
-	<div class="row form-group">
-		{!!Form::label('Seleccione una encuesta',null,['class'=>'col-sm-4 control-label'])!!}
-		<div class="col-sm-4">
-			{!!Form::select('encuesta',$polls,
-								 	   null,
-								 	   ['required' => 'true',
-								 	   	'placeholder' => '- Seleccione -',
-								 	   	'id' => 'el2'])
-							!!}
-		</div>
-	</div>	
-
-	<center>
-		<div class="row form-group">
-		  {!!Form::submit('Seleccionar', ['class'=>'btn btn-success','name'=>'aplicar'])!!}
-		</div>
-	</center>
 @elseif (isset($encuesta))
 	<!-- Mostramos encuesta -->
 

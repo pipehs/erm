@@ -12,6 +12,7 @@ use Mail;
 use DB;
 use ArrayObject;
 use Auth;
+use DateTime;
 
 class EncuestasController extends Controller
 {
@@ -773,7 +774,46 @@ class EncuestasController extends Controller
         {
             if (isset($_GET['encuesta']))  //se seleccionó la encuesta a revisar
             {
-                $poll = \Ermtool\Poll::find($_GET['encuesta']);
+                
+            }
+            else
+            {
+                //$polls = \Ermtool\Poll::lists('name','id');
+                $polls = array();
+                $encuestas = DB::table('polls')
+                                ->select('id','name','created_at')
+                                ->get();
+
+                $i = 0;
+                foreach ($encuestas as $poll)
+                {
+                    $created_at = new DateTime($poll->created_at);
+                    $created_at = date_format($created_at, 'd-m-Y');
+
+                    $polls[$i] = [
+                        'id' => $poll->id,
+                        'name' => $poll->name,
+                        'created_at' => $created_at
+                    ];
+
+                    $i += 1;
+                }
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.identificacion_eventos_riesgos.ver_encuestas',['polls'=>$polls]);
+                }
+                else
+                {
+                    return view('identificacion_eventos_riesgos.ver_encuestas',['polls'=>$polls]); 
+                }
+            }
+        }
+    }
+
+    //ACTUALIZADO 31-08: SE MOSTRARÁ DE DISTINTA FORMA INDEX DE ENCUESTAS PARA PODER AGREGAR BOTÓN DE ELIMINAR (ya no será a través de select)
+    public function showEncuesta2($id)
+    {
+        $poll = \Ermtool\Poll::find($id);
 
                 //obtenemos preguntas
                 $preguntas = DB::table('questions')->where('poll_id','=',$poll['id'])->get();
@@ -804,21 +844,6 @@ class EncuestasController extends Controller
                 {
                     return view('identificacion_eventos_riesgos.ver_encuestas',['encuesta'=>$poll,'preguntas'=>$preguntas,'respuestas'=>$answers]);
                 }
-            }
-            else
-            {
-                $polls = \Ermtool\Poll::lists('name','id');
-
-                if (Session::get('languaje') == 'en')
-                {
-                    return view('en.identificacion_eventos_riesgos.ver_encuestas',['polls'=>$polls]);
-                }
-                else
-                {
-                    return view('identificacion_eventos_riesgos.ver_encuestas',['polls'=>$polls]); 
-                }
-            }
-        }
     }
     /**
      * Display the specified resource.
@@ -906,6 +931,61 @@ class EncuestasController extends Controller
      */
     public function destroy($id)
     {
-        //
+        global $id1;
+        $id1 = $id;
+        global $res;
+        $res = 1;
+
+        DB::transaction(function() {
+
+            //vemos si es que tiene alguna respuesta asociada
+            $rev = DB::table('answers')
+                    ->join('questions','questions.id','=','answers.question_id')
+                    ->where('questions.poll_id','=',$GLOBALS['id1'])
+                    ->select('answers.id')
+                    ->get();
+
+            if (empty($rev))
+            {
+                //seleccionamos preguntas de la encuesta
+                $questions = DB::table('questions')
+                    ->where('poll_id','=',$GLOBALS['id1'])
+                    ->select('id')
+                    ->get();
+
+                foreach ($questions as $q)
+                {
+                    //obtenemos posible answer si es que hay
+                    $posibles = DB::table('posible_answers')
+                                ->where('question_id','=',$q->id)
+                                ->get('id');
+
+                    if (!empty($posibles))
+                    {
+                        //eliminamos posible answers
+                        foreach ($posibles as $p)
+                        {
+                            DB::table('posible_answers')
+                                ->where('id','=',$p->id)
+                                ->delete();
+                        }
+                    }
+
+                    //eliminamos ahora la pregunta
+                    DB::table('questions')
+                        ->where('id','=',$q->id)
+                        ->delete();
+                }
+
+                //ahora eliminamos la encuesta
+                DB::table('polls')
+                    ->where('id','=',$GLOBALS['id1'])
+                    ->delete();
+
+                    $GLOBALS['res'] = 0;
+            }
+        });
+
+        return $res;
     }
 }
