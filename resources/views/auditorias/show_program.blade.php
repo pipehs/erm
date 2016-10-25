@@ -9,7 +9,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Auditor&iacute;a de Riesgos</a></li>
-			<li><a href="show_program.{{$program['id']}}">Ver Programa</a></li>
+			<li><a href="show_program.{{$program['id']}}">Programa</a></li>
 		</ol>
 	</div>
 </div>
@@ -104,6 +104,7 @@
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
 				<th>Acci&oacute;n</th>
+				<th>Acci&oacute;n</th>
 			<?php break; ?>
 			@endif
 		@endforeach
@@ -149,6 +150,7 @@
 			@if ($role != 6)
 					<td>{!! link_to_route('programas_auditoria.edit_test', $title = 'Editar', $parameters = $test['id'],
 				 $attributes = ['class'=>'btn btn-success'])!!}</td>
+				 	<td><button class="btn btn-danger" onclick="eliminar2({{ $test['id'] }},'{{ $test['name'] }}','audit_tests','La prueba de auditoría')">Eliminar</button></td>
 			<?php break; ?>
 			@endif
 		@endforeach

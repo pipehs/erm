@@ -103,7 +103,7 @@
 						<td>{{ $action_plan['final_date'] }}</td>
 				@foreach (Session::get('roles') as $role)
 					@if ($role != 6)
-						<td>{!! link_to_route('edit_hallazgo', $title = 'Editar', $parameters = ['org'=>$org_id,'id'=>$action_plan['id']],$attributes = ['class'=>'btn btn-success'])!!}</td>
+						<td>{!! link_to_route('action_plan.edit', $title = 'Editar', $parameters = ['org'=>$org_id,'id'=>$action_plan['id']],$attributes = ['class'=>'btn btn-success'])!!}</td>
 						<td>
 						@if ($action_plan['status_number'] == 1)
 							Plan se encuentra cerrado.

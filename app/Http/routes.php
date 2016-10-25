@@ -115,8 +115,8 @@ Route::get('objetivos.bloquear.{id}', [
     'as' => 'objetivos.bloquear', 'uses' => 'ObjetivosController@bloquear'
 ]);
 
-Route::get('objetivos.verbloqueados.{id}', [
-	'as' => 'objetivos.verbloqueados', 'uses' => 'ObjetivosController@verbloqueados'
+Route::get('objetivos_plan.verbloqueados.{strategic_plan_id}', [
+	'as' => 'objetivos_plan.verbloqueados', 'uses' => 'ObjetivosController@objetivosPlan'
 ]);
 
 Route::get('objetivos.desbloquear.{id}', [
@@ -130,6 +130,10 @@ Route::put('objetivos.update.{id}', [
 Route::get('objetivos.destroy.{id}', [
     'as' => 'objetivos.destroy', 'uses' => 'ObjetivosController@destroy'
 ]);
+
+//Index de objetivos seleccionando a través de un plan
+Route::get('objetivos_plan.{strategic_id}', [
+	'as' => 'objetivos_plan', 'uses' => 'ObjetivosController@objetivosPlan']);
 
 //Rutas para CRUD + bloquear Procesos//
 
@@ -611,6 +615,9 @@ Route::get('controles.get_evaluation2.{id_control}', [
 	'as' => 'controles.get_evaluation2', 'uses' => 'ControlesController@getEvaluacion2'
 ]);
 
+Route::get('controles.destroy.{id}', [
+	'as' => 'controles.destroy', 'uses' => 'ControlesController@destroy']);
+
 // ----Rutas para reportes básicos---- //
 
 Route::get('heatmap', [
@@ -694,6 +701,9 @@ Route::get('audit_plan.open.{id}', [
 	'as' => 'audit_plan.open', 'uses' => 'AuditoriasController@open'
 ]);
 
+Route::get('audit_plan.destroy.{id}', [
+	'as' => 'audit_plan.destroy', 'uses' => 'AuditoriasController@destroy']);
+
 Route::get('auditorias', [
 	'as' =>'auditorias', 'uses' => 'AuditoriasController@indexAuditorias']);
 
@@ -770,6 +780,12 @@ Route::get('programas_auditoria.create_test.{id}', [
 Route::post('programas_auditoria.store_test', [
 	'as' => 'programas_auditoria.store_test', 'uses' => 'AuditoriasController@storeTest']);
 
+Route::get('programas_auditoria.destroy.{id}', [
+	'as' => 'programas_auditoria.destroy', 'uses' => 'AuditoriasController@destroyProgram']);
+
+Route::get('audit_tests.destroy.{id}', [
+	'as' => 'audit_tests.destroy', 'uses' => 'AuditoriasController@destroyTest']);
+
 
 //------ Rutas para trabajar con Excel ------//
 
@@ -812,7 +828,7 @@ Route::get('genplanes_accion.{org}', [
 	'as' => 'genplanes_accion', 'uses' => 'PlanesAccionController@generarReportePlanes']);
 
 //ruta para generar reporte de hallazgos
-Route::post('genissues_report', [
+Route::get('genissues_report', [
 	'as' => 'genissues_report', 'uses' => 'IssuesController@generarReporteIssues']);
 
 //ruta para obtener datos de plan de auditoría anterior 
@@ -954,7 +970,8 @@ Route::post('kri.guardar_evaluacion', [
 Route::get('kri.veranteriores.{id}', [
 	'as' => 'kri.veranteriores', 'uses' => 'KriController@showEvals']);
 
-
+Route::get('kri.destroy.{id}', [
+	'as' => 'kri.destroy', 'uses' => 'KriController@destroy']);
 
 //ruta para obtener todas las causas de riesgo
 Route::get('get_causes', [
@@ -993,6 +1010,22 @@ Route::put('update_hallazgo.{id}', [
     'as' => 'update_hallazgo', 'uses' => 'IssuesController@update']);
 
 //---- Rutas para gestión estratégica ----//
+Route::get('plan_estrategico', [
+	'as' => 'plan_estrategico', 'uses' => 'GestionEstrategicaController@indexPlanes']);
+
+Route::get('plan_estrategico.create', [
+	'as' => 'plan_estrategico.create', 'uses' => 'GestionEstrategicaController@createPlanEstrategico']);
+
+Route::post('plan_estrategico.store', [
+	'as' => 'plan_estrategico.store', 'uses' => 'GestionEstrategicaController@storePlanEstrategico']);
+
+Route::get('plan_estrategico.edit.{id}', [
+	'as' => 'plan_estrategico.edit', 'uses' => 'GestionEstrategicaController@editPlanEstrategico']);
+
+Route::put('plan_estrategico.update.{id}', [
+	'as' => 'plan_estrategico.update', 'uses' => 'GestionEstrategicaController@updatePlanEstrategico']);
+
+
 Route::get('kpi', [
 	'as' => 'kpi', 'uses' => 'GestionEstrategicaController@kpi']);
 
@@ -1002,15 +1035,29 @@ Route::get('kpi2', [
 Route::get('kpi.create.{id}', [
 	'as' => 'kpi.create', 'uses' => 'GestionEstrategicaController@kpiCreate']);
 
+Route::get('kpi.create2.{id}', [
+	'as' => 'kpi.create2', 'uses' => 'GestionEstrategicaController@kpiCreateFromObjective']);
+
 Route::post('kpi.store', [
 	'as' => 'kpi.store', 'uses' => 'GestionEstrategicaController@kpiStore']);
+
+Route::post('kpi.store2', [
+	'as' => 'kpi.store2', 'uses' => 'GestionEstrategicaController@kpiStoreFromObjective']);
 
 Route::get('kpi.edit.{id}', [
 	'as' => 'kpi.edit', 'uses' => 'GestionEstrategicaController@kpiEdit']);
 
-Route::put('kpi.update.{id}', [
-	'as' => 'kpi.update', 'uses' => 'GestionEstrategicaController@kpiUpdate']);
+//Función editar accedida desde definición de objetivos
+Route::get('kpi.edit2.{id}', [
+	'as' => 'kpi.edit2', 'uses' => 'GestionEstrategicaController@kpiEditFromObjective']);
 
+//Route::put('kpi.update.{id}', [
+//	'as' => 'kpi.update', 'uses' => 'GestionEstrategicaController@kpiUpdate']);
+
+Route::put('kpi.update2.{id}', [
+	'as' => 'kpi.update2', 'uses' => 'GestionEstrategicaController@kpiUpdate']);
+
+//Antes sólo era medir o evaluar, pero ahora también mostrará evaluaciones anteriores (tipo monitor de KRI)
 Route::get('kpi.evaluate.{id}', [
 	'as' => 'kpi.evaluate', 'uses' => 'GestionEstrategicaController@kpiEvaluate']);
 
@@ -1028,6 +1075,9 @@ Route::get('monitor_kpi_2', [
 
 Route::get('getkpi.{org_id}', [
 	'as' => 'getkpi', 'uses' => 'GestionEstrategicaController@getKpi']);
+
+Route::get('objective_kpi.{obj_id}', [
+	'as' => 'objective_kpi', 'uses' => 'GestionEstrategicaController@objectiveKpi']);
 
 
 Route::get('mapas', [
@@ -1051,6 +1101,15 @@ Route::get('action_plan.destroy.{id}', [
 Route::get('action_plan.close.{id}', [
 	'as' => 'action_plan.close', 'uses' => 'PlanesAccionController@close'
 ]);
+
+Route::get('action_plan.edit.{id}', [
+	'as' => 'action_plan.edit', 'uses' => 'PlanesAccionController@edit'
+]);
+
+Route::put('action_plan.update.{id}', [
+	'as' => 'action_plan.update', 'uses' => 'PlanesAccionController@update']);
+
+
 
 //ruta para eliminar evidencias (llama a funcion helper)
 Route::get('evidences.delete.{id},{kind}', function($id,$kind) {

@@ -92,7 +92,29 @@
 </div>
 </body>
 </html>
+	{!!Html::script('http://cdn.jsdelivr.net/webshim/1.12.4/extras/modernizr-custom.js')!!}
+	<!-- polyfiller file to detect and load polyfills -->
+	{!!Html::script('http://cdn.jsdelivr.net/webshim/1.12.4/polyfiller.js')!!}
+	<script>
+	  webshims.setOptions('forms-ext', {types: 'date'});
+		webshims.polyfill('forms forms-ext');
+		webshims.formcfg = {
+			en: {
+			    dFormat: '-',
+			    dateSigns: '-',
+			    patterns: {
+			        d: "yy-mm-dd"
+			    }
+			}
+		};
+	</script>
 
+	  <style>
+	  label {
+	    display: inline-block;
+	    width: 5em;
+	  }
+	  </style>
 	{!!Html::script('assets/plugins/jquery/jquery-2.1.0.min.js')!!}
 	{!!Html::script('assets/plugins/jquery-ui/jquery-ui.min.js')!!}
 	{!!Html::script('assets/plugins/bootstrap/bootstrap.min.js')!!}

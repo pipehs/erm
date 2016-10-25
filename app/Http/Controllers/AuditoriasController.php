@@ -2510,9 +2510,302 @@ class AuditoriasController extends Controller
      */
     public function destroy($id)
     {
-        //
+        global $id1;
+        $id1 = $id;
+        global $res;
+        $res = 1;
+
+        DB::transaction(function() {
+
+            //primero obtenemos audit_audit_plan para hacer las validaciones
+            $audit_audit_plan = DB::table('audit_audit_plan')
+                        ->where('audit_plan_id','=',$GLOBALS['id1'])
+                        ->select('id')
+                        ->get();
+
+            $rev2 = 1; //variable local para ver 
+            foreach ($audit_audit_plan as $audit)
+            {
+                //vemos si tiene issues
+                $rev = DB::table('issues')
+                    ->where('audit_audit_plan_id','=',$audit->id)
+                    ->select('id')
+                    ->get();
+
+                if (empty($rev))
+                {
+                    //ahora vemos notas de supervisor
+                    $rev = DB::table('supervisor_notes')
+                        ->where('audit_audit_plan_id','=',$audit->id)
+                        ->select('id')
+                        ->get();
+
+                    if (empty($rev))
+                    {
+                        //audit_audit_plan_audit_program
+                        $rev = DB::table('audit_audit_plan_audit_program')
+                            ->where('audit_audit_plan_id','=',$audit->id)
+                            ->select('id')
+                            ->get();
+
+                        if (empty($rev))
+                        {
+                            //podemos eliminar
+                            $rev2 = 0;
+                        }
+                        else
+                        {
+                            $rev2 = 1;
+                        }
+                    }
+                    else
+                    {
+                        $rev2 = 1;
+                    }
+                }
+                else
+                {
+                    $rev2 = 1;
+                }
+
+                if ($rev2 == 1)
+                {
+                    break;
+                }
+            }
+
+            if ($rev2 == 0)
+            {
+                //se puede eliminar
+                //primero eliminaremos todo lo que tiene que ver con audit_audit_plan, por lo que volvemos a recorrer todas las audit_audit_plan
+                foreach ($audit_audit_plan as $audit)
+                {
+                    //eliminamos audit_risk
+                    DB::table('audit_risk')
+                        ->where('audit_audit_plan_id','=',$audit->id)
+                        ->delete();
+
+                    //ahora eliminamos audit_audit_plan
+                    DB::table('audit_audit_plan')
+                        ->where('id','=',$audit->id)
+                        ->delete();
+                }
+                //eliminamos audit_plan_risk
+                DB::table('audit_plan_risk')
+                    ->where('audit_plan_id','=',$GLOBALS['id1'])
+                    ->delete();
+                //eliminamos audit_plan_stakeholder
+                DB::table('audit_plan_stakeholder')
+                    ->where('audit_plan_id','=',$GLOBALS['id1'])
+                    ->delete();
+                //ahora eliminamos audit_plan
+                DB::table('audit_plans')
+                    ->where('id','=',$GLOBALS['id1'])
+                    ->delete();
+
+                $GLOBALS['res'] = 0;
+
+            }
+        });
+
+        return $res;
     }
 
+    public function destroyProgram($id)
+    {
+        global $id1;
+        $id1 = $id;
+        global $res;
+        $res = 1;
+
+        DB::transaction(function() {
+
+            //revisaremos las pruebas de auditoría asociadas al programa
+            $audit_tests = DB::table('audit_tests')
+                    ->where('audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
+                    ->select('id')
+                    ->get();
+            $rev2 = 0;
+            foreach ($audit_tests as $audit_test)
+            {
+                //revisaremos los campos para audit_test
+                $rev = DB::table('issues')
+                    ->where('audit_test_id','=',$audit_test->id)
+                    ->select('id')
+                    ->get();
+
+                if (empty($rev))
+                {
+                    //revisamos supervisor_notes
+                    $rev = DB::table('supervisor_notes')
+                        ->where('audit_test_id','=',$audit_test->id)
+                        ->select('id')
+                        ->get();
+
+                    if (empty($rev))
+                    {
+                        //por último, notas
+                        $rev = DB::table('notes')
+                            ->where('audit_test_id','=',$audit_test->id)
+                            ->select('id')
+                            ->get();
+
+                        if (empty($rev))
+                        {
+                            $rev2 = 0;
+                        }
+                        else
+                        {
+                            $rev2 = 1;
+                        }
+                    }
+                    else
+                    {
+                        $rev2 = 1;
+                    }
+                }
+                else
+                {
+                    $rev2 = 1;
+                }
+
+                if ($rev2 == 1)
+                {
+                    break;
+                }
+            }
+
+            if ($rev2 == 1)
+            {
+               return $GLOBALS['res'];
+            }
+            else //ahora revisamos todos los campos del programa (que son los mismos de la prueba)
+            {
+                //revisaremos los campos para audit_test
+                $rev = DB::table('issues')
+                    ->where('audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
+                    ->select('id')
+                    ->get();
+
+                if (empty($rev))
+                {
+                    //revisamos supervisor_notes
+                    $rev = DB::table('supervisor_notes')
+                        ->where('audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
+                        ->select('id')
+                        ->get();
+
+                    if (empty($rev))
+                    {
+                        //por último, notas
+                        $rev = DB::table('notes')
+                            ->where('audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
+                            ->select('id')
+                            ->get();
+
+                        if (empty($rev))
+                        {
+                            $rev2 = 0;
+                        }
+                        else
+                        {
+                            $rev2 = 1;
+                        }
+                    }
+                    else
+                    {
+                        $rev2 = 1;
+                    }
+                }
+                else
+                {
+                    $rev2 = 1;
+                }
+            }
+
+            if ($rev2 == 0) //sólo si es igual a cero se podrán borrar todas las tablas
+            {
+
+                //eliminamos pruebas de auditoría
+                DB::table('audit_tests')
+                    ->where('audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
+                    ->delete();
+
+                //para ver si borramos el programa de auditoría en la tabla audit_programs, vemos si éste está presente en otros programas
+                $program = DB::table('audit_audit_plan_audit_program')->where('id','=',$GLOBALS['id1'])->select('audit_program_id')->first();
+
+                $rev3 = DB::table('audit_audit_plan_audit_program')
+                    ->where('audit_program_id','=',$program->audit_program_id)
+                    ->where('id','<>',$GLOBALS['id1'])
+                    ->select('id')
+                    ->get();
+
+                //ahora eliminamos programa por completo
+                DB::table('audit_audit_plan_audit_program')
+                    ->where('id','=',$GLOBALS['id1'])
+                    ->delete();
+
+                if (empty($rev3)) //si no hay otros planes, borramos
+                {
+                    DB::table('audit_programs')
+                        ->where('id','=',$program->audit_program_id)
+                        ->delete();
+                }
+
+                $GLOBALS['res'] = 0;
+            }
+            
+        });
+
+        return $res;
+    }
+
+    public function destroyTest($id)
+    {
+        global $id1;
+        $id1 = $id;
+        global $res;
+        $res = 1;
+
+        DB::transaction(function() {
+            //revisaremos los campos para audit_test
+            $rev = DB::table('issues')
+                ->where('audit_test_id','=',$GLOBALS['id1'])
+                ->select('id')
+                ->get();
+
+            if (empty($rev))
+            {
+                //revisamos supervisor_notes
+                $rev = DB::table('supervisor_notes')
+                        ->where('audit_test_id','=',$GLOBALS['id1'])
+                        ->select('id')
+                        ->get();
+
+                if (empty($rev))
+                {
+                    //por último, notas
+                    $rev = DB::table('notes')
+                        ->where('audit_test_id','=',$GLOBALS['id1'])
+                        ->select('id')
+                        ->get();
+
+                    if (empty($rev))
+                    {
+                        //ahora se puede eliminar
+                        DB::table('audit_tests')
+                            ->where('id','=',$GLOBALS['id1'])
+                            ->delete();
+
+                        $GLOBALS['res'] = 0;
+                    } 
+                } 
+            }
+        });
+
+        return $res;
+
+    }
     //función para ver todas las pruebas
     public function pruebas()
     {
@@ -3028,7 +3321,7 @@ class AuditoriasController extends Controller
         }
     }
 
-    //Función obtiene riesgos de negocio a través de JSON al crear plan de pruebas
+    //Función obtiene riesgos de negocio a través de JSON al crear plan de pruebas (también utilizado para crear encuesta de evaluación)
     public function getRiesgosObjetivos($org)
     {
         if (Auth::guest())
@@ -4578,6 +4871,9 @@ class AuditoriasController extends Controller
                 $j = 0; //contador de auditorias por plan
                 foreach ($auditorias as $audit)
                 {
+                    $ejecucion = 0;
+                    $abiertas = 0;
+                    $cerradas = 0;
                     $audits[$j] = $audit->name;
                     $j += 1;
                     //obtenemos programas
@@ -4602,9 +4898,7 @@ class AuditoriasController extends Controller
                         //vemos si hay alguna prueba en ejecución, si es así el plan estará en ejecución
                         $l = 0; //contador de pruebas
                         //estados de las pruebas
-                        $ejecucion = 0;
-                        $abiertas = 0;
-                        $cerradas = 0;
+                        
                         foreach ($tests as $test)
                         {
                             $audit_tests[$l] = $test->name;

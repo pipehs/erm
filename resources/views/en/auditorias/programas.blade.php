@@ -59,7 +59,8 @@
 		<th>Creation date</th>
 		<th>Last update</th>
 		<th>Final date</th>
-		<th>View</th>
+		<th>Action</th>
+		<th>Action</th>
 	</thead>
 
 	@foreach($programs as $program)
@@ -77,11 +78,8 @@
 				{{ $program['expiration_date'] }}
 			@endif
 			</td>
-			<td>
-				<div>
-		            {!! link_to_route('programas_auditoria.show', $title = 'Show', $parameters = $program['id'], $attributes = ['class'=>'btn btn-warning']) !!}
-		        </div><!-- /btn-group -->
-			</td>
+			<td>{!! link_to_route('programas_auditoria.show', $title = 'Show', $parameters = $program['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
+			<td><button class="btn btn-danger" onclick="eliminar2({{ $program['id'] }},'{{ $program['name'] }}','audit_program','The audit program')">Delete</button></td>
 		</tr>
 	@endforeach
 	</table>

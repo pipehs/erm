@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Organizaciones')
+@section('title', 'Definición de objetivos')
 
 @section('content')
 
@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Datos Maestros</a></li>
-			<li><a href="objetivos">Objetivos</a></li>
+			<li><a href="#">Gestión estratégica</a></li>
+			<li><a href="objetivos">Planes y objetivos estrat&eacute;gicos</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-puzzle-piece"></i>
-					<span>Objetivos</span>
+					<span>Planes y objetivos estrat&eacute;gicos</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -41,8 +41,10 @@
 			{{ Session::get('message') }}
 		</div>
 	@endif
+
+	@if (!isset($objetivos))
 		<center>
-		{!!Form::open(['url'=>'objetivos','method'=>'GET','class'=>'form-horizontal'])!!}
+		{!!Form::open(['url'=>'plan_estrategico','method'=>'GET','class'=>'form-horizontal'])!!}
 			<div class="row form-group">
 				<div class="col-sm-6">
 
@@ -56,153 +58,165 @@
 			</div>
 		</center>
 
-		{!!Form::submit('Ver Objetivos', ['class'=>'btn btn-success'])!!}
+		{!!Form::submit('Ver Planes', ['class'=>'btn btn-success'])!!}
 		{!!Form::close()!!}
 		<hr>
+	@else
+		<h3><b>Informaci&oacute;n plan estrat&eacute;gico</b></h3>
+		<h4><b>{{ $datos_plan->name }}</b></h4>
 
-	@if (isset($_GET['organizacion']))
-		@foreach (Session::get('roles') as $role)
-			@if ($role != 6)
-				{!! link_to_route('objetivos.verbloqueados', $title = 'Ver Objetivos Bloqueados', $parameters = $_GET['organizacion'], $attributes = ['class'=>'btn btn-danger']) !!}
-			<?php break; ?>
+		@if ($datos_plan->comments == "")
+			<b>Comentarios: No se han definido comentarios.</b>
+		@else
+			<b>Comentarios: {{ $datos_plan->comments }}.</b>
+		@endif
+		</br>
+		<b>Fecha de inicio vigencia: {{ date('d-m-Y',strtotime($datos_plan->initial_date)) }}.</b></br>
+		<b>Fecha de t&eacute;rmino de vigencia: {{ date('d-m-Y',strtotime($datos_plan->final_date)) }}.</b></br>
+		@if ($datos_plan['status'] != 0)
+			{!! link_to_route('plan_estrategico.edit', $title = 'Editar plan', $parameters = $datos_plan->id, $attributes = ['class'=>'btn btn-success']) !!}
+		@endif
+		<hr>
+
+		@if(!isset($validador))
+			@if (!strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
+				@foreach (Session::get('roles') as $role)
+					@if ($role != 6)
+						{!! link_to_route('objetivos_plan.verbloqueados', $title = 'Ver Objetivos Bloqueados', $parameters = $strategic_plan_id, $attributes = ['class'=>'btn btn-danger']) !!}
+					<?php break; ?>
+					@endif
+				@endforeach
+			@else
+				{!! link_to_route('objetivos_plan', $title = 'Ver Objetivos Desbloqueados', $parameters = $strategic_plan_id, $attributes = ['class'=>'btn btn-success']) !!}
 			@endif
-		@endforeach
-	@endif
-		
+			
 
-	@if (isset($objetivos))
-		@if (isset($organizacion))
+		@if (isset($objetivos))
+
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
-					{{-- Se hará el botón con un formulario para poder enviar por el método GET a la función index de ObjetivosController --}}
-					{!!Form::open(['url'=>'objetivos','method'=>'GET','class'=>'form-horizontal'])!!}
-						{!!Form::hidden('organizacion',$organizacion)!!}
-						{!!Form::submit('Ver Objetivos Desbloqueados', ['class'=>'btn btn-success'])!!}
+				{!!Form::open(['url'=>'objetivos.create','method'=>'GET','class'=>'form-horizontal'])!!}	
+					{!!Form::hidden('nombre_organizacion',$nombre_organizacion )!!}
+
+					@if ($datos_plan['status'] != 0)
+						{!!Form::submit('Agregar objetivo', ['class'=>'btn btn-primary'])!!}
+					@endif
+					
+					@if (isset($_GET['strategic_plan_id']))
+						{!!Form::hidden('strategic_plan_id',$_GET['strategic_plan_id'] )!!}
+					@else
+						{!!Form::hidden('strategic_plan_id',$strategic_plan_id)!!}
+					@endif
+						
 					{!!Form::close()!!}
 				<?php break; ?>
 				@endif
 			@endforeach
-		@endif
-
-		@foreach (Session::get('roles') as $role)
-			@if ($role != 6)
-			{!!Form::open(['url'=>'objetivos.create','method'=>'GET','class'=>'form-horizontal'])!!}	
-				{!!Form::hidden('nombre_organizacion',$nombre_organizacion )!!}
-				{!!Form::submit('Agregar objetivo', ['class'=>'btn btn-primary'])!!}
-				@if (isset($_GET['organizacion']))
-					{!!Form::hidden('organizacion',$_GET['organizacion'] )!!}
-				@else
-					{!!Form::hidden('organizacion',$organizacion)!!}
-				@endif
-					
-				{!!Form::close()!!}
-			<?php break; ?>
-			@endif
-		@endforeach
-	<hr>
-		@if ($probador !== 0) {{-- Si es que existe algún objetivo creado, probador no será cero --}}
-			<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
-				<thead>
-				<th>Nombre<label><input type='text' placeholder='Filtrar' /></label></th>
-				<th width="30%">Descripci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
-				<th>Fecha Creaci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
-				<th>Fecha Actualizaci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
-				<th>Fecha Expiraci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
-				<th>Categor&iacute;a<label><input type='text' placeholder='Filtrar' /></label></th>
-				<th>Perspectiva<label><input type='text' placeholder='Filtrar' /></label></th>
-
-			@foreach (Session::get('roles') as $role)
-				@if ($role != 6)
-				<th style="vertical-align:top;">Acci&oacute;n</th>
-				<th style="vertical-align:top;">Acci&oacute;n</th>
-				<?php break; ?>
-				@endif
-			@endforeach
-				</thead>
-
-				@foreach ($objetivos as $objetivo)
-					<tr>
-					<td>{{$objetivo['nombre']}}</td>
-					<td>{{$objetivo['descripcion']}}</td>
-					@if ($objetivo['fecha_creacion'] == NULL)
-						<td>Error al guardar fecha de creaci&oacute;n</td>
-					@else
-						<td>{{$objetivo['fecha_creacion']}}</td>
-					@endif
-
-					@if ($objetivo['fecha_act'] == NULL)
-						<td>Error al guardar fecha de &uacute;ltima actualizaci&oacute;n</td>
-					@else
-						<td>{{$objetivo['fecha_act']}}</td>
-					@endif
-
-					@if ($objetivo['fecha_exp'] == NULL)
-						<td>Ninguna</td>
-					@else
-						<td>{{$objetivo['fecha_exp']}}</td>
-					@endif
-					@if ($objetivo['categoria'] == NULL)
-						<td>No se ha definido categor&iacute;a</td>
-					@else
-						<td>{{$objetivo['categoria']}}</td>
-					@endif
-					
-					@if ($objetivo['perspective'] == NULL)
-						<td>No se ha definido perspectiva</td>
-					@elseif ($objetivo['perspective'] == 1)
-						<td>Financiera</td>
-					@elseif ($objetivo['perspective'] == 2)
-						<td>Procesos</td>
-					@elseif ($objetivo['perspective'] == 3)
-						<td>Clientes</td>
-					@elseif ($objetivo['perspective'] == 4)
-						<td>Aprendizaje</td>
-					@endif
-
-			@foreach (Session::get('roles') as $role)
-				@if ($role != 6)
-					<td>
-						<div>
-						@if ($objetivo['estado'] == 0)
-				            {!! link_to_route('objetivos.edit', $title = 'Editar', $parameters = $objetivo['id'], $attributes = ['class'=>'btn btn-success']) !!}
-				        @else
-				        	{!! link_to_route('objetivos.desbloquear', $title = 'Desbloquear', $parameters = $objetivo['id'], $attributes = ['class'=>'btn btn-success']) !!}
-				        @endif
-				        </div><!-- /btn-group -->
-					</td>
-					<td>
-						<div>
-						@if ($objetivo['estado'] == 0)
-				            <button class="btn btn-danger" onclick="bloquear({{ $objetivo['id'] }},'{{ $objetivo['nombre'] }}','objetivos','El objetivo')">Bloquear</button>
-				        @else
-				    		<button class="btn btn-danger" onclick="eliminar2({{ $objetivo['id'] }},'{{ $objetivo['nombre'] }}','objetivos','El objetivo')">Eliminar</button>
-				        @endif
-				        </div><!-- /btn-group -->
-					</td>
-				<?php break; ?>
-				@endif
-			@endforeach
-					</tr>
-				@endforeach
-				</table>
-		@else
-			@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
-				<b>La organizaci&oacute;n {{ $nombre_organizacion }} no posee objetivos bloqueados.</b>
-			@else
-				<b>Aun no se han creado objetivos para la organizaci&oacute;n {{ $nombre_organizacion }}, o bien sus objetivos est&aacute;n bloqueados. </b>
-			@endif
-		@endif
 		<hr>
+			@if ($probador !== 0) {{-- Si es que existe algún objetivo creado, probador no será cero --}}
+				<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
+					<thead>
+					<th>Perspectiva<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th>Nombre<label><input type='text' placeholder='Filtrar' /></label></th>
+					<th width="30%">Descripci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>				
 
-		<center>
+				@foreach (Session::get('roles') as $role)
+					@if ($role != 6)
+					@if ($datos_plan['status'] != 0)
+					<th style="vertical-align:top;">Acci&oacute;n</th>
+					<th style="vertical-align:top;">Acci&oacute;n</th>
+					<th style="vertical-align:top;">Acci&oacute;n</th>
+					@endif
+					<?php break; ?>
+					@endif
+				@endforeach
+					</thead>
 
-		{!! link_to_route('objetivos.index', $title = 'Volver', $parameters = NULL, $attributes = ['class'=>'btn btn-danger']) !!}
-		</center>
+					@foreach ($objetivos as $objetivo)
+						<tr>
+						@if ($objetivo['perspective'] == NULL)
+							<td>No se ha definido perspectiva</td>
+						@elseif ($objetivo['perspective'] == 1)
+							<td>Financiera</td>
+						@elseif ($objetivo['perspective'] == 2)
+							<td>Procesos</td>
+						@elseif ($objetivo['perspective'] == 3)
+							<td>Clientes</td>
+						@elseif ($objetivo['perspective'] == 4)
+							<td>Aprendizaje</td>
+						@endif
+						<td>{{$objetivo['nombre']}}</td>
+						<td>{{$objetivo['descripcion']}}</td>		
 
+				@foreach (Session::get('roles') as $role)
+					@if ($role != 6)
+						@if ($datos_plan['status'] != 0)
+						<td>
+							<div>
+							@if ($objetivo['estado'] == 0)
+					            {!! link_to_route('objetivos.edit', $title = 'Editar', $parameters = $objetivo['id'], $attributes = ['class'=>'btn btn-success']) !!}
+					        @else
+					        	{!! link_to_route('objetivos.desbloquear', $title = 'Desbloquear', $parameters = $objetivo['id'], $attributes = ['class'=>'btn btn-success']) !!}
+					        @endif
+					        </div><!-- /btn-group -->
+						</td>
+						<td>
+							<div>
+							@if ($objetivo['estado'] == 0)
+					            <button class="btn btn-danger" onclick="bloquear({{ $objetivo['id'] }},'{{ $objetivo['nombre'] }}','objetivos','El objetivo')">Bloquear</button>
+					        @else
+					    		<button class="btn btn-danger" onclick="eliminar2({{ $objetivo['id'] }},'{{ $objetivo['nombre'] }}','objetivos','El objetivo')">Eliminar</button>
+					        @endif
+					        </div><!-- /btn-group -->
+						</td>
+						<td>
+						{!! link_to_route('objective_kpi', $title = 'Gestionar KPI', $parameters = $objetivo['id'], $attributes = ['class'=>'btn btn-primary']) !!}
+						</td>
+						@endif
+					<?php break; ?>
+					@endif
+				@endforeach
+						</tr>
+					@endforeach
+					</table>
+			@else
+				@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
+					<b>La organizaci&oacute;n {{ $nombre_organizacion }} no posee objetivos bloqueados para el plan estrat&eacute;gico {{ $datos_plan->name }}.</b>
+				@else
+					<b>Aun no se han creado objetivos para la organizaci&oacute;n {{ $nombre_organizacion }} dentro del plan estrat&eacute;gico {{ $datos_plan->name }}, o bien sus objetivos est&aacute;n bloqueados. </b>
+				@endif
+			@endif
+			<hr>
+
+			<center>
+				<a href="plan_estrategico?organizacion={{$datos_plan->organization_id}}" class="btn btn-danger">Volver</a>	
+			<center>
+
+		@endif
 	@endif
+	@endif
+
+	
 			</div>
 		</div>
 	</div>
 </div>
 @stop
 
+@section('scripts2')
+	<script>
+		@if (isset($validador))
+			swal({   title: "Atención",
+		   			   text: "No existe ningún plan estratégico vigente para la organización seleccionada. Por favor cree un plan para poder agregar los objetivos estratégicos",
+		   			   type: "warning",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Aceptar",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	window.location="plan_estrategico.create";
+		   				});
+
+		@endif
+	</script>
+@stop

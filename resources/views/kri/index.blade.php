@@ -69,6 +69,7 @@
 						<th style="vertical-align:top;">Acci&oacute;n</th>
 						<th style="vertical-align:top;">Acci&oacute;n</th>
 						<th style="vertical-align:top;">Acci&oacute;n</th>
+						<th style="vertical-align:top;">Acci&oacute;n</th>
 				<?php break; ?>
 				@endif
 			@endforeach
@@ -139,6 +140,7 @@
 							<td><a href="kri.edit.{{ $k['id'] }}" class="btn btn-primary">Editar</a></td>
 							<td><a href="kri.evaluar.{{ $k['id'] }}" class="btn btn-success">Evaluar</a></td>
 							<td><a href="kri.veranteriores.{{ $k['id'] }}" class="btn btn-info" id="ver_evaluaciones">Monitorear</a></td>
+							<td><button class="btn btn-danger" onclick="eliminar2({{ $k['id'] }},'{{ $k['name'] }}','kri','El KRI')">Eliminar</button></td>
 				<?php break; ?>
 				@endif
 			@endforeach

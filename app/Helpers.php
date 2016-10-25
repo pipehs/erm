@@ -27,7 +27,7 @@ function activeMenu($uri='')
 //dropdown de datos maestros
 function dropDown1()
 {
-	$uri = array('organization','categorias_objetivos','objetivos','procesos','subprocesos',
+	$uri = array('organization','categorias_objetivos','procesos','subprocesos',
 				'categorias_risks','riskstype','roles','stakeholders','causas','efectos');
 
 	foreach ($uri as $uri)
@@ -50,7 +50,7 @@ function dropDown1()
 	}
 }
 
-//dropdown GENERAL de gestión de
+//dropdown GENERAL de gestión de riesgos
 function dropDown2()
 {
 	$uri = array('crear_encuesta','enviar_encuesta','encuestas','evaluacion','evaluacion_agregadas','evaluacion_manual','riesgos','enlazar_riesgos','kri','riesgo_kri');
@@ -227,9 +227,10 @@ function dropDown6()
 	}
 }
 
+//dropdown de gestión estratégica
 function dropDown7()
 {
-	$uri = array('mapas','kpi','kpi2');
+	$uri = array('plan_estrategico','mapas','objetivos','kpi','kpi2');
 
 	foreach ($uri as $uri)
 	{

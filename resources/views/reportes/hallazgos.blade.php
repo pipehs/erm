@@ -37,7 +37,7 @@
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
       <p>En esta secci&oacute;n podr&aacute; ver el reporte de hallazgos de cada organización con su información correspondiente.</p>
 
-      	{!!Form::open(['route'=>'genissues_report','method'=>'POST','class'=>'form-horizontal'])!!}
+      	{!!Form::open(['route'=>'genissues_report','method'=>'GET','class'=>'form-horizontal'])!!}
       			<div class="form-group">
 					{!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
@@ -251,7 +251,8 @@
 				@endif
 			</div>
 				<div id="boton_exportar">
-						<input type="image" id="btnExport" src="assets/img/excel.jpg" width="70" height="70">
+						<!--<input type="image" id="btnExport" src="assets/img/excel.jpg" width="70" height="70">-->
+						{!! link_to_route('genexcelissues', $title = 'Exportar', $parameters = "$kind,$org_id", $attributes = ['class'=>'btn btn-success']) !!}
 				</div>
 		@endif
 		

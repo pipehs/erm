@@ -61,7 +61,7 @@
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('programas_auditoria.show', $title = 'Volver', $parameters = $audit_test->audit_audit_plan_audit_program_id,$attributes = ['class'=>'btn btn-success'])!!}
+					{!! link_to_route('programas_auditoria.show', $title = 'Volver', $parameters = $audit_test->audit_audit_plan_audit_program_id,$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 			</div>
 		</div>

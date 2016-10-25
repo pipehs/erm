@@ -5,8 +5,6 @@
 	</a>
 	<ul class="dropdown-menu" style="{{ dropDown1() }}">
 		<li>{!!HTML::link('organization','Organizaciones',['class'=>activeMenu('organization')])!!}</li>
-		<li>{!!HTML::link('categorias_objetivos','Categor&iacute;as de Objetivos',['class'=>activeMenu('categorias_objetivos')])!!}</li>
-		<li>{!!HTML::link('objetivos','Objetivos Corporativos',['class'=>activeMenu('objetivos')])!!}</li>
 		<li>{!!HTML::link('procesos','Procesos',['class'=>activeMenu('procesos')])!!}</li>
 		<li>{!!HTML::link('subprocesos','Subprocesos',['class'=>activeMenu('subprocesos')])!!}</li>
 		<li>{!!HTML::link('categorias_risks','Categor&iacute;as de Riesgos',['class'=>activeMenu('categorias_risks')])!!}</li>

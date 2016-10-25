@@ -9,7 +9,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li>{!!Html::link('kpi','KPI')!!}</li>
-			<li>{!!Html::link('kpi.edit.$org_id','Editar KPI')!!}</li>
+			<li><a href="kpi.edit.{{$kpi['id']}}?org_id={{$org_id}}">Editar KPI</a>
 		</ol>
 	</div>
 </div>
@@ -48,8 +48,8 @@
 
 			Ingrese la informaci&oacute;n que desea modificar o agregar del indicador.
 
-			{!!Form::model($kpi,['route'=>['kpi.update',$kpi->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
-					@include('gestion_estrategica.kpiform')
+			{!!Form::model($kpi,['route'=>['kpi.update2',$kpi->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+					@include('gestion_estrategica.form2')
 			{!!Form::close()!!}
 
 			<center>

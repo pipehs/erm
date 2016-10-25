@@ -291,9 +291,6 @@ function horas()
 //por el momento no se podrán editar los datos de las auditorías ya creadas
 var pathname = window.location.pathname;
 
-
-
-
 	if (pathname.indexOf("edit") == -1)
 	{
 			//función para agregar info de auditorías existentes

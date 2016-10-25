@@ -20,6 +20,216 @@ class GestionEstrategicaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    //index de planes estratégicos
+    public function indexPlanes()
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            try {
+                if (isset($_GET['organizacion']))
+                {
+                    $planes = \Ermtool\Strategic_plan::where('organization_id','=',$_GET['organizacion'])->get();
+                    $organization = \Ermtool\Organization::name($_GET['organizacion']);
+
+                    //valida si es que existe algún plan vigente
+                    $validador = 0;
+                    foreach ($planes as $plan)
+                    {
+                        if ($plan['status'] == 1)
+                        {
+                            $validador = 1;
+                        }
+                        //formateamos las fechas
+                        $initial_date = new DateTime($plan['initial_date']);
+                        $plan['initial_date'] = date_format($initial_date, 'd-m-Y');
+
+                        $final_date = new DateTime($plan['final_date']);
+                        $plan['final_date'] = date_format($final_date, 'd-m-Y');
+
+                        if ($plan['expiration_date'] != NULL)
+                        {
+                            $expiration_date = new DateTime($plan['expiration_date']);
+                            $plan['expiration_date'] = date_format($expiration_date, 'd-m-Y');
+                        }
+                        //guardamos en organization_id el nombre de la organización
+                        //$plan['organization_id'] = \Ermtool\Organization::name($plan['organization_id']);
+                    }
+
+                    if (Session::get('languaje') == 'en')
+                    {
+                        return view('en.gestion_estrategica.plan_estrategico',['planes' => $planes,'organization' => $organization,'org_id'=>$_GET['organizacion'],'validador' => $validador]);
+                    }
+                    else
+                    {
+                        return view('gestion_estrategica.plan_estrategico',['planes' => $planes,'organization' => $organization,'org_id'=>$_GET['organizacion'],'validador' => $validador]);
+                    }
+                } 
+            }
+            catch (\Exception $e){
+                 return response()->view('errors.query');
+            }         
+        }
+    }
+
+    public function createPlanEstrategico()
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            //obtenemos organizaciones ---> Expiró 05-10-2016
+            //$organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.gestion_estrategica.create_plan',['org_id' => $_GET['org_id']]);
+            }
+            else
+            {
+                return view('gestion_estrategica.create_plan',['org_id' => $_GET['org_id']]);
+            }
+        }
+    }
+
+    public function storePlanEstrategico()
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+
+            //obtenemos planes para redirección a index
+            $planes = \Ermtool\Strategic_plan::all();
+            DB::transaction(function () {
+
+                //primero, debemos asegurarnos de cambiar el status a todos los planes estratégicos existentes para la misma organización
+                DB::table('strategic_plans')
+                    ->where('organization_id','=',$_POST['organization_id'])
+                    ->update([
+                        'status' => 0,
+                        ]);
+
+                if (isset($_POST['comments']) && $_POST['comments'] != '')
+                {
+                    $comments = $_POST['comments'];
+                }
+                else
+                {
+                    $comments = NULL;
+                }
+
+                //seteamos fecha de expiracion
+                $initial_date = explode('-',$_POST['initial_date']);
+
+                $final_date = $initial_date[0]+$_POST['duration'].'-'.$initial_date[1].'-'.$initial_date[2];
+
+                DB::table('strategic_plans')
+                    ->insert([
+                        'name' => $_POST['name'],
+                        'comments' => $_POST['comments'],
+                        'initial_date' => $_POST['initial_date'],
+                        'final_date' => $final_date,
+                        'created_at' => date('Y-m-d'),
+                        'updated_at' => date('Y-m-d'),
+                        'status' => 1,
+                        'organization_id' => $_POST['organization_id']
+                        ]);
+
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Strategic plan was successfully created');
+                }
+                else
+                {
+                    Session::flash('message','Plan estratégico fue generado correctamente');
+                }
+            });
+
+            return Redirect::to('plan_estrategico?organizacion='.$_POST['organization_id']);
+        }
+    }
+
+    public function editPlanEstrategico($id)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            $strategic_plan = \Ermtool\Strategic_plan::find($id);
+            //calculamos duracion en años
+            $segundos=strtotime($strategic_plan->final_date) - strtotime($strategic_plan->initial_date);
+
+            $duration = (int)($segundos / 365 / 24 / 60 / 60); 
+            
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.gestion_estrategica.edit_plan',['strategic_plan'=>$strategic_plan,'duration' => $duration]);
+            }
+            else
+            {
+                return view('gestion_estrategica.edit_plan',['strategic_plan'=>$strategic_plan,'duration' => $duration]);
+            }
+        }
+    }
+
+    public function updatePlanEstrategico(Request $request, $id)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {           
+                global $id1;
+                $id1 = $id;
+                DB::transaction(function() 
+                {
+                    $strategic_plan = \Ermtool\Strategic_plan::find($GLOBALS['id1']);
+
+                    if ($_POST['comments'] != "")
+                    {
+                        $comments = $_POST['comments'];
+                    }
+                    else
+                    {
+                        $comments = NULL;
+                    }
+
+                    //seteamos fecha de expiracion
+                    $initial_date = explode('-',$_POST['initial_date']);
+
+                    $final_date = $initial_date[0]+$_POST['duration'].'-'.$initial_date[1].'-'.$initial_date[2];
+
+                    $strategic_plan->name = $_POST['name'];
+                    $strategic_plan->comments = $comments;
+                    $strategic_plan->initial_date = $_POST['initial_date'];
+                    $strategic_plan->final_date = $final_date;
+                    $strategic_plan->save();
+
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','Objective was successfully updated');
+                    }
+                    else
+                    {
+                        Session::flash('message','Plan estratégico actualizado correctamente');
+                    }
+                    
+                });
+            return Redirect::to('plan_estrategico?organizacion='.$_POST['org_id']);
+        }
+    }
     public function kpi()
     {
         if (Auth::guest())
@@ -51,7 +261,7 @@ class GestionEstrategicaController extends Controller
         {
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
-            $org_selected = \Ermtool\Organization::where('id',$_GET['organization_id'])->value('name');
+            $org_selected = \Ermtool\Organization::name($_GET['organization_id']);
             $kpi = array();
 
             $financiera = 0;
@@ -204,6 +414,146 @@ class GestionEstrategicaController extends Controller
         }
     }
 
+    public function objectiveKpi($id)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+
+            $obj_selected = \Ermtool\Objective::name($id);
+            $kpi = array();
+
+            $kpiquery = DB::table('kpi')
+                        ->join('kpi_objective','kpi_objective.kpi_id','=','kpi.id')
+                        ->join('objectives','objectives.id','=','kpi_objective.objective_id')
+                        ->where('objectives.id','=',$id)
+                        ->select('kpi.id','kpi.name','kpi.description','kpi.stakeholder_id','kpi.goal','objectives.name as obj_name','objectives.perspective as perspective','kpi.measurement_unit','kpi.periodicity','kpi.calculation_method')
+                        ->get();
+
+            $i = 0;
+            foreach ($kpiquery as $k)
+            {
+                //hacemos ciclo para obtener última medición de cada kpi
+                //para esto primero obtenemos la fecha de la última medición (si es que hay mediciones)
+                $max_date = DB::table('kpi_measurements')
+                            ->where('kpi_id','=',$k->id)
+                            ->where('status','=',1)
+                            ->max('updated_at');
+
+                //ahora si es que hay fecha, obtenemos datos de última eval
+                if ($max_date)
+                {
+                    $last_eval = DB::table('kpi_measurements')
+                            ->where('kpi_id','=',$k->id)
+                            ->where('updated_at','=',$max_date)
+                            ->select('value','status')
+                            ->first();
+
+                    $last_eval_value = $last_eval->value;
+                    $last_eval_status = $last_eval->status;
+                    $date_last = new DateTime($max_date);
+                    $date_last_eval = date_format($date_last, 'd-m-Y');
+                }
+                else
+                {   //Resulta más fácil configurarlo los mensajes aquí que en la vista (en este caso)
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $last_eval_value = "No valid assessments";
+                        $date_last_eval = "No valid assessments";
+                    }
+                    else
+                    {
+                        $last_eval_value = "No hay evaluaciones validadas";
+                        $date_last_eval = "No hay evaluaciones validadas";
+                    }
+                    $last_eval_status = NULL;
+                }
+
+                //vemos si existe eval para validar
+                $id_eval = DB::table('kpi_measurements')
+                            ->where('kpi_id','=',$k->id)
+                            ->where('status','=',0)
+                            ->select('id')
+                            ->first();
+
+                if ($id_eval) //existe evaluación para validar
+                {
+                    $status = TRUE;
+                }
+                else
+                {
+                    $status = FALSE;
+                }
+
+                $stakeholder = DB::table('stakeholders')
+                            ->where('id','=',$k->stakeholder_id)
+                            ->select('name','surnames')
+                            ->first();
+
+                if ($stakeholder)
+                {
+                    $stake = $stakeholder->name.' '.$stakeholder->surnames;
+                }
+                else
+                {
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $stake = "No responsable assigned";
+                    }
+                    else
+                    {
+                        $stake = "No se ha asignado responsable";   
+                    }
+                }
+
+                if ($k->goal == NULL)
+                {
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $goal = "No defined goals";
+                    }
+                    else
+                    {
+                        $goal = "No se han definido metas";
+                    }
+                }
+                else
+                {
+                    $goal = $k->goal;
+                }
+                $kpi[$i] = [
+                    'id' => $k->id,
+                    'name' => $k->name,
+                    'description' => $k->description,
+                    'stakeholder' => $stake,
+                    'last_eval' => $last_eval_value,
+                    'date_last_eval' => $date_last_eval,
+                    'status' => $last_eval_status,
+                    'goal' => $goal,
+                    'objective' => $k->obj_name,
+                    'periodicity' => $k->periodicity,
+                    'calculation_method' => $k->calculation_method,
+                    'measurement_unit' => $k->measurement_unit,
+                    'status_validate' => $status,
+                ];
+
+                $i += 1;
+            }
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.gestion_estrategica.kpi_objective',['obj_selected' => $obj_selected, 'kpi' => $kpi,'obj_id' => $id]);
+            }
+            else
+            {
+                return view('gestion_estrategica.kpi_objective',['obj_selected' => $obj_selected, 'kpi' => $kpi,'obj_id' => $id]);
+            }
+        }
+    }
+
     public function mapas()
     {
         if (Auth::guest())
@@ -238,11 +588,49 @@ class GestionEstrategicaController extends Controller
             $org_selected = \Ermtool\Organization::where('id',$_GET['organization_id'])->value('name');
             $objectives = array();
 
-            $objectives = DB::table('objectives')
+            $objectives1 = DB::table('objectives')
+                        ->join('strategic_plans','strategic_plans.id','=','objectives.strategic_plan_id')
                         ->where('objectives.organization_id','=',$_GET['organization_id'])
-                        ->where('status','=',0)
-                        ->select('name','id','perspective','description')
+                        ->where('objectives.status','=',0)
+                        ->where('strategic_plans.status','=',1)
+                        ->select('objectives.name','objectives.id','objectives.perspective','objectives.description','objectives.code','objectives.perspective2')
                         ->get();
+
+            //Obtendremos los objetivos impactados por cada objetivo, y los almacenaremos en un array con su correspondiente objetivo
+            $objectives = array();
+            $j = 0;
+            foreach ($objectives1 as $obj)
+            {
+                $obj_imp = DB::table('objectives_impact')
+                            ->join('objectives','objectives.id','=','objectives_impact.objective_father_id')
+                            ->where('objective_father_id','=',$obj->id)
+                            ->select('objectives_impact.objective_impacted_id as id')
+                            ->get();
+
+                $i = 0;
+                $obj_temp = array();
+                foreach ($obj_imp as $impacted)
+                {
+                    //obtenemos código
+                    $code = \Ermtool\Objective::where('id',$impacted->id)->value('code');
+                    $obj_temp[$i] = $code;
+                    $i += 1;
+                }
+
+                $objectives[$j] = [
+                    'id' => $obj->id,
+                    'code' => $obj->code,
+                    'name' => $obj->name,
+                    'perspective' => $obj->perspective,
+                    'perspective2' => $obj->perspective2,
+                    'description' => $obj->description,
+                    'code_impacted' => $obj_temp,
+                ];
+
+                $j += 1;
+
+            }
+
             if (Session::get('languaje') == 'en')
             {
                 return view('en.gestion_estrategica.mapas',['organizations' => $organizations, 'vision' => $vision, 'objectives' => $objectives, 'org_selected' => $org_selected]);
@@ -269,7 +657,11 @@ class GestionEstrategicaController extends Controller
         else
         {
             //obtenemos todos los objetivos de la organización
-            $objectives = \Ermtool\Objective::where('organization_id','=',$id)->where('status',0)->lists('name','id');
+            $objectives = \Ermtool\Objective::where('objectives.organization_id','=',$id)
+                                ->join('strategic_plans','strategic_plans.id','=','objectives.strategic_plan_id')
+                                ->where('strategic_plans.status',1)
+                                ->where('objectives.status',0)
+                                ->lists('objectives.name','objectives.id');
 
             $org_selected = \Ermtool\Organization::where('id',$id)->value('name');
 
@@ -284,6 +676,31 @@ class GestionEstrategicaController extends Controller
             else
             {
                 return view('gestion_estrategica.createkpi',['objectives' => $objectives,'org_selected' => $org_selected,'org_id' => $id,'stakeholders'=>$stakeholders]);
+            }
+        }
+    }
+
+    //Nuevo KPI para el objetivo de id = $id
+    public function kpiCreateFromObjective($id)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+           
+            $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+            ->orderBy('name')
+            ->lists('full_name', 'id');
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.gestion_estrategica.createkpi2',['obj_id' => $id,'stakeholders'=>$stakeholders]);
+            }
+            else
+            {
+                return view('gestion_estrategica.createkpi2',['obj_id' => $id,'stakeholders'=>$stakeholders]);
             }
         }
     }
@@ -420,6 +837,130 @@ class GestionEstrategicaController extends Controller
         }
     }
 
+    public function kpiStoreFromObjective(Request $request)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            DB::transaction(function() {
+
+                if ($_POST['calculation_method'] == "")
+                {
+                    $calc_method = NULL;
+                }
+                else
+                {
+                    $calc_method = $_POST['calculation_method'];
+                }
+
+                if ($_POST['periodicity'] == "")
+                {
+                    $periodicity = NULL;
+                }
+                else
+                {
+                    $periodicity = $_POST['periodicity'];
+                }
+
+                if ($_POST['stakeholder_id'] == "")
+                {
+                    $stake = NULL;
+                }
+                else
+                {
+                    $stake = $_POST['stakeholder_id'];
+                }
+
+                if ($_POST['measurement_unit'] == "")
+                {
+                    $measurement_unit = NULL;
+                }
+                else
+                {
+                    $measurement_unit = $_POST['measurement_unit'];
+                }
+
+                if ($_POST['initial_date'] == "")
+                {
+                    $initial_date = NULL;
+                }
+                else
+                {
+                    $initial_date = $_POST['initial_date'];
+                }
+
+                if ($_POST['final_date'] == "")
+                {
+                    $final_date = NULL;
+                }
+                else
+                {
+                    $final_date = $_POST['final_date'];
+                }
+
+                if ($_POST['goal'] == "")
+                {
+                    $goal = NULL;
+                }
+                else
+                {
+                    $goal = $_POST['goal'];
+                }
+
+                //luego de seteados todos los posibles datos nulos, guardamos primero KPI y obtenemos id
+                $kpi = \Ermtool\kpi::create([
+                    'name' => $_POST['name'],
+                    'description' => $_POST['description'],
+                    'calculation_method' => $calc_method,
+                    'periodicity' => $periodicity,
+                    'stakeholder_id' => $stake,
+                    'initial_date' => $initial_date,
+                    'final_date' => $final_date,
+                    'measurement_unit' => $measurement_unit,
+                    'calculation_method' => $calc_method,
+                    'goal' => $goal
+                ]);
+
+                //ahora guardamos en kpi_objective la relación con obj_id
+
+                DB::table('kpi_objective')
+                    ->insert([
+                        'kpi_id' => $kpi->id,
+                        'objective_id' => $_POST['obj_id'],
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
+
+
+                if (isset($kpi))
+                {
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','KPI successfully created');
+                    }
+                    else
+                    {
+                        Session::flash('message','KPI generado correctamente');
+                    }
+                }
+                else
+                {
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('error','Error at storing KPI');
+                    }
+                    else
+                    {
+                        Session::flash('error','Error al grabar KPI');
+                    }
+                }
+            });
+
+            return Redirect::to('objective_kpi.'.$_POST['obj_id']);
+        }
+    }
     /**
      * Display the specified resource.
      *
@@ -450,7 +991,7 @@ class GestionEstrategicaController extends Controller
             //obtenemos todos los objetivos de la organización
             $objectives = \Ermtool\Objective::where('organization_id','=',$_GET['org_id'])->where('status',0)->lists('name','id');
 
-            $org_selected = \Ermtool\Organization::where('id',$_GET['org_id'])->value('name');
+            $org_selected = \Ermtool\Organization::name($_GET['org_id']);
 
             $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
             ->orderBy('name')
@@ -479,6 +1020,32 @@ class GestionEstrategicaController extends Controller
         }
     }
 
+    //Editar KPI al cual se accedió a través de objetivos (por lo que no existirá la opción de editar los objetivos)
+    public function kpiEditFromObjective($id)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            $kpi = \Ermtool\kpi::find($id);
+
+            $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+            ->orderBy('name')
+            ->lists('full_name', 'id');
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.gestion_estrategica.editkpi2',['stakeholders'=>$stakeholders,'kpi' => $kpi,'obj_id' => $_GET['obj_id']]);
+            }
+            else
+            {
+                return view('gestion_estrategica.editkpi2',['stakeholders'=>$stakeholders,'kpi' => $kpi,'obj_id' => $_GET['obj_id']]);
+            }
+        }
+    }
+
     public function kpiEvaluate($id)
     {
         if (Auth::guest())
@@ -496,6 +1063,7 @@ class GestionEstrategicaController extends Controller
                                 ->max('year');
 
             $min_year = date('Y')-1; //Se puede medir KPI como mínimo desde el año anterior
+            $measurements = 0;
 
             if ($year) //si es que hay fecha de evaluación
             {
@@ -510,6 +1078,16 @@ class GestionEstrategicaController extends Controller
                                 ->max('month');
 
                     $last_eval = $month;
+
+                    //las mediciones irán dentro de los if para poder ordenar según corresponda (por mes, trimestre, semestre o año)
+                    $measurements = DB::table('kpi_measurements')
+                                    ->where('kpi_id','=',$id)
+                                    ->where('status','=',1)
+                                    ->select('value','month','year')
+                                    ->orderBy('year','asc')
+                                    ->orderBy('month','asc')
+                                    ->get();
+            
                 }
                 else if ($kpi->periodicity == 2) //Semestral
                 {
@@ -521,6 +1099,14 @@ class GestionEstrategicaController extends Controller
                     
                     $last_eval = $semester;
 
+                    $measurements = DB::table('kpi_measurements')
+                                    ->where('kpi_id','=',$id)
+                                    ->where('status','=',1)
+                                    ->select('value','semester','year')
+                                    ->orderBy('year','asc')
+                                    ->orderBy('semester','asc')
+                                    ->get();
+
                 }
                 else if ($kpi->periodicity == 3) //Trimestral
                 {
@@ -531,10 +1117,25 @@ class GestionEstrategicaController extends Controller
                                 ->max('trimester');
 
                     $last_eval = $trimester;
+
+                    $measurements = DB::table('kpi_measurements')
+                                    ->where('kpi_id','=',$id)
+                                    ->where('status','=',1)
+                                    ->select('value','trimester','year')
+                                    ->orderBy('year','asc')
+                                    ->orderBy('trimester','asc')
+                                    ->get();
                 }
                 else if ($kpi->periodicity == 4) //Anual
                 {
                     $last_eval = $year;
+
+                    $measurements = DB::table('kpi_measurements')
+                                    ->where('kpi_id','=',$id)
+                                    ->where('status','=',1)
+                                    ->select('value','year')
+                                    ->orderBy('year','asc')
+                                    ->get();
                 }
             }
             else
@@ -550,28 +1151,57 @@ class GestionEstrategicaController extends Controller
                                 ->select('id','month','semester','trimester','year','value')
                                 ->first();
 
-            if ($eval)
+            if (isset($_GET['org_id']))
             {
-                if (Session::get('languaje') == 'en')
+                if ($eval)
                 {
-                    return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval]);
+                    if (Session::get('languaje') == 'en')
+                    {
+                        return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval, 'measurements' => $measurements]);
+                    }
+                    else
+                    {
+                        return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval, 'measurements' => $measurements]);
+                    }
                 }
                 else
                 {
-                    return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval]);
+                    if (Session::get('languaje') == 'en')
+                    {
+                        return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year, 'measurements' => $measurements]);
+                    }
+                    else
+                    {
+                        return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year, 'measurements' => $measurements]);
+                    }
                 }
             }
-            else
+            else if (isset($_GET['obj_id']))
             {
-                if (Session::get('languaje') == 'en')
+                if ($eval)
                 {
-                    return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year]);
+                    if (Session::get('languaje') == 'en')
+                    {
+                        return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'obj_id' => $_GET['obj_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval,  'measurements' => $measurements]);
+                    }
+                    else
+                    {
+                        return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'obj_id' => $_GET['obj_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval,  'measurements' => $measurements]);
+                    }
                 }
                 else
                 {
-                    return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year]);
+                    if (Session::get('languaje') == 'en')
+                    {
+                        return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'obj_id' => $_GET['obj_id'],'last_eval' => $last_eval,'year' => $year,  'measurements' => $measurements]);
+                    }
+                    else
+                    {
+                        return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'obj_id' => $_GET['obj_id'],'last_eval' => $last_eval,'year' => $year,  'measurements' => $measurements]);
+                    }
                 }
             }
+            
         }
     }
 
@@ -812,8 +1442,15 @@ class GestionEstrategicaController extends Controller
                             }
                     }
                 });
-
-                return Redirect::to('kpi2?organization_id='.$_POST['org_id']);
+                
+                if (isset($_POST['org_id']))
+                {
+                    return Redirect::to('kpi2?organization_id='.$_POST['org_id']);
+                }
+                else if (isset($_POST['obj_id']))
+                {
+                    return Redirect::to('objective_kpi.'.$_POST['obj_id']);
+                }
             }
         }
     }
@@ -859,6 +1496,7 @@ class GestionEstrategicaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+/*
     public function kpiUpdate(Request $request, $id1)
     {
         if (Auth::guest())
@@ -972,6 +1610,133 @@ class GestionEstrategicaController extends Controller
             return Redirect::to('kpi2?organization_id='.$_POST['org_id']);
         }
     }
+*/
+    public function kpiUpdate(Request $request, $id1)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            global $id;
+            $id = $id1;
+            DB::transaction(function() {
+
+                $kpi = \Ermtool\kpi::find($GLOBALS['id']);
+
+                if ($_POST['calculation_method'] == "")
+                {
+                    $calc_method = NULL;
+                }
+                else
+                {
+                    $calc_method = $_POST['calculation_method'];
+                }
+
+                if ($_POST['periodicity'] == "")
+                {
+                    $periodicity = NULL;
+                }
+                else
+                {
+                    $periodicity = $_POST['periodicity'];
+                }
+
+                if ($_POST['stakeholder_id'] == "")
+                {
+                    $stake = NULL;
+                }
+                else
+                {
+                    $stake = $_POST['stakeholder_id'];
+                }
+
+                if ($_POST['measurement_unit'] == "")
+                {
+                    $measurement_unit = NULL;
+                }
+                else
+                {
+                    $measurement_unit = $_POST['measurement_unit'];
+                }
+
+                if ($_POST['initial_date'] == "")
+                {
+                    $initial_date = NULL;
+                }
+                else
+                {
+                    $initial_date = $_POST['initial_date'];
+                }
+
+                if ($_POST['final_date'] == "")
+                {
+                    $final_date = NULL;
+                }
+                else
+                {
+                    $final_date = $_POST['final_date'];
+                }
+
+                if ($_POST['goal'] == "")
+                {
+                    $goal = NULL;
+                }
+                else
+                {
+                    $goal = $_POST['goal'];
+                }
+
+                $kpi->name = $_POST['name'];
+                $kpi->description = $_POST['description'];
+                $kpi->calculation_method = $calc_method;
+                $kpi->periodicity = $periodicity;
+                $kpi->stakeholder_id = $stake;
+                $kpi->measurement_unit = $measurement_unit;
+                $kpi->initial_date = $initial_date;
+                $kpi->final_date = $final_date;
+                $kpi->goal = $goal;
+
+                //si es que estamos editando a través del monitor de KPI
+                if (isset($_POST['objectives_id']))
+                {  
+                    //primero que todo, eliminaremos los objetivos anteriores del kpi para evitar repeticiones
+                    DB::table('kpi_objective')->where('kpi_id',$GLOBALS['id'])->delete();
+
+                    //ahora, agregamos posibles nuevas relaciones
+                    foreach($_POST['objectives_id'] as $obj_id)
+                    {
+                        DB::table('kpi_objective')->insert([
+                            'objective_id'=>$obj_id,
+                            'kpi_id'=>$GLOBALS['id']
+                            ]);
+                    }
+                }
+
+                $kpi->save();
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','KPI successfully generated');
+                }
+                else
+                {
+                    Session::flash('message','KPI generado correctamente');
+                }
+            });
+
+            if (isset($_POST['objectives_id']))
+            {
+                return Redirect::to('kpi2?organization_id='.$_POST['org_id']);
+            }
+            else
+            {
+                return Redirect::to('objective_kpi.'.$_POST['obj_id']);
+            }
+        }
+    }
+
+/* ACTUALIZACIÓN HECHA POR EUGENIO: (26-09): No se usa monitor KPI en su forma antigua, sino que ahora monitor KPI será la sección de Gestión de KPI.
 
     public function kpiMonitor()
     {
@@ -1042,6 +1807,8 @@ class GestionEstrategicaController extends Controller
             }
         }
     }
+
+    */
 
     public function getKpi($org)
     {

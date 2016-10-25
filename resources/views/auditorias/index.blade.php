@@ -56,7 +56,14 @@
 		<th>Descripci&oacute;n</th>
 		<th>Fecha Agregado</th>
 		<th>&Uacute;ltima actualizaci&oacute;n</th>
-		<th>Ver</th>
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)
+			<th>Acci&oacute;n</th>
+			<th>Acci&oacute;n</th>
+			<th>Acci&oacute;n</th>
+			<?php break; ?>
+		@endif
+	@endforeach
 	</thead>
 
 	@foreach($planes as $plan)
@@ -65,17 +72,19 @@
 			<td>{{ $plan['description'] }}</td>
 			<td>{{ $plan['created_at'] }}</td>
 			<td>{{ $plan['updated_at'] }}</td>
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)
 			@if ($plan['status'] == 0)
-				<td><button class="btn btn-danger" onclick="closer({{ $plan['id'] }},'{{ $plan['name'] }}','audit_plan','El plan de auditoría')">Cerrar</button></td>
+				<td><button class="btn btn-warning" onclick="closer({{ $plan['id'] }},'{{ $plan['name'] }}','audit_plan','El plan de auditoría')">Cerrar</button></td>
 			@else
 				<td>El plan de auditor&iacute;a se encuentra cerrado.<br>
-				<button class="btn btn-warning" onclick="opening({{ $plan['id'] }},'{{ $plan['name'] }}','audit_plan','El plan de auditoría')">Re-abrir</button></td>
+				<button class="btn btn-primary" onclick="opening({{ $plan['id'] }},'{{ $plan['name'] }}','audit_plan','El plan de auditoría')">Re-abrir</button></td>
 			@endif
-			<td>
-				<div>
-		            {!! link_to_route('plan_auditoria.show', $title = 'Ver', $parameters = $plan['id'], $attributes = ['class'=>'btn btn-success']) !!}
-		        </div><!-- /btn-group -->
-			</td>
+			<td>{!! link_to_route('plan_auditoria.show', $title = 'Ver', $parameters = $plan['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
+			<td><button class="btn btn-danger" onclick="eliminar2({{ $plan['id'] }},'{{ $plan['name'] }}','audit_plan','El plan de auditoría')">Eliminar</button></td>
+		<?php break; ?>
+		@endif
+	@endforeach
 		</tr>
 	@endforeach
 	</table>

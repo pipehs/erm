@@ -57,21 +57,6 @@
 		<?php break; ?>
 	@endif
 @endforeach
-<!--
-		<form class="form-horizontal" method="REQUEST" action="organization.create">
-		<input type="hidden" name="_token" value="{{{ csrf_token() }}}" >
-				<button type="submit" class="btn btn-primary">Agregar Nueva Organizaci&oacute;n</button>
-			</form>
-
-			{!!Form::open()!!}
-				<div class="form-group">
-					{!!Form::label('Nombre',null,['class' => 'col-sm-4 control-label'])!!}
-					<div class="col-sm-3">
-						{!!Form::text('name',null,['class' => 'form-control','placeholder' => 'Ingrese nombre de la organizaci&oacute;n'])!!}
-					</div>
-				</div>			
-			{!!Form::close()!!}
--->	
 
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 	<thead>

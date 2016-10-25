@@ -1886,6 +1886,7 @@ class IssuesController extends Controller
         else
         {   
             $org = \Ermtool\Organization::where('id',$_GET['org'])->value('name');
+            $org_id = \Ermtool\Organization::where('id',$_GET['org'])->value('id');
 
             //obtenemos stakeholders de la misma organización
             $stakes = DB::table('stakeholders')
@@ -1907,7 +1908,7 @@ class IssuesController extends Controller
 
 
             //vemos si es hallazgo de proceso, organización, u otro
-            if ($issue->process_id != NULL)
+            if ($issue['process_id'] != NULL)
             {
                 $processes = \Ermtool\Process::where('processes.status',0)
                             ->join('subprocesses','subprocesses.process_id','=','processes.id')
@@ -1919,33 +1920,33 @@ class IssuesController extends Controller
 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.hallazgos.edit',['org'=>$org, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan]);
+                    return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan]);
                 }
                 else
                 {
-                    return view('hallazgos.edit',['org'=>$org, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan]);
+                    return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan]);
                 }
             }
-            else if ($issue->organization_id != NULL)
+            else if ($issue['organization_id'] != NULL)
             {
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.hallazgos.edit',['org'=>$org, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan]);
+                    return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan]);
                 }
                 else
                 {
-                    return view('hallazgos.edit',['org'=>$org, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan]);
+                    return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan]);
                 }
             }
             else
             {
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.hallazgos.edit',['org'=>$org, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan]);
+                    return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan]);
                 }
                 else
                 {
-                    return view('hallazgos.edit',['org'=>$org, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan]);
+                    return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan]);
                 }
             }
         }
@@ -2169,21 +2170,21 @@ class IssuesController extends Controller
             $organizations = \Ermtool\Organization::lists('name','id');
 
             //obtenemos nombre de organización
-            $org = \Ermtool\Organization::where('id',$_POST['organization_id'])->value('name');
+            $org = \Ermtool\Organization::where('id',$_GET['organization_id'])->value('name');
 
-            $org_id = $_POST['organization_id'];
+            $org_id = $_GET['organization_id'];
             
             $issues = array();
 
-            $issues = $this->getIssues($_POST['kind'],$_POST['organization_id'],2);
+            $issues = $this->getIssues($_GET['kind'],$_GET['organization_id'],2);
             //print_r($_POST);
             if (Session::get('languaje') == 'en')
             {
-                return view('en.reportes.hallazgos',['issues'=>$issues,'kind'=>$_POST['kind'],'organizations'=>$organizations,'org'=>$org,'org_id'=>$org_id]);
+                return view('en.reportes.hallazgos',['issues'=>$issues,'kind'=>$_GET['kind'],'organizations'=>$organizations,'org'=>$org,'org_id'=>$org_id]);
             }
             else
             {
-                return view('reportes.hallazgos',['issues'=>$issues,'kind'=>$_POST['kind'],'organizations'=>$organizations,'org'=>$org,'org_id'=>$org_id]);
+                return view('reportes.hallazgos',['issues'=>$issues,'kind'=>$_GET['kind'],'organizations'=>$organizations,'org'=>$org,'org_id'=>$org_id]);
             }
         }
     }

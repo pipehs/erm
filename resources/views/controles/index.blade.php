@@ -61,11 +61,12 @@
 	<th>Prop&oacute;sito</th>
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
-	<th>Editar</th>
+	<th>Acci&oacute;n</th>
+	<th>Acci&oacute;n</th>
 	<?php break; ?>
 	@endif
 @endforeach
-	<th>Documentos</th>
+	<th>Acci&oacute;n</th>
 	</thead>
 
 	@foreach($controls as $control)
@@ -113,19 +114,12 @@
 			</td>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)	
-			<td> 
-			<div>
-	            {!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'], $attributes = ['class'=>'btn btn-success']) !!}
-	        </div><!-- /btn-group -->
-			</td>
+			<td>{!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
+			<td><button class="btn btn-danger" onclick="eliminar2({{ $control['id'] }},'{{ $control['name'] }}','controles','El control')">Eliminar</button></td>
 		<?php break; ?>
 		@endif
 	@endforeach
-		<td>
-			<div>
-	            {!! link_to_route('controles.docs', $title = 'Ver', $parameters = $control['id'], $attributes = ['class'=>'btn btn-warning']) !!}
-	        </div><!-- /btn-group -->
-		</td>
+		<td>{!! link_to_route('controles.docs', $title = 'Ver', $parameters = $control['id'], $attributes = ['class'=>'btn btn-warning']) !!}</td>
 		</tr>
 	@endforeach
 	</table>

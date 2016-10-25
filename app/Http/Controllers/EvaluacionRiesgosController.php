@@ -277,7 +277,7 @@ class EvaluacionRiesgosController extends Controller
                     }
                     if (Session::get('languaje') == 'en')
                     {
-                        Session::flash('message','Evaluation poll successfully created');
+                        Session::flash('message','Assessment poll successfully created');
                     }
                     else
                     {
@@ -285,7 +285,7 @@ class EvaluacionRiesgosController extends Controller
                     }
                 });
 
-                return Redirect::to('/evaluacion');           
+                return Redirect::to('evaluacion_agregadas');           
             }
         }
     }
@@ -1507,7 +1507,7 @@ class EvaluacionRiesgosController extends Controller
                             ->select('id','avg_probability','avg_impact')
                             ->get();
 
-                if ($val) //si no existe $val la encuesta ni siquiera tiene riesgos, por lo que se puede eliminar
+                if (!empty($val)) //si no existe $val la encuesta ni siquiera tiene riesgos, por lo que se puede eliminar
                 {
                     $cont = 0; //contador de valores distintos de cero
                     foreach ($val as $v)

@@ -58,6 +58,8 @@
 		<th>Last update</th>
 		<th>View</th>
 		<th>Action</th>
+		<th>Action</th>
+		<th>Action</th>
 	</thead>
 
 	@foreach($planes as $plan)
@@ -67,16 +69,13 @@
 			<td>{{ $plan['created_at'] }}</td>
 			<td>{{ $plan['updated_at'] }}</td>
 			@if ($plan['status'] == 0)
-				<td><button class="btn btn-danger" onclick="closer({{ $plan['id'] }},'{{ $plan['name'] }}','audit_plan','The audit plan')">Close</button></td>
+				<td><button class="btn btn-warning" onclick="closer({{ $plan['id'] }},'{{ $plan['name'] }}','audit_plan','The audit plan')">Close</button></td>
 			@else
 				<td>The audit plan is closed.<br>
-				<button class="btn btn-warning" onclick="opening({{ $plan['id'] }},'{{ $plan['name'] }}','audit_plan','The audit plan')">Re-open</button></td>
+				<button class="btn btn-primary" onclick="opening({{ $plan['id'] }},'{{ $plan['name'] }}','audit_plan','The audit plan')">Re-open</button></td>
 			@endif
-			<td>
-				<div>
-		            {!! link_to_route('plan_auditoria.show', $title = 'Show', $parameters = $plan['id'], $attributes = ['class'=>'btn btn-success']) !!}
-		        </div><!-- /btn-group -->
-			</td>
+			<td>{!! link_to_route('plan_auditoria.show', $title = 'Show', $parameters = $plan['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
+			<td><button class="btn btn-danger" onclick="eliminar2({{ $plan['id'] }},'{{ $plan['name'] }}','audit_plan','The audit plan')">Delete</button></td>
 		</tr>
 	@endforeach
 	</table>

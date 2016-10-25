@@ -440,7 +440,42 @@ class PlanesAccionController extends Controller
      */
     public function edit($id)
     {
-        //
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {   
+            $org = \Ermtool\Organization::where('id',$_GET['org'])->value('name');
+            $org_id = \Ermtool\Organization::where('id',$_GET['org'])->value('id');
+
+            //obtenemos stakeholders de la misma organización
+            $stakes = DB::table('stakeholders')
+                        ->join('organization_stakeholder','organization_stakeholder.stakeholder_id','=','stakeholders.id')
+                        ->where('organization_stakeholder.organization_id','=',$_GET['org'])
+                        ->select('stakeholders.id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+                        ->orderBy('name')
+                        ->lists('full_name', 'id');
+
+            $action_plan = \Ermtool\Action_plan::find($id);
+
+            //obtenemos todos los issues y el issue del plan de acción
+            $issue = DB::table('issues')
+                    ->where('id','=',$action_plan->issue_id)
+                    ->select('id','name')
+                    ->first();
+
+            $issues = \Ermtool\Issue::lists('name','id');
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.planes_accion.edit',['org'=>$org, 'org_id' => $org_id, 'action_plan' => $action_plan,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'issues' => $issues, 'issue' => $issue]);
+            }
+            else
+            {
+                return view('planes_accion.edit',['org'=>$org, 'org_id' => $org_id, 'action_plan' => $action_plan,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'issues' => $issues, 'issue' => $issue]);
+            }
+        }
     }
 
     /**
@@ -452,7 +487,70 @@ class PlanesAccionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            //print_r($_POST);
+            //actualizamos issue de id = $id
+            global $id2;
+            $id2 = $id;
+            DB::transaction(function() {
+                
+                $status = 0;
+
+                //verificamos ingreso de datos
+                if (isset($_POST['description']) AND $_POST['description'] != "")
+                {
+                    $description = $_POST['description'];
+                }
+                else
+                {
+                    $description = NULL;
+                }
+
+                if ($_POST['stakeholder_id'] != "")
+                {
+                    $stakeholder_id = $_POST['stakeholder_id'];
+                }
+                else
+                    $stakeholder_id = NULL;
+
+                if ($_POST['final_date'] != "")
+                {
+                    $final_date = $_POST['final_date'];
+                }
+                else
+                {
+                    $final_date = NULL;
+                }
+
+                //actualizamos action_plan de issue_id = $id
+                DB::table('action_plans')->where('id','=',$GLOBALS['id2'])
+                    ->update([
+                        'issue_id' => $_POST['issue_id'],
+                        'description' => $description,
+                        'stakeholder_id' => $stakeholder_id,
+                        'final_date' => $final_date,
+                        'status' => $status,
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Action plan successfully updated');
+                }
+                else
+                {
+                    Session::flash('message','Plan de acción actualizado correctamente');
+                }
+
+            });
+
+            return Redirect::to('action_plans2?organization_id='.$_POST['org_id']);
+        }
     }
 
     /**

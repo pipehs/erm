@@ -36,16 +36,25 @@
 				<div class="no-move"></div>
 			</div>
 			<div class="box-content">
+			@if(Session::has('error'))
+				<div class="alert alert-danger alert-dismissible" role="alert">
+					{{ Session::get('error') }}
+				</div>
+			@endif
 			Ingrese los nuevos datos para el objetivo seleccionado.
 				{!!Form::model($objetivo,['route'=>['objetivos.update',$objetivo->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
 					@include('datos_maestros.objetivos.form')
 				{!!Form::close()!!}
 
 				<center>
-					<a href="objetivos?organizacion={{$org_id}}" class="btn btn-danger">Volver</a>	
+					<a href="objetivos_plan.{{$strategic_plan_id}}" class="btn btn-danger">Volver</a>	
 				<center>
 			</div>
 		</div>
 	</div>
 </div>
+@stop
+
+@section('scripts2')
+{!!Html::script('assets/js/create_objectives.js')!!}
 @stop

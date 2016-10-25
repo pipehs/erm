@@ -51,7 +51,7 @@
       <div class="col-sm-5">
             <table style="text-align: center; font-weight: bold; float: left;">
             <tr><td bgcolor="#000000" style="padding:5px;">
-              <div  style="width: 12px; background-color:#000000; word-wrap: break-word; text-align: center; color:white;">Impacto
+              <div  style="width: 11px; background-color:#000000; word-wrap: break-word; text-align: center; color:white;">Impacto
                     </div></td>
                 <td  bgcolor="#CCCCCC">
                   <table height="395px" width="100%" border="1">

@@ -36,13 +36,19 @@
 				<div class="no-move"></div>
 			</div>
 			<div class="box-content">
+
+			@if(Session::has('error'))
+				<div class="alert alert-danger alert-dismissible" role="alert">
+					{{ Session::get('error') }}
+				</div>
+			@endif
 			Ingrese los datos del nuevo objetivo corporativo para la organizaci&oacute;n {{ $_GET['nombre_organizacion'] }}
 				{!!Form::open(['route'=>'objetivos.store','method'=>'POST','class'=>'form-horizontal'])!!}
 					@include('datos_maestros.objetivos.form')
 				{!!Form::close()!!}
 				
 				<center>
-					<a href="objetivos?organizacion={{$org_id}}" class="btn btn-danger">Volver</a>	
+					<a href="objetivos_plan.{{$strategic_plan_id}}" class="btn btn-danger">Volver</a>	
 				<center>
 			</div>
 		</div>
@@ -50,3 +56,6 @@
 </div>
 @stop
 
+@section('scripts2')
+{!!Html::script('assets/js/create_objectives.js')!!}
+@stop

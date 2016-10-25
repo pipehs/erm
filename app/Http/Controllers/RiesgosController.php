@@ -1195,30 +1195,234 @@ class RiesgosController extends Controller
         $res = 1;
 
         DB::transaction(function() {
-            //primero vemos si contiene algún objetivo asociado
-            $rev = DB::table('objective_risk')
-                ->where('risk_id','=',$id)
+            //CORRECCIÓN DISEÑO: SIEMPRE TENDRÁ O UN OBJECTIVE_RISK O UN RISK_SUBPROCESS
+            //primero vemos si contiene algún objetivo asociado 
+            
+            //$rev = DB::table('action_plans')
+            //    ->where('')
+            //OJO: En evaluation_risk sólo se buscará en el campo risk_id, ya que después se revisará objective_risk o risk_subprocess
+            $rev = DB::table('evaluation_risk')
+                ->where('risk_id','=',$GLOBALS['id1'])
                 ->select('id')
                 ->get();
 
             if (empty($rev))
             {
-                //ahora vemos si es que tiene risk subprocess
-                $rev = DB::table('risk_subprocess')
-                    ->where('risk_id','=')
+                //revisamos objective_subprocess_risk (hayq que ver objective_risk y subprocess_risk)
+                $rev = DB::table('objective_subprocess_risk')
+                    ->where('objective_risk_id','=',$GLOBALS['id1'])
                     ->select('id')
                     ->get();
 
                 if (empty($rev))
                 {
-                    //$rev = DB::table('action_plans')
-                    //    ->where('')
-                    //Esta consulta es más brigida, ver mañana
-                    //Hay que ver subprocesos o planes de auditoría que tengan hallazgos en los que pueda estar el riesgo (quizas sea mejor solo ver issue ya que si tiene issue automáticamente se descarta)
+                    //ahora revisamos en la misma tabla subprocess_risk
+                    $rev = DB::table('objective_subprocess_risk')
+                        ->where('risk_subprocess_id','=',$GLOBALS['id1'])
+                        ->select('id')
+                        ->get();
+
+                    if (empty($rev))
+                    {
+                        //pruebas de auditoría
+                        $rev = DB::table('audit_tests')
+                            ->where('risk_id','=',$GLOBALS['id1'])
+                            ->select('id')
+                            ->get();
+
+                        if (empty($rev))
+                        {
+                            //KRI
+                            $rev = DB::table('kri')
+                                ->where('risk_id','=',$GLOBALS['id1'])
+                                ->select('id')
+                                ->get();
+
+                            if (empty($rev))
+                            {
+                                //ahora vemos verificamos las uniones con objective_risk o subprocess_risk
+                                //primero usaremos una variable local para verificar posteriormente
+                                $res2 = 1;
+
+                                $risks = DB::table('risk_subprocess')
+                                    ->where('risk_id','=',$GLOBALS['id1'])
+                                    ->select('id')
+                                    ->get();
+
+                                if (empty($risks)) //entonces es objective_risk
+                                {
+                                    $risks = DB::table('objective_risk')
+                                        ->where('risk_id','=',$GLOBALS['id1'])
+                                        ->select('id')
+                                        ->get();
+
+                                    foreach ($risks as $risk)
+                                    {
+                                        //vemos si tiene control_objective_risk
+                                        $rev = DB::table('control_objective_risk')
+                                            ->where('objective_risk_id','=',$risk->id)
+                                            ->select('id')
+                                            ->get();
+
+                                        if (empty($rev))
+                                        {
+                                            //evaluation_risk
+                                            $rev = DB::table('evaluation_risk')
+                                                ->where('objective_risk_id','=',$risk->id)
+                                                ->select('id')
+                                                ->get();
+
+                                            if (empty($rev))
+                                            {
+                                                $rev = DB::table('audit_plan_risk')
+                                                    ->where('objective_risk_id','=',$risk->id)
+                                                    ->select('id')
+                                                    ->get();
+
+                                                if (empty($rev))
+                                                {
+                                                    $rev = DB::table('audit_risk')
+                                                        ->where('objective_risk_id','=',$risk->id)
+                                                        ->select('id')
+                                                        ->get();
+
+                                                    if (empty($rev))
+                                                    {
+                                                        //para verificar que sea parar todos los objective_risk
+                                                        $res2 = 0;
+                                                    }
+                                                    else
+                                                    {
+                                                        $res2 = 1;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    $res2 = 1;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                $res2 = 1;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            $res2 = 1;
+                                        }
+
+                                        if ($res2 == 1)
+                                        {
+                                            break;
+                                        }
+                                    } 
+                                }
+                                else
+                                {
+                                    foreach ($risks as $risk)
+                                    {
+                                        //vemos si tiene control_risk_subprocess
+                                        $rev = DB::table('control_risk_subprocess')
+                                            ->where('risk_subprocess_id','=',$risk->id)
+                                            ->select('id')
+                                            ->get();
+
+                                        if (empty($rev))
+                                        {
+                                            //evaluation_risk
+                                            $rev = DB::table('evaluation_risk')
+                                                ->where('risk_subprocess_id','=',$risk->id)
+                                                ->select('id')
+                                                ->get();
+
+                                            if (empty($rev))
+                                            {
+                                                $rev = DB::table('audit_plan_risk')
+                                                    ->where('risk_subprocess_id','=',$risk->id)
+                                                    ->select('id')
+                                                    ->get();
+
+                                                if (empty($rev))
+                                                {
+                                                    $rev = DB::table('audit_risk')
+                                                        ->where('risk_subprocess_id','=',$risk->id)
+                                                        ->select('id')
+                                                        ->get();
+
+                                                    if (empty($rev))
+                                                    {
+                                                        $res2 = 0;
+                                                        //eliminamos risk(s)_subprocess asociados
+                                                        //DB::table('risk_subprocess')
+                                                        //    ->where('id','=',$risk->id)
+                                                        //    ->delete();
+                                                    }
+                                                    else
+                                                    {
+                                                        $res2 = 1;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    $res2 = 1;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                $res2 = 1;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            $res2 = 1;
+                                        }
+
+                                        if ($res2 == 1)
+                                        {
+                                            break;
+                                        }
+                                    } 
+                                }
+
+                                if ($res2 == 0)
+                                {
+                                    //se puede borrar
+
+                                    //eliminamos objective_risk(s) asociados (si es que hay)
+                                    DB::table('objective_risk')
+                                        ->where('risk_id','=',$GLOBALS['id1'])
+                                        ->delete();
+
+                                    //eliminamos de risk(s)_subprocess asociados (si es que hay)
+                                    DB::table('risk_subprocess')
+                                        ->where('risk_id','=',$GLOBALS['id1'])
+                                        ->delete();
+
+                                    //eliminamos posibles causas asociadas
+                                    DB::table('cause_risk')
+                                        ->where('risk_id','=',$GLOBALS['id1'])
+                                        ->delete();
+
+                                    //eliminamos posibles efectos asociados
+                                    DB::table('effect_risk')
+                                        ->where('risk_id','=',$GLOBALS['id1'])
+                                        ->delete();
+                                    DB::table('risks')
+                                        ->where('id','=',$GLOBALS['id1'])
+                                        ->delete();
+
+                                    $GLOBALS['res'] = 0;
+                                }
+                                
+                            }
+                        }
+                    }
                 }
             }
 
         });
+
+        return $res;
         
     }
 

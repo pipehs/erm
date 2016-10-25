@@ -222,7 +222,7 @@
 
 
 @section('scripts2')
-<script type="text/javascript" src="assets/js/loader.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
 //función que selecciona KPI de determinada organización
 		$("#organization_id").change(function() {

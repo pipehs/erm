@@ -61,7 +61,8 @@
 	<th>Purpose</th>
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
-	<th>Edit</th>
+	<th>Action</th>
+	<th>Action</th>
 	<?php break; ?>
 	@endif
 @endforeach
@@ -120,6 +121,7 @@
 			<td> 
 			<div>
 	            {!! link_to_route('controles.edit', $title = 'Edit', $parameters = $control['id'], $attributes = ['class'=>'btn btn-success']) !!}
+	            <td><button class="btn btn-danger" onclick="eliminar2({{ $control['id'] }},'{{ $control['name'] }}','controles','The control')">Delete</button></td>
 	        </div><!-- /btn-group -->
 			</td>
 		<?php break; ?>

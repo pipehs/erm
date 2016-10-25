@@ -65,7 +65,7 @@
 					<div class="form-group">
 						{!!Form::label('P&eacute;rdida esperada',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
-							{!!Form::number('expected_loss',null,['id'=>'expected_loss','class'=>'form-control','required'=>'true','min'=>'0'])!!}
+							{!!Form::number('expected_loss',null,['id'=>'expected_loss','class'=>'form-control','min'=>'0'])!!}
 						</div>
 					</div>
 					<div id="causa">

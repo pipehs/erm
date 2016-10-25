@@ -407,7 +407,71 @@ class ControlesController extends Controller
      */
     public function destroy($id)
     {
-        //
+        global $id1;
+        $id1 = $id;
+        global $res;
+        $res = 1;
+
+        DB::transaction(function() {
+
+            //vemos si tiene evaluaciones
+            $rev = DB::table('control_evaluation')
+                    ->where('control_id','=',$GLOBALS['id1'])
+                    ->select('id')
+                    ->get();
+
+            if (empty($rev))
+            {
+                //ahora vemos si tiene issues
+                $rev = DB::table('issues')
+                    ->where('control_id','=',$GLOBALS['id1'])
+                    ->select('id')
+                    ->get();
+
+                if (empty($rev))
+                {
+                    //audit_tests
+                    $rev = DB::table('audit_tests')
+                        ->where('control_id','=',$GLOBALS['id1'])
+                        ->select('id')
+                        ->get();
+
+                    if (empty($rev))
+                    {
+                        //se puede borrar
+                        //primero debemos borrar control_risk_subprocess o control_objective_risk según corresponda
+                        $control_objective_risk = DB::table('control_objective_risk')
+                                                    ->where('control_id','=',$GLOBALS['id1'])
+                                                    ->select('id')
+                                                    ->get();
+
+                        if (empty($control_objective_risk)) //entonces es control de proceso
+                        {
+                            //borramos todos los campos de control_risk_subprocess donde el control sea el seleccionado
+                            DB::table('control_risk_subprocess')
+                                ->where('control_id','=',$GLOBALS['id1'])
+                                ->delete();
+                        }
+                        else //eliminamos de control_objective_risk
+                        {
+                            DB::table('control_objective_risk')
+                                ->where('control_id','=',$GLOBALS['id1'])
+                                ->delete();
+                        }
+
+                        //ahora eliminamos el control en si
+                        DB::table('controls')
+                            ->where('id','=',$GLOBALS['id1'])
+                            ->delete();
+
+                        $GLOBALS['res'] = 0;
+                    }
+                }
+                
+            }
+        });
+
+        return $res;
     }
     //index para evaluación de controles
     public function indexEvaluacion()

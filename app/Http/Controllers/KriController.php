@@ -553,7 +553,32 @@ class KriController extends Controller
      */
     public function destroy($id)
     {
-        //
+        global $id1;
+        $id1 = $id;
+        global $res;
+        $res = 1;
+
+        DB::transaction(function() {
+
+            //vemos si es que tiene alguna medición
+            $rev = DB::table('measurements')
+                    ->where('kri_id','=',$GLOBALS['id1'])
+                    ->select('id')
+                    ->get();
+
+            if (empty($rev))
+            {
+                //si es que se llega a esta instancia, se puede eliminar
+                DB::table('kri')
+                    ->where('id','=',$GLOBALS['id1'])
+                    ->delete();
+
+                $GLOBALS['res'] = 0;
+                
+            }
+        });
+
+        return $res;
     }
 
     //vista de enlazador de riesgos de proceso a riesgos de negocio

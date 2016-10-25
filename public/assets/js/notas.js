@@ -102,6 +102,8 @@ function notas(id)
 							resultado += '<div style="cursor:hand" id="responder_nota_'+this.id+'" onclick="responder_nota('+this.id+','+this.test_id+')" class="btn btn-primary">Responder</div>';
 							//agregamos div para formulario de creación de nota
 							resultado += '<div id="respuesta_nota_'+this.id+'"  style="display: none; clear: left;"><br><br></div>';
+
+							resultado += "<div style='cursor:hand' class='btn btn-danger'onclick='eliminar2("+this.id+",'"+this.name+"','notas','La nota')'>Eliminar</div>";
 						}
 					}
 					resultado += '<hr style="border-style: inset; border-width: 1px;">';

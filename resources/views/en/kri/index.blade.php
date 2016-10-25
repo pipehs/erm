@@ -68,6 +68,7 @@
 				@if ($role != 6)
 						<th style="vertical-align:top;">Action</th>
 						<th style="vertical-align:top;">Action</th>
+						<th style="vertical-align:top;">Action</th>
 				<?php break; ?>
 				@endif
 			@endforeach
@@ -138,6 +139,7 @@
 				@if ($role != 6)
 							<td><a href="kri.edit.{{ $k['id'] }}" class="btn btn-primary">Edit</a></td>
 							<td><a href="kri.evaluar.{{ $k['id'] }}" class="btn btn-success">Assess</a></td>
+							<td><button class="btn btn-danger" onclick="eliminar2({{ $k['id'] }},'{{ $k['name'] }}','kri','The KRI')">Delete</button></td>
 				<?php break; ?>
 				@endif
 			@endforeach

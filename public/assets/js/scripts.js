@@ -238,9 +238,11 @@ function eliminar_ev(id,kind)
 
 function validarFechaMayorActual(date)
 {
+	//por error de js (que está restando un día a la fecha ingresada); modificaremos ésta para parsear como INT (y agregar hora)
+	var date_temp = date.split('-');
     var today = new Date();
-    var date2= new Date(date);
-        
+    var date2 = new Date(date_temp[0]+'-'+date_temp[1]+'-'+parseInt(date_temp[2])+' 23:59:59');
+
     if (date2<today)
     {   
         swal('Cuidado!','Está ingresando una fecha menor a la fecha actual','warning');
@@ -256,9 +258,11 @@ function validarFechaMayorActual(date)
 function compararFechas(fecha_menor,fecha_mayor)
 {
 	//primero hacemos la misma validación de arriba
-	var today = new Date();
-    var date1 = new Date(fecha_mayor);
-    var date2 = new Date(fecha_menor);
+    var date_temp1 = fecha_menor.split('-');
+    var date_temp2 = fecha_mayor.split('-');
+    var today = new Date();
+    var date1 = new Date(date_temp1[0]+'-'+date_temp1[1]+'-'+parseInt(date_temp1[2])+' 23:59:59');
+    var date2 = new Date(date_temp2[0]+'-'+date_temp2[1]+'-'+parseInt(date_temp2[2])+' 23:59:59');
         
     if (date2<today)
     {   

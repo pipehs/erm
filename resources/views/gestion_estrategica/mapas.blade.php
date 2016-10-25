@@ -62,66 +62,179 @@
 			{!!Form::close()!!}
 
 @if (isset($objectives))
+
+	@if (!empty($objectives))
 	
-	
-	<h3>{{ $org_selected }}</h3>
-		<div class="objetivos">Visi&oacute;n: {{ $vision }}</div>
-		<div class="perspectiva">Perspectiva</div>
-		<div class="financiera">
-		<table style="margin:10px;" width="100%" height="100%">
+	<table class="table_mapa" border="0">
+		<thead>
+		<th colspan="2" class="thead2">
+		<h3>Mapa estrat&eacute;gico {{ $org_selected }}</h3>
+			<div class="objetivos">Visi&oacute;n: {{ $vision }}</div>
+		</th>
+		</thead>
 		<tr>
-			<td width="20%">Financiera</td>
-
-			@foreach ($objectives as $obj)
-				@if ($obj->perspective == 1)
-				<td><p class="objectives" title="{{$obj->description}}">{{$obj->name}}</td>
-				@endif
-			@endforeach
+			<td class="perspectivas">Financiera</td>
+			<td>
+			<table class="financiera" border="0" align="center">
+			<tr>
+				@foreach ($objectives as $obj)
+					@if ($obj['perspective'] == 1)
+						<td><center><p class="circulo-big">{{$obj['code']}}</p><p class="objectives" title="{{$obj['description']}}">{{$obj['name']}}</p><br>
+						<!--<div style="display:inline-block; margin:-15px;">-->
+						@foreach ($obj['code_impacted'] as $imp)
+							<p class="circulo-impactado">{{$imp}}</p>
+						@endforeach
+						<!--</div>-->
+						</center>
+						</td>
+					@endif
+				@endforeach
+			</tr>
+			</table>
+			</td>
 		</tr>
-		</table>
-		</div>
 
-		<div class="procesos">
-		<table style="margin:15px;" width="100%" height="100%">
 		<tr>
-			<td width="20%">Procesos</td>
-			@foreach ($objectives as $obj)
-				@if ($obj->perspective == 2)
-				<td><p class="objectives" title="{{$obj->description}}">{{$obj->name}}</td>
-				@endif
-			@endforeach
+			<td class="perspectivas">Clientes&nbsp;</td>
+			<td>
+			<table class="clientes" border="0" align="center">
+			<tr>
+				@foreach ($objectives as $obj)
+					@if ($obj['perspective'] == 3)
+						<td>
+						<center><p class="circulo-big">{{$obj['code']}}</p><p class="objectives" title="{{$obj['description']}}">{{$obj['name']}}</p></br>
+						<!--<div style="display:inline-block; margin:-15px;">-->
+						@foreach ($obj['code_impacted'] as $imp)
+							<p class="circulo-impactado">{{ $imp }}</p>
+						@endforeach
+						<!--</div>-->
+						</center>
+						</td>
+					@endif
+				@endforeach
+			</tr>
+			</table>
+			</td>
 		</tr>
-		</table>
-		</div>
 
-		<div class="procesos">
-		<table style="margin:15px;" width="100%" height="100%">
 		<tr>
-			<td width="20%">Clientes</td>
-			@foreach ($objectives as $obj)
-				@if ($obj->perspective == 3)
-				<td><p class="objectives" title="{{$obj->description}}">{{$obj->name}}</td>
-				@endif
-			@endforeach
+			<td class="perspectiva_proceso">Procesos&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td>
+			<table class="procesos1" border="0" align="center">
+			<tr><td style="vertical-align:top;"><h4><b><center>Gesti&oacute;n Operacional</center></b></h4></td></tr>
+			<tr>
+				@foreach ($objectives as $obj)
+					@if ($obj['perspective'] == 2 && $obj['perspective2'] == 1)
+						<tr><td style="vertical-align:top;">
+						<center><p class="circulo-big">{{$obj['code']}}</p><p class="objectives" title="{{$obj['description']}}">{{$obj['name']}}</p></br>
+						<!--<div style="display:inline-block; margin:-15px;">-->
+						@if (!empty($obj['code_impacted']))
+							@foreach ($obj['code_impacted'] as $imp)
+								<p class="circulo-impactado">{{$imp}}</p>
+							@endforeach
+						@else
+							</br>
+						@endif
+						<!--</div>-->
+						</center>
+						</td></tr>
+					@endif
+				@endforeach
+			</tr>
+			</table>
+			<table class="procesos2" border="0" align="center">
+			<tr><td style="vertical-align:top; height: inherit;"><h4><b><center>Gesti&oacute;n de Clientes</center></b></h4>
+			
+				@foreach ($objectives as $obj)
+					@if ($obj['perspective'] == 2 && $obj['perspective2'] == 2)
+						
+						<center><p class="circulo-big">{{$obj['code']}}</p><p class="objectives" title="{{$obj['description']}}">{{$obj['name']}}</p></br>
+						<!--<div style="display:inline-block; margin:-15px;">-->
+						@if (!empty($obj['code_impacted']))
+							@foreach ($obj['code_impacted'] as $imp)
+								<p class="circulo-impactado">{{$imp}}</p>
+							@endforeach
+						@else
+							</br>
+						@endif
+						<!--</div>-->
+						</center>
+						
+					@endif
+				@endforeach
+			</tr>
+			</table>
+			<table class="procesos3" border="0" align="center">
+			<tr><td style="vertical-align:top;"><h4><b><center> Gesti&oacute;n de Innovaci&oacute;n</center></b></h4></td></tr>
+				@foreach ($objectives as $obj)
+					@if ($obj['perspective'] == 2 && $obj['perspective2'] == 3)
+						<tr><td style="vertical-align:top;">
+						<center><p class="circulo-big">{{$obj['code']}}</p><p class="objectives" title="{{$obj['description']}}">{{$obj['name']}}</p></br>
+						<!--<div style="display:inline-block; margin:-15px;">-->
+						@if (!empty($obj['code_impacted']))
+							@foreach ($obj['code_impacted'] as $imp)
+								<p class="circulo-impactado">{{$imp}}</p>
+							@endforeach
+						@else
+							</br>
+						@endif
+						<!--</div>-->
+						</center>
+						</td></tr>
+					@endif
+				@endforeach
+			</table>
+			<table class="procesos4" border="0" align="center">
+				<tr><td style="vertical-align:top;"><h4><b><center>Reguladores sociales</center></b></h4></td></tr>
+				@foreach ($objectives as $obj)
+					@if ($obj['perspective'] == 2 && $obj['perspective2'] == 4)
+						<tr><td style="vertical-align:top;">
+						<center><p class="circulo-big">{{$obj['code']}}</p><p class="objectives" title="{{$obj['description']}}">{{$obj['name']}}</p></br>
+						<!--<div style="display:inline-block; margin:-15px;">-->
+						@if (!empty($obj['code_impacted']))
+							@foreach ($obj['code_impacted'] as $imp)
+								<p class="circulo-impactado">{{$imp}}</p>
+							@endforeach
+						@else
+							</br>
+						@endif
+						<!--</div>-->
+						</center>
+						</td></tr>
+					@endif
+				@endforeach
+			</table>
+			</td>
 		</tr>
-		</table>
-		</div>
 
-		<div class="procesos">
-		<table style="margin:15px; vertical-align:middle;" width="100%" height="100%">
 		<tr>
-			<td width="20%">Aprendizaje</td>
-			@foreach ($objectives as $obj)
-				@if ($obj->perspective == 4)
-				<td><p class="objectives" title="{{$obj->description}}">{{$obj->name}}</td>
-				@endif
-			@endforeach
+			<td class="perspectivas">Aprendizaje</td>
+			<td>
+			<table class="aprendizaje" border="0" align="center">
+			<tr>
+				@foreach ($objectives as $obj)
+					@if ($obj['perspective'] == 4)
+					<td><center><p class="circulo-big">{{$obj['code']}}</p><p class="objectives" title="{{$obj['description']}}">{{$obj['name']}}</p><br>
+					<!--<div style="display:inline-block; margin:-15px;">-->
+					@foreach ($obj['code_impacted'] as $imp)
+						<p class="circulo-impactado">{{$imp}}</p>
+					@endforeach
+					<!--</div>-->
+					</center></td>
+					@endif
+				@endforeach
+			</tr>
+			</table>
+			</td>
 		</tr>
-		</table>
 
-		</div>
-	</div>
-	
+	</table>
+
+	@else
+		</br>
+		<center><h4><b>No existe un plan estrat&eacute;gico activo para la organizaci&oacute;n {{ $org_selected }}, o bien no se han definido objetivos para &eacute;sta.</b></h4></center>
+		</br></br></br></br>
+	@endif
 @endif
 
 
