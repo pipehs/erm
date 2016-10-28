@@ -54,7 +54,7 @@
 						</div>
 					</div>
 
-				<table id="table_evaluacion" class="table table-bordered table-striped table-hover table-heading table-datatable" style="display: none;">
+				<table id="table_evaluacion" class="table table-bordered table-striped table-hover table-heading table-datatable" style="display: none; vertical-align: top;">
 				</table>
 
 				<div id="boton-guardar">
@@ -395,7 +395,7 @@ function editEval(control_id)
 				efectividad2 += "<option value='2'>Inefectivo</option></select>";
 				efectividad2 += "<div id='datos_efectividad' style='display: none;'></div></td>";
 
-				sustantiva2 = "<td><select name='sustantiva' style='width:180px' class='form-control' id='sustantiva' onchange='test_efectividad()'>";
+				sustantiva2 = "<td><select name='sustantiva' style='width:180px' class='form-control' id='sustantiva' onchange='test_sustantiva()'>";
 				sustantiva2 += "<option value=''>Seleccione Resultado</option>";
 				sustantiva2 += "<option value='1'>Efectivo</option>";
 				sustantiva2 += "<option value='2'>Inefectivo</option></select>";

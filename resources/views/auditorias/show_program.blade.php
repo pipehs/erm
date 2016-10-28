@@ -158,10 +158,9 @@
 				</tr>
 			@endforeach
 			</table>
-
+			</br>
 			<center>
-				{!! link_to_route('programas_auditoria', $title = 'Volver', $parameters = NULL,
-				 $attributes = ['class'=>'btn btn-danger'])!!}
+				{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
 			<center>
 			</div>
 		</div>

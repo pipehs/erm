@@ -306,7 +306,7 @@ $(document).ready(function() {
 	// Initialize datepicker 2
 	$('#input_date2').datepicker({setDate: new Date()});
 	// Load Timepicker plugin
-	LoadTimePickerScript(DemoTimePicker);
+	//LoadTimePickerScript(DemoTimePicker);
 	// Add tooltip to form-controls
 	$('.form-control').tooltip();
 	// Load example of form validation

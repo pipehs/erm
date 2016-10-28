@@ -52,22 +52,7 @@
 
 				{!!Form::open(['route'=>'agregar_supervision','method'=>'POST','class'=>'form-horizontal','id'=>'form',
 				'enctype'=>'multipart/form-data'])!!}
-	      			<div class="form-group">
-						{!!Form::label('Plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							{!!Form::select('audit_plan_id',$audit_plans,null, 
-							 	   ['id' => 'audit_plans','required'=>'true','placeholder'=>'- Seleccione -'])!!}
-						</div>
-					</div>
-
-					<div class="form-group">
-						{!!Form::label('Auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							<select name="audit" id="audit" required>
-								<!-- Aquí se agregarán las auditorías relacionadas al plan seleccionado a través de Jquery -->
-							</select>
-						</div>
-					</div>
+	      			@include('auditorias.form_basico_audit')
 
 					<div id="audit_programs"></div>
 					
@@ -81,37 +66,7 @@
 
 @section('scripts2')
 <script>
-$("#audit_plans").change(function() {
-			
-		if ($("#audit_plans").val() != '') //Si es que se ha seleccionado valor válido de plan
-		{
-			//Añadimos la imagen de carga en el contenedor
-				$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
-			//se obtienen controles asociados a los riesgos presentes en el plan de prueba seleccionado
-				//primero obtenemos controles asociados a los riesgos de negocio
 
-				//obtenemos auditorias relacionadas al plan seleccionado
-				$.get('auditorias.auditorias.'+$("#audit_plans").val(), function (result) {
-
-						$("#cargando").html('<br>');
-						$("#audit").empty();
-
-						//parseamos datos obtenidos
-						var datos = JSON.parse(result);
-						$("#audit").append('<option value="" disabled selected>- Seleccione -</option>');
-						//seteamos datos en select de auditorías
-						$(datos).each( function() {
-							$("#audit").append('<option value="' + this.id + '">' + this.name +'</option>');
-						});
-	
-				});
-
-		}
-		else
-		{
-			$("#audit").empty();
-		}
-});
 
 $("#audit").change(function() {
 			if ($("#audit").val() != '') //Si es que se ha seleccionado valor válido de plan
@@ -225,49 +180,8 @@ $("#audit").change(function() {
 									$("#audit_programs").append('<div id="notas_'+test.id+'" style="display: none;"></div>');
 
 								});
-								/*
-								//agregamos las actividades con sus estados y posibles resultados
-								var actividades = '<div id="activities_'+this.id+'">';
-								actividades += '<table class="table table-bordered table-striped table-hover table-heading table-datatable">';
-								actividades += '<thead><th>Actividad</th><th>Estado</th><th>Resultado</th></thead>';
-								$(this.activities).each( function(i, activity) {
-									activities_id.push(this.id);
-									actividades += '<tr><td>'+activity.name+'</td>';
-
-									//estado de actividades
-									if (activity.status == 0)
-									{
-										actividades += '<td>Abierta</td>';
-									}
-									else if (activity.status == 1)
-									{
-										actividades += '<td>En ejecución</td>';
-									}
-									else if (activity.status == 2)
-									{
-										actividades += '<td>Cerrada</td>';
-									}
-									
-									//resultado de actividades
-									actividades += '<td>'+activity.result+'</td>';
-
-								});
-
-								$('#audit_tests').append(actividades);
-
-								//cont = cont+1;
-								*/
 
 							});
-
-							//agregamos id de activities
-							//input_actividades = '<input type="hidden" value="'+activities_id+'" name="id_activities[]">';
-
-							//agregamos id de pruebas
-							//input_pruebas = '<input type="hidden" value="'+tests_id+'" name="tests_id[]">';
-
-							//$('#audit_tests').append(input_actividades);
-							//$('#audit_tests').append(input_pruebas);
 	
 					});
 
@@ -337,6 +251,7 @@ function cerrar_nota(id,note_id)
 }
 
 </script>
+{!!Html::script('assets/js/audits.js')!!}
 {!!Html::script('assets/js/notas.js')!!}
 {!!Html::script('assets/js/descargar.js')!!}
 @stop

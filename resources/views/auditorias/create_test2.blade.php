@@ -62,7 +62,7 @@
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('programas_auditoria.show', $title = 'Volver', $parameters = $audit_program, $attributes = ['class'=>'btn btn-danger'])!!}
+					{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
 				<center>
 			</div>
 		</div>

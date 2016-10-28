@@ -718,7 +718,7 @@ Route::get('auditorias.show.{id}', [
 	'as' => 'auditorias.show', 'uses' => 'AuditoriasController@showAuditoria'
 ]);
 
-Route::get('crear_pruebas', [
+Route::get('crear_pruebas.{id}', [
 	'as' => 'crear_pruebas', 'uses' => 'AuditoriasController@createPruebas']);
 
 Route::get('pruebas', [
@@ -756,8 +756,12 @@ Route::get('planes_accion', [
 Route::post('agregar_plan2', [
 	'as' => 'agregar_plan2', 'uses' => 'AuditoriasController@storePlan']);
 
+//para seleccionar primero organización
 Route::get('programas_auditoria', [
-	'as' => 'programas_auditoria', 'uses' => 'AuditoriasController@auditPrograms']);
+	'as' => 'programas_auditoria', 'uses' => 'AuditoriasController@auditPrograms1']);
+
+Route::get('programas_auditoria2', [
+	'as' => 'programas_auditoria2', 'uses' => 'AuditoriasController@auditPrograms']);
 
 Route::get('programas_auditoria.show.{id}', [
 	'as' => 'programas_auditoria.show', 'uses' => 'AuditoriasController@showProgram']);
@@ -834,6 +838,10 @@ Route::get('genissues_report', [
 //ruta para obtener datos de plan de auditoría anterior 
 Route::get('auditorias.get_audit_plan.{org}', [
 	'as' => 'auditorias.get_audit_plan', 'uses' => 'AuditoriasController@getAuditPlan']);
+
+//ruta para obtener todos los planes de auditoría de una organización
+Route::get('auditorias.get_planes.{org}', [
+	'as' => 'auditorias.get_planes', 'uses' => 'AuditoriasController@getPlanes']);
 
 //ruta para obtener objetivos al crear un plan de auditoría
 Route::get('auditorias.objetivos.{org}', [
@@ -1008,6 +1016,10 @@ Route::get('hallazgo.destroy.{id}', [
 
 Route::put('update_hallazgo.{id}', [
     'as' => 'update_hallazgo', 'uses' => 'IssuesController@update']);
+
+//ruta para ver hallazgo a través de ejecución de auditoría
+Route::get('hallazgos_test.{id}', [
+	'as' => 'hallazgos_test', 'uses' => 'IssuesController@index3']);
 
 //---- Rutas para gestión estratégica ----//
 Route::get('plan_estrategico', [

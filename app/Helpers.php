@@ -457,7 +457,7 @@ function calc_controlled_risk($control_id,$efectividad)
 			
 			if (empty($risks)) //retornamos error ya que hubo un problema para encontrar los riesgos asociados al control
 			{
-				return 1;
+				echo 1;
 			}
 		}
 		foreach ($risks as $risk)
@@ -536,15 +536,15 @@ function calc_controlled_risk($control_id,$efectividad)
 					}
 					else
 					{
-						return 1;
+						echo 1;
 					}
 			}
 			else
 			{
-				return 1;
+				echo 1;
 			}
 		}
-		return 0; //fin correcto	
+		echo 0; //fin correcto	
 	});
 }
 

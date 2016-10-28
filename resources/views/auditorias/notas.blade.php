@@ -52,22 +52,7 @@
 
 				{!!Form::open(['route'=>'responder_nota','method'=>'POST','class'=>'form-horizontal','id'=>'form',
 				'enctype'=>'multipart/form-data'])!!}
-	      			<div class="form-group">
-						{!!Form::label('Plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							{!!Form::select('audit_plan_id',$audit_plans,null, 
-							 	   ['id' => 'audit_plans','required'=>'true','placeholder'=>'- Seleccione -'])!!}
-						</div>
-					</div>
-
-					<div class="form-group">
-						{!!Form::label('Auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							<select name="audit" id="audit" required>
-								<!-- Aquí se agregarán las auditorías relacionadas al plan seleccionado a través de Jquery -->
-							</select>
-						</div>
-					</div>
+	      			@include('auditorias.form_basico_audit')
 
 					<div id="audit_tests"></div>
 					
@@ -81,38 +66,6 @@
 
 @section('scripts2')
 <script>
-$("#audit_plans").change(function() {
-			
-		if ($("#audit_plans").val() != '') //Si es que se ha seleccionado valor válido de plan
-		{
-			//Añadimos la imagen de carga en el contenedor
-				$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
-			//se obtienen controles asociados a los riesgos presentes en el plan de prueba seleccionado
-				//primero obtenemos controles asociados a los riesgos de negocio
-
-				//obtenemos auditorias relacionadas al plan seleccionado
-				$.get('auditorias.auditorias.'+$("#audit_plans").val(), function (result) {
-
-						$("#cargando").html('<br>');
-						$("#audit").empty();
-
-						//parseamos datos obtenidos
-						var datos = JSON.parse(result);
-						$("#audit").append('<option value="" disabled selected>- Seleccione -</option>');
-						//seteamos datos en select de auditorías
-						$(datos).each( function() {
-							$("#audit").append('<option value="' + this.id + '">' + this.name +'</option>');
-						});
-	
-				});
-
-		}
-		else
-		{
-			$("#audit").empty();
-		}
-});
-
 $("#audit").change(function() {
 			if ($("#audit").val() != '') //Si es que se ha seleccionado valor válido de plan
 			{
@@ -193,7 +146,7 @@ function responder_nota(id,id_prueba)
 
 }
 </script>
-
+{!!Html::script('assets/js/audits.js')!!}
 {!!Html::script('assets/js/notas.js')!!}
 {!!Html::script('assets/js/descargar.js')!!}
 

@@ -15,6 +15,15 @@
 	#cero_espacios {
 		margin: 0;
 		padding: 0;
+	}
+	#container {
+	    min-width: 300px;
+	    max-width: 800px;
+	    height: 400px;
+	    margin: 1em auto;
+	}
+	label {
+		display: inline-block;
 	}  
 	</style>
  
@@ -65,18 +74,6 @@
 		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 	<![endif]-->
 
-	
-	
-
-
-<style>
-#container {
-    min-width: 300px;
-    max-width: 800px;
-    height: 400px;
-    margin: 1em auto;
-}
-</style>
 </head>
 <body>
 
@@ -109,12 +106,6 @@
 		};
 	</script>
 
-	  <style>
-	  label {
-	    display: inline-block;
-	    width: 5em;
-	  }
-	  </style>
 	{!!Html::script('assets/plugins/jquery/jquery-2.1.0.min.js')!!}
 	{!!Html::script('assets/plugins/jquery-ui/jquery-ui.min.js')!!}
 	{!!Html::script('assets/plugins/bootstrap/bootstrap.min.js')!!}
@@ -129,8 +120,9 @@
 	{!!Html::script('assets/js/heatmap.js')!!}
 	{!!Html::script('assets/js/exporting.js')!!}
 
+<!--
 	{!!Html::script('assets/js/jquery-1.10.2.js')!!}
-	{!!Html::script('assets/js/jquery-ui.js')!!}
+	{!!Html::script('assets/js/jquery-ui.js')!!} -->
 
 	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}
 

@@ -82,38 +82,8 @@
 @stop
 
 @section('scripts2')
+{!!Html::script('assets/js/audits.js')!!}
 <script>
-$("#audit_plans").change(function() {
-	
-			if ($("#audit_plans").val() != '') //Si es que se ha seleccionado valor válido de plan
-			{
-				//Añadimos la imagen de carga en el contenedor
-				$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
-
-					//obtenemos auditorias relacionadas al plan seleccionado
-					$.get('auditorias.auditorias.'+$("#audit_plans").val(), function (result) {
-
-							$("#cargando").html('<br>');
-							$("#audit").empty();
-
-							//parseamos datos obtenidos
-							var datos = JSON.parse(result);
-
-							//seteamos datos en select de auditorías
-							$(datos).each( function() {
-								$("#audit").append('<option value="' + this.id + '">' + this.name +'</option>');
-							});
-	
-					});
-
-			}
-
-			else
-			{
-				$("#audit").empty();
-			}
-});
-
 $("#audit").change(function() {
 			if ($("#audit").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 			{

@@ -41,7 +41,12 @@
 				</div>
 			@endif
 
-			Ingrese los datos del hallazgo para la organizaci&oacute;n <b>{{ $org }}</b> <br><br>
+			@if (isset($org))
+				Ingrese los datos del hallazgo para la organizaci&oacute;n <b>{{ $org }}</b> 
+			@elseif (isset($test))
+				Ingrese los datos del hallazgo para la prueba <b>{{ $test }}</b> 
+			@endif
+			<br><br>
 
 			{!!Form::open(['route'=>'store_hallazgo','method'=>'POST','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
 					@include('hallazgos.form')

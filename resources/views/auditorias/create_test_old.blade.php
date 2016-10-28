@@ -69,6 +69,89 @@
 
 					@include('auditorias.form_program')
 
+			<div id="super_tests">		
+
+			<center><b><font color="blue">Informaci&oacute;n de pruebas de auditor&iacute;a</font></b></center><hr>
+
+					<div id="category">
+							<div class="form-group">
+								{!!Form::label('Categor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
+								<div class="col-sm-4">
+									{!!Form::select('type2_test_1',['1'=>'Prueba de control','2'=>'Prueba de riesgo',
+																'3'=>'Prueba de subproceso'],null,
+																['id'=>'type2_test_1','required'=>'true','onchange'=>'getType(1)','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+								</div>
+							</div>
+					</div>	
+
+					<div id="categoria_test_1" style="display:none;"></div>
+					<div id="tests">
+						
+						<div class="form-group">
+								{!!Form::label('Prueba 1: Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+								<div class="col-sm-4">
+									{!!Form::text('name_test_1',null,['id'=>'name_test_1','class'=>'form-control',
+																'required'=>'true'])!!}
+								</div>
+						</div>
+
+						<div class="form-group">
+
+								{!!Form::label('Descripción',null,['class'=>'col-sm-4 control-label'])!!}	
+								<div class="col-sm-4">
+									{!!Form::textarea('description_test_1',null,['id'=>'description_test_1','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
+								</div>
+
+						</div>
+
+						<div class="form-group">
+							{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
+							<div class="col-sm-4">
+								{!!Form::select('type_test_1',['0'=>'Prueba de diseño','1'=>'Prueba de efectividad operativa',
+															'2'=>'Prueba de cumplimiento','3'=>'Prueba sustantiva'],null,
+															['id'=>'type','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+							</div>
+						</div>
+
+						<div class="form-group">
+
+							{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
+							<div class="col-sm-4">
+								{!!Form::select('stakeholder_test_1',$stakeholders,null,['required'=>'true',
+								'placeholder'=>'- Seleccione -','id'=>'stakeholder_test_1','class'=>'first-disabled'])!!}
+							</div>
+
+						</div>
+
+						<div class="form-group">
+
+								{!!Form::label('Horas-hombre',null,['class'=>'col-sm-4 control-label'])!!}
+								<div class="col-sm-4">
+									{!!Form::number('hh_test_1',null,['id'=>'hh_test_1','class'=>'form-control','min'=>'1'])!!}
+								</div>
+
+						</div>
+
+						<div class="form-group">
+
+							<label for="file_1" class="col-sm-4 control-label">Para mayor detalle de la prueba, puede agregar un archivo (opcional)</label>
+
+							<div class="col-sm-4">
+								<input type="file" name="file_1" id="file1" class="inputfile" />
+								<label for="file1">Cargue evidencia</label>
+							</div>
+						</div>
+
+					</div>
+					<hr>
+					<div id="new_pruebas">
+						
+					</div>
+					<center>
+					<div style="cursor:hand; margin:auto; " id="agregar_prueba"><font color="CornflowerBlue"><u>Agregar m&aacute;s pruebas</u></font></div>
+					</center>
+			</div>
+
 					{!!Form::hidden('audit_program_id',null,['id'=>'audit_test_id'])!!}
 
 					{!!Form::hidden('audit_id',$audit_id)!!}

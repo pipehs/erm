@@ -70,17 +70,24 @@
 					</div>
 
 				@if (strstr($_SERVER["REQUEST_URI"],'create'))
-					{!!Form::hidden('kind',$kind)!!}
+					@if (isset($org))
+						{!!Form::hidden('kind',$kind)!!}
+					@endif
 				@endif
 
 				@if (isset($org_id))
 					{!!Form::hidden('org_id',$org_id)!!}
 				@endif
 
+				@if (isset($test))
+					{!!Form::hidden('test_id',$test_id)!!}
+				@endif
+
 					<div class="form-group">
-						<label for="file_1" class="col-sm-4 control-label">Para mayor detalle del hallazgo, puede agregar un archivo (opcional)</label>
+						<label for="file" class="col-sm-4 control-label">Para mayor detalle del hallazgo, puede agregar un archivo (opcional)</label>
 						<div class="col-sm-4">
-							<input type="file" name="evidence_doc" id="evidence_doc" class="inputfile" /><label for="evidence_doc">Cargue evidencia</label>
+							<input type="file" name="evidence_doc" id="evidence_doc" class="inputfile" />
+							<label for="evidence_doc">Cargue evidencia</label>
 						</div>
 						
 					</div>
@@ -149,13 +156,18 @@
 
 				@endif
 
-
 					<div class="form-group">
 						<center>
 						{!!Form::submit('Guardar', ['class'=>'btn btn-primary'])!!}
 						</center>
 					</div>
 
-				<center>
-					{!! link_to_route('hallazgos', $title = 'Volver', $parameters = NULL, $attributes = ['class'=>'btn btn-danger'])!!}
-				<center>
+				@if ($test_id != NULL)
+					<center>
+						{!! link_to_route('hallazgos_test', $title = 'Volver', $parameters = $test_id, $attributes = ['class'=>'btn btn-danger'])!!}		
+					<center>
+				@else
+					<center>
+						{!! link_to_route('hallazgos', $title = 'Volver', $parameters = NULL, $attributes = ['class'=>'btn btn-danger'])!!}
+					<center>
+				@endif

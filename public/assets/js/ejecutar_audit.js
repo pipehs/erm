@@ -1,34 +1,3 @@
-$("#audit_plans").change(function() {
-			
-			if ($("#audit_plans").val() != '') //Si es que se ha seleccionado valor válido de plan
-			{
-				//Añadimos la imagen de carga en el contenedor
-					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
-				//se obtienen controles asociados a los riesgos presentes en el plan de prueba seleccionado
-					//primero obtenemos controles asociados a los riesgos de negocio
-
-					//obtenemos auditorias relacionadas al plan seleccionado
-					$.get('auditorias.auditorias.'+$("#audit_plans").val(), function (result) {
-
-							$("#cargando").html('<br>');
-							$("#audit").empty();
-
-							//parseamos datos obtenidos
-							var datos = JSON.parse(result);
-							$("#audit").append('<option value="" disabled selected>- Seleccione -</option>');
-							//seteamos datos en select de auditorías
-							$(datos).each( function() {
-								$("#audit").append('<option value="' + this.id + '">' + this.name +'</option>');
-							});
-					});
-			}
-			else
-			{
-				$("#audit").empty();
-			}
-		});
-
-
 $("#audit").change(function() {
 			if ($("#audit").val() != '') //Si es que se ha seleccionado valor válido de auditoría
 			{
@@ -109,19 +78,20 @@ $("#audit").change(function() {
 										pruebas += '</div>';
 										
 										$('#audit_programs').append(pruebas);
+								});
 
-									//agregamos id de pruebas
+								//agregamos id de pruebas
 									input_pruebas = '<input type="hidden" value="'+audit_tests_id+'" name="id_pruebas[]">';
 
 									//agregamos id de programas
 									input_programas = '<input type="hidden" value="'+programs_id+'" name="programs_id[]">';
 
 									$('#audit_programs').append(input_pruebas);
-									$('#audit_programs').append(input_programas);
-								});	
+									$('#audit_programs').append(input_programas);	
 							}
 							else
 							{
+								$("#audit_programs").empty();
 								$("#btn_guardar").prop('disabled',true);
 								$("#cargando").html("<br>");
 							}
@@ -193,105 +163,17 @@ function result(id,result)
 //declaramos contador para issues
 contador = 0;
 //agrega campo de issue de una prueba en caso de que esta haya sido mencionada como inefectiva
+//ACTUALIZACIÓN 25-10: Sacaremos campo de issue y botones de agregar más issues para ordenar un poco la interfaz gráfica: Sólo agregaremos botón para ir a gestionar Issues
 function testResult(id)
 {
 
 	if ($("#test_result_"+id).val() == 0 && $("#test_result_"+id).val() != "") //el resultado de la prueba es inefectivo
 	{
-		//obtenemos issues si es que existen
-		$.get('auditorias.get_issue.'+id, function (result) {
-			//alert(result);
-			//agregamos botón para añadir mas issues en div de botón
-			var result_boton = '<br><hr><button type="button" class="btn btn-primary btn-xs" onclick="addNewIssue('+id+')">Agregar nuevo hallazgo</button>';
-			$("#boton_add_"+id).html(result_boton);
+		
 
-			if (result == "null") //no existe issue
-			{
-				//agregamos nuevo issue
-				addNewIssue(id);
-			}
+		resultado = '<a href="hallazgos_test.'+id+'" class="btn btn-info">Gestionar Hallazgos</button>';
+		$("#issues_"+id).append(resultado);
 
-			else
-			{
-				//parseamos datos obtenidos
-				var datos = JSON.parse(result);
-
-				issues_id = []; //array con id de issues para guardar en PHP 
-				//contador de issues existentes
-				contador = 1;
-				resultado = '';
-				$(datos).each( function() {
-					//alert(this.evidences)
-					issues_id.push(this.id);
-					//alert("Entramos2");
-					resultado += '<b>Hallazgo N° '+contador+'</b><br>';
-					resultado += '<select class="form-control" name="issue_classification_'+this.id+'" required>';
-
-					if (this.classification == 0)
-					{
-						resultado += '<option value="" disabled>- Clasificación debilidad -</option>';
-						resultado += '<option value="0" selected>Oportunidad de mejora</option>';
-						resultado += '<option value="1">Deficiencia</option>';
-						resultado += '<option value="2">Debilidad significativa</option></select><br>';
-					}
-					else if (this.classification == 1)
-					{
-						resultado += '<option value="" disabled>- Clasificación debilidad -</option>';
-						resultado += '<option value="0">Oportunidad de mejora</option>';
-						resultado += '<option value="1" selected>Deficiencia</option>';
-						resultado += '<option value="2">Debilidad significativa</option></select><br>';
-					}
-					else if (this.classification == 2)
-					{
-						resultado += '<option value="" disabled>- Clasificación debilidad -</option>';
-						resultado += '<option value="0">Oportunidad de mejora</option>';
-						resultado += '<option value="1">Deficiencia</option>';
-						resultado += '<option value="2" selected>Debilidad significativa</option></select><br>';
-					}
-					
-					resultado += '<input type="text" class="form-control" name="issue_name_'+this.id+'" value="'+this.name+'" required placeholder="Nombre de debilidad"><br>'; 
-					if (this.description == "")
-					{
-						resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_description_'+this.id+'" placeholder="Descripción de debilidad (opcional)"></textarea><br>';
-					}
-					else
-					{
-						resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_description_'+this.id+'" value="'+this.description+'" placeholder="'+this.description+'"></textarea><br>';
-					}
-					
-					if (this.recommendations == "")
-					{
-						resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_recommendations_'+this.id+'" placeholder="Recomendaciones (opcional)"></textarea><br>';
-					}
-					else
-					{
-						resultado += '<textarea rows="3" cols="4" class="form-control" name="issue_recommendations_'+this.id+'" value="'+this.recommendations+'" placeholder="'+this.recommendations+'"></textarea><br>';
-					}
-
-					if (this.evidences == null)
-					{
-						resultado += '<input type="file" id="file'+this.id+'" class="inputfile" name="issue_evidence_'+this.id+'"/><label for="file'+this.id+'">Cargue evidencia (opcional)</label></div><br>';
-					}
-					else
-					{
-						$(this.evidences).each( function(i,evidence) {
-							resultado += '<div style="cursor:hand" id="descargar_'+this.id+'" onclick="descargar(2,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia</u></font></div><br>';
-						});
-					}
-
-					resultado += '<br>';
-					contador++;
-				});
-
-				//agregamos id de issues para el id del programa
-				resultado += '<input type="hidden" value="'+issues_id+'" name="'+id+'_issues[]">';
-				
-				$("#issues_"+id).append(resultado);
-
-
-			}
-			
-		});
 	}
 	else
 	{
@@ -299,56 +181,4 @@ function testResult(id)
 		$("#boton_add_"+id).empty();
 		new_issues = 0;
 	}
-}
-//declaramos contador de nuevas issues
-//new_issues = 0;
-//función para agregar un nuevo issue
-function addNewIssue(id)
-{
-	
-	new_issues = 1;
-	//vemos número de issue para cada id de prueba
-	while (1) 
-	{
-		if ($('#new_issue_'+id+'_'+new_issues).length > 0)
-		{
-			new_issues++;
-		}
-		else
-		{
-			break;
-		}
-	}
-
-	var resultado = '<div id="new_issue_'+id+'_'+new_issues+'"><b>Nuevo hallazgo N° '+new_issues+'</b><br>';
-	//solo si es el primer new issue haremos ALGUNOS de los campos required (los otros siempre aceptan nulos)
-	if (new_issues == 1)
-	{
-		resultado += '<select class="form-control" name="new_issue_classification_'+id+'_'+new_issues+'" required>';
-		resultado += '<option value="" disabled selected>- Clasificación debilidad -</option>';
-		resultado += '<option value="0">Oportunidad de mejora</option>';
-		resultado += '<option value="1">Deficiencia</option>';
-		resultado += '<option value="1">Debilidad significativa</option></select><br>';
-
-		resultado += '<input type="text" class="form-control" name="new_issue_name_'+id+'_'+new_issues+'" required placeholder="Nombre de debilidad"><br>'; 
-	}
-	else
-	{
-		resultado += '<select class="form-control" name="new_issue_classification_'+id+'_'+new_issues+'">';
-		resultado += '<option value="" disabled selected>- Clasificación debilidad -</option>';
-		resultado += '<option value="0">Oportunidad de mejora</option>';
-		resultado += '<option value="1">Deficiencia</option>';
-		resultado += '<option value="1">Debilidad significativa</option></select><br>';
-
-		resultado += '<input type="text" class="form-control" name="new_issue_name_'+id+'_'+new_issues+'" placeholder="Nombre de debilidad"><br>'; 
-	}
-
-	
-	resultado += '<textarea rows="3" cols="4" class="form-control" name="new_issue_description_'+id+'_'+new_issues+'" placeholder="Descripción de debilidad (opcional)"></textarea><br>';
-	resultado += '<textarea rows="3" cols="4" class="form-control" name="new_issue_recommendations_'+id+'_'+new_issues+'" placeholder="Recomendaciones (opcional)"></textarea></div><br>';
-	resultado += '<input type="file" id="file'+id+'" class="inputfile" name="new_issue_evidence_'+id+'_'+new_issues+'"/><label for="file'+id+'">Cargue evidencia (opcional)</label></div><br>';
-
-	resultado += '<script>$("html,body").animate({scrollTop: $("#new_issue_'+id+'_'+new_issues+'").offset().top}, 900); </script>';
-	$("#issues_"+id).append(resultado);
-
 }

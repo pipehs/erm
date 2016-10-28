@@ -1,7 +1,6 @@
 @extends('master')
 
-@section('title', 'Auditor&iacute;as - Planes de auditor&iacute;as')
-
+@section('title', 'Auditor&iacute;as - Programas')
 
 @section('content')
 
@@ -36,19 +35,42 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-	      <p>En esta secci&oacute;n podr&aacute; ver los programas de auditor&iacute;as de riesgos y generar nuevos programas.</p>
 
 				@if(Session::has('message'))
 					<div class="alert alert-success alert-dismissible" role="alert">
 					{{ Session::get('message') }}
 					</div>
 				@endif
-@foreach (Session::get('roles') as $role)
-	@if ($role != 6)
-		{!! link_to_route('crear_pruebas', $title = 'Agregar Nuevo Programa', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
-	<?php break; ?>
-	@endif
-@endforeach
+
+
+@if (!isset($programs))
+	<p>En esta secci&oacute;n podr&aacute; ver los programas de auditor&iacute;as de riesgos y generar nuevos programas.</p>
+
+	<div id="cargando"><br></div>
+
+	{!!Form::open(['route'=>'programas_auditoria2','method'=>'GET','class'=>'form-horizontal'])!!}
+	@include('auditorias.form_basico_audit')
+
+	<div class="form-group">
+		<center>
+			{!!Form::submit('Seleccionar', ['class'=>'btn btn-success','id'=>'guardar'])!!}
+		</center>
+	</div>
+	{!!Form::close()!!}
+@else
+	<p>
+	<ul>
+	<li>Organizaci&oacute;n: {{ $org_name }}</li>
+	<li>Plan de auditor&iacute;a: {{ $audit_plan_name }}</li>
+	<li>Auditor&iacute;a: {{ $audit_name }}</li>
+	</ul>
+	</p>
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)
+			<a href="crear_pruebas.{{ $audit_id }}" class="btn btn-primary">Agregar Nuevo Programa</a>
+		<?php break; ?>
+		@endif
+	@endforeach
 
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 	<thead>
@@ -64,7 +86,13 @@
 	@foreach($programs as $program)
 		<tr>
 			<td>{{ $program['name'] }}</td>
-			<td>{{ $program['description'] }}</td>
+			<td>
+			@if ($program['expiration_date'] == NULL)
+				No se ha definido descripci&oacute;n
+			@else
+				{{ $program['description'] }}
+			@endif
+			</td>
 			<td>{{ $program['created_at'] }}</td>
 			<td>{{ $program['updated_at'] }}</td>
 			<td>
@@ -80,8 +108,16 @@
 	@endforeach
 	</table>
 
+	<center>
+		{!! link_to_route('programas_auditoria', $title = 'Volver', $parameters=null, $attributes = ['class'=>'btn btn-danger']) !!}
+	</center>
+@endif
 			</div>
 		</div>
 	</div>
 </div>
+@stop
+
+@section('scripts2')
+	{!!Html::script('assets/js/audits.js')!!}
 @stop

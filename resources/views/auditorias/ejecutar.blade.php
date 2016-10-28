@@ -52,22 +52,8 @@
 				<div id="cargando"><br></div>
 
 				{!!Form::open(['route'=>'agregar_ejecucion','method'=>'POST','class'=>'form-horizontal','id'=>'form','enctype'=>'multipart/form-data'])!!}
-	      			<div class="form-group">
-						{!!Form::label('Plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							{!!Form::select('audit_plan_id',$audit_plans,null, 
-							 	   ['id' => 'audit_plans','required'=>'true','placeholder'=>'- Seleccione -'])!!}
-						</div>
-					</div>
-
-					<div class="form-group">
-						{!!Form::label('Auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							<select name="audit" id="audit" required>
-								<!-- Aquí se agregarán las auditorías relacionadas al plan seleccionado a través de Jquery -->
-							</select>
-						</div>
-					</div>
+	      			
+	      			@include('auditorias.form_basico_audit')
 
 					<div id="audit_programs"></div>
 
@@ -91,6 +77,7 @@
 @stop
 
 @section('scripts2')
+{!!Html::script('assets/js/audits.js')!!}
 {!!Html::script('assets/js/ejecutar_audit.js')!!}
 {!!Html::script('assets/js/descargar.js')!!}
 @stop
