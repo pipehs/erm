@@ -52,22 +52,22 @@ $("#audit").change(function() {
 											if (test.status == 0)
 											{
 												pruebas += '<option value="0" selected>Abierta</option>';
-												pruebas += '<option value="1">En ejecución</option>';
-												pruebas += '<option value="2">Cerrada</option>';
-											}
-											else if (test.status == 1)
-											{
-												pruebas += '<option value="0">Abierta</option>';
-												pruebas += '<option value="1" selected>En ejecución</option>';
 												pruebas += '<option value="2">Cerrada</option>';
 											}
 											else if (test.status == 2)
 											{
-												pruebas += '<option value="0" selected>Abierta</option>';
-												pruebas += '<option value="1">En ejecución</option>';
+												pruebas += '<option value="0">Abierta</option>';
 												pruebas += '<option value="2" selected>Cerrada</option>';
 												//alert(activity.results);
 												pruebas += '<script>result('+test.id+','+test.results+')</script>'
+											}
+
+											//ACTUALIZACIÓN 02-11: Se eliminó resultado de prueba en ejecución (pero no de la base de datos para evitar inconsistencias),
+											//por lo que seguiremos comprobando que el estado de la prueba no sea este, solo que lo mostraremos como abierta
+											else if (test.status == 1)
+											{
+												pruebas += '<option value="0" selected>Abierta</option>';
+												pruebas += '<option value="2">Cerrada</option>';
 											}
 											
 											pruebas += '</select></div><br><div class="col-sm-8" id="boton_add_'+test.id+'"></div></td>';
@@ -149,7 +149,7 @@ function result(id,result)
 			resultado += '<option value="1">Efectiva</option></div>';
 		}
 
-		resultado += '</select><hr><br>';
+		resultado += '</select>';
 		resultado += '<div id="issues_'+id+'" class="col-sm-12"></div>'
 		$("#results_"+id).append(resultado);
 		$("#results_"+id).show(500);
@@ -170,8 +170,7 @@ function testResult(id)
 	if ($("#test_result_"+id).val() == 0 && $("#test_result_"+id).val() != "") //el resultado de la prueba es inefectivo
 	{
 		
-
-		resultado = '<a href="hallazgos_test.'+id+'" class="btn btn-info">Gestionar Hallazgos</button>';
+		resultado = '</br><a href="hallazgos_test.'+id+'" class="btn btn-info">Gestionar Hallazgos</button>';
 		$("#issues_"+id).append(resultado);
 
 	}

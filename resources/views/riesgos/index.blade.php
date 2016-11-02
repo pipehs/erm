@@ -168,7 +168,7 @@
 				</td>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
-				<td>{!! link_to_route('riesgos.edit', $title = 'Editar', $parameters = $riesgo['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
+				<td>{!! link_to_route('riesgos.edit', $title = 'Editar', $parameters = ['id' => $riesgo['id'], 'org' => $org_id], $attributes = ['class'=>'btn btn-success']) !!}</td>
 				<td><button class="btn btn-danger" onclick="eliminar2({{ $riesgo['id'] }},'{{ $riesgo['nombre'] }}','riesgos','El riesgo')">Eliminar</button></td>
 			<?php break; ?>
 			@endif

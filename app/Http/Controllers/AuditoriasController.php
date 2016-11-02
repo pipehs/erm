@@ -15,6 +15,16 @@ use Auth;
 
 class AuditoriasController extends Controller
 {
+    //compara scores para ordenar de mayor a menor
+    function cmp($a, $b)
+    {
+        if ($a['score'] == $b['score'])
+        {
+            return 0;
+        }
+
+        return ($a['score'] > $b['score']) ? -1 : 1;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -338,7 +348,7 @@ class AuditoriasController extends Controller
             DB::transaction(function()
             {
                 $fecha = date('Y-m-d H:i:s');
-                    if (!isset($_POST['description']) && $_POST['description'] == '')
+                    if (!isset($_POST['description']) || $_POST['description'] == '')
                     {
                         $description = NULL;
                     }
@@ -3146,6 +3156,7 @@ class AuditoriasController extends Controller
                                     ->join('risks','risks.id','=','objective_risk.risk_id')
                                     ->where('objectives.organization_id','=',(int)$org)
                                     ->groupBy('risks.id')
+                                    ->orderBy('risks.name')
                                     ->select('risks.name','objective_risk.id as riskid')
                                     ->get();
 
@@ -3171,6 +3182,7 @@ class AuditoriasController extends Controller
                 //seteamos por si no hay evaluación
                 $avg_probability = "Falta Eval.";
                 $avg_impact = "Falta Eval.";
+                $score = "Falta Eval.";
                 $proba_def = "";
                 $impact_def = "";
 
@@ -3262,6 +3274,7 @@ class AuditoriasController extends Controller
                     $avg_impact = $evaluation->avg_impact;
                     $impact_def = $impact;
                     $proba_def = $proba;
+                    $score = $evaluation->avg_probability * $evaluation->avg_impact;
                 }
 
                 $results[$i] = [
@@ -3270,10 +3283,13 @@ class AuditoriasController extends Controller
                              'avg_probability' => $avg_probability,
                              'avg_impact' => $avg_impact,
                              'proba_def' => $proba_def,
-                             'impact_def' => $impact_def
+                             'impact_def' => $impact_def,
+                             'score' => $score
                             ];
                 $i += 1;
             }
+
+            usort($results, array($this,"cmp"));
 
             return json_encode($results);
         }   
@@ -3415,6 +3431,7 @@ class AuditoriasController extends Controller
                     $avg_impact = $evaluation->avg_impact;
                     $impact_def = $impact;
                     $proba_def = $proba;
+                    $score = $evaluation->avg_probability * $evaluation->avg_impact;
                 }
                 $results[$i] = [
                             'name' => $risk->name,
@@ -3423,9 +3440,12 @@ class AuditoriasController extends Controller
                              'avg_impact' => $avg_impact,
                              'proba_def' => $proba_def,
                              'impact_def' => $impact_def,
+                             'score' => $score,
                             ];
                 $i += 1;
             }
+
+            usort($results, array($this,"cmp"));
 
             return json_encode($results);
         }   

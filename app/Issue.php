@@ -76,6 +76,8 @@ class Issue extends Model
     //obtiene issues y planes de acción de una prueba de auditoría
     public static function getIssueByTestId($id)
     {
+        $results = array();
+
     	$issues = DB::table('issues')
                         ->where('issues.audit_test_id','=',$id)
                         ->select('issues.id','issues.name','issues.description','issues.recommendations','issues.classification')
@@ -83,14 +85,8 @@ class Issue extends Model
                         ->get();
             $i = 0;
 
-            if ($issues == NULL)
-            {
-                $results = NULL;
-            }
-            else
-            {
-                foreach ($issues as $issue)
-                {
+        foreach ($issues as $issue)
+        {
                 	//para cada issue obtenemos plan de acción (si es que hay)
                 	$plan = DB::table('action_plans')
 	                    ->where('issue_id','=',$issue->id)
@@ -130,8 +126,7 @@ class Issue extends Model
                     }
 
                     $i += 1;
-                }
-            }
+        }
 
         return $results;
     }

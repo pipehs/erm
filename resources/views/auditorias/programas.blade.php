@@ -87,7 +87,7 @@
 		<tr>
 			<td>{{ $program['name'] }}</td>
 			<td>
-			@if ($program['expiration_date'] == NULL)
+			@if ($program['description'] == NULL)
 				No se ha definido descripci&oacute;n
 			@else
 				{{ $program['description'] }}

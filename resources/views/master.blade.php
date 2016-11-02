@@ -132,6 +132,9 @@
 
 	{!!Html::script('assets/bootstrap-toggle-master/js/bootstrap2-toggle.min.js')!!}
 	
+
 	@yield('scripts2')
+
+	
 </body>
 </html>

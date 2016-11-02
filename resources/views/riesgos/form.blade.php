@@ -2,8 +2,30 @@
 					<div class="form-group">
 						{!!Form::label('Seleccione objetivos involucrados',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
-							{!!Form::select('objective_id[]',$objetivos,null, 
+							@if (strstr($_SERVER["REQUEST_URI"],'edit'))
+								<select name="objective_id[]" multiple required id="el2">
+								@foreach ($objetivos as $id=>$name)
+
+									<?php $i = 0; //contador de roles del usuario 
+									$cont = 0; //contador para ver si es que un rol está seleccionado ?>
+									@while (isset($obj_selected[$i]))
+										@if ($obj_selected[$i] == $id)
+											<option value="{{ $id }}" selected>{{ $name }}</option>
+											<?php $cont += 1; ?>
+										@endif
+										<?php $i += 1; ?>
+									@endwhile
+
+									@if ($cont == 0)
+										<option value="{{ $id }}">{{ $name }}</option>
+									@endif
+
+								@endforeach
+								</select>
+							@else
+								{!!Form::select('objective_id[]',$objetivos,null, 
 							 	   ['id' => 'el2','required'=>'true','multiple'=>'true'])!!}
+							@endif
 						</div>
 					</div>
 
@@ -12,8 +34,30 @@
 					<div class="form-group">
 						{!!Form::label('Seleccione subprocesos involucrados',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
-							{!!Form::select('subprocess_id[]',$subprocesos,null, 
+							@if (strstr($_SERVER["REQUEST_URI"],'edit'))
+								<select name="subprocess_id[]" multiple required id="el2">
+								@foreach ($subprocesos as $id=>$name)
+
+									<?php $i = 0; //contador de roles del usuario 
+									$cont = 0; //contador para ver si es que un rol está seleccionado ?>
+									@while (isset($sub_selected[$i]))
+										@if ($sub_selected[$i] == $id)
+											<option value="{{ $id }}" selected>{{ $name }}</option>
+											<?php $cont += 1; ?>
+										@endif
+										<?php $i += 1; ?>
+									@endwhile
+
+									@if ($cont == 0)
+										<option value="{{ $id }}">{{ $name }}</option>
+									@endif
+
+								@endforeach
+								</select>
+							@else
+								{!!Form::select('subprocess_id[]',$subprocesos,null, 
 							 	   ['id' => 'el2','required'=>'true','multiple'=>'true'])!!}
+							@endif
 						</div>
 					</div>
 			@endif
@@ -135,6 +179,7 @@
 						</div>
 					</div>
 					
+					{!!Form::hidden('org_id',$org_id)!!}
 					<div class="form-group">
 						<center>
 						{!!Form::submit('Guardar', ['class'=>'btn btn-primary'])!!}

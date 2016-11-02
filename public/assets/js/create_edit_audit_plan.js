@@ -113,7 +113,7 @@
 					
 							//Seteamos cabecera
 							var table_head = "<thead>";
-							table_head += "<th>Riesgo</th><th>Probabilidad</th><th>Impacto</th>";
+							table_head += "<th>Riesgo</th><th>Probabilidad</th><th>Impacto</th><th>Score</th>";
 							table_head += "</thead>";
 							
 							$("#riesgos").html(table_head);
@@ -129,7 +129,7 @@
 							//seteamos datos en select de riesgos / objetivos
 							$(datos).each( function() {
 								$("#objective_risk_id").append('<option value="' + this.id + '">' + this.name +'</option>');
-								$("#riesgos").append('<tr><td>' + this.name + '</td><td>' +this.proba_def + ' (' + this.avg_probability + ')</td><td>' + this.impact_def + ' (' + this.avg_impact + ')</td></tr>');
+								$("#riesgos").append('<tr><td>' + this.name + '</td><td>' +this.proba_def + ' (' + this.avg_probability + ')</td><td>' + this.impact_def + ' (' + this.avg_impact + ')</td><td>'+ this.score +'</td></tr>');
 							});
 					});
 
@@ -144,7 +144,7 @@
 							//seteamos datos en select de riesgos / procesos
 							$(datos).each( function() {
 								$("#risk_subprocess_id").append('<option value="' + this.id + '">' + this.name +'</option>');
-								$("#riesgos").append('<tr><td>' + this.name + '</td><td>' + this.proba_def + ' (' + this.avg_probability + ')</td><td>' + this.impact_def + ' (' + this.avg_impact + ')</td></tr>');
+								$("#riesgos").append('<tr><td>' + this.name + '</td><td>' + this.proba_def + ' (' + this.avg_probability + ')</td><td>' + this.impact_def + ' (' + this.avg_impact + ')</td><td>'+ this.score +'</td></tr>');
 							});
 					});
 

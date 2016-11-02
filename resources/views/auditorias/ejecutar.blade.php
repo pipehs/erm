@@ -4,6 +4,11 @@
 
 @section('content')
 
+<style>
+td {
+	vertical-align:top;
+}
+</style>
 <!-- header menu de arbol -->
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">

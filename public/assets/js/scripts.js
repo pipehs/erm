@@ -243,14 +243,26 @@ function validarFechaMayorActual(date)
     var today = new Date();
     var date2 = new Date(date_temp[0]+'-'+date_temp[1]+'-'+parseInt(date_temp[2])+' 23:59:59');
 
-    if (date2<today)
+    //Actualización 02-11-2016: Agregamos validador de fecha menor a 31-12-9999
+    var date3 = new Date('9999-12-'+parseInt(31)+' 23:59:59');
+
+    if (date2 > date3)
+    {
+    	swal('Error!','Está ingresando una fecha incorrecta. La fecha mayor a ingresar es 31-12-9999','error');
+        $("#exp_date").prop('class','form-group has-error has-feedback');
+        $("#submit").prop('disabled',true);
+    }
+
+    else if (date2 < today)
     {   
         swal('Cuidado!','Está ingresando una fecha menor a la fecha actual','warning');
-        $("#exp_date").attr('class','form-group has-error has-feedback');
+        $("#exp_date").prop('class','form-group has-error has-feedback');
+        $("#submit").prop('disabled',true);
     }
     else
     {
-        $("#exp_date").attr('class','form-group');
+        $("#exp_date").prop('class','form-group');
+        $("#submit").prop('disabled',false);
     }   
 }
 

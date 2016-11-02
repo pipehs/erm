@@ -726,14 +726,20 @@ class ObjetivosController extends Controller
         $results = array();
         //obtenemos objetivos
         $objectives = \Ermtool\Objective::where('status',0)
-                                        ->where('organization_id',(int)$org)->get();
+                                        ->where('organization_id',(int)$org)
+                                        ->select('name','id')
+                                        ->groupBy('id')
+                                        ->get();
 
+        $i = 0;
         foreach ($objectives as $objective)
         {
-            $results = [
+            $results[$i] = [
                 'id' => $objective->id,
                 'name' => $objective->name,
             ];
+
+            $i += 1;
         }
         
         return json_encode($results);

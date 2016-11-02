@@ -421,15 +421,19 @@ class ProcesosController extends Controller
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                     ->where('organization_subprocess.organization_id','=',$org)
                     ->where('processes.status','=',0)
+                    ->groupBy('processes.id')
                     ->select('processes.id','processes.name')
                     ->get();
 
+        $i = 0;
         foreach ($processes as $process)
         {
-            $results = [
+            $results[$i] = [
                 'id' => $process->id,
                 'name' => $process->name,
             ];
+
+            $i += 1;
         }
         
         return json_encode($results);
