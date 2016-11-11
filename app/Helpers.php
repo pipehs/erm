@@ -287,8 +287,10 @@ function upload_file($archivo,$dir,$id)
     {
     	//eliminamos acentos (si es que hay)
     	$nombre = eliminaAcentos($file[0]);
+
+    	//ACTUALIZACIÓN 05-11-2016: Cada uno de los archivos se guardará en una carpeta con su id
 	    $guardado = Storage::put(
-	        $dir.'/'. $nombre . "___" . $id . "." . $file[1],
+	        $dir. "/" . $id . "/" . $nombre . "." . $file[1],
 	        file_get_contents($archivo->getRealPath())
 	    );
 	}
@@ -297,8 +299,7 @@ function upload_file($archivo,$dir,$id)
 		//eliminamos acentos (si es que hay)
     	$nombre = eliminaAcentos($file[0]);
 		$guardado = Storage::put(
-	        $dir.'/'. $nombre . "___" . $id ,
-	        file_get_contents($archivo->getRealPath())
+	        $dir. "/" . $id . "/" . $nombre,file_get_contents($archivo->getRealPath())
 	    );
 	}
 

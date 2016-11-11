@@ -53,8 +53,7 @@
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('controles', $title = 'Volver', $parameters = NULL,
-                 		$attributes = ['class'=>'btn btn-danger'])!!}
+					{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
 				<center>
 			</div>
 		</div>

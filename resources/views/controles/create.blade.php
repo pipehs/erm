@@ -3,7 +3,7 @@
 @section('title', 'Agregar Control')
 
 @section('content')
-
+<link href="assets/css/uploadfile.css" rel="stylesheet">
 <!-- header menu de arbol -->
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
@@ -53,8 +53,7 @@
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('controles', $title = 'Volver', $parameters = NULL,
-                 		$attributes = ['class'=>'btn btn-danger'])!!}
+					{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
 				<center>
 			</div>
 		</div>
@@ -63,6 +62,8 @@
 @stop
 
 @section('scripts2')
+
+<script src="assets/js/jquery.uploadfile.min.js"></script>
 <script>
 
 	$(document).ready(function () {
@@ -130,6 +131,15 @@
 			}
 			
 	    });
+
+	$("#upload").uploadFile({
+	  url:"cargar",
+	  multiple: true,
+	  allowedTypes: "jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx",
+	  doneStr:"Cargado !",
+	  extErrorStr:"Solo puedes realizar carga de archivos! ",
+	  uploadErrorStr:"Ocurrio un error al carga. Intentelo de nuevo!"
+	});
 
 </script>
 @stop

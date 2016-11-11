@@ -137,8 +137,8 @@ function responder_nota(id,id_prueba)
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<textarea name="answer_'+id+'" rows="3" cols="4" class="form-control" placeholder="Ingrese comentarios" required></textarea></div>';
 	nota += '<div class="form-group col-sm-12">';
-	nota += '<label class="control-label">Cargar evidencia (opcional)</label>';
-	nota += '<input type="file" id="input-1a" name="evidencia_'+id+'" class="file" data-show-preview="false"></div>';
+	nota += '<label class="control-label">Cargar evidencias (opcional)</label>';
+	nota += '<input type="file" id="input-1a" name="evidencia_'+id+'[]" multiple class="file" data-show-preview="false"></div>';
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<button class="btn btn-success">Guardar</button></div><hr><br>';
 	$("#respuesta_nota_"+id).append(nota);

@@ -9,6 +9,7 @@ use Redirect;
 use Storage;
 use DateTime;
 use Auth;
+use Ermtool\Http\Controllers\DocumentosController as Documentos;
 //sleep(2);
 class ControlesController extends Controller
 {
@@ -231,10 +232,16 @@ class ControlesController extends Controller
                                     ]);
                         }
                     }
-                    //guardamos archivo de evidencia (si es que hay)
+                    //guardamos archivos de evidencias (si es que hay)
                     if($GLOBALS['evidence'] != NULL)
                     {
-                        upload_file($GLOBALS['evidence'],'controles',$control_id);
+                        foreach ($GLOBALS['evidence'] as $evidence)
+                        {
+                            if ($evidence != NULL)
+                            {
+                                upload_file($evidence,'controles',$control_id);
+                            }
+                        }                    
                     }
                     if (Session::get('languaje') == 'en')
                     {
@@ -341,10 +348,16 @@ class ControlesController extends Controller
                     $stakeholder = NULL;
                 else
                     $stakeholder = $_POST['stakeholder_id'];
-                //guardamos archivo de evidencia (si es que hay)
+                //guardamos archivos de evidencia (si es que hay)
                 if($GLOBALS['evidence'] != NULL)
                 {
-                    upload_file($GLOBALS['evidence'],'controles',$control->id);
+                    foreach ($GLOBALS['evidence'] as $evidence)
+                    {
+                        if ($evidence != NULL)
+                        {
+                            upload_file($evidence,'controles',$control->id);
+                        }
+                    }                    
                 }
                 $control->name = $_POST['name'];
                 $control->description = $_POST['description'];
@@ -463,6 +476,10 @@ class ControlesController extends Controller
                         DB::table('controls')
                             ->where('id','=',$GLOBALS['id1'])
                             ->delete();
+
+                        //ahora eliminamos las evidencias (si es que existen)
+                        $docs = new Documentos;
+                        $docs->deleteFiles('controles',$GLOBALS['id1']);
 
                         $GLOBALS['res'] = 0;
                     }
@@ -1084,14 +1101,8 @@ class ControlesController extends Controller
     {
         $controls = array();
         //controles de negocio
-        $controles = DB::table('controls')
-                    ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
-                    ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
-                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                    ->where('objectives.organization_id','=',$org)
-                    ->select('controls.id','controls.name')
-                    ->distinct('controls.id')
-                    ->get();
+        $controles = \Ermtool\Control::getBussinessControls($org);
+        
         $i = 0;
         foreach ($controles as $control)
         {
@@ -1102,15 +1113,8 @@ class ControlesController extends Controller
             $i += 1;
         }
         //controles de proceso
-        $controles = DB::table('controls')
-                    ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
-                    ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
-                    ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                    ->where('organization_subprocess.organization_id','=',$org)
-                    ->select('controls.id','controls.name')
-                    ->distinct('controls.id')
-                    ->get();
+        $controles = \Ermtool\Control::getProcessesControls($org);
+
         foreach ($controles as $control)
         {
             $controls[$i] = [
@@ -1118,6 +1122,62 @@ class ControlesController extends Controller
                 'name' => $control->name
             ];
             $i += 1;
+        }
+        return json_encode($controls);
+    }
+
+    public function getControls2($org,$type)
+    {
+        $controls = array();
+
+        if ($type == 1)
+        {
+            //controles de negocio
+            $controles = DB::table('controls')
+                        ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
+                        ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                        ->where('objectives.organization_id','=',$org)
+                        ->select('controls.id','controls.name')
+                        ->distinct('controls.id')
+                        ->get();
+
+            $i = 0;
+
+            foreach ($controles as $control)
+            {
+                $controls[$i] = [
+                    'id' => $control->id,
+                    'name' => $control->name
+                ];
+
+                $i += 1;
+            }
+        }
+        else if ($type == 0)
+        {
+            //controles de proceso
+            $controles = DB::table('controls')
+                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                        ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('organization_subprocess.organization_id','=',$org)
+                        ->select('controls.id','controls.name')
+                        ->distinct('controls.id')
+                        ->get();
+
+            $i = 0;
+            
+            foreach ($controles as $control)
+            {
+                $controls[$i] = [
+                    'id' => $control->id,
+                    'name' => $control->name
+                ];
+
+                $i += 1;
+            }
         }
         return json_encode($controls);
     }

@@ -70,6 +70,7 @@
 @stop
 
 @section('scripts2')
+{!!Html::script('assets/js/controls_by_org.js')!!}
 <script>
 $("#control_id").change(function() {
 		

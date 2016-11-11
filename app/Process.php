@@ -3,6 +3,7 @@
 namespace Ermtool;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class Process extends Model
 {
@@ -14,6 +15,21 @@ class Process extends Model
     public function subprocesses()
     {
     	return $this->hasMany('Ermtool\Subprocess');
+    }
+
+    //obtiene procesos que tienen issues(de una organización)
+    public static function getProcessFromIssues($org)
+    {
+        $processes = DB::table('issues')
+                    ->whereNotNull('issues.process_id')
+                    ->join('processes','processes.id','=','issues.process_id')
+                    ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->select('processes.id','processes.name','processes.description')
+                    ->get();
+
+        return $processes;
     }
 
 }

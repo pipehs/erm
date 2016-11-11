@@ -82,8 +82,7 @@ input[type="number"] {
 					@endif
 					</td>
 					<td>
-						{!!Form::number('eval_in_risk_'.$dato->id,$dato->eval_in_risk, 
-					 	   null,['id' => 'el2','min' => '1','max' => '5'])!!}
+					 	<input type="number" name="eval_in_risk_{{ $dato->id }}" value="{{ $dato->eval_in_risk }}" min="1" max="5" disabled>
 					</td>
 					<td>
 					@if ($dato->control_evaluation == 2)

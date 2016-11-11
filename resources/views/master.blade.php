@@ -26,7 +26,6 @@
 		display: inline-block;
 	}  
 	</style>
- 
  	{!!Html::style('assets/css/matrix.css')!!}
  	{!!Html::style('assets/plugins/bootstrap/bootstrap.css')!!}
  	{!!Html::style('assets/css/bootstrap-min.css')!!}
@@ -44,6 +43,7 @@
  	{!!Html::style('assets/css/fileinput.min.css')!!}
  	{!!Html::style('assets/css/semaforo.css')!!}
  	{!!Html::style('assets/css/upload.css')!!}
+ 	{!!Html::style('assets/css/fileinput.css')!!}
 
  	{!!Html::style('assets/css/imprimir.css',['media'=>'print'])!!}	
 
@@ -104,8 +104,16 @@
 			    }
 			}
 		};
-	</script>
 
+		$("#file-3").fileinput({
+			showCaption: false,
+			browseClass: "btn btn-primary btn-lg",
+			fileType: "any"
+		});
+
+	</script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" type="text/javascript"></script>
+	{!!Html::script('assets/js/fileinput.min.js')!!}
 	{!!Html::script('assets/plugins/jquery/jquery-2.1.0.min.js')!!}
 	{!!Html::script('assets/plugins/jquery-ui/jquery-ui.min.js')!!}
 	{!!Html::script('assets/plugins/bootstrap/bootstrap.min.js')!!}

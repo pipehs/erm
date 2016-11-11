@@ -30,33 +30,13 @@
 					</div>
 			@endif
 
-			@if (isset($audit_audit_plan_audit_program))
-					@if ($evidence == NULL)
-						<div class="form-group">
+			<div class="form-group">
+				<label for="file" class="col-sm-4 control-label">Cargar documentos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>
+				<div class="col-sm-4">
+					<input id="file-1" type="file" class="file" name="file_program[]" multiple=true data-preview-file-type="any">
+				</div>
+							
+			</div>
 
-							<label for="file_program" class="col-sm-4 control-label">Opcionalmente puede agregar un documento al programa</label>
-
-							<div class="col-sm-4">
-								<input type="file" name="file_program" id="fileprogram" class="inputfile" />
-								<label for="fileprogram">Cargue evidencia</label>
-							</div>
-						</div>
-					@else
-						<center>
-						<a href="../storage/app/programas_auditoria/{{$evidence[0]['url'] }}" style="cursor:hand">
-						<font color="CornflowerBlue"><u>Descargar evidencia</u></font></a><br>
-						</center>
-					@endif
-			@else
-					<div class="form-group">
-
-							<label for="file_program" class="col-sm-4 control-label">Opcionalmente puede agregar un documento al programa</label>
-
-							<div class="col-sm-4">
-								<input type="file" name="file_program" id="fileprogram" class="inputfile" />
-								<label for="fileprogram">Cargue evidencia</label>
-							</div>
-					</div>
-			@endif
 
 					

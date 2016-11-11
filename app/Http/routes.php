@@ -930,8 +930,12 @@ Route::get('get_organization.{audit_plan_id}', [
 	'as' => 'get_organization', 'uses' => 'AuditoriasController@getOrganization']);
 
 //ruta para obtener controles de una organizacion
+Route::get('get_controls2.{id},{type}', [
+	'as' => 'get_controls', 'uses' => 'ControlesController@getControls2']);
+
+//ruta para obtener programas de auditoría de una organizacion
 Route::get('get_controls.{id}', [
-	'as' => 'get_controls', 'uses' => 'ControlesController@getControls']);
+	'as' => 'get_controls2', 'uses' => 'ControlesController@getControls']);
 
 Route::get('get_kri.{id}', [
 	'as' => 'get_kri', 'uses' => 'KriController@getKri']);
@@ -1121,13 +1125,24 @@ Route::get('action_plan.edit.{id}', [
 Route::put('action_plan.update.{id}', [
 	'as' => 'action_plan.update', 'uses' => 'PlanesAccionController@update']);
 
+Route::get('documentos', [
+	'as' => 'documentos', 'uses' => 'DocumentosController@index']);
 
+Route::get('documentos.show.{id}', [
+	'as' => 'documentos.show', 'uses' => 'DocumentosController@show']);
+
+Route::get('deleteFiles.{dir},{id}', [
+	'as' => 'deleteFiles', 'uses' => 'DocumentosController@deleteFiles']);
 
 //ruta para eliminar evidencias (llama a funcion helper)
 Route::get('evidences.delete.{id},{kind}', function($id,$kind) {
 	return eliminarArchivo($id,$kind);
 });
 
+
+//prueba para cargar archivos por AJAX
+Route::get('cargar', [
+	'as' => 'cargar', 'uses' => 'DocumentosController@storeFile']);
 // ---- Rutas adicionales del framework ----//
 
 /*

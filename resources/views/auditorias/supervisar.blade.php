@@ -218,8 +218,8 @@ function crear_nota(id)
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<textarea name="description_'+id+'" rows="3" cols="4" class="form-control" placeholder="Nota" required></textarea></div>';
 	nota += '<div class="form-group col-sm-12">';
-	nota += '<label class="control-label">Cargar evidencia (opcional)</label>';
-	nota += '<input type="file" name="evidencia_'+id+'"></div>';
+	nota += '<label class="control-label">Cargar evidencias (opcional)</label>';
+	nota += '<input id="file-1" type="file" class="file" name="evidencia_'+id+'[]" multiple=true data-preview-file-type="any">';
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<button class="btn btn-success">Guardar</button></div><hr><br>';
 	$("#nueva_nota_"+id).append(nota);

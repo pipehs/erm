@@ -138,9 +138,8 @@
 	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);
 }
 
-.procesos1 {
+.procesos {
 	float:left !important;  
-	background-color:#F5BCA9;
 	border-radius: 40px;
 	font-size: 12px;
 	margin:5px;
@@ -148,47 +147,24 @@
 	font-weight: bold;
 	/*border-left: thick solid #CCCCCC;*/
 	height: 450px;
-	width: 25%;
 	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);
+}
+
+.procesos1 {
+	background-color:#F5BCA9;
+	width: 24%;
 }
 .procesos2 {
-	float:left !important;  
 	background-color:#04B4AE;
-	border-radius: 40px;
-	font-size: 12px;
-	margin:5px;
-	padding-left:10px;
-	font-weight: bold;
-	/*border-left: thick solid #CCCCCC;*/
-	height: 450px;
-	width: 24%;
-	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);
+	width: 23%;
 }
 .procesos3 {
-	float:left !important;  
-	background-color:#F5F6CE;
-	border-radius: 40px;
-	font-size: 12px;
-	margin:5px;
-	padding-left:10px;
-	font-weight: bold;
-	/*border-left: thick solid #CCCCCC;*/
-	height: 450px;
-	width: 24%;
-	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);
+	background-color:#F5F6CE;	
+	width: 23%;
 }
 .procesos4 {
-	float:left !important;  
 	background-color:#A9A9F5;
-	border-radius: 40px;
-	font-size: 12px;
-	margin:5px;
-	padding-left:10px;
-	font-weight: bold;
-	/*border-left: thick solid #CCCCCC;*/
-	height: 450px;
-	width: 24%;
-	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);
+	width: 23%;
 }
 
 .aprendizaje {
@@ -227,10 +203,10 @@
     padding: 20px;
     border:0px outset #000000;
     height:65px;
-    width:250px !important;
+    width:200px !important;
     -moz-border-radius: 150px / 50px;
 	-webkit-border-radius: 150px / 50px;
-	border-radius: 200px / 50px;
+	border-radius: 150px / 50px;
 	text-align: center;
 	-webkit-box-shadow: 6px 6px 3px 0px rgba(80, 80, 80, 0.75);
 	-moz-box-shadow:    6px 6px 3px 0px rgba(80, 80, 80, 0.75);

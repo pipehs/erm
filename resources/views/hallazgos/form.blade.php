@@ -84,10 +84,9 @@
 				@endif
 
 					<div class="form-group">
-						<label for="file" class="col-sm-4 control-label">Para mayor detalle del hallazgo, puede agregar un archivo (opcional)</label>
+						<label for="file" class="col-sm-4 control-label">Para mayor detalle del hallazgo, puede agregar archivos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>
 						<div class="col-sm-4">
-							<input type="file" name="evidence_doc" id="evidence_doc" class="inputfile" />
-							<label for="evidence_doc">Cargue evidencia</label>
+							<input id="file-1" type="file" class="file" name="evidence_doc[]" multiple=true data-preview-file-type="any">
 						</div>
 						
 					</div>
@@ -162,12 +161,12 @@
 						</center>
 					</div>
 
-				@if ($test_id != NULL)
+				@if (isset($test_id) AND $test_id != NULL)
 					<center>
 						{!! link_to_route('hallazgos_test', $title = 'Volver', $parameters = $test_id, $attributes = ['class'=>'btn btn-danger'])!!}		
 					<center>
 				@else
 					<center>
-						{!! link_to_route('hallazgos', $title = 'Volver', $parameters = NULL, $attributes = ['class'=>'btn btn-danger'])!!}
+						{!! link_to_route('hallazgos_lista', $title = 'Volver', $parameters = ['organization_id' => $org_id, 'kind' => $kind], $attributes = ['class'=>'btn btn-danger'])!!}
 					<center>
 				@endif

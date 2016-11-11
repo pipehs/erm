@@ -3,6 +3,7 @@
 namespace Ermtool;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class Risk extends Model
 {
@@ -38,5 +39,32 @@ class Risk extends Model
     public function evaluations()
     {
         return $this->belongsToMany('Ermtool\Evaluation');
+    }
+
+    //obtenemos riesgos de control. type=0 (de proceso) type=1 (de negocio)
+    public static function getRisksFromControl($control,$type)
+    {
+        if ($type == 0)
+        {
+            $risks = DB::table('risks')
+                    ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                    ->join('control_risk_subprocess','control_risk_subprocess.risk_subprocess_id','=','risk_subprocess.id')
+                    ->where('control_risk_subprocess.control_id','=',$control)
+                    ->select('risks.id','risks.name','risks.description')
+                    ->groupBy('risks.id')
+                    ->get();
+        }
+        else if ($type == 1)
+        {
+            $risks = DB::table('risks')
+                    ->join('objective_risk','objective_risk.risk_id','=','risks.id')
+                    ->join('control_objective_risk','control_objective_risk.objective_risk_id','=','objective_risk.id')
+                    ->where('control_objective_risk.control_id','=',$control)
+                    ->select('risks.id','risks.name','risks.description')
+                    ->groupBy('risks.id')
+                    ->get();
+        }
+
+        return $risks;
     }
 }

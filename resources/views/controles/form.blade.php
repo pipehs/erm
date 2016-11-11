@@ -1,6 +1,6 @@
 				@if (strstr($_SERVER["REQUEST_URI"],'create'))
 					<div class="form-group">
-						{!!Form::label('Seleccione si es control de negocio o proceso',null,['class'=>'col-sm-4 control-label'])!!}
+						<label for="subneg" class="col-sm-4 control-label">Seleccione si es control de negocio o proceso</label>
 						<div class="col-sm-4">
 							{!!Form::select('subneg',['0'=>'Proceso','1'=>'Negocio'],null, 
 							 	   ['id' => 'subneg','required'=>'true','placeholder'=>'- Seleccione -'])!!}
@@ -90,12 +90,20 @@
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Cargar evidencia (opcional)',null,['class'=>'col-sm-4 control-label'])!!}
+						<label for="file" class="col-sm-4 control-label">Cargar documentos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>
 						<div class="col-sm-4">
-							{!!Form::file('evidence_doc',null)!!}
+							<input id="file-1" type="file" class="file" name="evidence_doc[]" multiple=true data-preview-file-type="any">
 						</div>
 					</div>
-
+				<!--	
+					<div class="form-group">
+						<label for="evidence_doc" class="col-sm-4 control-label">
+						Cargar Documentos (para seleccionar más de 1 use ctrl + click)</label>
+						<div class="col-sm-4">
+							<input type="file" name="evidence_doc" multiple>
+						</div>
+					</div>
+				-->
 					<div class="form-group">
 						<center>
 						{!!Form::submit('Guardar', ['class'=>'btn btn-primary'])!!}

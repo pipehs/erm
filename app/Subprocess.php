@@ -3,6 +3,7 @@
 namespace Ermtool;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class Subprocess extends Model
 {
@@ -25,6 +26,51 @@ class Subprocess extends Model
     public function risks()
     {
         return $this->belongsToMany('Ermtool\Risk');
+    }
+
+    //obtiene subprocesos que tienen issues(de una organización)
+    public static function getSubprocessFromIssues($org)
+    {
+        //primero hallazgos de subproceso creados directamente
+        $subprocesses1 = DB::table('issues')
+                    ->whereNotNull('issues.subprocess_id')
+                    ->join('subprocesses','subprocesses.id','=','issues.subprocess_id')
+                    ->join('processes','processes.id','=','subprocesses.process_id')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->select('subprocesses.id','subprocesses.name','subprocesses.description','processes.name as process_name')
+                    ->groupBy('subprocesses.id')
+                    ->get();
+
+        //hallazgos obtenidos a través de la evaluación de controles
+        $subprocesses2 = DB::table('control_evaluation')
+                        ->join('controls','controls.id','=','control_evaluation.control_id')
+                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                        ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                        ->join('processes','processes.id','=','subprocesses.process_id')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                        ->join('issues','issues.id','=','control_evaluation.issue_id')
+                        ->where('organization_subprocess.organization_id','=',$org)
+                        ->select('subprocesses.id','subprocesses.name','subprocesses.description','processes.name as process_name')
+                        ->groupBy('subprocesses.id')
+                        ->get();
+
+        //hallazgos generados a través de auditoría orientada a procesos
+        $subprocesses3 = DB::table('issues')
+                        ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                        ->join('subprocesses','subprocesses.id','=','audit_tests.subprocess_id')
+                        ->join('processes','processes.id','=','subprocesses.process_id')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('organization_subprocess.organization_id','=',$org)
+                        ->select('subprocesses.id','subprocesses.name','subprocesses.description','processes.name as process_name')
+                        ->groupBy('subprocesses.id')
+                        ->get();
+
+        $subprocesses = array_merge($subprocesses1,$subprocesses2,$subprocesses3);
+        //eliminamos duplicados (si es que hay)
+        $subprocessesX = array_unique($subprocesses,SORT_REGULAR);
+        return $subprocessesX;
     }
 
 }

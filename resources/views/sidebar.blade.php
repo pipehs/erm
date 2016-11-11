@@ -38,10 +38,19 @@
 		@include('menu.reportes')
 
 		@foreach (Session::get('roles') as $role)
+			@if ($role != 6) <!-- Rol distinto de display -->
+				@include('menu.documentos')
+				<?php break; ?>
+			@endif
+		@endforeach
+
+		@foreach (Session::get('roles') as $role)
 			@if ($role == 1) {{-- Administración del sistema --}}
 				@include('menu.admin')
 			@endif
 		@endforeach
+
+
 	@endif
 @else
 					<li>&nbsp;</li>

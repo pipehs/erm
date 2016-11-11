@@ -183,8 +183,10 @@ class IssuesController extends Controller
 
         else if ($kind == 2) //Hallazgos de organización
         {
+            //CORRECCIÓN 08-11-2016: SÓLO SE MOSTRARÁN LOS ISSUES PARA LAS ORGANIZACIONES DIRECTAMENTE => PARA EVITAR MAYORES CAMBIOS QUE PUEDAN CONLLEVAR ERRORERS,
+            //LAS VARIABLES DE ISSUES SERÁN ENVIADAS PERO VACÍAS
             //seleccionamos los hallazgos obtenidos a través de la evaluación de controles (que sean para controles de riesgos de negocio)
-            $issues1 = DB::table('control_evaluation')
+            /*$issues1 = DB::table('control_evaluation')
                         ->join('controls','controls.id','=','control_evaluation.control_id')
                         ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
                         ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
@@ -220,16 +222,18 @@ class IssuesController extends Controller
                                      'issues.recommendations','objective_risk.id as subobj_id')
                         ->distinct()
                         ->groupBy('issues.id')
-                        ->get();
+                        ->get(); */
+
+            $issues4 = array();
+            $issues2 = array();
+            $issues3 = array();
 
             //hallazgos de organización creados directamente
-            $issues4 = DB::table('issues')
-                        ->join('organizations','organizations.id','=','issues.organization_id')
+            $issues1 = DB::table('issues')
                         ->where('issues.organization_id','=',$org_id)
                         ->whereNotNull('issues.organization_id')
                         ->select('issues.id','issues.name as issue_name','issues.classification',
-                                     'issues.recommendations','organizations.id as subobj_id')
-                        ->distinct()
+                                     'issues.recommendations','issues.organization_id as subobj_id')
                         ->groupBy('issues.id')
                         ->get();
         }
@@ -1538,9 +1542,7 @@ class IssuesController extends Controller
         }
         else
         {
-            //echo $_GET['org'];
-            //echo $_GET['kind'];
-            if (isset($_GET['org']))
+            if (isset($_GET['org'])) //mantenedor de hallazgos
             {
                 $org = \Ermtool\Organization::where('id',$_GET['org'])->value('name');
 
@@ -1562,11 +1564,11 @@ class IssuesController extends Controller
 
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.hallazgos.create',['org'=>$org, 'processes' => $processes,'kind' => $_GET['kind'],'stakeholders'=>$stakes]);
+                        return view('en.hallazgos.create',['org'=>$org, 'processes' => $processes,'kind' => $_GET['kind'],'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                     else
                     {
-                        return view('hallazgos.create',['org'=>$org, 'processes' => $processes,'kind' => $_GET['kind'],'stakeholders'=>$stakes]);
+                        return view('hallazgos.create',['org'=>$org, 'processes' => $processes,'kind' => $_GET['kind'],'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                     
                 }
@@ -1579,22 +1581,22 @@ class IssuesController extends Controller
 
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.hallazgos.create',['org'=>$org, 'subprocesses' => $subprocesses,'kind' => $_GET['kind'],'stakeholders'=>$stakes]);
+                        return view('en.hallazgos.create',['org'=>$org, 'subprocesses' => $subprocesses,'kind' => $_GET['kind'],'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                     else
                     {
-                        return view('hallazgos.create',['org'=>$org, 'subprocesses' => $subprocesses,'kind' => $_GET['kind'],'stakeholders'=>$stakes]);
+                        return view('hallazgos.create',['org'=>$org, 'subprocesses' => $subprocesses,'kind' => $_GET['kind'],'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                 }
                 else if ($_GET['kind'] == 2) //mandamos id de org
                 {
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.hallazgos.create',['org'=>$org, 'kind' => $_GET['kind'], 'org_id'=>$_GET['org'],'stakeholders'=>$stakes]);
+                        return view('en.hallazgos.create',['org'=>$org, 'kind' => $_GET['kind'], 'org_id'=>$_GET['org'],'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                     else
                     {
-                        return view('hallazgos.create',['org'=>$org, 'kind' => $_GET['kind'], 'org_id'=>$_GET['org'],'stakeholders'=>$stakes]);
+                        return view('hallazgos.create',['org'=>$org, 'kind' => $_GET['kind'], 'org_id'=>$_GET['org'],'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                 }
                 else if ($_GET['kind'] == 3) //obtenemos controles de proceso
@@ -1608,11 +1610,11 @@ class IssuesController extends Controller
 
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.hallazgos.create',['org'=>$org, 'controls' => $controls, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes]);
+                        return view('en.hallazgos.create',['org'=>$org, 'controls' => $controls, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                     else
                     {
-                        return view('hallazgos.create',['org'=>$org, 'controls' => $controls, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes]);
+                        return view('hallazgos.create',['org'=>$org, 'controls' => $controls, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                 }
                 else if ($_GET['kind'] == 4) //obtenemos controles de entidad
@@ -1627,11 +1629,11 @@ class IssuesController extends Controller
 
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.hallazgos.create',['org'=>$org, 'controls' => $controls, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes]);
+                        return view('en.hallazgos.create',['org'=>$org, 'controls' => $controls, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                     else
                     {
-                        return view('hallazgos.create',['org'=>$org, 'controls' => $controls, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes]);
+                        return view('hallazgos.create',['org'=>$org, 'controls' => $controls, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                 }
                 else if ($_GET['kind'] == 5)
@@ -1645,11 +1647,11 @@ class IssuesController extends Controller
                     
                     if (Session::get('languaje') == 'en')
                     {         
-                        return view('en.hallazgos.create',['org'=>$org, 'audit_programs' => $audit_programs, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes]);
+                        return view('en.hallazgos.create',['org'=>$org, 'audit_programs' => $audit_programs, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                     else
                     {
-                        return view('hallazgos.create',['org'=>$org, 'audit_programs' => $audit_programs, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes]);
+                        return view('hallazgos.create',['org'=>$org, 'audit_programs' => $audit_programs, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                 }
                 else if ($_GET['kind'] == 6)
@@ -1663,15 +1665,16 @@ class IssuesController extends Controller
                     
                     if (Session::get('languaje') == 'en')
                     {     
-                        return view('en.hallazgos.create',['org'=>$org, 'audits' => $audits, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes]);
+                        return view('en.hallazgos.create',['org'=>$org, 'audits' => $audits, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                     else
                     {
-                        return view('hallazgos.create',['org'=>$org, 'audits' => $audits, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes]);
+                        return view('hallazgos.create',['org'=>$org, 'audits' => $audits, 'kind' => $_GET['kind'], 'stakeholders'=>$stakes,'org_id' => $_GET['org']]);
                     }
                 }
             }
-            else if (isset($_GET['test']))
+
+            else if (isset($_GET['test'])) //ejecución de auditorías
             {
                 $org = \Ermtool\Organization::getOrgIdByTestId($_GET['test']);
 
@@ -1785,7 +1788,7 @@ class IssuesController extends Controller
                                     'updated_at' => date('Y-m-d H:i:s'),
                                 ]);
                     }
-                    else if ($_POST['kind'] == 3 || $_POST['kind'] == 4)
+                    else if ($_POST['kind'] == 3 || $_POST['kind'] == 4) //hallazgo de controles
                     {
                         $issue = DB::table('issues')
                             ->insertGetId([
@@ -1798,7 +1801,7 @@ class IssuesController extends Controller
                                     'updated_at' => date('Y-m-d H:i:s'),
                                 ]);
                     }
-                    else if ($_POST['kind'] == 5)
+                    else if ($_POST['kind'] == 5) //hallazgo de programa de auditoría
                     {
                         $issue = DB::table('issues')
                             ->insertGetId([
@@ -1811,7 +1814,7 @@ class IssuesController extends Controller
                                     'updated_at' => date('Y-m-d H:i:s'),
                                 ]);
                     }
-                    else if ($_POST['kind'] == 6)
+                    else if ($_POST['kind'] == 6) //hallazgo de auditoría
                     {
                         $issue = DB::table('issues')
                             ->insertGetId([
@@ -1842,9 +1845,14 @@ class IssuesController extends Controller
                 //agregamos evidencia (si es que existe)
                 if ($GLOBALS['req']->file('evidence_doc') != NULL)
                 {
-                    upload_file($GLOBALS['req']->file('evidence_doc'),'evidencias_hallazgos',$issue);    
+                    foreach ($GLOBALS['req']->file('evidence_doc') as $file)
+                    {
+                        if ($file != NULL)
+                        {
+                            upload_file($file,'evidencias_hallazgos',$issue);
+                        } 
+                    }
                 }
-
 
                 //vemos si tiene al menos la descripción del plan de acción, si es así se agrega el plan
                 if (isset($_POST['description_plan']) AND $_POST['description_plan'] != "")
@@ -1870,7 +1878,6 @@ class IssuesController extends Controller
                     $plan = new PlanesAccion;
 
                     $newplan = $plan->store($issue,$_POST['description_plan'],$stakeholder,$final_date);
-
                 }
                 if (Session::get('languaje') == 'en')
                 {
@@ -1969,33 +1976,33 @@ class IssuesController extends Controller
 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan,'test_id' => $test_id]);
+                    return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan,'test_id' => $test_id, 'kind' => $_GET['kind']]);
                 }
                 else
                 {
-                    return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan,'test_id' => $test_id]);
+                    return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan,'test_id' => $test_id, 'kind' => $_GET['kind']]);
                 }
             }
             else if ($issue['organization_id'] != NULL)
             {
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id]);
+                    return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id, 'kind' => $_GET['kind']]);
                 }
                 else
                 {
-                    return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id]);
+                    return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id, 'kind' => $_GET['kind']]);
                 }
             }
             else
             {
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id]);
+                    return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'kind' => $_GET['kind']]);
                 }
                 else
                 {
-                    return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id]);
+                    return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'kind' => $_GET['kind']]);
                 }
             }
         }
@@ -2020,6 +2027,8 @@ class IssuesController extends Controller
             //actualizamos issue de id = $id
             global $id2;
             $id2 = $id;
+            global $req;
+            $req = $request;
             DB::transaction(function() {
 
                 //vemos si el plan se mandó cerrado o abierto y damos formato a campos de plan de acción
@@ -2124,6 +2133,18 @@ class IssuesController extends Controller
                         'status' => $status,
                         'updated_at' => date('Y-m-d H:i:s')
                     ]);
+
+                //agregamos evidencia (si es que existe)
+                if ($GLOBALS['req']->file('evidence_doc') != NULL)
+                {
+                    foreach ($GLOBALS['req']->file('evidence_doc') as $file)
+                    {
+                        if ($file != NULL)
+                        {
+                            upload_file($file,'evidencias_hallazgos',$GLOBALS['id2']); 
+                        }
+                    }
+                }
 
                 if (Session::get('languaje') == 'en')
                 {

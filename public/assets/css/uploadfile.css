@@ -1,0 +1,42 @@
+.ajax-file-upload {
+  font-family: 'Open Sans', Arial, serif;
+  background: lightblue;
+  box-shadow: 0 2px 0 0 #000000;
+  color: #000000;
+}
+.ajax-file-upload:hover {
+  background: #045FB4;
+  box-shadow: 0 2px 0 0 #045FB4;
+}
+.ajax-upload-dragdrop {
+  margin: auto;
+}
+
+.ajax-file-upload-image img {
+  float: left;
+  margin-right: 10px;
+  border-radius: 3px;
+  transition: all 0.2s;
+  -moz-transition: all 0.2s;
+  -webkit-transition: all 0.2s;
+}
+.ajax-file-upload-image img:hover {
+  box-shadow: 1px 0 5px rgba(0,0,0,0.5);
+}
+.ajax-file-upload-filename {
+  color: #edf1f4;
+}
+.ajax-file-upload-bar {
+  background-color: #8dbf4a;
+}
+.ajax-file-upload-progress {
+  border: none;
+  margin: 0;
+  margin-right: 10px;
+  width: 45%;
+}
+.ajax-file-upload-statusbar {
+  margin: 20px auto;
+  border: 1px solid rgba(255,255,255,0.5);
+  height: 100px;
+}

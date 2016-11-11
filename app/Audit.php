@@ -19,4 +19,19 @@ class Audit extends Model
 
     	return $res->name;
     }
+
+    //obtiene auditorías que contienen hallazgos
+    public static function getAuditsFromIssues($org)
+    {
+        $audits = DB::table('issues')
+                    ->join('audit_audit_plan','audit_audit_plan.id','=','issues.audit_audit_plan_id')
+                    ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                    ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                    ->where('audit_plans.organization_id','=',$org)
+                    ->select('audit_audit_plan.id','audit_plans.name as audit_plan','audits.name','audits.description')
+                    ->groupBy('audit_audit_plan.id')
+                    ->get();
+
+        return $audits;
+    }
 }

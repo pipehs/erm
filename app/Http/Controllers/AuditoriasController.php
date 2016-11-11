@@ -377,7 +377,14 @@ class AuditoriasController extends Controller
                 //agregamos evidencia (si es que existe)
                 if ($GLOBALS['req']->file('file_program') != NULL)
                 {
-                    upload_file($GLOBALS['req']->file('file_program'),'programas_auditoria',$audit_audit_plan_audit_program);    
+                    foreach ($GLOBALS['req']->file('file_program') as $file)
+                    {
+                        if ($file != NULL)
+                        {
+                            upload_file($file,'programas_auditoria',$audit_audit_plan_audit_program);
+                        }
+                    }
+                        
                 }
 
                 if (Session::get('languaje') == 'en')
@@ -596,13 +603,13 @@ class AuditoriasController extends Controller
                 //guardamos archivo de evidencia (si es que hay)
                 if($GLOBALS['evidence'] != NULL)
                 {
-                    //separamos nombre archivo extension
-                    $file = explode('.',$GLOBALS['evidence']->getClientOriginalName());
-
-                    Storage::put(
-                        'evidencias_notas/'. $file[0] . "___" . $res . "." . $file[1],
-                        file_get_contents($GLOBALS['evidence']->getRealPath())
-                    );
+                    foreach ($GLOBALS['evidence'] as $file)
+                    {
+                        if ($file != NULL)
+                        {
+                            upload_file($file,'evidencias_notas',$res);
+                        }
+                    }
                 }
 
                 if ($res)
@@ -1496,20 +1503,17 @@ class AuditoriasController extends Controller
         {
             $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')->find($id);
             $audit_program = \Ermtool\Audit_program::find($audit_audit_plan_audit_program->audit_program_id);
-            //obtenemos evidencias de la nota (si es que existe)
-            $evidence = getEvidences(4,$audit_audit_plan_audit_program->id);
+            //$evidence = getEvidences(4,$audit_audit_plan_audit_program->id);
 
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.edit_program',['program'=>$audit_program,
-                    'audit_audit_plan_audit_program'=>$audit_audit_plan_audit_program,
-                    'evidence'=>$evidence]);
+                    'audit_audit_plan_audit_program'=>$audit_audit_plan_audit_program]);
             }
             else
             {
                 return view('auditorias.edit_program',['program'=>$audit_program,
-                    'audit_audit_plan_audit_program'=>$audit_audit_plan_audit_program,
-                    'evidence'=>$evidence]);
+                    'audit_audit_plan_audit_program'=>$audit_audit_plan_audit_program]);
             }
         }
     }
@@ -1560,15 +1564,15 @@ class AuditoriasController extends Controller
             }
 
             //obtenemos evidencias de prueba (si es que existen)
-            $evidence = getEvidences(5,$audit_test->id);
+            //$evidence = getEvidences(5,$audit_test->id);
 
             if (Session::get('languaje') == 'en')
             {
-                return view('en.auditorias.edit_test',['audit_test'=>$audit_test,'stakeholders'=>$stakeholders,'type2'=>$type2,'audit_plan' => $audit_plan->id,'type_id'=>$type_id,'evidence'=>$evidence]);
+                return view('en.auditorias.edit_test',['audit_test'=>$audit_test,'stakeholders'=>$stakeholders,'type2'=>$type2,'audit_plan' => $audit_plan->id,'type_id'=>$type_id]);
             }
             else
             {
-                return view('auditorias.edit_test',['audit_test'=>$audit_test,'stakeholders'=>$stakeholders,'type2'=>$type2,'audit_plan' => $audit_plan->id,'type_id'=>$type_id,'evidence'=>$evidence]);
+                return view('auditorias.edit_test',['audit_test'=>$audit_test,'stakeholders'=>$stakeholders,'type2'=>$type2,'audit_plan' => $audit_plan->id,'type_id'=>$type_id]);
             }
         }
     }
@@ -1605,10 +1609,16 @@ class AuditoriasController extends Controller
                             'updated_at' => date('Y-m-d H:i:s')
                         ]);
 
-                //agregamos evidencia (si es que existe)
+                //agregamos evidencias (si es que existe)
                 if ($GLOBALS['req']->file('file_program') != NULL)
                 {
-                    upload_file($GLOBALS['req']->file('file_program'),'programas_auditoria',$audit_audit_plan_audit_program->id); 
+                    foreach ($GLOBALS['req']->file('file_program') as $file)
+                    {
+                        if ($file != NULL)
+                        {
+                            upload_file($file,'programas_auditoria',$audit_audit_plan_audit_program->id);
+                        } 
+                    }
                 }
             
                 $audit_program->save();
@@ -1713,9 +1723,15 @@ class AuditoriasController extends Controller
                     }
                 }
 
-                if ($GLOBALS['req']->file('file_1') != NULL)
+                if ($GLOBALS['req']->file('file_test') != NULL)
                 {
-                    upload_file($GLOBALS['req']->file('file_1'),'pruebas_auditoria',$GLOBALS['audit_test']->id);     
+                    foreach ($GLOBALS['req']->file('file_test') as $file)
+                    {
+                        if ($file != NULL)
+                        {
+                            upload_file($file,'pruebas_auditoria',$GLOBALS['audit_test']->id);
+                        }
+                    }   
                 }
 
                 $GLOBALS['audit_test']->save();
@@ -1887,9 +1903,15 @@ class AuditoriasController extends Controller
                     }
                 }
 
-                if ($GLOBALS['req']->file('file_1') != NULL)
+                if ($GLOBALS['req']->file('file_test') != NULL)
                 {
-                    upload_file($GLOBALS['req']->file('file_1'),'pruebas_auditoria',$test_id);    
+                    foreach ($GLOBALS['req']->file('file_test') as $file)
+                    {
+                        if ($file != NULL)
+                        {
+                            upload_file($file,'pruebas_auditoria',$test_id);
+                        } 
+                    }   
                 }
 
                 if (Session::get('languaje') == 'en')
@@ -2698,13 +2720,13 @@ class AuditoriasController extends Controller
                 //guardamos archivo de evidencia (si es que hay)
                 if($GLOBALS['evidence'] != NULL)
                 {
-                    //separamos nombre archivo extension
-                    $file = explode('.',$GLOBALS['evidence']->getClientOriginalName());
-
-                    Storage::put(
-                        'evidencias_resp_notas/'. $file[0] . "___" . $res . "." . $file[1],
-                        file_get_contents($GLOBALS['evidence']->getRealPath())
-                    );
+                    foreach ($GLOBALS['evidence'] as $file)
+                    {
+                        if ($file != NULL)
+                        {
+                            upload_file($file,'evidencias_resp_notas',$res);
+                        }
+                    }
                 }
 
                 if ($res)
@@ -4464,53 +4486,6 @@ class AuditoriasController extends Controller
     {
         return json_encode(\Ermtool\Organization::find($org)->audit_plans);
     }
-    //obtiene issues asociadas a una plan auditoria + auditoria
-    /*
-    public function getIssue($id)
-    {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
-            $results = array();
-            //obtenemos solo primer issue (en caso de que existieran muchos)
-            //OBS ACTUALIZACIÓN: Ahora (13-04-2016) se obtendrán todos los issues que existan asociados a un plan + audit
-            $issues = DB::table('issues')
-                        ->where('issues.audit_test_id','=',$id)
-                        ->select('issues.id','issues.name','issues.description','issues.recommendations','issues.classification')
-                        //->first();
-                        ->get();
-            $i = 0;
-
-            if ($issues == NULL)
-            {
-                $results = NULL;
-            }
-            else
-            {
-                foreach ($issues as $issue)
-                {
-                    //obtenemos evidencias de issue (si es que existen)
-                    $evidences = getEvidences(2,$issue->id);
-
-                    $results[$i] = [
-                        'id' => $issue->id,
-                        'name' => $issue->name,
-                        'description' => $issue->description,
-                        'recommendations' => $issue->recommendations,
-                        'classification' => $issue->classification,
-                        'evidences' => $evidences
-                    ];
-
-                    $i += 1;
-                }
-            }
-            return json_encode($results);
-        }
-    }
-    */
 
     //obtiene notas asociadas a una prueba de auditoría
     public function getNotes($id)

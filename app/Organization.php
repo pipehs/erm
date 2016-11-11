@@ -17,6 +17,11 @@ class Organization extends Model
     	$res = DB::table('organizations')->where('id', $organization_id)->value('name');
     	return $res;
     }
+    public static function description($organization_id)
+    {
+        $res = DB::table('organizations')->where('id', $organization_id)->value('description');
+        return $res;
+    }
 
     public function processes()
     {
@@ -62,5 +67,10 @@ class Organization extends Model
                     ->first();
 
         return $org->name;
+    }
+
+    public function issues()
+    {
+        return $this->hasMany('Ermtool\Issue');
     }
 }

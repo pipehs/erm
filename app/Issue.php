@@ -130,4 +130,108 @@ class Issue extends Model
 
         return $results;
     }
+
+    //obtiene issues de procesos
+    public static function getProcessIssues($process)
+    {
+        $issues = DB::table('issues')
+                    ->where('process_id','=',$process)
+                    ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
+                    ->get();
+
+        return $issues;
+    }
+
+    //obtiene issues de subprocesos
+    public static function getSubprocessIssuesBySubprocess($subprocess)
+    {
+        $issues1 = DB::table('issues')
+                    ->where('subprocess_id','=',$subprocess)
+                    ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
+                    ->groupBy('issues.id')
+                    ->get();
+
+        //hallazgos relacionados al subproceso a través de una evaluación de control
+        $issues2 = DB::table('issues')
+                    ->join('control_evaluation','control_evaluation.issue_id','=','issues.id')
+                    ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','control_evaluation.control_id')
+                    ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                    ->where('risk_subprocess.subprocess_id','=',$subprocess)
+                    ->groupBy('issues.id')
+                    ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
+                    ->get();
+
+        //hallazgos de auditoría basada en procesos
+        $issues3 = DB::table('issues')
+                        ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                        ->join('subprocesses','subprocesses.id','=','audit_tests.subprocess_id')
+                        ->where('subprocesses.id','=',$subprocess)
+                        ->groupBy('issues.id')
+                        ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
+                        ->get();
+
+        //hallazgos de auditoría basada en riesgos
+        $issues4 = DB::table('audit_tests')
+                        ->join('issues','issues.audit_test_id','=','audit_tests.id')
+                        ->join('risk_subprocess','risk_subprocess.risk_id','=','audit_tests.risk_id')
+                        ->where('risk_subprocess.subprocess_id','=',$subprocess)
+                        ->groupBy('issues.id')
+                        ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
+                        ->get();
+
+        //hallazgos de auditoría con pruebas de controles (controles orientados a subproceso)
+        $issues5 = DB::table('audit_tests')
+                        ->join('issues','issues.audit_test_id','=','audit_tests.id')
+                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','audit_tests.control_id')
+                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                        ->where('risk_subprocess.subprocess_id','=',$subprocess)
+                        ->groupBy('issues.id')
+                        ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
+                        ->get();
+
+        $issues = array_merge($issues1,$issues2,$issues3,$issues4,$issues5);
+        $issuesX = array_unique($issues,SORT_REGULAR);
+        return $issuesX;
+    }
+
+    public static function getControlIssues($control)
+    {
+        //hallazgos de controles creados directamente
+        $issues1 = DB::table('issues')
+                    ->where('issues.control_id','=',$control)
+                    ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
+                    ->get();
+
+        //hallazgos de controles generados a través de evaluación de controles
+        $issues2 = DB::table('control_evaluation')
+                    ->join('issues','issues.id','=','control_evaluation.issue_id')
+                    ->where('control_evaluation.control_id','=',$control)
+                    ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
+                    ->get();
+
+        $issues = array_merge($issues1,$issues2);
+        $issues = array_unique($issues,SORT_REGULAR);
+
+        return $issues;
+    }
+
+    public static function getAuditProgramIssues($audit_audit_plan_audit_program)
+    {
+        $issues = DB::table('issues')
+                    ->where('audit_audit_plan_audit_program_id','=',$audit_audit_plan_audit_program)
+                    ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
+                    ->get();
+
+        return $issues;
+    }
+
+    public static function getAuditIssues($audit_audit_plan_id)
+    {
+        $issues = DB::table('issues')
+                    ->where('audit_audit_plan_id','=',$audit_audit_plan_id)
+                    ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
+                    ->get();
+
+        return $issues;
+    }
 }

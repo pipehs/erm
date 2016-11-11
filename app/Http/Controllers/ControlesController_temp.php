@@ -1197,6 +1197,62 @@ class ControlesController extends Controller
         return json_encode($controls);
     }
 
+    public function getControls($org,$type)
+    {
+        $controls = array();
+
+        if ($type == 1)
+        {
+            //controles de negocio
+            $controles = DB::table('controls')
+                        ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
+                        ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                        ->where('objectives.organization_id','=',$org)
+                        ->select('controls.id','controls.name')
+                        ->distinct('controls.id')
+                        ->get();
+
+            $i = 0;
+
+            foreach ($controles as $control)
+            {
+                $controls[$i] = [
+                    'id' => $control->id,
+                    'name' => $control->name
+                ];
+
+                $i += 1;
+            }
+        }
+        else if ($type == 0)
+        {
+            //controles de proceso
+            $controles = DB::table('controls')
+                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                        ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('organization_subprocess.organization_id','=',$org)
+                        ->select('controls.id','controls.name')
+                        ->distinct('controls.id')
+                        ->get();
+
+            $i = 0;
+            
+            foreach ($controles as $control)
+            {
+                $controls[$i] = [
+                    'id' => $control->id,
+                    'name' => $control->name
+                ];
+
+                $i += 1;
+            }
+        }
+        return json_encode($controls);
+    }
+
     //obtiene evaluación de control de id = $id
     public function getEvaluacion($id)
     {
