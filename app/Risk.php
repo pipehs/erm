@@ -42,19 +42,17 @@ class Risk extends Model
     }
 
     //obtenemos riesgos de control. type=0 (de proceso) type=1 (de negocio)
-    public static function getRisksFromControl($control,$type)
+    public static function getRisksFromControl($control)
     {
-        if ($type == 0)
-        {
-            $risks = DB::table('risks')
+        $risks = DB::table('risks')
                     ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
                     ->join('control_risk_subprocess','control_risk_subprocess.risk_subprocess_id','=','risk_subprocess.id')
                     ->where('control_risk_subprocess.control_id','=',$control)
                     ->select('risks.id','risks.name','risks.description')
                     ->groupBy('risks.id')
                     ->get();
-        }
-        else if ($type == 1)
+
+        if (empty($risks))
         {
             $risks = DB::table('risks')
                     ->join('objective_risk','objective_risk.risk_id','=','risks.id')
@@ -66,5 +64,21 @@ class Risk extends Model
         }
 
         return $risks;
+    }
+
+    public static function getRiskSubprocessFromControl($control_id)
+    {
+        return DB::table('control_risk_subprocess')
+                    ->where('control_id','=',$control_id)
+                    ->select('control_risk_subprocess.risk_subprocess_id as id')
+                    ->get();
+    }
+
+    public static function getObjectiveRiskFromControl($control_id)
+    {
+        return DB::table('control_objective_risk')
+                    ->where('control_id','=',$control_id)
+                    ->select('control_objective_risk.objective_risk_id as id')
+                    ->get();
     }
 }

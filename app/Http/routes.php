@@ -595,8 +595,33 @@ Route::get('evaluar_controles', [
 	'as' => 'evaluar_controles', 'uses' => 'ControlesController@indexEvaluacion'
 ]);
 
-Route::post('control.guardar_evaluacion', [
-	'as' => 'control.guardar_evaluacion', 'uses' => 'ControlesController@storeEvaluacion'
+Route::get('evaluar_controles2', [
+	'as' => 'evaluar_controles2', 'uses' => 'ControlesController@indexEvaluacion2'
+]);
+
+Route::get('volver_evaluacion', [
+	'as' => 'volver_evaluacion', 'uses' => 'ControlesController@indexEvaluacion2'
+]);
+
+Route::get('cerrar_evaluacion.{id}', [
+	'as' => 'cerrar_evaluacion', 'uses' => 'ControlesController@closeEvaluation'
+]);
+
+//ruta para ir a formulario de evaluación de cada prueba
+Route::get('editar_evaluacion.{id}', [
+	'as' => 'editar_evaluacion', 'uses' => 'ControlesController@editEvaluacion'
+]);
+
+Route::get('agregar_evaluacion.{id}.{kind}', [
+	'as' => 'agregar_evaluacion', 'uses' => 'ControlesController@createEvaluacion'
+]);
+
+Route::put('control_evaluation.update.{id}', [
+	'as' => 'control_evaluation.update', 'uses' => 'ControlesController@updateEvaluation'
+]);
+
+Route::post('control_evaluation.store', [
+	'as' => 'control_evaluation.store', 'uses' => 'ControlesController@storeEvaluation'
 ]);
 
 Route::get('controles.get_evaluation.{id_control}', [
@@ -617,6 +642,12 @@ Route::get('controles.get_evaluation2.{id_control}', [
 
 Route::get('controles.destroy.{id}', [
 	'as' => 'controles.destroy', 'uses' => 'ControlesController@destroy']);
+
+Route::get('controles.get_objective_controls.{org_id}', [
+	'as' => 'controles.get_objective_controls', 'uses' => 'ControlesController@getObjectiveControls']);
+
+Route::get('controles.get_subprocess_controls.{org_id}', [
+	'as' => 'controles.get_subprocess_controls', 'uses' => 'ControlesController@getSubprocessControls']);
 
 // ----Rutas para reportes básicos---- //
 
@@ -913,7 +944,7 @@ Route::get('auditorias.close_note.{id}', [
 Route::get('get_processes.{id}', [
 	'as' => 'get_processes', 'uses' => 'ProcesosController@getProcesses']);
 
-//ruta para obtener procesos de una organizacion
+//ruta para obtener subprocesos de una organizacion
 Route::get('get_subprocesses.{id}', [
 	'as' => 'get_subprocesses', 'uses' => 'SubprocesosController@getSubprocesses']);
 

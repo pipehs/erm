@@ -414,28 +414,8 @@ class ProcesosController extends Controller
     //obtiene procesos de una organización
     public function getProcesses($org)
     {
-        $results = array();
-
-        $processes = DB::table('processes')
-                    ->join('subprocesses','subprocesses.process_id','=','processes.id')
-                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                    ->where('organization_subprocess.organization_id','=',$org)
-                    ->where('processes.status','=',0)
-                    ->groupBy('processes.id')
-                    ->select('processes.id','processes.name')
-                    ->get();
-
-        $i = 0;
-        foreach ($processes as $process)
-        {
-            $results[$i] = [
-                'id' => $process->id,
-                'name' => $process->name,
-            ];
-
-            $i += 1;
-        }
+        $processes = \Ermtool\Process::getProcesses($org);
         
-        return json_encode($results);
+        return json_encode($processes);
     }
 }

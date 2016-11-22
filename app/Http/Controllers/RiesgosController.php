@@ -276,9 +276,7 @@ class RiesgosController extends Controller
             $riesgos_tipo = \Ermtool\Risk::where('status',0)->where('type2',0)->lists('name','id');
 
             //obtenemos lista de stakeholders
-            $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-            ->orderBy('name')
-            ->lists('full_name', 'id');
+            $stakeholders = \Ermtool\Stakeholder::listStakeholders($_GET['org']);
 
             if(isset($_GET['P']))
             {

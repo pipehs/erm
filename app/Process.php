@@ -32,4 +32,18 @@ class Process extends Model
         return $processes;
     }
 
+    public static function getProcesses($org)
+    {
+        $processes = DB::table('processes')
+                    ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->where('processes.status','=',0)
+                    ->groupBy('processes.id')
+                    ->select('processes.id','processes.name')
+                    ->get();
+                    
+        return $processes;
+    }
+
 }

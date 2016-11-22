@@ -9,7 +9,6 @@ use Redirect;
 use Storage;
 use DateTime;
 use Auth;
-use ArrayObject;
 use Ermtool\Http\Controllers\DocumentosController as Documentos;
 //sleep(2);
 class ControlesController extends Controller
@@ -744,6 +743,115 @@ class ControlesController extends Controller
             return Redirect::to('editar_evaluacion.'.$GLOBALS['eval2']->id);
         }
     }
+    /* ACTUALIZADO MODO DE EVALUAR CONTROLES EL 14-11-2016
+    //guarda evaluación de un control
+    public function storeEvaluacion(Request $request)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            //para guardar en todas las tablas exactamente la misma fecha
+            global $date;
+            $date = date('Y-m-d H:i:s');
+            //variables globales de evidencia
+            global $file_diseno;
+            global $file_efectividad;
+            global $file_sustantiva;
+            global $file_cumplimiento;
+            $file_diseno = $request->file('file_diseno');
+            $file_efectividad = $request->file('file_efectividad');
+            $file_sustantiva = $request->file('file_sustantiva');
+            $file_cumplimiento = $request->file('file_cumplimiento');
+            //echo "Diseño: ".$file_diseno."Efectividad: ".$file_efectividad."Sustantiva: ".$file_sustantiva."Cumplimiento: ".$file_cumplimiento;
+            //vemos si se está guardando una nueva evaluación o si se está editando una previa
+            //print_r($_POST);
+            
+            if ($_POST['guardar'] == 0) //se está guardando una evaluación nueva
+            {
+                DB::transaction (function() {
+                    //primero que todo, verificaremos que no haya una evaluación anterior abierta, y si es así, la cerramos
+                    $last_eval = DB::table('control_evaluation')
+                                ->where('control_id','=',$_POST['control_id'])
+                                ->where('status','=',1)
+                                ->select('control_evaluation.id')
+                                ->get();
+                    //sólo si se que hay hará la actualización
+                    foreach ($last_eval as $eval)
+                    {
+                        //actualizamos dejando status en 2
+                        DB::table('control_evaluation')
+                            ->where('id','=',$eval->id)
+                            ->update([ 'status'=>2 ]);
+                    }
+                    //si es que se evaluó diseño
+                    if ($_POST['diseno'] != "")
+                    {
+                        $this->storeTests('diseno',0);
+                    }
+                    //lo mismo con efectividad operativa
+                    if ($_POST['efectividad'] != "")
+                    {
+                        $this->storeTests('efectividad',1);
+                    }
+                    //lo mismo con pruebas sustantivas
+                    if ($_POST['sustantiva'] != "")
+                    {
+                        $this->storeTests('sustantiva',2);
+                    }
+                    //lo mismo con pruebas de cumplimiento
+                    if ($_POST['cumplimiento'] != "")
+                    {
+                        $this->storeTests('cumplimiento',3);
+                    }
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','Assessment successfully done');
+                    }
+                    else
+                    {
+                        Session::flash('message','Evaluación realizada correctamente');
+                    }
+                });
+            }
+            else if ($_POST['guardar'] == 1) //se está editando una evaluación previa
+            {
+                DB::transaction (function() {
+                    //si es que se evaluó diseño
+                    if ($_POST['diseno'] != "")
+                    {
+                        $this->editTests('diseno',0);
+                    }
+                    //lo mismo con efectividad operativa
+                    if ($_POST['efectividad'] != "")
+                    {
+                        $this->editTests('efectividad',1);
+                    }
+                    //lo mismo con pruebas sustantivas
+                    if ($_POST['sustantiva'] != "")
+                    {
+                        $this->editTests('sustantiva',2);
+                    }
+                    //lo mismo con pruebas de cumplimiento
+                    if ($_POST['cumplimiento'] != "")
+                    {
+                        $this->editTests('cumplimiento',3);
+                    }
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','Assessment successfully updated');
+                    }
+                    else
+                    {
+                        Session::flash('message','Evaluación actualizada correctamente');
+                    }
+                });
+            } 
+            return Redirect::to('/evaluar_controles');
+        }
+    }*/
 
     public function updateEvaluation($id)
     {
@@ -800,22 +908,10 @@ class ControlesController extends Controller
             $eval->save();
 
             //ahora calcularemos el resultado del control
-            $control = $this->calcControlValue($eval->control_id);
+            $control = \Ermtool\Control::calcControlValue($eval->control_id);
 
-            //ahora calcularemos el valor de el o los riesgos a los que apunte este control
-            $eval_risk = $this->calcControlledRisk($eval->control_id);
 
-            if (Session::get('languaje') == 'en')
-            {
-                Session::flash('message','Control test was successfully closed');
-            }
-            else
-            {
-                Session::flash('message','La prueba fue cerrada satisfactoriamente');
-            }
         });
-
-        return 0;
     }
     /*
     función identifica si se seleccionarán riesgos/subprocesos o riesgos/objetivos
@@ -1461,6 +1557,315 @@ class ControlesController extends Controller
         return json_encode($description);
     }
 
+    /*
+     //guarda pruebas de diseño, sustantivas, efectividad y cumplimiento (y otros tipos si es que hubieran)
+    public function storeTests($test,$kind)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            
+         if (isset($_POST['comentarios_'.$test]))
+            {
+                $comments = $_POST['comentarios_'.$test];
+            }
+            else
+            {
+                $comments = NULL;
+            }
+            //ahora guardamos datos de ISSUE si es que la prueba fue inefectiva
+            if ($_POST[$test] == 2)
+            {
+                        if (isset($_POST['clasificacion_'.$test]))
+                        {
+                            $class = $_POST['clasificacion_'.$test];
+                        }
+                        else
+                        {
+                            $class = NULL;
+                        }
+                        $issue_id = DB::table('issues')
+                                ->insertGetId([
+                                    'classification' => $class,
+                                    'name' => $_POST['name_hallazgo_'.$test],
+                                    'description' => $_POST['description_hallazgo_'.$test],
+                                    'recommendations' => $_POST['recomendaciones_'.$test],
+                                    'created_at' => $GLOBALS['date'],
+                                    'updated_at' => $GLOBALS['date'],
+                                ]);
+                         //vemos si existe responsable de diseño
+                        if (isset($_POST['responsable_plan_'.$test]))
+                        {
+                            $responsable = $_POST['responsable_plan_'.$test];
+                        }
+                        else
+                        {
+                            $responsable = NULL;
+                        }
+                        //insertamos plan de acción
+                        DB::table('action_plans')
+                            ->insert([
+                                'issue_id' => $issue_id,
+                                'stakeholder_id' => $responsable,
+                                'description' => $_POST['plan_accion_'.$test],
+                                'created_at' => $GLOBALS['date'],
+                                'updated_at' => $GLOBALS['date'],
+                                'final_date' => $_POST['fecha_plan_'.$test],
+                                'status' => 0
+                                ]);
+            }
+            else
+            {
+                $issue_id = NULL;
+            }
+                        
+            //si es inefectiva issue_id tendrá valor, si no será NULL
+            $id_eval = DB::table('control_evaluation')
+                    ->insertGetId([
+                        'control_id' => $_POST['control_id'],
+                        'kind' => $kind,
+                        'comments' => $comments,
+                        'results' => $_POST[$test],
+                        'created_at' => $GLOBALS['date'],
+                        'updated_at' => $GLOBALS['date'],
+                        'status' => 1,
+                        'issue_id' => $issue_id
+                    ]);                           
+            
+            //cargamos evidencia
+            if ($GLOBALS['file_'.$test] != NULL)
+            {
+                upload_file($GLOBALS['file_'.$test],'eval_controles',$id_eval);    
+            }
+            //si es que la prueba es de efectividad operativa, actualizamos riesgo controlado
+            if ($kind == 1)
+            {
+                $res = calc_controlled_risk($_POST['control_id'],$_POST[$test]);
+                if (Session::get('languaje') == 'en')
+                {
+                    if ($res == 0)
+                    {
+                        echo "Controlled risk successfully stored";
+                    }
+                    else if ($res == 1)
+                    {
+                        echo "Error storing the value of controlled risk";
+                    }
+                }
+                else
+                {
+                    if ($res == 0)
+                    {
+                        echo "Riesgo controlado guardado correctamente";
+                    }
+                    else if ($res == 1)
+                    {
+                        echo "Error al guardar valor de riesgo controlado";
+                    }
+                }
+            }
+        }       
+    }
+     //guarda nueva versión (o primera si es que no existia) de pruebas de diseño, sustantivas, efectividad y cumplimiento (y otros tipos si es que hubieran)
+    public function editTests($test,$kind)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            //primero que todo, obtenemos datos de prueba anterior si es que existía
+            $last_test = DB::table('control_evaluation')
+                            ->where('status','=',1)
+                            ->where('control_id','=',$_POST['control_id'])
+                            ->where('kind','=',$kind)
+                            ->select('id','results','issue_id')
+                            ->first();
+            if (isset($_POST['comentarios_'.$test]))
+            {
+                $comments = $_POST['comentarios_'.$test];
+            }
+            else
+            {
+                $comments = NULL;
+            }
+            //ahora guardamos datos de ISSUE si es que la prueba fue inefectiva
+            if ($_POST[$test] == 2)
+            {
+                if (isset($_POST['clasificacion_'.$test]))
+                {
+                    $class = $_POST['clasificacion_'.$test];
+                }
+                else
+                {
+                    $class = NULL;
+                }
+                //vemos si anteriormente era inefectiva, si lo era, se debe actualizar issue. De lo contrario se crea uno nuevo
+                if ($last_test->issue_id == NULL)
+                {
+                    
+                    $issue_id = DB::table('issues')
+                            ->insertGetId([
+                                'classification' => $class,
+                                'name' => $_POST['name_hallazgo_'.$test],
+                                'description' => $_POST['description_hallazgo_'.$test],
+                                'recommendations' => $_POST['recomendaciones_'.$test],
+                                'created_at' => $GLOBALS['date'],
+                                'updated_at' => $GLOBALS['date'],
+                            ]);
+                }
+                else //sólo debe ser actualizado
+                {
+                    $issue_id = $last_test->issue_id; //se guarda para después comprobar plan de acción
+                    DB::table('issues')
+                        ->where('id','=',$issue_id)
+                        ->update([
+                            'classification' => $class,
+                            'name' => $_POST['name_hallazgo_'.$test],
+                            'description' => $_POST['description_hallazgo_'.$test],
+                            'recommendations' => $_POST['recomendaciones_'.$test],
+                            'updated_at' => $GLOBALS['date'],
+                        ]);
+                }
+                $action_plan = NULL;
+                //ahora vemos si existe un plan de acción para el issue 
+                $action_plan = DB::table('action_plans')
+                            ->where('issue_id','=',$issue_id)
+                            ->select('id')
+                            ->first();
+                if ($action_plan == NULL) //agregamos nuevo plan de acción
+                {
+                    //vemos si existe responsable de diseño
+                    if (isset($_POST['responsable_plan_'.$test]))
+                    {
+                        $responsable = $_POST['responsable_plan_'.$test];
+                    }
+                    else
+                    {
+                        $responsable = NULL;
+                    }
+                    //insertamos plan de acción
+                    DB::table('action_plans')
+                        ->insert([
+                            'issue_id' => $issue_id,
+                            'stakeholder_id' => $responsable,
+                            'description' => $_POST['plan_accion_'.$test],
+                            'created_at' => $GLOBALS['date'],
+                            'updated_at' => $GLOBALS['date'],
+                            'final_date' => $_POST['fecha_plan_'.$test],
+                            'status' => 0
+                            ]);
+                }
+                else //actualizamos plan de acción
+                {
+                    //vemos si existe responsable de diseño
+                    if (isset($_POST['responsable_plan_'.$test]))
+                    {
+                        $responsable = $_POST['responsable_plan_'.$test];
+                    }
+                    else
+                    {
+                        $responsable = NULL;
+                    }
+                    //actualizamos plan de acción
+                    DB::table('action_plans')
+                        ->where('id','=',$action_plan->id)
+                        ->update([
+                            'issue_id' => $issue_id,
+                            'stakeholder_id' => $responsable,
+                            'description' => $_POST['plan_accion_'.$test],
+                            'updated_at' => $GLOBALS['date'],
+                            'final_date' => $_POST['fecha_plan_'.$test],
+                            'status' => 0
+                            ]);
+                }
+            }
+            else
+            {
+                $issue_id = NULL;
+            }
+            //vemos ahora si la evaluación existia anteriormente o es nueva (se pueden haber creado una nueva prueba para una evaluación de un control)
+            $id_eval_prev = NULL;
+            $id_eval_prev = DB::table('control_evaluation')
+                        ->where('control_id','=',$_POST['control_id'])
+                        ->where('kind','=',$kind)
+                        ->where('status','=',1)
+                        ->select('id')
+                        ->first();
+            if ($id_eval_prev == NULL)
+            {
+                //si es inefectiva issue_id tendrá valor, si no será NULL
+                $id_eval = DB::table('control_evaluation')
+                        ->insertGetId([
+                            'control_id' => $_POST['control_id'],
+                            'kind' => $kind,
+                            'comments' => $comments,
+                            'results' => $_POST[$test],
+                            'created_at' => $GLOBALS['date'],
+                            'updated_at' => $GLOBALS['date'],
+                            'status' => 1,
+                            'issue_id' => $issue_id
+                        ]);
+            }
+            else
+            {
+                $id_eval = $id_eval_prev->id;
+                DB::table('control_evaluation')
+                        ->where('id','=',$id_eval_prev->id)
+                        ->update([
+                            'control_id' => $_POST['control_id'],
+                            'kind' => $kind,
+                            'comments' => $comments,
+                            'results' => $_POST[$test],
+                            'updated_at' => $GLOBALS['date'],
+                            'status' => 1,
+                            'issue_id' => $issue_id
+                        ]);
+            }                  
+                                       
+            
+            //**************** vemos si es que hay una evidencia cargada *******************
+            //OBS: Lo anteriorun no es necesario, ya que por ahora (y no sé si habrá que hacerlo) la evidencia se agrega solo una vez y no hay opción a cambio de decisión
+                    
+            //cargamos evidencia
+            if ($GLOBALS['file_'.$test] != NULL)
+            {
+                upload_file($GLOBALS['file_'.$test],'eval_controles',$id_eval);    
+            }
+            //si es que la prueba es de efectividad operativa, actualizamos riesgo controlado
+            if ($kind == 1)
+            {
+                $res = calc_controlled_risk($_POST['control_id'],$_POST[$test]);
+                if (Session::get('languaje') == 'en')
+                {
+                    if ($res == 0)
+                    {
+                        echo "Controlled risk successfully updated";
+                    }
+                    else if ($res == 1)
+                    {
+                        echo "Error updating the value of controlled risk";
+                    }
+                }
+                else
+                {
+                    if ($res == 0)
+                    {
+                        echo "Riesgo controlado actualizado correctamente";
+                    }
+                    else if ($res == 1)
+                    {
+                        echo "Error al actualizar valor de riesgo controlado";
+                    }
+                }
+            }
+        }         
+    }
+    */
     public function indexGraficos($value)
     {
         if (Auth::guest())
@@ -1808,8 +2213,7 @@ class ControlesController extends Controller
                             ->where('kind','=',0)
                             ->max('updated_at');
 
-
-        if (isset($last_diseno_updated) && !empty($last_diseno_updated))
+        if (isset($last_diseno_updated))
         {
             //ahora obtenemos la evaluación en esa fecha
             $last_diseno = DB::table('control_evaluation')
@@ -1818,7 +2222,6 @@ class ControlesController extends Controller
                             ->where('updated_at','=',$last_diseno_updated)
                             ->select('results','status')
                             ->first();
-
         }
         else
         {
@@ -1831,213 +2234,59 @@ class ControlesController extends Controller
                             ->where('kind','=',1)
                             ->max('updated_at');
 
-        if (isset($last_efectividad_updated) && !empty($last_efectividad_updated))
+        if (isset($last_efectividad_updated))
         {
             //ahora obtenemos la evaluación en esa fecha
             $last_efectividad = DB::table('control_evaluation')
                             ->where('control_id','=',$id)
-                            ->where('kind','=',1)
-                            ->where('updated_at','=',$last_efectividad_updated)
-                            ->select('results','status')
-                            ->first();
-        }
-        else
-        {
-            $last_efectividad = NULL;
-        }
-
-        $last_sustantiva_updated = DB::table('control_evaluation')
-                            ->where('control_id','=',$id)
-                            ->where('kind','=',2)
-                            ->max('updated_at');
-
-        if (isset($last_sustantiva_updated) && !empty($last_sustantiva_updated))
-        {
-            //ahora obtenemos la evaluación en esa fecha
-            $last_sustantiva = DB::table('control_evaluation')
-                            ->where('control_id','=',$id)
-                            ->where('kind','=',2)
-                            ->where('updated_at','=',$last_sustantiva_updated)
-                            ->select('results','status')
-                            ->first();
-        }
-        else
-        {
-            $last_sustantiva = NULL;
-        }
-
-        $last_cumplimiento_updated = DB::table('control_evaluation')
-                            ->where('control_id','=',$id)
-                            ->where('kind','=',3)
-                            ->max('updated_at');
-
-        if (isset($last_cumplimiento_updated) && !empty($last_cumplimiento_updated))
-        {
-            //ahora obtenemos la evaluación en esa fecha
-            $last_cumplimiento = DB::table('control_evaluation')
-                            ->where('control_id','=',$id)
-                            ->where('kind','=',3)
+                            ->where('kind','=',0)
                             ->where('updated_at','=',$last_diseno_updated)
                             ->select('results','status')
                             ->first();
         }
         else
         {
-            $last_cumplimiento = NULL;
+            $last_diseno = NULL;
         }
 
+        $last_diseno_updated = DB::table('control_evaluation')
+                            ->where('control_id','=',$id)
+                            ->where('kind','=',0)
+                            ->max('updated_at');
 
-        //vemos cada una de las pruebas (que estén cerradas, y sumamos en variable de efectivo en el caso de que lo sean; además guardamos el total de pruebas)
-        $efectivas = 0;
-        $total = 0;
-        if ($last_diseno != NULL && isset($last_diseno->status) && $last_diseno->status == 2)
+        if (isset($last_diseno_updated))
         {
-            $total += 1;
-            if ($last_diseno->results == 1)
-            {
-                $efectivas += 1;
-            }
-        }
-
-        if ($last_efectividad != NULL && isset($last_efectividad->status) && $last_efectividad->status == 2)
-        {
-            $total += 1;
-            if ($last_efectividad->results == 1)
-            {
-                $efectivas += 1;
-            }
-        }
-
-        if ($last_sustantiva != NULL && isset($last_sustantiva->status) && $last_sustantiva->status == 2)
-        {
-            $total += 1;
-            if ($last_sustantiva->results == 1)
-            {
-                $efectivas += 1;
-            }
-        }
-
-        if ($last_cumplimiento != NULL && isset($last_cumplimiento->status) && $last_cumplimiento->status == 2)
-        {
-            $total += 1;
-            if ($last_cumplimiento->results == 1)
-            {
-                $efectivas += 1;
-            }
-        }
-
-        //ahora vemos si el total de pruebas realizadas y cerradas es igual a la cantidad de pruebas efectivas
-        if ($total == $efectivas)
-        {
-            //guardamos en control_eval_risk_temp como control efectivo
-            DB::table('control_eval_risk_temp')
-                ->insert([
-                    'result' => 1,
-                    'control_id' => $id,
-                    'created_at' => date('Y-m-d H:i:s'),
-                ]);
+            //ahora obtenemos la evaluación en esa fecha
+            $last_diseno = DB::table('control_evaluation')
+                            ->where('control_id','=',$id)
+                            ->where('kind','=',0)
+                            ->where('updated_at','=',$last_diseno_updated)
+                            ->select('results')
+                            ->first();
         }
         else
         {
-            //guardamos como inefectivo
-            DB::table('control_eval_risk_temp')
-                ->insert([
-                    'result' => 2,
-                    'control_id' => $id,
-                    'created_at' => date('Y-m-d H:i:s'),
-                ]);
+            $last_diseno = NULL;
         }
 
-        return 0;
-    }
+        $last_diseno_updated = DB::table('control_evaluation')
+                            ->where('control_id','=',$id)
+                            ->where('kind','=',0)
+                            ->max('updated_at');
 
-    //función que calcula el valor del o los riesgos controlados (a través de una nueva agregación o modificación en el valor de un control)
-    public function calcControlledRisk($control_id)
-    {
-        //primero que todo, obtenemos todos los riesgos a los que apunta este control (vemos si apunta a riesgos de proceso o de entidad)
-        $risks = \Ermtool\Risk::getRiskSubprocessFromControl($control_id);
-        $kind = 1; //para facilitar la manipulación posterior del riesgo
-
-        if (empty($risks)) //entonces apunta a riesgos de entidad
+        if (isset($last_diseno_updated))
         {
-            $kind = 2; //para facilitar la manipulación posterior del riesgo
-            $risks = \Ermtool\Risk::getObjectiveRiskFromControl($control_id);
-        }
-
-
-        //ahora recorremos cada uno de esos riesgos, y obtenemos los controles que tiene asociado y cuáles de estos controles posee una evaluación en la tabla control_eval_risk_temp
-        foreach ($risks as $risk)
-        {
-            //obtenemos todos los controles de este riesgo
-            if ($kind == 1) //riesgo de proceso
-            {
-                $controls = \Ermtool\Control::getControlsFromRiskSubprocess($risk->id);
-            }
-            else
-            {
-                $controls = \Ermtool\Control::getControlsFromObjectiveRisk($risk->id);
-            }
-
-            //ahora para cada uno de estos controles, verificamos su ÚLTIMO resultado en la tabla control_eval_risk_temp
-            $efectivos = 0;
-            $inefectivos = 0;
-            foreach ($controls as $control)
-            {
-                //obtenemos ÚLTIMA fecha de creación
-                $max_date = DB::table('control_eval_risk_temp')
-                                ->where('control_id','=',$control->id)
-                                ->max('created_at');
-
-                //obtenemos resultado del control
-                $eval = DB::table('control_eval_risk_temp')
-                            ->where('control_id','=',$control->id)
-                            ->where('created_at','=',$max_date)
-                            ->select('result')
+            //ahora obtenemos la evaluación en esa fecha
+            $last_diseno = DB::table('control_evaluation')
+                            ->where('control_id','=',$id)
+                            ->where('kind','=',0)
+                            ->where('updated_at','=',$last_diseno_updated)
+                            ->select('results')
                             ->first();
-
-                
-                if (isset($eval) && $eval != NULL)
-                {
-                    if ($eval->result  == 1)
-                    {
-                        $efectivos += 1;
-                    }
-                    else
-                    {
-                        $inefectivos += 1;
-                    }
-                }
-            }
-
-            //ahora hacemos una división de todos los efectivos con la suma de efectivos más inefectivos, y si esta división es mayor o igual a 0.5, entonces el riesgo es guardado como efectivo, sino será guardado como inefectivo
-
-            $res = $efectivos / ($efectivos + $inefectivos);
-
-            if ($res >= 0.5)
-            {
-                //el riesgo es efectivo
-                if ($kind == 1)
-                {
-                    \Ermtool\Control_evaluation::insesrtControlledRisk($risk->id,1,1);
-                }
-                else
-                {
-                    \Ermtool\Control_evaluation::insertControlledRisk($risk->id,1,2);
-                }
-            }
-            else //inefectivo
-            {
-                if ($kind == 1)
-                {
-                    \Ermtool\Control_evaluation::insertControlledRisk($risk->id,2,1);
-                }
-                else
-                {
-                    \Ermtool\Control_evaluation::insertControlledRisk($risk->id,2,2);
-                }
-            }
         }
-
-        return 0;
+        else
+        {
+            $last_diseno = NULL;
+        }
     }
 }

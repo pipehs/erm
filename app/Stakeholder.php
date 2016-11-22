@@ -3,7 +3,7 @@
 namespace Ermtool;
 
 use Illuminate\Database\Eloquent\Model;
-
+use DB;
 class Stakeholder extends Model
 {
     protected $fillable = ['id','dv','name','surnames','role','position','mail','organization_id','status'];
@@ -36,6 +36,36 @@ class Stakeholder extends Model
     public function user()
     {
         return $this->hasOne('App\User');
+    }
+
+    public static function getName($rut)
+    {
+        $stakeholder = \Ermtool\Stakeholder::where('id',$rut)->first(['name','surnames']);
+        
+        return $stakeholder->name.' '.$stakeholder->surnames;
+    }
+
+    public static function listStakeholders($org)
+    {
+        //para los casos en que sea muy difícil especificar la org, dejaremos momentáneamente la opción de NULL
+
+        if ($org == NULL)
+        {
+            $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+            ->orderBy('name')
+            ->lists('full_name', 'id');
+        }
+        else
+        {
+            $stakeholders = \Ermtool\Stakeholder::where('status',0)
+                ->join('organization_stakeholder','organization_stakeholder.stakeholder_id','=','stakeholders.id')
+                ->where('organization_stakeholder.organization_id','=',$org)
+                ->select('stakeholders.id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+                ->orderBy('name')
+                ->lists('full_name', 'id');
+        }
+
+        return $stakeholders;
     }
 }
  

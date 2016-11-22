@@ -73,4 +73,18 @@ class Organization extends Model
     {
         return $this->hasMany('Ermtool\Issue');
     }
+
+    public static function getOrganizationFromControl($id)
+    {
+        //vemos si es de proceso o de entidad
+        $control = DB::table('control_risk_subprocess')
+                    ->join('risk_subprocess','risk_subprocess.id','control_risk_subprocess.risk_subprocess_id')
+                    ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                    ->where('control_risk_subprocess.control_id','=',$id)
+                    ->select('organization_subprocess.organization_id')
+                    ->get();
+
+        //función aun no terminada (20-11-16)
+    }
 }

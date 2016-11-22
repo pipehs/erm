@@ -306,6 +306,35 @@ function compararFechas(fecha_menor,fecha_mayor)
 	}
 }
 
+//función para cerrar evaluación de prueba de control
+function cerrar_evaluacion(id,name,kind)
+{
+	swal({   title: "Atención!",
+		   text: "Está seguro que desea cerrar "+kind+" para el control "+name+"?",
+		   type: "warning",   
+		   showCancelButton: true,   
+		   confirmButtonColor: "#31B404",   
+		   confirmButtonText: "Cerrar",
+		   cancelButtonText: "Cancelar",   
+		   closeOnConfirm: false }, 
+		   function(){
+		   		$.get('cerrar_evaluacion.'+id, function (result) {
+		   			swal({   title: "",
+		   			   text: ""+kind+" del control "+name+" fue cerrada exitosamente ",
+		   			   type: "success",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Aceptar",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	location.reload();
+		   			   });
+
+		   			});
+		   		 
+		   	});
+}
+
 $(document).ready(function() {
 	// Load Datatables and run plugin on tables 
 	LoadDataTablesScripts(AllTables);

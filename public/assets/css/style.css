@@ -872,6 +872,25 @@ td.beauty-hover {
   background-color: #5a8db6;
   border-color: rgba(0, 0, 0, 0.3);
 }
+
+
+
+.btn-negro, .btn-negro.disabled, .btn-negro[disabled], fieldset[disabled] .btn-negro, .btn-negro.disabled:hover, .btn-negro[disabled]:hover, fieldset[disabled] .btn-negro:hover, .btn-negro.disabled:focus, .btn-negro[disabled]:focus, fieldset[disabled] .btn-negro:focus, .btn-negro.disabled:active, .btn-negro[disabled]:active, fieldset[disabled] .btn-negro:active, .btn-negro.disabled.active, .btn-negro[disabled].active, fieldset[disabled] .btn-negro.active,
+.table > thead > tr > td.primary, .table > tbody > tr > td.primary, .table > tfoot > tr > td.primary, .table > thead > tr > th.primary, .table > tbody > tr > th.primary, .table > tfoot > tr > th.primary, .table > thead > tr.primary > td, .table > tbody > tr.primary > td, .table > tfoot > tr.primary > td, .table > thead > tr.primary > th, .table > tbody > tr.primary > th, .table > tfoot > tr.primary > th {
+  background-color: #413F3C;
+  border-color: rgba(0, 0, 0, 0.3);
+  color: #f8f8f8;
+}
+.btn-negro:hover, .btn-negro:focus, .btn-negro:active, .btn-negro.active, .open .dropdown-toggle.btn-negro,
+.table-hover > tbody > tr > td.primary:hover, .table-hover > tbody > tr > th.primary:hover, .table-hover > tbody > tr.primary:hover > td, .table-hover > tbody > tr.primary:hover > th {
+  color: #fff;
+  background-color: #000000;
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+
+
+
 .btn-success:hover, .btn-success:focus, .btn-success:active, .btn-success.active, .open .dropdown-toggle.btn-success,
 .table-hover > tbody > tr > td.success:hover, .table-hover > tbody > tr > th.success:hover, .table-hover > tbody > tr.success:hover > td, .table-hover > tbody > tr.success:hover > th {
   color: #fff;
@@ -2384,4 +2403,3 @@ td.beauty-hover {
     top: -1000px;
     cursor: pointer;
 }
-

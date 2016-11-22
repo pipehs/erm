@@ -101,7 +101,7 @@ class IssuesController extends Controller
                         ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
                         ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                        ->join('issues','issues.id','=','control_evaluation.issue_id')
+                        ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
                         ->where('organization_subprocess.organization_id','=',$org_id)
                         ->select('issues.id','issues.name as issue_name','issues.classification',
                                  'issues.recommendations','risk_subprocess.id as subobj_id')
@@ -237,7 +237,7 @@ class IssuesController extends Controller
                         ->groupBy('issues.id')
                         ->get();
         }
-        else if ($kind == 3) //Hallazgos de control
+        else if ($kind == 3) //Hallazgos de control de proceso
         {
 
             //primero seleccionamos los hallazgos obtenidos a través de la evaluación de controles (riesgos de subproceso)
@@ -246,7 +246,7 @@ class IssuesController extends Controller
                         ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
                         ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                        ->join('issues','issues.id','=','control_evaluation.issue_id')
+                        ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
                         ->where('organization_subprocess.organization_id','=',$org_id)
                         ->select('issues.id','issues.name as issue_name','issues.classification',
                                  'issues.recommendations','control_risk_subprocess.id as subobj_id')
@@ -292,7 +292,7 @@ class IssuesController extends Controller
                         ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
                         ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
                         ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                        ->join('issues','issues.id','=','control_evaluation.issue_id')
+                        ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
                         ->where('objectives.organization_id','=',$org_id)
                         ->select('issues.id','issues.name as issue_name','issues.classification',
                                      'issues.recommendations','control_objective_risk.id as subobj_id')
@@ -612,13 +612,13 @@ class IssuesController extends Controller
 
             if (strstr($_SERVER["REQUEST_URI"],'genexcelissues'))
             {
-                if ($kind == 0)
+                if ($kind == 0 || $kind == 3)
                 {
                     $issues[$i] = $this->setIssue1($datos['processes'],$datos['subprocesses'],$datos['risks'],$datos['controls'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
                 }
-                else if ($kind == 2)
+                else if ($kind == 2 || $kind == 4)
                 {
-                    $issues[$i] = $this->setIssue2($datos['objectives'],$datos['risks'],$temp['controls'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                    $issues[$i] = $this->setIssue2($datos['objectives'],$datos['risks'],$datos['controls'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
                 }
                 
             }
@@ -672,13 +672,13 @@ class IssuesController extends Controller
 
             if (strstr($_SERVER["REQUEST_URI"],'genexcelissues'))
             {
-                if ($kind == 0)
+                if ($kind == 0 || $kind == 3)
                 {
                     $issues[$i] = $this->setIssue1($datos['processes'],$datos['subprocesses'],$datos['risks'],$datos['controls'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
                 }
-                else if ($kind == 2)
+                else if ($kind == 2 || $kind == 4)
                 {
-                    $issues[$i] = $this->setIssue2($datos['objectives'],$datos['risks'],$temp['controls'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                    $issues[$i] = $this->setIssue2($datos['objectives'],$datos['risks'],$datos['controls'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
                 }
             }
             else
@@ -727,13 +727,13 @@ class IssuesController extends Controller
             if ($kind2 == 2) //estamos formateando para reporte de hallazgos, por lo que se agregarán los riesgos
             {
                 if ($kind == 2) //estamos formateando para organizacion, se envía en vez de NULL un 1
-                $datos = $this->datosReporte($issue->subobj_id,$kind,1);
+                {
+                    $datos = $this->datosReporte($issue->subobj_id,$kind,1);
+                }
             }            
 
             if (strstr($_SERVER["REQUEST_URI"],'genexcelissues'))
             {   
-                if (Session::get('languaje') == 'en')
-                {
                 if ($kind == 0)
                 {
                     $issues[$i] = $this->setIssue1($datos['processes'],$datos['subprocesses'],$datos['risks'],$datos['controls'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
@@ -764,7 +764,6 @@ class IssuesController extends Controller
                     'evidence' => $evidence
                 ];
             }
-
             $i += 1;
         }
 
@@ -819,12 +818,10 @@ class IssuesController extends Controller
                     ];
                 }
 
-                $i += 1;
-                    
-                
+                $i += 1; 
             }
         }
-    }}
+    }
     
     return $issues;
 }

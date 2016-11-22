@@ -28,6 +28,19 @@ class Subprocess extends Model
         return $this->belongsToMany('Ermtool\Risk');
     }
 
+    public static function getSubprocesses($org)
+    {
+        $subprocesses = DB::table('subprocesses')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->where('subprocesses.status','=',0)
+                    ->select('subprocesses.id','subprocesses.name')
+                    ->distinct('subprocesses.id')
+                    ->get();
+
+        return $subprocesses;
+    }
+
     //obtiene subprocesos que tienen issues(de una organización)
     public static function getSubprocessFromIssues($org)
     {

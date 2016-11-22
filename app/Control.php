@@ -14,6 +14,12 @@ class Control extends Model
     	return $this->belongsTo('Ermtool\Stakeholder');
     }
 
+    public static function name($id)
+    {
+        $res = DB::table('controls')->where('id', $id)->value('name');
+        return $res;
+    }
+
     public static function getBussinessControls($org)
     {
     	$ctrl = DB::table('controls')
@@ -109,5 +115,35 @@ class Control extends Model
         $controls = array_unique($controls,SORT_REGULAR);
 
         return $controls;
+    }
+
+    //obtiene controles de un subproceso en específico
+    public static function getSubprocessControls($subprocess)
+    {
+        $controls = DB::table('controls')
+                    ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                    ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                    ->where('risk_subprocess.subprocess_id','=',$subprocess)
+                    ->select('controls.id','controls.name','controls.description')
+                    ->groupBy('controls.id')
+                    ->get();
+
+        return $controls;
+    }
+
+    public static function getControlsFromRiskSubprocess($risk_subprocess_id)
+    {
+        return DB::table('control_risk_subprocess')
+                ->where('risk_subprocess_id','=',$risk_subprocess_id)
+                ->select('control_id as id')
+                ->get();
+    }
+
+    public static function getControlsFromObjectiveRisk($objective_risk_id)
+    {
+        return DB::table('control_objective_risk')
+                ->where('objective_risk_id','=',$objective_risk_id)
+                ->select('control_id as id')
+                ->get();
     }
 }
