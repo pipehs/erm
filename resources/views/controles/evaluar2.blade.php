@@ -208,7 +208,17 @@
 							@foreach ($last_diseno['issues'] as $i)
 								<li>Nombre: {{ $i->name }}</li>
 								<li>Descripci&oacute;n: {{ $i->description }}</li>
-								<li>Clasificaci&oacute;n: {{ $i->classification }}</li>
+								<li>Clasificaci&oacute;n:
+									@if ($i->classification == 0)
+										Oportunidad de mejora
+									@elseif ($i->classification == 1)
+										Deficiencia
+									@elseif ($i->classification == 2)
+										Debilidad significativa
+									@else
+										No se pudo obtener la clasificaci&oacute;n
+									@endif
+								</li>
 								<li>Recomendaciones: {{ $i->recommendations }}</li>
 							@endforeach
 							</li>
@@ -267,7 +277,17 @@
 							@foreach ($last_efectividad['issues'] as $i)
 								<li>Nombre: {{ $i->name }}</li>
 								<li>Descripci&oacute;n: {{ $i->description }}</li>
-								<li>Clasificaci&oacute;n: {{ $i->classification }}</li>
+								<li>Clasificaci&oacute;n:
+									@if ($i->classification == 0)
+										Oportunidad de mejora
+									@elseif ($i->classification == 1)
+										Deficiencia
+									@elseif ($i->classification == 2)
+										Debilidad significativa
+									@else
+										No se pudo obtener la clasificaci&oacute;n
+									@endif
+								</li>
 								<li>Recomendaciones: {{ $i->recommendations }}</li>
 							@endforeach
 							</li>
@@ -325,7 +345,17 @@
 							@foreach ($last_sustantiva['issues'] as $i)
 								<li>Nombre: {{ $i->name }}</li>
 								<li>Descripci&oacute;n: {{ $i->description }}</li>
-								<li>Clasificaci&oacute;n: {{ $i->classification }}</li>
+								<li>Clasificaci&oacute;n:
+									@if ($i->classification == 0)
+										Oportunidad de mejora
+									@elseif ($i->classification == 1)
+										Deficiencia
+									@elseif ($i->classification == 2)
+										Debilidad significativa
+									@else
+										No se pudo obtener la clasificaci&oacute;n
+									@endif
+								</li>
 								<li>Recomendaciones: {{ $i->recommendations }}</li>
 							@endforeach
 							</li>
@@ -382,7 +412,17 @@
 							@foreach ($last_cumplimiento['issues'] as $i)
 								<li>Nombre: {{ $i->name }}</li>
 								<li>Descripci&oacute;n: {{ $i->description }}</li>
-								<li>Clasificaci&oacute;n: {{ $i->classification }}</li>
+								<li>Clasificaci&oacute;n:
+									@if ($i->classification == 0)
+										Oportunidad de mejora
+									@elseif ($i->classification == 1)
+										Deficiencia
+									@elseif ($i->classification == 2)
+										Debilidad significativa
+									@else
+										No se pudo obtener la clasificaci&oacute;n
+									@endif
+								</li>
 								<li>Recomendaciones: {{ $i->recommendations }}</li>
 							@endforeach
 							</li>

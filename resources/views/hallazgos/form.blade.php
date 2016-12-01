@@ -83,6 +83,10 @@
 					{!!Form::hidden('test_id',$test_id)!!}
 				@endif
 
+				@if (isset($evaluation_id))
+					{!!Form::hidden('evaluation_id',$evaluation_id)!!}
+				@endif
+
 					<div class="form-group">
 						<label for="file" class="col-sm-4 control-label">Para mayor detalle del hallazgo, puede agregar archivos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>
 						<div class="col-sm-4">
@@ -165,6 +169,10 @@
 					<center>
 						{!! link_to_route('hallazgos_test', $title = 'Volver', $parameters = $test_id, $attributes = ['class'=>'btn btn-danger'])!!}		
 					<center>
+				@elseif (isset($evaluation_id))
+					<center>
+						{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
+					</center>
 				@else
 					<center>
 						{!! link_to_route('hallazgos_lista', $title = 'Volver', $parameters = ['organization_id' => $org_id, 'kind' => $kind], $attributes = ['class'=>'btn btn-danger'])!!}

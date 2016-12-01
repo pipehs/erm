@@ -1482,12 +1482,19 @@ class ControlesController extends Controller
                             //->where('control_evaluation.status','=',2)
                             ->distinct()
                             ->get(['control_id as id']);
+
             $i = 0;
             foreach ($controles as $control)
             {
+                //primero obtenemos fecha del último resultado de evaluación del control
+                $max_date = DB::table('control_eval_risk_temp')
+                                ->where('control_id','=',$control->id)
+                                ->max('created_at');
+
                 $controls_temp[$i] = $control->id;
                 $i += 1;
                 //para cada uno vemos si son efectivos o inefectivos: Si al menos una de las pruebas es inefectiva, el control es inefectivo
+                //ACTUALIZACIÓN 22-11-16: Sólo verificaremos en tabla control_eval_risk_temp
                 $res = DB::table('control_evaluation')
                             ->where('control_id','=',$control->id)
                             ->where('results','=',2)
@@ -2039,5 +2046,100 @@ class ControlesController extends Controller
         }
 
         return 0;
+    }
+
+    public function hallazgos($id)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            //datos de evaluación de control
+            $evaluation = \Ermtool\Control_evaluation::find($id);
+            
+            $issues = array();
+
+            $issues1 = \Ermtool\Issue::getIssueByControlEvaluation($id);
+
+            $control_name = \Ermtool\Control::name($evaluation->control_id);
+
+            $iss = new IssuesController;
+            //print_r($_POST);
+            $i = 0;
+            foreach ($issues1 as $issue)
+            {
+                
+                if ($issue['plan_description'] != NULL)
+                {
+                    $temp = $iss->formatearIssue($issue['id'],$issue['name'],$issue['classification'],$issue['recommendations'],$issue['plan_description'],$issue['plan_status'],$issue['plan_final_date']);  
+                }
+                else
+                {
+                    $temp = $iss->formatearIssue($issue['id'],$issue['name'],$issue['classification'],$issue['recommendations'],NULL,NULL,NULL);  
+                }
+
+                $issues[$i] = [
+                    'id' => $temp['id'],
+                    'name' => $temp['name'],
+                    'classification' => $temp['classification'],
+                    'recommendations' => $temp['recommendations'],
+                    'plan' => $temp['plan'],
+                    'status' => $temp['status'],
+                    'status_origin' => $temp['status_origin'],
+                    'final_date' => $temp['final_date'],
+                    'evidence' => $issue['evidences']
+                ];
+
+                $i += 1; 
+            }
+
+            $org_id = \Ermtool\Organization::getOrganizationIdFromControl($evaluation->control_id);
+
+            
+            if (Session::get('languaje') == 'en')
+            {
+                switch ($evaluation->kind) {
+                    case 0:
+                        $kind = 'Design test';
+                        break;
+                    case 1:
+                        $kind = 'Operational effectiveness test';
+                        break;
+                    case 2:
+                        $kind = 'Sustantive test';
+                        break;
+                    case 3:
+                        $kind = 'Compliance test';
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
+                return view('en.hallazgos.index3',['issues'=>$issues, 'evaluation' => $evaluation,'org_id' => $org_id,'kind' => $kind]);
+            }
+            else
+            {
+                switch ($evaluation->kind) {
+                    case 0:
+                        $kind = 'Prueba de diseño';
+                        break;
+                    case 1:
+                        $kind = 'Prueba de efectividad operativa';
+                        break;
+                    case 2:
+                        $kind = 'Prueba sustantiva';
+                        break;
+                    case 3:
+                        $kind = 'Prueba de cumplimiento';
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
+                return view('hallazgos.index3',['issues'=>$issues, 'evaluation' => $evaluation,'control_name'=>$control_name,'org_id' => $org_id,'kind' => $kind]);
+            }
+        }
     }
 }

@@ -70,16 +70,7 @@
 <script>
 function gestionarHallazgos()
 {
-	@if(Session::has('message'))
-		guardado = true
-	@else
-		guardado = false
-	@endif
-	
-	if (guardado == false)
-	{
-		swal('Cuidado','Antes de poder gestionar hallazgos debe guardar los resultados de la prueba','warning');
-	}
+	swal('Cuidado','Antes de poder gestionar hallazgos debe guardar los resultados de la prueba','warning');
 }
 </script>
 {!!Html::script('assets/js/evaluar.js')!!}

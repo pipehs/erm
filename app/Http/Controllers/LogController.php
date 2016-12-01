@@ -163,12 +163,12 @@ class LogController extends Controller
             if (Session::get('languaje') == 'en')
             {
                 Session::flash('message','The entered id was incorrect. Try again');
-                return Redirect::to('crear_usuario')->withInput();
+                return Redirect::to('usuario.create')->withInput();
             }
             else
             {
                 Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente');
-                return Redirect::to('crear_usuario')->withInput();
+                return Redirect::to('usuario.create')->withInput();
             }
         }
     }

@@ -234,4 +234,61 @@ class Issue extends Model
 
         return $issues;
     }
+
+    //obtiene issues y planes de acción de una evaluación de control
+    public static function getIssueByControlEvaluation($id)
+    {
+        $results = array();
+
+        $issues = DB::table('issues')
+                    ->where('issues.control_evaluation_id','=',$id)
+                    ->select('issues.id','issues.name','issues.description','issues.recommendations','issues.classification')
+                    ->get();
+            $i = 0;
+
+        foreach ($issues as $issue)
+        {
+            //para cada issue obtenemos plan de acción (si es que hay)
+            $plan = DB::table('action_plans')
+                ->where('issue_id','=',$issue->id)
+                ->select('description','final_date','status')
+                ->first();
+
+            //obtenemos evidencias de issue (si es que existen)
+            $evidences = getEvidences(2,$issue->id);
+
+            if ($plan != NULL)
+            {
+                $results[$i] = [
+                    'id' => $issue->id,
+                    'name' => $issue->name,
+                    'description' => $issue->description,
+                    'recommendations' => $issue->recommendations,
+                    'classification' => $issue->classification,
+                    'evidences' => $evidences,
+                    'plan_description' => $plan->description,
+                    'plan_final_date' => $plan->final_date,
+                    'plan_status' => $plan->status,
+                ];
+            }
+            else
+            {
+                $results[$i] = [
+                    'id' => $issue->id,
+                    'name' => $issue->name,
+                    'description' => $issue->description,
+                    'recommendations' => $issue->recommendations,
+                    'classification' => $issue->classification,
+                    'evidences' => $evidences,
+                    'plan_description' => NULL,
+                    'plan_final_date' => NULL,
+                    'plan_status' => NULL,
+                ];
+            }
+
+            $i += 1;
+        }
+
+        return $results;
+    }
 }

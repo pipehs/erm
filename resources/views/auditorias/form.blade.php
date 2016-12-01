@@ -7,67 +7,7 @@
 						</div>
 					</div>
 
-					<div class="form-group">
-						{!!Form::label('Seleccione tipo de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-8">
-							<div class="radio">
-								<label>
-									<input type="radio" onchange="kind(this.value)" name="type" id="type" value="0">Auditor&iacute;a de Procesos
-									<i class="fa fa-circle-o small"></i>
-								</label>
-							</div>
-							<div class="radio">
-								<label>
-									<input type="radio" onchange="kind(this.value)" name="type" id="type" value="1">Auditor&iacute;a de Negocios
-									<i class="fa fa-circle-o small"></i>
-								</label>
-							</div>
-							<div class="radio">
-								<label>
-									<input type="radio" onchange="kind(this.value)" name="type" id="type" value="2">Auditor&iacute;a de Riesgos
-									<i class="fa fa-circle-o small"></i>
-								</label>
-							</div>
-						</div>
-					</div>
-
 					<b><font color="blue">Ingrese informaci&oacute;n para el plan de auditor&iacute;a</font></b></br>
-
-					<div class="form-group" id="procesos" style="display: none;">
-						{!!Form::label('Procesos de la organización',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-8">
-							<select name="processes_id[]" id="processes_id" multiple="multiple">
-								<!-- Aquí se agregarán los procesos de la org seleccionada a través de Jquery -->
-							</select>
-						</div>
-					</div>
-
-					<div class="form-group" id="objetivos" style="display: none;">
-						{!!Form::label('Objetivos de la organización',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-8">
-							<select name="objectives_id[]" id="objectives_id" multiple="multiple">
-								<!-- Aquí se agregarán los procesos de la org seleccionada a través de Jquery -->
-							</select>
-						</div>
-					</div>
-
-					<div class="form-group" id="riesgos_objetivos" style="display: none;">
-						{!!Form::label('Riesgos relevantes (del negocio)',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-8">
-							<select name="objective_risk_id[]" id="objective_risk_id" multiple="multiple">
-								<!-- Aquí se agregarán los riesgos de negocio de la org seleccionada a través de Jquery -->
-							</select>
-						</div>
-					</div>
-
-					<div class="form-group" id="riesgos_procesos" style="display: none;">
-						{!!Form::label('Riesgos relevantes (de proceso)',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-8">
-							<select name="risk_subprocess_id[]" id="risk_subprocess_id" multiple="multiple">
-								<!-- Aquí se agregarán los riesgos de proceso de la org seleccionada a través de Jquery -->
-							</select>
-						</div>
-					</div>
 
 					<div class="form-group">
 						{!!Form::label('Nombre plan',null,['class'=>'col-sm-4 control-label'])!!}

@@ -624,6 +624,10 @@ Route::post('control_evaluation.store', [
 	'as' => 'control_evaluation.store', 'uses' => 'ControlesController@storeEvaluation'
 ]);
 
+Route::get('control_evaluation.hallazgos.{id}', [
+	'as' => 'control_evaluation.hallazgos', 'uses' => 'ControlesController@hallazgos'
+]);
+
 Route::get('controles.get_evaluation.{id_control}', [
 	'as' => 'controles.get_evaluation', 'uses' => 'ControlesController@getEvaluacion'
 ]);

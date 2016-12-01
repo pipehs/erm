@@ -360,28 +360,28 @@ function getEvidences($kind,$id)
         if ($kind == 0) //se están solicitando evidencias de una nota
         {
             //seleccionamos carpeta de notas
-            $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_notas';
+            $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_notas\''.$id;
         }
         else if ($kind == 1) //se están solicitando respuestas a evidencias de una nota
         {
             //seleccionamos carpeta de respuestas evidencias
-            $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_resp_notas';
+            $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_resp_notas\''.$id;
         }
         else if ($kind == 2) //se están solicitando evidencias de un hallazgo
         {
-            $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_hallazgos';
+            $carpeta = 'C:\virtualhost\erm\storage\app\evidencias_hallazgos\''.$id;
         }
         else if ($kind == 3) //solicitando evidencias de una evaluación de control
         {
-        	$carpeta = 'C:\virtualhost\erm\storage\app\eval_controles';
+        	$carpeta = 'C:\virtualhost\erm\storage\app\eval_controles\''.$id;
         }
         else if ($kind == 4) //solicitando evidencias de un programa de auditoría
         {
-        	$carpeta = 'C:\virtualhost\erm\storage\app\programas_auditoria';
+        	$carpeta = 'C:\virtualhost\erm\storage\app\programas_auditoria\''.$id;
         }
         else if ($kind == 5) //solicitando evidencias de un programa de auditoría
         {
-        	$carpeta = 'C:\virtualhost\erm\storage\app\pruebas_auditoria';
+        	$carpeta = 'C:\virtualhost\erm\storage\app\pruebas_auditoria\''.$id;
         }
 
         if (file_exists($carpeta) != false) //verificamos que exista la carpeta
@@ -390,27 +390,12 @@ function getEvidences($kind,$id)
 
             foreach ($archivos as $archivo)
             {    
-                    //dividimos archivos para buscar id
-                    if (strpos($archivo,'___'))
-                    {   
-                        $j = 0;
-                        $temp = explode('___',$archivo);
+				$evidences[$j] = [
+                    'id' => $id,
+                    'url' => $archivo,
+                ];
 
-                        //sacamos extensión del archivo
-                        $temp2 = explode('.',$temp[1]);
-
-                        if ($temp2[0] == $id)
-                        {
-                            $evidences[$j] = [
-                                'id' => $id,
-                                'url' => $archivo,
-                            ];
-
-                            $j += 1;
-                        }
-                    }
-                    else
-                        $evidences = NULL;                      
+                $j += 1;                                        
             }
         }
         else
@@ -421,6 +406,7 @@ function getEvidences($kind,$id)
         return $evidences;
 }
 
+/*FUNCIÓN OBSOLETA 23-11-16: Se actualizó esta función en ControlesController (se dividió en 2 funciones: calcControlValue() y calcControlledRisk())
 //calcula el valor de riesgo controlado pasando como parametro el id del control y la evaluación de EFECTIVIDAD OPERATIVA
 //por otra parte, si es un cálculo a través de una auditoría, el valor de efectividad será el de la evaluación de la prueba
 function calc_controlled_risk($control_id,$efectividad)
@@ -547,7 +533,7 @@ function calc_controlled_risk($control_id,$efectividad)
 		}
 		echo 0; //fin correcto	
 	});
-}
+}*/
 
 //función para eliminar los tíldes en el string ingresado
 function eliminaAcentos($String)
@@ -583,22 +569,23 @@ function eliminaAcentos($String)
     return $String;
 }
 
+/*esta función se debe actualizar, ya que estaba hecha para eliminar sólo un archivo (pensando que cada evidencia era única)
 function eliminarArchivo($id,$kind)
 {
 	//Elimina evidencias de prueba (carpeta pruebas_auditoria)
 	if ($kind == 0)
 	{
-		$dir = "../storage/app/pruebas_auditoria";
+		$dir = "../storage/app/pruebas_auditoria/".$id;
 	}
 	//Elimina evidencias de programa (carpeta programas_auditoria)
 	else if ($kind == 1)
 	{
-		$dir = "../storage/app/programas_auditoria";
+		$dir = "../storage/app/programas_auditoria/".$id;
 	}
 	//Elimina evidencias de hallazgos (carpeta evidencias_hallazgos)
 	else if ($kind == 2)
 	{
-		$dir = "../storage/app/evidencias_hallazgos";
+		$dir = "../storage/app/evidencias_hallazgos/".$id;
 	}
 		
 	$handle = opendir($dir); 
@@ -621,5 +608,5 @@ function eliminarArchivo($id,$kind)
 		}
 	}	
 	
-}
+} */
 ?>

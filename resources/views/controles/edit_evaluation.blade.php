@@ -74,6 +74,10 @@ function gestionarHallazgos()
 	{
 		swal('Cuidado','Antes de poder gestionar hallazgos debe guardar los resultados de la prueba','warning');
 	}
+	else
+	{
+		window.location.href = 'control_evaluation.hallazgos.{{$eval->id}}'
+	}
 }
 </script>
 @section('scripts2')

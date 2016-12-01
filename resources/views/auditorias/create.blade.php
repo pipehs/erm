@@ -54,7 +54,7 @@
 
 				<center>
 					{!! link_to_route('plan_auditoria', $title = 'Volver', $parameters = NULL,
-                 		$attributes = ['class'=>'btn btn-success'])!!}
+                 		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 			</div>
 		</div>

@@ -875,12 +875,12 @@ class AuditoriasController extends Controller
                         ]);
 
                 //insertamos en audit_plan_stakeholder primero al encargado del plan y luego al equipo
-                        DB::table('audit_plan_stakeholder')
-                            ->insert([
-                                'role' => 0,
-                                'audit_plan_id' => $audit_plan_id,
-                                'stakeholder_id' => $_POST['stakeholder_id']
-                                ]);
+                DB::table('audit_plan_stakeholder')
+                    ->insert([
+                        'role' => 0,
+                        'audit_plan_id' => $audit_plan_id,
+                        'stakeholder_id' => $_POST['stakeholder_id']
+                    ]);
 
                 //ahora insertamos equipo de stakeholders (si es que hay)
                 if (isset($_POST['stakeholder_team']))
@@ -895,7 +895,9 @@ class AuditoriasController extends Controller
                                     ]);
                     }
                 }
-                
+
+
+                /*  ACTUALIZACIÓN 28-11: Eliminamos esta selección
                 if ($_POST['type'] == 0) //se agrego auditoría de procesos
                 {
                     //primero, obtenemos riesgos asociados a cada proceso (si es que hay)
@@ -975,7 +977,7 @@ class AuditoriasController extends Controller
                                         ]);
                         }
                     }
-                }
+                } */
 
                 //ahora guardamos auditorías que no son nuevas (si es que hay)
 
@@ -1013,6 +1015,7 @@ class AuditoriasController extends Controller
                                         'hh' => $estimated_HH
                                         ]);
                         
+                        /* Eliminamos esta selección
                         if ($_POST['type'] == 0) //se agrego auditoría de procesos
                         {
                             //primero, obtenemos riesgos asociados a cada proceso (si es que hay)
@@ -1095,7 +1098,7 @@ class AuditoriasController extends Controller
                                             ]);
                                 }
                             }
-                        }
+                        }*/
                     }
                 } //fin isset($_POST['audits'])
 
@@ -1131,6 +1134,7 @@ class AuditoriasController extends Controller
                                         'hh' => $HH
                                         ]);
 
+                        /* Actualización 28-11: Elminamos esta selección, ya que sólo se realizará en las pruebas de auditoría
                         if ($_POST['type'] == 0) //se agrego auditoría de procesos
                         {
                             //primero, obtenemos riesgos asociados a cada proceso (si es que hay)
@@ -1211,7 +1215,7 @@ class AuditoriasController extends Controller
                                                 ]);
                                     }
                                }
-                        }           
+                        }*/           
 
                        $i += 1;
                     }

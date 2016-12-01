@@ -40,7 +40,7 @@ class Organization extends Model
 
     public function audit_plans()
     {
-        return $this->hasMany('Ermtool\Audit_plan');
+        return $this->belongsToMany('Ermtool\Audit_plan');
     }
 
     public static function getOrgIdByTestId($id)
@@ -74,17 +74,28 @@ class Organization extends Model
         return $this->hasMany('Ermtool\Issue');
     }
 
-    public static function getOrganizationFromControl($id)
+    //OJO (23-11-16): En un comienzo se está seleccionando una organización por control, pero puede darse el caso que un control esté apuntando a más de una organización
+    public static function getOrganizationIdFromControl($id)
     {
         //vemos si es de proceso o de entidad
         $control = DB::table('control_risk_subprocess')
-                    ->join('risk_subprocess','risk_subprocess.id','control_risk_subprocess.risk_subprocess_id')
+                    ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
                     ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                     ->where('control_risk_subprocess.control_id','=',$id)
-                    ->select('organization_subprocess.organization_id')
-                    ->get();
+                    ->select('organization_subprocess.organization_id as id')
+                    ->first();
 
-        //función aun no terminada (20-11-16)
+        if (empty($control)) //es de entidad
+        {
+            $control = DB::table('control_objective_risk')
+                    ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                    ->where('control_objective_risk.control_id','=',$id)
+                    ->select('objectives.organization_id as id')
+                    ->first();
+        }
+
+        return $control;
     }
 }

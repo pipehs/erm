@@ -14,6 +14,11 @@ class Audit_plan extends Model
     	return $this->belongsToMany('\Ermtool\Stakeholder');
     }
 
+    public function organizations()
+    {
+        return $this->belongsToMany('\Ermtool\Organization');
+    }
+
     public static function name($plan_id)
     {
     	$res = DB::table('audit_plans')->where('id', $plan_id)->value('name');
