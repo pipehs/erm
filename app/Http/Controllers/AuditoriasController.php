@@ -1,7 +1,5 @@
 <?php
-
 namespace Ermtool\Http\Controllers;
-
 use Illuminate\Http\Request;
 use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
@@ -12,7 +10,6 @@ use dateTime;
 use Storage;
 use stdClass;
 use Auth;
-
 class AuditoriasController extends Controller
 {
     //compara scores para ordenar de mayor a menor
@@ -22,7 +19,6 @@ class AuditoriasController extends Controller
         {
             return 0;
         }
-
         return ($a['score'] > $b['score']) ? -1 : 1;
     }
     /**
@@ -41,7 +37,6 @@ class AuditoriasController extends Controller
             $planes = array();
             $plans = \Ermtool\Audit_plan::all();
             $i = 0; //contador de planes
-
             foreach ($plans as $plan)
             {
                 //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
@@ -49,21 +44,17 @@ class AuditoriasController extends Controller
                 {
                     $fecha_creacion = NULL;
                 }
-
                 else
                 {
                     $fecha_creacion = date_format($plan['created_at'],"d-m-Y");
                 }
-
                 //damos formato a fecha de actualización 
                 if ($plan['updated_at'] != NULL)
                 {
                     $fecha_act = date_format($plan['updated_at'],"d-m-Y");
                 }
-
                 else
                     $fecha_act = NULL;
-
                 $planes[$i] = [
                                 'id' => $plan['id'],
                                 'name' => $plan['name'],
@@ -74,7 +65,6 @@ class AuditoriasController extends Controller
                             ];
                 $i += 1;
             }
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.index',['planes' => $planes]);
@@ -85,7 +75,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     public function indexAuditorias()
     {
         if (Auth::guest())
@@ -97,7 +86,6 @@ class AuditoriasController extends Controller
             $audits = array();
             $auditorias = \Ermtool\Audit::all();
             $i = 0; //contador de planes
-
             foreach ($auditorias as $audit)
             {
                 //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
@@ -105,21 +93,17 @@ class AuditoriasController extends Controller
                 {
                     $fecha_creacion = NULL;
                 }
-
                 else
                 {
                     $fecha_creacion = date_format($audit['created_at'],"d-m-Y");
                 }
-
                 //damos formato a fecha de actualización 
                 if ($audit['updated_at'] != NULL)
                 {
                     $fecha_act = date_format($audit['updated_at'],"d-m-Y");
                 }
-
                 else
                     $fecha_act = NULL;
-
                 $audits[$i] = [
                                 'id' => $audit['id'],
                                 'name' => $audit['name'],
@@ -139,8 +123,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
-
     //Creación de plan de auditoría
     public function create()
     {
@@ -154,20 +136,16 @@ class AuditoriasController extends Controller
             //$stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
             //->orderBy('name')
             //->lists('full_name', 'id');
-
             //obtenemos lista de organizaciones
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
             //obtenemos universo de auditorias
             $audits = \Ermtool\Audit::lists('name','id');
-
             //obtenemos riesgos de proceso
             $risk_subprocess = DB::table('risk_subprocess')
                                     ->join('risks','risk_subprocess.risk_id','=','risks.id')
                                     ->where('risks.type2','=',1)
                                     ->select('risk_subprocess.id AS riskid','risks.name')
                                     ->lists('risks.name','riskid');
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.create',[/*'stakeholders'=>$stakeholders,*/'organizations'=>$organizations,
@@ -180,12 +158,10 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     //Función con la que primero se seleccionará: Organización
     public function auditPrograms1()
     {
         $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
         if (Session::get('languaje') == 'en')
         {
             return view('en.auditorias.programas',['organizations' => $organizations]);
@@ -205,15 +181,12 @@ class AuditoriasController extends Controller
         else
         {
             $programas = array();
-
             $org_name = \Ermtool\Organization::getNameByAuditAuditPlan($_GET['audit_id']);
             $audit_plan_name = \Ermtool\Audit_plan::getNameByAuditAuditPlan($_GET['audit_id']);
             $audit_name = \Ermtool\Audit::name($_GET['audit_id']);
-
             $programs = \Ermtool\Audit_program::getProgramsByAudit($_GET['audit_id']);
                         
             $i = 0; //contador de planes
-
             foreach ($programs as $program)
             {
                 //AGREGADO 17-08: Obtenemos plan de auditoría y auditoría asociados
@@ -222,35 +195,29 @@ class AuditoriasController extends Controller
                             ->where('audit_audit_plan.id','=',$program->audit_audit_plan_id)
                             ->select('audit_plans.name')
                             ->first();
-
                 $audit = DB::table('audits')
                             ->join('audit_audit_plan','audit_audit_plan.audit_id','=','audits.id')
                             ->where('audit_audit_plan.id','=',$program->audit_audit_plan_id)
                             ->select('audits.name')
                             ->first();
-
                 //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
                 if ($program->created_at == NULL OR $program->created_at == "0000-00-00" OR $program->created_at == "")
                 {
                     $fecha_creacion = NULL;
                 }
-
                 else
                 {
                     //damos formato a fecha inicial
                     $fecha_creacion = date('d-m-Y',strtotime($program->created_at));
                 }
-
                 //damos formato a fecha de actualización 
                 if ($program->updated_at != NULL)
                 {
                     //damos formato a fecha final
                     $fecha_act = date('d-m-Y',strtotime($program->updated_at));
                 }
-
                 else
                     $fecha_act = NULL;
-
                 //formato a fecha expiración
                 if ($program->expiration_date)
                 {
@@ -258,7 +225,6 @@ class AuditoriasController extends Controller
                 }
                 else
                     $fecha_exp = NULL;
-
                 $programas[$i] = [
                                 'id' => $program->id,
                                 'name' => $program->name,
@@ -271,7 +237,6 @@ class AuditoriasController extends Controller
                             ];
                 $i += 1;
             }
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.programas',['programs' => $programas,'org_name' => $org_name, 'audit_plan_name' => $audit_plan_name, 'audit_name' => $audit_name,'audit_id' => $_GET['audit_id']]);
@@ -282,7 +247,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     //función crea PROGRAMAS de auditoría
     public function createPruebas($audit_id)
     {
@@ -294,14 +258,11 @@ class AuditoriasController extends Controller
         {
             //plan de auditoría
             $audit_plans = \Ermtool\Audit_plan::where('status',0)->lists('name','id');
-
             $audit_programs = \Ermtool\Audit_program::lists('name','id');
-
              //obtenemos lista de stakeholders
             $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
             ->orderBy('name')
             ->lists('full_name', 'id');
-
             //echo $audit_tests;
             if (Session::get('languaje') == 'en')
             {
@@ -313,7 +274,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     public function createAuditoria()
     {
         if (Auth::guest())
@@ -332,7 +292,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     //función que guarda programa de auditoría
     public function storePrueba(Request $request)
     {
@@ -356,14 +315,11 @@ class AuditoriasController extends Controller
                     {
                         $description = $_POST['description'];
                     }
-
                     $audit_program = \Ermtool\Audit_program::create([
                                 'name' => $_POST['name'],
                                 'description' => $description
                                 ]);
-
                     $audit_program_id = $audit_program->id;
-
                 //insertamos en audit_audit_plan_audit_program
                 $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')
                     ->insertGetId([
@@ -373,7 +329,6 @@ class AuditoriasController extends Controller
                             'updated_at' => $fecha,
                             //'stakeholder_id' => $_POST['stakeholder_id']
                         ]);
-
                 //agregamos evidencia (si es que existe)
                 if ($GLOBALS['req']->file('file_program') != NULL)
                 {
@@ -386,7 +341,6 @@ class AuditoriasController extends Controller
                     }
                         
                 }
-
                 if (Session::get('languaje') == 'en')
                 {
                     Session::flash('message','Audit program successfully created');
@@ -399,7 +353,6 @@ class AuditoriasController extends Controller
             return Redirect::to('/programas_auditoria');
         }
     }
-
     public function storeAuditoria(Request $request)
     {
         if (Auth::guest())
@@ -412,7 +365,6 @@ class AuditoriasController extends Controller
                 'name' => $request['name'],
                 'description' => $request['description']
                 ]);
-
             if (Session::get('languaje') == 'en')
             {
                 Session::flash('message','Audit successfully created');
@@ -421,11 +373,9 @@ class AuditoriasController extends Controller
             {
                 Session::flash('message','Auditor&iacute;a creada correctamente');
             }
-
             return Redirect::to('/auditorias');
         }
     }
-
     public function ejecutar()
     {
         if (Auth::guest())
@@ -435,7 +385,6 @@ class AuditoriasController extends Controller
         else
         {
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.ejecutar',['organizations' => $organizations]);
@@ -446,7 +395,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     public function storeEjecution(Request $request)
     {
         if (Auth::guest())
@@ -460,10 +408,11 @@ class AuditoriasController extends Controller
             $req = $request;
             //print_r($_POST);
             DB::transaction(function() {
+
+                $c = new ControlesController;
                 //primero que todo, actualizamos las pruebas
                 //para esto, separamos primer string del array id_pruebas por sus comas
                 $id_pruebas = explode(',',$_POST['id_pruebas'][0]);
-
                 foreach ($id_pruebas as $id)
                 {
                     //actualizamos resultados (ACTUALIZACIÓN 28-10-2016) Solo actualizamos resultados ya que el issue no se tocará en esta sección) (si es que el estado de la prueba es cerrado (igual a 2))
@@ -475,7 +424,8 @@ class AuditoriasController extends Controller
                             ->update([ 
                                 'status' => $_POST['status_'.$id],
                                 'results' => $_POST['test_result_'.$id],
-                                'updated_at' => date('Y-m-d H:i:s')
+                                'updated_at' => date('Y-m-d H:i:s'),
+                                'hh_real' => $_POST['hh_real_'.$id],
                                 ]);
 
                         //obtenemos id de control para la evaluación de riesgo controlado
@@ -484,27 +434,26 @@ class AuditoriasController extends Controller
                                     ->select('control_id')
                                     ->first();
 
-                        $res = $_POST['test_result_'.$id] + 1;
-                        //Verificamos que res no sea igual a 3 (prueba en proceso)
-                        if (isset($_POST['test_result_'.$id]))
+                        if (isset($_POST['test_result_'.$id]) && isset($control) && $control != NULL)
                         {
-                            $res = $_POST['test_result_'.$id] + 1;
                         
-                        
-                            //Verificamos que res no sea igual a 3 (prueba en proceso)
-                            if ($control->control_id != NULL && $res == 2)
+                            if ($control->control_id != NULL)
                             {
-                                $result = calc_controlled_risk($control->control_id,$res);
+                                $result = $c->calcControlValue($control->control_id);
+
+                                $eval = $c->calcControlledRisk($control->control_id);
+
+                                $result = 0;
                             }
                             else
                             {
                                 $result = 2;
                             }
                         }
-                        else {
+                        else 
+                        {
                             $result = 2;
                         }
-
                         if (Session::get('languaje') == 'en')
                         {
                             if ($result == 0)
@@ -528,7 +477,6 @@ class AuditoriasController extends Controller
                             }
                         }
                     }
-
                     else
                     {
                         //sólo actualizamos resultado de prueba
@@ -536,7 +484,7 @@ class AuditoriasController extends Controller
                             ->where('id','=',$id)
                             ->update([ 
                                 'status' => $_POST['status_'.$id],
-                                'updated_at' => date('Y-m-d H:i:s')
+                                'updated_at' => date('Y-m-d H:i:s'),
                                 ]);
                     }
                 }
@@ -552,10 +500,7 @@ class AuditoriasController extends Controller
             
             return Redirect::to('/ejecutar_pruebas');
         }
-
-
     }
-
     public function supervisar()
     {
         if (Auth::guest())
@@ -565,7 +510,6 @@ class AuditoriasController extends Controller
         else
         {
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.supervisar',['organizations' => $organizations]);
@@ -576,7 +520,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     public function storeSupervision(Request $request)
     {
         if (Auth::guest())
@@ -611,7 +554,6 @@ class AuditoriasController extends Controller
                         }
                     }
                 }
-
                 if ($res)
                 {
                     if (Session::get('languaje') == 'en')
@@ -623,7 +565,6 @@ class AuditoriasController extends Controller
                         Session::flash('message','Nota agregada correctamente');
                     }
                 }
-
                 else
                 {
                     if (Session::get('languaje') == 'en')
@@ -658,7 +599,6 @@ class AuditoriasController extends Controller
             $objective_risk_id = array();
             $risk_subprocess_id = array();
             $stakeholder_team = array();
-
             //primero obtenemos datos de auditorias
             $i = 0;
             foreach ($request['audits'] as $audit)
@@ -667,7 +607,6 @@ class AuditoriasController extends Controller
                             ->where('id','=',$audit)
                             ->select('name')
                             ->get();
-
                 foreach ($auditoria as $auditoria2)
                 {
                     $audits[$i] = [
@@ -691,7 +630,6 @@ class AuditoriasController extends Controller
                     'final_date' => $request['final_date'],
                     'rules' => $request['rules']
             ];
-
             //mandamos equipo de stakeholders (auditores) si es que hay
             if (isset($request['stakeholder_team']))
             {
@@ -701,7 +639,6 @@ class AuditoriasController extends Controller
                     $i += 1;
                 }
             }
-
             //mandamos objetivos
             $i = 0;
             foreach ($request['objective_id'] as $objective)
@@ -709,8 +646,6 @@ class AuditoriasController extends Controller
                 $objective_id[$i] = $objective;
                 $i += 1;
             }
-
-
                 //obtenemos lista de nombre e id de riesgos de objetivo
                 $i = 0;
                 if (isset($request['objective_risk_id']))
@@ -723,7 +658,6 @@ class AuditoriasController extends Controller
                                         ->join('risks','objective_risk.risk_id','=','risks.id')
                                         ->select('risks.name')
                                         ->get();
-
                         //almacenamos id y nombre del riesgo
                         foreach ($risk_name as $name)
                         {
@@ -735,7 +669,6 @@ class AuditoriasController extends Controller
                         }
                     }
                 }
-
                 //obtenemos lista de nombre e id de riesgos de proceso
                 $i = 0;
                 if (isset($request['risk_subprocess_id']))
@@ -748,7 +681,6 @@ class AuditoriasController extends Controller
                                         ->join('risks','risk_subprocess.risk_id','=','risks.id')
                                         ->select('risks.name')
                                         ->get();
-
                         //almacenamos id y nombre del riesgo
                         foreach ($risk_name as $name)
                         {
@@ -760,9 +692,7 @@ class AuditoriasController extends Controller
                         }
                     }
                 }
-
             $i = 0;
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.create2',['audits' => $audits,
@@ -783,7 +713,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -811,7 +740,6 @@ class AuditoriasController extends Controller
                 {
                     $objectives = $_POST['objectives'];
                 }
-
                 if ($_POST['scopes'] == "")
                 {
                     $scopes = NULL;
@@ -820,7 +748,6 @@ class AuditoriasController extends Controller
                 {
                     $scopes = $_POST['scopes'];
                 }
-
                 if ($_POST['resources'] == "")
                 {
                     $resources = NULL;
@@ -829,7 +756,6 @@ class AuditoriasController extends Controller
                 {
                     $resources = $_POST['resources'];
                 }
-
                 if ($_POST['methodology'] == "")
                 {
                     $methodology = NULL;
@@ -838,7 +764,6 @@ class AuditoriasController extends Controller
                 {
                     $methodology = $_POST['methodology'];
                 }
-
                 if ($_POST['rules'] == "")
                 {
                     $rules = NULL;
@@ -847,7 +772,6 @@ class AuditoriasController extends Controller
                 {
                     $rules = $_POST['rules'];
                 }
-
                 if ($_POST['HH_plan'] == "")
                 {
                     $estimated_HH = NULL;
@@ -873,7 +797,6 @@ class AuditoriasController extends Controller
                         'hh'=>$estimated_HH,
                         'organization_id'=>$_POST['organization_id']
                         ]);
-
                 //insertamos en audit_plan_stakeholder primero al encargado del plan y luego al equipo
                 DB::table('audit_plan_stakeholder')
                     ->insert([
@@ -881,7 +804,6 @@ class AuditoriasController extends Controller
                         'audit_plan_id' => $audit_plan_id,
                         'stakeholder_id' => $_POST['stakeholder_id']
                     ]);
-
                 //ahora insertamos equipo de stakeholders (si es que hay)
                 if (isset($_POST['stakeholder_team']))
                 {
@@ -895,8 +817,6 @@ class AuditoriasController extends Controller
                                     ]);
                     }
                 }
-
-
                 /*  ACTUALIZACIÓN 28-11: Eliminamos esta selección
                 if ($_POST['type'] == 0) //se agrego auditoría de procesos
                 {
@@ -911,7 +831,6 @@ class AuditoriasController extends Controller
                                             ->where('subprocesses.process_id','=',$process_id)
                                             ->select('risk_subprocess.id')
                                             ->get();
-
                             foreach ($risks as $risk)
                             {
                                 //insertamos cada riesgo de subproceso
@@ -924,7 +843,6 @@ class AuditoriasController extends Controller
                         }
                     }
                 }
-
                 else if ($_POST['type'] == 1) //se agregó auditoría de negocios
                 {
                     //obtenemos riesgo asociado a cada objetivo (si es que hay)
@@ -937,7 +855,6 @@ class AuditoriasController extends Controller
                                     ->join('objective_risk','objective_risk.objective_id','=',$objective_id)
                                     ->select('objective_risk.id')
                                     ->get();
-
                             foreach ($risks as $risk)
                             {
                                 //insertamos cada riesgo de subproceso
@@ -950,7 +867,6 @@ class AuditoriasController extends Controller
                         }
                     }
                 }
-
                 else if ($_POST['type'] == 2)
                 {
                     //insertamos riesgos del negocio (si es que existen)
@@ -978,9 +894,7 @@ class AuditoriasController extends Controller
                         }
                     }
                 } */
-
                 //ahora guardamos auditorías que no son nuevas (si es que hay)
-
                 //insertamos cada auditoria (de universo de auditorias) en audit_audit_plan
                 $i = 1;
                 if (isset($_POST['audits']))
@@ -995,7 +909,6 @@ class AuditoriasController extends Controller
                         {
                             $resources = $_POST['audit_'.$audit.'_resources'];
                         }
-
                         if ($_POST['audit_'.$audit.'_HH'] == "")
                         {
                             $estimated_HH = NULL;
@@ -1029,7 +942,6 @@ class AuditoriasController extends Controller
                                             ->where('subprocesses.process_id','=',$process_id)
                                             ->select('risk_subprocess.id')
                                             ->get();
-
                                     foreach ($risks as $risk)
                                     {
                                         //insertamos cada riesgo de subproceso
@@ -1042,7 +954,6 @@ class AuditoriasController extends Controller
                                 }
                             }
                         }
-
                         else if ($_POST['type'] == 1) //se agregó auditoría de negocios
                         {
                             //obtenemos riesgo asociado a cada objetivo (si es que hay)
@@ -1055,7 +966,6 @@ class AuditoriasController extends Controller
                                             ->join('objective_risk','objective_risk.objective_id','=',$objective_id)
                                             ->select('objective_risk.id')
                                             ->get();
-
                                     foreach ($risks as $risk)
                                     {
                                         //insertamos cada riesgo de subproceso
@@ -1068,7 +978,6 @@ class AuditoriasController extends Controller
                                 }
                             }
                         }
-
                         else if ($_POST['type'] == 2)
                         {
                             //insertamos riesgos de negocio de la auditoría
@@ -1084,7 +993,6 @@ class AuditoriasController extends Controller
                                             ]);
                                 }
                             }
-
                             //insertamos riesgos de proceso de la auditoría
                             if (isset($_POST['audit_'.$audit.'_risk_subprocesses']))
                             {
@@ -1101,7 +1009,6 @@ class AuditoriasController extends Controller
                         }*/
                     }
                 } //fin isset($_POST['audits'])
-
                 //ahora guardamos auditorías nuevas (si es que hay)
                 $i = 1; //contador para auditorías nuevas
                 if(isset($_POST['audit_new'.$i.'_name']))
@@ -1133,7 +1040,6 @@ class AuditoriasController extends Controller
                                         'resources' => $_POST['audit_new'.$i.'_resources'],
                                         'hh' => $HH
                                         ]);
-
                         /* Actualización 28-11: Elminamos esta selección, ya que sólo se realizará en las pruebas de auditoría
                         if ($_POST['type'] == 0) //se agrego auditoría de procesos
                         {
@@ -1148,7 +1054,6 @@ class AuditoriasController extends Controller
                                             ->where('subprocesses.process_id','=',$process_id)
                                             ->select('risk_subprocess.id')
                                             ->get();
-
                                     foreach ($risks as $risk)
                                     {
                                         //insertamos cada riesgo de subproceso
@@ -1161,7 +1066,6 @@ class AuditoriasController extends Controller
                                 }
                             }
                         }
-
                         else if ($_POST['type'] == 1) //se agregó auditoría de negocios
                         {
                             //obtenemos riesgo asociado a cada objetivo (si es que hay)
@@ -1174,7 +1078,6 @@ class AuditoriasController extends Controller
                                             ->join('objective_risk','objective_risk.objective_id','=',$objective_id)
                                             ->select('objective_risk.id')
                                             ->get();
-
                                     foreach ($risks as $risk)
                                     {
                                         //insertamos cada riesgo de subproceso
@@ -1187,7 +1090,6 @@ class AuditoriasController extends Controller
                                 }
                             }
                         }
-
                         else if ($_POST['type'] == 2)
                         {
                              //insertamos riesgos de negocio (de haber)
@@ -1202,7 +1104,6 @@ class AuditoriasController extends Controller
                                                 ]);
                                     }
                                }
-
                                //insertamos nuevo riesgo de proceso (de haber)
                                if (isset($_POST['audit_new'.$i.'_risk_subprocesses']))
                                {
@@ -1216,11 +1117,9 @@ class AuditoriasController extends Controller
                                     }
                                }
                         }*/           
-
                        $i += 1;
                     }
                 } //fin isset($_POST['audit_new'.$i.'_name']))
-
                 if (Session::get('languaje') == 'en')
                 {
                     Session::flash('message','Audit plan successfully created');
@@ -1230,11 +1129,9 @@ class AuditoriasController extends Controller
                     Session::flash('message','Plan de auditor&iacute;a generado correctamente');
                 }
             });
-
             return Redirect::to('/plan_auditoria'); 
         }
     }
-
     /**
      * Display the specified resource.
      *
@@ -1255,35 +1152,27 @@ class AuditoriasController extends Controller
             $organizacion = NULL;
             $riesgos_neg = array();
             $riesgos_proc = array();
-
             $j = 0; //contador de auditorías
             $k = 0; //contador de objetivos (nombre)
             $l = 0; //contador de riesgos de negocio
             $i = 0; //contador de riesgos de proceso
-
             //obtenemos plan de auditoría
             $audit_plan = \Ermtool\Audit_plan::where('id',(int)$id)->get();
-
             foreach ($audit_plan as $plan)
             {
                 //damos formato a estado
                 $estado = $plan['status'];
-
                 //damos formato a fecha inicial
                 $fecha_inicial = date("d-m-Y",strtotime($plan['initial_date']));
-
                 //damos formato a fecha final
                 $fecha_final = date("d-m-Y",strtotime($plan['final_date']));
-
                 //obtenemos organizacion
                 $organization = \Ermtool\Organization::where('id',$plan['organization_id'])->get();
-
                 foreach ($organization as $org)
                 {
                     //guardamos nombre de organizacion (siempre será el mismo)
                     $organizacion = $org['name'];
                 }
-
                 //obtenemos objetivos de negocios y riesgos, según los riesgos de negocio asociados al plan
                 $objective = DB::table('audit_plan_risk')
                                     ->join('objective_risk','objective_risk.id','=','audit_plan_risk.objective_risk_id')
@@ -1293,26 +1182,22 @@ class AuditoriasController extends Controller
                                     ->select('objectives.name','objectives.id')
                                     ->distinct()
                                     ->get();
-
                 foreach ($objective as $obj)
                 {
                     $objetivos[$k] = $obj->name;
                     $k += 1;
-
                     //obtenemos riesgos de negocio asociados al objetivo
                     $objective_risk = DB::table('risks')
                                         ->join('objective_risk','objective_risk.risk_id','=','risks.id')
                                         ->where('objective_risk.objective_id','=',$obj->id)
                                         ->select('risks.name')
                                         ->get();
-
                     foreach ($objective_risk as $risk)
                     {
                         $riesgos_neg[$l] = $risk->name;
                         $l += 1;
                     }
                 }
-
                 //obtenemos riesgos de procesos
                 $risk_subprocess = DB::table('audit_plan_risk')
                                         ->join('risk_subprocess','risk_subprocess.id','=','audit_plan_risk.risk_subprocess_id')
@@ -1321,24 +1206,20 @@ class AuditoriasController extends Controller
                                         ->whereNotNull('audit_plan_risk.risk_subprocess_id')
                                         ->select('risks.name')
                                         ->get();
-
                 foreach ($risk_subprocess as $risk)
                 {
                     $riesgos_proc[$i] = $risk->name;
                     $i += 1;
                 }
-
                 //obtenemos universo de auditorías
                 $audits = DB::table('audit_audit_plan')
                             ->where('audit_plan_id','=',$plan['id'])
                             ->get();
-
                 //cada una de las auditorías pertenecientes al plan
                 foreach ($audits as $audit)
                 {
                     //obtenemos datos de auditoría
                     $audite = \Ermtool\Audit::where('id',$audit->audit_id)->get();
-
                     foreach ($audite as $audit1)
                     {
                         $auditorias[$j] = [
@@ -1348,10 +1229,8 @@ class AuditoriasController extends Controller
                         $j += 1;
                     }
                 }
-
                 //obtenemos riesgos relacionados
                 //$risks = DB::table('audit_plan_risk')
-
                 $plan_auditoria = [
                                 'id' => $plan['id'],
                                 'name' => $plan['name'],
@@ -1365,7 +1244,6 @@ class AuditoriasController extends Controller
                                 'final_date' => $fecha_final,
                                 'rules' => $plan['rules']
                                 ];
-
                 if (Session::get('languaje') == 'en')
                 {
                     return view('en.auditorias.show',['plan_auditoria' => $plan_auditoria,
@@ -1387,7 +1265,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     public function showProgram($id)
     {
         if (Auth::guest())
@@ -1404,11 +1281,9 @@ class AuditoriasController extends Controller
                                 ->select('audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description',
                                     'audit_audit_plan_audit_program.created_at','audit_audit_plan_audit_program.expiration_date')
                                 ->first();
-
             //damos formato a fecha creación
             $created_at = date('d-m-Y',strtotime($audit_program->created_at));
             $created_at.= ' a las '.date('H:i:s',strtotime($audit_program->created_at));
-
             //damos formato a fecha de expiración
             if ($audit_program->expiration_date == NULL)
             {
@@ -1419,15 +1294,12 @@ class AuditoriasController extends Controller
                 $expiration_date = date('d-m-Y',strtotime($audit_program->expiration_date));
             }
             
-
-
             //obtenemos pruebas de auditoría del programa
             $audit_tests = DB::table('audit_tests')
                             ->where('audit_audit_plan_audit_program_id','=',$id)
                             ->select('id','name','description','type','status','results','created_at',
-                                     'updated_at','hh','stakeholder_id')
+                                     'updated_at','hh_plan','hh_real','stakeholder_id')
                             ->get();
-
             $i = 0;
             foreach ($audit_tests as $audit_test)
             {
@@ -1442,21 +1314,17 @@ class AuditoriasController extends Controller
                     $stakeholder = \Ermtool\Stakeholder::find($audit_test->stakeholder_id);
                     $stakeholder2 = $stakeholder['name'].' '.$stakeholder['surnames'];
                 }
-
                 //damos formato a fecha creación
                 $fecha_creacion = date('d-m-Y',strtotime($audit_test->created_at));
-
                 //damos formato a fecha de actualización
                 $fecha_act = date('d-m-Y',strtotime($audit_test->updated_at));
-
                 $type = $audit_test->type;
                 $status = $audit_test->status;
                 $results = $audit_test->results;            
                 $description = $audit_test->description;
-                $hh = $audit_test->hh;
-
-                $evidence = getEvidences(5,$audit_test->id);
-
+                $hh = $audit_test->hh_plan;
+                $hh_real = $audit_test->hh_real;
+                //$evidence = getEvidences(5,$audit_test->id);
                 $tests[$i] = [
                     'id' => $audit_test->id,
                     'name' => $audit_test->name,
@@ -1468,14 +1336,12 @@ class AuditoriasController extends Controller
                     'updated_at' => $fecha_act,
                     'stakeholder' => $stakeholder2,
                     'hh' => $hh,
-                    'evidence' => $evidence,
+                    'hh_real' => $hh_real,
+                    //'evidence' => $evidence,
                 ];
-
                 $i += 1;
             }
-
-            $evidence = getEvidences(4,$audit_program->id);
-
+            //$evidence = getEvidences(4,$audit_program->id);
             $programa = [
                 'id' => $audit_program->id,
                 'name' => $audit_program->name,
@@ -1483,9 +1349,8 @@ class AuditoriasController extends Controller
                 'created_at' => $created_at,
                 'expiration_date' => $expiration_date,
                 'tests' => $tests,
-                'evidence' => $evidence,
+                //'evidence' => $evidence,
             ];
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.show_program',['program'=>$programa]);
@@ -1496,7 +1361,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     public function editProgram($id)
     {
         if (Auth::guest())
@@ -1508,7 +1372,6 @@ class AuditoriasController extends Controller
             $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')->find($id);
             $audit_program = \Ermtool\Audit_program::find($audit_audit_plan_audit_program->audit_program_id);
             //$evidence = getEvidences(4,$audit_audit_plan_audit_program->id);
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.edit_program',['program'=>$audit_program,
@@ -1521,7 +1384,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     public function editTest($program_id)
     {
         if (Auth::guest())
@@ -1531,7 +1393,6 @@ class AuditoriasController extends Controller
         else
         {
             $audit_test = \Ermtool\Audit_test::find($program_id);
-
             //obtenemos audit_plan para despues obtener controles, riesgos o subproceso de la prueba
             $audit_plan = DB::table('audit_audit_plan_audit_program')
                         ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
@@ -1540,11 +1401,9 @@ class AuditoriasController extends Controller
                         ->where('audit_tests.audit_audit_plan_audit_program_id','=',$audit_test->audit_audit_plan_audit_program_id)
                         ->select('audit_plans.id')
                         ->first();
-
             $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
             ->orderBy('name')
             ->lists('full_name', 'id');
-
             //seleccionamos tipo o categoría
             if ($audit_test->control_id != NULL)
             {
@@ -1566,10 +1425,8 @@ class AuditoriasController extends Controller
                 $type2 = NULL;
                 $type_id = NULL;
             }
-
             //obtenemos evidencias de prueba (si es que existen)
             //$evidence = getEvidences(5,$audit_test->id);
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.edit_test',['audit_test'=>$audit_test,'stakeholders'=>$stakeholders,'type2'=>$type2,'audit_plan' => $audit_plan->id,'type_id'=>$type_id]);
@@ -1580,7 +1437,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     public function updateProgram(Request $request, $id)
     {
         if (Auth::guest())
@@ -1591,28 +1447,21 @@ class AuditoriasController extends Controller
         {
             global $id1;
             $id1 = $id;
-
             global $req;
             $req = $request;
             //echo "POST: ";
             //print_r($_POST);
             DB::transaction(function (){
-
                 $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')->find($GLOBALS['id1']);
-
                 $audit_program = \Ermtool\Audit_program::find($audit_audit_plan_audit_program->audit_program_id);
-
                 $audit_program->name = $_POST['name'];
-
                 $audit_program->description = $_POST['description'];
-
                 DB::table('audit_audit_plan_audit_program')
                     ->where('id',$audit_audit_plan_audit_program->id)
                     ->update([
                             'expiration_date' => $_POST['expiration_date'],
                             'updated_at' => date('Y-m-d H:i:s')
                         ]);
-
                 //agregamos evidencias (si es que existe)
                 if ($GLOBALS['req']->file('file_program') != NULL)
                 {
@@ -1627,7 +1476,6 @@ class AuditoriasController extends Controller
             
                 $audit_program->save();
                 //$audit_audit_plan_audit_program->save();
-
                 if (Session::get('languaje') == 'en')
                 {
                     Session::flash('message','Program successfully updated');
@@ -1636,13 +1484,11 @@ class AuditoriasController extends Controller
                 {
                     Session::flash('message','Programa actualizado correctamente');
                 }
-
             });
             
             return Redirect::to('/programas_auditoria');
         }
     }
-
     public function updateTest(Request $request, $id)
     {
         if (Auth::guest())
@@ -1659,9 +1505,7 @@ class AuditoriasController extends Controller
             global $req;
             $req = $request;
             DB::transaction(function (){
-
                 $GLOBALS['audit_test']->name = $_POST['name'];
-
                 //si es que se ingreso descripción
                 if (isset($_POST['description']))
                 {
@@ -1671,7 +1515,6 @@ class AuditoriasController extends Controller
                 {
                     $GLOBALS['audit_test']->description = NULL;
                 }
-
                 //si es que se ingreso tipo
                 if (isset($_POST['type']))
                 {
@@ -1681,7 +1524,6 @@ class AuditoriasController extends Controller
                 {
                     $GLOBALS['audit_test']->type = NULL;
                 }
-
                 //si es que se ingreso stakeholder
                 if (isset($_POST['stakeholder_id']))
                 {
@@ -1691,17 +1533,15 @@ class AuditoriasController extends Controller
                 {
                     $GLOBALS['audit_test']->stakeholder_id = NULL;
                 }
-
                 //si es que se ingreso HH
                 if (isset($_POST['hh']))
                 {
-                    $GLOBALS['audit_test']->hh = $_POST['hh'];
+                    $GLOBALS['audit_test']->hh_plan = $_POST['hh'];
                 }
                 else
                 {
-                    $GLOBALS['audit_test']->hh = NULL;
+                    $GLOBALS['audit_test']->hh_plan = NULL;
                 }
-
                 //vemos si el tipo de prueba es de control, de proceso o de riesgo
                 if ($_POST['type2'] == 1) //es de control
                 {
@@ -1710,7 +1550,6 @@ class AuditoriasController extends Controller
                         $GLOBALS['audit_test']->control_id = $_POST['control_id_test_1'];
                     }
                 }
-
                 else if ($_POST['type2'] == 2) //es de riesgo
                 {
                     if (isset($_POST['risk_id_test_1']))
@@ -1718,7 +1557,6 @@ class AuditoriasController extends Controller
                         $GLOBALS['audit_test']->risk_id = $_POST['risk_id_test_1'];
                     }
                 }
-
                 else if ($_POST['type2'] == 3) //es de proceso
                 {
                     if (isset($_POST['subprocess_id_test_1']))
@@ -1726,7 +1564,6 @@ class AuditoriasController extends Controller
                         $GLOBALS['audit_test']->subprocess_id = $_POST['subprocess_id_test_1'];
                     }
                 }
-
                 if ($GLOBALS['req']->file('file_test') != NULL)
                 {
                     foreach ($GLOBALS['req']->file('file_test') as $file)
@@ -1737,9 +1574,7 @@ class AuditoriasController extends Controller
                         }
                     }   
                 }
-
                 $GLOBALS['audit_test']->save();
-
                 if (Session::get('languaje') == 'en')
                 {
                     Session::flash('message','Test successfully updated');
@@ -1748,13 +1583,11 @@ class AuditoriasController extends Controller
                 {
                     Session::flash('message','Prueba actualizada correctamente');
                 }
-
             });
             
             return Redirect::to('programas_auditoria.show.'.$GLOBALS['audit_test']->audit_audit_plan_audit_program_id);
         }
     }
-
     public function createTest($id_program)
     {
         if (Auth::guest())
@@ -1770,14 +1603,11 @@ class AuditoriasController extends Controller
                         ->where('audit_audit_plan_audit_program.id','=',$id_program)
                         ->select('audit_plans.id')
                         ->first();
-
             $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
             ->orderBy('name')
             ->lists('full_name', 'id');
-
             $type2 = NULL;
             $type_id = NULL;
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.create_test2',['audit_program'=>$id_program,'stakeholders'=>$stakeholders,'audit_plan' => $audit_plan->id,'type2'=>$type2,'type_id'=>$type_id]);
@@ -1788,7 +1618,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     public function storeTest(Request $request)
     {
         if (Auth::guest())
@@ -1801,9 +1630,7 @@ class AuditoriasController extends Controller
             global $req;
             $req = $request;
             DB::transaction(function () {
-
                 $fecha = date('Y-m-d H:i:s');
-
                 if (isset($_POST['description']))
                 {
                     $description = $_POST['description'];
@@ -1812,7 +1639,6 @@ class AuditoriasController extends Controller
                 {
                     $description = NULL;
                 }
-
                 //si es que se ingreso tipo
                 if (isset($_POST['type']))
                 {
@@ -1822,7 +1648,6 @@ class AuditoriasController extends Controller
                 {
                     $type = NULL;
                 }
-
                 //si es que se ingreso stakeholder
                 if (isset($_POST['stakeholder_id']))
                 {
@@ -1832,7 +1657,6 @@ class AuditoriasController extends Controller
                 {
                     $stakeholder = NULL;
                 }
-
                 //si es que se ingreso HH
                 if (isset($_POST['hh']))
                 {
@@ -1843,6 +1667,106 @@ class AuditoriasController extends Controller
                     $hh = NULL;
                 }
 
+                //ACTUALIZACIÓN 07-12-16: La prueba ya no puede ser de riesgo; estará orientada a proceso o entidad; si es de proceso se podrá se dejará abierto si se seleccionan los controles o los subprocesos o sólo el proceso. A nivel de entidad se seleccionará sólo la perspectiva o se especificarán los controles a nivel de entidad
+
+                if (isset($_POST['process_id']))
+                {
+                    $process_id = $_POST['process_id'];
+                }
+                else
+                {
+                    $process_id = NULL;
+                }
+                //primero insertamos prueba
+                    $test_id = DB::table('audit_tests')
+                            ->insertGetId([
+                            'audit_audit_plan_audit_program_id' => $_POST['audit_audit_plan_audit_program_id'],
+                            'name' => $_POST['name'],
+                            'description' => $description, 
+                            'type' => $type,
+                            'status' => 0,
+                            'results' => 2,
+                            'created_at' => $fecha,
+                            'updated_at' => $fecha,
+                            'hh_plan' => $hh,
+                            'stakeholder_id' => $stakeholder,
+                            'process_id' => $process_id
+                    ]);
+
+                if ($_POST['type1'] == 1) //prueba a nivel de proceso
+                {
+                    //vemos si se especificaron los controles
+                    if (isset($_POST['control_id']))
+                    {
+                        foreach ($_POST['control_id'] as $c)
+                        {
+                            //primero verificamos que no se encuentre vacío (ya que está enviando el último valor vacío)
+                            if ($c != NULL && $c != '')
+                            {
+                                //almacenamos controles en audit_test_control
+                                DB::table('audit_test_control')
+                                    ->insert([
+                                        'audit_test_id' => $test_id,
+                                        'control_id' => $c
+                                        ]);
+                            }   
+                        }
+                    }
+                    //sino se agregaron controles, vemos si se especificaron subprocesos
+                    else if ($_POST['subprocess_id'])
+                    {
+                        foreach ($_POST['subprocess_id'] as $s)
+                        {
+                            DB::table('audit_test_subprocess')
+                                ->insert([
+                                    'audit_test_id' => $test_id,
+                                    'subprocess_id' => $s
+                                    ]);
+                        }
+                    }
+                }
+                else if ($_POST['type1'] == 2) //es prueba a nivel de entidad
+                {
+                    //vemos si se especificaron los controles
+                    $cont = 0;
+                    if (isset($_POST['control_id']))
+                    {
+                        foreach ($_POST['control_id'] as $c)
+                        {
+                            //primero verificamos que no se encuentre vacío (ya que está enviando el último valor vacío)
+                            if ($c != NULL && $c != '')
+                            {
+                                $cont += 1;
+                                //almacenamos controles en audit_test_control
+                                DB::table('audit_test_control')
+                                    ->insert([
+                                        'audit_test_id' => $test_id,
+                                        'control_id' => $c
+                                        ]);
+                            }   
+                        }
+                    }
+
+                    if ($cont == 0) //no se especificaron controles, por lo que se seleccionan todos los de la organización y perspectiva correspondiente
+                    {
+                        //obtenemos organización
+                        $org = \Ermtool\Organization::getOrgByAuditPlan($_POST['audit_plans']);
+
+                        //obtenemos todos los controles de los objetivos asociados a la org y la perspectiva
+                        $controls = \Ermtool\Control::getControlsFromPerspective($org->id,$_POST['perspective']);
+
+                        foreach ($controls as $c)
+                        {
+                            //almacenamos controles en audit_test_control
+                            DB::table('audit_test_control')
+                                ->insert([
+                                    'audit_test_id' => $test_id,
+                                    'control_id' => $c->id
+                                ]);
+                        }
+                    }
+                }
+                /*
                 //vemos si el tipo de prueba es de control, de proceso o de riesgo
                 if ($_POST['type2'] == 1) //es de control
                 {
@@ -1864,7 +1788,6 @@ class AuditoriasController extends Controller
                         ]);
                     }
                 }
-
                 else if ($_POST['type2'] == 2) //es de riesgo
                 {
                     if (isset($_POST['risk_id_test_1']))
@@ -1885,7 +1808,6 @@ class AuditoriasController extends Controller
                                 ]);
                     }
                 }
-
                 else if ($_POST['type2'] == 3) //es de proceso
                 {
                     if (isset($_POST['subprocess_id_test_1']))
@@ -1906,6 +1828,7 @@ class AuditoriasController extends Controller
                                 ]);
                     }
                 }
+                */
 
                 if ($GLOBALS['req']->file('file_test') != NULL)
                 {
@@ -1917,21 +1840,18 @@ class AuditoriasController extends Controller
                         } 
                     }   
                 }
-
                 if (Session::get('languaje') == 'en')
                 {
                     Session::flash('message','Audit test successfully created');
                 }
                 else
                 {
-                    Session::flash('message','Prueba de auditor&iacute;a creado correctamente');
+                    Session::flash('message','Prueba de auditor&iacute;a creada correctamente');
                 }
-
             });
             return Redirect::to('/programas_auditoria.show.'.$_POST['audit_audit_plan_audit_program_id']);
         }
     }
-
     public function showAuditoria($id)
     {
         if (Auth::guest())
@@ -1941,40 +1861,32 @@ class AuditoriasController extends Controller
         else
         {
             $planes = array();
-
             $k = 0; //contador de planes
-
             //obtenemos auditoría
             $audite = \Ermtool\Audit::where('id',(int)$id)->get();
-
             foreach ($audite as $audit)
             {
                 //obtenemos planes en los que se está aplicando
                 $audit_plans = DB::table('audit_audit_plan')
                             ->where('audit_id','=',$audit['id'])
                             ->get();
-
                 //cada una de los planes en los que se aplica la auditoria
                 foreach ($audit_plans as $plan)
                 {
                     //obtenemos nombre del plan
                     $plan_name = \Ermtool\Audit_plan::where('id',$plan->audit_plan_id)->value('name');
-
                     $planes[$k] = [
                             'id' => $plan->audit_plan_id,
                             'name' => $plan_name,
                     ];
-
                     $k += 1;
                 }
-
                 $auditoria = [
                             'id' => $audit['id'],
                             'name' => $audit['name'],
                             'description' => $audit['description']
                 ];
             }
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.show_audit',['auditoria' => $auditoria, 'planes' => $planes]);
@@ -2007,19 +1919,15 @@ class AuditoriasController extends Controller
             $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
             ->orderBy('name')
             ->lists('full_name', 'id');
-
             //obtenemos lista de organizaciones
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
             //obtenemos universo de auditorias
             $audits = \Ermtool\Audit::lists('name','id');
-
             //obtenemos universo de auditorías seleccionadas
             $auditorias = DB::table('audit_audit_plan')
                         ->where('audit_plan_id','=',$id)
                         ->select('audit_audit_plan.audit_id as id')
                         ->get();
-
             //cada una de las auditorías pertenecientes al plan
             $i = 0;
             foreach ($auditorias as $audit)
@@ -2027,7 +1935,6 @@ class AuditoriasController extends Controller
                 $audits_selected[$i] = $audit->id;
                 $i += 1;
             }
-
             //obtenemos riesgos de procesos que ya fueron seleccionados
             $riesgos_selected = DB::table('audit_plan_risk')
                                     ->join('risk_subprocess','risk_subprocess.id','=','audit_plan_risk.risk_subprocess_id')
@@ -2042,7 +1949,6 @@ class AuditoriasController extends Controller
                 $riesgos_proc[$i] = $risk->id;
                 $i += 1;
             }
-
             //obtenemos riesgos de negocio que ya fueron seleccionados
             $riesgos_selected = DB::table('audit_plan_risk')
                                     ->join('objective_risk','objective_risk.id','=','audit_plan_risk.objective_risk_id')
@@ -2057,15 +1963,12 @@ class AuditoriasController extends Controller
                 $riesgos_neg[$i] = $risk->id;
                 $i += 1;
             }
-
-
             //obtenemos stakeholder responsable
             $stakeholder1 = DB::table('audit_plan_stakeholder')
                             ->where('audit_plan_id','=',$id)
                             ->where('role','=',0)
                             ->select('stakeholder_id')
                             ->first();
-
             //obtenemos equipo de auditores
             $stakeholders2 = DB::table('audit_plan_stakeholder')
                                 ->where('audit_plan_id','=',$id)
@@ -2078,13 +1981,9 @@ class AuditoriasController extends Controller
                 $stakeholder_team[$i] = $stakeholder->stakeholder_id;
                 $i += 1;
             }
-
-
             //enviamos id de org seleccionada
             $idorg = $id;
-
             $audit_plan = \Ermtool\Audit_plan::find($id);
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.edit',['stakeholders'=>$stakeholders,'organizations'=>$organizations,
@@ -2103,7 +2002,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     /**
      * Update the specified resource in storage.
      *
@@ -2122,7 +2020,6 @@ class AuditoriasController extends Controller
             //print_r($_POST);
             global $id;
             $id = $idtemp;
-
             //creamos una transacción para cumplir con atomicidad
             DB::transaction(function()
             {
@@ -2134,7 +2031,6 @@ class AuditoriasController extends Controller
                     }
                     else
                         $fecha_inicio = $_POST['initial_date'];
-
                     if (strpos($_POST['final_date'],'/')) //verificamos que la fecha no se encuentre ya en el orden correcto
                     {
                         //damos formato a fecha de término
@@ -2143,7 +2039,6 @@ class AuditoriasController extends Controller
                     }
                     else
                         $fecha_termino = $_POST['final_date'];
-
                     //actualizamos plan
                     DB::table('audit_plans')
                             ->where('id','=',$GLOBALS['id'])
@@ -2161,7 +2056,6 @@ class AuditoriasController extends Controller
                             'rules'=>$_POST['rules'],
                             'organization_id'=>$_POST['organization_id']
                             ]);
-
                     //primero actuakizamos stakeholder responsable
                     $resp = DB::table('audit_plan_stakeholder')
                             ->where('audit_plan_id','=',$GLOBALS['id'])
@@ -2169,9 +2063,7 @@ class AuditoriasController extends Controller
                             ->update([
                                 'stakeholder_id' => $_POST['stakeholder_id']
                                 ]);
-
                     
-
                     //ahora actualizamos equipo de stakeholders (si es que hay)
                     if (isset($request['stakeholder_team']))
                     {   
@@ -2180,7 +2072,6 @@ class AuditoriasController extends Controller
                         ->where('audit_plan_id',$GLOBALS['id'])
                         ->where('role','=',1)
                         ->delete();
-
                         //ahora agregamos cada uno
                         foreach ($_POST['stakeholder_team'] as $stakes)
                         {
@@ -2192,7 +2083,6 @@ class AuditoriasController extends Controller
                                         ]);
                         }
                     }
-
                      //actualizamos riesgos del negocio (si es que existen)
                     if (isset($_POST['objective_risk_id']))
                     {
@@ -2201,7 +2091,6 @@ class AuditoriasController extends Controller
                         ->where('audit_plan_id',$GLOBALS['id'])
                         ->whereNotNull('objective_risk_id')
                         ->delete();
-
                         foreach ($_POST['objective_risk_id'] as $objective_risk)
                         {
                                 DB::table('audit_plan_risk')
@@ -2211,7 +2100,6 @@ class AuditoriasController extends Controller
                                         ]);
                         }
                     }
-
                     //actualizamos riesgos de proceso (si es que existen)
                     if (isset($_POST['risk_subprocess_id']))
                     {
@@ -2220,7 +2108,6 @@ class AuditoriasController extends Controller
                         ->where('audit_plan_id',$GLOBALS['id'])
                         ->whereNotNull('risk_subprocess_id')
                         ->delete();
-
                         foreach ($_POST['risk_subprocess_id'] as $risk_subprocess)
                         {
                                 DB::table('audit_plan_risk')
@@ -2230,10 +2117,8 @@ class AuditoriasController extends Controller
                                         ]);
                         }
                     }
-
         /* PRIMERO DEBO HACER MODIFICABLE LAS AUDITORÍAS DEL PLAN 
                     //ahora guardamos auditorías que no son nuevas
-
                     //insertamos cada auditoria (de universo de auditorias) en audit_audit_plan
                     $i = 1;
                     if (isset($request['audits']))
@@ -2263,7 +2148,6 @@ class AuditoriasController extends Controller
                                             ]);
                                 }
                             }
-
                             //insertamos riesgos de proceso de la auditoría
                             if (isset($request['audit_'.$audit.'_risk_subprocess']))
                             {
@@ -2291,7 +2175,6 @@ class AuditoriasController extends Controller
                                             'created_at' => date('Y-m-d H:i:s'),
                                             'updated_at' => date('Y-m-d H:i:s')
                                             ]);
-
                             //ahora insertamos en audit_audit_plan
                             $audit_audit_plan_id = DB::table('audit_audit_plan')
                                         ->insertGetId([
@@ -2301,7 +2184,6 @@ class AuditoriasController extends Controller
                                             'final_date' => $_POST['audit_new'.$i.'_final_date'],
                                             'resources' => $_POST['audit_new'.$i.'_resources']
                                             ]);
-
                             //insertamos riesgos de negocio (de haber)
                            if (isset($_POST['audit_new'.$i.'_objective_risks']))
                            {
@@ -2314,7 +2196,6 @@ class AuditoriasController extends Controller
                                             ]);
                                 }
                            }
-
                            //insertamos nuevo riesgo de proceso (de haber)
                            if (isset($_POST['audit_new'.$i.'_objective_risks']))
                            {
@@ -2327,7 +2208,6 @@ class AuditoriasController extends Controller
                                             ]);
                                 }
                            }
-
                            $i += 1;
                         }
     // DEBO AGREGAR MODIFICACIÓN A AUDITORIAS ANTIGUAS                }
@@ -2339,13 +2219,10 @@ class AuditoriasController extends Controller
                 {
                     Session::flash('message','Plan de auditor&iacute;a actualizado correctamente');
                 }
-
             });
-
             return Redirect::to('/plan_auditoria');
         }
     }
-
     /**
      * Remove the specified resource from storage.
      *
@@ -2358,15 +2235,12 @@ class AuditoriasController extends Controller
         $id1 = $id;
         global $res;
         $res = 1;
-
         DB::transaction(function() {
-
             //primero obtenemos audit_audit_plan para hacer las validaciones
             $audit_audit_plan = DB::table('audit_audit_plan')
                         ->where('audit_plan_id','=',$GLOBALS['id1'])
                         ->select('id')
                         ->get();
-
             $rev2 = 1; //variable local para ver 
             foreach ($audit_audit_plan as $audit)
             {
@@ -2375,7 +2249,6 @@ class AuditoriasController extends Controller
                     ->where('audit_audit_plan_id','=',$audit->id)
                     ->select('id')
                     ->get();
-
                 if (empty($rev))
                 {
                     //ahora vemos notas de supervisor
@@ -2383,7 +2256,6 @@ class AuditoriasController extends Controller
                         ->where('audit_audit_plan_id','=',$audit->id)
                         ->select('id')
                         ->get();
-
                     if (empty($rev))
                     {
                         //audit_audit_plan_audit_program
@@ -2391,7 +2263,6 @@ class AuditoriasController extends Controller
                             ->where('audit_audit_plan_id','=',$audit->id)
                             ->select('id')
                             ->get();
-
                         if (empty($rev))
                         {
                             //podemos eliminar
@@ -2411,13 +2282,11 @@ class AuditoriasController extends Controller
                 {
                     $rev2 = 1;
                 }
-
                 if ($rev2 == 1)
                 {
                     break;
                 }
             }
-
             if ($rev2 == 0)
             {
                 //se puede eliminar
@@ -2428,7 +2297,6 @@ class AuditoriasController extends Controller
                     DB::table('audit_risk')
                         ->where('audit_audit_plan_id','=',$audit->id)
                         ->delete();
-
                     //ahora eliminamos audit_audit_plan
                     DB::table('audit_audit_plan')
                         ->where('id','=',$audit->id)
@@ -2446,24 +2314,18 @@ class AuditoriasController extends Controller
                 DB::table('audit_plans')
                     ->where('id','=',$GLOBALS['id1'])
                     ->delete();
-
                 $GLOBALS['res'] = 0;
-
             }
         });
-
         return $res;
     }
-
     public function destroyProgram($id)
     {
         global $id1;
         $id1 = $id;
         global $res;
         $res = 1;
-
         DB::transaction(function() {
-
             //revisaremos las pruebas de auditoría asociadas al programa
             $audit_tests = DB::table('audit_tests')
                     ->where('audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
@@ -2477,7 +2339,6 @@ class AuditoriasController extends Controller
                     ->where('audit_test_id','=',$audit_test->id)
                     ->select('id')
                     ->get();
-
                 if (empty($rev))
                 {
                     //revisamos supervisor_notes
@@ -2485,7 +2346,6 @@ class AuditoriasController extends Controller
                         ->where('audit_test_id','=',$audit_test->id)
                         ->select('id')
                         ->get();
-
                     if (empty($rev))
                     {
                         //por último, notas
@@ -2493,7 +2353,6 @@ class AuditoriasController extends Controller
                             ->where('audit_test_id','=',$audit_test->id)
                             ->select('id')
                             ->get();
-
                         if (empty($rev))
                         {
                             $rev2 = 0;
@@ -2512,13 +2371,11 @@ class AuditoriasController extends Controller
                 {
                     $rev2 = 1;
                 }
-
                 if ($rev2 == 1)
                 {
                     break;
                 }
             }
-
             if ($rev2 == 1)
             {
                return $GLOBALS['res'];
@@ -2530,7 +2387,6 @@ class AuditoriasController extends Controller
                     ->where('audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
                     ->select('id')
                     ->get();
-
                 if (empty($rev))
                 {
                     //revisamos supervisor_notes
@@ -2538,7 +2394,6 @@ class AuditoriasController extends Controller
                         ->where('audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
                         ->select('id')
                         ->get();
-
                     if (empty($rev))
                     {
                         //por último, notas
@@ -2546,7 +2401,6 @@ class AuditoriasController extends Controller
                             ->where('audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
                             ->select('id')
                             ->get();
-
                         if (empty($rev))
                         {
                             $rev2 = 0;
@@ -2566,58 +2420,47 @@ class AuditoriasController extends Controller
                     $rev2 = 1;
                 }
             }
-
             if ($rev2 == 0) //sólo si es igual a cero se podrán borrar todas las tablas
             {
-
                 //eliminamos pruebas de auditoría
                 DB::table('audit_tests')
                     ->where('audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
                     ->delete();
-
                 //para ver si borramos el programa de auditoría en la tabla audit_programs, vemos si éste está presente en otros programas
                 $program = DB::table('audit_audit_plan_audit_program')->where('id','=',$GLOBALS['id1'])->select('audit_program_id')->first();
-
                 $rev3 = DB::table('audit_audit_plan_audit_program')
                     ->where('audit_program_id','=',$program->audit_program_id)
                     ->where('id','<>',$GLOBALS['id1'])
                     ->select('id')
                     ->get();
-
                 //ahora eliminamos programa por completo
                 DB::table('audit_audit_plan_audit_program')
                     ->where('id','=',$GLOBALS['id1'])
                     ->delete();
-
                 if (empty($rev3)) //si no hay otros planes, borramos
                 {
                     DB::table('audit_programs')
                         ->where('id','=',$program->audit_program_id)
                         ->delete();
                 }
-
                 $GLOBALS['res'] = 0;
             }
             
         });
-
         return $res;
     }
-
     public function destroyTest($id)
     {
         global $id1;
         $id1 = $id;
         global $res;
         $res = 1;
-
         DB::transaction(function() {
             //revisaremos los campos para audit_test
             $rev = DB::table('issues')
                 ->where('audit_test_id','=',$GLOBALS['id1'])
                 ->select('id')
                 ->get();
-
             if (empty($rev))
             {
                 //revisamos supervisor_notes
@@ -2625,7 +2468,6 @@ class AuditoriasController extends Controller
                         ->where('audit_test_id','=',$GLOBALS['id1'])
                         ->select('id')
                         ->get();
-
                 if (empty($rev))
                 {
                     //por último, notas
@@ -2633,22 +2475,18 @@ class AuditoriasController extends Controller
                         ->where('audit_test_id','=',$GLOBALS['id1'])
                         ->select('id')
                         ->get();
-
                     if (empty($rev))
                     {
                         //ahora se puede eliminar
                         DB::table('audit_tests')
                             ->where('id','=',$GLOBALS['id1'])
                             ->delete();
-
                         $GLOBALS['res'] = 0;
                     } 
                 } 
             }
         });
-
         return $res;
-
     }
     //función para ver todas las pruebas
     public function pruebas()
@@ -2660,7 +2498,6 @@ class AuditoriasController extends Controller
         else
         {
             $audit_plans = \Ermtool\Audit_plan::lists('name','id');
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.pruebas',['audit_plans' => $audit_plans]);
@@ -2671,7 +2508,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     //función para revisar las notas agregadas por el auditor jefe
     public function notas()
     {
@@ -2682,7 +2518,6 @@ class AuditoriasController extends Controller
         else
         {
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.notas',['organizations' => $organizations]);
@@ -2693,7 +2528,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     //función para responder una nota por parte de un auditori
     public function responderNota(Request $request)
     {
@@ -2707,11 +2541,8 @@ class AuditoriasController extends Controller
             $id = $_POST['note_id'];
             global $evidence;
             $evidence = $request->file('evidencia_'.$id);
-
             DB::transaction(function() {
-
                 $id = $_POST['note_id'];
-
                 //insertamos y obtenemos id para verificar que se guarde
                 $res = DB::table('notes_answers')
                         ->insertGetId([
@@ -2720,7 +2551,6 @@ class AuditoriasController extends Controller
                                 'updated_at' => date('Y-m-d H:i:s'),
                                 'note_id' => $id 
                             ]);
-
                 //guardamos archivo de evidencia (si es que hay)
                 if($GLOBALS['evidence'] != NULL)
                 {
@@ -2732,7 +2562,6 @@ class AuditoriasController extends Controller
                         }
                     }
                 }
-
                 if ($res)
                 {
                     if (Session::get('languaje') == 'en')
@@ -2756,11 +2585,9 @@ class AuditoriasController extends Controller
                     }
                 } 
             });
-
             return Redirect::to('/notas');
         }
     }
-
     public function actionPlans()
     {
         if (Auth::guest())
@@ -2782,7 +2609,6 @@ class AuditoriasController extends Controller
                     'id' => $stake->id,
                     'name' => $stake->name.' '.$stake->surnames,
                 ];
-
                 $i += 1;
             }
             if (Session::get('languaje') == 'en')
@@ -2795,7 +2621,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     public function storePlan(Request $request)
     {
         if (Auth::guest())
@@ -2808,7 +2633,6 @@ class AuditoriasController extends Controller
             DB::transaction(function() {
                 //id del issue que se está agregando
                 $id = $_POST['issue_id'];
-
                 $new_id = DB::table('action_plans')
                                 ->insertGetId([
                                         'issue_id' => $id,
@@ -2846,7 +2670,6 @@ class AuditoriasController extends Controller
             return Redirect::to('/planes_accion');
         }
     }
-
     //función para reporte de planes de acción
     public function actionPlansReport()
     {
@@ -2867,7 +2690,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     //función para reporte de auditorías
     public function auditsReport()
     {
@@ -2878,7 +2700,6 @@ class AuditoriasController extends Controller
         else
         {
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
             if (Session::get('languaje') == 'en')
             {
                 return view('en.reportes.auditorias',['organizations' => $organizations]);
@@ -2889,7 +2710,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
     //reporte de auditorías
     public function generarReporteAuditorias($org)
     {
@@ -2900,7 +2720,6 @@ class AuditoriasController extends Controller
         else
         {
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
             if (strstr($_SERVER["REQUEST_URI"],'genexcelaudit'))
             {
                 $org_id = $org;
@@ -2909,15 +2728,13 @@ class AuditoriasController extends Controller
             {
                 $org_id = $_GET['organization_id'];
             }
-
             $results = array();
             $i = 0;
             
             $audit_plans = DB::table('audit_plans')
                         ->where('audit_plans.organization_id','=',$org_id)
-                        ->select('id','name','description','objectives','scopes','status','resources','methodology','initial_date','final_date','rules','hh')
+                        ->select('id','name','description','objectives','scopes','status','resources','methodology','initial_date','final_date','rules')
                         ->get();
-
             foreach ($audit_plans as $plan)
             {
                 if ($plan->objectives == "" || $plan->objectives == NULL)
@@ -2933,7 +2750,6 @@ class AuditoriasController extends Controller
                 }
                 else
                     $objectives = $plan->objectives;
-
                 if ($plan->scopes == "" || $plan->scopes == NULL)
                 {
                     if (Session::get('languaje') == 'en')
@@ -2947,7 +2763,6 @@ class AuditoriasController extends Controller
                 }
                 else
                     $scopes = $plan->scopes;
-
                 if ($plan->resources == "" || $plan->resources == NULL)
                 {
                     if (Session::get('languaje') == 'en')
@@ -2961,7 +2776,6 @@ class AuditoriasController extends Controller
                 }
                 else
                     $resources = $plan->resources;
-
                 if ($plan->methodology == "" || $plan->methodology == NULL)
                 {
                     if (Session::get('languaje') == 'en')
@@ -2975,7 +2789,6 @@ class AuditoriasController extends Controller
                 }
                 else
                     $methodology = $plan->methodology;
-
                 if ($plan->rules == "" || $plan->rules == NULL)
                 {
                     if (Session::get('languaje') == 'en')
@@ -2990,6 +2803,7 @@ class AuditoriasController extends Controller
                 else
                     $rules = $plan->rules;
 
+                /*
                 if ($plan->hh == "" || $plan->hh == NULL)
                 {
                     if (Session::get('languaje') == 'en')
@@ -3003,16 +2817,30 @@ class AuditoriasController extends Controller
                 }
                 else
                     $hh = $plan->hh;
+                */
 
+                //obtenemos horas hombre a través de las pruebas de auditoría
+                $hh = \Ermtool\Audit_plan::getHH($plan->id);
+                $hh_plan = 0;
+                $hh_real = 0;
+                foreach ($hh as $h)
+                {
+                    if ($h->hh_plan != NULL)
+                    {
+                        $hh_plan = $hh_plan + $h->hh_plan;
+                    }
+                    
+                    if ($h->hh_real != NULL)
+                    {
+                        $hh_real = $hh_real + $h->hh_real;
+                    }
+                }
                 $initial_date = new DateTime($plan->initial_date);
                 $initial_date = date_format($initial_date, 'd-m-Y');
-
                 //¡¡¡¡¡¡¡¡¡corregir problema del año 2038!!!!!!!!!!!! //
                 $fecha_final = date('d-m-Y',strtotime($plan->final_date));
-
                 $final_date = new DateTime($plan->final_date);
                 $final_date = date_format($final_date, 'd-m-Y');
-
                 if ($plan->status == 0)
                 {
                     if (Session::get('languaje') == 'en')
@@ -3046,14 +2874,12 @@ class AuditoriasController extends Controller
                         $estado_plan = 'Error al obtener estado';
                     }
                 }
-
                 //obtenemos auditorías
                 $audits = DB::table('audits')
                             ->join('audit_audit_plan','audit_audit_plan.audit_id','=','audits.id')
                             ->where('audit_audit_plan.audit_plan_id','=',$plan->id)
                             ->select('name','audit_audit_plan.id')
                             ->get();
-
                 
                 if (strstr($_SERVER["REQUEST_URI"],'genexcelaudit'))
                 {    
@@ -3073,14 +2899,12 @@ class AuditoriasController extends Controller
                 {
                     $j = 0;
                     $auditorias = array();
-
                     foreach ($audits as $audit)
                     {
                         $auditorias[$j] = ['id' => $audit->id, 'name' => $audit->name];
                         $j += 1;
                     }
                 }
-
                 if (Session::get('languaje') == 'en')
                 {
                     $results[$i] = [
@@ -3092,7 +2916,8 @@ class AuditoriasController extends Controller
                                 'Resources' => $resources,
                                 'Methodology' => $methodology,
                                 'Rules' => $rules,
-                                'Hours_man_plan' => $hh,
+                                'Hours_man_plan' => $hh_plan,
+                                'Hours_man_real' => $hh_real,
                                 'Initial_date' => $initial_date,
                                 'Final_date' => $final_date,
                             
@@ -3109,16 +2934,15 @@ class AuditoriasController extends Controller
                                 'Recursos' => $resources,
                                 'Metodología' => $methodology,
                                 'Normas' => $rules,
-                                'Horas_hombre_plan' => $hh,
+                                'Horas_hombre_plan' => $hh_plan,
+                                'Horas_hombre_real' => $hh_real,
                                 'Fecha_inicio' => $initial_date,
                                 'Fecha_fin' => $final_date,
                             
                     ];
                 }
-
                 $i += 1;
             }
-
             if (strstr($_SERVER["REQUEST_URI"],'genexcelaudit')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
             {
                 return $results;
@@ -3136,8 +2960,6 @@ class AuditoriasController extends Controller
             }
         }
     }
-
-
     //función que obtiene objetivos y riesgos de objetivos a través de JsON para la creación de un plan de pruebas
     public function getObjetivos($org)
     {
@@ -3156,15 +2978,11 @@ class AuditoriasController extends Controller
                                 'name' => $objective['name'],
                                 'id' => $objective['id']
                                 ];
-
-
                 $i += 1;
             }
-
             return json_encode($results);
         }
     }
-
     //Función obtiene riesgos de negocio a través de JSON al crear plan de pruebas (también utilizado para crear encuesta de evaluación)
     public function getRiesgosObjetivos($org)
     {
@@ -3185,7 +3003,6 @@ class AuditoriasController extends Controller
                                     ->orderBy('risks.name')
                                     ->select('risks.name','objective_risk.id as riskid')
                                     ->get();
-
             foreach ($objective_risk as $risk)
             {
                 //obtengo maxima fecha para obtener última evaluación
@@ -3193,7 +3010,6 @@ class AuditoriasController extends Controller
                                 ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                                 ->where('evaluation_risk.objective_risk_id','=',$risk->riskid)
                                 ->max('updated_at');
-
                 //obtenemos evaluación de riesgo de negocio (si es que hay)---> Ultima (mayor fecha updated_at)
                 $evaluations = DB::table('evaluation_risk')
                                 ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
@@ -3204,14 +3020,12 @@ class AuditoriasController extends Controller
                                 ->where('evaluations.updated_at','=',$fecha)
                                 ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
                                 ->get();
-
                 //seteamos por si no hay evaluación
                 $avg_probability = "Falta Eval.";
                 $avg_impact = "Falta Eval.";
                 $score = "Falta Eval.";
                 $proba_def = "";
                 $impact_def = "";
-
                 foreach ($evaluations as $evaluation)
                 {
                     //seteamos nombres de probabilidad e impacto
@@ -3235,7 +3049,6 @@ class AuditoriasController extends Controller
                                 $proba = 'Very likely';
                                 break;
                         }
-
                         switch ($evaluation->avg_impact)
                         {
                             case 1:
@@ -3275,7 +3088,6 @@ class AuditoriasController extends Controller
                                 $proba = 'Muy probable';
                                 break;
                         }
-
                         switch ($evaluation->avg_impact)
                         {
                             case 1:
@@ -3295,14 +3107,12 @@ class AuditoriasController extends Controller
                                 break;
                         }
                     }
-
                     $avg_probability = $evaluation->avg_probability;
                     $avg_impact = $evaluation->avg_impact;
                     $impact_def = $impact;
                     $proba_def = $proba;
                     $score = $evaluation->avg_probability * $evaluation->avg_impact;
                 }
-
                 $results[$i] = [
                             'name' => $risk->name,
                              'id' => $risk->riskid,
@@ -3314,13 +3124,10 @@ class AuditoriasController extends Controller
                             ];
                 $i += 1;
             }
-
             usort($results, array($this,"cmp"));
-
             return json_encode($results);
         }   
     }
-
     //Función obtiene riesgos de proceso a través de JSON al crear plan de pruebas
     public function getRiesgosProcesos($org)
     {
@@ -3342,7 +3149,6 @@ class AuditoriasController extends Controller
                                     ->groupBy('risks.id')
                                     ->select('risks.name','risk_subprocess.id as riskid')
                                     ->get();
-
             foreach ($risk_subprocess as $risk)
             {
                 //obtengo maxima fecha para obtener última evaluación
@@ -3350,7 +3156,6 @@ class AuditoriasController extends Controller
                                 ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                                 ->where('evaluation_risk.risk_subprocess_id','=',$risk->riskid)
                                 ->max('updated_at');
-
                 //obtenemos evaluación de riesgo de negocio (si es que hay)---> Ultima (mayor fecha updated_at)
                 $evaluations = DB::table('evaluation_risk')
                                 ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
@@ -3361,17 +3166,14 @@ class AuditoriasController extends Controller
                                 ->where('evaluations.updated_at','=',$fecha)
                                 ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
                                 ->get();
-
                 //seteamos por si no hay evaluación
                 $avg_probability = "Falta Eval.";
                 $avg_impact = "Falta Eval.";
                 $proba_def = "";
                 $impact_def = "";
-
                 foreach ($evaluations as $evaluation)
                 {
                 //seteamos nombres de probabilidad e impacto
-
                     if (Session::get('languaje') == 'en')
                     {
                         switch ($evaluation->avg_probability)
@@ -3392,7 +3194,6 @@ class AuditoriasController extends Controller
                                 $proba = 'Very likely';
                                 break;
                         }
-
                         switch ($evaluation->avg_impact)
                         {
                             case 1:
@@ -3432,7 +3233,6 @@ class AuditoriasController extends Controller
                                 $proba = 'Muy probable';
                                 break;
                         }
-
                         switch ($evaluation->avg_impact)
                         {
                             case 1:
@@ -3452,7 +3252,6 @@ class AuditoriasController extends Controller
                                 break;
                         }
                     }
-
                     $avg_probability = $evaluation->avg_probability;
                     $avg_impact = $evaluation->avg_impact;
                     $impact_def = $impact;
@@ -3470,13 +3269,10 @@ class AuditoriasController extends Controller
                             ];
                 $i += 1;
             }
-
             usort($results, array($this,"cmp"));
-
             return json_encode($results);
         }   
     }
-
     //Función que obtiene todos los stakeholders menos auditor responsable, al crear plan de auditoría
     public function getStakeholders($rut)
     {
@@ -3488,12 +3284,10 @@ class AuditoriasController extends Controller
         {
             $results = array();
             $i = 0; //contador de usuarios
-
             $users = DB::table('stakeholders')
                         ->where('id','<>',(int)$rut)
                         ->select('stakeholders.name','stakeholders.surnames','stakeholders.id')
                         ->get();
-
             foreach ($users as $user)
             {
                 $results[$i] = [
@@ -3502,11 +3296,9 @@ class AuditoriasController extends Controller
                 ];
                 $i += 1;
             }
-
             return json_encode($results);
         }
     }
-
     //función que obtiene un programa de auditoría (al crear uno nuevo basado en uno antiguo)
     public function getAuditProgram($id)
     {
@@ -3523,7 +3315,6 @@ class AuditoriasController extends Controller
                         ->where('id','=',$id)
                         ->select('audit_programs.name','audit_programs.id','audit_programs.description')
                         ->get();
-
             foreach ($audit_program as $program)
             {
                 $i = 0; //contador de pruebas
@@ -3534,21 +3325,17 @@ class AuditoriasController extends Controller
                                 ->select('audit_tests.name','audit_tests.description','audit_tests.type','audit_tests.hh',
                                         'audit_tests.control_id','audit_tests.subprocess_id','audit_tests.risk_id')
                                 ->get();
-
                 $results = [
                         'name' => $program->name,
                         'id' => $program->id,
                         'description' => $program->description,
                 ];
             }
-
             return json_encode($results);
         }
     }
-
     /*función que obtiene los datos y las pruebas de un programa de auditoría (al revisar un plan de auditoría)
     a través del identificador de audit_audit_plan (auditoría + plan de auditoría) */
-
     public function getAuditProgram2($id)
     {
         if (Auth::guest())
@@ -3566,7 +3353,6 @@ class AuditoriasController extends Controller
                         ->where('audit_audit_plan_audit_program.audit_audit_plan_id','=',$id)
                         ->select('audit_programs.name','audit_audit_plan_audit_program.expiration_date','audit_audit_plan_audit_program.id','audit_programs.description')
                         ->get();
-
             $k = 0; //contador de programas
             foreach ($audit_programs as $program)
             {
@@ -3575,15 +3361,13 @@ class AuditoriasController extends Controller
                 $audit_tests = DB::table('audit_tests')
                                 ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
                                 ->where('audit_audit_plan_audit_program.id','=',$program->id)
-                                ->select('audit_tests.name','audit_tests.description','audit_tests.results','audit_tests.id','audit_tests.status','audit_tests.stakeholder_id')
+                                ->select('audit_tests.name','audit_tests.description','audit_tests.results','audit_tests.id','audit_tests.status','audit_tests.stakeholder_id','audit_tests.hh_real')
                                 ->get();
-
                 $audit_tests2 = array(); //seteamos en 0 variable de pruebas
                 $i = 0; //contador de pruebas
                 foreach ($audit_tests as $test)
                 {
                     $test_result = $test->results;
-
                     if ($test->stakeholder_id == NULL)
                     {
                         $stake = NULL;
@@ -3594,18 +3378,15 @@ class AuditoriasController extends Controller
                         $stakeholder = \Ermtool\Stakeholder::find($test->stakeholder_id);
                         $stake = $stakeholder->name.' '.$stakeholder->surnames;
                     }
-
                     //obtenemos issues
                     $issues = DB::table('issues')
                                     ->where('audit_test_id','=',$test->id)
                                     ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
                                     ->get();
-
                     $debilidades = array();
                     $j = 0;
                     foreach ($issues as $issue)
                     {
-
                         $debilidades[$j] = [
                             'id' => $issue->id,
                             'name' => $issue->name,
@@ -3613,10 +3394,8 @@ class AuditoriasController extends Controller
                             'classification' => $issue->classification,
                             'recommendations' => $issue->recommendations
                         ];
-
                         $j += 1;
                     }
-
                     $audit_tests2[$i] = [
                             'name' => $test->name,
                             'description' => $test->description,
@@ -3624,27 +3403,23 @@ class AuditoriasController extends Controller
                             'id' => $test->id,
                             'status' => $test->status,
                             'results' => $test->results,
+                            'hh_real' => $test->hh_real,
                             'stakeholder' => $stake,
                             'issues' => $debilidades
                             ];
-
                     $i += 1;
                 }
-
                 $audit_programs[$k] = [
                         'name' => $program->name,
                         'id' => $program->id,
                         'description' => $program->description,
                         'audit_tests' => $audit_tests2
                 ];
-
                 $k += 1;
             }
-
             return json_encode($audit_programs);
         }
     }
-
     //obtiene los controles relacionados a un plan de auditoría (según la organización que esté involucrada
     //con el plan de auditoría)
     public function getObjectiveControls($id)
@@ -3658,7 +3433,6 @@ class AuditoriasController extends Controller
             $results = array();
             $objective_risks = array();
             $i = 0; //contador de pruebas
-
             //obtendremos riesgos de negocio
             $objective_risk = DB::table('audit_plan_risk')
                         ->join('control_objective_risk','control_objective_risk.objective_risk_id','=','audit_plan_risk.objective_risk_id')
@@ -3668,7 +3442,6 @@ class AuditoriasController extends Controller
                         ->select('controls.name','controls.id')
                         ->groupBy('controls.id')
                         ->get();
-
             foreach ($objective_risk as $obj)
             {
                 $results[$i] = [
@@ -3677,11 +3450,9 @@ class AuditoriasController extends Controller
                 ];
                 $i += 1;
             }
-
             return json_encode($results);
         }
     }
-
     //obtiene los controles relacionados a un plan de auditoría (según la organización que esté involucrada
     //con el plan de auditoría)
     public function getSubprocessControls($id)
@@ -3695,7 +3466,6 @@ class AuditoriasController extends Controller
             $results = array();
             $objective_risks = array();
             $i = 0; //contador de pruebas
-
             //obtendremos controles de procesos
             $risk_subprocess = DB::table('audit_plan_risk')
                         ->join('control_risk_subprocess','control_risk_subprocess.risk_subprocess_id','=','audit_plan_risk.risk_subprocess_id')
@@ -3705,7 +3475,6 @@ class AuditoriasController extends Controller
                         ->select('controls.name','controls.id')
                         ->groupBy('controls.id')
                         ->get();
-
             foreach ($risk_subprocess as $sub)
             {
                 $results[$i] = [
@@ -3714,11 +3483,9 @@ class AuditoriasController extends Controller
                 ];
                 $i += 1;
             }
-
             return json_encode($results);
         }
     }
-
     //obtiene auditorías relacionadas a un plan de auditoría
     public function getAudits($id)
     {
@@ -3731,14 +3498,12 @@ class AuditoriasController extends Controller
             $results = array();
             $objective_risks = array();
             $i = 0; //contador de auditorias
-
             //obtendremos auditorias
             $audits = DB::table('audit_audit_plan')
                         ->where('audit_audit_plan.audit_plan_id','=',$id)
                         ->join('audits','audits.id','=','audit_audit_plan.audit_id')
                         ->select('audits.name AS name','audit_audit_plan.id AS id')
                         ->get();
-
             foreach ($audits as $audit)
             {
                 $results[$i] = [
@@ -3747,11 +3512,9 @@ class AuditoriasController extends Controller
                 ];
                 $i += 1;
             }
-
             return json_encode($results);
         }
     }
-
     // ESTÁ MALA, CORREGIR SI ES QUE ES NECESARIO 
     // ACTUALIZACIÓN 24-08: LA UTILIZAREMOS PARA GENERAR EL GRÁFICO DE PRUEBAS DE AUDITORÍA
     //obtiene pruebas asociadas a una plan auditoria
@@ -3777,7 +3540,6 @@ class AuditoriasController extends Controller
                             'audit_tests.hh','audit_tests.control_id','audit_tests.subprocess_id','audit_tests.risk_id',
                             'audit_tests.stakeholder_id')
                     ->get();
-
         foreach ($tests as $test)
         {
             //sumamos a prueba ejec abierta o cerrada según el estado que posea
@@ -3793,11 +3555,9 @@ class AuditoriasController extends Controller
             {
                 $pruebas_cerradas += 1;
             }
-
             //obtenemos nombre de stakeholder
             $resp = \Ermtool\Stakeholder::find($test->stakeholder_id);
             $resp = $resp['name'].' '.$resp['surnames'];
-
             //obtenemos nombre de riesgo, control o subproceso según corresponda
             if ($test->risk_id != NULL)
             {
@@ -3842,7 +3602,6 @@ class AuditoriasController extends Controller
                         {
                             $test_type = 'Not defined';
                         }
-
                         //resultado
                         if ($test->results == 0)
                         {
@@ -3856,7 +3615,6 @@ class AuditoriasController extends Controller
                         {
                             $results = 'In process';
                         }
-
                         if ($type == 1)
                         {
                             $related = 'Risk: '.$relacionado;
@@ -3869,7 +3627,6 @@ class AuditoriasController extends Controller
                         {
                             $related = 'Control: '.$relacionado;
                         }
-
                         $audit_tests[$i] = [
                             'Audit plan' => $audit_plan,
                             'Audit' => $test->audit_name,
@@ -3906,7 +3663,6 @@ class AuditoriasController extends Controller
                         {
                             $test_type = 'Not defined';
                         }
-
                         //resultado
                         if ($test->results == 0)
                         {
@@ -3920,7 +3676,6 @@ class AuditoriasController extends Controller
                         {
                             $results = 'In process';
                         }
-
                         if ($type == 1)
                         {
                             $related = 'Risk: '.$relacionado;
@@ -3933,7 +3688,6 @@ class AuditoriasController extends Controller
                         {
                             $related = 'Control: '.$relacionado;
                         }
-
                         $audit_tests[$i] = [
                             'Audit plan' => $audit_plan,
                             'Audit' => $test->audit_name,
@@ -3970,7 +3724,6 @@ class AuditoriasController extends Controller
                         {
                             $test_type = 'Not defined';
                         }
-
                         //resultado
                         if ($test->results == 0)
                         {
@@ -3984,7 +3737,6 @@ class AuditoriasController extends Controller
                         {
                             $results = 'In process';
                         }
-
                         if ($type == 1)
                         {
                             $related = 'Risk: '.$relacionado;
@@ -3997,7 +3749,6 @@ class AuditoriasController extends Controller
                         {
                             $related = 'Control: '.$relacionado;
                         }
-
                         $audit_tests[$i] = [
                             'Audit plan' => $audit_plan,
                             'Audit' => $test->audit_name,
@@ -4037,7 +3788,6 @@ class AuditoriasController extends Controller
                         {
                             $test_type = 'No definido';
                         }
-
                         //resultado
                         if ($test->results == 0)
                         {
@@ -4051,7 +3801,6 @@ class AuditoriasController extends Controller
                         {
                             $results = 'En proceso';
                         }
-
                         if ($type == 1)
                         {
                             $related = 'Riesgo: '.$relacionado;
@@ -4064,7 +3813,6 @@ class AuditoriasController extends Controller
                         {
                             $related = 'Control: '.$relacionado;
                         }
-
                         $audit_tests[$i] = [
                             'Plan de auditoría' => $audit_plan,
                             'Auditoría' => $test->audit_name,
@@ -4101,7 +3849,6 @@ class AuditoriasController extends Controller
                         {
                             $test_type = 'No definido';
                         }
-
                         //resultado
                         if ($test->results == 0)
                         {
@@ -4115,7 +3862,6 @@ class AuditoriasController extends Controller
                         {
                             $results = 'En proceso';
                         }
-
                         if ($type == 1)
                         {
                             $related = 'Riesgo: '.$relacionado;
@@ -4128,7 +3874,6 @@ class AuditoriasController extends Controller
                         {
                             $related = 'Control: '.$relacionado;
                         }
-
                         $audit_tests[$i] = [
                             'Plan de auditoría' => $audit_plan,
                             'Auditoría' => $test->audit_name,
@@ -4165,7 +3910,6 @@ class AuditoriasController extends Controller
                         {
                             $test_type = 'No definido';
                         }
-
                         //resultado
                         if ($test->results == 0)
                         {
@@ -4179,7 +3923,6 @@ class AuditoriasController extends Controller
                         {
                             $results = 'En proceso';
                         }
-
                         if ($type == 1)
                         {
                             $related = 'Riesgo: '.$relacionado;
@@ -4192,7 +3935,6 @@ class AuditoriasController extends Controller
                         {
                             $related = 'Control: '.$relacionado;
                         }
-
                         $audit_tests[$i] = [
                             'Plan de auditoría' => $audit_plan,
                             'Auditoría' => $test->audit_name,
@@ -4227,7 +3969,6 @@ class AuditoriasController extends Controller
             
             $i += 1;
         }
-
         if (strstr($_SERVER["REQUEST_URI"],'genexcelgraficos')) //si es excel debemos solo enviamos audit_tests
         {
             return $audit_tests;
@@ -4238,7 +3979,6 @@ class AuditoriasController extends Controller
         }
         
     }
-
     //obtiene datos asociados al último plan de auditoría generado para una organización
     public function getAuditPlan($org)
     {
@@ -4254,18 +3994,15 @@ class AuditoriasController extends Controller
             $obj_plan_risks = array();
             $audit_programs = array();
             $i = 0; //contador de pruebas
-
             //primero obtenemos último id de plan de auditoría generado para una organización
             $audit_plan_id = DB::table('audit_plans')
                                     ->where('organization_id','=',$org)
                                     ->max('id');
-
             //verificamos que existe plan
             if ($audit_plan_id)
             {
                 //primero obtenemos info del plan
                 $audit_plan_info = \Ermtool\Audit_plan::find($audit_plan_id);
-
                 //obtenemos stakeholders
                 $stakeholders = DB::table('audit_plan_stakeholder')
                                     ->join('audit_plans','audit_plans.id','=','audit_plan_stakeholder.audit_plan_id')
@@ -4273,7 +4010,6 @@ class AuditoriasController extends Controller
                                     ->where('audit_plan_stakeholder.audit_plan_id','=',$audit_plan_id)
                                     ->select('stakeholders.name','stakeholders.surnames','audit_plan_stakeholder.role')
                                     ->get();
-
                 $responsable = NULL;
                 $users = NULL;
                 $j = 0; //contador de stakeholders
@@ -4290,7 +4026,6 @@ class AuditoriasController extends Controller
                     }
                     
                 }
-
                  //obtenemos riesgos de negocio del plan
                 $objective_risks = DB::table('audit_plan_risk')
                                     ->join('objective_risk','objective_risk.id','=','audit_plan_risk.objective_risk_id')
@@ -4299,7 +4034,6 @@ class AuditoriasController extends Controller
                                     ->where('audit_plan_risk.audit_plan_id','=',$audit_plan_id)
                                     ->select('objective_risk.id as id','risks.name as risk_name','objectives.name as objective_name')
                                     ->get();
-
                 //obtenemos riesgos de negocio del plan
                 $subprocess_risks = DB::table('audit_plan_risk')
                                     ->join('risk_subprocess','risk_subprocess.id','=','audit_plan_risk.risk_subprocess_id')
@@ -4310,18 +4044,15 @@ class AuditoriasController extends Controller
                                     ->select('risk_subprocess.id as id','risks.name as risk_name','subprocesses.name as subprocess_name',
                                             'processes.name as process_name')
                                     ->get();
-
                 $j = 0; //contador de riesgos en cero
                 //seteamos en variables los riesgos de negocio
                 foreach ($objective_risks as $objective_risk)
                 {
-
                     $obj_plan_risks[$j] = ['name' => $objective_risk->risk_name,
                                            'objective_name' => $objective_risk->objective_name,
                                            ];
                     $j += 1;
                 }
-
                 $j = 0; //contador de riesgos en cero
                 //seteamos en variables los riesgos de proceso
                 foreach ($subprocess_risks as $subprocess_risk)
@@ -4331,7 +4062,6 @@ class AuditoriasController extends Controller
                                            'process_name' => $subprocess_risk->process_name];
                     $j += 1;
                 }
-
                 
                 //ahora obtenemos los datos requeridos de auditoría para el plan
                 $audits = DB::table('audit_audit_plan')
@@ -4341,7 +4071,6 @@ class AuditoriasController extends Controller
                                             'audits.description as description','audit_audit_plan.initial_date as audit_initial_date',
                                             'audit_audit_plan.final_date as audit_final_date','audit_audit_plan.resources as resources')
                                     ->get();
-
                 foreach ($audits as $audit)
                 {
                     //formateamos datos
@@ -4351,7 +4080,6 @@ class AuditoriasController extends Controller
                     }
                     else
                         $resources = $audit->resources;
-
                     if ($audit->audit_initial_date == NULL)
                     {
                         $initial_date = NULL;
@@ -4371,14 +4099,12 @@ class AuditoriasController extends Controller
                         $final_date_tmp = new DateTime($audit->audit_final_date);
                         $final_date = date_format($final_date_tmp, 'd-m-Y');
                     }
-
                     if ($audit->description == NULL)
                     {
                         $description = NULL;
                     }
                     else
                         $description = $audit->description;
-
                     $obj_risks = array();
                     $sub_risks = array();
                     //obtenemos riesgos de negocio asociados a la auditoría
@@ -4389,7 +4115,6 @@ class AuditoriasController extends Controller
                                     ->where('audit_risk.audit_audit_plan_id','=',$audit->id)
                                     ->select('risks.name as risk_name','objectives.name as objective_name')
                                     ->get();
-
                     //obtenemos riesgos de negocio asociados a la auditoría
                     $subprocess_risks = DB::table('audit_risk')
                                     ->join('risk_subprocess','risk_subprocess.id','=','audit_risk.risk_subprocess_id')
@@ -4400,7 +4125,6 @@ class AuditoriasController extends Controller
                                     ->select('risks.name as risk_name','subprocesses.name as subprocess_name',
                                             'processes.name as process_name')
                                     ->get();
-
                     //obtenemos programas de auditoría realizadas en cada auditoría (si es que hay)
                     $audit_programs1 = DB::table('audit_audit_plan_audit_program')
                                 ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
@@ -4408,7 +4132,6 @@ class AuditoriasController extends Controller
                                 ->where('audit_audit_plan_audit_program.audit_audit_plan_id','=',$audit->id)
                                 ->select('audit_programs.name as audit_program_name')
                                 ->get();
-
                     if ($audit_programs1)
                     {
                         $j = 0; //contador de programas en cero
@@ -4420,7 +4143,6 @@ class AuditoriasController extends Controller
                             $j += 1;
                         }
                     }
-
                     $j = 0; //contador de riesgos en cero
                     //seteamos en variables los riesgos de negocio (si es que hay)
                     foreach ($objective_risks as $objective_risk)
@@ -4430,7 +4152,6 @@ class AuditoriasController extends Controller
                                           'objective_name' => $objective_risk->objective_name];
                         $j += 1;
                     }
-
                     $j = 0; //contador de riesgos en cero
                     //seteamos en variables los riesgos de proceso
                     foreach ($subprocess_risks as $subprocess_risk)
@@ -4441,9 +4162,7 @@ class AuditoriasController extends Controller
                                           'process_name' => $subprocess_risk->process_name];
                         $j += 1;
                     }
-
                     //guardamos datos de pruebas de auditoría de la auditoría seleccionada
-
                     $auditorias[$i] = ['name' => $audit->name,
                                         'description' => $description,
                                         'initial_date' => $initial_date,
@@ -4455,13 +4174,11 @@ class AuditoriasController extends Controller
                                     ];
                     $i += 1;
                 }
-
                 //ordenamos fechas
                 $initial_date_tmp = new DateTime($audit_plan_info['initial_date']);
                 $initial_date = date_format($initial_date_tmp, 'd-m-Y');
                 $final_date_tmp = new DateTime($audit_plan_info['final_date']);
                 $final_date = date_format($final_date_tmp, 'd-m-Y');
-
                 //guardamos datos finales que serán enviados
                 $results = ['name' => $audit_plan_info['name'],
                             'description' => $audit_plan_info['description'],
@@ -4479,18 +4196,15 @@ class AuditoriasController extends Controller
                             'sub_plan_risks' => $sub_plan_risks,
                             'audits' => $auditorias
                     ];
-
                 return json_encode($results);
             } //if ($audit_plan_id)
         }
     }
-
     //obtiene todos los planes asociados a una organización
     public function getPlanes($org)
     {
         return json_encode(\Ermtool\Organization::find($org)->audit_plans);
     }
-
     //obtiene notas asociadas a una prueba de auditoría
     public function getNotes($id)
     {
@@ -4507,7 +4221,6 @@ class AuditoriasController extends Controller
                         ->select('notes.id','notes.name','notes.description','notes.created_at','notes.status',
                                  'notes.audit_test_id as test_id')
                         ->get();
-
             if (empty($notes))
             {
                 $results = NULL;
@@ -4521,7 +4234,6 @@ class AuditoriasController extends Controller
                                 ->where('note_id',$note->id)
                                 ->select('notes_answers.id','notes_answers.answer','notes_answers.created_at','notes_answers.updated_at')
                                 ->get();
-
                     if (empty($answers_notes))
                     {
                         $answers = NULL;
@@ -4534,7 +4246,6 @@ class AuditoriasController extends Controller
                         {
                             //obtenemos evidencias de la respuesta (si es que existen)
                             $evidences = getEvidences(1,$ans->id);
-
                             $answers[$j] = [
                                     'id' => $ans->id,
                                     'answer' => $ans->answer,
@@ -4542,15 +4253,12 @@ class AuditoriasController extends Controller
                                     'updated_at' => $ans->updated_at,
                                     'ans_evidences' => $evidences,
                             ];
-
                             $j += 1;
                         }
-
                         
                     }
                     //obtenemos evidencias de la nota (si es que existe)
                     $evidences = getEvidences(0,$note->id);
-
                     $fecha_creacion = date('d-m-Y',strtotime($note->created_at));
                     $fecha_creacion .= ' a las '.date('H:i:s',strtotime($note->created_at));
                     $results[$i] = [
@@ -4564,14 +4272,12 @@ class AuditoriasController extends Controller
                         'answers' => $answers,
                         'evidences' => $evidences
                         ];
-
                     $i += 1;
                 }
             }
             return json_encode($results);
         }
     }
-
     public function closeNote($id)
     {
         if (Auth::guest())
@@ -4581,34 +4287,27 @@ class AuditoriasController extends Controller
         else
         {
             $res = 0;
-
             DB::table('notes')
                 ->where('id','=',$id)
                 ->update([
                     'status' => 1,
                     'updated_at' => date('Y-m-d H:i:s'),
                     ]);
-
             $res = 1;
-
             return $res;
         }
     }
-
     //obtenemos id de organización perteneciente a un plan de auditoría
     public function getOrganization($audit_plan)
     {
         $organization = NULL;
-
         $organization = DB::table('organizations')
                     ->join('audit_plans','audit_plans.organization_id','=','organizations.id')
                     ->where('audit_plans.id','=',$audit_plan)
                     ->select('organizations.id')
                     ->first();
-
         return json_encode($organization);
     }
-
     public function indexGraficos($value)
     {
         if (Auth::guest())
@@ -4623,9 +4322,7 @@ class AuditoriasController extends Controller
             $planes_abiertos = 0; //planes con al menos una prueba abierta
             $planes_cerrados = 0; //plan sin pruebas abiertas ni en ejecución, pero si cerradas 
             $audit_plans = array();
-
             //obtenemos todas las auditorías y pruebas de auditoría con su estado de ejecución
-
             $planes = \Ermtool\Audit_plan::all(['id','name','status','description']);
             $i = 0; //contador de planes
             foreach ($planes as $audit_plan)
@@ -4639,7 +4336,6 @@ class AuditoriasController extends Controller
                             ->where('audit_audit_plan.audit_plan_id','=',$audit_plan->id)
                             ->select('audit_audit_plan.id','audits.name')
                             ->get();
-
                 $j = 0; //contador de auditorias por plan
                 foreach ($auditorias as $audit)
                 {
@@ -4654,19 +4350,16 @@ class AuditoriasController extends Controller
                                     ->where('audit_audit_plan_audit_program.audit_audit_plan_id','=',$audit->id)
                                     ->select('audit_audit_plan_audit_program.id','audit_programs.name')
                                     ->get();
-
                     $k = 0; //contador de programas
                     foreach ($programs as $program)
                     {
                         $audit_programs[$k] = $program->name;
                         $k += 1;
-
                         //obtenemos pruebas
                         $tests = DB::table('audit_tests')
                                     ->where('audit_audit_plan_audit_program_id','=',$program->id)
                                     ->select('name','status')
                                     ->get();
-
                         //vemos si hay alguna prueba en ejecución, si es así el plan estará en ejecución
                         $l = 0; //contador de pruebas
                         //estados de las pruebas
@@ -4675,7 +4368,6 @@ class AuditoriasController extends Controller
                         {
                             $audit_tests[$l] = $test->name;
                             $l += 1;
-
                             if ($test->status == 0)
                             {
                                 $abiertas += 1;
@@ -4691,7 +4383,6 @@ class AuditoriasController extends Controller
                         }
                     }
                 }
-
                 $audit_plans[$i] = [
                     'name' => $audit_plan->name,
                     'description' => $audit_plan->description,
@@ -4704,7 +4395,6 @@ class AuditoriasController extends Controller
                     'cerradas' => $cerradas,
                 ];
                 $i += 1;
-
                 if ($audit_plan->status == 1) //AGREGADO 01-08-2016 SI EL STATUS DEL PLAN ES 1 SE CALIFICA OBVIAMENTE COMO CERRADO)
                 {
                     $planes_cerrados += 1;
@@ -4722,9 +4412,7 @@ class AuditoriasController extends Controller
                 {
                     $planes_cerrados += 1;
                 } 
-
             }
-
             if (strstr($_SERVER["REQUEST_URI"],'genexcelgraficos'))
             {
                 $i = 0;
@@ -4742,7 +4430,6 @@ class AuditoriasController extends Controller
                             else
                                 $audits .= $audit;
                     }
-
                     $programs = "";
                     $last = end($plan['programs']); //guardamos final para no agregarle coma
                     foreach ($plan['programs'] as $program)
@@ -4765,7 +4452,6 @@ class AuditoriasController extends Controller
                             else
                                 $tests .= $test;
                     }
-
                     if ($value == 5)
                     {
                         if ($plan['abiertas'] > 0 && $plan['ejecucion'] == 0 && $plan['status'] == 0)
@@ -4790,7 +4476,6 @@ class AuditoriasController extends Controller
                                     'Pruebas' => $tests
                                 ];
                             }
-
                             $i += 1;
                         }
                     }
@@ -4818,7 +4503,6 @@ class AuditoriasController extends Controller
                                     'Pruebas' => $tests
                                 ];
                             }
-
                             $i += 1;
                         }    
                     }
@@ -4846,7 +4530,6 @@ class AuditoriasController extends Controller
                                     'Pruebas' => $tests
                                 ];
                             }
-
                             $i += 1;
                         }       
                     }
@@ -4866,7 +4549,6 @@ class AuditoriasController extends Controller
             }
         }    
     }
-
     //obtiene datos de una auditoría
     public function getAudit($id)
     {
@@ -4875,13 +4557,10 @@ class AuditoriasController extends Controller
                 ->where('audit_audit_plan.id','=',$id)
                 ->select('audits.id','audits.name','audits.description','audit_audit_plan.hh','audit_audit_plan.resources','audit_audit_plan.initial_date','audit_audit_plan.final_date')
                 ->first();
-
         $initial_date = new DateTime($audit->initial_date);
         $audit->initial_date = date_format($initial_date, 'd-m-Y');
-
         $final_date = new DateTime($audit->final_date);
         $audit->final_date = date_format($final_date, 'd-m-Y');
-
         //obtenemos programas
         $audit_programs = DB::table('audit_programs')
                     ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_program_id','=','audit_programs.id')
@@ -4895,16 +4574,13 @@ class AuditoriasController extends Controller
             $programs[$i] = ['id' => $program->id, 'name' => $program->name];
             $i += 1;
         }
-
         if (empty($programs))
         {
             $programs = NULL;
         }
-
         $audits = ['audit' => $audit, 'programs' => $programs];
         return json_encode($audits);
     }
-
     //función para cerrar plan de auditoría
     public function close($id)
     {
@@ -4921,7 +4597,6 @@ class AuditoriasController extends Controller
                 $audit_plan = \Ermtool\Audit_plan::find($GLOBALS['id1']);
                 $audit_plan->status = 1;
                 $audit_plan->save();
-
                 if (Session::get('languaje') == 'en')
                 {
                     Session::flash('message','Audit Plan successfully closed');
@@ -4934,7 +4609,6 @@ class AuditoriasController extends Controller
             return Redirect::to('plan_auditoria');
         }
     }
-
     public function open($id)
     {
         if (Auth::guest())
@@ -4950,7 +4624,6 @@ class AuditoriasController extends Controller
                 $audit_plan = \Ermtool\Audit_plan::find($GLOBALS['id1']);
                 $audit_plan->status = 0;
                 $audit_plan->save();
-
                 if (Session::get('languaje') == 'en')
                 {
                     Session::flash('message','Audit Plan successfully opened');
@@ -4963,5 +4636,4 @@ class AuditoriasController extends Controller
             return Redirect::to('plan_auditoria');
         }
     }
-
 }

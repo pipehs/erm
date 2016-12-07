@@ -146,4 +146,45 @@ class Control extends Model
                 ->select('control_id as id')
                 ->get();
     }
+
+    public static function getControlsFromProcess($org,$process)
+    {
+        return DB::table('controls')
+                ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                ->where('organization_subprocess.organization_id','=',$org)
+                ->where('subprocesses.process_id','=',$process)
+                ->select('controls.id','controls.name','controls.description')
+                ->groupBy('controls.id')
+                ->get();
+    }
+
+    public static function getControlsFromSubprocess($org, $subprocess)
+    {
+        return DB::table('controls')
+                ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                ->where('organization_subprocess.organization_id','=',$org)
+                ->where('subprocesses.id','=',$subprocess)
+                ->select('controls.id','controls.name','controls.description')
+                ->groupBy('controls.id')
+                ->get();
+    }
+
+    public static function getControlsFromPerspective($org,$perspective)
+    {
+        return DB::table('controls')
+                ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
+                ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                ->where('objectives.organization_id','=',$org)
+                ->where('objectives.perspective','=',$perspective)
+                ->select('controls.id','controls.name','controls.description')
+                ->groupBy('controls.id')
+                ->get();
+    }
 }

@@ -458,4 +458,11 @@ class SubprocesosController extends Controller
         
         return json_encode($subprocesses);
     }
+
+    public function getSubprocessesFromProcess($org,$process)
+    {
+        $subprocesses = \Ermtool\Subprocess::getSubprocessesFromProcess($org,$process);
+
+        return json_encode($subprocesses);
+    }
 }

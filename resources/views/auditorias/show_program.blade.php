@@ -47,29 +47,7 @@
 			<li><b>Descripci&oacute;n: {{ $program['description'] }}</b></li>
 			<li><b>Fecha creaci&oacute;n: {{ $program['created_at'] }}</b></li>
 			<li><b>Fecha fin: {{ $program['expiration_date'] }}</b></li>
-			<li><b>Documento asociado: 
 
-			@if ($program['evidence'] == NULL)
-				El programa no tiene ning&uacute;n documento asociado
-			@else
-			<table>
-			<tr>
-			<td>
-				<div style="cursor:hand" id="descargar_{{ $program['id'] }}" onclick="descargar(4,'{{$program['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Descargar</u></font></div>
-			</td>
-	@foreach (Session::get('roles') as $role)
-		@if ($role != 6)
-			<td>&nbsp;&nbsp;
-				<img src="assets/img/btn_eliminar.png" height="40px" width="40px" onclick="eliminar_ev({{ $program['id'] }},1)">
-			</td>
-		<?php break; ?>
-		@endif
-	@endforeach
-			</tr>
-			</table>
-			</br>
-			@endif
-			</b></li>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)		
 			<li>{!! link_to_route('programas_auditoria.edit', $title = 'Editar programa', $parameters = $program['id'],
@@ -99,8 +77,8 @@
 				<th>Estado</th>
 				<th>Resultado</th>
 				<th>Responsable</th>
-				<th>Horas / Hombre</th>
-				<th>Documento</th>
+				<th>Horas / Hombre planificadas</th>
+				<th>Horas / Hombre reales</th>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
 				<th>Acci&oacute;n</th>
@@ -121,31 +99,49 @@
 
 					<td>{{ $test['updated_at'] }}</td>
 
-					<td>{{ $test['type'] }}</td>
+					<td>
+					@if ($test['type'] == 0)
+						Prueba de diseño
+					@elseif($test['type'] == 1)
+						Prueba de efectivdad operativa
+					@elseif($test['type'] == 2)
+						Prueba sustantiva
+					@elseif($test['type'] == 3)
+						Prueba de cumplimiento
+					@endif	
+					</td>
 
-					<td>{{ $test['status'] }}</td>				
+					<td>
+					@if ($test['status'] == 0)
+						Abierta
+					@elseif ($test['status'] == 1)
+						En ejecuci&oacute;n
+					@elseif ($test['status'] == 2)
+						Cerrada
+					@endif
+					</td>				
 					
-					<td>{{ $test['results'] }}</td>
+					<td>
+					@if ($test['results'] == 0)
+						Inefectiva
+					@elseif($test['results'] == 1)
+						Efectiva
+					@elseif($test['results'] == 2)
+						En proceso
+					@endif
+					</td>
 
 					<td>{{ $test['stakeholder'] }}</td>
 
 					<td>{{ $test['hh'] }}</td>
-
 					<td>
-					@if ($test['evidence'] == NULL)
-						No tiene documentos
+					@if ($test['hh_real'] == NULL || $test['hh_real'] == "")
+						No especifica
 					@else
-						<div style="cursor:hand" id="descargar_{{ $test['id'] }}" onclick="descargar(5,'{{$test['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Descargar</u></font></div>
-					@foreach (Session::get('roles') as $role)
-						@if ($role != 6)
-						<img src="assets/img/btn_eliminar.png" height="40px" width="40px" onclick="eliminar_ev({{ $test['id'] }},0)">
-						<?php break; ?>
-						@endif
-					@endforeach
-
-						</br>
+						{{ $test['hh_real'] }}
 					@endif
 					</td>
+
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
 					<td>{!! link_to_route('programas_auditoria.edit_test', $title = 'Editar', $parameters = $test['id'],

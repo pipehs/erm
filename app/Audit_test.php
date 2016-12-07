@@ -31,4 +31,26 @@ class Audit_test extends Model
 
     	return $tests;
     }
+
+    public static function getMaxDate($control)
+    {
+        $max = DB::table('audit_tests')
+                ->where('control_id','=',$control)
+                ->where('status','=',2)
+                ->max('updated_at');
+
+        return $max;
+    }
+
+    public static function getTestFromDate($date,$control)
+    {
+        $test = DB::table('audit_tests')
+                ->where('updated_at','=',$date)
+                ->where('control_id','=',$control)
+                ->where('status','=',2)
+                ->select('results')
+                ->first();
+
+        return $test;
+    }
 }

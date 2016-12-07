@@ -40,7 +40,7 @@ class Organization extends Model
 
     public function audit_plans()
     {
-        return $this->belongsToMany('Ermtool\Audit_plan');
+        return $this->hasMany('Ermtool\Audit_plan');
     }
 
     public static function getOrgIdByTestId($id)
@@ -67,6 +67,14 @@ class Organization extends Model
                     ->first();
 
         return $org->name;
+    }
+
+    public static function getOrgByAuditPlan($id)
+    {
+        return DB::table('audit_plans')
+                ->where('audit_plans.id','=',$id)
+                ->select('organization_id as id')
+                ->first();
     }
 
     public function issues()

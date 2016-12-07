@@ -46,14 +46,14 @@ class Subprocess extends Model
     {
         //primero hallazgos de subproceso creados directamente
         $subprocesses1 = DB::table('issues')
-                    ->whereNotNull('issues.subprocess_id')
-                    ->join('subprocesses','subprocesses.id','=','issues.subprocess_id')
-                    ->join('processes','processes.id','=','subprocesses.process_id')
-                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                    ->where('organization_subprocess.organization_id','=',$org)
-                    ->select('subprocesses.id','subprocesses.name','subprocesses.description','processes.name as process_name')
-                    ->groupBy('subprocesses.id')
-                    ->get();
+                        ->whereNotNull('issues.subprocess_id')
+                        ->join('subprocesses','subprocesses.id','=','issues.subprocess_id')
+                        ->join('processes','processes.id','=','subprocesses.process_id')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('organization_subprocess.organization_id','=',$org)
+                        ->select('subprocesses.id','subprocesses.name','subprocesses.description','processes.name as process_name')
+                        ->groupBy('subprocesses.id')
+                        ->get();
 
         //hallazgos obtenidos a través de la evaluación de controles
         $subprocesses2 = DB::table('control_evaluation')
@@ -84,6 +84,20 @@ class Subprocess extends Model
         //eliminamos duplicados (si es que hay)
         $subprocessesX = array_unique($subprocesses,SORT_REGULAR);
         return $subprocessesX;
+    }
+
+    public static function getSubprocessesFromProcess($org,$process)
+    {
+        $subprocesses = DB::table('subprocesses')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('subprocesses.process_id','=',$process)
+                        ->where('organization_subprocess.organization_id','=',$org)
+                        ->where('subprocesses.status','=',0)
+                        ->select('subprocesses.id','subprocesses.name')
+                        ->distinct('subprocesses.id')
+                        ->get();
+
+        return $subprocesses;
     }
 
 }

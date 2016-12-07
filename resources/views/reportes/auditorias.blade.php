@@ -69,7 +69,8 @@
 		<th>Recursos</th>
 		<th>Metodolog&iacute;a</th>
 		<th>Normas</th>
-		<th>Horas-hombre plan</th>
+		<th>Horas-hombre planificadas</th>
+		<th>Horas-hombre utilizadas</th>
 		<th>Fecha inicial</th>
 		<th>Fecha final</th>
 		</thead>
@@ -88,7 +89,13 @@
 				<td>{{ $plan['Recursos'] }}</td>
 				<td>{{ $plan['Metodología'] }}</td>
 				<td>{{ $plan['Normas'] }}</td>
-				<td>{{ $plan['Horas_hombre_plan'] }}</td>
+				@if ($plan['Horas_hombre_plan'] < $plan['Horas_hombre_real'])
+					<td style="background: #F4A7A1;">{{ $plan['Horas_hombre_plan'] }}</td>
+					<td style="background: #F4A7A1;">{{ $plan['Horas_hombre_real'] }}</td>
+				@else
+					<td style="background: #CAF4A1;">{{ $plan['Horas_hombre_plan'] }}</td>
+					<td style="background: #CAF4A1;">{{ $plan['Horas_hombre_real'] }}</td>
+				@endif
 				<td>{{ $plan['Fecha_inicio'] }}</td>
 				<td>{{ $plan['Fecha_fin'] }}</td>
 			</tr>

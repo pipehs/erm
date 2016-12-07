@@ -59,7 +59,7 @@ $("#audit").change(function() {
 												pruebas += '<option value="0">Abierta</option>';
 												pruebas += '<option value="2" selected>Cerrada</option>';
 												//alert(activity.results);
-												pruebas += '<script>result('+test.id+','+test.results+')</script>'
+												pruebas += '<script>result('+test.id+','+test.results+','+test.hh_real+')</script>'
 											}
 
 											//ACTUALIZACIÓN 02-11: Se eliminó resultado de prueba en ejecución (pero no de la base de datos para evitar inconsistencias),
@@ -120,12 +120,12 @@ function ocultar(id)
 
 //agrega select de resultado de una prueba (efectiva o inefectiva), en el caso de que ésta haya sido señalada como cerrada.
 //En caso de ser inefectiva, se debe agregar los campos para issue y para agregar evidencias
-function result(id,result)
+function result(id,result,hh_real)
 {
 	if ($("#status_"+id).val() == 2)
 	{
 		var resultado = '<div class="col-sm-8"><select class="form-control" name="test_result_'+id+'" id="test_result_'+id+'"';
-		resultado += 'onchange="testResult('+id+')" required>';
+		resultado += 'onchange="testResult('+id+','+hh_real+')" required>';
 
 		//seteamos resultado previo si es que existe
 		if (result == 0)
@@ -134,13 +134,15 @@ function result(id,result)
 			resultado += '<option value="0" selected>Inefectiva</option>';
 			resultado += '<option value="1">Efectiva</option></div>';
 
-			resultado += '<script>testResult('+id+');</script>';
+			resultado += '<script>testResult('+id+','+hh_real+');</script>';
 		}
 		else if (result == 1)
 		{
 			resultado += '<option value="">- Seleccione resultado -</option>';
 			resultado += '<option value="0">Inefectiva</option>';
 			resultado += '<option value="1" selected>Efectiva</option></div>';
+
+			resultado += '<script>testResult('+id+','+hh_real+');</script>';
 		}
 		else
 		{
@@ -164,20 +166,35 @@ function result(id,result)
 contador = 0;
 //agrega campo de issue de una prueba en caso de que esta haya sido mencionada como inefectiva
 //ACTUALIZACIÓN 25-10: Sacaremos campo de issue y botones de agregar más issues para ordenar un poco la interfaz gráfica: Sólo agregaremos botón para ir a gestionar Issues
-function testResult(id)
+function testResult(id,hh)
 {
-
-	if ($("#test_result_"+id).val() == 0 && $("#test_result_"+id).val() != "") //el resultado de la prueba es inefectivo
+	if (hh != undefined)
 	{
-		
-		resultado = '</br><a href="hallazgos_test.'+id+'" class="btn btn-info">Gestionar Hallazgos</button>';
+		resultado = '</br><div class="col-sm-6 control-label"><label for="hh_real_'+id+'"><b>HH utilizadas</b></label></div><div class="col-sm-6"><input type="text" name="hh_real_'+id+'" class="form-control" value="'+hh+'"></input>'
+	}
+	else
+	{
+		resultado = '</br><div class="col-sm-6 control-label"><label for="hh_real_'+id+'"><b>HH utilizadas</b></label></div><div class="col-sm-6"><input type="text" name="hh_real_'+id+'" class="form-control" placeholder="Ingrese Horas-hombre"></input>'
+	}
+	
+	if ($("#test_result_"+id).val() == 0) //el resultado de la prueba es inefectivo
+	{
+		$("#issues_"+id).empty();
+		resultado += '</br><a href="hallazgos_test.'+id+'" class="btn btn-info">Gestionar Hallazgos</button>';
 		$("#issues_"+id).append(resultado);
-
+	}
+	else if ($("#test_result_"+id).val() == 1)
+	{
+		$("#issues_"+id).empty();
+		$("#boton_add_"+id).empty();
+		new_issues = 0;
+		$("#issues_"+id).append(resultado);
 	}
 	else
 	{
 		$("#issues_"+id).empty();
 		$("#boton_add_"+id).empty();
-		new_issues = 0;
 	}
+
+	
 }

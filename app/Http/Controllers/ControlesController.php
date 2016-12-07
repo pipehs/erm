@@ -1893,6 +1893,12 @@ class ControlesController extends Controller
             $last_cumplimiento = NULL;
         }
 
+        //Actualización 05-12-16: Se debe ver también la última prueba de auditoría que se encuentre cerrada y que corresponda a dicho control
+        //primero obtenemos la última prueba
+        $max_date = \Ermtool\Audit_test::getMaxDate($id);
+
+        //ahora obtenemos la prueba
+        $test = \Ermtool\Audit_test::getTestFromDate($max_date,$id);
 
         //vemos cada una de las pruebas (que estén cerradas, y sumamos en variable de efectivo en el caso de que lo sean; además guardamos el total de pruebas)
         $efectivas = 0;
@@ -1928,6 +1934,15 @@ class ControlesController extends Controller
         {
             $total += 1;
             if ($last_cumplimiento->results == 1)
+            {
+                $efectivas += 1;
+            }
+        }
+
+        if ($test != NULL)
+        {
+            $total += 1;
+            if ($test->results == 1)
             {
                 $efectivas += 1;
             }
@@ -2025,7 +2040,7 @@ class ControlesController extends Controller
                 //el riesgo es efectivo
                 if ($kind == 1)
                 {
-                    \Ermtool\Control_evaluation::insesrtControlledRisk($risk->id,1,1);
+                    \Ermtool\Control_evaluation::insertControlledRisk($risk->id,1,1);
                 }
                 else
                 {
@@ -2141,5 +2156,45 @@ class ControlesController extends Controller
                 return view('hallazgos.index3',['issues'=>$issues, 'evaluation' => $evaluation,'control_name'=>$control_name,'org_id' => $org_id,'kind' => $kind]);
             }
         }
+    }
+
+    public function getControlsFromProcess($id,$org)
+    {
+        $controls = \Ermtool\Control::getControlsFromProcess($id,$org);
+
+        return json_encode($controls);
+    }
+
+    //obtenemos controles (no repetidos) de los subprocesos seleccionados a través de jquery (al crear una prueba de auditoría) => $subprocesses = array con id de subprocesos
+    public function getControlsFromSubprocess($id,$subprocesses)
+    {
+        $subs = explode(',',$subprocesses);
+        $controls = array();
+        $i = 0;
+        foreach ($subs as $s)
+        {
+            $controls1 = \Ermtool\Control::getControlsFromSubprocess($id,$s);
+
+            foreach ($controls1 as $c)
+            {
+                $controls[$i] = [
+                    'id' => $c->id,
+                    'name' => $c->name,
+                    'description' => $c->description,
+                ];
+
+                $i += 1;
+            }
+        }
+
+        $controls = array_unique($controls,SORT_REGULAR);
+        return json_encode(array_values($controls));
+    }
+
+    public function getControlsFromPerspective($org,$perspective)
+    {
+        $controls = \Ermtool\Control::getControlsFromPerspective($org,$perspective);
+
+        return json_encode($controls);
     }
 }

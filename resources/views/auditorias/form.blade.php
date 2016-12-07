@@ -3,7 +3,7 @@
 						{!!Form::label('Seleccione organizaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::select('organization_id',$organizations,null, 
-							 	   ['id' => 'orgs','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+							 	   ['id' => 'orgs','required'=>'true','placeholder' => '- Seleccione -'])!!}
 						</div>
 					</div>
 
@@ -48,14 +48,14 @@
 																'cols'=>'4'])!!}
 						</div>
 					</div>
-
+<!--
 					<div class="form-group">
 						{!!Form::label('Horas-Hombre estimadas del plan',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::number('HH_plan',null,['class'=>'form-control','id'=>'HH_plan','min'=>'0'])!!}
 						</div>
 					</div>
-
+-->
 					<div class="form-group">
 						{!!Form::label('Auditor responsable',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
@@ -107,10 +107,11 @@
 					</div>
 
 					<b><font color="blue">Ingrese informaci&oacute;n para cada auditor&iacute;a del plan</font></b></br>
-
+<!--
 					<div id="contador_HH">
 						<font color="red">Debe asignar horas hombre al plan</font>
 					</div>
+-->
 					<div class="form-group">
 						<center>
 							<div style="cursor:hand" id="agregar_auditoria">

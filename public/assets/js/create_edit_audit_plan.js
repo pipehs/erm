@@ -1,4 +1,4 @@
-	horasPlan = 0;
+horasPlan = 0;
 	total_horas = 0;
 	//script para agregar select de riesgos de organización
 	$("#orgs").change(function() {
@@ -6,6 +6,7 @@
 			if ($("#orgs").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 			{
 					$("#guardar").prop("disabled",false);
+					$("#auditorias").prop("disabled",false);
 					$("#stakeholder").val("");
 					$("#stakeholder_id").empty(); //vaciamos lista de stakeholders para que no se repitan
 
@@ -26,27 +27,27 @@
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
 
-								$("#informacion").append('<h3><b> ' + datos.name + '</h3><hr>');
-								$("#informacion").append('<b>Descripci&oacute;n:</b> ' + datos.description + '</br>');
-								$("#informacion").append('<b>Objetivos:</b> ' + datos.objectives + '</br>');
-								$("#informacion").append('<b>Alcances:</b> ' + datos.scopes + '</br>');
-								$("#informacion").append('<b>Recursos:</b> ' + datos.resources + '</br>');
-								$("#informacion").append('<b>Metodolog&iacute;a:</b> ' + datos.methodology + '</br>');
-								$("#informacion").append('<b>Normas:</b> ' + datos.rules + '</br>');
-								$("#informacion").append('<b>Responsable: </b>' + datos.responsable + '</br>');
-								$("#informacion").append('<b>Auditores: </b>');
+							$("#informacion").append('<h3><b> ' + datos.name + '</h3><hr>');
+							$("#informacion").append('<b>Descripci&oacute;n:</b> ' + datos.description + '</br>');
+							$("#informacion").append('<b>Objetivos:</b> ' + datos.objectives + '</br>');
+							$("#informacion").append('<b>Alcances:</b> ' + datos.scopes + '</br>');
+							$("#informacion").append('<b>Recursos:</b> ' + datos.resources + '</br>');
+							$("#informacion").append('<b>Metodolog&iacute;a:</b> ' + datos.methodology + '</br>');
+							$("#informacion").append('<b>Normas:</b> ' + datos.rules + '</br>');
+							$("#informacion").append('<b>Responsable: </b>' + datos.responsable + '</br>');
+							$("#informacion").append('<b>Auditores: </b>');
 
-								$(datos.users).each( function(i, users) {
-									$("#informacion").append(users + ', ');
-								})
-								$("#informacion").append('</br><b>Fecha inicial:</b> ' + datos.initial_date + '</br>');
-								$("#informacion").append('<b>Fecha final:</b> ' + datos.final_date + '</br>');
-								if (datos.status == 0)
-									$("#informacion").append('<b>Estado:</b> Abierto </br></br>');
-								else if (datos.status == 1)
-									$("#informacion").append('<b>Estado:</b> Cerrado </br></br>');
+							$(datos.users).each( function(i, users) {
+								$("#informacion").append(users + ', ');
+							})
+							$("#informacion").append('</br><b>Fecha inicial:</b> ' + datos.initial_date + '</br>');
+							$("#informacion").append('<b>Fecha final:</b> ' + datos.final_date + '</br>');
+							if (datos.status == 0)
+								$("#informacion").append('<b>Estado:</b> Abierto </br></br>');
+							else if (datos.status == 1)
+								$("#informacion").append('<b>Estado:</b> Cerrado </br></br>');
 
-								$("#informacion").append('<h4><b>Auditor&iacute;as Realizadas</b></h4><hr>');
+							$("#informacion").append('<h4><b>Auditor&iacute;as Realizadas</b></h4><hr>');
 
 							//seteamos datos de cada auditoría
 							$(datos.audits).each( function(i, audit) {
@@ -206,7 +207,7 @@
 			}
 		});
 
-
+/*
 //funcion para contador general de HH del plan
 $('#HH_plan').change(function() {
 
@@ -288,6 +289,7 @@ function horas()
 	}
  
 }
+*/
 
 //por el momento no se podrán editar los datos de las auditorías ya creadas
 var pathname = window.location.pathname;

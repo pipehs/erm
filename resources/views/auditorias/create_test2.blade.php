@@ -14,7 +14,7 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-sm-12 col-sm-8">
+	<div class="col-sm-12 col-sm-6">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -67,6 +67,7 @@
 			</div>
 		</div>
 	</div>
+	<div id="riesgos" style="display:none;">
 	</div>
 </div>
 @stop

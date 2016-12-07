@@ -952,6 +952,10 @@ Route::get('get_processes.{id}', [
 Route::get('get_subprocesses.{id}', [
 	'as' => 'get_subprocesses', 'uses' => 'SubprocesosController@getSubprocesses']);
 
+//ruta para obtener subprocesos de una organizacion y además de un proceso en específico
+Route::get('get_subprocesses_from_process.{id}.{process}', [
+	'as' => 'get_subprocesses_from_process', 'uses' => 'SubprocesosController@getSubprocessesFromProcess']);
+
 //ruta para obtener procesos de una organizacion
 Route::get('get_objectives.{id}', [
 	'as' => 'get_objectives', 'uses' => 'ObjetivosController@getObjectives']);
@@ -967,6 +971,18 @@ Route::get('get_organization.{audit_plan_id}', [
 //ruta para obtener controles de una organizacion
 Route::get('get_controls2.{id},{type}', [
 	'as' => 'get_controls', 'uses' => 'ControlesController@getControls2']);
+
+//ruta para obtener controles de una organizacion y además de un proceso en específico
+Route::get('get_controls_from_process.{id}.{process}', [
+	'as' => 'get_controls_from_process', 'uses' => 'ControlesController@getControlsFromProcess']);
+
+//ruta para obtener controles de una organizacion y además de un proceso en específico
+Route::get('get_controls_from_subprocess.{id}.[{subprocesses}]', [
+	'as' => 'get_controls_from_subprocess', 'uses' => 'ControlesController@getControlsFromSubprocess']);
+
+//obtiene controles de una organización para una perspectiva en específica
+Route::get('get_controls_from_perspective.{org}.{perspective}', [
+	'as' => 'get_controls_from_perspective', 'uses' => 'ControlesController@getControlsFromPerspective']);
 
 //ruta para obtener programas de auditoría de una organizacion
 Route::get('get_controls.{id}', [

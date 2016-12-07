@@ -1,4 +1,5 @@
-/* HeatMap */
+/* HeatMap OLD*/
+/*
 .heatmap1{
 width:100%;height:400px;
 background-color:#f20505;
@@ -12,9 +13,19 @@ background-image:-ms-linear-gradient(right top, #f20505 33%, #c2f01d 75%,#0ccc16
 /*sombra 
     -webkit-box-shadow: 7px 7px 5px 0px rgba(50, 50, 50, 0.75);
 	-moz-box-shadow:    7px 7px 5px 0px rgba(50, 50, 50, 0.75);
-	box-shadow:         7px 7px 5px 0px rgba(50, 50, 50, 0.75); */
+	box-shadow:         7px 7px 5px 0px rgba(50, 50, 50, 0.75); 
 }
+*/
 
+.heatmap1{
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#6bce0e+16,f2ea07+27,f2ea07+27,f2ea07+27,f2ea07+27,f2ea07+27,f2ea07+27,f2ea07+31,f2ea07+31,f2ea07+31,f2ea07+31,f2ea07+31,f2ea07+31,f2ea07+31,f2ea07+31,f2ea07+31,ff1111+68,db2a0f+99,d61706+100,db2a0f+100 */
+    width:100%;height:400px;
+    background: #6bce0e; /* Old browsers */
+    background: -moz-linear-gradient(45deg, #6bce0e 16%, #f2ea07 27%, #f2ea07 27%, #f2ea07 27%, #f2ea07 27%, #f2ea07 27%, #f2ea07 27%, #f2ea07 31%, #f2ea07 31%, #f2ea07 31%, #f2ea07 31%, #f2ea07 31%, #f2ea07 31%, #f2ea07 31%, #f2ea07 31%, #f2ea07 31%, #ff1111 68%, #db2a0f 99%, #d61706 100%, #db2a0f 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(45deg, #6bce0e 16%,#f2ea07 27%,#f2ea07 27%,#f2ea07 27%,#f2ea07 27%,#f2ea07 27%,#f2ea07 27%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#ff1111 68%,#db2a0f 99%,#d61706 100%,#db2a0f 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(45deg, #6bce0e 16%,#f2ea07 27%,#f2ea07 27%,#f2ea07 27%,#f2ea07 27%,#f2ea07 27%,#f2ea07 27%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#f2ea07 31%,#ff1111 68%,#db2a0f 99%,#d61706 100%,#db2a0f 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6bce0e', endColorstr='#db2a0f',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+}
 
 /*Circulo para heatmap*/
 .circulo {
