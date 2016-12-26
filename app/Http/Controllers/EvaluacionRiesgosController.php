@@ -577,16 +577,16 @@ class EvaluacionRiesgosController extends Controller
             }
             if (Session::get('languaje') == 'en')
             {
-                $tipos_impacto = ['Despicable','Less','Moderate','Severe','Catastrophic'];
-                $tipos_proba = ['Very improbable','Unlikely','Possible','Likely','Very likely'];
+                $tipos_impacto = \Ermtool\Eval_description::getImpactValues(2); //2 es inglés
+                $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(2);
 
                 return view('en.evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
                         'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id]);
             }
             else
             {
-                $tipos_impacto = ['Despreciable','Menor','Moderado','Severo','Catastrófico'];
-                $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
+                $tipos_impacto = \Ermtool\Eval_description::getImpactValues(1);
+                $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
 
                 return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
                         'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id]);
@@ -632,15 +632,15 @@ class EvaluacionRiesgosController extends Controller
                 $res = $this->getEvalRisks($_POST['encuesta_id'],$user->stakeholder_id);
                 if (Session::get('languaje') == 'en')
                 {
-                    $tipos_impacto = ['Despicable','Less','Moderate','Severe','Catastrophic'];
-                $tipos_proba = ['Very improbable','Unlikely','Possible','Likely','Very likely'];
+                    $tipos_impacto = \Ermtool\Eval_description::getImpactValues(2); //2 es inglés
+                    $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(2);
                     
                     return view('en.evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id]);
                 }
                 else
                 {
-                    $tipos_impacto = ['Despreciable','Menor','Moderado','Severo','Catastrófico'];
-                    $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
+                    $tipos_impacto = \Ermtool\Eval_description::getImpactValues(1);
+                    $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
 
                     return view('evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id]);
                 }
@@ -895,7 +895,7 @@ class EvaluacionRiesgosController extends Controller
                             foreach ($sub as $sub)
                             {
                                 $riesgos[$i] = array('type' => 'subprocess',
-                                                    'risk_id' => $risk,
+                                                    'risk_id' => $risk_id,
                                                     'risk_name' => $sub->risk_name,
                                                     'description' => $sub->description,
                                                     'subobj' => $sub->subprocess_name,
@@ -933,16 +933,16 @@ class EvaluacionRiesgosController extends Controller
                     {
                         Session::flash('message',"The entered Id is not in our database");
 
-                        $tipos_impacto = ['Despicable','Less','Moderate','Severe','Catastrophic'];
-                        $tipos_proba = ['Very improbable','Unlikely','Possible','Likely','Very likely'];
+                        $tipos_impacto = \Ermtool\Eval_description::getImpactValues(2); //2 es inglés
+                        $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(2);
 
                         return view('en.evaluacion.encuesta',['encuesta'=>'Manual Evaluation','riesgos'=>$riesgos,'tipo'=>0,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>0]);
                     }
                     else
                     {
                         Session::flash('message','El rut ingresado no se encuentra en nuestra base de datos');
-                        $tipos_impacto = ['Despreciable','Menor','Moderado','Severo','Catastrófico'];
-                        $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
+                        $tipos_impacto = \Ermtool\Eval_description::getImpactValues(1); //2 es inglés
+                        $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
 
                         return view('evaluacion.encuesta',['encuesta'=>'Evaluación Manual','riesgos'=>$riesgos,'tipo'=>0,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>0])->withInput(Input::all()); //no funcion withInput
                     }
@@ -1596,8 +1596,8 @@ class EvaluacionRiesgosController extends Controller
 
             if (Session::get('languaje') == 'en')
             {
-                $tipos_impacto = ['Despicable','Less','Moderate','Severe','Catastrophic'];
-                $tipos_proba = ['Very improbable','Unlikely','Possible','Likely','Very likely'];
+                $tipos_impacto = \Ermtool\Eval_description::getImpactValues(2); //2 es inglés
+                $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(2);
 
                 return view('en.evaluacion.respuestas',['riesgos'=>$res['riesgos'],'user_answers'=>$res['user_answers'],
                                                      'eval_id'=>$eval_id,'rut'=>$rut,'encuesta'=>$encuesta,'user'=>$user,
@@ -1605,8 +1605,8 @@ class EvaluacionRiesgosController extends Controller
             }
             else
             {
-                $tipos_impacto = ['Despreciable','Menor','Moderado','Severo','Catastrófico'];
-                $tipos_proba = ['Muy poco probable','Poco probable','Posible','Probable','Muy probable'];
+                $tipos_impacto = \Ermtool\Eval_description::getImpactValues(1); //2 es inglés
+                $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
 
                 return view('evaluacion.respuestas',['riesgos'=>$res['riesgos'],'user_answers'=>$res['user_answers'],
                                                      'eval_id'=>$eval_id,'rut'=>$rut,'encuesta'=>$encuesta,'user'=>$user,

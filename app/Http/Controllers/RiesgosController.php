@@ -340,6 +340,8 @@ class RiesgosController extends Controller
         }
         else
         {
+            global $evidence;
+            $evidence = $request->file('evidence_doc');
             //creamos una transacción para cumplir con atomicidad
             DB::transaction(function()
             {
@@ -457,6 +459,18 @@ class RiesgosController extends Controller
                             $objective = \Ermtool\Objective::find($objective_id);
                             $objective->risks()->attach($risk);
                         }       
+                    }
+
+                    //guardamos archivos de evidencias (si es que hay)
+                    if($GLOBALS['evidence'] != NULL)
+                    {
+                        foreach ($GLOBALS['evidence'] as $evidence)
+                        {
+                            if ($evidence != NULL)
+                            {
+                                upload_file($evidence,'riesgos',$risk);
+                            }
+                        }                    
                     }
 
                     if (Session::get('languaje') == 'en')
@@ -643,6 +657,8 @@ class RiesgosController extends Controller
         {
             global $id1;
             $id1 = $id;
+            global $evidence;
+            $evidence = $request->file('evidence_doc');
             //creamos una transacción para cumplir con atomicidad
             DB::transaction(function()
             {
@@ -820,7 +836,16 @@ class RiesgosController extends Controller
                         }       
                     }
 
-                    //eliminamos salto de linea del final de cada una de las textarea (en este caso solo descripción)
+                    if($GLOBALS['evidence'] != NULL)
+                    {
+                        foreach ($GLOBALS['evidence'] as $evidence)
+                        {
+                            if ($evidence != NULL)
+                            {
+                                upload_file($evidence,'riesgos',$GLOBALS['id1']);
+                            }
+                        }                    
+                    }
 
                     $riesgo->name = $_POST['name'];
                     $riesgo->description = $_POST['description'];
@@ -1568,6 +1593,23 @@ class RiesgosController extends Controller
         }
 
         return json_encode($results);
+    }
+
+    public function getRisks2($org,$type)
+    {
+        $risks = array();
+
+        if ($type == 1)
+        {
+            //riesgos de negocio
+            $risks = \Ermtool\Risk::getObjectiveRisks($org);
+        }
+        else if ($type == 0)
+        {
+            //riesgos de proceso
+            $risks = \Ermtool\Risk::getRiskSubprocess($org);
+        }
+        return json_encode($risks);
     }
 
     //obtiene todas las causas

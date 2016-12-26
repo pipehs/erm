@@ -11,7 +11,6 @@ use DB;
 use DateTime;
 use Auth;
 use stdClass;
-use Mail;
 
 class PlanesAccionController extends Controller
 {
@@ -499,8 +498,6 @@ class PlanesAccionController extends Controller
             //actualizamos issue de id = $id
             global $id2;
             $id2 = $id;
-            global $evidence;
-            $evidence = $request->file('evidence_doc');
             DB::transaction(function() {
                 
                 $status = 0;
@@ -541,17 +538,6 @@ class PlanesAccionController extends Controller
                         'status' => $status,
                         'updated_at' => date('Y-m-d H:i:s')
                     ]);
-
-                if($GLOBALS['evidence'] != NULL)
-                {
-                    foreach ($GLOBALS['evidence'] as $evidence)
-                    {
-                        if ($evidence != NULL)
-                        {
-                            upload_file($evidence,'planes_accion',$GLOBALS['id2']);
-                        }
-                    }                    
-                }
 
                 if (Session::get('languaje') == 'en')
                 {
@@ -595,9 +581,6 @@ class PlanesAccionController extends Controller
                 ->delete();
 
                 $GLOBALS['res'] = 0;
-
-                //eliminamos evidencia si es que existe (SE DEBE AGREGAR)
-                eliminarArchivo($GLOBALS['id1'],5,NULL);
             });
 
             return $res;
@@ -893,8 +876,6 @@ class PlanesAccionController extends Controller
             $cont_audit = 0;
             $others = 0;
 
-
-            /* AQUÍ SE DEBE CORREGIR!!!!!! YA QUE LOS PLANES DE ACCIÓN (Y LOS HALLAZGOS) PUEDEN SER PARA MÁS TIPOS QUE CONTROLADO O DE AUDITORÍA */
             //primero los controlados
             $action_plans = DB::table('action_plans')
                                 ->join('issues','issues.id','=','action_plans.issue_id')
@@ -1862,62 +1843,5 @@ class PlanesAccionController extends Controller
 
             return $res;
         }
-    }
-
-    //Función para que verificará proximidad en fecha de término de planes de acción, para poder de esta manera enviar alertas a los usuarios
-    public function verificarFechaPlanes()
-    {
-        $planes = \Ermtool\Action_plan::getOpenedActionPlans();
-        $plans = array();
-        $i = 0;
-        foreach ($planes as $p)
-        {
-            //verificaremos en una variable diferencia en días entre fecha final y fecha actual
-            $date = $p->final_date;
-            $seconds=strtotime($date) - strtotime(date('Y-m-d'));
-            $dif = intval($seconds/60/60/24);
-
-            //usaremos como estándar 2 semanas (14 días) para enviar alerta, sin embargo es modificable AQUÍ
-            if ($dif <= 14)
-            {
-                if ($p->stakeholder_id != NULL && $p->stakeholder_id != '')
-                {
-                    $plans[$i] = [
-                        'id' => $p->id,
-                        'description' => $p->description,
-                        'final_date' => $p->final_date,
-                        'dif' => $dif
-                    ];
-
-                    $i += 1;
-
-                    //obtenemos stakeholder (responsable) para enviarle un correo informando la situación
-                    $stakeholder_mail = \Ermtool\Stakeholder::where('id',$p->stakeholder_id)->value('mail');
-                    $name = \Ermtool\Stakeholder::getName($p->stakeholder_id);
-
-                    $mensaje1 = 'Estimado usuario.';
-                    $mensaje2 = 'Usted ha sido identificado como en el encargado del plan de acción descrito como "'.$p->description.'".';
-                    $mensaje3 = 'Se le envía este correo para informarle que dicho plan de acción se encuentra próximo a su fecha límite, o bien esta fecha ya se encuentra expirada.';
-                    $mensaje4 = 'Esperamos pueda solucionar dicha situación a la brevedad.';
-                    $mensaje5 = 'Se despide atentamente,';
-                    $mensaje6 = 'El equipo de B-GRC';
-
-                    Mail::send('envio_mail2',['mensaje1' => $mensaje1, 'mensaje2' => $mensaje2, 'mensaje3' => $mensaje3, 'mensaje4' => $mensaje4, 'mensaje5' => $mensaje5, 'mensaje6' => $mensaje6], function ($msj) use ($stakeholder_mail,$name)
-                    {
-                        if (Session::get('languaje') == 'en')
-                        {
-                            $msj->to($stakeholder_mail, $name)->subject('Action plan next to close!');
-                        }
-                        else
-                        {
-                            $msj->to($stakeholder_mail, $name)->subject('Plan de acción próximo a cerrar!');
-                        }
-                    });
-                }
-                
-            }
-        }
-
-        return $plans;
     }
 }

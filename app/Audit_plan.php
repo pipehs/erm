@@ -40,4 +40,15 @@ class Audit_plan extends Model
 
         return $hh;
     }
+
+    public static function getAuditPlansFromAudit($org,$audit_id)
+    {
+        return DB::table('audits')
+                ->join('audit_audit_plan','audit_audit_plan.audit_id','=','audits.id')
+                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                ->where('audits.id','=',$audit_id)
+                ->where('audit_plans.organization_id','=',$org)
+                ->select('audit_plans.id','audit_plans.name','audit_plans.description')
+                ->get();
+    }
 }

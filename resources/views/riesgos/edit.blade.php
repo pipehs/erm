@@ -36,14 +36,12 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos del riesgo.
-				{!!Form::model($risk,['route'=>['riesgos.update',$risk->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::model($risk,['route'=>['riesgos.update',$risk->id],'method'=>'PUT','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
 					@include('riesgos.form')
 				{!!Form::close()!!}
 
 				<center>
-				{!!Form::open(['url'=>'riesgos','method'=>'GET'])!!}
-					{!!Form::submit('Volver', ['class'=>'btn btn-danger'])!!}
-				{!!Form::close()!!}
+					{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
 				<center>
 			</div>
 		</div>

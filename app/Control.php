@@ -27,7 +27,7 @@ class Control extends Model
                     ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
                     ->join('objectives','objectives.id','=','objective_risk.objective_id')
                     ->where('objectives.organization_id','=',$org)
-                    ->select('controls.id','controls.name','controls.description')
+                    ->select('controls.*')
                     ->distinct('controls.id')
                     ->get();
 
@@ -42,7 +42,7 @@ class Control extends Model
                     ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                     ->where('organization_subprocess.organization_id','=',$org)
-                    ->select('controls.id','controls.name','controls.description')
+                    ->select('controls.*')
                     ->distinct('controls.id')
                     ->get();
 
@@ -70,7 +70,7 @@ class Control extends Model
                         ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
                         ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                        ->join('issues','issues.id','=','control_evaluation.issue_id')
+                        ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
                         ->join('controls','controls.id','=','control_risk_subprocess.control_id')
                         ->where('organization_subprocess.organization_id','=',$org)
                         ->select('controls.id','controls.name','controls.description')
@@ -103,7 +103,7 @@ class Control extends Model
                         ->join('control_objective_risk','control_objective_risk.control_id','=','control_evaluation.control_id')
                         ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
                         ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                        ->join('issues','issues.id','=','control_evaluation.issue_id')
+                        ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
                         ->join('controls','controls.id','=','control_objective_risk.control_id')
                         ->where('objectives.organization_id','=',$org)
                         ->select('controls.id','controls.name','controls.description')
@@ -186,5 +186,55 @@ class Control extends Model
                 ->select('controls.id','controls.name','controls.description')
                 ->groupBy('controls.id')
                 ->get();
+    }
+
+    public static function getEvaluatedControls($org)
+    {
+        $obj_controls = DB::table('control_eval_risk_temp')
+                ->join('control_objective_risk','control_objective_risk.control_id','=','control_eval_risk_temp.control_id')
+                ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                ->where('objectives.organization_id','=',$org)
+                ->select('control_eval_risk_temp.control_id as id')
+                ->distinct()
+                ->get();
+
+        $subprocess_controls = DB::table('control_eval_risk_temp')
+                ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','control_eval_risk_temp.control_id')
+                ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                ->where('organization_subprocess.organization_id','=',$org)
+                ->select('control_eval_risk_temp.control_id as id')
+                ->distinct()
+                ->get();
+        
+        $controls = array_merge($obj_controls,$subprocess_controls);
+        
+        return $controls; 
+    }
+
+    //obtenemos controles de riesgo.
+    public static function getControlsFromRisk($risk)
+    {
+        $risks = DB::table('controls')
+                    ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
+                    ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                    ->where('risk_subprocess.risk_id','=',$risk)
+                    ->select('controls.id','controls.name','controls.description')
+                    ->groupBy('controls.id')
+                    ->get();
+
+        if (empty($risks))
+        {
+            $risks = DB::table('controls')
+                    ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
+                    ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                    ->where('objective_risk.risk_id','=',$risk)
+                    ->select('controls.id','controls.name','controls.description')
+                    ->groupBy('controls.id')
+                    ->get();
+        }
+
+        return $risks;
     }
 }

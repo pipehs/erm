@@ -37,10 +37,31 @@
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
       		<p>En esta secci&oacute;n podr&aacute; ver distintos gr&aacute;ficos que permitan observar de mejor manera toda la informaci&oacute;n relacionada a los planes de acci&oacute;n ingresados en el sistema.</p>
 
+		@if(!isset($issues_om))
+			{!!Form::open(['url'=>'graficos_planes_accion2.0.0','method'=>'GET','class'=>'form-horizontal'])!!}
+			<div class="form-group">
+				  <div class="row">
+				    {!!Form::label('Seleccione organizaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+				    <div class="col-sm-4">
+				      {!!Form::select('organization_id',$organizations, 
+				           null, 
+				          ['id' => 'org','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+				    </div>
+				 </div>
+			</div>
+			<br>
+			<div class="form-group">
+				<center>
+					{!!Form::submit('Seleccionar', ['class'=>'btn btn-success'])!!}
+				</center>
+			</div>
+			{!!Form::close()!!}
+		@endif
 		</div>
 	</div>
 </div>
 
+@if (isset($issues_om))
 <!-- Gráfico de planes accion de controles, auditorias u otros -->
 <div class="col-xs-12 col-sm-6">
 	<div class="box">
@@ -130,13 +151,14 @@
 	</div>
 </div>
 <!-- FIN Gráfico de estado de planes de acción -->
-
+@endif
 @stop
 @section('scripts2')
 <!--<script type="text/javascript" src="assets/js/loader.js"></script>-->
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
 
+@if (isset($issues_om))
 	@if ($cont_ctrl > 0 || $cont_audit > 0 || $others > 0)
       google.charts.load("visualization", "1", {packages:["corechart"]});
       google.charts.setOnLoadCallback(chart1);
@@ -184,7 +206,7 @@
 					@endforeach
 
 					text += '</table>'
-					text += '<a class="btn btn-success" href="genexcelgraficos.8">Exportar</a>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.8.{{ $org }}">Exportar</a>'
 
 					swal({   
 						title: title,   
@@ -214,7 +236,7 @@
 					@endforeach
 
 					text += '</table>'
-					text += '<a class="btn btn-success" href="genexcelgraficos.9">Exportar</a>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.9.{{ $org }}">Exportar</a>'
 
 					swal({   
 						title: title,   
@@ -289,7 +311,7 @@
 								text += '</tr>';
 						@endforeach
 						text += '</table>'
-						text += '<a class="btn btn-success" href="genexcelgraficos.10">Exportar</a>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.10.{{ $org }}">Exportar</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -325,7 +347,7 @@
 								text += '</tr>';
 						@endforeach
 						text += '</table>'
-						text += '<a class="btn btn-success" href="genexcelgraficos.11">Exportar</a>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.11.{{ $org }}">Exportar</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -361,7 +383,7 @@
 								text += '</tr>';
 						@endforeach
 						text += '</table>'
-						text += '<a class="btn btn-success" href="genexcelgraficos.12">Exportar</a>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.12.{{ $org }}">Exportar</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -429,7 +451,7 @@
 								text += '</tr>';
 						@endforeach
 						text += '</table>'
-						text += '<a class="btn btn-success" href="genexcelgraficos.13">Exportar</a>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.13.{{ $org }}">Exportar</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -456,7 +478,7 @@
 								text += '</tr>';
 						@endforeach
 						text += '</table>'
-						text += '<a class="btn btn-success" href="genexcelgraficos.14">Exportar</a>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.14.{{ $org }}">Exportar</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -483,7 +505,7 @@
 								text += '</tr>';
 						@endforeach
 						text += '</table>'
-						text += '<a class="btn btn-success" href="genexcelgraficos.15">Exportar</a>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.15.{{ $org }}">Exportar</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -510,7 +532,7 @@
 								text += '</tr>';
 						@endforeach
 						text += '</table>'
-						text += '<a class="btn btn-success" href="genexcelgraficos.16">Exportar</a>'
+						text += '<a class="btn btn-success" href="genexcelgraficos.16.{{ $org }}">Exportar</a>'
 						swal({   
 							title: title,   
 							text: text,
@@ -526,7 +548,7 @@
     @else
     	$('#alternativo3').html('<b>No existen planes de acci&oacute;n</b>');
     @endif
-    
+@endif  
       
 </script>
 @stop

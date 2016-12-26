@@ -27,6 +27,7 @@ class Process extends Model
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                     ->where('organization_subprocess.organization_id','=',$org)
                     ->select('processes.id','processes.name','processes.description')
+                    ->groupBy('processes.id')
                     ->get();
 
         return $processes;
@@ -44,6 +45,20 @@ class Process extends Model
                     ->get();
                     
         return $processes;
+    }
+
+    public static function getProcessesFromControl($org,$control)
+    {
+        return DB::table('processes')
+                ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                ->join('control_risk_subprocess','control_risk_subprocess.risk_subprocess_id','=','risk_subprocess.id')
+                ->where('control_risk_subprocess.control_id','=',$control)
+                ->where('organization_subprocess.organization_id','=',$org)
+                ->select('processes.id','processes.name','processes.description')
+                ->groupBy('processes.id')
+                ->get();
     }
 
 }

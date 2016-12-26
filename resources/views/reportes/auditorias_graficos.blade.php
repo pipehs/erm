@@ -37,10 +37,32 @@
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
       		<p>En esta secci&oacute;n podr&aacute; ver distintos gr&aacute;ficos que permitan observar de mejor manera toda la informaci&oacute;n relacionada a las auditor&iacute;as ingresadas en el sistema.</p>
 
+      		@if (!isset($audit_plans))
+      		{!!Form::open(['url'=>'graficos_auditorias2.0.0','method'=>'GET','class'=>'form-horizontal'])!!}
+			<div class="form-group">
+				  <div class="row">
+				    {!!Form::label('Seleccione organizaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+				    <div class="col-sm-4">
+				      {!!Form::select('organization_id',$organizations, 
+				           null, 
+				          ['id' => 'org','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+				    </div>
+				 </div>
+			</div>
+			<br>
+			<div class="form-group">
+				<center>
+					{!!Form::submit('Seleccionar', ['class'=>'btn btn-success'])!!}
+				</center>
+			</div>
+			{!!Form::close()!!}
+			@endif
+
 		</div>
 	</div>
 </div>
 
+@if(isset($audit_plans))
 <!-- Gráfico de planes de auditoría abiertos, en ejecución o cerrados -->
 <div class="col-xs-12 col-sm-6">
 	<div class="box">
@@ -114,13 +136,14 @@
 	</div>
 </div>
 <!-- FIN Gráfico de pruebas de auditoría -->
-				
+@endif				
 
 @stop
 @section('scripts2')
 <!--<script type="text/javascript" src="assets/js/loader.js"></script>-->
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
+@if(isset($audit_plans))
 	@if ($planes_ejec > 0 || $planes_abiertos > 0 || $planes_cerrados > 0)
       google.charts.load("visualization", "1", {packages:["corechart"]});
       google.charts.setOnLoadCallback(chart1);
@@ -181,7 +204,7 @@
 					@endforeach
 
 					text += '</table>'
-					text += '<a class="btn btn-success" href="genexcelgraficos.5">Exportar</a>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.5.{{$org}}">Exportar</a>'
 
 					swal({   
 						title: title,   
@@ -221,7 +244,7 @@
 					@endforeach
 
 					text += '</table>'
-					text += '<a class="btn btn-success" href="genexcelgraficos.6">Exportar</a>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.6.{{$org}}">Exportar</a>'
 
 					swal({   
 						title: title,   
@@ -262,7 +285,7 @@
 					@endforeach
 
 					text += '</table>'
-					text += '<a class="btn btn-success" href="genexcelgraficos.7">Exportar</a>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.7.{{$org}}">Exportar</a>'
 
 					swal({   
 						title: title,   
@@ -329,7 +352,7 @@ $("#audit_plan_id").change(function() {
 								{
 									var title = '<b>Pruebas abiertas</b>';
 
-									var text ='<table class="table table-striped table-datatable"><thead><th>Auditoría</th><th>Programa</th><th>Prueba</th><th>Descripción</th><th>Tipo</th><th>Resultado</th><th>Horas-hombre</th><th>Responsable</th><th>Objeto involucrado</th></thead>';
+									var text ='<table class="table table-striped table-datatable"><thead><th>Auditoría</th><th>Programa</th><th>Prueba</th><th>Descripción</th><th>Tipo</th><th>Resultado</th><th>Horas-hombre planificadas</th><th>Horas-hombre reales</th><th>Responsable</th></thead>';
 
 									$(datos.audit_tests).each( function(i,test) {
 										if (test.status == 0)
@@ -373,28 +396,32 @@ $("#audit_plan_id").change(function() {
 												text += '<td>En proceso</td>'
 											}
 											
-											text += '<td>'+test.hh+'</td>'
-											text += '<td>'+test.stakeholder+'</td>'
+											if (!test.hh_plan)
+											{
+												text += '<td>No se ha agregado planificación de horas hombre</td>'
+											}
+											else
+											{
+												text += '<td>'+test.hh_plan+'</td>'
+											}
 
-											if (test.related_type == 1)
+											if (!test.hh_real)
 											{
-												text += '<td>Riesgo: '+test.related+'</td>'
+												text += '<td>No se ha agregado horas hombre de ejecución</td>'
 											}
-											else if (test.related_type == 2)
+											else
 											{
-												text += '<td>Subproceso: '+test.related+'</td>'
+												text += '<td>'+test.hh_real+'</td>'
 											}
-											else if (test.related_type == 3)
-											{
-												text += '<td>Control: '+test.related+'</td>'
-											}
+											
+											text += '<td>'+test.stakeholder+'</td>'
 											
 										}
 									});
 									
 
 									text += '</table>'
-									text += '<a class="btn btn-success" href="genexcelgraficosdinamicos.1,'+$("#audit_plan_id").val()+'">Exportar</a>'
+									text += '<a class="btn btn-success" href="genexcelgraficosdinamicos.1,'+$("#audit_plan_id").val()+'.{{$org}}">Exportar</a>'
 
 									swal({   
 										title: title,   
@@ -407,7 +434,7 @@ $("#audit_plan_id").change(function() {
 								{
 									var title = '<b>Pruebas abiertas</b>';
 
-									var text ='<table class="table table-striped table-datatable"><thead><th>Auditoría</th><th>Programa</th><th>Prueba</th><th>Descripción</th><th>Tipo</th><th>Resultado</th><th>Horas-hombre</th><th>Responsable</th><th>Objeto involucrado</th></thead>';
+									var text ='<table class="table table-striped table-datatable"><thead><th>Auditoría</th><th>Programa</th><th>Prueba</th><th>Descripción</th><th>Tipo</th><th>Resultado</th><th>Horas-hombre planificadas</th><th>Horas-hombre reales</th><th>Responsable</th></thead>';
 
 									$(datos.audit_tests).each( function(i,test) {
 										if (test.status == 1)
@@ -455,28 +482,32 @@ $("#audit_plan_id").change(function() {
 												text += '<td>Resultado no especificado</td>'
 											}
 											
-											text += '<td>'+test.hh+'</td>'
-											text += '<td>'+test.stakeholder+'</td>'
+											if (!test.hh_plan)
+											{
+												text += '<td>No se ha agregado planificación de horas hombre</td>'
+											}
+											else
+											{
+												text += '<td>'+test.hh_plan+'</td>'
+											}
 
-											if (test.related_type == 1)
+											if (!test.hh_real)
 											{
-												text += '<td>Riesgo: '+test.related+'</td>'
+												text += '<td>No se ha agregado horas hombre de ejecución</td>'
 											}
-											else if (test.related_type == 2)
+											else
 											{
-												text += '<td>Subproceso: '+test.related+'</td>'
+												text += '<td>'+test.hh_real+'</td>'
 											}
-											else if (test.related_type == 3)
-											{
-												text += '<td>Control: '+test.related+'</td>'
-											}
+
+											text += '<td>'+test.stakeholder+'</td>'
 											
 										}
 									});
 									
 
 									text += '</table>'
-									text += '<a class="btn btn-success" href="genexcelgraficosdinamicos.2,'+$("#audit_plan_id").val()+'">Exportar</a>'
+									text += '<a class="btn btn-success" href="genexcelgraficosdinamicos.2,'+$("#audit_plan_id").val()+'.{{$org}}">Exportar</a>'
 
 									swal({   
 										title: title,   
@@ -487,9 +518,9 @@ $("#audit_plan_id").change(function() {
 								}
 								else if (sel[0].row == 2) //pruebas cerradas
 								{
-									var title = '<b>Pruebas abiertas</b>';
+									var title = '<b>Pruebas cerradas</b>';
 
-									var text ='<table class="table table-striped table-datatable"><thead><th>Auditoría</th><th>Programa</th><th>Prueba</th><th>Descripción</th><th>Tipo</th><th>Resultado</th><th>Horas-hombre</th><th>Responsable</th><th>Objeto involucrado</th></thead>';
+									var text ='<table class="table table-striped table-datatable"><thead><th>Auditoría</th><th>Programa</th><th>Prueba</th><th>Descripción</th><th>Tipo</th><th>Resultado</th><th>Horas-hombre planificadas</th><th>Horas-hombre reales</th><th>Responsable</th></thead>';
 
 									$(datos.audit_tests).each( function(i,test) {
 										if (test.status == 2)
@@ -533,28 +564,32 @@ $("#audit_plan_id").change(function() {
 												text += '<td>En proceso</td>'
 											}
 											
-											text += '<td>'+test.hh+'</td>'
-											text += '<td>'+test.stakeholder+'</td>'
+											if (!test.hh_plan)
+											{
+												text += '<td>No se ha agregado planificación de horas hombre</td>'
+											}
+											else
+											{
+												text += '<td>'+test.hh_plan+'</td>'
+											}
 
-											if (test.related_type == 1)
+											if (!test.hh_real)
 											{
-												text += '<td>Riesgo: '+test.related+'</td>'
+												text += '<td>No se ha agregado horas hombre de ejecución</td>'
 											}
-											else if (test.related_type == 2)
+											else
 											{
-												text += '<td>Subproceso: '+test.related+'</td>'
+												text += '<td>'+test.hh_real+'</td>'
 											}
-											else if (test.related_type == 3)
-											{
-												text += '<td>Control: '+test.related+'</td>'
-											}
+
+											text += '<td>'+test.stakeholder+'</td>'
 											
 										}
 									});
 									
 
 									text += '</table>'
-									text += '<a class="btn btn-success" href="genexcelgraficosdinamicos.2,'+$("#audit_plan_id").val()+'">Exportar</a>'
+									text += '<a class="btn btn-success" href="genexcelgraficosdinamicos.2,'+$("#audit_plan_id").val()+'.{{$org}}">Exportar</a>'
 
 									swal({   
 										title: title,   
@@ -575,6 +610,7 @@ $("#audit_plan_id").change(function() {
 		});
 	}
 });    
-      
+
+@endif 
 </script>
 @stop

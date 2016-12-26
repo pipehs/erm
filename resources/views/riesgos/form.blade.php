@@ -178,6 +178,13 @@
 							<div style="cursor:hand" onclick="agregar_efecto()"><font color="CornflowerBlue"><u>Agregar Nuevo Efecto</u></font></div> <br>
 						</div>
 					</div>
+
+					<div class="form-group">
+						<label for="file" class="col-sm-4 control-label">Cargar documentos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>
+						<div class="col-sm-4">
+							<input id="file-1" type="file" class="file" name="evidence_doc[]" multiple=true data-preview-file-type="any">
+						</div>
+					</div>
 					
 					{!!Form::hidden('org_id',$org_id)!!}
 					<div class="form-group">

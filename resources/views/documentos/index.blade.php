@@ -56,7 +56,7 @@
 			<div class="form-group">
 				{!!Form::label('Seleccione un tipo',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-3">
-					{!!Form::select('kind',['1'=>'Controles','2'=>'Hallazgos','3'=>'Notas de auditoría','4'=>'Programas de auditoría','5'=>'Prueba de auditoría'],null, 
+					{!!Form::select('kind',['1'=>'Controles','2'=>'Hallazgos','3'=>'Notas de auditoría','4'=>'Programas de auditoría','5'=>'Prueba de auditoría','6'=>'Riesgos'],null, 
 							 	   ['id' => 'kind','required'=>'true','placeholder'=>'- Seleccione -'])!!}
 				</div>
 			</div>
@@ -67,9 +67,9 @@
 			</div>
 
 			<div class="form-group">
-						<center>
-						{!!Form::submit('Seleccionar', ['class'=>'btn btn-success','id'=>'guardar'])!!}
-						</center>
+				<center>
+					{!!Form::submit('Seleccionar', ['class'=>'btn btn-success','id'=>'guardar'])!!}
+				</center>
 			</div>
 			{!!Form::close()!!}
 

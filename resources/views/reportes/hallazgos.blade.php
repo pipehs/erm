@@ -65,7 +65,7 @@
 					<h4><b>{{ $org }}: Hallazgos de proceso</b></h4>
 					<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 					<thead>
-						<th style="vertical-align:top;">Proceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Proceso<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Control(es)<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -81,7 +81,7 @@
 
 					@foreach ($issues as $issue)
 						<tr>
-							<td>{{ $issue['datos']['processes'] }}</td>
+							<td>{{ $issue['datos']['process'] }}</td>
 							<td>{{ $issue['datos']['subprocesses'] }}</td>
 							<td>{{ $issue['datos']['risks'] }}</td>
 							<td>{{ $issue['datos']['controls'] }}</td> 
@@ -94,14 +94,44 @@
 						</tr>
 					@endforeach
 
+				@elseif ($kind == 1)
+					<h4><b>{{ $org }}: Hallazgos de subproceso</b></h4>
+					<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+					<thead>
+						<th style="vertical-align:top;">Proceso<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Subproceso<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Control(es)<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+					</thead>
+
+				
+
+					@foreach ($issues as $issue)
+						<tr>
+							<td>{{ $issue['datos']['process'] }}</td>
+							<td>{{ $issue['datos']['subprocess'] }}</td>
+							<td>{{ $issue['datos']['risks'] }}</td>
+							<td>{{ $issue['datos']['controls'] }}</td> 
+							<td>{{ $issue['name'] }}</td>
+							<td>{{ $issue['classification'] }}</td>
+							<td>{{ $issue['recommendations'] }}</td>
+							<td>{{ $issue['plan'] }}</td>
+							<td>{{ $issue['status'] }}</td>
+							<td>{{ $issue['final_date'] }}</td>
+						</tr>
+					@endforeach
 
 				@elseif ($kind == 2)
 					<h4><b>{{ $org }}: Hallazgos de organizaci&oacute;n</b></h4>
 					<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 					<thead>
-						<th style="vertical-align:top;">Objetivo(s) involucrado(s)<label><input type="text" placeholder="Filtrar" /></label></th>
-						<th style="vertical-align:top;">Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
-						<th style="vertical-align:top;">Control(es)<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Objetivo(s) de la organización<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></lab style="vertical-align:top;"el></th>
 						<th style="vertical-align:top;">Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -115,8 +145,6 @@
 					@foreach ($issues as $issue)
 						<tr>
 							<td>{{ $issue['datos']['objectives'] }}</td>
-							<td>{{ $issue['datos']['risks'] }}</td>
-							<td>{{ $issue['datos']['controls'] }}</td> 
 							<td>{{ $issue['name'] }}</td>
 							<td>{{ $issue['classification'] }}</td>
 							<td>{{ $issue['recommendations'] }}</td>
@@ -133,7 +161,7 @@
 						<th style="vertical-align:top;">Proceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
-						<th style="vertical-align:top;">Control(es)<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Control<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></lab style="vertical-align:top;"el></th>
 						<th style="vertical-align:top;">Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -149,7 +177,7 @@
 							<td>{{ $issue['datos']['processes'] }}</td>
 							<td>{{ $issue['datos']['subprocesses'] }}</td>
 							<td>{{ $issue['datos']['risks'] }}</td>
-							<td>{{ $issue['datos']['controls'] }}</td> 
+							<td>{{ $issue['datos']['control'] }}</td> 
 							<td>{{ $issue['name'] }}</td>
 							<td>{{ $issue['classification'] }}</td>
 							<td>{{ $issue['recommendations'] }}</td>
@@ -180,7 +208,7 @@
 						<tr>
 							<td>{{ $issue['datos']['objectives'] }}</td>
 							<td>{{ $issue['datos']['risks'] }}</td>
-							<td>{{ $issue['datos']['controls'] }}</td> 
+							<td>{{ $issue['datos']['control'] }}</td> 
 							<td>{{ $issue['name'] }}</td>
 							<td>{{ $issue['classification'] }}</td>
 							<td>{{ $issue['recommendations'] }}</td>
@@ -194,8 +222,8 @@
 					<h4><b>{{ $org }}: Hallazgos de programas de auditor&iacute;a</b></h4>
 					<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 					<thead>
-						<th style="vertical-align:top;">Plan de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
-						<th style="vertical-align:top;">Auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Planes de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Auditor&iacute;as<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Programa de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></lab style="vertical-align:top;"el></th>
@@ -209,8 +237,9 @@
 
 					@foreach ($issues as $issue)
 						<tr>
-							<td>{{ $issue['datos']['audit_plan'] }}</td>
-							<td>{{ $issue['datos']['audit'] }}</td> 
+							<td>{{ $issue['datos']['audit_plans'] }}</td>
+							<td>{{ $issue['datos']['audits'] }}</td>
+							<td>{{ $issue['datos']['audit_program']}} 
 							<td>{{ $issue['name'] }}</td>
 							<td>{{ $issue['classification'] }}</td>
 							<td>{{ $issue['recommendations'] }}</td>
@@ -224,8 +253,9 @@
 					<h4><b>{{ $org }}: Hallazgos de auditor&iacute;a</b></h4>
 					<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 					<thead>
-						<th style="vertical-align:top;">Plan de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Planes de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Programas de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></lab style="vertical-align:top;"el></th>
 						<th style="vertical-align:top;">Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -238,8 +268,9 @@
 
 					@foreach ($issues as $issue)
 						<tr>
-							<td>{{ $issue['datos']['audit_plan'] }}</td>
+							<td>{{ $issue['datos']['audit_plans'] }}</td>
 							<td>{{ $issue['datos']['audit'] }}</td>
+							<td>{{ $issue['datos']['audit_programs'] }}</td>
 							<td>{{ $issue['name'] }}</td>
 							<td>{{ $issue['classification'] }}</td>
 							<td>{{ $issue['recommendations'] }}</td>

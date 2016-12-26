@@ -36,12 +36,12 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos del riesgo.
-				{!!Form::open(['route'=>'riesgos.store','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'riesgos.store','method'=>'POST','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
 					@include('riesgos.form')
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('riesgos.index2', $title = 'Volver', $parameters = ['organization_id' => $org_id], $attributes = ['class'=>'btn btn-danger']) !!}
+					{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
 				<center>
 			</div>
 		</div>

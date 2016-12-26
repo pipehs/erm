@@ -25,7 +25,11 @@ class Audit_test extends Model
     			->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
     			->where('audit_plans.id','=',$audit_plan)
     			->where('audit_plans.organization_id','=',$org)
-    			->select('audit_tests.id','audit_tests.name','audit_tests.description','audit_programs.name as program','audits.name as audit')
+    			->select('audit_plans.name AS audit_plan_name',
+                    'audits.name AS audit_name','audit_programs.name as audit_program_name','audit_tests.id','audit_tests.description',
+                    'audit_tests.name','audit_tests.type','audit_tests.status','audit_tests.results',
+                    'audit_tests.hh_plan','audit_tests.hh_real','audit_tests.process_id',
+                    'audit_tests.stakeholder_id')
     			->groupBy('audit_tests.id')
     			->get();
 

@@ -17,7 +17,7 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-xs-12 col-sm-8">
+	<div class="col-xs-12 col-sm-7">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -89,16 +89,16 @@
 							<?php $cont = 0; //verificador para ver si hay respuesta ?>
 							@foreach ($user_answers as $answer)
 								@if ($answer['id'] == $riesgo['evaluation_risk_id'] && $answer['probability'] == $i)
-									<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}" checked> {{ $i }} ({{ $tipos_proba[$i-1] }})
+									<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}" checked> {{ $i }} ({{ $tipos_proba[$i-1]->name }})
 								<?php $cont += 1; ?>
 								@endif		
 							@endforeach
 
 							@if ($cont == 0)
-								<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[$i-1] }})
+								<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[$i-1]->name }})
 							@endif
 						@else
-							<input type="radio" name="proba_{{$riesgo['risk_id']}}_{{$riesgo['type']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[$i-1] }})
+							<input type="radio" name="proba_{{$riesgo['risk_id']}}_{{$riesgo['type']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[$i-1]->name }})
 						@endif
 						<i class="fa fa-circle-o"></i>
 					</label>
@@ -113,16 +113,16 @@
 							<?php $cont = 0; //lo mismo para impacto ?>
 							@foreach ($user_answers as $answer)
 								@if ($answer['id'] == $riesgo['evaluation_risk_id'] && $answer['impact'] == $i)
-									<input type="radio" name="criticidad_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}" checked> {{ $i }} ({{ $tipos_impacto[$i-1] }})
+									<input type="radio" name="criticidad_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}" checked> {{ $i }} ({{ $tipos_impacto[$i-1]->name }})
 									<?php $cont += 1; ?>
 								@endif
 							@endforeach
 
 							@if ($cont == 0)
-								<input type="radio" name="criticidad_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[$i-1] }})
+								<input type="radio" name="criticidad_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[$i-1]->name }})
 							@endif
 						@else
-							<input type="radio" name="criticidad_{{$riesgo['risk_id']}}_{{$riesgo['type']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[$i-1] }})
+							<input type="radio" name="criticidad_{{$riesgo['risk_id']}}_{{$riesgo['type']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[$i-1]->name }})
 						@endif
 						<i class="fa fa-circle-o"></i>
 					</label>
@@ -147,6 +147,57 @@
 			{!!Form::close()!!}
 
 			
+			</div>
+		</div>
+	</div>
+
+	<div class="col-xs-12 col-sm-5">
+		<div class="box">
+			<div class="box-header">
+				<div class="box-name">
+					<i class="fa fa-info-circle"></i>
+					<span>Descripci&oacute;n de valores de evaluaci&oacute;n</span>
+				</div>
+				<div class="box-icons">
+					<a class="collapse-link">
+						<i class="fa fa-chevron-up"></i>
+					</a>
+					<a class="expand-link">
+						<i class="fa fa-expand"></i>
+					</a>
+					<a class="close-link">
+						<i class="fa fa-times"></i>
+					</a>
+				</div>
+				<div class="move"></div>
+			</div>
+			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
+
+			<h4><b>Descripci&oacute;n de valores de impacto</b></h4>
+			<table class="table" style="font-size:11px">
+			<thead>
+				<th>Valor</th><th>Descripci&oacute;n</th>
+			</thead>
+				@foreach ($tipos_impacto as $tipos)
+					<tr>
+					<td style="background-color: {{$tipos->color}}">{{ $tipos->value }} ({{ $tipos->name }})</td>
+					<td style="background-color: {{$tipos->color}}">{{ $tipos->description }}</td>
+					</tr>
+				@endforeach
+			</table>
+
+			<h4><b>Descripci&oacute;n de valores de probabilidad</b></h4>
+			<table class="table" style="font-size:11px">
+			<thead>
+				<th>Valor</th><th>Descripci&oacute;n</th>
+			</thead>
+				@foreach ($tipos_proba as $tipos)
+					<tr>
+					<td style="background-color: {{$tipos->color}}">{{ $tipos->value }} ({{ $tipos->name }})</td>
+					<td style="background-color: {{$tipos->color}}">{{ $tipos->description }}</td>
+					</tr>
+				@endforeach
+			</table>
 			</div>
 		</div>
 	</div>

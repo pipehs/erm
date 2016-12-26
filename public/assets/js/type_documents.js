@@ -69,6 +69,25 @@ $("#kind").change(function() {
 					$("#cargando").html('<br>');
 			});
 		}
+
+		else if ($('#kind').val() == 6) //seleccionamos riesgos de organización
+		{
+			var select = '<div class="form-group">';
+			select += '<label for="risk_type" class="col-sm-4 control-label">Seleccione tipo de riesgo</label>';
+			select += '<div class="col-sm-3">'
+			select += '<select name="risk_type" id="risk_type" onchange="getRisks()" class="form-control" required="true">';
+			select += '<option value="" selected disabled>- Seleccione tipo -</option>';
+			select += '<option value="0">Riesgos a nivel de proceso</option>'
+			select += '<option value="1">Riesgos a nivel de entidad</option>'
+			select += '</select>';
+			select += '</div></div>';
+
+			$('#seleccion2').html('');
+			$('#seleccion').html(select);
+			$('#seleccion').show(500);
+
+		}
+
 		//else if ($('#kind').val() == 6) Por ahora no especificaremos nada para plan de acción
 		else if ($('#kind').val() == '')
 		{
@@ -112,6 +131,39 @@ function getControls()
 					var datos = JSON.parse(result);
 					$(datos).each( function() {
 							select += '<option value="'+this.id+'">'+this.name+'</option>';
+					});
+
+					select += '</select>';
+					select += '</div></div>';
+
+					$('#seleccion2').html(select);
+					$('#seleccion2').show(500);
+					$("#cargando").html('<br>');
+			});
+
+	}
+
+}
+
+function getRisks()
+{
+	if ($('#orgs').val() != '' && $('#risk_type').val() != '')
+	{
+			//Añadimos la imagen de carga en el contenedor
+			$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
+			//obtenemos los datos necesarios según sea el caso
+			$.get('get_risks2.'+ $("#orgs").val() +','+$("#risk_type").val(), function (result) {
+					//alert("entro2");
+
+					var select = '<div class="form-group">';
+					select += '<label for="control_id" class="col-sm-4 control-label">Seleccione riesgo</label>';
+					select += '<div class="col-sm-3">'
+					select += '<select name="risk_id" class="form-control" required="true">';
+					select += '<option value="" selected disabled>- Seleccione -</option>';
+
+					var datos = JSON.parse(result);
+					$(datos).each( function() {
+							select += '<option value="'+this.risk_id+'">'+this.risk_name+'</option>';
 					});
 
 					select += '</select>';

@@ -120,6 +120,7 @@
 		<tr>
 			<td class="perspectiva_proceso">Procesos&nbsp;&nbsp;&nbsp;&nbsp;</td>
 			<td>
+			<table>
 			<table class="procesos procesos1" border="0" align="center">
 			<tr><td style="vertical-align:top;"><h4><b><center>Gesti&oacute;n Operacional</center></b></h4></td></tr>
 			<tr>
@@ -204,6 +205,7 @@
 					@endif
 				@endforeach
 			</table>
+
 			</td>
 		</tr>
 

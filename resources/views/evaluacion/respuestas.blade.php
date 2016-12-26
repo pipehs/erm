@@ -13,7 +13,7 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-xs-12 col-sm-8">
+	<div class="col-xs-12 col-sm-6">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -65,7 +65,7 @@
 		</div>
 	</div>
 
-	<div class="col-xs-6 col-sm-4">
+	<div class="col-xs-6 col-sm-6">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -86,15 +86,29 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-				<table class="table table-bordered table-striped table-hover table-heading table-datatable">
-				<thead>
-				<th>Valor</th><th>Probabilidad</th><th>Impacto</th>
-				</thead>
-				@for ($i=0;$i<5;$i++)
-					<tr>
-						<td>({{$i+1}})</td><td>{{ $tipos_proba[$i] }}</td><td>{{ $tipos_impacto[$i] }}</td>
-					</tr>
-				@endfor
+				<table class="table" style="font-size:11px">
+					<thead>
+						<th>Valor</th><th>Descripci&oacute;n</th>
+					</thead>
+						@foreach ($tipos_impacto as $tipos)
+							<tr>
+							<td style="background-color: {{$tipos->color}}">{{ $tipos->value }} ({{ $tipos->name }})</td>
+							<td style="background-color: {{$tipos->color}}">{{ $tipos->description }}</td>
+							</tr>
+						@endforeach
+					</table>
+
+					<h4><b>Descripci&oacute;n de valores de probabilidad</b></h4>
+					<table class="table" style="font-size:11px">
+					<thead>
+						<th>Valor</th><th>Descripci&oacute;n</th>
+					</thead>
+						@foreach ($tipos_proba as $tipos)
+							<tr>
+							<td style="background-color: {{$tipos->color}}">{{ $tipos->value }} ({{ $tipos->name }})</td>
+							<td style="background-color: {{$tipos->color}}">{{ $tipos->description }}</td>
+							</tr>
+						@endforeach
 				</table>
 			</div>
 		</div>

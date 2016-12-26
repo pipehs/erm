@@ -37,10 +37,31 @@
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
       		<p>En esta secci&oacute;n podr&aacute; ver distintos gr&aacute;ficos que permitan observar de mejor manera la ejecuci&oacute;n del control interno en la empresa.</p>
 
+      	@if (!isset($controls))
+      		{!!Form::open(['url'=>'graficos_controles2.0.0','method'=>'GET','class'=>'form-horizontal'])!!}
+			<div class="form-group">
+				  <div class="row">
+				    {!!Form::label('Seleccione organizaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+				    <div class="col-sm-4">
+				      {!!Form::select('organization_id',$organizations, 
+				           null, 
+				          ['id' => 'org','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+				    </div>
+				 </div>
+			</div>
+			<br>
+			<div class="form-group">
+				<center>
+					{!!Form::submit('Seleccionar', ['class'=>'btn btn-success'])!!}
+				</center>
+			</div>
+			{!!Form::close()!!}
+		@endif
 		</div>
 	</div>
 </div>
 
+@if(isset($controls))
 <!-- Gráfico de controles ejecutados v/s no ejecutados -->
 <div class="col-xs-12 col-sm-6">
 	<div class="box">
@@ -100,7 +121,7 @@
 	</div>
 </div>
 <!-- FIN Gráfico de controles efectivos v/s inefectivos -->
-
+@endif
       		
 
 				
@@ -111,6 +132,7 @@
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
 
+@if (isset($controls))
 	@if ($cont_ejec > 0 || $cont_no_ejec > 0)
       google.charts.load("visualization", "1", {packages:["corechart"]});
       google.charts.setOnLoadCallback(chart1);
@@ -153,7 +175,7 @@
 					@endforeach
 
 					text += '</table>'
-					text += '<a class="btn btn-success" href="genexcelgraficos.1">Exportar</a>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.1.{{$org}}">Exportar</a>'
 
 					swal({   
 						title: title,   
@@ -175,7 +197,7 @@
 					@endforeach
 
 					text += '</table>'
-					text += '<a class="btn btn-success" href="genexcelgraficos.2">Exportar</a>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.2.{{$org}}">Exportar</a>'
 					swal({   
 						title: title,   
 						text: text,
@@ -230,7 +252,7 @@
 					@endforeach
 
 					text += '</table>'
-					text += '<a class="btn btn-success" href="genexcelgraficos.3">Exportar</a>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.3.{{$org}}">Exportar</a>'
 
 					swal({   
 						title: title,   
@@ -254,7 +276,7 @@
 					@endforeach
 
 					text += '</table>'
-					text += '<a class="btn btn-success" href="genexcelgraficos.4">Exportar</a>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.4.{{$org}}">Exportar</a>'
 
 					swal({   
 						title: title,   
@@ -273,6 +295,6 @@
     	$('#alternativo').html('<b>Aun no se han ejecutado controles</b>');
     	$('#alternativo2').html('<b>Aun no se han ejecutado controles</b>');
     @endif
-      
+@endif
 </script>
 @stop

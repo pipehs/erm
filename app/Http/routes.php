@@ -578,7 +578,10 @@ Route::get('evaluacion_manual', [
 Route::get('controles', [
 	'as' =>'controles', 'uses' => 'ControlesController@index']);
 
-Route::get('controles.create', [
+Route::get('controles.index2', [
+	'as' => 'controles.index2', 'uses' => 'ControlesController@index2']);
+
+Route::get('controles.create.{org}', [
 	'as' =>'controles.create', 'uses' => 'ControlesController@create']);
 
 Route::post('controles.store', [
@@ -683,14 +686,23 @@ Route::get('reporte_planes', [
 Route::get('reporte_hallazgos', [
 	'as' => 'reporte_hallazgos', 'uses' => 'IssuesController@issuesReport']);
 
-Route::get('graficos_controles.{id}', [
+Route::get('graficos_controles', [
 	'as' => 'graficos_controles', 'uses' => 'ControlesController@indexGraficos']);
 
-Route::get('graficos_auditorias.{id}', [
+Route::get('graficos_controles2.{id}.{org}', [
+	'as' => 'graficos_controles2', 'uses' => 'ControlesController@indexGraficos2']);
+
+Route::get('graficos_auditorias', [
 	'as' => 'graficos_auditorias', 'uses' => 'AuditoriasController@indexGraficos']);
 
-Route::get('graficos_planes_accion.{id}', [
+Route::get('graficos_auditorias2.{id}.{org}', [
+	'as' => 'graficos_auditorias2', 'uses' => 'AuditoriasController@indexGraficos2']);
+
+Route::get('graficos_planes_accion', [
 	'as' => 'graficos_planes_accion', 'uses' => 'PlanesAccionController@indexGraficos']);
+
+Route::get('graficos_planes_accion2.{id}.{org}', [
+	'as' => 'graficos_planes_accion2', 'uses' => 'PlanesAccionController@indexGraficos2']);
 
 Route::get('reporte_audits', [
 	'as' => 'reporte_audits', 'uses' => 'AuditoriasController@AuditsReport']);
@@ -840,17 +852,17 @@ Route::get('genexcelissues.{type},{org}', [
 Route::get('genexcelaudit.{org}', [
 	'as' => 'genexcelaudit', 'uses' => 'ExcelController@generarExcelAudit']);
 
-Route::get('genexcelgraficos.{id}', [
+Route::get('genexcelgraficos.{id}.{org}', [
 	'as' => 'genexcelgraficos', 'uses' => 'ExcelController@generarExcelGraficos']);
 
-Route::get('genexcelgraficosdinamicos.{kind},{id}', [
+Route::get('genexcelgraficosdinamicos.{kind},{id}.{org}', [
 	'as' => 'genexcelgraficosdinamicos', 'uses' => 'ExcelController@generarExcelGraficosDinamicos']);
 
 
 //------ RUTAS PARA ENLACES A TRAVÉS DE JSON --------//
 
 //ruta para seleccionar a través de JSON los controles de negocio o de procesos en campo select
-Route::get('controles.subneg.{value}', [
+Route::get('controles.subneg.{value}.{org}', [
 	'as' => 'controles.subneg', 'uses' => 'ControlesController@subneg'
 ]);
 
@@ -964,13 +976,14 @@ Route::get('get_objectives.{id}', [
 Route::get('get_risks.{id}', [
 	'as' => 'get_risks', 'uses' => 'RiesgosController@getRisks']);
 
+//ruta para obtener riesgos de una organizacion y de un tipo en específico
+Route::get('get_risks2.{id},{type}', [
+	'as' => 'get_risks2', 'uses' => 'RiesgosController@getRisks2']);
+
 //ruta para obtener organizacion de un plan de auditoría
 Route::get('get_organization.{audit_plan_id}', [
 	'as' => 'get_organization', 'uses' => 'AuditoriasController@getOrganization']);
 
-//ruta para obtener controles de una organizacion
-Route::get('get_controls2.{id},{type}', [
-	'as' => 'get_controls', 'uses' => 'ControlesController@getControls2']);
 
 //ruta para obtener controles de una organizacion y además de un proceso en específico
 Route::get('get_controls_from_process.{id}.{process}', [
@@ -984,9 +997,13 @@ Route::get('get_controls_from_subprocess.{id}.[{subprocesses}]', [
 Route::get('get_controls_from_perspective.{org}.{perspective}', [
 	'as' => 'get_controls_from_perspective', 'uses' => 'ControlesController@getControlsFromPerspective']);
 
-//ruta para obtener programas de auditoría de una organizacion
+//ruta para obtener controles de una organización
 Route::get('get_controls.{id}', [
 	'as' => 'get_controls2', 'uses' => 'ControlesController@getControls']);
+
+//ruta para obtener controles de una organizacion y de un determinado tipo
+Route::get('get_controls2.{id},{type}', [
+	'as' => 'get_controls', 'uses' => 'ControlesController@getControls2']);
 
 Route::get('get_kri.{id}', [
 	'as' => 'get_kri', 'uses' => 'KriController@getKri']);
@@ -1186,8 +1203,8 @@ Route::get('deleteFiles.{dir},{id}', [
 	'as' => 'deleteFiles', 'uses' => 'DocumentosController@deleteFiles']);
 
 //ruta para eliminar evidencias (llama a funcion helper)
-Route::get('evidences.delete.{id},{kind}', function($id,$kind) {
-	return eliminarArchivo($id,$kind);
+Route::get('evidences.delete.{id},{kind},{name}', function($id,$kind,$name) {
+	return eliminarArchivo($id,$kind,$name);
 });
 
 

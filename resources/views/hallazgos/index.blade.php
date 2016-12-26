@@ -116,7 +116,6 @@
 					<th>Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Estado<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
-					<th>Evidencia</th>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
 					<th>Editar</th>
@@ -135,19 +134,6 @@
 						<td>{{ $issue['plan'] }}</td>
 						<td>{{ $issue['status'] }}</td>
 						<td>{{ $issue['final_date'] }}</td>
-						<td>
-						@if ($issue['evidence'] == NULL)
-							No tiene documentos
-						@else
-							<div style="cursor:hand" id="descargar_{{ $issue['id'] }}" onclick="descargar(2,'{{$issue['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Descargar</u></font></div>
-				@foreach (Session::get('roles') as $role)
-					@if ($role != 6)
-							<img src="assets/img/btn_eliminar.png" height="40px" width="40px" onclick="eliminar_ev({{ $issue['id'] }},2)">
-							</br>
-					<?php break; ?>
-					@endif
-				@endforeach
-						@endif
 				@foreach (Session::get('roles') as $role)
 					@if ($role != 6)
 						<td>{!! link_to_route('edit_hallazgo', $title = 'Editar', $parameters = ['org'=>$org_id,'id'=>$issue['id'],'kind'=>$kind],$attributes = ['class'=>'btn btn-success'])!!}</td>

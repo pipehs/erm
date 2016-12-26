@@ -76,7 +76,7 @@
 			{
 				if ($("#subneg").val() == 0) //Se seleccionó Riesgos / Procesos
 				{
-					$.get('controles.subneg.'+$("#subneg").val(), function (result) {
+					$.get('controles.subneg.'+$("#subneg").val()+'.{{$org}}', function (result) {
 
 							$("#procesos").removeAttr("style").show(); //hacemos visible riesgos / procesos
 							$("#negocios").removeAttr("style").hide(); //ocultamos riesgos / objetivos
@@ -96,7 +96,7 @@
 
 				else if ($("#subneg").val() == 1) //Se seleccionó Riesgos / Objetivos
 				{
-					$.get('controles.subneg.'+$("#subneg").val(), function (result) {
+					$.get('controles.subneg.'+$("#subneg").val()+'.{{$org}}', function (result) {
 
 							$("#negocios").removeAttr("style").show(); //hacemos visible riesgos / objetivos
 							$("#procesos").removeAttr("style").hide(); //ocultamos riesgos / procesos
@@ -109,7 +109,7 @@
 							
 							//seteamos datos en select de riesgos / procesos
 							$(datos).each( function() {
-								$("#select_objetivos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.objective_name +' - ' + this.organization_name + '<option>');
+								$("#select_objetivos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.objective_name +'<option>');
 							});
 					});
 				}

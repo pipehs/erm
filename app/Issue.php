@@ -17,17 +17,14 @@ class Issue extends Model
         if ($kind == 0) //obtenemos nombre de proceso
         {
             $origin = DB::table('processes')
-                        ->join('subprocesses','subprocesses.process_id','=','processes.id')
-                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                        ->where('risk_subprocess.id','=',$id)
+                        ->where('id','=',$id)
                         ->select('processes.name')
                         ->first();
         }
         else if ($kind == 1) //obtenemos nombre de subproceso
         {
             $origin = DB::table('subprocesses')
-                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                        ->where('risk_subprocess.id','=',$id)
+                        ->where('id','=',$id)
                         ->select('subprocesses.name')
                         ->first();
         }
@@ -38,8 +35,7 @@ class Issue extends Model
         else if ($kind == 3) //control de proceso
         {
             $origin = DB::table('controls')
-                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
-                        ->where('control_risk_subprocess.id','=',$id)
+                        ->where('id','=',$id)
                         ->select('controls.name')
                         ->first();
         }
@@ -47,8 +43,7 @@ class Issue extends Model
         else if ($kind == 4) //control de entidad
         {
             $origin = DB::table('controls')
-                        ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
-                        ->where('control_objective_risk.id','=',$id)
+                        ->where('id','=',$id)
                         ->select('controls.name')
                         ->first();
         }
@@ -63,14 +58,19 @@ class Issue extends Model
         else if ($kind == 6) //auditoría
         {
             $origin = DB::table('audits')
-                        ->join('audit_audit_plan','audit_audit_plan.audit_id','=','audits.id')
-                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
-                        ->where('audit_audit_plan.id','=',$id)
-                        ->select(DB::raw('CONCAT(audit_plans.name, " - ", audits.name) AS name'))
+                        ->where('id','=',$id)
+                        ->select('audits.name')
                         ->first();
         }
 
-        return $origin->name;
+        if (!empty($origin))
+        {
+            return $origin->name;
+        }
+        else
+        {
+            return NULL;
+        }
     }
 
     //obtiene issues y planes de acción de una prueba de auditoría
@@ -153,7 +153,7 @@ class Issue extends Model
 
         //hallazgos relacionados al subproceso a través de una evaluación de control
         $issues2 = DB::table('issues')
-                    ->join('control_evaluation','control_evaluation.issue_id','=','issues.id')
+                    ->join('control_evaluation','control_evaluation.id','=','issues.control_evaluation_id')
                     ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','control_evaluation.control_id')
                     ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
                     ->where('risk_subprocess.subprocess_id','=',$subprocess)
@@ -164,12 +164,14 @@ class Issue extends Model
         //hallazgos de auditoría basada en procesos
         $issues3 = DB::table('issues')
                         ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
-                        ->join('subprocesses','subprocesses.id','=','audit_tests.subprocess_id')
+                        ->join('processes','processes.id','=','audit_tests.process_id')
+                        ->join('subprocesses','subprocesses.process_id','=','processes.id')
                         ->where('subprocesses.id','=',$subprocess)
                         ->groupBy('issues.id')
                         ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
                         ->get();
 
+        /* ACT. 14-12-16: YA NO EXISTEN LAS PRUEBAS DE RIESGOS
         //hallazgos de auditoría basada en riesgos
         $issues4 = DB::table('audit_tests')
                         ->join('issues','issues.audit_test_id','=','audit_tests.id')
@@ -178,18 +180,19 @@ class Issue extends Model
                         ->groupBy('issues.id')
                         ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
                         ->get();
-
+        */
         //hallazgos de auditoría con pruebas de controles (controles orientados a subproceso)
-        $issues5 = DB::table('audit_tests')
+        $issues4 = DB::table('audit_tests')
                         ->join('issues','issues.audit_test_id','=','audit_tests.id')
-                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','audit_tests.control_id')
+                        ->join('audit_test_control','audit_test_control.audit_test_id','=','audit_tests.id')
+                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','audit_test_control.control_id')
                         ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
                         ->where('risk_subprocess.subprocess_id','=',$subprocess)
                         ->groupBy('issues.id')
                         ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
                         ->get();
 
-        $issues = array_merge($issues1,$issues2,$issues3,$issues4,$issues5);
+        $issues = array_merge($issues1,$issues2,$issues3,$issues4);
         $issuesX = array_unique($issues,SORT_REGULAR);
         return $issuesX;
     }
@@ -204,7 +207,7 @@ class Issue extends Model
 
         //hallazgos de controles generados a través de evaluación de controles
         $issues2 = DB::table('control_evaluation')
-                    ->join('issues','issues.id','=','control_evaluation.issue_id')
+                    ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
                     ->where('control_evaluation.control_id','=',$control)
                     ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
                     ->get();
@@ -225,10 +228,12 @@ class Issue extends Model
         return $issues;
     }
 
-    public static function getAuditIssues($audit_audit_plan_id)
+    public static function getAuditIssues($audit_id)
     {
         $issues = DB::table('issues')
-                    ->where('audit_audit_plan_id','=',$audit_audit_plan_id)
+                    ->join('audit_audit_plan','audit_audit_plan.id','=','issues.audit_audit_plan_id')
+                    ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                    ->where('audits.id','=',$audit_id)
                     ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
                     ->get();
 
@@ -290,5 +295,89 @@ class Issue extends Model
         }
 
         return $results;
+    }
+
+    public static function getIssues($org)
+    {
+        //issues de organización a través de audit_audit_plan_id
+        $issues1 = DB::table('issues')
+                ->join('audit_audit_plan','audit_audit_plan.id','=','issues.audit_audit_plan_id')
+                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                ->where('audit_plans.organization_id','=',$org)
+                ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        //issues de programa
+        $issues2 = DB::table('issues')
+                ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','issues.audit_audit_plan_audit_program_id')
+                ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                ->where('audit_plans.organization_id','=',$org)
+                ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        //issues de pruebas
+        $issues3 = DB::table('issues')
+                ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                ->where('audit_plans.organization_id','=',$org)
+                ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        //de organización directamente
+        $issues4 = DB::table('issues')
+                    ->where('organization_id','=',$org)
+                    ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        //de subproceso
+        $issues5 = DB::table('issues')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','issues.subprocess_id')
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        //de proceso
+        $issues6 = DB::table('issues')
+                    ->join('subprocesses','subprocesses.process_id','=','issues.process_id')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        //hallazgo de control de proceso
+        $issues7 = DB::table('issues')
+                    ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','issues.control_id')
+                    ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        //hallazgo de control de entidad
+        $issues8 = DB::table('issues')
+                    ->join('control_objective_risk','control_objective_risk.control_id','=','issues.control_id')
+                    ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                    ->where('objectives.organization_id','=',$org)
+                    ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        //de control_evaluation (de controles de proceso)
+        $issues9 = DB::table('issues')
+                    ->join('control_evaluation','control_evaluation.control_id','=','issues.control_evaluation_id')
+                    ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','control_evaluation.control_id')
+                    ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        $issues10 = DB::table('issues')
+                    ->join('control_evaluation','control_evaluation.control_id','=','issues.control_evaluation_id')
+                    ->join('control_objective_risk','control_objective_risk.control_id','=','control_evaluation.control_id')
+                    ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                    ->where('objectives.organization_id','=',$org)
+                    ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        $issues = array_merge($issues1,$issues2,$issues3,$issues4,$issues5,$issues6,$issues7,$issues8,$issues9,$issues10);
+        $issuesX = array_unique($issues,SORT_REGULAR);
+        return $issuesX;
+
+
     }
 }

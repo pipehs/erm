@@ -569,8 +569,8 @@ function eliminaAcentos($String)
     return $String;
 }
 
-/*esta función se debe actualizar, ya que estaba hecha para eliminar sólo un archivo (pensando que cada evidencia era única)
-function eliminarArchivo($id,$kind)
+//esta función se debe actualizar, ya que estaba hecha para eliminar sólo un archivo (pensando que cada evidencia era única)
+function eliminarArchivo($id,$kind,$name)
 {
 	//Elimina evidencias de prueba (carpeta pruebas_auditoria)
 	if ($kind == 0)
@@ -587,26 +587,64 @@ function eliminarArchivo($id,$kind)
 	{
 		$dir = "../storage/app/evidencias_hallazgos/".$id;
 	}
+	else if ($kind == 3) //control
+	{
+		$dir = "../storage/app/controles/".$id;
+	}
+	else if ($kind == 4) //notas
+	{
+		$dir = "../storage/app/evidencias_notas/".$id;
+
+	}
+	/* NO DEBERÍAN HABER DOCS. DE EVAL DE CONTROLES YA QUE FINALMENTE SON HALLAZGOS
+	else if ($kind == 5) //eval controles
+	{
+		$dir = "../storage/app/eval_controles/".$id;
+	} */
+
+	else if ($kind == 5) //planes de acción
+	{
+		$dir = "../storage/app/planes_accion/".$id;
+	}
+	else if ($kind == 6) //riesgos
+	{
+		$dir = "../storage/app/riesgos/".$id;
+	}
+	else if ($kind == 7) //respuestas de notas
+	{
+		$dir = "../storage/app/evidencias_resp_notas/".$id;
+	}
 		
 	$handle = opendir($dir); 
 
-	while ($file = readdir($handle))  
-	{   
-		if (is_file($dir.'/'.$file)) 
-		{ 
-
-		    //verificamos que sea la misma
-		    $file_temp = explode('___',$file);
-		    $file_temp2 = explode('.',$file_temp[1]);
-
-		    if ($file_temp2[0] == $id)
-		    {
-		    	//unlink($dir.'/'.$file);
-		    	File::delete($dir.'/'.$file);
-		    }
-		         
+	if ($name == NULL)
+	{
+		while ($file = readdir($handle))  
+		{   
+			if (is_file($dir.'/'.$file)) 
+			{ 
+				//unlink($dir.'/'.$file);
+				File::delete($dir.'/'.$file);	         
+			}
 		}
-	}	
-	
-} */
+
+		rmdir($dir);	
+	}
+	else
+	{
+		while ($file = readdir($handle))  
+		{   
+			if (is_file($dir.'/'.$file)) 
+			{
+				$file_name = explode('.',$file);
+				$file_name = $file_name[0];
+				if (strcmp($file_name,$name) == 0)
+				{
+					//unlink($dir.'/'.$file);
+					File::delete($dir.'/'.$file);	    
+				}     
+			}
+		}
+	}
+} 
 ?>

@@ -66,47 +66,37 @@ class DocumentosController extends Controller
         switch ($_GET['kind']) 
         {
             case 1: //archivos de controles
-                if ($_GET['control_type'] == 0)
-                {
-                    $controls = \Ermtool\Control::getProcessesControls($_GET['organization_id']);
-                }
-                else if ($_GET['control_type'] == 1)
-                {
-                    $controls = \Ermtool\Control::getBussinessControls($_GET['organization_id']);
-                }
+                //if ($_GET['control_type'] == 0)
+                //{
+                    //$controls = \Ermtool\Control::getProcessesControls($_GET['organization_id']);
+                    //ACTUALIZACIÓN 14-12-16: SE MOSTRARÁN LOS ARCHIVOS DE UN SÓLO CONTROL
+                //}
+                //else if ($_GET['control_type'] == 1)
+                //{
+                    //$controls = \Ermtool\Control::getBussinessControls($_GET['organization_id']);
+                    //ACTUALIZACIÓN 14-12-16: SE MOSTRARÁN LOS ARCHIVOS DE UN SÓLO CONTROL
+                //}
+
+                $control = \Ermtool\Control::find($_GET['control_id']);
                 
-                $i = 0;
+                //$i = 0;
 
                 $org_name = \Ermtool\Organization::name($_GET['organization_id']);
                 //recorremos los controles para ver cuales tienen archivos
-                $controls2 = array();
-                foreach ($controls as $control)
-                {
-                    $files = Storage::files('controles/'.$control->id);
+                //foreach ($controls as $control)
+                //{
+                $files = Storage::files('controles/'.$control->id);
                     //vemos si existe la carpeta (si existe es porque tiene archivos)
-                    if ($files != NULL)
-                    {
-                        //obtenemos los riesgos asociados a este control
-                        $risks = \Ermtool\Risk::getRisksFromControl($control->id,$_GET['control_type']);
+                $risks = \Ermtool\Risk::getRisksFromControl($_GET['organization_id'],$control->id);
 
-                        $controls2[$i] = [
-                            'name' => $control->name,
-                            'description' => $control->description,
-                            'risks' => $risks,
-                            'files' => $files,
-                        ];
-
-                        $i += 1;
-                    }
-
-                }
+                //}
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.documentos.show',['elements' => $controls2,'kind' => $_GET['kind'], 'control_type' => $_GET['control_type'],'org_name' => $org_name]);
+                    return view('en.documentos.show',['control' => $control,'kind' => $_GET['kind'], 'control_type' => $_GET['control_type'],'org_name' => $org_name,'risks' => $risks, 'files' => $files]);
                 }
                 else
                 {
-                    return view('documentos.show',['elements' => $controls2,'kind' => $_GET['kind'], 'control_type' => $_GET['control_type'],'org_name' => $org_name]);
+                    return view('documentos.show',['control' => $control,'kind' => $_GET['kind'], 'control_type' => $_GET['control_type'],'org_name' => $org_name,'risks' => $risks,'files' => $files]);
                 }
                 break;
             case 2: //hallazgos
@@ -125,28 +115,48 @@ class DocumentosController extends Controller
                             $issues = \Ermtool\Issue::getProcessIssues($process->id);
 
                             $issues2 = array(); //array donde se guardaran los issues que tienen documentos
+
+                            $action_plans = array();
                             //recorremos los issues para ver por cada uno si posee archivos
                             $j = 0;
                             foreach ($issues as $issue)
                             {
+                                //obtenemos plan de acción del issue
+                                $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
+                                //obtenemos files del plan de acción
+                                if (!empty($action_plan))
+                                {
+                                    $files2 = Storage::files('planes_accion/'.$action_plan->id);
+
+                                    $action_plan2 = [
+                                        'id' => $action_plan->id,
+                                        'description' => $action_plan->description,
+                                        'status' => $action_plan->status,
+                                        'files' => $files2,
+                                    ];
+                                }
+                                else
+                                {
+                                    $files2 = NULL;
+                                    $action_plan2 = NULL;
+                                }
+
                                 $files = Storage::files('evidencias_hallazgos/'.$issue->id);
                                 //vemos si existe la carpeta (si existe es porque tiene archivos)
                                 if ($files != NULL)
                                 {
                                     $issues2[$j] = [
+                                        'id' => $issue->id,
                                         'name' => $issue->name,
                                         'description' => $issue->description,
                                         'classification' => $issue->classification,
                                         'recommendations' => $issue->recommendations,
                                         'files' => $files,
+                                        'action_plan' => $action_plan2
                                     ];
 
                                     $j += 1;
                                 }
-                                //else
-                                //{
-                                //    echo 'el issue ' . $issue->id . ' no tiene evidencia<br>';
-                                //}
                             }
 
                             //ahora guardamos solo aquellos procesos que tienen documentos asociados
@@ -172,7 +182,7 @@ class DocumentosController extends Controller
                         break;
                     case 1: //issues de subprocesos
                         $subprocesses = \Ermtool\Subprocess::getSubprocessFromIssues($_GET['organization_id']);
-
+                        $org_name = \Ermtool\Organization::name($_GET['organization_id']);
                         $subprocess_issues = array(); //se guardaran los subprocesos que tienen issues que además tienen documentos
                         $i = 0;
                         foreach ($subprocesses as $subprocess)
@@ -185,16 +195,38 @@ class DocumentosController extends Controller
                             $j = 0;
                             foreach ($issues as $issue)
                             {
+                                //obtenemos plan de acción del issue
+                                $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
+                                //obtenemos files del plan de acción
+                                if (!empty($action_plan))
+                                {
+                                    $files2 = Storage::files('planes_accion/'.$action_plan->id);
+
+                                    $action_plan2 = [
+                                        'id' => $action_plan->id,
+                                        'description' => $action_plan->description,
+                                        'status' => $action_plan->status,
+                                        'files' => $files2,
+                                    ];
+                                }
+                                else
+                                {
+                                    $files2 = NULL;
+                                    $action_plan2 = NULL;
+                                }
+
                                 $files = Storage::files('evidencias_hallazgos/'.$issue->id);
                                 //vemos si existe la carpeta (si existe es porque tiene archivos)
                                 if ($files != NULL)
                                 {
                                     $issues2[$j] = [
+                                        'id' => $issue->id,
                                         'name' => $issue->name,
                                         'description' => $issue->description,
                                         'classification' => $issue->classification,
                                         'recommendations' => $issue->recommendations,
                                         'files' => $files,
+                                        'action_plan' => $action_plan2
                                     ];
 
                                     $j += 1;
@@ -216,11 +248,11 @@ class DocumentosController extends Controller
                         }
                         if (Session::get('languaje') == 'en')
                         {
-                            return view('en.documentos.show',['elements' => $subprocess_issues,'kind2' => $_GET['kind_issue']]);
+                            return view('en.documentos.show',['elements' => $subprocess_issues,'kind2' => $_GET['kind_issue'],'org_name' => $org_name]);
                         }
                         else
                         {
-                            return view('documentos.show',['elements' => $subprocess_issues,'kind2' => $_GET['kind_issue']]);
+                            return view('documentos.show',['elements' => $subprocess_issues,'kind2' => $_GET['kind_issue'],'org_name' => $org_name]);
                         }
                         break;
                     case 2: //issues de organización
@@ -233,16 +265,37 @@ class DocumentosController extends Controller
                         $j = 0;
                         foreach ($issues as $issue)
                         {
+                                //obtenemos plan de acción del issue
+                                $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
+                                //obtenemos files del plan de acción
+                                if (!empty($action_plan))
+                                {
+                                    $files2 = Storage::files('planes_accion/'.$action_plan->id);
+
+                                    $action_plan2 = [
+                                        'id' => $action_plan->id,
+                                        'description' => $action_plan->description,
+                                        'status' => $action_plan->status,
+                                        'files' => $files2,
+                                    ];
+                                }
+                                else
+                                {
+                                    $files2 = NULL;
+                                    $action_plan2 = NULL;
+                                }
                                 $files = Storage::files('evidencias_hallazgos/'.$issue->id);
                                 //vemos si existe la carpeta (si existe es porque tiene archivos)
                                 if ($files != NULL)
                                 {
                                     $issues2[$j] = [
-                                        'name' => $issue['name'],
-                                        'description' => $issue['description'],
-                                        'classification' => $issue['classification'],
-                                        'recommendations' => $issue['recommendations'],
+                                        'id' => $issue->id,
+                                        'name' => $issue->name,
+                                        'description' => $issue->description,
+                                        'classification' => $issue->classification,
+                                        'recommendations' => $issue->recommendations,
                                         'files' => $files,
+                                        'action_plan' => $action_plan2
                                     ];
 
                                     $j += 1;
@@ -261,7 +314,7 @@ class DocumentosController extends Controller
                     case 3: //issues de control de proceso
                         $controls = \Ermtool\Control::getProcessesControlsFromIssues($_GET['organization_id']);
 
-                        $controls_issues = array(); //se guardaran los controles que tienen issues que además tienen documentos
+                        $control_issues = array(); //se guardaran los controles que tienen issues que además tienen documentos
                         $i = 0;
                         foreach ($controls as $control)
                         {
@@ -273,16 +326,38 @@ class DocumentosController extends Controller
                             $j = 0;
                             foreach ($issues as $issue)
                             {
+                                //obtenemos plan de acción del issue
+                                $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
+                                //obtenemos files del plan de acción
+                                if (!empty($action_plan))
+                                {
+                                    $files2 = Storage::files('planes_accion/'.$action_plan->id);
+
+                                    $action_plan2 = [
+                                        'id' => $action_plan->id,
+                                        'description' => $action_plan->description,
+                                        'status' => $action_plan->status,
+                                        'files' => $files2,
+                                    ];
+                                }
+                                else
+                                {
+                                    $files2 = NULL;
+                                    $action_plan2 = NULL;
+                                }
+
                                 $files = Storage::files('evidencias_hallazgos/'.$issue->id);
                                 //vemos si existe la carpeta (si existe es porque tiene archivos)
                                 if ($files != NULL)
                                 {
                                     $issues2[$j] = [
+                                        'id' => $issue->id,
                                         'name' => $issue->name,
                                         'description' => $issue->description,
                                         'classification' => $issue->classification,
                                         'recommendations' => $issue->recommendations,
                                         'files' => $files,
+                                        'action_plan' => $action_plan2
                                     ];
 
                                     $j += 1;
@@ -325,16 +400,38 @@ class DocumentosController extends Controller
                             $j = 0;
                             foreach ($issues as $issue)
                             {
+                                //obtenemos plan de acción del issue
+                                $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
+                                //obtenemos files del plan de acción
+                                if (!empty($action_plan))
+                                {
+                                    $files2 = Storage::files('planes_accion/'.$action_plan->id);
+
+                                    $action_plan2 = [
+                                        'id' => $action_plan->id,
+                                        'description' => $action_plan->description,
+                                        'status' => $action_plan->status,
+                                        'files' => $files2,
+                                    ];
+                                }
+                                else
+                                {
+                                    $files2 = NULL;
+                                    $action_plan2 = NULL;
+                                }
+
                                 $files = Storage::files('evidencias_hallazgos/'.$issue->id);
                                 //vemos si existe la carpeta (si existe es porque tiene archivos)
                                 if ($files != NULL)
                                 {
                                     $issues2[$j] = [
+                                        'id' => $issue->id,
                                         'name' => $issue->name,
                                         'description' => $issue->description,
                                         'classification' => $issue->classification,
                                         'recommendations' => $issue->recommendations,
                                         'files' => $files,
+                                        'action_plan' => $action_plan2
                                     ];
 
                                     $j += 1;
@@ -378,16 +475,37 @@ class DocumentosController extends Controller
                             $j = 0;
                             foreach ($issues as $issue)
                             {
+                                //obtenemos plan de acción del issue
+                                $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
+                                //obtenemos files del plan de acción
+                                if (!empty($action_plan))
+                                {
+                                    $files2 = Storage::files('planes_accion/'.$action_plan->id);
+
+                                    $action_plan2 = [
+                                        'id' => $action_plan->id,
+                                        'description' => $action_plan->description,
+                                        'status' => $action_plan->status,
+                                        'files' => $files2,
+                                    ];
+                                }
+                                else
+                                {
+                                    $action_plan2 = NULL;
+                                }
+
                                 $files = Storage::files('evidencias_hallazgos/'.$issue->id);
                                 //vemos si existe la carpeta (si existe es porque tiene archivos)
                                 if ($files != NULL)
                                 {
                                     $issues2[$j] = [
+                                        'id' => $issue->id,
                                         'name' => $issue->name,
                                         'description' => $issue->description,
                                         'classification' => $issue->classification,
                                         'recommendations' => $issue->recommendations,
                                         'files' => $files,
+                                        'action_plan' => $action_plan2
                                     ];
 
                                     $j += 1;
@@ -431,16 +549,38 @@ class DocumentosController extends Controller
                             $j = 0;
                             foreach ($issues as $issue)
                             {
+                                //obtenemos plan de acción del issue
+                                $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
+                                //obtenemos files del plan de acción
+                                if (!empty($action_plan))
+                                {
+                                    $files2 = Storage::files('planes_accion/'.$action_plan->id);
+
+                                    $action_plan2 = [
+                                        'id' => $action_plan->id,
+                                        'description' => $action_plan->description,
+                                        'status' => $action_plan->status,
+                                        'files' => $files2,
+                                    ];
+                                }
+                                else
+                                {
+                                    $files2 = NULL;
+                                    $action_plan2 = NULL;
+                                }
+
                                 $files = Storage::files('evidencias_hallazgos/'.$issue->id);
                                 //vemos si existe la carpeta (si existe es porque tiene archivos)
                                 if ($files != NULL)
                                 {
                                     $issues2[$j] = [
+                                        'id' => $issue->id,
                                         'name' => $issue->name,
                                         'description' => $issue->description,
                                         'classification' => $issue->classification,
                                         'recommendations' => $issue->recommendations,
                                         'files' => $files,
+                                        'action_plan' => $action_plan2
                                     ];
 
                                     $j += 1;
@@ -495,6 +635,7 @@ class DocumentosController extends Controller
                             //seteamos fecha
                             $created_at = date_format($ans['created_at'], 'd-m-Y');
                             $answers2[$j] = [
+                                'id' => $ans['id'],
                                 'answer' => $ans['answer'],
                                 'created_at' => $created_at,
                                 'files' => $files1
@@ -509,6 +650,7 @@ class DocumentosController extends Controller
                     if ($files != NULL)
                     {
                         $notes2[$j] = [
+                            'id' => $note->id,
                             'name' => $note->name,
                             'description' => $note->description,
                             'files' => $files,
@@ -542,6 +684,7 @@ class DocumentosController extends Controller
                     if ($files != NULL)
                     {
                         $programs2[$i] = [
+                            'id' => $program->id,
                             'audit' => $program->audit,
                             'name' => $program->name,
                             'description' => $program->description,
@@ -574,8 +717,9 @@ class DocumentosController extends Controller
                     if ($files != NULL)
                     {
                         $tests2[$i] = [
-                            'audit' => $test->audit,
-                            'program' => $test->program,
+                            'id' => $test->id,
+                            'audit' => $test->audit_name,
+                            'program' => $test->audit_program_name,
                             'name' => $test->name,
                             'description' => $test->description,
                             'files' => $files,
@@ -592,6 +736,29 @@ class DocumentosController extends Controller
                 else
                 {
                     return view('documentos.show',['elements' => $tests2,'kind' => $_GET['kind'], 'audit_plan' => $plan]);
+                }
+                break;
+            case 6: //riesgos
+                $risk = \Ermtool\Risk::find($_GET['risk_id']);
+                
+                //$i = 0;
+
+                $org_name = \Ermtool\Organization::name($_GET['organization_id']);
+                //recorremos los controles para ver cuales tienen archivos
+                //foreach ($controls as $control)
+                //{
+                $files = Storage::files('riesgos/'.$risk->id);
+                    //vemos si existe la carpeta (si existe es porque tiene archivos)
+                $controls = \Ermtool\Control::getControlsFromRisk($risk->id);
+
+                //}
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.documentos.show',['risk' => $risk,'kind' => $_GET['kind'], 'risk_type' => $_GET['risk_type'],'org_name' => $org_name,'controls' => $controls, 'files' => $files]);
+                }
+                else
+                {
+                    return view('documentos.show',['risk' => $risk,'kind' => $_GET['kind'], 'risk_type' => $_GET['risk_type'],'org_name' => $org_name,'controls' => $controls, 'files' => $files]);
                 }
                 break;
             default:

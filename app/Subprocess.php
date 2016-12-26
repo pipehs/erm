@@ -63,7 +63,7 @@ class Subprocess extends Model
                         ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
                         ->join('processes','processes.id','=','subprocesses.process_id')
                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                        ->join('issues','issues.id','=','control_evaluation.issue_id')
+                        ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
                         ->where('organization_subprocess.organization_id','=',$org)
                         ->select('subprocesses.id','subprocesses.name','subprocesses.description','processes.name as process_name')
                         ->groupBy('subprocesses.id')
@@ -72,8 +72,8 @@ class Subprocess extends Model
         //hallazgos generados a través de auditoría orientada a procesos
         $subprocesses3 = DB::table('issues')
                         ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
-                        ->join('subprocesses','subprocesses.id','=','audit_tests.subprocess_id')
-                        ->join('processes','processes.id','=','subprocesses.process_id')
+                        ->join('processes','processes.id','=','audit_tests.process_id')
+                        ->join('subprocesses','subprocesses.process_id','=','processes.id')
                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                         ->where('organization_subprocess.organization_id','=',$org)
                         ->select('subprocesses.id','subprocesses.name','subprocesses.description','processes.name as process_name')
@@ -98,6 +98,28 @@ class Subprocess extends Model
                         ->get();
 
         return $subprocesses;
+    }
+
+    public static function getSubprocessesFromControl($org,$control)
+    {
+        return DB::table('subprocesses')
+                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                ->join('control_risk_subprocess','control_risk_subprocess.risk_subprocess_id','=','risk_subprocess.id')
+                ->where('control_risk_subprocess.control_id','=',$control)
+                ->where('organization_subprocess.organization_id','=',$org)
+                ->select('subprocesses.id','subprocesses.name','subprocesses.description')
+                ->groupBy('subprocesses.id')
+                ->get();
+
+    }
+
+    public static function getProcess($id)
+    {
+        return DB::table('processes')
+                ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                ->select('processes.id','processes.name','processes.description')
+                ->first();
     }
 
 }

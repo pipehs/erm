@@ -19,6 +19,7 @@ class ControlesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
     public function index()
     {
         if (Auth::guest())
@@ -27,72 +28,69 @@ class ControlesController extends Controller
         }
         else
         {
-            $controls = array();
-            $risk_subneg = array(); //array para almacenar riesgos y subprocesos u objetivos asociados 
-                                    //(si es objetivos, además se almacena organización)
-            $i = 0; //contador de controles
-            $j = 0; //contador de riesgos y subprocesos u objetivos
-            $controles = \Ermtool\Control::all();
-            foreach ($controles as $control) //se recorre cada uno de los controles creados (de existir)
+            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
+            if (Session::get('languaje') == 'en')
             {
-                //obtenemos todos los riesgos asociados al control (sean de subprocesos o de negocio)
-                if ($control['type2'] == 0) //el control está asociado a un riesgo de subproceso
+                return view('en.controles.index',['organizations' => $organizations]);
+            }
+            else
+            {
+                return view('controles.index',['organizations' => $organizations]);
+            }
+        }
+    }
+    public function index2()
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            $controls1 = array();
+            $controls2 = array();
+            $objective_risks = array();
+            $risks_subprocess = array();
+
+            $i = 0; //contador de controles
+            
+            $controles1 = \Ermtool\Control::getBussinessControls($_GET['organization_id']);
+            $controles2 = \Ermtool\Control::getProcessesControls($_GET['organization_id']);
+            $j = 0; //contador de riesgos y subprocesos u objetivos
+            foreach ($controles1 as $control) //se recorre cada uno de los controles de negocio
+            {
+
+                $objectives_risks = \Ermtool\Risk::getObjectiveRisksFromControl($control->id);
+                //almacenamos los nombres de los riesgos y subprocessos asociados al control
+                foreach ($objectives_risks as $objective_risk)
                 {
-                    $risks_subprocesses = DB::table('control_risk_subprocess')
-                                ->join('risk_subprocess','control_risk_subprocess.risk_subprocess_id','=','risk_subprocess.id')
-                                ->join('subprocesses','risk_subprocess.subprocess_id','=','subprocesses.id')
-                                ->join('risks','risk_subprocess.risk_id','=','risks.id')
-                                ->where('control_risk_subprocess.control_id','=',$control['id'])
-                                ->select('subprocesses.name as sub_name','risks.name as risk_name')
-                                ->get();
-                    //almacenamos los nombres de los riesgos y subprocesos u objetivos asociados asociados al control
-                    foreach ($risks_subprocesses as $risk_subprocess)
-                    {
-                        $risk_subneg[$j] = array('control_id' => $control['id'],
-                                                'organization' => NULL,
-                                                'subneg' => $risk_subprocess->sub_name,
-                                                'risk' => $risk_subprocess->risk_name);
-                        $j += 1;
-                    }
+                        $objective_risks[$j] = array('control_id' => $control->id,
+                                            'subneg' => $objective_risk->obj_name,
+                                            'risk' => $objective_risk->risk_name);
+                    $j += 1;
                 }
-                else if ($control['type2'] == 1) //el control está asociado a un riesgo de negocio
-                {
-                    $objectives_risks = DB::table('control_objective_risk')
-                                ->join('objective_risk','control_objective_risk.objective_risk_id','=','objective_risk.id')
-                                ->join('objectives','objective_risk.objective_id','=','objectives.id')
-                                ->join('organizations','organizations.id','=','objectives.organization_id')
-                                ->join('risks','objective_risk.risk_id','=','risks.id')
-                                ->where('control_objective_risk.control_id','=',$control['id'])
-                                ->select('objectives.name as obj_name','risks.name as risk_name','organizations.name as org_name')
-                                ->get();
-                    //almacenamos los nombres de los riesgos y subprocessos asociados al control
-                    foreach ($objectives_risks as $objective_risk)
-                    {
-                        $risk_subneg[$j] = array('control_id' => $control['id'],
-                                                'organization' => $objective_risk->org_name,
-                                                'subneg' => $objective_risk->obj_name,
-                                                'risk' => $objective_risk->risk_name);
-                        $j += 1;
-                    }
-                }
+
                 //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
-                if ($control['created_at'] == NULL OR $control['created_at'] == "0000-00-00" OR $control['created_at'] == "")
+                if ($control->created_at == NULL OR $control->created_at == "0000-00-00" OR $control->created_at == "")
                 {
                     $fecha_creacion = NULL;
                 }
                 else
                 {
-                    $fecha_creacion = date_format($control['created_at'],"d-m-Y");
+                    $fecha_creacion = new DateTime($control->created_at);
+                    $fecha_creacion = date_format($fecha_creacion,"d-m-Y");
                 }
                 //damos formato a fecha de actualización 
-                if ($control['updated_at'] != NULL)
+                if ($control->updated_at != NULL)
                 {
-                    $fecha_act = date_format($control['updated_at'],"d-m-Y");
+                    $fecha_act = new DateTime($control->updated_at);
+                    $fecha_act = date_format($fecha_act,"d-m-Y");
                 }
                 else
                     $fecha_act = NULL;
                 //obtenemos nombre de responsable
-                $stakeholder = \Ermtool\Stakeholder::find($control['stakeholder_id']);
+                $stakeholder = \Ermtool\Stakeholder::find($control->stakeholder_id);
                 if ($stakeholder)
                 {
                     $stakeholder2 = $stakeholder['name'].' '.$stakeholder['surnames'];
@@ -101,26 +99,81 @@ class ControlesController extends Controller
                 {
                     $stakeholder2 = NULL;
                 }
-                $controls[$i] = array('id'=>$control['id'],
-                                    'name'=>$control['name'],
-                                    'description'=>$control['description'],
-                                    'type'=>$control['type'],
-                                    'type2'=>$control['type2'],
+                $controls1[$i] = array('id'=>$control->id,
+                                    'name'=>$control->name,
+                                    'description'=>$control->description,
+                                    'type'=>$control->type,
+                                    'type2'=>$control->type2,
                                     'created_at'=>$fecha_creacion,
                                     'updated_at'=>$fecha_act,
-                                    'evidence'=>$control['evidence'],
-                                    'periodicity'=>$control['periodicity'],
-                                    'purpose'=>$control['purpose'],
+                                    'evidence'=>$control->evidence,
+                                    'periodicity'=>$control->periodicity,
+                                    'purpose'=>$control->purpose,
+                                    'stakeholder'=>$stakeholder2);
+                $i += 1;
+            }
+
+            $j = 0; //contador de riesgos y subprocesos u objetivos
+            foreach ($controles2 as $control)
+            {
+                $risks_subprocesses = \Ermtool\Risk::getRisksSubprocessFromControl($control->id);
+                //almacenamos los nombres de los riesgos y subprocesos u objetivos asociados asociados al control
+                foreach ($risks_subprocesses as $risk_subprocess)
+                {
+                    $risks_subprocess[$j] = array('control_id' => $control->id,
+                                            'subneg' => $risk_subprocess->sub_name,
+                                            'risk' => $risk_subprocess->risk_name);
+                    $j += 1;
+                }
+
+                //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
+                if ($control->created_at == NULL OR $control->created_at == "0000-00-00" OR $control->created_at == "")
+                {
+                    $fecha_creacion = NULL;
+                }
+                else
+                {
+                    $fecha_creacion = new DateTime($control->created_at);
+                    $fecha_creacion = date_format($fecha_creacion,"d-m-Y");
+                }
+                //damos formato a fecha de actualización 
+                if ($control->updated_at != NULL)
+                {
+                    $fecha_act = new DateTime($control->updated_at);
+                    $fecha_act = date_format($fecha_act,"d-m-Y");
+                }
+                else
+                    $fecha_act = NULL;
+                //obtenemos nombre de responsable
+                $stakeholder = \Ermtool\Stakeholder::find($control->stakeholder_id);
+                if ($stakeholder)
+                {
+                    $stakeholder2 = $stakeholder['name'].' '.$stakeholder['surnames'];
+                }
+                else
+                {
+                    $stakeholder2 = NULL;
+                }
+                $controls2[$i] = array('id'=>$control->id,
+                                    'name'=>$control->name,
+                                    'description'=>$control->description,
+                                    'type'=>$control->type,
+                                    'type2'=>$control->type2,
+                                    'created_at'=>$fecha_creacion,
+                                    'updated_at'=>$fecha_act,
+                                    'evidence'=>$control->evidence,
+                                    'periodicity'=>$control->periodicity,
+                                    'purpose'=>$control->purpose,
                                     'stakeholder'=>$stakeholder2);
                 $i += 1;
             }
             if (Session::get('languaje') == 'en')
             {
-                return view('en.controles.index',['controls' => $controls,'risk_subneg' => $risk_subneg]);
+                return view('en.controles.index',['controls1' => $controls1,'controls2'=>$controls2,'risks_subprocess' => $risks_subprocess,'objective_risks'=>$objective_risks,'org_id' => $_GET['organization_id']]);
             }
             else
             {
-                return view('controles.index',['controls' => $controls,'risk_subneg' => $risk_subneg]);
+                return view('controles.index',['controls1' => $controls1,'controls2'=>$controls2,'risks_subprocess' => $risks_subprocess,'objective_risks'=>$objective_risks,'org_id' => $_GET['organization_id']]);
             }
         }
     }
@@ -129,7 +182,7 @@ class ControlesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($org)
     {
         if (Auth::guest())
         {
@@ -137,16 +190,15 @@ class ControlesController extends Controller
         }
         else
         {
-            $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-            ->orderBy('name')
-            ->lists('full_name', 'id');
+            $stakeholders = \Ermtool\Stakeholder::listStakeholders($org);
+
             if (Session::get('languaje') == 'en')
             {
-                return view('en.controles.create',['stakeholders'=>$stakeholders]);
+                return view('en.controles.create',['stakeholders'=>$stakeholders,'org'=>$org]);
             }
             else
             {
-                return view('controles.create',['stakeholders'=>$stakeholders]);
+                return view('controles.create',['stakeholders'=>$stakeholders,'org'=>$org]);
             }
         }
     }
@@ -555,7 +607,7 @@ class ControlesController extends Controller
             $last_sustantiva = \Ermtool\control_evaluation::getLastEvaluation($_GET['control_id'],2);
             $last_cumplimiento = \Ermtool\control_evaluation::getLastEvaluation($_GET['control_id'],3);
 
-            $risks = \Ermtool\Risk::getRisksFromControl($_GET['control_id']);
+            $risks = \Ermtool\Risk::getRisksFromControl($_GET['organization_id'],$_GET['control_id']);
 
             //if ($_GET['control_kind'] == 1) //control de negocio
             //{
@@ -820,7 +872,7 @@ class ControlesController extends Controller
     /*
     función identifica si se seleccionarán riesgos/subprocesos o riesgos/objetivos
     al momento de crear un control */
-    public function subneg($value)
+    public function subneg($value,$org)
     {
         if (Auth::guest())
         {
@@ -828,43 +880,15 @@ class ControlesController extends Controller
         }
         else
         {
-            $i = 0; //contador de riesgos/subprocesos o riesgos/objetivos
-            $datos = array();
             if ($value == 0) //son riesgos de subprocesos
             {
-                $risks_subprocesses = DB::table('risk_subprocess')
-                                        ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                                        ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                                        ->select('risk_subprocess.id as id','risks.name as risk_name',
-                                                'subprocesses.name as subprocess_name')
-                                        ->get();
-                foreach ($risks_subprocesses as $risk_subprocess)
-                {
-                    $datos[$i] = ['id' => $risk_subprocess->id,
-                                'risk_name' => $risk_subprocess->risk_name,
-                                'subprocess_name' => $risk_subprocess->subprocess_name];
-                    $i += 1;
-                }
+                $risks_subprocesses = \Ermtool\Risk::getRiskSubprocess($org);
             }
             else if ($value == 1) //son riesgos de negocio
             {
                 //query para obtener id de objective_risk, junto a nombre de riesgo, objetivo y organización
-                $objectives_risks = DB::table('objective_risk')
-                                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                        ->join('risks','risks.id','=','objective_risk.risk_id')
-                                        ->join('organizations','organizations.id','=','objectives.organization_id')
-                                        ->select('objective_risk.id as id','risks.name as risk_name',
-                                                'objectives.name as objective_name',
-                                                'organizations.name as organization_name')
-                                        ->get();
-                foreach ($objectives_risks as $objective_risk)
-                {
-                    $datos[$i] = ['id' => $objective_risk->id,
-                                'risk_name' => $objective_risk->risk_name,
-                                'objective_name' => $objective_risk->objective_name,
-                                'organization_name' => $objective_risk->organization_name];
-                    $i += 1;
-                }
+                $objectives_risks = \Ermtool\Risk::getObjectiveRisks($org);
+
             }
             return json_encode($datos);
         }
@@ -1461,7 +1485,27 @@ class ControlesController extends Controller
         return json_encode($description);
     }
 
-    public function indexGraficos($value)
+    public function indexGraficos()
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.reportes.controles_graficos',['organizations' => $organizations]);
+            }
+            else
+            {
+                return view('reportes.controles_graficos',['organizations' => $organizations]);
+            }
+        }
+    }
+    public function indexGraficos2($value,$org)
     {
         if (Auth::guest())
         {
@@ -1478,10 +1522,20 @@ class ControlesController extends Controller
             $id_inefectivos = array();
             $id_efectivos = array();
             //primero seleccionamos id de controles de control_evaluation donde tengan status 2 (cerrado) y donde estos sean diferentes para que no se repitan
-            $controles = DB::table('control_evaluation')
+            /*$controles = DB::table('control_evaluation')
                             //->where('control_evaluation.status','=',2)
                             ->distinct()
-                            ->get(['control_id as id']);
+                            ->get(['control_id as id']); */
+
+            //ACT. 09-12-16: SELECCIONAMOS CONTROLES DE TABLA CONTROL_EVAL_RISK_TEMP
+            if ($org == 0)
+            {
+                $controles = \Ermtool\Control::getEvaluatedControls($_GET['organization_id']);
+            }
+            else
+            {
+                $controles = \Ermtool\Control::getEvaluatedControls($org); //en el caso de que se esté generando excel, org tendrá valor
+            }
 
             $i = 0;
             foreach ($controles as $control)
@@ -1495,11 +1549,12 @@ class ControlesController extends Controller
                 $i += 1;
                 //para cada uno vemos si son efectivos o inefectivos: Si al menos una de las pruebas es inefectiva, el control es inefectivo
                 //ACTUALIZACIÓN 22-11-16: Sólo verificaremos en tabla control_eval_risk_temp
-                $res = DB::table('control_evaluation')
+                $res = DB::table('control_eval_risk_temp')
                             ->where('control_id','=',$control->id)
-                            ->where('results','=',2)
+                            ->where('created_at','=',$max_date)
+                            ->select('result')
                             ->first();
-                if ($res)
+                if ($res->result == 2)
                 {
                     array_push($id_inefectivos,$control->id);
                     $inefectivos += 1;
@@ -1511,10 +1566,11 @@ class ControlesController extends Controller
                 }
             }
             //ahora en audit_tests y que no hayan sido encontrados en control_evaluation
+            /*
             $controles = DB::table('audit_tests')
+                            ->join('audit_test_control','audit_test_control.audit_test_id','=','audit_tests.id')
                             ->where('audit_tests.status','=',2)
-                            ->whereNotNull('audit_tests.control_id')
-                            ->whereNotIn('audit_tests.control_id',$controls_temp)
+                            ->whereNotIn('audit_test_control.control_id',$controls_temp)
                             ->distinct()
                             ->get(['control_id as id','results']);
             foreach ($controles as $control)
@@ -1531,7 +1587,7 @@ class ControlesController extends Controller
                     $efectivos += 1;
                     array_push($id_efectivos,$control->id);
                 }
-            }
+            } */
             //ahora obtenemos los datos de los controles seleccionados
             $i = 0;
             foreach ($controls_temp as $id)
@@ -1583,6 +1639,8 @@ class ControlesController extends Controller
             $i = 0;
             foreach ($controles as $control)
             {
+                $updated_at = new DateTime($control->updated_at);
+                $updated_at = date_format($updated_at, 'd-m-Y');
                 $description = preg_replace("[\n|\r|\n\r]", ' ', $control->description);  
                 $no_ejecutados[$i] = [
                             'id' => $control->id,
@@ -1602,6 +1660,7 @@ class ControlesController extends Controller
             //print_r($no_ejecutados);
             if (strstr($_SERVER["REQUEST_URI"],'genexcelgraficos')) 
             {
+                $res2 = array();
                 if ($value == 1) //reporte excel de controles ejecutados
                 {
                     $i = 0;
@@ -1609,7 +1668,7 @@ class ControlesController extends Controller
                     {
                         if (Session::get('languaje') == 'en')
                         {
-                            $res[$i] = [
+                            $res2[$i] = [
                                 'Name' => $control['name'],
                                 'Description' => $control['description'],
                                 'Updated date' => $control['updated_at'],
@@ -1617,7 +1676,7 @@ class ControlesController extends Controller
                         }
                         else
                         {
-                            $res[$i] = [
+                            $res2[$i] = [
                                 'Nombre' => $control['name'],
                                 'Descripción' => $control['description'],
                                 'Actualizado' => $control['updated_at'],
@@ -1625,7 +1684,7 @@ class ControlesController extends Controller
                         }
                         $i += 1;
                     }
-                    return $res;
+                    return $res2;
                 }
                 else if ($value == 2) //reporte excel de controles no ejecutados
                 {
@@ -1634,7 +1693,7 @@ class ControlesController extends Controller
                     {
                         if (Session::get('languaje') == 'en')
                         {
-                            $res[$i] = [
+                            $res2[$i] = [
                                 'Name' => $control['name'],
                                 'Description' => $control['description'],
                                 'Updated date' => $control['updated_at'],
@@ -1642,7 +1701,7 @@ class ControlesController extends Controller
                         }
                         else
                         {
-                            $res[$i] = [
+                            $res2[$i] = [
                                 'Nombre' => $control['name'],
                                 'Descripción' => $control['description'],
                                 'Actualizado' => $control['updated_at'],
@@ -1650,7 +1709,7 @@ class ControlesController extends Controller
                         }
                         $i += 1;
                     }
-                    return $res;
+                    return $res2;
                 }
                 else if ($value == 3) //reporte excel de controles efectivos
                 {
@@ -1661,7 +1720,7 @@ class ControlesController extends Controller
                         {
                             if (Session::get('languaje') == 'en')
                             {
-                                $res[$i] = [
+                                $res2[$i] = [
                                     'Name' => $control['name'],
                                     'Description' => $control['description'],
                                     'Updated date' => $control['updated_at'],
@@ -1669,7 +1728,7 @@ class ControlesController extends Controller
                             }
                             else
                             {
-                                $res[$i] = [
+                                $res2[$i] = [
                                     'Nombre' => $control['name'],
                                     'Descripción' => $control['description'],
                                     'Actualizado' => $control['updated_at'],
@@ -1678,7 +1737,7 @@ class ControlesController extends Controller
                         }
                         $i += 1;
                     }
-                    return $res;
+                    return $res2;
                 }
                 else if ($value == 4) //reporte excel de controles no efectivos
                 {
@@ -1689,7 +1748,7 @@ class ControlesController extends Controller
                         {
                             if (Session::get('languaje') == 'en')
                             {
-                                $res[$i] = [
+                                $res2[$i] = [
                                     'Name' => $control['name'],
                                     'Description' => $control['description'],
                                     'Updated date' => $control['updated_at'],
@@ -1697,7 +1756,7 @@ class ControlesController extends Controller
                             }
                             else
                             {
-                                $res[$i] = [
+                                $res2[$i] = [
                                     'Nombre' => $control['name'],
                                     'Descripción' => $control['description'],
                                     'Actualizado' => $control['updated_at'],
@@ -1706,7 +1765,7 @@ class ControlesController extends Controller
                         }
                         $i += 1;
                     }
-                    return $res;
+                    return $res2;
                 }
                 
             }
@@ -1716,13 +1775,13 @@ class ControlesController extends Controller
                 {
                     return view('en.reportes.controles_graficos',['controls'=>$controls,'no_ejecutados'=>$no_ejecutados,
                                                   'cont_ejec' => $cont_ejec,'cont_no_ejec'=>$cont_no_ejec,
-                                                  'efectivos' => $efectivos,'inefectivos'=>$inefectivos]);
+                                                  'efectivos' => $efectivos,'inefectivos'=>$inefectivos,'org' => $_GET['organization_id']]);
                 }
                 else
                 {
                     return view('reportes.controles_graficos',['controls'=>$controls,'no_ejecutados'=>$no_ejecutados,
                                                   'cont_ejec' => $cont_ejec,'cont_no_ejec'=>$cont_no_ejec,
-                                                  'efectivos' => $efectivos,'inefectivos'=>$inefectivos]);
+                                                  'efectivos' => $efectivos,'inefectivos'=>$inefectivos,'org' => $_GET['organization_id']]);
                 } 
             }
         }

@@ -292,7 +292,7 @@ class ExcelController extends Controller
             })->export('xls');
     }
 
-    public function generarExcelGraficos($id)
+    public function generarExcelGraficos($id,$org)
     {
         //generamos variable global para usarla en la función excel
         /*id identifica el tipo de control gráfico que es
@@ -319,6 +319,9 @@ class ExcelController extends Controller
         global $id2;
         $id2 = $id;
 
+        global $org2;
+        $org2 = $org;
+
         if ($GLOBALS['id2'] == 1)
         {
             Excel::create('Reporte Controles ejecutados '.date("d-m-Y"), function($excel) {
@@ -332,7 +335,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de controles ejecutados');
                 $excel->sheet('Controles', function($sheet) {
                     $control = new Controles;
-                    $datos = $control->indexGraficos($GLOBALS['id2']);
+                    $datos = $control->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     //$datos2 = json_decode($datos);
                     $sheet->fromArray($datos);
 
@@ -360,7 +363,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de controles pendientes');
                 $excel->sheet('Controles', function($sheet) {
                     $control = new Controles;
-                    $datos = $control->indexGraficos($GLOBALS['id2']);
+                    $datos = $control->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:C1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -385,7 +388,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de controles efectivos');
                 $excel->sheet('Controles', function($sheet) {
                     $control = new Controles;
-                    $datos = $control->indexGraficos($GLOBALS['id2']);
+                    $datos = $control->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:C1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -410,7 +413,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de controles inefectivos');
                 $excel->sheet('Controles', function($sheet) {
                     $control = new Controles;
-                    $datos = $control->indexGraficos($GLOBALS['id2']);
+                    $datos = $control->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:C1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -435,7 +438,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de planes de auditoría abiertos');
                 $excel->sheet('Planes de auditoría', function($sheet) {
                     $plan = new Audits;
-                    $datos = $plan->indexGraficos($GLOBALS['id2']);
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:E1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -460,7 +463,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de planes de auditoría en ejecución');
                 $excel->sheet('Planes de auditoría', function($sheet) {
                     $plan = new Audits;
-                    $datos = $plan->indexGraficos($GLOBALS['id2']);
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:E1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -485,7 +488,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de planes de auditoría cerrados');
                 $excel->sheet('Planes de auditoría', function($sheet) {
                     $plan = new Audits;
-                    $datos = $plan->indexGraficos($GLOBALS['id2']);
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:E1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -510,7 +513,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de planes de acción creados a través de la evaluación de controles');
                 $excel->sheet('Planes de acción', function($sheet) {
                     $plan = new PlanesAccion;
-                    $datos = $plan->indexGraficos($GLOBALS['id2']);
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:G1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -535,7 +538,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de planes de acción creados a través de auditorías');
                 $excel->sheet('Planes de acción', function($sheet) {
                     $plan = new PlanesAccion;
-                    $datos = $plan->indexGraficos($GLOBALS['id2']);
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:J1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -560,7 +563,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de planes de acción creados a través de hallazgos clasificados como oportunidad de mejora');
                 $excel->sheet('Planes de acción', function($sheet) {
                     $plan = new PlanesAccion;
-                    $datos = $plan->indexGraficos($GLOBALS['id2']);
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:I1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -585,7 +588,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de planes de acción creados a través de hallazgos clasificados como deficiencias');
                 $excel->sheet('Planes de acción', function($sheet) {
                     $plan = new PlanesAccion;
-                    $datos = $plan->indexGraficos($GLOBALS['id2']);
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:I1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -610,7 +613,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de planes de acción creados a través de hallazgos clasificados como debilidades significativas');
                 $excel->sheet('Planes de acción', function($sheet) {
                     $plan = new PlanesAccion;
-                    $datos = $plan->indexGraficos($GLOBALS['id2']);
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:I1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -635,7 +638,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de planes de acción que se encuentran abiertos');
                 $excel->sheet('Planes de acción', function($sheet) {
                     $plan = new PlanesAccion;
-                    $datos = $plan->indexGraficos($GLOBALS['id2']);
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:G1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -660,7 +663,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de planes de acción en que su fecha límite se encuentra próxima a cumplirse');
                 $excel->sheet('Planes de acción', function($sheet) {
                     $plan = new PlanesAccion;
-                    $datos = $plan->indexGraficos($GLOBALS['id2']);
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:G1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -685,7 +688,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de planes de acción que se encuentran abiertos siendo que la fecha final del mismo se encuentra pasada');
                 $excel->sheet('Planes de acción', function($sheet) {
                     $plan = new PlanesAccion;
-                    $datos = $plan->indexGraficos($GLOBALS['id2']);
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:G1', function($cells) {
                             $cells->setBackground('#013ADF');
@@ -710,7 +713,7 @@ class ExcelController extends Controller
                 $excel->setDescription('Reporte de planes de acción cerrados');
                 $excel->sheet('Planes de acción', function($sheet) {
                     $plan = new PlanesAccion;
-                    $datos = $plan->indexGraficos($GLOBALS['id2']);
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
                     $sheet->fromArray($datos);
                     $sheet->cells('A1:G1', function($cells) {
                             $cells->setBackground('#013ADF');

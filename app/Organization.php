@@ -43,6 +43,11 @@ class Organization extends Model
         return $this->hasMany('Ermtool\Audit_plan');
     }
 
+    public function objectives()
+    {
+        return $this->hasMany('Ermtool\Objective');
+    }
+
     public static function getOrgIdByTestId($id)
     {
         $org = DB::table('organizations')

@@ -40,89 +40,210 @@
 			{{ Session::get('message') }}
 			</div>
 		@endif
-@foreach (Session::get('roles') as $role)
-	@if ($role != 6)
-		{!! link_to_route('controles.create', $title = 'Agregar Nuevo Control', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
-	<?php break; ?>
-	@endif
-@endforeach
 
-	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
-	<thead>
-	<th>Nombre</th>
-	<th>Descripci&oacute;n</th>
-	<th>Origen del Control</th>
-	<th>Riesgo(s)/Subproceso(s) - Riesgo(s)/Objetivo(s) </th>
-	<th>Tipo Control</th>
-	<th>Fecha Agregado</th>
-	<th>Fecha Actualizado</th>
-	<th>Responsable del Control</th>
-	<th>Evidencia</th>
-	<th>Prop&oacute;sito</th>
-@foreach (Session::get('roles') as $role)
-	@if ($role != 6)
-	<th>Acci&oacute;n</th>
-	<th>Acci&oacute;n</th>
-	<?php break; ?>
-	@endif
-@endforeach
-	<th>Acci&oacute;n</th>
-	</thead>
+@if (isset($controls1) || isset($controls2))
 
-	@foreach($controls as $control)
-		<tr>
-			<td>{{ $control['name'] }}</td>
-			<td>{{ $control['description'] }}</td>
-			<td>
-			@if ($control['type2'] == 0)
-				De Proceso
-			@elseif ($control['type2'] == 1)
-				De Negocio
-			@endif
-			</td>
-			<td><ul>
-			@foreach ($risk_subneg as $subneg)
-				@if ($subneg['control_id'] == $control['id'])
-					<li>* {{ $subneg['risk'] }} - {{ $subneg['subneg'] }} - {{ $subneg['organization'] }}</li>
-				@endif
-			@endforeach
-			</ul></td>
-			<td>
-			@if ($control['type'] == 0)
-				Manual
-			@elseif ($control['type'] == 1)
-				Semi-autom&aacute;tico
-			@elseif ($control['type'] == 2)
-				Autom&aacute;tico
-			@endif	
-			</td>
-			<td>{{ $control['created_at'] }}</td>
-			<td>{{ $control['updated_at'] }}</td>
-			
-			<td>{{ $control['stakeholder'] }}</td>
-			<td>{{ $control['evidence'] }}</td>
-			<td>
-			@if ($control['purpose'] == 0)
-				Preventivo
-			@elseif ($control['purpose'] == 1)
-				Detectivo
-			@elseif ($control['purpose'] == 2)
-				Correctivo
-			@else
-				Error al ingresar prop&oacute;sito
-			@endif
-			</td>
 	@foreach (Session::get('roles') as $role)
-		@if ($role != 6)	
-			<td>{!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
-			<td><button class="btn btn-danger" onclick="eliminar2({{ $control['id'] }},'{{ $control['name'] }}','controles','El control')">Eliminar</button></td>
+		@if ($role != 6)
+			{!! link_to_route('controles.create', $title = 'Agregar Nuevo Control', $parameters = $org_id, $attributes = ['class'=>'btn btn-primary']) !!}
 		<?php break; ?>
 		@endif
 	@endforeach
-		<td>{!! link_to_route('controles.docs', $title = 'Ver', $parameters = $control['id'], $attributes = ['class'=>'btn btn-warning']) !!}</td>
-		</tr>
+@if (isset($controls1))
+	<h4><b>Controles a nivel de entidad</b></h4>
+		<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+		<thead>
+		<th>Nombre</th>
+		<th>Descripci&oacute;n</th>
+		<th>Origen del Control</th>
+		<th>Riesgo(s)/Objetivo(s)</th>
+		<th>Tipo Control</th>
+		<th>Fecha Agregado</th>
+		<th>Fecha Actualizado</th>
+		<th>Responsable del Control</th>
+		<th>Evidencia</th>
+		<th>Prop&oacute;sito</th>
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)
+		<th>Acci&oacute;n</th>
+		<th>Acci&oacute;n</th>
+		<?php break; ?>
+		@endif
 	@endforeach
-	</table>
+		<th>Acci&oacute;n</th>
+		</thead>
+
+		@foreach($controls1 as $control)
+			<tr>
+				<td>{{ $control['name'] }}</td>
+				<td>{{ $control['description'] }}</td>
+				<td>
+				@if ($control['type2'] == 0)
+					De Proceso
+				@elseif ($control['type2'] == 1)
+					De Negocio
+				@endif
+				</td>
+				<td><ul>
+				@foreach ($objective_risks as $subneg)
+					@if ($subneg['control_id'] == $control['id'])
+						<li>* {{ $subneg['risk'] }} - {{ $subneg['subneg'] }}</li>
+					@endif
+				@endforeach
+				</ul></td>
+				<td>
+				@if ($control['type'] == 0)
+					Manual
+				@elseif ($control['type'] == 1)
+					Semi-autom&aacute;tico
+				@elseif ($control['type'] == 2)
+					Autom&aacute;tico
+				@endif	
+				</td>
+				<td>{{ $control['created_at'] }}</td>
+				<td>{{ $control['updated_at'] }}</td>			
+				<td>
+				@if ($control['stakeholder'])
+					{{ $control['stakeholder'] }}
+				@else
+					No se ha definido
+				@endif
+				</td>
+				<td>{{ $control['evidence'] }}</td>
+				<td>
+				@if ($control['purpose'] == 0)
+					Preventivo
+				@elseif ($control['purpose'] == 1)
+					Detectivo
+				@elseif ($control['purpose'] == 2)
+					Correctivo
+				@else
+					Error al ingresar prop&oacute;sito
+				@endif
+				</td>
+		@foreach (Session::get('roles') as $role)
+			@if ($role != 6)	
+				<td>{!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
+				<td><button class="btn btn-danger" onclick="eliminar2({{ $control['id'] }},'{{ $control['name'] }}','controles','El control')">Eliminar</button></td>
+			<?php break; ?>
+			@endif
+		@endforeach
+			<td>{!! link_to_route('controles.docs', $title = 'Ver', $parameters = $control['id'], $attributes = ['class'=>'btn btn-warning']) !!}</td>
+			</tr>
+		@endforeach
+		</table>
+@endif
+
+@if (isset($controls2))
+	<h4><b>Controles a nivel de proceso</b></h4>
+
+		<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+		<thead>
+		<th>Nombre</th>
+		<th>Descripci&oacute;n</th>
+		<th>Origen del Control</th>
+		<th>Riesgo(s)/Subproceso(s)</th>
+		<th>Tipo Control</th>
+		<th>Fecha Agregado</th>
+		<th>Fecha Actualizado</th>
+		<th>Responsable del Control</th>
+		<th>Evidencia</th>
+		<th>Prop&oacute;sito</th>
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)
+		<th>Acci&oacute;n</th>
+		<th>Acci&oacute;n</th>
+		<?php break; ?>
+		@endif
+	@endforeach
+		<th>Acci&oacute;n</th>
+		</thead>
+
+		@foreach($controls2 as $control)
+			<tr>
+				<td>{{ $control['name'] }}</td>
+				<td>{{ $control['description'] }}</td>
+				<td>
+				@if ($control['type2'] == 0)
+					De Proceso
+				@elseif ($control['type2'] == 1)
+					De Negocio
+				@endif
+				</td>
+				<td><ul>
+				@foreach ($risks_subprocess as $subneg)
+					@if ($subneg['control_id'] == $control['id'])
+						<li>* {{ $subneg['risk'] }} - {{ $subneg['subneg'] }}</li>
+					@endif
+				@endforeach
+				</ul></td>
+				<td>
+				@if ($control['type'] == 0)
+					Manual
+				@elseif ($control['type'] == 1)
+					Semi-autom&aacute;tico
+				@elseif ($control['type'] == 2)
+					Autom&aacute;tico
+				@endif	
+				</td>
+				<td>{{ $control['created_at'] }}</td>
+				<td>{{ $control['updated_at'] }}</td>
+				
+				<td>
+				@if ($control['stakeholder'])
+					{{ $control['stakeholder'] }}
+				@else
+					No se ha definido
+				@endif
+				</td>
+				<td>{{ $control['evidence'] }}</td>
+				<td>
+				@if ($control['purpose'] == 0)
+					Preventivo
+				@elseif ($control['purpose'] == 1)
+					Detectivo
+				@elseif ($control['purpose'] == 2)
+					Correctivo
+				@else
+					Error al ingresar prop&oacute;sito
+				@endif
+				</td>
+		@foreach (Session::get('roles') as $role)
+			@if ($role != 6)	
+				<td>{!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
+				<td><button class="btn btn-danger" onclick="eliminar2({{ $control['id'] }},'{{ $control['name'] }}','controles','El control')">Eliminar</button></td>
+			<?php break; ?>
+			@endif
+		@endforeach
+			<td>{!! link_to_route('controles.docs', $title = 'Ver', $parameters = $control['id'], $attributes = ['class'=>'btn btn-warning']) !!}</td>
+			</tr>
+		@endforeach
+		</table>
+@endif
+		<br/>
+		<center>
+			{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
+		<center>
+@else
+	{!!Form::open(['url'=>'controles.index2','method'=>'GET','class'=>'form-horizontal'])!!}
+	<div class="form-group">
+		  <div class="row">
+		    {!!Form::label('Seleccione organizaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+		    <div class="col-sm-4">
+		      {!!Form::select('organization_id',$organizations, 
+		           null, 
+		          ['id' => 'org','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+		    </div>
+		 </div>
+	</div>
+	<br>
+	<div class="form-group">
+		<center>
+			{!!Form::submit('Seleccionar', ['class'=>'btn btn-success'])!!}
+		</center>
+	</div>
+	{!!Form::close()!!}
+@endif
 
 			</div>
 		</div>

@@ -208,7 +208,7 @@ function eliminar(id,name,kind,type)
 }
 
 //función para eliminar evidencias
-function eliminar_ev(id,kind)
+function eliminar_ev(id,kind,name)
 {
 	swal({   title: "Atención!",
 		   text: "Esta seguro de eliminar este documento?",
@@ -219,7 +219,7 @@ function eliminar_ev(id,kind)
 		   cancelButtonText: "Cancelar",   
 		   closeOnConfirm: false }, 
 		   function(){
-		   		$.get('evidences.delete.'+id+','+kind, function (result) {
+		   		$.get('evidences.delete.'+id+','+kind+','+name, function (result) {
 		   			swal({   title: "",
 		   			   text: "El documento fue eliminado con éxito ",
 		   			   type: "success",   

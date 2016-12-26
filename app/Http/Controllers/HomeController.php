@@ -9,6 +9,7 @@ use Session;
 use DB;
 use Auth;
 use Redirect;
+use Ermtool\Http\Controllers\PlanesAccionController as PlanesAccion;
 
 class HomeController extends Controller
 {
@@ -34,6 +35,12 @@ class HomeController extends Controller
         {
             return Redirect::route('/');
         }
+
+        //--- SISTEMA DE ALERTA ---//
+        $planes = new PlanesAccion;
+        //verificamos que hayan planes de acción próximos a cerrar
+        $plans = $planes->verificarFechaPlanes();
+
         //--- GENERAMOS HEATMAP PARA ÚLTIMA ENCUESTA DE EVALUACIÓN AGREGADA ---//
 
         //obtenemos id de última evaluación
@@ -126,13 +133,13 @@ class HomeController extends Controller
         {
             return view('home',['nombre'=>$nombre,'descripcion'=>$descripcion,
                                         'riesgos'=>$riesgos,'prom_proba'=>$prom_proba,
-                                        'prom_criticidad'=>$prom_criticidad]);
+                                        'prom_criticidad'=>$prom_criticidad,'plans' => $plans]);
         }
         else if (Session::get('languaje') == 'en')
         {
             return view('en.home',['nombre'=>$nombre,'descripcion'=>$descripcion,
                                         'riesgos'=>$riesgos,'prom_proba'=>$prom_proba,
-                                        'prom_criticidad'=>$prom_criticidad]);
+                                        'prom_criticidad'=>$prom_criticidad,'plans' => $plans]);
         }
     }
 

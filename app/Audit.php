@@ -9,6 +9,12 @@ class Audit extends Model
 {
     protected $fillable = ['name','description'];
 
+    public static function name($id)
+    {
+        $res = DB::table('audits')->where('id', $id)->value('name');
+        return $res;
+    }
+/*
     public static function name($audit_id)
     {
     	$res = DB::table('audits')
@@ -19,7 +25,7 @@ class Audit extends Model
 
     	return $res->name;
     }
-
+*/
     //obtiene auditorías que contienen hallazgos
     public static function getAuditsFromIssues($org)
     {
@@ -28,8 +34,8 @@ class Audit extends Model
                     ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
                     ->join('audits','audits.id','=','audit_audit_plan.audit_id')
                     ->where('audit_plans.organization_id','=',$org)
-                    ->select('audit_audit_plan.id','audit_plans.name as audit_plan','audits.name','audits.description')
-                    ->groupBy('audit_audit_plan.id')
+                    ->select('audits.id','audit_plans.name as audit_plan','audits.name','audits.description')
+                    ->groupBy('audits.id')
                     ->get();
 
         return $audits;
