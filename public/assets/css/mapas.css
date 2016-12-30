@@ -146,6 +146,7 @@
 	padding-left:10px;
 	font-weight: bold;
 	width: 100%;
+
 	/*border-left: thick solid #CCCCCC;*/
 
 	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);
@@ -154,18 +155,30 @@
 .procesos1 {
 	background-color:#F5BCA9;
 	width: 24%;
+	min-height:500px;
+	height: auto !important;
+	height:500px;
 }
 .procesos2 {
 	background-color:#04B4AE;
-	width: 23%;
+	width: 24%;
+	min-height:500px;
+	height: auto !important;
+	height:500px;
 }
 .procesos3 {
 	background-color:#F5F6CE;	
-	width: 23%;
+	width: 24%;
+	min-height:500px;
+	height: auto !important;
+	height:500px;
 }
 .procesos4 {
 	background-color:#A9A9F5;
-	width: 23%;
+	width: 24%;
+	min-height:500px;
+	height: auto !important;
+	height:500px;
 }
 
 .aprendizaje {

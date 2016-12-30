@@ -1519,28 +1519,83 @@ class AuditoriasController extends Controller
                 {
                     $GLOBALS['audit_test']->hh_plan = NULL;
                 }
-                //vemos si el tipo de prueba es de control, de proceso o de riesgo
-                if ($_POST['type2'] == 1) //es de control
+
+                //ACTUALIZACIÓN 30-12: NUEVO FORMATO DE PRUEBAS (PROCESO O ENTIDAD)
+                if (isset($_POST['process_id']))
                 {
-                    if (isset($_POST['control_id_test_1']))
+                    $GLOBALS['audit_test']->process_id = $_POST['process_id'];
+                }
+                else
+                {
+                    $GLOBALS['audit_test']->process_id = NULL;
+                }
+
+                if ($_POST['type1'] == 1) //prueba a nivel de proceso
+                {
+                    //vemos si se especificaron los controles
+                    if (isset($_POST['control_id']))
                     {
-                        $GLOBALS['audit_test']->control_id = $_POST['control_id_test_1'];
+                        foreach ($_POST['control_id'] as $c)
+                        {
+                            //primero verificamos que no se encuentre vacío (ya que está enviando el último valor vacío)
+                            if ($c != NULL && $c != '')
+                            {
+                                //primero eliminaos todas las relaciones
+                                DB::table('audit_test_control')
+                                    ->where('audit_test_id','=',$GLOBALS['audit_test']->id)
+                                    ->delete();
+
+                                //almacenamos controles en audit_test_control
+                                DB::table('audit_test_control')
+                                    ->insert([
+                                        'audit_test_id' => $test_id,
+                                        'control_id' => $c
+                                        ]);
+                            }   
+                        }
+                    }
+                    //sino se agregaron controles, vemos si se especificaron subprocesos
+                    else if (isset($_POST['subprocess_id']))
+                    {
+                        foreach ($_POST['subprocess_id'] as $s)
+                        {
+                            DB::table('audit_test_subprocess')
+                                ->where('audit_test_id','=',$GLOBALS['audit_test']->id)
+                                ->delete();
+
+                            DB::table('audit_test_subprocess')
+                                ->insert([
+                                    'audit_test_id' => $test_id,
+                                    'subprocess_id' => $s
+                                    ]);
+                        }
                     }
                 }
-                else if ($_POST['type2'] == 2) //es de riesgo
+                else if ($_POST['type1'] == 2) //es prueba a nivel de entidad
                 {
-                    if (isset($_POST['risk_id_test_1']))
+                    //vemos si se especificaron los controles
+                    if (isset($_POST['control_id']))
                     {
-                        $GLOBALS['audit_test']->risk_id = $_POST['risk_id_test_1'];
+                        foreach ($_POST['control_id'] as $c)
+                        {
+                            //primero verificamos que no se encuentre vacío (ya que está enviando el último valor vacío)
+                            if ($c != NULL && $c != '')
+                            {
+
+                                DB::table('audit_test_control')
+                                    ->where('audit_test_id','=',$GLOBALS['audit_test']->id)
+                                    ->delete();
+                                //almacenamos controles en audit_test_control
+                                DB::table('audit_test_control')
+                                    ->insert([
+                                        'audit_test_id' => $test_id,
+                                        'control_id' => $c
+                                        ]);
+                            }   
+                        }
                     }
                 }
-                else if ($_POST['type2'] == 3) //es de proceso
-                {
-                    if (isset($_POST['subprocess_id_test_1']))
-                    {
-                        $GLOBALS['audit_test']->subprocess_id = $_POST['subprocess_id_test_1'];
-                    }
-                }
+                
                 if ($GLOBALS['req']->file('file_test') != NULL)
                 {
                     foreach ($GLOBALS['req']->file('file_test') as $file)
@@ -1644,7 +1699,7 @@ class AuditoriasController extends Controller
                     $hh = NULL;
                 }
 
-                //ACTUALIZACIÓN 07-12-16: La prueba ya no puede ser de riesgo; estará orientada a proceso o entidad; si es de proceso se podrá se dejará abierto si se seleccionan los controles o los subprocesos o sólo el proceso. A nivel de entidad se seleccionará sólo la perspectiva o se especificarán los controles a nivel de entidad
+                //ACTUALIZACIÓN 07-12-16: La prueba ya no puede ser de riesgo; estará orientada a proceso o entidad; si es de proceso se dejará abierto si se seleccionan los controles o los subprocesos o sólo el proceso. A nivel de entidad se seleccionará sólo la perspectiva o se especificarán los controles a nivel de entidad
 
                 if (isset($_POST['process_id']))
                 {

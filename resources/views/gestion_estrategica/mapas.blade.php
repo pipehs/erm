@@ -120,7 +120,8 @@
 		<tr>
 			<td class="perspectiva_proceso">Procesos&nbsp;&nbsp;&nbsp;&nbsp;</td>
 			<td>
-			<table>
+			<table style="width:100%;">
+			<tr><td>
 			<table class="procesos procesos1" border="0" align="center">
 			<tr><td style="vertical-align:top;"><h4><b><center>Gesti&oacute;n Operacional</center></b></h4></td></tr>
 			<tr>
@@ -144,7 +145,7 @@
 			</tr>
 			</table>
 			<table class="procesos procesos2" border="0" align="center">
-			<tr><td style="vertical-align:top; height: inherit;"><h4><b><center>Gesti&oacute;n de Clientes</center></b></h4>
+			<tr><td style="vertical-align:top;"><h4><b><center>Gesti&oacute;n de Clientes</center></b></h4>
 			
 				@foreach ($objectives as $obj)
 					@if ($obj['perspective'] == 2 && $obj['perspective2'] == 2)
@@ -205,7 +206,7 @@
 					@endif
 				@endforeach
 			</table>
-
+			</td></tr></table>
 			</td>
 		</tr>
 
@@ -229,7 +230,6 @@
 			</table>
 			</td>
 		</tr>
-
 	</table>
 
 	@else

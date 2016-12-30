@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Agregar Organizaci&oacute;n')
+@section('title', 'Editar Objetivo corporativo')
 
 @section('content')
 
@@ -56,5 +56,10 @@
 @stop
 
 @section('scripts2')
+<script>
+$(document).ready(function () {
+	$("#perspective").change();
+});
+</script>
 {!!Html::script('assets/js/create_objectives.js')!!}
 @stop
