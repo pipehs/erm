@@ -87,13 +87,15 @@ class GestionEstrategicaController extends Controller
             //obtenemos organizaciones ---> Expiró 05-10-2016
             //$organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
+            $org_name = \Ermtool\Organization::name($_GET['org_id']);
+
             if (Session::get('languaje') == 'en')
             {
-                return view('en.gestion_estrategica.create_plan',['org_id' => $_GET['org_id']]);
+                return view('en.gestion_estrategica.create_plan',['org_id' => $_GET['org_id'],'org_name' => $org_name]);
             }
             else
             {
-                return view('gestion_estrategica.create_plan',['org_id' => $_GET['org_id']]);
+                return view('gestion_estrategica.create_plan',['org_id' => $_GET['org_id'],'org_name' => $org_name]);
             }
         }
     }
@@ -273,7 +275,7 @@ class GestionEstrategicaController extends Controller
                         ->join('kpi_objective','kpi_objective.kpi_id','=','kpi.id')
                         ->join('objectives','objectives.id','=','kpi_objective.objective_id')
                         ->where('objectives.organization_id','=',$_GET['organization_id'])
-                        ->select('kpi.id','kpi.name','kpi.description','kpi.stakeholder_id','kpi.goal','objectives.name as obj_name','objectives.perspective as perspective')
+                        ->select('kpi.id','kpi.name','kpi.description','kpi.stakeholder_id','kpi.goal','objectives.name as obj_name','objectives.perspective as perspective','kpi.initial_value')
                         ->get();
 
             $i = 0;
@@ -281,24 +283,26 @@ class GestionEstrategicaController extends Controller
             {
                 //hacemos ciclo para obtener última medición de cada kpi
                 //para esto primero obtenemos la fecha de la última medición (si es que hay mediciones)
-                $max_date = DB::table('kpi_measurements')
-                            ->where('kpi_id','=',$k->id)
-                            ->where('status','=',1)
-                            ->max('updated_at');
+                //ACTUALIZACIÓN 20-01-17: Obtenemos último periódo evaluado
+                $last_period = \Ermtool\kpi::getLastEvaluationPeriod($k->id);
+
+                $max_updated = DB::table('kpi_measurements')
+                        ->where('kpi_id','=',$k->id)
+                        ->where('status','=',1)
+                        ->max('updated_at');
 
                 //ahora si es que hay fecha, obtenemos datos de última eval
-                if ($max_date)
+                if ($max_updated)
                 {
                     $last_eval = DB::table('kpi_measurements')
                             ->where('kpi_id','=',$k->id)
-                            ->where('updated_at','=',$max_date)
+                            ->where('updated_at','=',$max_updated)
                             ->select('value','status')
                             ->first();
 
                     $last_eval_value = $last_eval->value;
                     $last_eval_status = $last_eval->status;
-                    $date_last = new DateTime($max_date);
-                    $date_last_eval = date_format($date_last, 'd-m-Y');
+                    $date_last_eval = $last_period;
                 }
                 else
                 {   //Resulta más fácil configurarlo los mensajes aquí que en la vista (en este caso)
@@ -386,6 +390,24 @@ class GestionEstrategicaController extends Controller
                 {
                     $goal = $k->goal;
                 }
+                switch ($k->initial_value) 
+                {
+                    case 1:
+                        $init = 'Clp';
+                        break;
+                    case 2:
+                        $init = 'US Dlls';
+                        break;
+                    case 3:
+                        $init = 'Porcentaje';
+                        break;
+                    case 4:
+                        $init = 'Cantidad';
+                        break;
+                    default:
+                        $init = 'No se ha definido';
+                        break;
+                }
                 $kpi[$i] = [
                     'id' => $k->id,
                     'name' => $k->name,
@@ -398,6 +420,7 @@ class GestionEstrategicaController extends Controller
                     'perspective' => $k->perspective,
                     'objective' => $k->obj_name,
                     'status_validate' => $status,
+                    'initial_value' => $init,
                 ];
 
                 $i += 1;
@@ -430,7 +453,7 @@ class GestionEstrategicaController extends Controller
                         ->join('kpi_objective','kpi_objective.kpi_id','=','kpi.id')
                         ->join('objectives','objectives.id','=','kpi_objective.objective_id')
                         ->where('objectives.id','=',$id)
-                        ->select('kpi.id','kpi.name','kpi.description','kpi.stakeholder_id','kpi.goal','objectives.name as obj_name','objectives.perspective as perspective','kpi.measurement_unit','kpi.periodicity','kpi.calculation_method')
+                        ->select('kpi.id','kpi.name','kpi.description','kpi.stakeholder_id','kpi.goal','objectives.name as obj_name','objectives.perspective as perspective','kpi.measurement_unit','kpi.periodicity','kpi.calculation_method','kpi.initial_value')
                         ->get();
 
             $i = 0;
@@ -438,24 +461,26 @@ class GestionEstrategicaController extends Controller
             {
                 //hacemos ciclo para obtener última medición de cada kpi
                 //para esto primero obtenemos la fecha de la última medición (si es que hay mediciones)
-                $max_date = DB::table('kpi_measurements')
-                            ->where('kpi_id','=',$k->id)
-                            ->where('status','=',1)
-                            ->max('updated_at');
+                //ACTUALIZACIÓN 20-01-17: Obtenemos último periódo evaluado
+                $last_period = \Ermtool\kpi::getLastEvaluationPeriod($k->id);
+
+                $max_updated = DB::table('kpi_measurements')
+                        ->where('kpi_id','=',$k->id)
+                        ->where('status','=',1)
+                        ->max('updated_at');
 
                 //ahora si es que hay fecha, obtenemos datos de última eval
-                if ($max_date)
+                if ($max_updated)
                 {
                     $last_eval = DB::table('kpi_measurements')
                             ->where('kpi_id','=',$k->id)
-                            ->where('updated_at','=',$max_date)
+                            ->where('updated_at','=',$max_updated)
                             ->select('value','status')
                             ->first();
 
                     $last_eval_value = $last_eval->value;
                     $last_eval_status = $last_eval->status;
-                    $date_last = new DateTime($max_date);
-                    $date_last_eval = date_format($date_last, 'd-m-Y');
+                    $date_last_eval = $last_period;
                 }
                 else
                 {   //Resulta más fácil configurarlo los mensajes aquí que en la vista (en este caso)
@@ -524,6 +549,25 @@ class GestionEstrategicaController extends Controller
                 {
                     $goal = $k->goal;
                 }
+
+                switch ($k->initial_value) 
+                {
+                    case 1:
+                        $init = 'Clp';
+                        break;
+                    case 2:
+                        $init = 'US Dlls';
+                        break;
+                    case 3:
+                        $init = 'Porcentaje';
+                        break;
+                    case 4:
+                        $init = 'Cantidad';
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
                 $kpi[$i] = [
                     'id' => $k->id,
                     'name' => $k->name,
@@ -536,7 +580,7 @@ class GestionEstrategicaController extends Controller
                     'objective' => $k->obj_name,
                     'periodicity' => $k->periodicity,
                     'calculation_method' => $k->calculation_method,
-                    'measurement_unit' => $k->measurement_unit,
+                    'measurement_unit' => $init,
                     'status_validate' => $status,
                 ];
 
@@ -613,7 +657,8 @@ class GestionEstrategicaController extends Controller
                 {
                     //obtenemos código
                     $code = \Ermtool\Objective::where('id',$impacted->id)->value('code');
-                    $obj_temp[$i] = $code;
+                    $description_impacted = \Ermtool\Objective::where('id',$impacted->id)->value('description');
+                    $obj_temp[$i] = ['code' => $code, 'description' => $description_impacted];
                     $i += 1;
                 }
 
@@ -624,7 +669,7 @@ class GestionEstrategicaController extends Controller
                     'perspective' => $obj->perspective,
                     'perspective2' => $obj->perspective2,
                     'description' => $obj->description,
-                    'code_impacted' => $obj_temp,
+                    'impacted' => $obj_temp,
                 ];
 
                 $j += 1;
@@ -661,7 +706,9 @@ class GestionEstrategicaController extends Controller
                                 ->join('strategic_plans','strategic_plans.id','=','objectives.strategic_plan_id')
                                 ->where('strategic_plans.status',1)
                                 ->where('objectives.status',0)
-                                ->lists('objectives.name','objectives.id');
+                                ->select('objectives.id', DB::raw('CONCAT (objectives.code, " - ", objectives.name) AS code_name'))
+                                ->orderBy('code')
+                                ->lists('code_name','objectives.id');
 
             $org_selected = \Ermtool\Organization::where('id',$id)->value('name');
 
@@ -809,6 +856,97 @@ class GestionEstrategicaController extends Controller
                             ]);
                 }
 
+                //ahora almacenamos primera evaluación
+                if ($_POST['first_evaluation'] != "")
+                {
+                    //ingresamos según periodicidad
+                    if ($_POST['periodicity'] == 3) //Trimestral
+                    {
+                        //calculamos trimestre
+                        if (date('m') >= 1 || date('m') <= 3)
+                        {
+                            $trim = 1;
+                        }
+                        else if (date('m') >= 4 || date('m') <= 6)
+                        {
+                            $trim = 2;
+                        }
+                        else if (date('m') >= 7 || date('m') <= 9)
+                        {
+                            $trim = 3;
+                        }
+                        else if (date('m') >= 10 || date('m') <= 12)
+                        {
+                            $trim = 4;
+                        }
+
+                                DB::table('kpi_measurements')
+                                    ->insert([
+                                        'kpi_id' => $kpi->id,
+                                        'value' => $_POST['first_evaluation'],
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s'),
+                                        'status' => 0,
+                                        'trimester' => $trim,
+                                        'year' => date('Y')
+                                        ]);
+                           
+                    }
+                    else if ($_POST['periodicity'] == 2)
+                    {
+                        //calculamos semestre
+                        if (date('m') >= 1 || date('m') <= 6)
+                        {
+                            $sem = 1;
+                        }
+                        else if (date('m') >= 7 || date('m') <= 12)
+                        {
+                            $sem = 2;
+                        }
+                    
+                                DB::table('kpi_measurements')
+                                    ->insert([
+                                        'kpi_id' => $kpi->id,
+                                        'value' => $_POST['first_evaluation'],
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s'),
+                                        'status' => 0,
+                                        'semester' => $sem,
+                                        'year' => date('Y')
+                                        ]);
+
+                    }
+                    else if ($_POST['periodicity'] == 1) //mensual 
+                    {
+ 
+                                DB::table('kpi_measurements')
+                                    ->insert([
+                                        'kpi_id' => $kpi->id,
+                                        'value' => $_POST['first_evaluation'],
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s'),
+                                        'status' => 0,
+                                        'month' => date('m'),
+                                        'year' => date('Y')
+                                        ]);
+
+                    }
+
+                    else //es anual
+                    {
+                                DB::table('kpi_measurements')
+                                    ->insert([
+                                        'kpi_id' => $kpi->id,
+                                        'value' => $_POST['first_evaluation'],
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s'),
+                                        'status' => 0,
+                                        'year' => date('Y')
+                                        ]);
+
+                    }
+                }
+
                 if (isset($kpi))
                 {
                     if (Session::get('languaje') == 'en')
@@ -933,6 +1071,96 @@ class GestionEstrategicaController extends Controller
                         'created_at' => date('Y-m-d H:i:s')
                     ]);
 
+                //ahora almacenamos primera evaluación
+                if ($_POST['first_evaluation'] == "")
+                {
+                    //ingresamos según periodicidad
+                    if ($_POST['periodicity'] == 3) //Trimestral
+                    {
+                        //calculamos trimestre
+                        if (date('m') >= 1 || date('m') <= 3)
+                        {
+                            $trim = 1;
+                        }
+                        else if (date('m') >= 4 || date('m') <= 6)
+                        {
+                            $trim = 2;
+                        }
+                        else if (date('m') >= 7 || date('m') <= 9)
+                        {
+                            $trim = 3;
+                        }
+                        else if (date('m') >= 10 || date('m') <= 12)
+                        {
+                            $trim = 4;
+                        }
+
+                                DB::table('kpi_measurements')
+                                    ->insert([
+                                        'kpi_id' => $kpi->id,
+                                        'value' => $_POST['first_evaluation'],
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s'),
+                                        'status' => 0,
+                                        'trimester' => $trim,
+                                        'year' => date('Y')
+                                        ]);
+                           
+                    }
+                    else if ($_POST['periodicity'] == 2)
+                    {
+                        //calculamos semestre
+                        if (date('m') >= 1 || date('m') <= 6)
+                        {
+                            $sem = 1;
+                        }
+                        else if (date('m') >= 7 || date('m') <= 12)
+                        {
+                            $sem = 2;
+                        }
+                    
+                                DB::table('kpi_measurements')
+                                    ->insert([
+                                        'kpi_id' => $kpi->id,
+                                        'value' => $_POST['first_evaluation'],
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s'),
+                                        'status' => 0,
+                                        'semester' => $sem,
+                                        'year' => date('Y')
+                                        ]);
+
+                    }
+                    else if ($_POST['periodicity'] == 1) //mensual 
+                    {
+ 
+                                DB::table('kpi_measurements')
+                                    ->insert([
+                                        'kpi_id' => $kpi->id,
+                                        'value' => $_POST['first_evaluation'],
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s'),
+                                        'status' => 0,
+                                        'month' => date('m'),
+                                        'year' => date('Y')
+                                        ]);
+
+                    }
+
+                    else //es anual
+                    {
+                                DB::table('kpi_measurements')
+                                    ->insert([
+                                        'kpi_id' => $kpi->id,
+                                        'value' => $_POST['first_evaluation'],
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s'),
+                                        'status' => 0,
+                                        'year' => date('Y')
+                                        ]);
+
+                    }
+                }
 
                 if (isset($kpi))
                 {
@@ -1056,7 +1284,50 @@ class GestionEstrategicaController extends Controller
         {
             $kpi = \Ermtool\kpi::find($id);
 
-            //obtenemos AÑO De última evaluación
+            //asignamos unidad de medida
+            switch ($kpi->initial_value) {
+                case 1:
+                    $kpi->initial_value = 'Clp';
+                    break;
+                case 2:
+                    $kpi->initial_value = 'Us Dlls';
+                    break;
+                case 3:
+                    $kpi->initial_value = '%';
+                    break;
+                case 4:
+                    $kpi->initial_value = '';
+                    break;
+                    
+                default:
+                    $kpi->initial_value = '';
+                    break;
+            }
+            
+            //obtenemos fecha de término del KPI
+            $final_date = $kpi->getFinalDate($kpi->id);
+
+            if ($final_date->final_date != NULL)
+            {
+                if (Session::get('languaje') == 'en')
+                {
+                    $meses = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                }
+                else
+                {
+                    $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+                }
+                
+                $final_date = explode('-',$final_date->final_date);
+                $final_date = $final_date[2].' de '.$meses[$final_date[1]-1].' de '.$final_date[0];
+            }
+            else
+            {
+                $final_date = 'No se ha definido';
+            }
+            
+
+            //obtenemos AÑO de última evaluación
             $year = DB::table('kpi_measurements')
                                 ->where('kpi_id','=',$id)
                                 ->where('status','=',1)
@@ -1084,8 +1355,8 @@ class GestionEstrategicaController extends Controller
                                     ->where('kpi_id','=',$id)
                                     ->where('status','=',1)
                                     ->select('value','month','year')
-                                    ->orderBy('year','asc')
-                                    ->orderBy('month','asc')
+                                    ->orderBy('year','desc')
+                                    ->orderBy('month','desc')
                                     ->get();
             
                 }
@@ -1103,8 +1374,8 @@ class GestionEstrategicaController extends Controller
                                     ->where('kpi_id','=',$id)
                                     ->where('status','=',1)
                                     ->select('value','semester','year')
-                                    ->orderBy('year','asc')
-                                    ->orderBy('semester','asc')
+                                    ->orderBy('year','desc')
+                                    ->orderBy('semester','desc')
                                     ->get();
 
                 }
@@ -1122,8 +1393,8 @@ class GestionEstrategicaController extends Controller
                                     ->where('kpi_id','=',$id)
                                     ->where('status','=',1)
                                     ->select('value','trimester','year')
-                                    ->orderBy('year','asc')
-                                    ->orderBy('trimester','asc')
+                                    ->orderBy('year','desc')
+                                    ->orderBy('trimester','desc')
                                     ->get();
                 }
                 else if ($kpi->periodicity == 4) //Anual
@@ -1134,7 +1405,7 @@ class GestionEstrategicaController extends Controller
                                     ->where('kpi_id','=',$id)
                                     ->where('status','=',1)
                                     ->select('value','year')
-                                    ->orderBy('year','asc')
+                                    ->orderBy('year','desc')
                                     ->get();
                 }
             }
@@ -1157,22 +1428,22 @@ class GestionEstrategicaController extends Controller
                 {
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval, 'measurements' => $measurements]);
+                        return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval, 'measurements' => $measurements,'final_date' => $final_date]);
                     }
                     else
                     {
-                        return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval, 'measurements' => $measurements]);
+                        return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval, 'measurements' => $measurements,'final_date' => $final_date]);
                     }
                 }
                 else
                 {
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year, 'measurements' => $measurements]);
+                        return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year, 'measurements' => $measurements,'final_date' => $final_date]);
                     }
                     else
                     {
-                        return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year, 'measurements' => $measurements]);
+                        return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'org_id' => $_GET['org_id'],'last_eval' => $last_eval,'year' => $year, 'measurements' => $measurements,'final_date' => $final_date]);
                     }
                 }
             }
@@ -1182,22 +1453,22 @@ class GestionEstrategicaController extends Controller
                 {
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'obj_id' => $_GET['obj_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval,  'measurements' => $measurements]);
+                        return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'obj_id' => $_GET['obj_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval,  'measurements' => $measurements,'final_date' => $final_date]);
                     }
                     else
                     {
-                        return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'obj_id' => $_GET['obj_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval,  'measurements' => $measurements]);
+                        return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'obj_id' => $_GET['obj_id'],'last_eval' => $last_eval,'year' => $year,'eval'=>$eval,  'measurements' => $measurements,'final_date' => $final_date]);
                     }
                 }
                 else
                 {
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'obj_id' => $_GET['obj_id'],'last_eval' => $last_eval,'year' => $year,  'measurements' => $measurements]);
+                        return view('en.gestion_estrategica.medirkpi',['kpi' => $kpi,'obj_id' => $_GET['obj_id'],'last_eval' => $last_eval,'year' => $year,  'measurements' => $measurements,'final_date' => $final_date]);
                     }
                     else
                     {
-                        return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'obj_id' => $_GET['obj_id'],'last_eval' => $last_eval,'year' => $year,  'measurements' => $measurements]);
+                        return view('gestion_estrategica.medirkpi',['kpi' => $kpi,'obj_id' => $_GET['obj_id'],'last_eval' => $last_eval,'year' => $year,  'measurements' => $measurements,'final_date' => $final_date]);
                     }
                 }
             }
@@ -1496,7 +1767,7 @@ class GestionEstrategicaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-/*
+
     public function kpiUpdate(Request $request, $id1)
     {
         if (Auth::guest())
@@ -1520,15 +1791,6 @@ class GestionEstrategicaController extends Controller
                     $calc_method = $_POST['calculation_method'];
                 }
 
-                if ($_POST['periodicity'] == "")
-                {
-                    $periodicity = NULL;
-                }
-                else
-                {
-                    $periodicity = $_POST['periodicity'];
-                }
-
                 if ($_POST['stakeholder_id'] == "")
                 {
                     $stake = NULL;
@@ -1536,15 +1798,6 @@ class GestionEstrategicaController extends Controller
                 else
                 {
                     $stake = $_POST['stakeholder_id'];
-                }
-
-                if ($_POST['initial_value'] == "")
-                {
-                    $initial_value = NULL;
-                }
-                else
-                {
-                    $initial_value = $_POST['initial_value'];
                 }
 
                 if ($_POST['initial_date'] == "")
@@ -1577,123 +1830,7 @@ class GestionEstrategicaController extends Controller
                 $kpi->name = $_POST['name'];
                 $kpi->description = $_POST['description'];
                 $kpi->calculation_method = $calc_method;
-                $kpi->periodicity = $periodicity;
                 $kpi->stakeholder_id = $stake;
-                $kpi->initial_value = $initial_value;
-                $kpi->initial_date = $initial_date;
-                $kpi->final_date = $final_date;
-                $kpi->goal = $goal;
-
-                //primero que todo, eliminaremos los objetivos anteriores del kpi para evitar repeticiones
-                DB::table('kpi_objective')->where('kpi_id',$GLOBALS['id'])->delete();
-
-                //ahora, agregamos posibles nuevas relaciones
-                foreach($_POST['objectives_id'] as $obj_id)
-                {
-                    DB::table('kpi_objective')->insert([
-                        'objective_id'=>$obj_id,
-                        'kpi_id'=>$GLOBALS['id']
-                        ]);
-                }
-
-                $kpi->save();
-                if (Session::get('languaje') == 'en')
-                {
-                    Session::flash('message','KPI successfully generated');
-                }
-                else
-                {
-                    Session::flash('message','KPI generado correctamente');
-                }
-            });
-
-            return Redirect::to('kpi2?organization_id='.$_POST['org_id']);
-        }
-    }
-*/
-    public function kpiUpdate(Request $request, $id1)
-    {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
-            global $id;
-            $id = $id1;
-            DB::transaction(function() {
-
-                $kpi = \Ermtool\kpi::find($GLOBALS['id']);
-
-                if ($_POST['calculation_method'] == "")
-                {
-                    $calc_method = NULL;
-                }
-                else
-                {
-                    $calc_method = $_POST['calculation_method'];
-                }
-
-                if ($_POST['periodicity'] == "")
-                {
-                    $periodicity = NULL;
-                }
-                else
-                {
-                    $periodicity = $_POST['periodicity'];
-                }
-
-                if ($_POST['stakeholder_id'] == "")
-                {
-                    $stake = NULL;
-                }
-                else
-                {
-                    $stake = $_POST['stakeholder_id'];
-                }
-
-                if ($_POST['measurement_unit'] == "")
-                {
-                    $measurement_unit = NULL;
-                }
-                else
-                {
-                    $measurement_unit = $_POST['measurement_unit'];
-                }
-
-                if ($_POST['initial_date'] == "")
-                {
-                    $initial_date = NULL;
-                }
-                else
-                {
-                    $initial_date = $_POST['initial_date'];
-                }
-
-                if ($_POST['final_date'] == "")
-                {
-                    $final_date = NULL;
-                }
-                else
-                {
-                    $final_date = $_POST['final_date'];
-                }
-
-                if ($_POST['goal'] == "")
-                {
-                    $goal = NULL;
-                }
-                else
-                {
-                    $goal = $_POST['goal'];
-                }
-
-                $kpi->name = $_POST['name'];
-                $kpi->description = $_POST['description'];
-                $kpi->calculation_method = $calc_method;
-                $kpi->periodicity = $periodicity;
-                $kpi->stakeholder_id = $stake;
-                $kpi->measurement_unit = $measurement_unit;
                 $kpi->initial_date = $initial_date;
                 $kpi->final_date = $final_date;
                 $kpi->goal = $goal;

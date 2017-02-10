@@ -64,7 +64,7 @@
                   <div class="col-sm-3">
                     {!!Form::select('organization_id',$organizaciones, 
                          null, 
-                         ['id' => 'org','placeholder'=>'- Seleccione -'])!!}
+                         ['id' => 'org','placeholder'=>'- Seleccione -','required'=>'true'])!!}
                   </div>
                 </div>
             </div>
@@ -75,7 +75,7 @@
                   <div class="col-sm-3">
                     {!!Form::select('kind',(['0'=>'Riesgos de proceso','1'=>'Riesgos de negocio']), 
                          null, 
-                         ['id' => 'kind','placeholder'=>'- Seleccione -'])!!}
+                         ['id' => 'kind','placeholder'=>'- Seleccione -','required'=>'true'])!!}
                   </div>
                 </div>
             </div>
@@ -86,7 +86,7 @@
                   <div class="col-sm-3">
                     {!!Form::select('kind2',(['0'=>'Riesgos inherentes','1'=>'Riesgos inherentes v/s Riesgos controlados']), 
                          null, 
-                         ['id' => 'kind2','placeholder'=>'- Seleccione -'])!!}
+                         ['id' => 'kind2','placeholder'=>'- Seleccione -','required'=>'true'])!!}
                   </div>
                 </div>
             </div>

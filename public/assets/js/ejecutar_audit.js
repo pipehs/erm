@@ -180,7 +180,7 @@ function testResult(id,hh)
 	if ($("#test_result_"+id).val() == 0) //el resultado de la prueba es inefectivo
 	{
 		$("#issues_"+id).empty();
-		resultado += '</br><a href="hallazgos_test.'+id+'" class="btn btn-info">Gestionar Hallazgos</button>';
+		resultado += '</br><a href="#" onclick="gestionarHallazgos('+id+')" class="btn btn-info">Gestionar Hallazgos</button>';
 		$("#issues_"+id).append(resultado);
 	}
 	else if ($("#test_result_"+id).val() == 1)

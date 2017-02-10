@@ -18,12 +18,6 @@ class EvaluacionRiesgosController extends Controller
 {
     public function getEvalRisks($eval_id,$rut)
     {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
             //obtenemos datos
             $evaluation_risk = DB::table('evaluation_risk')->where('evaluation_id','=',$eval_id)->get();
 
@@ -98,7 +92,6 @@ class EvaluacionRiesgosController extends Controller
             }
 
             return ['riesgos'=>$riesgos,'user_answers'=>$user_answers];
-        }
     }
     public function mensaje($id)
     {
@@ -189,6 +182,9 @@ class EvaluacionRiesgosController extends Controller
         {
             $riesgos_objetivos = array();
             $riesgos_subprocesos = array();
+
+            global $verificador;
+            $verificador = 0;
             if (isset($_POST['manual'])) //Se está evaluando manualmente
             {
 
@@ -233,60 +229,77 @@ class EvaluacionRiesgosController extends Controller
             else //se está creando encuesta de evaluación
             {
                 DB::transaction(function () {
-
-                    if ($_POST['expiration_date'] == "" || $_POST['expiration_date'] == NULL)
+                    if (!isset($_POST['objective_risk_id']) && !isset($_POST['objective_risk_id'])) //no se ingresó ningún riesgo
                     {
-                        $exp_date = NULL;
+                        Session::flash('error','Debe ingresar a lo menos un riesgo');
+                        $GLOBALS['verificador'] = 1;
                     }
                     else
                     {
-                        $exp_date = $_POST['expiration_date'];
-                    }
-                    //agregamos evaluación y obtenemos id
-                    $eval_id = DB::table('evaluations')->insertGetId([
-                        'name' => $_POST['name'],
-                        'consolidation' => 0,
-                        'description' => $_POST['description'],
-                        'created_at' => date('Y-m-d H:i:s'),
-                        'updated_at' => date('Y-m-d H:i:s'),
-                        'expiration_date' => $exp_date,
-                        ]);
-
-                    if (isset($_POST['objective_risk_id'])) //insertamos primero riesgos de negocio -> si es que se agregaron
-                    {
-                        foreach ($_POST['objective_risk_id'] as $objective_risk_id)
-                        {                   
-                            //insertamos riesgo de negocio en evaluation_risk
-                            DB::table('evaluation_risk')->insert([
-                                'evaluation_id' => $eval_id,
-                                'objective_risk_id' => $objective_risk_id,
-                                ]); 
-                        }
-                    }
-
-                    $i = 0;
-                    if (isset($_POST['risk_subprocess_id'])) //ahora insertamos riesgos de subproceso (si es que se agregaron)
-                    {
-                        foreach ($_POST['risk_subprocess_id'] as $subprocess_risk_id)
+                        if ($_POST['expiration_date'] == "" || $_POST['expiration_date'] == NULL)
                         {
-                            //inseratmos riesgo de subproceso en evaluation_risk
-                            DB::table('evaluation_risk')->insert([
-                                'evaluation_id' => $eval_id,
-                                'risk_subprocess_id' => $subprocess_risk_id,
-                                ]); 
+                            $exp_date = NULL;
+                        }
+                        else
+                        {
+                            $exp_date = $_POST['expiration_date'];
+                        }
+                        //agregamos evaluación y obtenemos id
+                        $eval_id = DB::table('evaluations')->insertGetId([
+                            'name' => $_POST['name'],
+                            'consolidation' => 0,
+                            'description' => $_POST['description'],
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                            'expiration_date' => $exp_date,
+                            ]);
+
+                    
+                        if (isset($_POST['objective_risk_id'])) //insertamos primero riesgos de negocio -> si es que se agregaron
+                        {
+                            foreach ($_POST['objective_risk_id'] as $objective_risk_id)
+                            {                   
+                                //insertamos riesgo de negocio en evaluation_risk
+                                DB::table('evaluation_risk')->insert([
+                                    'evaluation_id' => $eval_id,
+                                    'objective_risk_id' => $objective_risk_id,
+                                    ]); 
+                            }
+                        }
+
+                        $i = 0;
+                        if (isset($_POST['risk_subprocess_id'])) //ahora insertamos riesgos de subproceso (si es que se agregaron)
+                        {
+                            foreach ($_POST['risk_subprocess_id'] as $subprocess_risk_id)
+                            {
+                                //inseratmos riesgo de subproceso en evaluation_risk
+                                DB::table('evaluation_risk')->insert([
+                                    'evaluation_id' => $eval_id,
+                                    'risk_subprocess_id' => $subprocess_risk_id,
+                                    ]); 
+                            }
+                        }
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('message','Assessment poll successfully created');
+                        }
+                        else
+                        {
+                            Session::flash('message','Encuesta de evaluacion agregada correctamente');
                         }
                     }
-                    if (Session::get('languaje') == 'en')
-                    {
-                        Session::flash('message','Assessment poll successfully created');
-                    }
-                    else
-                    {
-                        Session::flash('message','Encuesta de evaluacion agregada correctamente');
-                    }
+                    
                 });
 
-                return Redirect::to('evaluacion_agregadas');           
+                if ($verificador == 1)
+                {
+                    return Redirect::to('evaluacion')->withInput();
+                }
+                else
+                {
+                    return Redirect::to('evaluacion_agregadas');
+                }
+                        
             }
         }
     }
@@ -596,56 +609,68 @@ class EvaluacionRiesgosController extends Controller
     //función que generará la encuesta para que el usuario pueda responderla
     public function generarEncuesta()
     {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
             $tipo = 1; //identifica que es encuesta y no evaluación manual
             $encuesta = \Ermtool\Evaluation::find($_POST['encuesta_id']);
-            $res = array();
 
-            //primero, verificamos que el usuario exista
-            $user = DB::table('evaluation_stakeholder')
-                        ->where('evaluation_id','=',$_POST['encuesta_id'])
-                        ->where('stakeholder_id','=',$_POST['id'])
-                        ->select('stakeholder_id')
-                        ->first();
-
-            if (!$user)
+            //vemos si la encuesta se encuentra consolidada o no (ACTUALIZACIÖN: 24-01-17)
+            if ($encuesta->consolidation == 1)
             {
                 if (Session::get('languaje') == 'en')
                 {
-                    Session::flash('error',"The poll doesn't send to the entered user");
+                    Session::flash('error',"The poll si consolidated so it can not be answered");
                     return view('en.evaluacion.verificar_encuesta',['encuesta'=>$encuesta]);
                 }
                 else
                 {
-                    Session::flash('error','La encuesta no ha sido enviada al usuario ingresado');
+                    Session::flash('error','La encuesta se encuentra consolidada por lo que no puede ser respondida');
                     return view('evaluacion.verificar_encuesta',['encuesta'=>$encuesta]);
                 }
             }
             else
             {   
-                //cada uno de los riesgos de la evaluación
-                $res = $this->getEvalRisks($_POST['encuesta_id'],$user->stakeholder_id);
-                if (Session::get('languaje') == 'en')
+                $res = array();
+
+                //primero, verificamos que el usuario exista
+                $user = DB::table('evaluation_stakeholder')
+                            ->where('evaluation_id','=',$_POST['encuesta_id'])
+                            ->where('stakeholder_id','=',$_POST['id'])
+                            ->select('stakeholder_id')
+                            ->first();
+
+                if (!$user)
                 {
-                    $tipos_impacto = \Ermtool\Eval_description::getImpactValues(2); //2 es inglés
-                    $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(2);
-                    
-                    return view('en.evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id]);
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('error',"The poll doesn't send to the entered user");
+                        return view('en.evaluacion.verificar_encuesta',['encuesta'=>$encuesta]);
+                    }
+                    else
+                    {
+                        Session::flash('error','La encuesta no ha sido enviada al usuario ingresado');
+                        return view('evaluacion.verificar_encuesta',['encuesta'=>$encuesta]);
+                    }
                 }
                 else
-                {
-                    $tipos_impacto = \Ermtool\Eval_description::getImpactValues(1);
-                    $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
+                {   
+                    //cada uno de los riesgos de la evaluación
+                    $res = $this->getEvalRisks($_POST['encuesta_id'],$user->stakeholder_id);
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $tipos_impacto = \Ermtool\Eval_description::getImpactValues(2); //2 es inglés
+                        $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(2);
+                        
+                        return view('en.evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id]);
+                    }
+                    else
+                    {
+                        $tipos_impacto = \Ermtool\Eval_description::getImpactValues(1);
+                        $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
 
-                    return view('evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id]);
+                        return view('evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id]);
+                    }
                 }
             }
-        }
+            
     }
 
     //Función para enviar correo con link a la encuesta
@@ -747,14 +772,16 @@ class EvaluacionRiesgosController extends Controller
 
     public function guardarEvaluacion(Request $request)
     {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
             //primero verificamos si el rut ingresado corresponde a algún stakeholder
-            $stakeholder = \Ermtool\Stakeholder::find($request['rut']);
+            //ACTUALIZACIÓN 24-01: Si es que la evaluación es manual, se debe verificar que el usuario exista en la tabla users
+            if (isset($_POST['tipo']) && $_POST['tipo'] == 0)
+            {
+                $stakeholder = \Ermtool\User::find($request['rut']);
+            }
+            else
+            {
+                $stakeholder = \Ermtool\Stakeholder::find($request['rut']);
+            }
 
             //Validación: Si la validación es pasada, el código continua
             //$this->validate($request, [
@@ -952,7 +979,6 @@ class EvaluacionRiesgosController extends Controller
                     return Redirect::to('evaluacion.encuesta.'.$request["evaluation_id"])->withInput();
                 }
             }
-        }
     }
 
     public function listHeatmap()
@@ -1556,12 +1582,6 @@ class EvaluacionRiesgosController extends Controller
 
     public function verificadorUserEncuesta($id)
     {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
             $encuesta = \Ermtool\Evaluation::find($id);
 
             if (Session::get('languaje') == 'en')
@@ -1572,7 +1592,7 @@ class EvaluacionRiesgosController extends Controller
             {
                 return view('evaluacion.verificar_encuesta',['encuesta'=>$encuesta]);
             }
-        }
+        
     }
 
     public function verRespuestas($eval_id,$rut)
@@ -1617,12 +1637,7 @@ class EvaluacionRiesgosController extends Controller
 
     public function updateEvaluacion(Request $request)
     {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {  
+
             DB::transaction(function() {
 
                 //verificamos si tipo = 0 (significaria que es evaluación manual por lo tanto se debe crear)
@@ -1671,9 +1686,9 @@ class EvaluacionRiesgosController extends Controller
                 }
             });
             
-            return view('en.evaluacion.encuestaresp');
+            return view('evaluacion.encuestaresp');
             //print_r($_POST);
-        }
+    
     }
 
 }

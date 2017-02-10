@@ -55,7 +55,13 @@
 	</div>
 </div>
 @stop
-
 @section('scripts2')
+<script>
+$(document).ready(function () {
+	perspective2_id = 0;
+	strategic_plan_id = {{ $strategic_plan_id }};
+});
+</script>
+
 {!!Html::script('assets/js/create_objectives.js')!!}
 @stop

@@ -39,7 +39,8 @@ class Audit_test extends Model
     public static function getMaxDate($control)
     {
         $max = DB::table('audit_tests')
-                ->where('control_id','=',$control)
+                ->join('audit_test_control','audit_test_control.audit_test_id','=','audit_tests.id')
+                ->where('audit_test_control.control_id','=',$control)
                 ->where('status','=',2)
                 ->max('updated_at');
 
@@ -49,12 +50,30 @@ class Audit_test extends Model
     public static function getTestFromDate($date,$control)
     {
         $test = DB::table('audit_tests')
-                ->where('updated_at','=',$date)
-                ->where('control_id','=',$control)
+                 ->join('audit_test_control','audit_test_control.audit_test_id','=','audit_tests.id')
+                ->where('audit_tests.updated_at','=',$date)
+                ->where('audit_test_control.control_id','=',$control)
                 ->where('status','=',2)
                 ->select('results')
                 ->first();
 
         return $test;
+    }
+
+    public static function getAuditTestsFromIssues($org)
+    {
+        $audits = DB::table('issues')
+                    ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                    ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                    ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                    ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                    ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                    ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                    ->where('audit_plans.organization_id','=',$org)
+                    ->select('audit_tests.id','audit_tests.name','audit_tests.description','audit_plans.name as audit_plan','audits.name as audit','audit_programs.name as program')
+                    ->groupBy('audit_tests.id')
+                    ->get();
+
+        return $audits;
     }
 }

@@ -115,14 +115,7 @@ class HomeController extends Controller
                 $riesgos[$i] = array('name' => $temp->name,
                                     'subobj' => $temp->subobj);
             }
-            //obtenemos nombre del riesgo y lo guardamos en array de riesgo con foreach
-            //$riesgos[$i] = \Ermtool\Risk::where('id',$evaluation->risk_id)->value('name');
-
-       /*
-            echo 
-                 "Riesgo: ".$riesgos[$i]."<br>".
-                 "Proba: ".$prom_proba[$i]."<br>".
-                 "Criti: ".$prom_criticidad[$i]."<hr>"; */
+            
             
             $i += 1;
         }

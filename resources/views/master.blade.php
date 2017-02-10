@@ -105,12 +105,6 @@
 			}
 		};
 
-		$("#file-3").fileinput({
-			showCaption: false,
-			browseClass: "btn btn-primary btn-lg",
-			fileType: "any"
-		});
-
 	</script>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" type="text/javascript"></script>
 	{!!Html::script('assets/js/fileinput.min.js')!!}
@@ -128,10 +122,6 @@
 	{!!Html::script('assets/js/heatmap.js')!!}
 	{!!Html::script('assets/js/exporting.js')!!}
 
-<!--
-	{!!Html::script('assets/js/jquery-1.10.2.js')!!}
-	{!!Html::script('assets/js/jquery-ui.js')!!} -->
-
 	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}
 
 	{!!Html::script('assets/js/jquery.min.js')!!}
@@ -140,6 +130,7 @@
 
 	{!!Html::script('assets/bootstrap-toggle-master/js/bootstrap2-toggle.min.js')!!}
 	
+
 
 	@yield('scripts2')
 

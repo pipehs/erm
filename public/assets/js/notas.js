@@ -56,7 +56,8 @@ function notas(id)
 					resultado += '<h4>Nota: '+this.description+'</h4>';
 
 					//agregamos evidencias
-					if (this.evidences == null)
+					//ACTUALIZACIÓN 30-01-17: No se muestran evidencias ya que pueden ser muchas
+					/*if (this.evidences == null)
 					{
 						resultado += '<font color="red">Esta nota no tiene evidencias agregadas</font><br>';
 					}
@@ -67,7 +68,7 @@ function notas(id)
 						$(this.evidences).each( function(i,evidence) {
 							resultado += '<div style="cursor:hand" id="descargar_'+id+'" onclick="descargar(0,\''+evidence.url+'\')"><font color="CornflowerBlue"><u>Descargar evidencia</u></font></div><br>';
 						});
-					}
+					}*/
 
 					if (this.answers == null)
 					{

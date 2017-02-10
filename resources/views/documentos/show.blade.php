@@ -183,7 +183,7 @@
 											<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 											{{ $file_name }}<br/>
 										@endif
-										<img src="assets/img/btn_eliminar2.png" height="40px" width="40px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $file_name }}')"><br/>
+										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $file_name }}')"><br/>
 										@if ($cont == 4)
 											</td></tr>
 											<?php $cont = 0; ?>
@@ -451,7 +451,7 @@
 											<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 											{{ $file_name }}<br/>
 										@endif
-										<img src="assets/img/btn_eliminar2.png" height="40px" width="40px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $file_name }}')"><br/>
+										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $file_name }}')"><br/>
 										@if ($cont == 4)
 											</td></tr>
 											<?php $cont = 0; ?>
@@ -527,9 +527,9 @@
 								@endif
 
 								@if ($kind == 4)
-									<img src="assets/img/btn_eliminar2.png" height="40px" width="40px" onclick="eliminar_ev({{ $risk->id }},1,'{{ $file_name }}')"><br/>
+									<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},1,'{{ $file_name }}')"><br/>
 								@elseif ($kind == 5)
-									<img src="assets/img/btn_eliminar2.png" height="40px" width="40px" onclick="eliminar_ev({{ $risk->id }},0,'{{ $file_name }}')"><br/>
+									<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},0,'{{ $file_name }}')"><br/>
 								@endif
 								@if ($cont == 4)
 									</td></tr>
@@ -600,7 +600,7 @@
 										<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 										{{ $file_name }}
 									@endif
-										<img src="assets/img/btn_eliminar2.png" height="40px" width="40px" onclick="eliminar_ev({{ $risk->id }},6,'{{ $file_name }}')"><br/>
+										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $risk['id'] }},6,'{{ $file_name }}')"><br/>
 									@if ($cont == 4)
 										</td></tr>
 										<?php $cont = 0; ?>

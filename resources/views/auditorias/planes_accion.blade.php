@@ -95,16 +95,51 @@ $("#audit").change(function() {
 								$(this.audit_tests).each( function(i,test) {
 									audit_test += '<h4>Prueba: '+test.name+'</h4>';
 									audit_test += '<b>Descripción: '+test.description+'</b><br>';
-									audit_test += '<b>Estado: '+test.status_name+'</b><br>';
-									audit_test += '<b>Resultado: '+test.results_name+'</b><br><br>';
+
+									if (test.status == 0)
+									{
+										audit_test += '<b>Estado: Abierta</b><br>';
+									}
+									else if (test.status == 2)
+									{
+										audit_test += '<b>Estado: Cerrada</b><br>';
+									}
+									if (test.results == 0)
+									{
+										audit_test += '<b>Resultado: Inefectiva</b><br>';
+									}
+									else if (test.results == 1)
+									{
+										audit_test += '<b>Resultado: Efectiva</b><br>';
+									}
+									else if (test.results == 2)
+									{
+										audit_test += '<b>Resultado: En ejecución</b><br>';
+									}
 									audit_test += '<b>Hallazgos encontrados: </b>';
 
 									var cont = 0; //contador de issues
 									$(test.issues).each( function(i,issue) {
-										audit_test += '<hr><li>Clasificación: '+issue.classification+'</li>';
+
+										if (issue.classification == null)
+										{
+											audit_test += '<hr><li>Clasificación: No se ha definido</li>';
+										}
+										else
+										{
+											audit_test += '<hr><li>Clasificación: '+issue.classification+'</li>';
+										}
 										audit_test += '<li>Nombre: '+issue.name+'</li>';
 										audit_test += '<li>Descripción: '+issue.description+'</li>';
-										audit_test += '<li>Recomendaciones: '+issue.recommendations+'</li>';
+
+										if (issue.recommendations == null)
+										{
+											audit_test += '<li>Recomendaciones: No se han definido recomendaciones</li>';
+										}
+										else
+										{
+											audit_test += '<li>Recomendaciones: '+issue.recommendations+'</li>';
+										}
 										audit_test += '<div style="cursor:hand" id="btn_crear_'+issue.id+'" onclick="crear_plan('+issue.id+')" class="btn btn-default">Agregar plan de acción</div>';
 
 										audit_test += '<div id="nuevo_plan_'+issue.id+'" style="display: none;"></div>';

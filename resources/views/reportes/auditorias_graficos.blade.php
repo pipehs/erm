@@ -85,7 +85,7 @@
 			<div class="no-move"></div>
 		</div>
 		<div class="box-content">
-			<p align="justify">En este gr&aacute;fico podr&aacute; observar el universo de planes de auditor&iacute;a para todas las organizaciones en el sistema y el estado de estos, ya sea abierto, cerrado o en ejecuci&oacute;n.</p>
+			<p align="justify">En este gr&aacute;fico podr&aacute; observar el universo de planes de auditor&iacute;a para la organizaci&oacute;n seleccionada y el estado de estos, ya sea abierto, cerrado o en ejecuci&oacute;n.</p>
 			<br><br><br><br><br><br>
 			<p id="alternativo"></p>
 			<div id="piechart_3d" style="width: 500px; height: 300px;"></div>
@@ -180,7 +180,7 @@
 					var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Descripción</th><th>Auditorías</th><th>Programas</th><th>Pruebas</th></thead>';
 
 					@foreach ($audit_plans as $plan)
-						@if ($plan['abiertas'] > 0 && $plan['ejecucion'] == 0 && $plan['status'] == 0)
+						@if ($plan['abiertas'] >= 0 && $plan['ejecucion'] == 0 && $plan['status'] == 0)
 							text += '<tr><td>{{$plan["name"]}}</td>';
 							text += '<td>{{$plan["description"]}}</td>';
 							text += '<td>';

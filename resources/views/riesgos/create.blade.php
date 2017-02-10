@@ -54,6 +54,17 @@
 //bloqueamos opciones de llenado si es que se esta ingresando un riesgo tipo
 	$("#risk_id").change(function() {
 
+			//primero que todo, sea cual sea el valor eliminamos atributo selected de causas y efectos
+			$("#cause_id option").each(function(){
+				$(this).prop('selected',false);
+				$("#cause_id").change();
+			});
+
+			$("#effect_id option").each(function(){
+				$(this).prop('selected',false);
+				$("#effect_id").change();
+			});
+
 			if ($("#risk_id").val() != "")
 			{
 				$.get('riesgos.setriesgotipo.'+$("#risk_id").val(), function (result) {
@@ -69,14 +80,14 @@
 						$("#categoria").val(datos.risk_category_id); 
 						$("#categoria").change(); //cambiamos texto que muestra select
 						$("#input_date2").val(datos.expiration_date);
-
+						
 						$(datos.causes).each(function(i,cause) {
 
 							//recorremos select
 							$("#cause_id option").each(function(){
 							   if ($(this).attr('value') == cause.id)
 							   {
-							   		$(this).attr('selected','selected');
+							   		$(this).prop('selected',true);
 							   }
 							});
 
@@ -85,12 +96,11 @@
 						});
 
 						$(datos.effects).each(function(i,effect) {
-
 							//recorremos select
 							$("#effect_id option").each(function(){
 							   if ($(this).attr('value') == effect.id)
 							   {
-							   		$(this).attr('selected','selected');
+							   		$(this).prop('selected',true);
 							   }
 							});
 

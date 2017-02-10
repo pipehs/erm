@@ -1,73 +1,3 @@
-/*
-
-.perspectiva{
-	float:left !important;
-	font-size: 22px;
-	width: 3%;
-	height:620px;
-	padding: 10px;
-	word-wrap:break-word;
-	letter-spacing:500px; 
-	text-align: center;
-	background-color: #FAAC58;
-	border-radius: 5px;
-	margin:5px;
-	padding-top: 150px;
-
-}
-
-.objetivos{
-	float:block !important;
-	width: 95%;
-	padding: 5px;
-	text-align: center;
-	vertical-align: middle;
-	background-color: #FAAC58;
-	border-radius: 5px;
-	margin:5px;
-	letter-spacing:2px; 
-}
-.financiera{
-	float:left !important;  
-	height:150px; 
-	width:92%; 
-	background-color:lightblue;
-	border-radius: 25px;
-	font-size: 18px;
-	margin:5px;
-	padding-left:10px;
-	font-weight: bold;
-	border-left: thick solid #CCCCCC;
-}
-.procesos{
-	float:left !important; 
-	height:150px; 
-	width:92%; 
-	background-color:lightblue;
-	border-radius: 25px;
-	font-size: 18px;
-	margin:5px;
-	padding-left:10px;
-	font-weight: bold;
-	border-left: thick solid #CCCCCC;
-}
-
-.objectives {
-     background: #428bca;
-     display: inline-block;
-     padding: 10px;
-     border:4px outset #4444ff;
-     border-radius: 50px;
-/*
-     -webkit-transform: skew(20deg);
-     -moz-transform: skew(20deg);
-     -ms-transform: skew(20deg);
-     -o-transform: skew(20deg);
-     transform: skew(20deg);
-
-     */
-/*}*/
-
 .table_mapa {
 	width:100% !important;
 }
@@ -78,6 +8,18 @@
 	width: 100%;
 }
 
+.perspectiva {
+	font-weight: bold;
+	font-size: 22px;
+	background-color: #424242;
+	color: white;
+	margin:3px;
+	padding: 3px;
+	border-radius: 10px;
+	text-align: center;
+	letter-spacing:5px; 
+}
+/*
 .perspectivas{
 	float:left !important;
 	font-weight: bold;
@@ -107,20 +49,49 @@
 	color: white;
 	border-radius: 5px;
 	padding-top: 150px;
+	padding-bottom: 15px;
 }
 
-.financiera {
-	float:left !important;  
-	background-color:#FE9A2E;
-	border-radius: 40px;
-	font-size: 12px;
-	margin:5px;
-	padding-left:10px;
+.perspectivas2{
+	float:left !important;
 	font-weight: bold;
-	/*border-left: thick solid #CCCCCC;*/
-	height: 200px;
-	width: 100%;
-	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);
+	font-size: 18px;
+	width: 25px;
+	height:100%;
+	padding-left: 5px;
+	word-wrap:break-word;
+	letter-spacing:50px; 
+	text-align: center;
+	background-color: black;
+	color: white;
+	border-radius: 5px;
+	padding-top: 20px;
+}
+*/
+.financiera_box1{
+	background-color:#67A3E0;
+	font-size: 12px;
+	font-weight: bold;
+	float:left;
+	width: 36%;
+	margin-right: 5px;
+	margin-left: 5px;
+	min-height:200px;
+	border-radius: 40px;
+	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);*
+}
+
+.financiera_box2{
+	background-color:#FE9A2E;
+	font-size: 12px;
+	font-weight: bold;
+	float:left;
+	width: 61%;
+	margin-right: 5px;
+	margin-left: 5px;
+	min-height:200px;
+	border-radius: 40px;
+	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);*
 }
 
 .clientes {
@@ -131,10 +102,10 @@
 	margin:5px;
 	padding-left:10px;
 	font-weight: bold;
-	padding-top: 20cm;
+	padding-top: 10px;
+	min-height: 150px;
 	/*border-left: thick solid #CCCCCC;*/
-	height: 200px;
-	width: 100%;
+	width: 97%;
 	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);
 }
 
@@ -142,11 +113,12 @@
 	float:left !important;  
 	border-radius: 40px;
 	font-size: 12px;
-	margin:5px;
+	margin-left: 5px;
 	padding-left:10px;
 	font-weight: bold;
 	width: 100%;
-
+	min-height:500px;
+	height: auto !important;
 	/*border-left: thick solid #CCCCCC;*/
 
 	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);
@@ -155,46 +127,34 @@
 .procesos1 {
 	background-color:#F5BCA9;
 	width: 24%;
-	min-height:500px;
-	height: auto !important;
-	height:500px;
 }
 .procesos2 {
 	background-color:#04B4AE;
 	width: 24%;
-	min-height:500px;
-	height: auto !important;
-	height:500px;
+
 }
 .procesos3 {
 	background-color:#F5F6CE;	
 	width: 24%;
-	min-height:500px;
-	height: auto !important;
-	height:500px;
 }
 .procesos4 {
 	background-color:#A9A9F5;
-	width: 24%;
-	min-height:500px;
-	height: auto !important;
-	height:500px;
+	width: 25%;
 }
 
-.aprendizaje {
-	float:left !important;  
+.aprendizaje_box{
 	background-color:#CEE3F6;
-	border-radius: 40px;
+	float:left;
 	font-size: 12px;
-	margin:5px;
-	padding-left:10px;
 	font-weight: bold;
-	/*border-left: thick solid #CCCCCC;*/
-	height: 200px;
-	width: 100%;
-	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);
+	width: 32%;
+	margin-right: 5px;
+	margin-left: 5px;
+	min-height:300px;
+	height: auto !important;
+	border-radius: 40px;
+	box-shadow: 0 14px 18px 0 rgba(0,0,0,0.5);*
 }
-
 
 .objetivos{
 	float:block !important;
@@ -208,19 +168,21 @@
 	letter-spacing:2px; 
 }
 
+/*ovalo de objetivos en mapa*/
 .objectives {
 	z-index: 0;
 	position: relative;
-	margin: 0px;
+	margin-left: 15px;
+	margin-bottom: 10px;
     /*background: #CCCCCC;*/
     display: inline-block;
-    padding: 20px;
+    padding: 12px;
     border:0px outset #000000;
     height:65px;
-    width:200px !important;
-    -moz-border-radius: 150px / 50px;
-	-webkit-border-radius: 150px / 50px;
-	border-radius: 150px / 50px;
+    width:155px !important;
+    -moz-border-radius: 140px / 55px;
+	-webkit-border-radius: 140px / 55px;
+	border-radius: 140px / 55px;
 	text-align: center;
 	-webkit-box-shadow: 6px 6px 3px 0px rgba(80, 80, 80, 0.75);
 	-moz-box-shadow:    6px 6px 3px 0px rgba(80, 80, 80, 0.75);
@@ -243,4 +205,61 @@
 	background: -ms-linear-gradient(left, rgba(255,255,255,1) 0%, rgba(219,216,219,1) 75%, rgba(219,212,219,1) 100%);
 	background: linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(219,216,219,1) 75%, rgba(219,212,219,1) 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#dbd4db', GradientType=1 );
+}
+
+.obj_position {
+	float:left; 
+	margin-right: 10px; 
+	margin-left:10px;
+}
+
+/* Circulo grande para mapa estratégico */
+.circulo-big {
+    width: 27px;
+    height: 27px;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    background: #000;
+    z-index:1;
+    position: absolute;
+    margin-top: 15px;
+
+    /*formato de texto interior */
+    color: #ffffff;
+    display: inline-block;
+    font-weight: bold;
+    line-height: 2.4em;
+    font-size: 12px;
+    text-align: center;
+
+    /*sombra */
+    -webkit-box-shadow: 3px 3px 1px 0px rgba(50, 50, 50, 0.75);
+    -moz-box-shadow:    3px 3px 1px 0px rgba(50, 50, 50, 0.75);
+    box-shadow:         3px 3px 1px 0px rgba(50, 50, 50, 0.75);
+}
+    
+/* Circulo grande para objetivos impactados mapa estratégico */
+.circulo-impactado {
+    width: 27px;
+    height: 27px;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    background: #0404B4;
+    display:inline-block;
+    /*formato de texto interior */
+    color: #ffffff;
+    font-weight: bold;
+    line-height: 2.4em;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: -1px;
+    position: relative;
+
+
+    /*sombra */
+    -webkit-box-shadow: 3px 3px 1px 0px rgba(50, 50, 50, 0.75);
+    -moz-box-shadow:    3px 3px 1px 0px rgba(50, 50, 50, 0.75);
+    box-shadow:         3px 3px 1px 0px rgba(50, 50, 50, 0.75);
 }

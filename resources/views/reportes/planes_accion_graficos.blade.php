@@ -86,7 +86,7 @@
 		<div class="box-content">
 			<p align="justify">En este gr&aacute;fico podr&aacute; observar del universo de planes de acci&oacute;n, de que tipo son estos, ya sean planes de acci&oacute;n para evaluaci&oacute;n de controles, auditor&iacute;s u otros.</p>
 			<p id="alternativo"></p>
-			<div id="piechart_3d" style="width: 500px; height: 300px;"></div>
+			<div id="piechart_3d" style="width: 100%; height: 300px;"></div>
 		</div>
 	</div>
 </div>
@@ -116,7 +116,7 @@
 		<div class="box-content">
 			<p align="justify">En este gr&aacute;fico podr&aacute; observar los distintos hallazgos registrados en el sistema, además de la informaci&oacute;n correspondiente a los planes de acci&oacute;n enlazados a los mismos (siempre que estos tengan un plan de acci&oacute;n registrado).</p>
 			<p id="alternativo2"></p>
-			<div id="piechart2" style="width: 500px; height: 300px;"></div>
+			<div id="piechart2" style="width: 100%; height: 300px;"></div>
 		</div>
 	</div>
 </div>
@@ -146,7 +146,7 @@
 		<div class="box-content">
 			<p align="justify">En este gr&aacute;fico podr&aacute; observar el estado de los distintos planes de acci&oacute;n, si es que est&aacute;n cerrados, pr&oacute;ximos a cerrar, o aquellos que est&aacute;n pasados en su fecha final y aun no se han cerrado.</p>
 			<p id="alternativo3"></p>
-			<div id="piechart3" style="width: 500px; height: 300px;"></div>
+			<div id="piechart3" style="width: 100%; height: 300px;"></div>
 		</div>
 	</div>
 </div>
@@ -166,14 +166,20 @@
         var data = google.visualization.arrayToDataTable([
           ['Planes de acción', 'Cantidad'],
           ['Evaluación de controles',     {{ $cont_ctrl }}],
-          ['Ejecución de auditoría',     {{ $cont_audit }}],
-          ['Otros',     {{ $others }}]
+          ['Ejecución de auditorías',     {{ $cont_audit }}],
+          ['Planes de auditoría',     {{ $cont_audit_plan }}],
+          ['Programas de auditoría',     {{ $cont_program }}],
+          ['Organización',     {{ $cont_org }}],
+          ['Subprocesos',     {{ $cont_subprocess }}],
+          ['Procesos',     {{ $cont_process }}],
+          ['Controles de proceso',     {{ $cont_process_ctrl }}],
+          ['Controles de entidad',     {{ $cont_bussiness_ctrl }}]
         ]);
 
         var options = {
-          title: 'Tipo de planes de acción',
+          title: 'Tipos de planes de acción',
           is3D: false,
-          colors: ['#0431B4', '#5882FA']
+          colors: ['#0431B4','#5882FA','#ACD0FB','#967FD9','#85D4A1','#8A64AE','#64AE90','#C4D551','#D58651']
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
@@ -224,8 +230,8 @@
 					@foreach ($action_plans_audit as $plan)
 							text += '<tr><td>{{$plan["audit_plan"]}}</td>';
 							text += '<td>{{$plan["audit"]}}</td>';
-							text += '<td>{{$plan["program"]}}</td>';
-							text += '<td>{{$plan["test"]}}</td>';
+							text += '<td>{{$plan["audit_program"]}}</td>';
+							text += '<td>{{$plan["audit_test"]}}</td>';
 							text += '<td>{{ $plan["issue"] }}';
 							text += '<td>{{ $plan["recommendations"]}}</td>';
 							text += '<td>{{ $plan["description"] }}</td>';
@@ -245,10 +251,202 @@
 						html: true 
 					});
 				}
+				else if (sel[0].row == 2) //planes de auditorías
+				{
+					var title = '<b>Planes de acción creados para auditorías</b>';
 
+					var text ='<table class="table table-striped table-datatable"><thead><th>Plan de auditoría</th><th>Auditoría</th><th>Hallazgo</th><th>Recomendaciones</th><th>Plan</th><th>Estado</th><th>Fecha final</th><th>Responsable</th></thead>';
+
+					@foreach ($action_plans_audit_plan as $plan)
+							text += '<tr><td>{{$plan["audit_plan"]}}</td>';
+							text += '<td>{{$plan["audit"]}}</td>';
+							text += '<td>{{ $plan["issue"] }}';
+							text += '<td>{{ $plan["recommendations"]}}</td>';
+							text += '<td>{{ $plan["description"] }}</td>';
+							text += '<td>{{ $plan["status"] }}</td>';
+							text += '<td>{{ $plan["final_date"] }}</td>';
+							text += '<td>{{ $plan["stakeholder"] }}</td>';
+							text += '</tr>';
+					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.17.{{ $org }}">Exportar</a>'
+
+					swal({   
+						title: title,   
+						text: text,
+						customClass: 'swal-wide3',   
+						html: true 
+					});
+				}
+				else if (sel[0].row == 3) //programa de auditoría
+				{
+					var title = '<b>Planes de acción creados para programas de auditoría</b>';
+
+					var text ='<table class="table table-striped table-datatable"><thead><th>Plan de auditoría</th><th>Auditoría</th><th>Programa</th><th>Hallazgo</th><th>Recomendaciones</th><th>Plan</th><th>Estado</th><th>Fecha final</th><th>Responsable</th></thead>';
+
+					@foreach ($action_plans_program as $plan)
+							text += '<tr><td>{{$plan["audit_plan"]}}</td>';
+							text += '<td>{{$plan["audit"]}}</td>';
+							text += '<td>{{$plan["audit_program"]}}</td>';
+							text += '<td>{{ $plan["issue"] }}';
+							text += '<td>{{ $plan["recommendations"]}}</td>';
+							text += '<td>{{ $plan["description"] }}</td>';
+							text += '<td>{{ $plan["status"] }}</td>';
+							text += '<td>{{ $plan["final_date"] }}</td>';
+							text += '<td>{{ $plan["stakeholder"] }}</td>';
+							text += '</tr>';
+					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.18.{{ $org }}">Exportar</a>'
+
+					swal({   
+						title: title,   
+						text: text,
+						customClass: 'swal-wide3',   
+						html: true 
+					});
+				}
+				else if (sel[0].row == 4) //organización
+				{
+					var title = '<b>Planes de acción creados para organización</b>';
+
+					var text ='<table class="table table-striped table-datatable"><thead><th>Organización</th><th>Hallazgo</th><th>Recomendaciones</th><th>Plan</th><th>Estado</th><th>Fecha final</th><th>Responsable</th></thead>';
+
+					@foreach ($action_plans_org as $plan)
+							text += '<tr><td>{{$plan["organization"]}}</td>';
+							text += '<td>{{ $plan["issue"] }}';
+							text += '<td>{{ $plan["recommendations"]}}</td>';
+							text += '<td>{{ $plan["description"] }}</td>';
+							text += '<td>{{ $plan["status"] }}</td>';
+							text += '<td>{{ $plan["final_date"] }}</td>';
+							text += '<td>{{ $plan["stakeholder"] }}</td>';
+							text += '</tr>';
+					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.19.{{ $org }}">Exportar</a>'
+
+					swal({   
+						title: title,   
+						text: text,
+						customClass: 'swal-wide3',   
+						html: true 
+					});
+				}
+				else if (sel[0].row == 5) //subprocesos
+				{
+					var title = '<b>Planes de acción creados para subprocesos</b>';
+
+					var text ='<table class="table table-striped table-datatable"><thead><th>Proceso</th><th>Subproceso</th><th>Hallazgo</th><th>Recomendaciones</th><th>Plan</th><th>Estado</th><th>Fecha final</th><th>Responsable</th></thead>';
+
+					@foreach ($action_plans_subprocess as $plan)
+							text += '<tr><td>{{$plan["process"]}}</td>';
+							text += '<td>{{$plan["subprocess"]}}</td>';
+							text += '<td>{{ $plan["issue"] }}';
+							text += '<td>{{ $plan["recommendations"]}}</td>';
+							text += '<td>{{ $plan["description"] }}</td>';
+							text += '<td>{{ $plan["status"] }}</td>';
+							text += '<td>{{ $plan["final_date"] }}</td>';
+							text += '<td>{{ $plan["stakeholder"] }}</td>';
+							text += '</tr>';
+					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.20.{{ $org }}">Exportar</a>'
+
+					swal({   
+						title: title,   
+						text: text,
+						customClass: 'swal-wide3',   
+						html: true 
+					});
+				}
+				else if (sel[0].row == 6) //procesos
+				{
+					var title = '<b>Planes de acción creados para procesos</b>';
+
+					var text ='<table class="table table-striped table-datatable"><thead><th>Proceso</th><th>Hallazgo</th><th>Recomendaciones</th><th>Plan</th><th>Estado</th><th>Fecha final</th><th>Responsable</th></thead>';
+
+					@foreach ($action_plans_process as $plan)
+							text += '<tr><td>{{$plan["process"]}}</td>';
+							text += '<td>{{ $plan["issue"] }}';
+							text += '<td>{{ $plan["recommendations"]}}</td>';
+							text += '<td>{{ $plan["description"] }}</td>';
+							text += '<td>{{ $plan["status"] }}</td>';
+							text += '<td>{{ $plan["final_date"] }}</td>';
+							text += '<td>{{ $plan["stakeholder"] }}</td>';
+							text += '</tr>';
+					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.21.{{ $org }}">Exportar</a>'
+
+					swal({   
+						title: title,   
+						text: text,
+						customClass: 'swal-wide3',   
+						html: true 
+					});
+				}
+				if (sel[0].row == 7) //controles de proceso
+				{
+					var title = '<b>Planes de acción creados para controles de procesos</b>';
+
+					var text ='<table class="table table-striped table-datatable"><thead><th>Control</th><th>Hallazgo</th><th>Recomendaciones</th><th>Plan</th><th>Estado</th><th>Fecha final</th><th>Responsable</th></thead>';
+
+					@foreach ($action_plans_process_ctrl as $plan)
+							text += '<tr><td>{{$plan["control"]}}</td>';
+							text += '<td>{{ $plan["issue"] }}';
+							text += '<td>{{ $plan["recommendations"]}}</td>';
+							text += '<td>{{ $plan["description"] }}</td>';
+							text += '<td>{{ $plan["status"] }}</td>';
+							text += '<td>{{ $plan["final_date"] }}</td>';
+							text += '<td>{{ $plan["stakeholder"] }}</td>';
+							text += '</tr>';
+					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.22.{{ $org }}">Exportar</a>'
+
+					swal({   
+						title: title,   
+						text: text,
+						customClass: 'swal-wide3',   
+						html: true 
+					});
+				}
+				if (sel[0].row == 8) //controles de negocio
+				{
+					var title = '<b>Planes de acción creados para controles de negocio</b>';
+
+					var text ='<table class="table table-striped table-datatable"><thead><th>Control</th><th>Hallazgo</th><th>Recomendaciones</th><th>Plan</th><th>Estado</th><th>Fecha final</th><th>Responsable</th></thead>';
+
+					@foreach ($action_plans_bussiness_ctrl as $plan)
+							text += '<tr><td>{{$plan["control"]}}</td>';
+							text += '<td>{{ $plan["issue"] }}';
+							text += '<td>{{ $plan["recommendations"]}}</td>';
+							text += '<td>{{ $plan["description"] }}</td>';
+							text += '<td>{{ $plan["status"] }}</td>';
+							text += '<td>{{ $plan["final_date"] }}</td>';
+							text += '<td>{{ $plan["stakeholder"] }}</td>';
+							text += '</tr>';
+					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.23.{{ $org }}">Exportar</a>'
+
+					swal({   
+						title: title,   
+						text: text,
+						customClass: 'swal-wide3',   
+						html: true 
+					});
+				}
 
 			}
-      		//console.log(sel);
+      		console.log(sel);
 		}
       }
     @else

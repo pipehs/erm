@@ -361,14 +361,32 @@ class StakeholdersController extends Controller
                 //nuevamente eliminaremos los roles anteriores del stakeholder para evitar repeticiones
                 DB::table('role_stakeholder')->where('stakeholder_id',$GLOBALS['id1'])->delete();
 
-                //ahora, agregamos posibles nuevas relaciones
-                foreach($_POST['role_id'] as $role_id)
+                //primero verificamos si es que se está agregando un nuevo rol
+                if (isset($_POST['rol_nuevo']))
                 {
+                    $role = \Ermtool\Role::create([
+                        'name' => $_POST['rol_nuevo'],
+                        'status' => 0
+                    ]);
+
+                    //insertamos relación
                     DB::table('role_stakeholder')->insert([
-                        'role_id'=>$role_id,
-                        'stakeholder_id'=>$GLOBALS['id1']
-                        ]);
+                            'stakeholder_id' => $GLOBALS['id1'],
+                            'role_id' => $role->id
+                            ]);
                 }
+                else
+                {
+                    //ahora, agregamos posibles nuevas relaciones
+                    foreach($_POST['role_id'] as $role_id)
+                    {
+                        DB::table('role_stakeholder')->insert([
+                            'role_id'=>$role_id,
+                            'stakeholder_id'=>$GLOBALS['id1']
+                            ]);
+                    }
+                }
+                
 
                 if (Session::get('languaje') == 'en')
                 {

@@ -113,7 +113,7 @@ class ExcelController extends Controller
                     $sheet->fromArray($datos);
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:I1', function($cells) {
+                    $sheet->cells('A1:N1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');
@@ -277,7 +277,7 @@ class ExcelController extends Controller
                     $sheet->fromArray($datos);
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:K1', function($cells) {
+                    $sheet->cells('A1:L1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');
@@ -711,6 +711,183 @@ class ExcelController extends Controller
                 $excel->setCreator('Administrador B-GRC')
                       ->setCompany('B-GRC - IXUS Consulting');
                 $excel->setDescription('Reporte de planes de acción cerrados');
+                $excel->sheet('Planes de acción', function($sheet) {
+                    $plan = new PlanesAccion;
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
+                    $sheet->fromArray($datos);
+                    $sheet->cells('A1:G1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                    $sheet->freezeFirstRow();
+                });
+
+            })->export('xls');
+        }
+
+        //ACTUALIZACIÓN 08-02: NUEVOS TIPOS DE PLANES DE ACCIÓN
+        else if ($GLOBALS['id2'] == 17)
+        {
+            Excel::create('Planes de acción para auditorías '.date("d-m-Y"), function($excel) {
+
+                $excel->setTitle('Planes de acción para auditorías');
+                $excel->setCreator('Administrador B-GRC')
+                      ->setCompany('B-GRC - IXUS Consulting');
+                $excel->setDescription('Reporte de planes de acción creados directamente para auditorías');
+                $excel->sheet('Planes de acción', function($sheet) {
+                    $plan = new PlanesAccion;
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
+                    $sheet->fromArray($datos);
+                    $sheet->cells('A1:H1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                    $sheet->freezeFirstRow();
+                });
+
+            })->export('xls');
+        }
+        else if ($GLOBALS['id2'] == 18)
+        {
+            Excel::create('Planes de acción para programas de auditoría '.date("d-m-Y"), function($excel) {
+
+                $excel->setTitle('Planes de acción programas de auditoría');
+                $excel->setCreator('Administrador B-GRC')
+                      ->setCompany('B-GRC - IXUS Consulting');
+                $excel->setDescription('Reporte de planes de acción para programas de auditoría');
+                $excel->sheet('Planes de acción', function($sheet) {
+                    $plan = new PlanesAccion;
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
+                    $sheet->fromArray($datos);
+                    $sheet->cells('A1:I1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                    $sheet->freezeFirstRow();
+                });
+
+            })->export('xls');
+        }
+        else if ($GLOBALS['id2'] == 19)
+        {
+            Excel::create('Planes de acción para organización '.date("d-m-Y"), function($excel) {
+
+                $excel->setTitle('Planes de acción para organización');
+                $excel->setCreator('Administrador B-GRC')
+                      ->setCompany('B-GRC - IXUS Consulting');
+                $excel->setDescription('Reporte de planes de acción para organización');
+                $excel->sheet('Planes de acción', function($sheet) {
+                    $plan = new PlanesAccion;
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
+                    $sheet->fromArray($datos);
+                    $sheet->cells('A1:G1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                    $sheet->freezeFirstRow();
+                });
+
+            })->export('xls');
+        }
+        else if ($GLOBALS['id2'] == 20)
+        {
+            Excel::create('Planes de acción para subprocesos '.date("d-m-Y"), function($excel) {
+
+                $excel->setTitle('Planes de acción para subprocesos');
+                $excel->setCreator('Administrador B-GRC')
+                      ->setCompany('B-GRC - IXUS Consulting');
+                $excel->setDescription('Reporte de planes de acción para subprocesos');
+                $excel->sheet('Planes de acción', function($sheet) {
+                    $plan = new PlanesAccion;
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
+                    $sheet->fromArray($datos);
+                    $sheet->cells('A1:H1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                    $sheet->freezeFirstRow();
+                });
+
+            })->export('xls');
+        }
+        else if ($GLOBALS['id2'] == 21)
+        {
+            Excel::create('Planes de acción para procesos '.date("d-m-Y"), function($excel) {
+
+                $excel->setTitle('Planes de acción para procesos');
+                $excel->setCreator('Administrador B-GRC')
+                      ->setCompany('B-GRC - IXUS Consulting');
+                $excel->setDescription('Reporte de planes de acción para procesos');
+                $excel->sheet('Planes de acción', function($sheet) {
+                    $plan = new PlanesAccion;
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
+                    $sheet->fromArray($datos);
+                    $sheet->cells('A1:G1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                    $sheet->freezeFirstRow();
+                });
+
+            })->export('xls');
+        }
+        else if ($GLOBALS['id2'] == 22)
+        {
+            Excel::create('Planes de acción controles de procesos '.date("d-m-Y"), function($excel) {
+
+                $excel->setTitle('Planes de acción controles de procesos');
+                $excel->setCreator('Administrador B-GRC')
+                      ->setCompany('B-GRC - IXUS Consulting');
+                $excel->setDescription('Reporte de planes controles de procesos');
+                $excel->sheet('Planes de acción', function($sheet) {
+                    $plan = new PlanesAccion;
+                    $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
+                    $sheet->fromArray($datos);
+                    $sheet->cells('A1:G1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                    $sheet->freezeFirstRow();
+                });
+
+            })->export('xls');
+        }
+        else if ($GLOBALS['id2'] == 23)
+        {
+            Excel::create('Planes de acción controles de negocio '.date("d-m-Y"), function($excel) {
+
+                $excel->setTitle('Planes de acción controles de negocio');
+                $excel->setCreator('Administrador B-GRC')
+                      ->setCompany('B-GRC - IXUS Consulting');
+                $excel->setDescription('Reporte de planes de acción controles de negocio');
                 $excel->sheet('Planes de acción', function($sheet) {
                     $plan = new PlanesAccion;
                     $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);

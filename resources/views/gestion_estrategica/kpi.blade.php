@@ -90,9 +90,10 @@
 				<th style="vertical-align:top;">Indicador</th>
 				<th style="vertical-align:top;">Descripci&oacute;n</th>
 				<th style="vertical-align:top;">Responsable</th>
-				<th style="vertical-align:top;">&Uacute;ltima medici&oacute;n</th>
+				<th style="vertical-align:top;">&Uacute;ltimo peri&oacute;do evaluado</th>
 				<th style="vertical-align:top;">Valor</th>
 				<th style="vertical-align:top;">Meta</th>
+				<th style="vertical-align:top;">Unidad de medida</th>
 
 				@foreach (Session::get('roles') as $role)
 					@if ($role != 6)
@@ -132,6 +133,7 @@
 										<td>{{ $k['date_last_eval'] }}</td>
 										<td>{{ $k['last_eval'] }}</td>
 										<td>{{ $k['goal'] }}</td>
+										<td>{{ $k['initial_value'] }}</td>
 										<td>{!!link_to_route('kpi.edit', $title = 'Editar', $parameters=['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-success']) !!}</td>
 										<td>{!! link_to_route('kpi.evaluate', $title = 'Medir', $parameters = ['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-primary']) !!}</td>
 										@if ($k['status'] == 1 && !$k['status_validate'])
@@ -155,6 +157,7 @@
 										<td>{{ $k['date_last_eval'] }}</td>
 										<td>{{ $k['last_eval'] }}</td>
 										<td>{{ $k['goal'] }}</td>
+										<td>{{ $k['initial_value'] }}</td>
 										<td>{!!link_to_route('kpi.edit', $title = 'Editar', $parameters=['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-success']) !!}</td>
 										<td>{!! link_to_route('kpi.evaluate', $title = 'Medir', $parameters = ['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-primary']) !!}</td>
 										@if ($k['status'] == 1 && !$k['status_validate'])
@@ -201,6 +204,7 @@
 										<td>{{ $k['date_last_eval'] }}</td>
 										<td>{{ $k['last_eval'] }}</td>
 										<td>{{ $k['goal'] }}</td>
+										<td>{{ $k['initial_value'] }}</td>
 										<td>{!!link_to_route('kpi.edit', $title = 'Editar', $parameters=['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-success']) !!}</td>
 										<td>{!! link_to_route('kpi.evaluate', $title = 'Medir', $parameters = ['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-primary']) !!}</td>
 										@if ($k['status'] == 1 && !$k['status_validate'])
@@ -224,6 +228,7 @@
 										<td>{{ $k['date_last_eval'] }}</td>
 										<td>{{ $k['last_eval'] }}</td>
 										<td>{{ $k['goal'] }}</td>
+										<td>{{ $k['initial_value'] }}</td>
 										<td>{!!link_to_route('kpi.edit', $title = 'Editar', $parameters=['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-success']) !!}</td>
 										<td>{!! link_to_route('kpi.evaluate', $title = 'Medir', $parameters = ['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-primary']) !!}</td>
 										@if ($k['status'] == 1 && !$k['status_validate'])
@@ -269,6 +274,7 @@
 										<td>{{ $k['date_last_eval'] }}</td>
 										<td>{{ $k['last_eval'] }}</td>
 										<td>{{ $k['goal'] }}</td>
+										<td>{{ $k['initial_value'] }}</td>
 										<td>{!!link_to_route('kpi.edit', $title = 'Editar', $parameters=['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-success']) !!}</td>
 										<td>{!! link_to_route('kpi.evaluate', $title = 'Medir', $parameters = ['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-primary']) !!}</td>
 										@if ($k['status'] == 1 && !$k['status_validate'])
@@ -292,6 +298,7 @@
 										<td>{{ $k['date_last_eval'] }}</td>
 										<td>{{ $k['last_eval'] }}</td>
 										<td>{{ $k['goal'] }}</td>
+										<td>{{ $k['initial_value'] }}</td>
 										<td>{!!link_to_route('kpi.edit', $title = 'Editar', $parameters=['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-success']) !!}</td>
 										<td>{!! link_to_route('kpi.evaluate', $title = 'Medir', $parameters = ['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-primary']) !!}</td>
 										@if ($k['status'] == 1 && !$k['status_validate'])
@@ -338,6 +345,7 @@
 										<td>{{ $k['date_last_eval'] }}</td>
 										<td>{{ $k['last_eval'] }}</td>
 										<td>{{ $k['goal'] }}</td>
+										<td>{{ $k['initial_value'] }}</td>
 										<td>{!!link_to_route('kpi.edit', $title = 'Editar', $parameters=['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-success']) !!}</td>
 										<td>{!! link_to_route('kpi.evaluate', $title = 'Medir', $parameters = ['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-primary']) !!}</td>
 										@if ($k['status'] == 1 && !$k['status_validate'])
@@ -361,6 +369,7 @@
 										<td>{{ $k['date_last_eval'] }}</td>
 										<td>{{ $k['last_eval'] }}</td>
 										<td>{{ $k['goal'] }}</td>
+										<td>{{ $k['initial_value'] }}</td>
 										<td>{!!link_to_route('kpi.edit', $title = 'Editar', $parameters=['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-success']) !!}</td>
 										<td>{!! link_to_route('kpi.evaluate', $title = 'Medir', $parameters = ['id'=>$k['id'],'org_id'=>$org_id], $attributes = ['class'=>'btn btn-primary']) !!}</td>
 										@if ($k['status'] == 1 && !$k['status_validate'])

@@ -225,7 +225,7 @@ class EncuestasController extends Controller
                         {
 
                             $j = 1; //contador cantidad de alternativas para cada pregunta
-                            while (isset($_POST['pregunta'.$i.'_alternativa'.$j])) //mientras hayan alternativas para la pregunta
+                            while (isset($_POST['pregunta'.$i.'_alternativa'.$j]) && $_POST['pregunta'.$i.'_alternativa'.$j] != "") //mientras hayan alternativas para la pregunta y la pregunta no se encuentre vacía
                             {
                                 \Ermtool\Posible_answer::create([
                                     'answer'=>$_POST['pregunta'.$i.'_alternativa'.$j],
@@ -238,15 +238,24 @@ class EncuestasController extends Controller
                         }
                     }
                 }
+
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message',"Poll created successfully");
+                }
+                else
+                {
+                    Session::flash('message','Encuesta creada con &eacute;xito');
+                }
             });
             
             if (Session::get('languaje') == 'en')
             {
-                return view('en.identificacion_eventos_riesgos.encuestacreada',['post'=>$_POST]);
+                return Redirect::to('ver_encuestas');
             }
             else
             {
-                return view('identificacion_eventos_riesgos.encuestacreada',['post'=>$_POST]);
+                return Redirect::to('ver_encuestas');
             }
         }
     }
@@ -254,39 +263,28 @@ class EncuestasController extends Controller
     //función que primero verificará que el usuario no haya respondido previamente (si es que respondio permitirá editar sus respuestas)
     public function verificadorUserEncuesta($id)
     {
-        if (Auth::guest())
+
+        $encuesta = \Ermtool\Poll::find($id);
+
+        if (Session::get('languaje') == 'en')
         {
-            return view('login');
+            return view('en.identificacion_eventos_riesgos.verificar_encuesta',['encuesta'=>$encuesta]);
         }
         else
         {
-            $encuesta = \Ermtool\Poll::find($id);
-
-            if (Session::get('languaje') == 'en')
-            {
-                return view('en.identificacion_eventos_riesgos.verificar_encuesta',['encuesta'=>$encuesta]);
-            }
-            else
-            {
-                return view('identificacion_eventos_riesgos.verificar_encuesta',['encuesta'=>$encuesta]);
-            }
+            return view('identificacion_eventos_riesgos.verificar_encuesta',['encuesta'=>$encuesta]);
         }
     }
 
     public function generarEncuesta()
     {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
-            $encuesta = \Ermtool\Poll::find($_POST['encuesta_id']);
+
+            $encuesta = \Ermtool\Poll::find($_GET['encuesta_id']);
 
             //primero, verificamos que el usuario exista
             $user = DB::table('poll_stakeholder')
-                        ->where('poll_id','=',$_POST['encuesta_id'])
-                        ->where('stakeholder_id','=',$_POST['id'])
+                        ->where('poll_id','=',$_GET['encuesta_id'])
+                        ->where('stakeholder_id','=',$_GET['id'])
                         ->select('stakeholder_id')
                         ->first();
 
@@ -352,7 +350,6 @@ class EncuestasController extends Controller
                     return view('identificacion_eventos_riesgos.encuesta',['encuesta'=>$encuesta,'preguntas'=>$preguntas,'respuestas'=>$answers,'user_answers'=>$user_answers,'user'=>$user->stakeholder_id]);
                 }
             }
-        }
     }
 
     //Función para enviar correo con link a la encuesta
@@ -374,7 +371,6 @@ class EncuestasController extends Controller
             {
                 foreach ($request['stakeholder_id'] as $stakeholder_id)
                 {
-                    
                     $stakeholder = \Ermtool\Stakeholder::find($stakeholder_id);
 
                     //ALMACENAMOS EN POLL_STAKEHOLDER (funcionalidad agregada 13-05-2016) PARA SABER A QUIENES SE ENVÍA LA ENCUESTA. OBS: Debemos ver que el usuario no exista
@@ -418,8 +414,10 @@ class EncuestasController extends Controller
             {
                 foreach ($request['stakeholder_id'] as $stakeholder_id)
                 {
-                    //obteneos los id de stakeholders de la organizacion
+                    //obteneos los id de stakeholders de la organizacion (ACT: 23-01-17 stakeholders que no se encuentren bloqueados)
                     $stakeholders = DB::table('organization_stakeholder')
+                                        ->join('stakeholders','stakeholders.id','=','organization_stakeholder.stakeholder_id')
+                                        ->where('stakeholders.status','=',0)
                                         ->where('organization_id',$stakeholder_id)
                                         ->select('stakeholder_id as id')->get();
 
@@ -457,7 +455,7 @@ class EncuestasController extends Controller
                             }
                         }
 
-                        if ($errors)
+                        if (isset($errors))
                         {
                             Session::flash('error',$errors);
                         }
@@ -471,6 +469,8 @@ class EncuestasController extends Controller
                 {
                     //obtenemos los id de stakeholders del rol seleccionado
                     $stakeholders = DB::table('role_stakeholder')
+                                        ->join('stakeholders','stakeholders.id','=','role_stakeholder.stakeholder_id')
+                                        ->where('stakeholders.status','=',0)
                                         ->where('role_id',$stakeholder_id)
                                         ->select('stakeholder_id as id')->get();
 
@@ -508,7 +508,7 @@ class EncuestasController extends Controller
                             }
                         }
 
-                        if ($errors)
+                        if (isset($errors))
                         {
                             Session::flash('error',$errors);
                         }
@@ -543,96 +543,136 @@ class EncuestasController extends Controller
                 }
             );
 
-            if (Session::get('languaje') == 'en')
+            if (isset($errors))
             {
-                Session::flash('message','Poll successfully sent');
+                if (sizeof($errors) != sizeof($request['stakeholder_id']) && $request['tipo'] == 0) //para verificar que se enviaron correos en caso de que se hayan asignado manualmente los stakeholders
+                {
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','Poll successfully sent');
+                    }
+                    else
+                    {
+                        Session::flash('message','Encuesta enviada correctamente');    
+                    }
+                }
+                else if (sizeof($errors) == sizeof($request['stakeholder_id']) && ($request['tipo'] == 1 || $request['tipo'] == 2)) //pueden ser iguales en tamaño en caso de que se esté enviando por organización o por rol
+                {
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','Poll successfully sent');
+                    }
+                    else
+                    {
+                        Session::flash('message','Encuesta enviada correctamente');    
+                    }
+                }
             }
             else
             {
-                Session::flash('message','Encuesta enviada correctamente');    
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Poll successfully sent');
+                }
+                else
+                {
+                    Session::flash('message','Encuesta enviada correctamente');    
+                }
             }
 
             return Redirect::to('enviar_encuesta');
         }    
     }
 
-    public function guardarEvaluacion(Request $request)
+    public function guardarEvaluacion($id)
     {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
-            foreach ($_POST['pregunta_id'] as $pregunta_id) //vemos cada pregunta
+        DB::transaction(function() {
+
+            if (isset($_POST['pregunta_id'])) //para verificar en caso de que sea una encuesta sin preguntas (mal hecha)
             {
-                if (gettype($_POST['respuesta'.$pregunta_id]) == "array") //vemos si la respuesta es un array (caso de checkbox)
+                foreach ($_POST['pregunta_id'] as $pregunta_id) //vemos cada pregunta
                 {
-                    //si es checkbox, deberemos agregar cada respuesta
-                    foreach ($_POST['respuesta'.$pregunta_id] as $respuesta)
+                    if (gettype($_POST['respuesta'.$pregunta_id]) == "array") //vemos si la respuesta es un array (caso de checkbox)
+                    {
+                        //si es checkbox, deberemos agregar cada respuesta
+                        foreach ($_POST['respuesta'.$pregunta_id] as $respuesta)
+                        {
+                            //obtenemos valor de la respuesta -> de la tabla posible_answers
+                            $resp = DB::table('posible_answers')->where('id',$respuesta)->value('answer');
+                            
+                            //agregamos respuesta
+                            \Ermtool\Answer::create([
+                                            'answer'=>$resp,
+                                            'question_id'=>$pregunta_id,
+                                            'stakeholder_id'=>$_POST['stakeholder_id'],
+                                            ]);
+                        }
+                    }
+                    else
                     {
                         //obtenemos valor de la respuesta -> de la tabla posible_answers
-                        $resp = DB::table('posible_answers')->where('id',$respuesta)->value('answer');
-                        
-                        //agregamos respuesta
-                        \Ermtool\Answer::create([
-                                        'answer'=>$resp,
-                                        'question_id'=>$pregunta_id,
-                                        'stakeholder_id'=>$request['stakeholder_id'],
-                                        ]);
+                            $resp = DB::table('posible_answers')->where('id',$_POST['respuesta'.$pregunta_id])->value('answer');
+                            
+                        //vemos si es radio button (debería existir $resp)
+                        if ($resp)
+                        {
+                            //agregamos respuesta
+                            \Ermtool\Answer::create([
+                                            'answer'=>$resp,
+                                            'question_id'=>$pregunta_id,
+                                            'stakeholder_id'=>$_POST['stakeholder_id'],
+                                            ]);
+                        }
+                        else //es texto
+                        {
+                            //agregamos respuesta
+                            \Ermtool\Answer::create([
+                                            'answer'=>$_POST['respuesta'.$pregunta_id],
+                                            'question_id'=>$pregunta_id,
+                                            'stakeholder_id'=>$_POST['stakeholder_id'],
+                                            ]);
+                        }
                     }
+                }
+
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Answers successfully sent');
                 }
                 else
                 {
-                    //obtenemos valor de la respuesta -> de la tabla posible_answers
-                        $resp = DB::table('posible_answers')->where('id',$_POST['respuesta'.$pregunta_id])->value('answer');
-                        
-                    //vemos si es radio button (debería existir $resp)
-                    if ($resp)
-                    {
-                        //agregamos respuesta
-                        \Ermtool\Answer::create([
-                                        'answer'=>$resp,
-                                        'question_id'=>$pregunta_id,
-                                        'stakeholder_id'=>$request['stakeholder_id'],
-                                        ]);
-                    }
-                    else //es texto
-                    {
-                        //agregamos respuesta
-                        \Ermtool\Answer::create([
-                                        'answer'=>$_POST['respuesta'.$pregunta_id],
-                                        'question_id'=>$pregunta_id,
-                                        'stakeholder_id'=>$request['stakeholder_id'],
-                                        ]);
-                    }
+                    Session::flash('message','Respuestas enviadas correctamente');
                 }
-            }
-
-            //echo "Encuesta agregada con éxito";
-            ///////////////////// MEJORAR MENSAJE ////////////////////////
-            if (Session::get('languaje') == 'en')
-            {
-                Session::flash('message','Answers successfully sent');
-                return view('en.evaluacion.encuestaresp');
             }
             else
             {
-                Session::flash('message','Respuestas enviadas correctamente');
-                return view('evaluacion.encuestaresp');
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('error','It could not answer a poll without questions');
+                }
+                else
+                {
+                    Session::flash('error','No se puede responder una encuesta sin preguntas');
+                }
             }
-        }  
-    }
-
-    public function updateEvaluacion(Request $request)
-    {
-        if (Auth::guest())
+             
+        });
+        
+        if (Session::get('languaje') == 'en')
         {
-            return view('login');
+            return Redirect::to('encuestaresp');
         }
         else
         {
-            DB::transaction(function () {
+            return Redirect::to('encuestaresp');
+        }
+
+    }
+
+    public function updateEvaluacion(Request $request, $id)
+    {
+
+        DB::transaction(function () {
                 foreach ($_POST['pregunta_id'] as $pregunta_id) //vemos cada pregunta
                 {
                     if (gettype($_POST['respuesta'.$pregunta_id]) == "array") //vemos si la respuesta es un array (caso de checkbox)
@@ -688,15 +728,21 @@ class EncuestasController extends Controller
                 if (Session::get('languaje') == 'en')
                 {
                     Session::flash('message','Answers successfully updated');
-                    return view('en.evaluacion.encuestaresp');
                 }
                 else
                 {
                     Session::flash('message','Respuestas modificadas correctamente');
-                    return view('evaluacion.encuestaresp');
                 }
-            });
-        }          
+        });
+         
+        if (Session::get('languaje') == 'en')
+        {
+            return Redirect::to('encuestaresp');
+        }
+        else
+        {
+            return Redirect::to('encuestaresp');
+        }
     }
 
     public function encuestaRespondida()
@@ -958,7 +1004,7 @@ class EncuestasController extends Controller
                     //obtenemos posible answer si es que hay
                     $posibles = DB::table('posible_answers')
                                 ->where('question_id','=',$q->id)
-                                ->get('id');
+                                ->get(['id']);
 
                     if (!empty($posibles))
                     {
@@ -977,12 +1023,17 @@ class EncuestasController extends Controller
                         ->delete();
                 }
 
+                //primero eliminamos posible relación en poll_stakeholder (ACTUALIZACIÓN 23-01-17)
+                DB::table('poll_stakeholder')
+                    ->where('poll_id','=',$GLOBALS['id1'])
+                    ->delete();
+
                 //ahora eliminamos la encuesta
                 DB::table('polls')
                     ->where('id','=',$GLOBALS['id1'])
                     ->delete();
 
-                    $GLOBALS['res'] = 0;
+                $GLOBALS['res'] = 0;
             }
         });
 

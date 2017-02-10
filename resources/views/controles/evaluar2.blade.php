@@ -65,7 +65,7 @@
 			</tr>
 			<tr><td><b>Tipo</td>
 			<td>
-				@if ($control->type == 0)
+				@if ($control->type === 0)
 					Manual
 				@elseif ($control->type == 1)
 					Semi-autom&aacute;tico
@@ -78,7 +78,7 @@
 			</tr>
 			<tr><td><b>Periodicidad</td>
 			<td>
-				@if ($control->periodicity == 0)
+				@if ($control->periodicity === 0)
 					Diario
 				@elseif ($control->periodicity == 1)
 					Semanal
@@ -105,7 +105,7 @@
 			</tr>
 			<tr><td><b>Prop&oacute;sito</td>
 			<td>
-				@if ($control->purpose == 0)
+				@if ($control->purpose === 0)
 					Preventivo
 				@elseif ($control->purpose == 1)
 					Detectivo

@@ -109,7 +109,7 @@
 							
 							//seteamos datos en select de riesgos / procesos
 							$(datos).each( function() {
-								$("#select_objetivos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.objective_name +'<option>');
+								$("#select_objetivos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.objective_name +'</option>');
 							});
 					});
 				}

@@ -63,6 +63,14 @@ class Issue extends Model
                         ->first();
         }
 
+        else if ($kind == 7) //prueba auditoría
+        {
+            $origin = DB::table('audit_tests')
+                        ->where('id','=',$id)
+                        ->select('audit_tests.name')
+                        ->first();
+        }
+
         if (!empty($origin))
         {
             return $origin->name;
@@ -299,12 +307,18 @@ class Issue extends Model
 
     public static function getIssues($org)
     {
+        //ACTUALIZACIÓN 03-02-2017: Distintos tipos serán enviados para reporte de gráficos
         //issues de organización a través de audit_audit_plan_id
         $issues1 = DB::table('issues')
                 ->join('audit_audit_plan','audit_audit_plan.id','=','issues.audit_audit_plan_id')
                 ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
                 ->where('audit_plans.organization_id','=',$org)
                 ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        foreach ($issues1 as $i)
+        {
+            $i->kind = 1;
+        }
 
         //issues de programa
         $issues2 = DB::table('issues')
@@ -314,7 +328,12 @@ class Issue extends Model
                 ->where('audit_plans.organization_id','=',$org)
                 ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
 
-        //issues de pruebas
+        foreach ($issues2 as $i)
+        {
+            $i->kind = 2;
+        }
+
+        //issues de ejecución de pruebas
         $issues3 = DB::table('issues')
                 ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
                 ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
@@ -323,10 +342,20 @@ class Issue extends Model
                 ->where('audit_plans.organization_id','=',$org)
                 ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
 
+        foreach ($issues3 as $i)
+        {
+            $i->kind = 3;
+        }
+
         //de organización directamente
         $issues4 = DB::table('issues')
                     ->where('organization_id','=',$org)
                     ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        foreach ($issues4 as $i)
+        {
+            $i->kind = 4;
+        }
 
         //de subproceso
         $issues5 = DB::table('issues')
@@ -334,12 +363,22 @@ class Issue extends Model
                     ->where('organization_subprocess.organization_id','=',$org)
                     ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
 
+        foreach ($issues5 as $i)
+        {
+            $i->kind = 5;
+        }
+
         //de proceso
         $issues6 = DB::table('issues')
                     ->join('subprocesses','subprocesses.process_id','=','issues.process_id')
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                     ->where('organization_subprocess.organization_id','=',$org)
                     ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
+
+        foreach ($issues6 as $i)
+        {
+            $i->kind = 6;
+        }
 
         //hallazgo de control de proceso
         $issues7 = DB::table('issues')
@@ -349,6 +388,11 @@ class Issue extends Model
                     ->where('organization_subprocess.organization_id','=',$org)
                     ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
 
+        foreach ($issues7 as $i)
+        {
+            $i->kind = 7;
+        }
+
         //hallazgo de control de entidad
         $issues8 = DB::table('issues')
                     ->join('control_objective_risk','control_objective_risk.control_id','=','issues.control_id')
@@ -357,27 +401,49 @@ class Issue extends Model
                     ->where('objectives.organization_id','=',$org)
                     ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
 
+        foreach ($issues8 as $i)
+        {
+            $i->kind = 8;
+        }
+
         //de control_evaluation (de controles de proceso)
         $issues9 = DB::table('issues')
-                    ->join('control_evaluation','control_evaluation.control_id','=','issues.control_evaluation_id')
+                    ->join('control_evaluation','control_evaluation.id','=','issues.control_evaluation_id')
                     ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','control_evaluation.control_id')
                     ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                     ->where('organization_subprocess.organization_id','=',$org)
                     ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
 
+        foreach ($issues9 as $i)
+        {
+            $i->kind = 9;
+        }
+
+        //de control_evaluation (de controles de negocio)
         $issues10 = DB::table('issues')
-                    ->join('control_evaluation','control_evaluation.control_id','=','issues.control_evaluation_id')
+                    ->join('control_evaluation','control_evaluation.id','=','issues.control_evaluation_id')
                     ->join('control_objective_risk','control_objective_risk.control_id','=','control_evaluation.control_id')
                     ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
                     ->join('objectives','objectives.id','=','objective_risk.objective_id')
                     ->where('objectives.organization_id','=',$org)
                     ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification','issues.updated_at']);
 
+        foreach ($issues10 as $i)
+        {
+            $i->kind = 9;
+        }
+
         $issues = array_merge($issues1,$issues2,$issues3,$issues4,$issues5,$issues6,$issues7,$issues8,$issues9,$issues10);
         $issuesX = array_unique($issues,SORT_REGULAR);
         return $issuesX;
+    }
 
-
+    public static function getTestIssues($audit_test_id)
+    {
+        return DB::table('issues')
+                ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                ->where('audit_tests.id','=',$audit_test_id)
+                ->get(['issues.id','issues.name','issues.description','.issues.recommendations','issues.classification']);
     }
 }

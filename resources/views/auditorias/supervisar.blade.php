@@ -121,15 +121,15 @@ $("#audit").change(function() {
 									
 									if (test.results == 0)
 									{
-										audit_test += '<b>Estado: Inefectiva</b><br>';
+										audit_test += '<b>Resultado: Inefectiva</b><br>';
 									}
 									else if (test.results == 1)
 									{
-										audit_test += '<b>Estado: Efectiva</b><br>';
+										audit_test += '<b>Resultado: Efectiva</b><br>';
 									}
 									else if (test.results == 2)
 									{
-										audit_test += '<b>Estado: En proceso</b><br>';	
+										audit_test += '<b>Resultado: En proceso</b><br>';	
 									}
 
 									audit_test += '<b>Hallazgos encontrados</b><hr>';
@@ -219,6 +219,7 @@ function crear_nota(id)
 	nota += '<textarea name="description_'+id+'" rows="3" cols="4" class="form-control" placeholder="Nota" required></textarea></div>';
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<label class="control-label">Cargar evidencias (opcional)</label>';
+
 	nota += '<input id="file-1" type="file" class="file" name="evidencia_'+id+'[]" multiple=true data-preview-file-type="any">';
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<button class="btn btn-success">Guardar</button></div><hr><br>';
@@ -247,7 +248,6 @@ function cerrar_nota(id,note_id)
 			}, 1000);
 		}
 	});
-
 }
 
 </script>

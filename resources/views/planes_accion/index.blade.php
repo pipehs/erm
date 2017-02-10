@@ -40,7 +40,7 @@
 				{{ Session::get('message') }}
 				</div>
 			@endif
-
+@if (!isset($action_plans))
 			En esta secci&oacute;n podr&aacute; ver y cerrar cualquier plan de acci&oacute;n ingresado en el sistema.<br><br>
 			<div id="cargando"><br></div>
 
@@ -64,14 +64,14 @@
 			
 			</div>
 
-@if (isset($action_plans))
+@elseif (isset($action_plans))
 
 	<h4><b>Planes de acci&oacute;n creados para {{ $org }}</b></h4>
 
 
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
-				
+				{!! link_to_route('action_plan.create', $title = 'Agregar Nuevo Plan', $parameters = $org_id, $attributes = ['class'=>'btn btn-primary']) !!}
 			<?php break; ?>
 			@endif
 		@endforeach
@@ -97,7 +97,13 @@
 					<tr>
 						<td>{{ $action_plan['origin'] }}</td>
 						<td>{{ $action_plan['issue'] }}</td>
-						<td>{{ $action_plan['description'] }}</td>
+						<td>
+						@if ($action_plan['description'] == '')
+							No se ha definido descripci&oacute;n
+						@else
+							{{ $action_plan['description'] }}
+						@endif
+						</td>
 						<td>{{ $action_plan['stakeholder'] }}.<br>{{ $action_plan['stakeholder_mail'] }}</td>
 						<td>{{ $action_plan['status'] }}</td>
 						<td>{{ $action_plan['final_date'] }}</td>
@@ -116,6 +122,9 @@
 				@endforeach
 					</tr>
 				@endforeach
+
+				</table>
+		<center>{!! link_to_route('action_plans', $title = 'Volver', $parameters = NULL,$attributes = ['class'=>'btn btn-danger'])!!}</center>
 
 @endif
 

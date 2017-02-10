@@ -85,4 +85,24 @@ td {
 {!!Html::script('assets/js/audits.js')!!}
 {!!Html::script('assets/js/ejecutar_audit.js')!!}
 {!!Html::script('assets/js/descargar.js')!!}
+
+<script>
+function gestionarHallazgos(id)
+{
+	@if(Session::has('message'))
+		guardado = true
+	@else
+		guardado = false
+	@endif
+	
+	if (guardado == false)
+	{
+		swal('Cuidado','Antes de poder gestionar hallazgos debe guardar los resultados de la prueba','warning');
+	}
+	else
+	{
+		window.location.href = 'hallazgos_test.'+id
+	}
+}
+</script>
 @stop

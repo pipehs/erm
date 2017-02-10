@@ -1,6 +1,6 @@
 <!-- extends('master2') Se utilizará esta en el futuro para que no aparezca el menú de admin -->
 
-@extends('master')
+@extends('master2')
 
 @section('title', 'Identificaci&oacute;n de eventos de riesgo')
 
@@ -46,7 +46,7 @@
 			@if (empty($user_answers)) <!-- Si es que no hay respuestas se guardará nueva eval, de lo contrario se editará -->
 				{!!Form::open(['route'=>'identificacion.guardarEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
 			@else
-				{!!Form::open(['route'=>'identificacion.updateEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'identificacion.updateEvaluacion','method'=>'PUT','class'=>'form-horizontal'])!!}
 			@endif
 			<?php $i = 1; //contador de preguntas ?>
 			@foreach ($preguntas as $pregunta)

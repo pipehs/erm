@@ -9,7 +9,8 @@
         "laravel/framework": "5.1.*",
         "twbs/bootstrap": "^3.3",
         "sallar/jdatetime": "dev-master",
-        "laravelcollective/html": "5.1.*"
+        "laravelcollective/html": "5.1.*",
+        "yajra/laravel-oci8": "5.1.*"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
@@ -56,4 +57,3 @@
         "preferred-install": "dist"
     }
 }
-

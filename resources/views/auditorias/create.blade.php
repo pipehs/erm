@@ -113,7 +113,12 @@
 	</div>
 </div>
 @stop
-
 @section('scripts2')
+<script>
+$(document).ready(function () {
+
+	audit_plan_id = 0;
+});
+</script>
 {!!Html::script('assets/js/create_edit_audit_plan.js')!!}
 @stop

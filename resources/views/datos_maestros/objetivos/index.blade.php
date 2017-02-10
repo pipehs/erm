@@ -116,6 +116,7 @@
 			@if ($probador !== 0) {{-- Si es que existe algún objetivo creado, probador no será cero --}}
 				<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 					<thead>
+					<th>C&oacute;digo<label><input type='text' placeholder='Filtrar' /></label></th>
 					<th>Perspectiva<label><input type='text' placeholder='Filtrar' /></label></th>
 					<th>Nombre<label><input type='text' placeholder='Filtrar' /></label></th>
 					<th width="30%">Descripci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>				
@@ -134,6 +135,7 @@
 
 					@foreach ($objetivos as $objetivo)
 						<tr>
+						<td>{{ $objetivo['code'] }}</td>
 						@if ($objetivo['perspective'] == NULL)
 							<td>No se ha definido perspectiva</td>
 						@elseif ($objetivo['perspective'] == 1)
@@ -156,7 +158,7 @@
 							@if ($objetivo['estado'] == 0)
 					            {!! link_to_route('objetivos.edit', $title = 'Editar', $parameters = $objetivo['id'], $attributes = ['class'=>'btn btn-success']) !!}
 					        @else
-					        	{!! link_to_route('objetivos.desbloquear', $title = 'Desbloquear', $parameters = $objetivo['id'], $attributes = ['class'=>'btn btn-success']) !!}
+					        	<button class="btn btn-success" onclick="desbloquear({{ $objetivo['id'] }},'{{ $objetivo['nombre'] }}','objetivos','El objetivo')">Desbloquear</button>
 					        @endif
 					        </div><!-- /btn-group -->
 						</td>

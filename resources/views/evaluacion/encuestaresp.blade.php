@@ -1,4 +1,4 @@
-@extends('master')
+@extends('master2')
 
 @section('title', 'Encuesta respondida')
 
@@ -42,7 +42,20 @@
 			</div>
 		@endif
 
+		@if(Session::has('error'))
+			<div class="alert alert-danger alert-dismissible" role="alert">
+			{{ Session::get('error') }}
+			</div>
+		@endif
 
+		@if (Auth::guest())
+
+		@else
+			<center>
+				{!! link_to_route('home', $title = 'Ir al inicio', $parameters = NULL,
+				 $attributes = ['class'=>'btn btn-success'])!!}
+			<center>
+        @endif
 
 			</div>
 		</div>
@@ -50,26 +63,6 @@
 </div>
 @stop
 @section('scripts')
-<script>
-// Run Datables plugin and create 3 variants of settings
-function AllTables(){
-	TestTable1();
-	TestTable2();
-	TestTable3();
-	LoadSelect2Script(MakeSelect2);
-}
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
-}
-$(document).ready(function() {
-	// Load Datatables and run plugin on tables 
-	LoadDataTablesScripts(AllTables);
-	// Add Drag-n-Drop feature
-	WinMove();
-});
-</script>
+
 @stop
 

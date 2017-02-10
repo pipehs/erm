@@ -58,6 +58,14 @@
 @section('scripts2')
 <script>
 $(document).ready(function () {
+	strategic_plan_id = {{ $strategic_plan_id }};
+
+	@if ($objetivo->perspective2 != NULL || $objetivo->perspective2 != '')
+		perspective2_id = {{ $objetivo->perspective2 }};
+	@else
+		perspective2_id = 0;
+	@endif
+
 	$("#perspective").change();
 });
 </script>

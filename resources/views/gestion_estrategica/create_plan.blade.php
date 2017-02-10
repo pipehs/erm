@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-puzzle-piece"></i>
-					<span>Crear plan estratégico</span>
+					<span>Crear plan estratégico {{ $org_name }}</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">

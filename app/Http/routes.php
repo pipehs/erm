@@ -135,6 +135,11 @@ Route::get('objetivos.destroy.{id}', [
 Route::get('objetivos_plan.{strategic_id}', [
 	'as' => 'objetivos_plan', 'uses' => 'ObjetivosController@objetivosPlan']);
 
+//Selecciona a través de JSON los objetivos a los que un objetivo puede impactar (según perspectiva)
+Route::get('objetivos.objectives_impact.{strategic_plan_id},{perspective}', [
+    'as' => 'objetivos.objectives_impact', 'uses' => 'ObjetivosController@getObjectivesImpact'
+]);
+
 //Rutas para CRUD + bloquear Procesos//
 
 Route::resource('procesos','ProcesosController');
@@ -434,7 +439,9 @@ Route::get('efectos.destroy.{id}', [
 
 Route::resource('crear_encuesta','EncuestasController@create');
 
-Route::post('encuesta.store','EncuestasController@store');
+Route::post('encuesta.store', [
+	'as' => 'encuesta.store', 'uses' => 'EncuestasController@store'
+]);
 
 Route::get('enviar_encuesta','EncuestasController@enviar');
 
@@ -446,7 +453,7 @@ Route::get('identificacion.encuesta.{id}', [
 	'as' => 'identificacion.encuesta', 'uses' => 'EncuestasController@verificadorUserEncuesta'
 ]);
 
-Route::post('identificacion.resp_encuesta.{id}', [
+Route::get('identificacion.resp_encuesta.{id}', [
 	'as' => 'identificacion.resp_encuesta', 'uses' => 'EncuestasController@generarEncuesta'
 ]);
 
@@ -454,13 +461,19 @@ Route::post('identificacion.guardarEvaluacion.{id}', [
 	'as' => 'identificacion.guardarEvaluacion', 'uses' => 'EncuestasController@guardarEvaluacion'
 ]);
 
-Route::post('identificacion.updateEvaluacion.{id}', [
+Route::put('identificacion.updateEvaluacion.{id}', [
 	'as' => 'identificacion.updateEvaluacion', 'uses' => 'EncuestasController@updateEvaluacion'
 ]);
 
 Route::post('identificacion.encuestaRespondida', [
 	'as' => 'identificacion.encuestaRespondida', 'uses' => 'EncuestasController@encuestaRespondida'
 ]);
+
+//ruta para usuarios invitados para saber que se guardo o actualizó encuesta
+Route::get('encuestaresp', function(){
+   return View::make('evaluacion.encuestaresp');
+});
+
 
 Route::get('encuestas', [
 	'as' => 'encuestas', 'uses' => 'EncuestasController@verEncuestas']);
@@ -750,6 +763,15 @@ Route::get('audit_plan.open.{id}', [
 
 Route::get('audit_plan.destroy.{id}', [
 	'as' => 'audit_plan.destroy', 'uses' => 'AuditoriasController@destroy']);
+
+//ruta que elimina auditoría enlazada a un plan de auditoría (audit_audit_plan_id)
+Route::get('audit.destroy.{id}', [
+	'as' => 'audit.destroy', 'uses' => 'AuditoriasController@destroyAudit']);
+
+//ruta para obtener dato de auditorías agregadas a un plan (audit_audit_plan se activa al editar plan de auditoría)
+Route::get('get_audit_info.{audit_plan}.{audit}', [
+	'as' => 'get_audit_info', 'uses' => 'AuditoriasController@getAuditInfo'
+]);
 
 Route::get('auditorias', [
 	'as' =>'auditorias', 'uses' => 'AuditoriasController@indexAuditorias']);
@@ -1179,6 +1201,10 @@ Route::get('action_plans', [
 Route::get('action_plans2', [
 	'as' => 'action_plans2', 'uses' => 'PlanesAccionController@index2']);
 
+//crear nuevo plan de acción a través de mantenedor
+Route::get('action_plan.create.{org}', [
+	'as' =>'action_plan.create', 'uses' => 'PlanesAccionController@create']);
+
 Route::get('action_plan.destroy.{id}', [
 	'as' => 'action_plan.destroy', 'uses' => 'PlanesAccionController@destroy']);
 
@@ -1190,8 +1216,14 @@ Route::get('action_plan.edit.{id}', [
 	'as' => 'action_plan.edit', 'uses' => 'PlanesAccionController@edit'
 ]);
 
+Route::post('action_plan.store', [
+	'as' => 'action_plan.store', 'uses' => 'PlanesAccionController@store2']);
+
 Route::put('action_plan.update.{id}', [
 	'as' => 'action_plan.update', 'uses' => 'PlanesAccionController@update']);
+
+Route::get('get_issues.{kind}.{org}', [
+	'as' => 'get_issues', 'uses' => 'PlanesAccionController@getIssues']);
 
 Route::get('documentos', [
 	'as' => 'documentos', 'uses' => 'DocumentosController@index']);

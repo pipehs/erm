@@ -56,6 +56,11 @@
 @section('scripts2')
 <script>
 @if (strstr($_SERVER["REQUEST_URI"],'edit'))
+
+	$('#issue_id').attr('disabled','disabled');
+	$('#kind').attr('disabled','disabled');
+	//QUEDE AQUÍ!!!! DEBO HACER DISABLED ´SELECT DE ISSUE
+	
 	@if ($action_plan != NULL)
 		$(document).ready(function() {
 
@@ -64,7 +69,6 @@
 			@endif
 
 			@if ($action_plan->status == 1)
-
 
 				$('#description').attr('disabled','disabled');
 				$('#stakeholder_id').attr('disabled','disabled');
@@ -98,5 +102,26 @@
 
 	@endif
 @endif
+
+$('#kind').change(function() {
+
+	if ($('#kind').val() != '')
+	{
+		$("#issues").empty();
+		//obtenemos todas las causas
+		$.get('get_issues.'+$('#kind').val()+'.{{ $org_id }}', function (result) {
+			//parseamos datos obtenidos
+			var datos = JSON.parse(result);
+			var issues = '<option value="" disabled selected>- Seleccione </option>';
+			$(datos).each( function() {
+				issues += '<option value='+this.id+'>'+this.name+'</option>';
+			});
+
+			$("#issues").append(issues);
+			$("#issues").change();
+		});
+	}
+		
+});
 </script>
 @stop

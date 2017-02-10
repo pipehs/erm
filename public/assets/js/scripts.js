@@ -18,7 +18,7 @@ function Select2Test(){
 	$("#el3").select2();
 }
 
-//función para bloquear o desbloquear (primeramente para datos maestros)
+//función para bloquear (primeramente para datos maestros)
 function bloquear(id,name,kind,type)
 {
 	swal({   title: "Atención!",
@@ -31,6 +31,35 @@ function bloquear(id,name,kind,type)
 		   closeOnConfirm: false }, 
 		   function(){
 		   		$.get(kind+'.bloquear.'+id, function (result) {
+		   			swal({   title: "",
+		   			   text: ""+type+" "+name+" fue bloqueado(a) con éxito ",
+		   			   type: "success",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Aceptar",   
+		   			   closeOnConfirm: false }, 
+		   			   function(){   
+		   			   	location.reload();
+		   			   });
+
+		   			});
+		   		 
+		   	});
+}
+
+//función para desbloquear (primeramente para datos maestros)
+function desbloquear(id,name,kind,type)
+{
+	swal({   title: "Atención!",
+		   text: "Esta seguro de desbloquear "+type+" "+name+"?",
+		   type: "warning",   
+		   showCancelButton: true,   
+		   confirmButtonColor: "#31B404",   
+		   confirmButtonText: "Desbloquear",
+		   cancelButtonText: "Cancelar",   
+		   closeOnConfirm: false }, 
+		   function(){
+		   		$.get(kind+'.desbloquear.'+id, function (result) {
 		   			swal({   title: "",
 		   			   text: ""+type+" "+name+" fue bloqueado(a) con éxito ",
 		   			   type: "success",   

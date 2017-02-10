@@ -55,7 +55,7 @@
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('plan_auditoria', $title = 'Volver', $parameters = NULL,
+					{!! link_to_route('plan_auditoria.show', $title = 'Volver', $parameters = $audit_plan->id,
                  		$attributes = ['class'=>'btn btn-danger'])!!}
 				<center>
 			</div>
@@ -70,17 +70,16 @@
 
 <script>
 $("#orgs").ready(function() {
-
 			$("#orgs").change();
 			//seteamos datos
 			//auditor responsable
-			$("#stakeholder").val('{{ $stakeholder->stakeholder_id }}');
-			$("#stakeholder").change();
+			$("#stakeholder_id").val('{{ $stakeholder->stakeholder_id }}');
+			$("#stakeholder_id").change();
 			
+			audit_plan_id = '{{ $audit_plan->id }}'
 			//seleccionamos datos cuando ya existan (esperaremos 1 segundo)
 			window.setTimeout(risks, 1000);
-			window.setTimeout(stakes, 1000);
-			window.setTimeout(audits, 1000);
+			window.setTimeout(stakes, 1500);
 	});
 
 function stakes()
@@ -93,15 +92,6 @@ function stakes()
 			});
 }
 
-function audits()
-{
-	//auditorias
-	var audits = JSON.parse('{{ $audits_selected }}');
-	$(audits).each( function() {
-				$("#auditorias option[value='" + this + "']").attr("selected",true);
-				$("#auditorias").change();
-			});
-}
 
 function risks()
 {

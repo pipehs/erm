@@ -56,7 +56,7 @@
 			<div class="form-group">
 				{!!Form::label('Seleccione un tipo',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-3">
-					{!!Form::select('kind',['0'=>'De proceso','1'=>'De subproceso','2'=>'De organización','3'=>'Control de proceso','4'=>'De control de entidad','5'=>'De programa de auditoría','6'=>'De auditoría'],null, 
+					{!!Form::select('kind',['0'=>'Procesos','1'=>'Subprocesos','2'=>'Organización','3'=>'Controles de proceso','4'=>'Controles de entidad','5'=>'Programas de auditoría','6'=>'Auditorías','7'=>'Pruebas de auditoría'],null, 
 							 	   ['id' => 'kind','required'=>'true','placeholder'=>'- Seleccione -'])!!}
 				</div>
 			</div>
@@ -86,12 +86,14 @@
 				@elseif ($kind == 5)
 					<h4><b>{{ $org }}: Hallazgos de programas de auditor&iacute;a</b></h4>
 				@elseif ($kind == 6)
-					<h4><b>{{ $org }}: Hallazgos de auditor&iacute;a</b></h4>
+					<h4><b>{{ $org }}: Hallazgos de auditor&iacute;as</b></h4>
+				@elseif ($kind == 7)
+					<h4><b>{{ $org }}: Hallazgos de pruebas de auditoría</b></h4>
 				@endif
 
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
-				{!! link_to_route('create_hallazgo', $title = 'Agregar Hallazgo', $parameters = ['org'=>$org_id,'kind'=>$kind],$attributes = ['class'=>'btn btn-success'])!!}
+				{!! link_to_route('create_hallazgo', $title = 'Agregar Hallazgo', $parameters = ['org'=>$org_id,'kind'=>$kind],$attributes = ['class'=>'btn btn-primary'])!!}
 			<?php break; ?>
 			@endif
 		@endforeach
@@ -109,6 +111,8 @@
 						<th>Programa de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
 					@elseif ($kind == 6)
 						<th>Plan de auditor&iacute;a - Auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+					@elseif ($kind == 7)
+						<th>Prueba de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
 					@endif
 					<th>Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>

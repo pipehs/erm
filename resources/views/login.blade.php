@@ -1,4 +1,4 @@
-@extends('master2')
+@extends('master_login')
 
 @section('title', 'Home')
 
@@ -9,7 +9,8 @@
 			<div class="box">
 				<div class="box-content">
 					<div class="text-center">
-						<h3 class="page-header">B-GRC Business, Governance, Risk and Compliance</h3>
+						<img src="assets/img/logoCompleto.PNG" title="Bussiness Governance and Risk Compliance"></img>
+						<h3 class="page-header">Business, Governance, Risk and Compliance</h3>
 					</div>
 					
 				    {!! Form::open(['route' => 'log.store', 'class' => 'form', 'method' => 'POST']) !!}

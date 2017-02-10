@@ -42,6 +42,12 @@
 			</div>
 		@endif
 
+		@if(Session::has('error'))
+			<div class="alert alert-danger alert-dismissible" role="alert">
+			{{ Session::get('error') }}
+			</div>
+		@endif
+
 En esta secci&oacute;n podr&aacute; crear encuestas para la evaluación de los riesgos identificados.
 
 {!!Form::open(['url'=>'evaluacion.store','method'=>'POST','class'=>'form-horizontal'])!!}
@@ -108,5 +114,10 @@ En esta secci&oacute;n podr&aacute; crear encuestas para la evaluación de los r
 @stop
 
 @section('scripts2')
+<script>
+$(document).ready(function () {
+	$('#org').change();
+});
+</script>
 {!!Html::script('assets/js/get_risks.js')!!}
 @stop

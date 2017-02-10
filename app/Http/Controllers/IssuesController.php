@@ -79,7 +79,7 @@ class IssuesController extends Controller
                             'Clasificación' => $classification,
                             'Recomendaciones' => $recommendations,
                             'Plan de acción' => $plan,
-                            'Esta' => $status,
+                            'Estado' => $status,
                             'Fecha límite plan' => $final_date
                         ];
         }
@@ -110,7 +110,7 @@ class IssuesController extends Controller
                             'Clasificación' => $classification,
                             'Recomendaciones' => $recommendations,
                             'Plan de acción' => $plan,
-                            'Esta' => $status,
+                            'Estado' => $status,
                             'Fecha límite plan' => $final_date
                         ];
         }
@@ -119,7 +119,7 @@ class IssuesController extends Controller
     }
 
     //set para reporte de excel de auditoría y programas de auditoría
-    public function setIssue4($audit_plans,$audits,$programs,$name,$classification,$recommendations,$plan,$status,$final_date)
+    public function setIssue4($audit_plans,$audits,$programs,$test,$name,$classification,$recommendations,$plan,$status,$final_date)
     {
         if (Session::get('languaje') == 'en')
         {
@@ -145,7 +145,7 @@ class IssuesController extends Controller
                             'Clasificación' => $classification,
                             'Recomendaciones' => $recommendations,
                             'Plan de acción' => $plan,
-                            'Esta' => $status,
+                            'Estado' => $status,
                             'Fecha límite plan' => $final_date
                         ];
         }
@@ -326,14 +326,43 @@ class IssuesController extends Controller
             foreach ($audits as $audit)
             {
                 //obtenemos issues de la auditoría
-                $issues3 = \Ermtool\Issue::getAuditIssues($audit->id);
+                $issues2 = \Ermtool\Issue::getAuditIssues($audit->id);
 
-                foreach ($issues3 as $issue)
+                foreach ($issues2 as $issue)
                 {
                     $issues[$i] = [
                         'element_id' => $audit->id,
                         'audit' => $audit->name,
                         'audit_description' => $audit->description,
+                        'id' => $issue->id,
+                        'name' => $issue->name,
+                        'description' => $issue->description,
+                        'classification' => $issue->classification,
+                        'recommendations' => $issue->recommendations
+                    ];
+
+                    $i += 1; 
+                }
+            }
+        }
+
+        else if ($kind == 7) //ACTUALIZACIÓN 31-01-2017: Hallazgos de pruebas de auditoría
+        {
+            $tests = \Ermtool\Audit_test::getAuditTestsFromIssues($org_id);
+
+            $issues = array(); //se guardaran los programas que tienen issues que además tienen documentos
+            $i = 0;
+            foreach ($tests as $test)
+            {
+                //obtenemos issues de la auditoría
+                $issues2 = \Ermtool\Issue::getTestIssues($test->id);
+
+                foreach ($issues2 as $issue)
+                {
+                    $issues[$i] = [
+                        'element_id' => $test->id,
+                        'audit_test' => $test->name,
+                        'audit_test_description' => $test->description,
                         'id' => $issue->id,
                         'name' => $issue->name,
                         'description' => $issue->description,
@@ -398,11 +427,15 @@ class IssuesController extends Controller
                 }
                 else if ($kind == 5) //Hallazgos de programa de auditoría
                 {
-                    $issues[$i] = $this->setIssue4($datos['audit_plans'],$datos['audits'],$datos['audit_program'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                    $issues[$i] = $this->setIssue4($datos['audit_plans'],$datos['audits'],$datos['audit_program'],NULL,$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
                 }
                 else if ($kind == 6) //Hallazgos de auditoría
                 {
-                    $issues[$i] = $this->setIssue4($datos['audit_plans'],$datos['audit'],$datos['audit_programs'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                    $issues[$i] = $this->setIssue4($datos['audit_plans'],$datos['audit'],$datos['audit_programs'],NULL,$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                }
+                else if ($kind == 7) //Hallazgos de pruebas de auditoría
+                {
+                    $issues[$i] = $this->setIssue4($datos['audit_plans'],$datos['audit'],$datos['audit_programs'],$datos['audit_test'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
                 }
                 
             }
@@ -818,6 +851,72 @@ class IssuesController extends Controller
                 'audit_plans' => $audit_plans,
                 'audit' => $audit,
                 'audit_programs' => $audit_programs
+            ];
+        }
+
+        else if ($kind == 7) //ACTUALIZACIÓN 31-01-2017: Pruebas de auditorías
+        {
+            $audit_plans1 = \Ermtool\Audit_plan::getAuditPlansFromAuditTest($org,$element_id);
+            $audit_plans = "";
+            $audit_programs = "";
+            $audits = "";
+            if ($audit_plans1)
+            {
+                $last = end($audit_plans1); //guardamos final para no agregarle coma
+                foreach ($audit_plans1 as $audit_plan)
+                {
+                    if ($audit_plan != $last)
+                    {
+                        $audit_plans .= $audit_plan->name.', ';
+                    }
+                    else
+                    {
+                        $audit_plans .= $audit_plan->name;
+                    }
+                }
+            }
+
+            $audit1 = \Ermtool\Audit::getAuditFromAuditTest($org,$element_id);
+            if ($audit1)
+            {
+                $last = end($audit1); //guardamos final para no agregarle coma
+                foreach ($audit1 as $audit)
+                {
+                    if ($audit != $last)
+                    {
+                        $audits .= $audit->name.', ';
+                    }
+                    else
+                    {
+                        $audits .= $audit->name;
+                    }
+                }
+            }
+
+            $audit_programs1 = \Ermtool\Audit_program::getAuditProgramFromAuditTest($org,$element_id);
+            if ($audit_programs1)
+            {
+                $last = end($audit_programs1); //guardamos final para no agregarle coma
+                foreach ($audit_programs1 as $program)
+                {
+                    if ($program != $last)
+                    {
+                        $audit_programs .= $program->name.', ';
+                    }
+                    else
+                    {
+                        $audit_programs .= $program->name;
+                    }
+                }
+            }
+
+            $audit_test = \Ermtool\Audit_test::getTestNameById($element_id);
+
+            $datos = [
+                'audit_plans' => $audit_plans,
+                'audit' => $audit,
+                'audit_programs' => $audit_programs,
+                'audit_test' => $audit_test,
             ];
         }
 
@@ -1445,7 +1544,7 @@ class IssuesController extends Controller
 
                     $newplan = $plan->store($issue,$_POST['description_plan'],$stakeholder,$final_date);
 
-                    $id_action_plan = $newplan;
+                    $id_action_plan = $newplan->id;
 
                     //agregamos evidencia del plan de acción (si es que existe)
                     if($GLOBALS['evidence'] != NULL)

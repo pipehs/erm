@@ -41,8 +41,7 @@
 				<div class="form-group">
 					{!!Form::label('Descripción',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
-						{!!Form::textarea('description',null,['class'=>'form-control',
-										'required'=>'true','rows'=>'3'])!!}
+						{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3'])!!}
 					</div>
 				</div>
 
@@ -54,26 +53,10 @@
 				</div>
 
 				<div class="form-group">
-					{!!Form::label('Periodicidad',null,['class'=>'col-sm-4 control-label'])!!}
-					<div class="col-sm-3">
-					{!!Form::select('periodicity',['1'=>'Mensual','2'=>'Semestral','3'=>'Trimestral','4'=>'Anual'], 
-				 	   null, 
-				 	   ['id' => 'el2','placeholder'=>'- Seleccione -'])!!}
-					</div>
-				</div>
-
-				<div class="form-group">
 					{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 						{!!Form::select('stakeholder_id',$stakeholders,null,
 												['placeholder'=>'- Seleccione -'])!!}
-					</div>
-				</div>
-
-				<div class="form-group">
-					{!!Form::label('Unidad de medida',null,['class'=>'col-sm-4 control-label'])!!}
-					<div class="col-sm-3">
-						{!!Form::textarea('measurement_unit',null,['class'=>'form-control','rows'=>'2'])!!}
 					</div>
 				</div>
 

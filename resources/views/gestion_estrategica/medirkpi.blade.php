@@ -63,8 +63,10 @@
 				<hr>
 
 				{!!Form::open(['route'=>'kpi.store_eval','method'=>'POST','class'=>'form-horizontal'])!!}
-
+					<h4 style="color:blue;"><center><b>Meta del KPI: {{ $kpi->goal }} {{ $kpi->initial_value }}</b></center></h4>
+					<h5><center><b>Fecha final del KPI: {{ $final_date }}</b></center></h5>
 				@if ($kpi->periodicity == 1) {{-- Mensual --}}
+					
 					<h5><center><b>Periodicidad del KPI: Mensual</b></center></h5>
 					<div class="row">
 	                  <div class="form-group">
@@ -248,40 +250,46 @@
 			</div>
 			<div class="box-content">
 			@if (isset($measurements) && $measurements != "0")
-				<table class="table table-bordered table-striped table-hover table-heading table-datatable">
-				<thead><th>Peri&oacute;do de evaluaci&oacute;n</th><th>Valor de la medici&oacute;n</th></thead>
 
-				@foreach ($measurements as $measure)
-				<tr>
-					<td>
-					@if ($kpi->periodicity == 1)
-						@if ($measure->month != NULL)
-							<?php $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']; ?>
+				<div id="table-wrapper">
+  					<div id="table-scroll">
+						<table class="table table-bordered table-striped table-hover table-heading table-datatable table-scroll ">
+						<thead><th>Peri&oacute;do de evaluaci&oacute;n</th><th>Valor de la medici&oacute;n</th></thead>
+						<tbody>
+						@foreach ($measurements as $measure)
+						<tr>
+							<td>
+							@if ($kpi->periodicity == 1)
+								@if ($measure->month != NULL)
+									<?php $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']; ?>
 
-							{{ $meses[$measure->month-1] }} de {{ $measure->year }}
-						@endif
-					@elseif($kpi->periodicity == 2)
-						@if ($measure->semester != NULL)
-							<?php $semestres = ['Primer semestre','Segundo semestre']; ?>
+									{{ $meses[$measure->month-1] }} de {{ $measure->year }}
+								@endif
+							@elseif($kpi->periodicity == 2)
+								@if ($measure->semester != NULL)
+									<?php $semestres = ['Primer semestre','Segundo semestre']; ?>
 
-							{{ $semestres[$measure->semester-1] }} de {{ $measure->year }}
-						@endif
-					@elseif($kpi->periodicity == 3)
-						@if ($measure->trimester != NULL)
-							<?php $trimestres = ['Primer trimestre','Segundo trimestre','Tercer trimestre','Cuarto trimestre']; ?>
+									{{ $semestres[$measure->semester-1] }} de {{ $measure->year }}
+								@endif
+							@elseif($kpi->periodicity == 3)
+								@if ($measure->trimester != NULL)
+									<?php $trimestres = ['Primer trimestre','Segundo trimestre','Tercer trimestre','Cuarto trimestre']; ?>
 
-							{{ $trimestres[$measure->trimester-1] }} de {{ $measure->year }}
-						@endif
-					@elseif($kpi->periodicity == 4)
-						{{ $measure->year }}
-					@endif
-					</td>
-					<td>
-						{{ $measure->value }}
-					</td>
-				</tr>
-				@endforeach
-				</table>
+									{{ $trimestres[$measure->trimester-1] }} de {{ $measure->year }}
+								@endif
+							@elseif($kpi->periodicity == 4)
+								{{ $measure->year }}
+							@endif
+							</td>
+							<td>
+								{{ $measure->value }}
+							</td>
+						</tr>
+						@endforeach
+						</tbody>
+						</table>
+					</div>
+				</div>
 			@else
 				Aun no se han agregado mediciones
 			@endif

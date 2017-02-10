@@ -51,6 +51,8 @@
 	@endforeach
 @if (isset($controls1))
 	<h4><b>Controles a nivel de entidad</b></h4>
+	<div id="table-wrapper">
+  	<div id="table-scroll">
 		<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 		<thead>
 		<th>Nombre</th>
@@ -59,10 +61,10 @@
 		<th>Riesgo(s)/Objetivo(s)</th>
 		<th>Tipo Control</th>
 		<th>Fecha Agregado</th>
-		<th>Fecha Actualizado</th>
 		<th>Responsable del Control</th>
 		<th>Evidencia</th>
 		<th>Prop&oacute;sito</th>
+		<th>Costo esperado</th>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 		<th>Acci&oacute;n</th>
@@ -92,16 +94,17 @@
 				@endforeach
 				</ul></td>
 				<td>
-				@if ($control['type'] == 0)
+				@if ($control['type'] === 0)
 					Manual
 				@elseif ($control['type'] == 1)
 					Semi-autom&aacute;tico
 				@elseif ($control['type'] == 2)
 					Autom&aacute;tico
+				@else
+					No se ha definido
 				@endif	
 				</td>
-				<td>{{ $control['created_at'] }}</td>
-				<td>{{ $control['updated_at'] }}</td>			
+				<td>{{ $control['created_at'] }}</td>			
 				<td>
 				@if ($control['stakeholder'])
 					{{ $control['stakeholder'] }}
@@ -109,7 +112,13 @@
 					No se ha definido
 				@endif
 				</td>
-				<td>{{ $control['evidence'] }}</td>
+				<td>
+				@if ($control['evidence'] === NULL)
+					No se ha agregado
+				@else
+					{{ $control['evidence'] }}
+				@endif
+				</td>
 				<td>
 				@if ($control['purpose'] == 0)
 					Preventivo
@@ -119,6 +128,13 @@
 					Correctivo
 				@else
 					Error al ingresar prop&oacute;sito
+				@endif
+				</td>
+				<td>
+				@if ($control['expected_cost'] === NULL)
+					No se ha definido
+				@else
+					{{ $control['expected_cost'] }}
 				@endif
 				</td>
 		@foreach (Session::get('roles') as $role)
@@ -132,11 +148,14 @@
 			</tr>
 		@endforeach
 		</table>
+	</div>
+	</div>
 @endif
 
 @if (isset($controls2))
 	<h4><b>Controles a nivel de proceso</b></h4>
-
+	<div id="table-wrapper">
+  	<div id="table-scroll">
 		<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 		<thead>
 		<th>Nombre</th>
@@ -145,10 +164,10 @@
 		<th>Riesgo(s)/Subproceso(s)</th>
 		<th>Tipo Control</th>
 		<th>Fecha Agregado</th>
-		<th>Fecha Actualizado</th>
 		<th>Responsable del Control</th>
 		<th>Evidencia</th>
 		<th>Prop&oacute;sito</th>
+		<th>Costo esperado</th>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 		<th>Acci&oacute;n</th>
@@ -178,16 +197,17 @@
 				@endforeach
 				</ul></td>
 				<td>
-				@if ($control['type'] == 0)
+				@if ($control['type'] === 0)
 					Manual
 				@elseif ($control['type'] == 1)
 					Semi-autom&aacute;tico
 				@elseif ($control['type'] == 2)
 					Autom&aacute;tico
-				@endif	
+				@else
+					No se ha definido
+				@endif
 				</td>
 				<td>{{ $control['created_at'] }}</td>
-				<td>{{ $control['updated_at'] }}</td>
 				
 				<td>
 				@if ($control['stakeholder'])
@@ -196,7 +216,13 @@
 					No se ha definido
 				@endif
 				</td>
-				<td>{{ $control['evidence'] }}</td>
+				<td>
+				@if ($control['evidence'] === NULL)
+					No se ha agregado
+				@else
+					{{ $control['evidence'] }}
+				@endif
+				</td>
 				<td>
 				@if ($control['purpose'] == 0)
 					Preventivo
@@ -206,6 +232,13 @@
 					Correctivo
 				@else
 					Error al ingresar prop&oacute;sito
+				@endif
+				</td>
+				<td>
+				@if ($control['expected_cost'] === NULL)
+					No se ha definido
+				@else
+					{{ $control['expected_cost'] }}
 				@endif
 				</td>
 		@foreach (Session::get('roles') as $role)
@@ -219,6 +252,8 @@
 			</tr>
 		@endforeach
 		</table>
+		</div>
+		</div>
 @endif
 		<br/>
 		<center>

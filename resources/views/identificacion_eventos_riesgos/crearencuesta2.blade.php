@@ -74,11 +74,9 @@
 					</div>
 					{!!Form::close()!!}
 
-					{!!Form::open(['url'=>'crear_encuesta','method'=>'POST','class'=>'form-horizontal'])!!}
-					<div class="form-group">
-						{!!Form::submit("Volver", ["class"=>"btn btn-danger","name"=>"volver"])!!}	
-					</div>
-					{!!Form::close()!!}
+					<center>
+					{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
+			</center>
 				</center>
 
 

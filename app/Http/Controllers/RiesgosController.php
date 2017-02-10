@@ -364,15 +364,42 @@ class RiesgosController extends Controller
                             $stake = $_POST['stakeholder_id'];
                         }
 
+                        if (!isset($_POST['description']) || $_POST['description'] == "")
+                        {
+                            $description = NULL;
+                        }
+                        else
+                        {
+                            $description = $_POST['description'];
+                        }
+
+                        if (!isset($_POST['risk_category_id']) || $_POST['risk_category_id'] == "")
+                        {
+                            $risk_category_id = NULL;
+                        }
+                        else
+                        {
+                            $risk_category_id = $_POST['risk_category_id'];
+                        }
+
+                        if (!isset($_POST['expected_loss']) || $_POST['expected_loss'] == "")
+                        {
+                            $expected_loss = NULL;
+                        }
+                        else
+                        {
+                            $expected_loss = $_POST['expected_loss'];
+                        }
+
                         $risk = \Ermtool\Risk::create([
                             'name'=>$_POST['name'],
-                            'description'=>$_POST['description'],
+                            'description'=>$description,
                             'type'=>$type,
                             'type2'=>1,
                             'expiration_date'=>$_POST['expiration_date'],
-                            'risk_category_id'=>$_POST['risk_category_id'],
+                            'risk_category_id'=>$risk_category_id,
                             'stakeholder_id'=>$stake,
-                            'expected_loss'=>$_POST['expected_loss'],
+                            'expected_loss'=>$expected_loss,
                             ]);
 
                         //vemos si se agrego alguna causa nueva
@@ -550,13 +577,13 @@ class RiesgosController extends Controller
                                 ->lists('name','id');
 
                 $obj_selected = array();
-                $orgs = DB::table('objective_risk')
+                $objs = DB::table('objective_risk')
                             ->where('objective_risk.risk_id','=',$id)
                             ->select('objective_risk.objective_id')
                             ->get();
 
                 $i = 0;
-                foreach ($subs as $sub)
+                foreach ($objs as $obj)
                 {
                     $obj_selected[$i] = $obj->objective_id;
                     $i += 1;
@@ -617,7 +644,7 @@ class RiesgosController extends Controller
                     return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
                                         'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders,
                                         'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,
-                                        'objetivos' => $objetivos,'obj_selected' => $obj_selected,'org_id' => $_GET['org']]);
+                                        'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org']]);
                 }
             }
             else
@@ -634,7 +661,7 @@ class RiesgosController extends Controller
                     return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
                                         'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders,
                                         'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,
-                                        'objetivos' => $objetivos,'obj_selected' => $obj_selected,'org_id' => $_GET['org']]);
+                                        'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org']]);
                 }
             }
         }
@@ -847,12 +874,39 @@ class RiesgosController extends Controller
                         }                    
                     }
 
+                    if (!isset($_POST['description']) || $_POST['description'] == "")
+                    {
+                        $description = NULL;
+                    }
+                    else
+                    {
+                        $description = $_POST['description'];
+                    }
+
+                    if (!isset($_POST['risk_category_id']) || $_POST['risk_category_id'] == "")
+                    {
+                        $risk_category_id = NULL;
+                    }
+                    else
+                    {
+                        $risk_category_id = $_POST['risk_category_id'];
+                    }
+
+                    if (!isset($_POST['expected_loss']) || $_POST['expected_loss'] == "")
+                    {
+                        $expected_loss = NULL;
+                    }
+                    else
+                    {
+                        $expected_loss = $_POST['expected_loss'];
+                    }
+
                     $riesgo->name = $_POST['name'];
-                    $riesgo->description = $_POST['description'];
+                    $riesgo->description = $description;
                     $riesgo->expiration_date = $_POST['expiration_date'];
                     $riesgo->type2 = 1;
-                    $riesgo->risk_category_id = $_POST['risk_category_id'];
-                    $riesgo->expected_loss = $_POST['expected_loss'];
+                    $riesgo->risk_category_id = $risk_category_id;
+                    $riesgo->expected_loss = $expected_loss;
                     $riesgo->stakeholder_id = $stake;
 
                     $riesgo->save();
@@ -1144,7 +1198,7 @@ class RiesgosController extends Controller
                         }
                         else
                         {
-                            $fecha_creacion = "Error al registrar fecha de creaci&oacute;n";
+                            $fecha_creacion = "Error al registrar fecha de creación";
                         }
                     }
 
@@ -1187,12 +1241,28 @@ class RiesgosController extends Controller
                         }
                         else
                         {
-                            $expected_loss = "No se ha asignado p&eacute;rdida esperada";
+                            $expected_loss = "No se ha asignado pérdida esperada";
                         }
                     }
                     else
                     {
                         $expected_loss = $risk->expected_loss;
+                    }
+
+                    if ($risk->description == NULL || $risk->description == '')
+                    {
+                        if (Session::get('languaje') == 'en')
+                        {
+                            $description = 'Not assigned description';
+                        }
+                        else
+                        {
+                            $description = 'No se ha asignado descripción';
+                        }
+                    }
+                    else
+                    {
+                        $description = $risk->description;
                     }
 
                     //Seteamos datos
@@ -1204,7 +1274,7 @@ class RiesgosController extends Controller
                                         'Process' => $risk->process_name,
                                         'Subprocess' => $risk->subprocess_name,
                                         'Risk' => $risk->name,
-                                        'Description' => $risk->description,
+                                        'Description' => $description,
                                         'Category' => $risk->risk_category_name,
                                         'Causes' => $causas,
                                         'Effects' => $efectos,
@@ -1222,7 +1292,7 @@ class RiesgosController extends Controller
                                         'Proceso' => $risk->process_name,
                                         'Subproceso' => $risk->subprocess_name,
                                         'Riesgo' => $risk->name,
-                                        'Descripción' => $risk->description,
+                                        'Descripción' => $description,
                                         'Categoría' => $risk->risk_category_name,
                                         'Causas' => $causas,
                                         'Efectos' => $efectos,
@@ -1245,7 +1315,7 @@ class RiesgosController extends Controller
                                         'Organization' => $risk->organization_name,
                                         'Objective' => $risk->objective_name,
                                         'Risk' => $risk->name,
-                                        'Description' => $risk->description,
+                                        'Description' => $description,
                                         'Category' => $risk->risk_category_name,
                                         'Causes' => $causas,
                                         'Effects' => $efectos,              
@@ -1263,7 +1333,7 @@ class RiesgosController extends Controller
                                         'Organización' => $risk->organization_name,
                                         'Objetivo' => $risk->objective_name,
                                         'Riesgo' => $risk->name,
-                                        'Descripción' => $risk->description,
+                                        'Descripción' => $description,
                                         'Categoría' => $risk->risk_category_name,
                                         'Causas' => $causas,
                                         'Efectos' => $efectos,              
@@ -1338,14 +1408,6 @@ class RiesgosController extends Controller
                         ->where('risk_subprocess_id','=',$GLOBALS['id1'])
                         ->select('id')
                         ->get();
-
-                    if (empty($rev))
-                    {
-                        //pruebas de auditoría
-                        $rev = DB::table('audit_tests')
-                            ->where('risk_id','=',$GLOBALS['id1'])
-                            ->select('id')
-                            ->get();
 
                         if (empty($rev))
                         {
@@ -1533,7 +1595,6 @@ class RiesgosController extends Controller
                                 
                             }
                         }
-                    }
                 }
             }
 

@@ -107,7 +107,7 @@
 				@endforeach
 				</td></tr></table>
 				<center>
-					{!! link_to_route('ejecutar_pruebas', $title = 'Volver', $parameters=null, $attributes = ['class'=>'btn btn-danger']) !!}
+					{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
 				</center>
 @endif
 			</div>

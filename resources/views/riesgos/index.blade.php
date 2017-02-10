@@ -112,7 +112,13 @@
 			@foreach ($riesgos as $riesgo)
 				<tr>
 				<td>{{ $riesgo['nombre'] }}</td>
-				<td>{{ $riesgo['descripcion'] }}</td>
+				<td>
+				@if ($riesgo['descripcion'] == NULL || $riesgo['descripcion'] == "")
+					No se ha definido descripci&oacute;n
+				@else
+					{{ $riesgo['descripcion'] }}
+				@endif
+				</td>
 				@if ($riesgo['tipo'] == 0)
 					<td>Riesgo de Proceso</td>
 				@else

@@ -189,7 +189,7 @@ horasPlan = 0;
 					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
 
 				//se obtienen stakeholders (menos el auditor jefe)
-					$.get('auditorias.stakeholders.'+$("#stakeholder").val(), function (result) {
+					$.get('auditorias.stakeholders.'+$("#stakeholder_id").val(), function (result) {
 							$("#cargando").html('<br>');
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
@@ -294,8 +294,68 @@ function horas()
 //por el momento no se podrán editar los datos de las auditorías ya creadas
 var pathname = window.location.pathname;
 
-	if (pathname.indexOf("edit") == -1)
-	{
+if (pathname.indexOf("create") == -1) //se está editando
+{	
+
+	//esperamos algunos segundos antes de llamar a la función (en este caso 3 segundos)
+	setTimeout(function() { editInstance(); }, 3000);
+
+	function editInstance() {
+				cont1 = 0;
+				if ($('#auditorias_sel').val() != null)
+				{
+							$('#info_auditorias').empty();
+							//insertamos los campos necesarios para la información de cada una de las auditorías seleccionadas
+							$('#auditorias_sel option:selected').each( function () {
+								cont1 += 1; //contador para ver cantidad de auditorías existentes (para agregar en id de HH)
+								//alert(cont1);
+								audit_id = $(this).val();
+								audit_name = $(this).text();
+
+								//ACTUALIZACIÓN 08-02-2017: OBTENEMOS POSIBLES AUDITORÍAS EXISTENTES
+								if (audit_plan_id != 0) //de esta forma verificamos que estamos editando (ya que en create asignamos la variable como 0)
+								{
+
+									$.get('get_audit_info.'+audit_plan_id+'.'+audit_id, function (result) {
+											//parseamos datos obtenidos
+											var datos = JSON.parse(result);
+											//seteamos datos en select de riesgos / procesos
+											$(datos).each( function() {
+												$('#info_auditorias_sel').append('<div id="titulo_'+ this.audit_id +'"><b><font color="red">Modifique la informaci&oacute;n que desee para ' + this.audit_name + '</b></div></br>');
+									
+												//recursos
+												$('#info_auditorias_sel').append('<div class="form-group">');
+												$('#info_auditorias_sel').append('<label for="audit_' + this.audit_idaudit_id + '_resources" class="col-sm-4 control-label">Recursos</label>');
+
+												if (!this.resources)
+												{
+													$('#info_auditorias_sel').append('<div class="col-sm-8"><input type="text" name="audit_' + this.audit_id + '_resources" class="form-control" ></div>');
+												}
+												else
+												{
+													$('#info_auditorias_sel').append('<div class="col-sm-8"><input type="text" name="audit_' + this.audit_id + '_resources" value="'+this.resources+'" class="form-control" ></div>');
+												}
+
+												//fecha inicio
+												$('#info_auditorias_sel').append('<div class="form-group">');
+												$('#info_auditorias_sel').append('<label for="audit_' + this.audit_id + '_initial_date" class="col-sm-4 control-label">Fecha de inicio</label>');
+												$('#info_auditorias_sel').append('<div class="col-sm-8"><input type="date" name="audit_' + this.audit_id + '_initial_date" onblur="validarFechaMayorActual(this.value)" value="'+this.initial_date+'" class="form-control" required="required"></div>');
+
+
+												//fecha fin
+												$('#info_auditorias_sel').append('<div class="form-group">');
+												$('#info_auditorias_sel').append('<label for="audit_' + this.audit_id + '_final_date" class="col-sm-4 control-label">Fecha final</label>');
+												$('#info_auditorias_sel').append('<div class="col-sm-8"><input type="date" name="audit_' + this.audit_id + '_final_date" onblur="validarFechaMayorActual(this.value)" value="'+this.final_date+'" class="form-control" required="required"></div>');
+												$('#info_auditorias_sel').append('</br></br>');
+											});
+									});
+								}
+							});
+				}
+		}
+}
+			
+
 			//función para agregar info de auditorías existentes
 			$("#auditorias").change(function() 
 			{
@@ -307,41 +367,31 @@ var pathname = window.location.pathname;
 							$('#info_auditorias').empty();
 							cont1 = 0;
 							//insertamos los campos necesarios para la información de cada una de las auditorías seleccionadas
-							$('#auditorias > option:selected').each( function () {
-								cont1 += 1; //contador para ver cantidad de auditorías existentes (para agregar en id de HH)
-								//alert(cont1);
+							$('#auditorias option:selected').each( function () {
+								
 								$('#info_auditorias').append('<div id="titulo_'+ $(this).val() +'"><b><font color="red">Ingrese informaci&oacute;n para ' + $(this).text() + '</b></div></br>');
-									
+										
 								$('#info_auditorias').append('</br></br>');
 								//recursos
 								$('#info_auditorias').append('<div class="form-group">');
 								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_resources" class="col-sm-4 control-label">Recursos</label>');
 								$('#info_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_' + $(this).val() + '_resources" class="form-control" ></div>');
 
-								//HH
-								$('#info_auditorias').append('<div class="form-group">');
-								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_HH"  class="col-sm-4 control-label">Horas-Hombre de auditoría</label>');
-								$('#info_auditorias').append('<div class="col-sm-8"><input type="number" min="0" onchange="horas()" id="audit_'+cont1+'" "name="audit_' + $(this).val() + '_HH" class="form-control" ></div>');
-
 								//fecha inicio
 								$('#info_auditorias').append('<div class="form-group">');
 								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_initial_date" class="col-sm-4 control-label">Fecha de inicio</label>');
-								$('#info_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_' + $(this).val() + '_initial_date" class="form-control" required="required"></div>');
+								$('#info_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_' + $(this).val() + '_initial_date" onblur="validarFechaMayorActual(this.value)" class="form-control" required="required"></div>');
 
 
 								//fecha fin
 								$('#info_auditorias').append('<div class="form-group">');
 								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_final_date" class="col-sm-4 control-label">Fecha final</label>');
-								$('#info_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_' + $(this).val() + '_final_date" class="form-control" required="required"></div>');
+								$('#info_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_' + $(this).val() + '_final_date" onblur="validarFechaMayorActual(this.value)" class="form-control" required="required"></div>');
 								$('#info_auditorias').append('</br></br>');
-
+								
 							})				
 						}
-						else
-						{
-							$('#info_auditorias').empty();
-							cont1 = 0;
-						}
+
 					}
 					else
 					{
@@ -350,8 +400,9 @@ var pathname = window.location.pathname;
 
 					}
 			});	
-	}
-		var cont = 1; //contador para nuevas auditorías
+
+
+var cont = 1; //contador para nuevas auditorías
 		//función para agregar una nueva auditoría
 		$("#agregar_auditoria").click(function() {
 			
@@ -387,13 +438,13 @@ var pathname = window.location.pathname;
 								//fecha inicio
 								$('#info_new_auditorias').append('<div class="form-group">');
 								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_initial_date" class="col-sm-4 control-label">Fecha de inicio</label>');
-								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_initial_date" class="form-control" required="required"></div>');
+								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_initial_date" onblur="validarFechaMayorActual(this.value)" class="form-control" required="required"></div>');
 
 
 								//fecha fin
 								$('#info_new_auditorias').append('<div class="form-group">');
 								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_final_date" class="col-sm-4 control-label">Fecha final</label>');
-								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_final_date" class="form-control" required="required"></div>');
+								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_final_date"  onblur="validarFechaMayorActual(this.value)"class="form-control" required="required"></div>');
 								$('#info_new_auditorias').append('</br></br>');
 
 								//movemos pantalla a nueva auditoría
@@ -408,7 +459,6 @@ var pathname = window.location.pathname;
 				swal("Error","Primero debe seleccionar la organización","error");
 			}
 		});
-
 
 
 	//función que define que tipo de auditoría se aplicará

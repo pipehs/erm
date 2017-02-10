@@ -42,23 +42,26 @@
 				{{ Session::get('message') }}
 			</div>
 			@endif
-@foreach (Session::get('roles') as $role)
-	@if ($role != 6)
-			{!! link_to_route('plan_auditoria.edit', $title = 'Editar', $parameters = $plan_auditoria['id'],
-				 $attributes = ['class'=>'btn btn-success'])!!}
-	<?php break; ?>
-	@endif
-@endforeach
+
+			@foreach (Session::get('roles') as $role)
+				@if ($role != 6)
+						{!! link_to_route('plan_auditoria.edit', $title = 'Editar', $parameters = $plan_auditoria['id'],
+							 $attributes = ['class'=>'btn btn-success'])!!}
+				<?php break; ?>
+				@endif
+			@endforeach
 
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
 			<tr>
 			<th>Auditor&iacute;a(s)</th>
-			<td><ul>
-					@foreach ($auditorias as $audit)
-						<li>{{ $audit['name'] }} - {{ $audit['description'] }}</li>
-					@endforeach
-					</ul>					
-				</td>
+			<td>
+				<ul>
+				@foreach ($auditorias as $audit)
+						<li>{{ $audit['name'] }} - {{ $audit['description'] }}   
+				 		<button class="btn_ultra_small btn-danger" onclick="eliminar2({{ $audit['audit_audit_plan_id'] }},'{{ $audit['name'] }}','audit','La auditoría')">Eliminar</button></li>
+				@endforeach
+				</ul>					
+			</td>
 			</tr>
 			<tr>
 			<th width="30%">Descripci&oacute;n</th>
@@ -66,57 +69,29 @@
 			</tr>
 			<tr>
 			<th>Objetivos del plan</th>
-			<td>{{ $plan_auditoria['objectives'] }}</td>
+			<td>
+			@if ($plan_auditoria['objectives'] == NULL)
+				No se han asignado
+			@else
+				{{ $plan_auditoria['objectives'] }}
+			@endif
+			</td>
 			</tr>
 			<tr>
 			<th>Organizaci&oacute;n involucrada</th>
 			<td>{{ $organizacion }}</td>
 			</tr>
 			<tr>
-			<th>Objetivos Relacionados</th>
-			<td>
-			@if($objetivos != NULL)
-					<ul>
-					@foreach ($objetivos as $obj)
-						<li>{{ $obj }}</li>
-					@endforeach
-					</ul>
-			@else
-				No tiene
-			@endif					
-			</td>
-			</tr>
-			<tr>
-			<th>Riesgos de negocio</th>
-			<td>
-			@if($riesgos_neg != NULL)	
-					<ul>
-					@foreach ($riesgos_neg as $risk)
-						<li>{{ $risk }}</li>
-					@endforeach
-					</ul>
-			@else
-				No tiene
-			@endif					
-			</td>
-			</tr>
-			<tr>
-			<th>Riesgos de proceso</th>
-			<td>
-			@if($riesgos_proc != NULL)
-					<ul>
-					@foreach ($riesgos_proc as $risk)
-						<li>{{ $risk }}</li>
-					@endforeach
-					</ul>
-			@else
-				No tiene
-			@endif					
-			</td>
 			</tr>
 			<tr>
 			<th>Alcances</th>
-			<td>{{ $plan_auditoria['scopes'] }}</td>
+			<td>
+			@if ($plan_auditoria['scopes'] == NULL)
+				No se han asignado
+			@else
+				{{ $plan_auditoria['scopes'] }}
+			@endif
+			</td>
 			</tr>
 			<tr>
 			<th>Estado</th>
@@ -130,11 +105,23 @@
 			</tr>
 			<tr>
 			<th>Recursos</th>
-			<td>{{ $plan_auditoria['resources'] }}</td>
+			<td>
+			@if ($plan_auditoria['resources'] == NULL)
+				No se han asignado
+			@else
+				{{ $plan_auditoria['resources'] }}
+			@endif
+			</td>
 			</tr>
 			<tr>
 			<th>Metodolog&iacute;a</th>
-			<td>{{ $plan_auditoria['methodology'] }}</td>
+			<td>
+			@if ($plan_auditoria['methodology'] == NULL)
+				No se ha asignado
+			@else
+				{{ $plan_auditoria['methodology'] }}
+			@endif
+			</td>
 			</tr>
 			<tr>
 			<th>Fecha inicial</th>
@@ -146,7 +133,13 @@
 			</tr>
 			<tr>
 			<th>Norma(s)</th>
-			<td>{{ $plan_auditoria['rules'] }}</td>
+			<td>
+			@if ($plan_auditoria['rules'] == NULL)
+				No se han asignado
+			@else
+				{{ $plan_auditoria['rules'] }}
+			@endif
+			</td>
 			</tr>
 			</table>
 

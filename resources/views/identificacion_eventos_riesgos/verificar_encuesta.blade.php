@@ -1,6 +1,6 @@
 <!-- extends('master2') Se utilizará esta en el futuro para que no aparezca el menú de admin -->
 
-@extends('master')
+@extends('master2')
 
 @section('title', 'Identificaci&oacute;n de eventos de riesgos')
 
@@ -43,7 +43,7 @@
 				</div>
 			@endif
 
-			{!!Form::open(['route'=>'identificacion.resp_encuesta','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'identificacion.resp_encuesta','method'=>'GET','class'=>'form-horizontal'])!!}
 
 			<div class="form-group">
 				<small>

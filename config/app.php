@@ -146,6 +146,7 @@ return [
         Ermtool\Providers\RouteServiceProvider::class,
         Collective\Html\HtmlServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
+        Yajra\Oci8\Oci8ServiceProvider::class,
 
     ],
 

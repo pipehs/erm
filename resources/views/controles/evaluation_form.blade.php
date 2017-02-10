@@ -52,5 +52,6 @@
 </div>
 
 <center>
-	{!! link_to_route('volver_evaluacion', $title = 'Volver', $parameters = ['control_id' => $id],$attributes = ['class'=>'btn btn-danger'])!!}
+	{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
+	<!--{!! link_to_route('volver_evaluacion', $title = 'Volver', $parameters = ['control_id' => $id],$attributes = ['class'=>'btn btn-danger'])!!}-->
 <center>

@@ -39,4 +39,34 @@ class Objective extends Model
                 ->groupBy('objectives.id')
                 ->get();
     }
+
+    public static function getObjectivesImpact($strategic_plan_id,$perspective)
+    {
+        return DB::table('objectives')
+                ->where('strategic_plan_id','=',$strategic_plan_id)
+                ->where('perspective','<',$perspective)
+                ->where('status','=',0)
+                ->select('id', DB::raw('CONCAT (code, " - ", name) AS code_name'))
+                ->orderBy('code_name')
+                ->get(['code_name','id']);
+    }
+
+    public static function deleteObjective($id)
+    {
+        //primero eliminamos de objectives_impact
+        DB::table('objectives_impact')
+            ->where('objective_father_id','=',$id)
+            ->delete();
+
+        DB::table('objectives_impact')
+            ->where('objective_impacted_id','=',$id)
+            ->delete();
+
+        //ahora eliminamos riesgo
+        DB::table('objectives')
+            ->where('id','=',$id)
+            ->delete();
+
+        return 0;
+    }
 }

@@ -1,6 +1,6 @@
 <!-- extends('master2') Se utilizará esta en el futuro para que no aparezca el menú de admin -->
 
-@extends('master')
+@extends('master2')
 
 @section('title', 'Evaluaci&oacute;n de riesgos')
 

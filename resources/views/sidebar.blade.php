@@ -10,15 +10,20 @@
 				<span class="hidden-xs">Inicio</span>
 			</a>
 		</li>
-		@include('menu.datos_maestros')
+		
 		
      	@foreach (Session::get('roles') as $role)
 			@if ($role == 1 || $role == 6) <!-- ADMIN TIENE ACCESO A TODO -->
+				@include('menu.datos_maestros')
 				@include('menu.estrategia')
 				@include('menu.riesgos')
 				@include('menu.controles')
 				@include('menu.auditorias')
 			<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+			@elseif ($role == 8) <!-- Admin. de datos maestros -->
+				@include('menu.datos_maestros')
+			@elseif ($role == 7) <!-- Admin. de estrategía -->
+				@include('menu.estrategia')
 			@elseif ($role == 2) <!-- Admin. de riesgo -->
 				@include('menu.riesgos')
 			@elseif ($role == 3) <!-- Admin. de control -->

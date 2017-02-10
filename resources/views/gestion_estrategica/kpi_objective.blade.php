@@ -64,7 +64,11 @@
 @if (isset($kpi))
 	<div style="float: center;">
 		@if (empty($kpi))
-			<center><b>Aun no se han creado ning&uacute;n KPI para {{$obj_selected}}.</b></center><br><br>
+			<center><b>Aun no se ha creado ning&uacute;n KPI para {{$obj_selected}}.</b></center><br><br>
+
+			<center>
+				{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
+			<center>
 		@else
 			<h4><b>{{ $obj_selected }}</b></h4>
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">

@@ -61,7 +61,7 @@
 
 							{!!Form::select('stakeholder_id[]',$dest,
 							 	   null, 
-							 	   ['id' => 'el2','multiple'=>'true',])!!}
+							 	   ['id' => 'el2','multiple'=>'true','required'=>'true'])!!}
 		</div>
 
 		<div class="row form-group">
@@ -173,26 +173,5 @@
 @stop
 
 @section('scripts')
-
-<script>
-// Run Select2 on element
-function Select2Test(){
-	$("#el2").select2();
-	$("#el3").select2();
-}
-
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
-}
-$(document).ready(function() {
-	// Load script of Select2 and run this
-	LoadSelect2Script(Select2Test);
-	// Add Drag-n-Drop feature
-	WinMove();
-});
-</script>
 
 @stop

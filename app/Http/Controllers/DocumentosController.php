@@ -649,7 +649,7 @@ class DocumentosController extends Controller
                     //vemos si existe la carpeta (si existe es porque tiene archivos)
                     if ($files != NULL)
                     {
-                        $notes2[$j] = [
+                        $notes2[$i] = [
                             'id' => $note->id,
                             'name' => $note->name,
                             'description' => $note->description,

@@ -217,6 +217,7 @@ class ObjetivosController extends Controller
                                         'fecha_act'=>$fecha_act,
                                         'fecha_exp'=>$fecha_exp,
                                         'categoria'=>$categoria,
+                                        'code' => $objetivo['code'],
                                         'estado'=>$objetivo['status'],
                                         'perspective' => $perspective);
                         $i += 1;
@@ -252,8 +253,10 @@ class ObjetivosController extends Controller
 
             //ahora seleccionamos objetivos pertenecientes a este plan
             $objectives = \Ermtool\Objective::where('strategic_plan_id','=',$_GET['strategic_plan_id'])
+                                        ->select('id', DB::raw('CONCAT (code, " - ", name) AS code_name'))
+                                        ->orderBy('code')
                                         ->where('status','=',0)
-                                        ->lists('name','id');
+                                        ->lists('code_name','id');
             
             if (Session::get('languaje') == 'en')
             {
@@ -417,11 +420,17 @@ class ObjetivosController extends Controller
             
             $objs_selected = array();
             $objetivo = \Ermtool\Objective::find($id);
+
+
             //$org_id = \Ermtool\Organization::where('id',$objetivo['organization_id'])->value('id');
+
             //lista de objetivos
             $objectives = \Ermtool\Objective::where('strategic_plan_id','=',$objetivo['strategic_plan_id'])
+                                        ->where('perspective','<',$objetivo['perspective'])
+                                        ->select('id', DB::raw('CONCAT (code, " - ", name) AS code_name'))
+                                        ->orderBy('code')
                                         ->where('status','=',0)
-                                        ->lists('name','id');
+                                        ->lists('code_name','id');
 
             $objetivos_sel = DB::table('objectives_impact')
                                 ->where('objective_father_id','=',$id)
@@ -443,6 +452,12 @@ class ObjetivosController extends Controller
                 return view('datos_maestros.objetivos.edit',['objetivo'=>$objetivo,'objectives' => $objectives, 'objs_selected' => $objs_selected,'strategic_plan_id' => $objetivo['strategic_plan_id']]);
             }
         }
+    }
+
+    //obtenemos lista de objetivos que puede impactar según perspectiva ingresada
+    public function getObjectivesImpact($strategic_plan_id, $perspective)
+    {
+        return json_encode(\Ermtool\Objective::getObjectivesImpact($strategic_plan_id,$perspective)); 
     }
 
     public function bloquear($id)
@@ -624,10 +639,20 @@ class ObjetivosController extends Controller
                         $perspective = NULL;
                     }
 
+                    if (isset($_POST['perspective2']) && $_POST['perspective2'] != '')
+                    {
+                        $perspective2 = $_POST['perspective2'];
+                    }
+                    else
+                    {
+                        $perspective2 = NULL;
+                    }
+
                     $objetivo->code = $_POST['code'];
                     $objetivo->name = $_POST['name'];
                     $objetivo->description = $_POST['description'];
                     $objetivo->perspective = $perspective;
+                    $objetivo->perspective2 = $perspective2;
 
                     $objetivo->save();
 
@@ -708,11 +733,7 @@ class ObjetivosController extends Controller
                 if (empty($rev))
                 {
                     //si pasa ambas validaciones se puede borrar
-                    DB::table('objectives')
-                        ->where('id','=',$GLOBALS['id1'])
-                        ->delete();
-
-                    $GLOBALS['res'] = 0;
+                    $GLOBALS['res'] = \Ermtool\Objective::deleteObjective($GLOBALS['id1']);
                 }
             }
         });

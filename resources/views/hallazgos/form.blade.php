@@ -3,7 +3,7 @@
 						{!!Form::label('Seleccione proceso involucrado',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('process_id',$processes,
-							null,['placeholder'=>'- Seleccione -'])!!}
+							null,['placeholder'=>'- Seleccione -','required'=>'true'])!!}
 						</div>
 					</div>
 				@elseif (isset($subprocesses))
@@ -11,7 +11,7 @@
 						{!!Form::label('Seleccione subproceso involucrado',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('subprocess_id',$subprocesses,
-							null,['placeholder'=>'- Seleccione -'])!!}
+							null,['placeholder'=>'- Seleccione -','required'=>'true'])!!}
 						</div>
 					</div>
 				@elseif(isset($controls))
@@ -19,7 +19,7 @@
 						{!!Form::label('Seleccione control involucrado',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('control_id',$controls,
-							null,['placeholder'=>'- Seleccione -'])!!}
+							null,['placeholder'=>'- Seleccione -','required'=>'true'])!!}
 						</div>
 					</div>
 				@elseif(isset($audit_programs))
@@ -27,7 +27,7 @@
 						{!!Form::label('Seleccione programa de auditoría involucrado',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('audit_audit_plan_audit_program_id',$audit_programs,
-							null,['placeholder'=>'- Seleccione -'])!!}
+							null,['placeholder'=>'- Seleccione -','required'=>'true'])!!}
 						</div>
 					</div>
 				@elseif(isset($audits))
@@ -35,7 +35,7 @@
 						{!!Form::label('Seleccione auditoría involucrada',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::select('audit_audit_plan_id',$audits,
-							null,['placeholder'=>'- Seleccione -'])!!}
+							null,['placeholder'=>'- Seleccione -','required'=>'true'])!!}
 						</div>
 					</div>
 				@endif

@@ -105,11 +105,11 @@ class ControlesController extends Controller
                                     'type'=>$control->type,
                                     'type2'=>$control->type2,
                                     'created_at'=>$fecha_creacion,
-                                    'updated_at'=>$fecha_act,
                                     'evidence'=>$control->evidence,
                                     'periodicity'=>$control->periodicity,
                                     'purpose'=>$control->purpose,
-                                    'stakeholder'=>$stakeholder2);
+                                    'stakeholder'=>$stakeholder2,
+                                   	'expected_cost' => $control->expected_cost);
                 $i += 1;
             }
 
@@ -164,7 +164,8 @@ class ControlesController extends Controller
                                     'evidence'=>$control->evidence,
                                     'periodicity'=>$control->periodicity,
                                     'purpose'=>$control->purpose,
-                                    'stakeholder'=>$stakeholder2);
+                                    'stakeholder'=>$stakeholder2,
+                                    'expected_cost' => $control->expected_cost);
                 $i += 1;
             }
             if (Session::get('languaje') == 'en')
@@ -232,6 +233,7 @@ class ControlesController extends Controller
                         $stakeholder = NULL;
                     else
                         $stakeholder = $_POST['stakeholder_id'];
+
                     if ($_POST['periodicity'] == NULL || $_POST['periodicity'] == "")
                     {
                         $periodicity = NULL;
@@ -248,19 +250,44 @@ class ControlesController extends Controller
                     {
                         $purpose = $_POST['purpose'];
                     }
+                    if ($_POST['type'] == NULL || $_POST['type'] == "")
+                    {
+                    	$type = NULL;
+                    }
+                    else
+                    {
+                    	$type = $_POST['type'];
+                    }
+                    if ($_POST['expected_cost'] == NULL || $_POST['expected_cost'] == "")
+                    {
+                    	$expected_cost = NULL;
+                    }
+                    else
+                    {
+                    	$expected_cost = $_POST['expected_cost'];
+                    }
+                    if ($_POST['evidence'] == NULL || $_POST['evidence'] == "")
+                    {
+                    	$evidence = NULL;
+                    }
+                    else
+                    {
+                    	$evidence = $_POST['evidence'];
+                    }
+
                     //insertamos control y obtenemos ID
                     $control_id = DB::table('controls')->insertGetId([
                             'name'=>$_POST['name'],
                             'description'=>$_POST['description'],
-                            'type'=>$_POST['type'],
+                            'type'=>$type,
                             'type2'=>$_POST['subneg'],
-                            'evidence'=>$_POST['evidence'],
+                            'evidence'=>$evidence,
                             'periodicity'=>$periodicity,
                             'purpose'=>$purpose,
                             'stakeholder_id'=>$stakeholder,
                             'created_at'=>date('Y-m-d H:i:s'),
                             'updated_at'=>date('Y-m-d H:i:s'),
-                            'expected_cost'=>$_POST['expected_cost']
+                            'expected_cost'=>$expected_cost
                             ]);
                     //insertamos en control_risk_subprocess o control_objective_risk
                     if ($_POST['subneg'] == 0) //es control de proceso
@@ -401,6 +428,47 @@ class ControlesController extends Controller
                     $stakeholder = NULL;
                 else
                     $stakeholder = $_POST['stakeholder_id'];
+
+                if ($_POST['periodicity'] == NULL || $_POST['periodicity'] == "")
+                {
+                    $periodicity = NULL;
+                }
+                else
+                {
+                    $periodicity = $_POST['periodicity'];
+                }
+                if ($_POST['purpose'] == NULL || $_POST['purpose'] == "")
+                {
+                    $purpose = NULL;
+                }
+                else
+                {
+                    $purpose = $_POST['purpose'];
+                }
+                if ($_POST['type'] == NULL || $_POST['type'] == "")
+                {
+                  	$type = NULL;
+                }
+                else
+                {
+                   	$type = $_POST['type'];
+                }
+                if ($_POST['expected_cost'] == NULL || $_POST['expected_cost'] == "")
+                {
+                 	$expected_cost = NULL;
+                }
+                else
+                {
+                 	$expected_cost = $_POST['expected_cost'];
+                }
+                if ($_POST['evidence'] == NULL || $_POST['evidence'] == "")
+                {
+                 	$evidence = NULL;
+                }
+                else
+                {
+                 	$evidence = $_POST['evidence'];
+                }
                 //guardamos archivos de evidencia (si es que hay)
                 if($GLOBALS['evidence'] != NULL)
                 {
@@ -414,12 +482,12 @@ class ControlesController extends Controller
                 }
                 $control->name = $_POST['name'];
                 $control->description = $_POST['description'];
-                $control->type = $_POST['type'];
-                $control->evidence = $_POST['evidence'];
-                $control->periodicity = $_POST['periodicity'];
-                $control->purpose = $_POST['purpose'];
+                $control->type = $type;
+                $control->evidence = $evidence;
+                $control->periodicity = $periodicity;
+                $control->purpose = $purpose;
                 $control->stakeholder_id = $stakeholder;
-                $control->expected_cost = $_POST['expected_cost'];
+                $control->expected_cost = $expected_cost;
                 $control->save();
                 //guardamos riesgos de proceso o de negocio
                 if (isset($_POST['select_procesos']))
@@ -497,7 +565,8 @@ class ControlesController extends Controller
                 if (empty($rev))
                 {
                     //audit_tests
-                    $rev = DB::table('audit_tests')
+                    //ACTUALIZACIÓN 25-01: Ahora audit_test se relaciona con control a través de la tabla audit_test_control
+                    $rev = DB::table('audit_test_control')
                         ->where('control_id','=',$GLOBALS['id1'])
                         ->select('id')
                         ->get();
@@ -602,12 +671,19 @@ class ControlesController extends Controller
             }
 
             //buscamos datos de cada una de las últimas pruebas (independiente de si se está editando o creando una nueva)
-            $last_diseno = \Ermtool\control_evaluation::getLastEvaluation($_GET['control_id'],0);
-            $last_efectividad = \Ermtool\control_evaluation::getLastEvaluation($_GET['control_id'],1);
-            $last_sustantiva = \Ermtool\control_evaluation::getLastEvaluation($_GET['control_id'],2);
-            $last_cumplimiento = \Ermtool\control_evaluation::getLastEvaluation($_GET['control_id'],3);
+            $last_diseno = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],0);
+            $last_efectividad = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],1);
+            $last_sustantiva = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],2);
+            $last_cumplimiento = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],3);
 
-            $risks = \Ermtool\Risk::getRisksFromControl($_GET['organization_id'],$_GET['control_id']);
+            if (isset($_GET['organization_id']))
+            {
+            	$risks = \Ermtool\Risk::getRisksFromControl($_GET['organization_id'],$_GET['control_id']);
+            }
+            else
+            {
+            	$risks = array();
+            }   
 
             //if ($_GET['control_kind'] == 1) //control de negocio
             //{
@@ -882,12 +958,12 @@ class ControlesController extends Controller
         {
             if ($value == 0) //son riesgos de subprocesos
             {
-                $risks_subprocesses = \Ermtool\Risk::getRiskSubprocess($org);
+                $datos = \Ermtool\Risk::getRiskSubprocess($org);
             }
             else if ($value == 1) //son riesgos de negocio
             {
                 //query para obtener id de objective_risk, junto a nombre de riesgo, objetivo y organización
-                $objectives_risks = \Ermtool\Risk::getObjectiveRisks($org);
+                $datos = \Ermtool\Risk::getObjectiveRisks($org);
 
             }
             return json_encode($datos);

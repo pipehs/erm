@@ -112,19 +112,36 @@
 						<font color="red">Debe asignar horas hombre al plan</font>
 					</div>
 -->
+			@if (strstr($_SERVER["REQUEST_URI"],'edit'))
 					<div class="form-group">
+						{!!Form::label('Auditor&iacute;as seleccionadas previamente',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-8">
+							<select name="audits_sel[]" multiple="true" disabled="true" id="auditorias_sel">
+							@foreach ($audits_selected as $audit)
+								<option value="{{$audit->id}}" selected="true">{{$audit->name}}</option>
+							@endforeach
+							</select>
+						</div>
+					</div>
+
+					<div id="info_auditorias_sel"></div>
+			@endif
+				<div class="form-group">
 						<center>
 							<div style="cursor:hand" id="agregar_auditoria">
 								<font color="CornflowerBlue"><u>Agregar Nueva Auditor&iacute;a</u></font>
 							</div>
 						</center> <br>
+					@if (strstr($_SERVER["REQUEST_URI"],'edit'))
+						<label for="audits" class="col-sm-4 control-label">Seleccione si desea agregar más Auditorías</label>
+					@else
 						{!!Form::label('Auditor&iacute;as a realizar',null,['class'=>'col-sm-4 control-label'])!!}
+					@endif
 						<div class="col-sm-8">
 							{!!Form::select('audits[]',$audits,null,
-													['multiple'=>'true','id'=>'auditorias','disabled'=>'true'])!!}
+													['multiple'=>'true','id'=>'auditorias'])!!}
 						</div>
-					</div>
-
+				</div>
 					<div id="info_auditorias"></div>
 
 					<div id="info_new_auditorias"></div>

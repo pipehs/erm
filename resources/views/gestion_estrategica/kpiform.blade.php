@@ -39,8 +39,7 @@
 				<div class="form-group">
 					{!!Form::label('Descripción',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
-						{!!Form::textarea('description',null,['class'=>'form-control',
-										'required'=>'true','rows'=>'3'])!!}
+						{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3'])!!}
 					</div>
 				</div>
 
@@ -56,7 +55,7 @@
 					<div class="col-sm-3">
 					{!!Form::select('periodicity',['1'=>'Mensual','2'=>'Semestral','3'=>'Trimestral','4'=>'Anual'], 
 				 	   null, 
-				 	   ['id' => 'el2','placeholder'=>'- Seleccione -'])!!}
+				 	   ['id' => 'el2','placeholder'=>'- Seleccione -','required' => 'true'])!!}
 					</div>
 				</div>
 
@@ -70,9 +69,12 @@
 
 				<div class="form-group">
 					{!!Form::label('Valor inicial',null,['class'=>'col-sm-4 control-label'])!!}
-					<div class="col-sm-3">
-					{!!Form::select('initial_value',['1'=>'Monto','2'=>'Porcentaje','3'=>'Cantidad'], 
-				 	   null,['id' => 'el2','placeholder'=>'- Seleccione -'])!!}
+					<div class="col-sm-2">
+					{!!Form::number('first_evaluation',null,['class'=>'form-control','required' => 'true'])!!}
+					</div>
+					<div class="col-sm-1">
+					{!!Form::select('initial_value',['1'=>'Clp','2'=>'US Dlls','3'=>'Porcentaje','4' => 'Cantidad'], 
+				 	   null,['id' => 'el2','placeholder'=>'Tipo','required' => 'true'])!!}
 					</div>
 				</div>
 
@@ -93,7 +95,7 @@
 				<div class="form-group">
 					{!!Form::label('Meta del KPI',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
-						{!!Form::textarea('goal',null,['class'=>'form-control','rows'=>'2'])!!}
+						{!!Form::number('goal',null,['class'=>'form-control'])!!}
 					</div>
 				</div>
 
