@@ -106,7 +106,8 @@ class DocumentosController extends Controller
                 switch ($_GET['kind_issue'] ) 
                 {
                     case 0: //obtenemos issues de proceso
-                        $processes = \Ermtool\Process::getProcessFromIssues($_GET['organization_id']);
+                        //ACTUALIZACIÓN 09-03-17: SE AGREGA UN NULL POR SI SE SELECCIONA UN TIPO
+                        $processes = \Ermtool\Process::getProcessFromIssues($_GET['organization_id'],NULL);
                         $process_issues = array(); //se guardaran los procesos que tienen issues que además tienen documentos
                         $i = 0;
                         foreach ($processes as $process)
@@ -181,7 +182,7 @@ class DocumentosController extends Controller
                         }
                         break;
                     case 1: //issues de subprocesos
-                        $subprocesses = \Ermtool\Subprocess::getSubprocessFromIssues($_GET['organization_id']);
+                        $subprocesses = \Ermtool\Subprocess::getSubprocessFromIssues($_GET['organization_id'],NULL);
                         $org_name = \Ermtool\Organization::name($_GET['organization_id']);
                         $subprocess_issues = array(); //se guardaran los subprocesos que tienen issues que además tienen documentos
                         $i = 0;
@@ -312,7 +313,7 @@ class DocumentosController extends Controller
                         }
                         break;
                     case 3: //issues de control de proceso
-                        $controls = \Ermtool\Control::getProcessesControlsFromIssues($_GET['organization_id']);
+                        $controls = \Ermtool\Control::getProcessesControlsFromIssues($_GET['organization_id'],NULL);
 
                         $control_issues = array(); //se guardaran los controles que tienen issues que además tienen documentos
                         $i = 0;
@@ -386,7 +387,7 @@ class DocumentosController extends Controller
                         }
                         break;
                     case 4: //issues de control de entidad
-                        $controls = \Ermtool\Control::getObjectivesControlsFromIssues($_GET['organization_id']);
+                        $controls = \Ermtool\Control::getObjectivesControlsFromIssues($_GET['organization_id'],NULL);
 
                         $control_issues = array(); //se guardaran los controles que tienen issues que además tienen documentos
                         $i = 0;
@@ -461,7 +462,7 @@ class DocumentosController extends Controller
                         break;
                     case 5: //issues de programas de auditoría
                         //(audit_audit_plan_audit_program)
-                        $audit_programs = \Ermtool\Audit_program::getProgramsFromIssues($_GET['organization_id']);
+                        $audit_programs = \Ermtool\Audit_program::getProgramsFromIssues($_GET['organization_id'],NULL);
 
                         $audit_program_issues = array(); //se guardaran los programas que tienen issues que además tienen documentos
                         $i = 0;
@@ -535,7 +536,7 @@ class DocumentosController extends Controller
                         break;
                     case 6: //issues de auditoría
                         //(audit_audit_plan)
-                        $audits = \Ermtool\Audit::getAuditsFromIssues($_GET['organization_id']);
+                        $audits = \Ermtool\Audit::getAuditsFromIssues($_GET['organization_id'],NULL);
 
                         $audit_issues = array(); //se guardaran las auditorías que tienen issues que además tienen documentos
                         $i = 0;

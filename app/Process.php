@@ -18,9 +18,25 @@ class Process extends Model
     }
 
     //obtiene procesos que tienen issues(de una organización)
-    public static function getProcessFromIssues($org)
+    public static function getProcessFromIssues($org,$kind)
     {
-        $processes = DB::table('issues')
+        if ($kind != NULL)
+        {
+            $processes = DB::table('issues')
+                    ->whereNotNull('issues.process_id')
+                    ->join('processes','processes.id','=','issues.process_id')
+                    ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->where('processes.id','=',$kind)
+                    ->select('processes.id','processes.name','processes.description')
+                    ->groupBy('processes.id')
+                    ->get();
+        }
+        
+        else
+        {
+            $processes = DB::table('issues')
                     ->whereNotNull('issues.process_id')
                     ->join('processes','processes.id','=','issues.process_id')
                     ->join('subprocesses','subprocesses.process_id','=','processes.id')
@@ -29,6 +45,7 @@ class Process extends Model
                     ->select('processes.id','processes.name','processes.description')
                     ->groupBy('processes.id')
                     ->get();
+        }
 
         return $processes;
     }

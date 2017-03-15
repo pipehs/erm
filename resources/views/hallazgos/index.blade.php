@@ -49,7 +49,7 @@
 				{!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-3">
 					{!!Form::select('organization_id',$organizations,null, 
-							 	   ['id' => 'orgs','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+							 	   ['id' => 'orgs','required'=>'true','placeholder'=>'- Seleccione -','onChange'=>'lala()'])!!}
 				</div>
 			</div>
 
@@ -57,13 +57,24 @@
 				{!!Form::label('Seleccione un tipo',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-3">
 					{!!Form::select('kind',['0'=>'Procesos','1'=>'Subprocesos','2'=>'Organización','3'=>'Controles de proceso','4'=>'Controles de entidad','5'=>'Programas de auditoría','6'=>'Auditorías','7'=>'Pruebas de auditoría'],null, 
-							 	   ['id' => 'kind','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+							 	   ['id' => 'kind','required'=>'true','placeholder'=>'- Seleccione -','onChange'=>'lala()'])!!}
 				</div>
 			</div>
+
+			<div class="form-group" id="secondGroup" style="display: none;">
+              <div class="row">
+                 <label for="second_select" class='col-sm-4 control-label' id="label_second_select"></label>
+                 <div class="col-sm-3">
+                   <select id="second_select" name="second_select">
+                   </select>
+                 </div>
+              </div>
+            </div>
+
 			<div class="form-group">
-						<center>
-						{!!Form::submit('Seleccionar', ['class'=>'btn btn-success','id'=>'guardar'])!!}
-						</center>
+				<center>
+					{!!Form::submit('Seleccionar', ['class'=>'btn btn-success','id'=>'guardar'])!!}
+				</center>
 			</div>
 			{!!Form::close()!!}
 
@@ -72,7 +83,6 @@
 			</div>
 
 @if (isset($issues))
-
 				@if ($kind == 0)
 					<h4><b>{{ $org }}: Hallazgos de procesos</b></h4>
 				@elseif($kind == 1)
@@ -160,5 +170,164 @@
 
 
 @section('scripts2')
+<script>
+function lala() {
+	
+	if ($('#orgs').val() != '')
+	{
+		if ($('#kind').val() != '')
+		{
+			if ($('#kind').val() == 0) //selección de proceso
+			{
+				$.get('get_processes.'+$("#orgs").val(), function (result) {
+					$("#second_select").empty();
+					$("#second_select").change();
 
+					//agregamos label
+					$("#label_second_select").html('Seleccione proceso')
+					//parseamos datos obtenidos
+					select = '<option value="" selected>- Seleccione -</option>';
+					var datos = JSON.parse(result);
+					$(datos).each( function() {
+						select += '<option value="'+this.id+'"">'+this.name+'</option>';
+					});
+
+					$("#second_select").html(select);
+					$("#secondGroup").show(500);
+				});
+			}
+			else if ($('#kind').val() == 1) //subproceso
+			{
+				$.get('get_subprocesses.'+$("#orgs").val(), function (result) {
+					$("#second_select").empty();
+					$("#second_select").change();
+
+					//agregamos label
+					$("#label_second_select").html('Seleccione subproceso')
+					//parseamos datos obtenidos
+					select = '<option value="" selected>- Seleccione -</option>';
+					var datos = JSON.parse(result);
+					$(datos).each( function() {
+						select += '<option value="'+this.id+'"">'+this.name+'</option>';
+					});
+
+					$("#second_select").html(select);
+					$("#secondGroup").show(500);
+				});
+			}
+			else if ($('#kind').val() == 2) //organización
+			{
+				$("#second_select").empty();
+				$("#second_select").change();
+				$("#secondGroup").hide(500);
+			}	
+			else if ($('#kind').val() == 3) //controles de proceso (obtendremos lista de procesos igual que en hallazgos de proceso)
+			{
+				$.get('get_processes.'+$("#orgs").val(), function (result) {
+					$("#second_select").empty();
+					$("#second_select").change();
+
+					//agregamos label
+					$("#label_second_select").html('Seleccione proceso')
+					//parseamos datos obtenidos
+					select = '<option value="" selected>- Seleccione -</option>';
+					var datos = JSON.parse(result);
+					$(datos).each( function() {
+						select += '<option value="'+this.id+'"">'+this.name+'</option>';
+					});
+
+					$("#second_select").html(select);
+					$("#secondGroup").show(500);
+				});
+			}	
+			else if ($('#kind').val() == 4) //controles de negocio
+			{
+				$.get('get_objectives.'+$("#orgs").val(), function (result) {
+					$("#second_select").empty();
+					$("#second_select").change();
+
+					//agregamos label
+					$("#label_second_select").html('Seleccione objetivo corporativo')
+					//parseamos datos obtenidos
+					select = '<option value="" selected>- Seleccione -</option>';
+					var datos = JSON.parse(result);
+					$(datos).each( function() {
+						select += '<option value="'+this.id+'"">'+this.name+'</option>';
+					});
+
+					$("#second_select").html(select);
+					$("#secondGroup").show(500);
+				});
+			}	
+			else if ($('#kind').val() == 5) //programas de auditoría
+			{
+				$.get('get_audit_programs.'+$("#orgs").val(), function (result) {
+					$("#second_select").empty();
+					$("#second_select").change();
+
+					//agregamos label
+					$("#label_second_select").html('Seleccione programa')
+					//parseamos datos obtenidos
+					select = '<option value="" selected>- Seleccione -</option>';
+					var datos = JSON.parse(result);
+					$(datos).each( function() {
+						select += '<option value="'+this.id+'"">'+this.name+'</option>';
+					});
+
+					$("#second_select").html(select);
+					$("#secondGroup").show(500);
+				});
+			}	
+			else if ($('#kind').val() == 6) //auditorías
+			{
+				$.get('get_audits.'+$("#orgs").val(), function (result) {
+					$("#second_select").empty();
+					$("#second_select").change();
+
+					//agregamos label
+					$("#label_second_select").html('Seleccione auditoría')
+					//parseamos datos obtenidos
+					select = '<option value="" selected>- Seleccione -</option>';
+					var datos = JSON.parse(result);
+					$(datos).each( function() {
+						select += '<option value="'+this.id+'"">'+this.name+'</option>';
+					});
+
+					$("#second_select").html(select);
+					$("#secondGroup").show(500);
+				});
+			}	
+			else if ($('#kind').val() == 7) //pruebas de auditoría
+			{
+				$.get('get_audit_tests.'+$("#orgs").val(), function (result) {
+					$("#second_select").empty();
+					$("#second_select").change();
+
+					//agregamos label
+					$("#label_second_select").html('Seleccione prueba de auditoría')
+
+					//parseamos datos obtenidos
+					select = '<option value="" selected>- Seleccione -</option>';
+					var datos = JSON.parse(result);
+					$(datos).each( function() {
+						select += '<option value="'+this.id+'"">'+this.name+'</option>';
+					});
+
+					$("#second_select").html(select);
+					$("#secondGroup").show(500);
+				});
+			}			
+		}
+		else
+		{
+			$("#second_select").empty();
+			$("#second_select").change();
+		}
+	}
+	else
+	{
+		swal('Cuidado','Primero debe seleccionar la organización','warning');
+	}
+}
+</script>
 @stop

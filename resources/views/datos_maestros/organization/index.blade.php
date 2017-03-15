@@ -118,10 +118,15 @@
 			Ninguna
 		@else
 			@foreach ($org_dependientes as $organizaciones)
+				<?php $cont = 0; //contador por si es que "Esta" organización no tiene organizaciones dependientes ?>
 				@if ($organizaciones['organization_id'] == $organization['id'])
 					<li>{{ $organizaciones['nombre'] }}</li>
+					<?php $cont += 1; ?>
 				@endif
 			@endforeach
+			@if ($cont == 0)
+				Ninguna
+			@endif
 		@endif
 		</td>
 	@foreach (Session::get('roles') as $role)

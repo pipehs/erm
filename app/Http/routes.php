@@ -727,6 +727,14 @@ Route::get('genauditreports.{org}', [
 Route::get('get_audit.{id}', [
 	'as' => 'get_audit', 'uses' => 'AuditoriasController@getAudit']);
 
+//obtiene auditorías de una organización
+Route::get('get_audits.{id}', [
+	'as' => 'get_audits', 'uses' => 'AuditoriasController@getAudits2']);
+
+//obtiene pruebas de auditoría relacionadas a una organización
+Route::get('get_audit_tests.{id}', [
+	'as' => 'get_audit_tests', 'uses' => 'AuditoriasController@getAuditTests']);
+
 //------ Rutas para auditoría de riesgos ------//
 
 Route::get('plan_auditoria', [
@@ -932,6 +940,10 @@ Route::get('auditorias.stakeholders.{id}', [
 Route::get('auditorias.get_audit_program.{id}', [
 	'as' => 'auditorias.get_audit_program', 'uses' => 'AuditoriasController@getAuditProgram']);
 
+//ruta para obtener programas de auditoría relacionados a una organización
+Route::get('get_audit_programs.{id}', [
+	'as' => 'get_audit_programs', 'uses' => 'AuditoriasController@getAuditPrograms']);
+
 //ruta para obtener datos de prueba de auditoría seleccionada (al supervisar un plan de auditoria)
 Route::get('auditorias.get_audit_program2.{id}', [
 	'as' => 'auditorias.get_audit_program2', 'uses' => 'AuditoriasController@getAuditProgram2']);
@@ -990,7 +1002,7 @@ Route::get('get_subprocesses.{id}', [
 Route::get('get_subprocesses_from_process.{id}.{process}', [
 	'as' => 'get_subprocesses_from_process', 'uses' => 'SubprocesosController@getSubprocessesFromProcess']);
 
-//ruta para obtener procesos de una organizacion
+//ruta para obtener objetivos de una organizacion
 Route::get('get_objectives.{id}', [
 	'as' => 'get_objectives', 'uses' => 'ObjetivosController@getObjectives']);
 

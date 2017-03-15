@@ -302,6 +302,15 @@
 			</div>
 
 			<div class="form-group">
+               <div class="row">
+                 <label for="obj_padres" class='col-sm-4 control-label'>Active si desea ver objetivos de organizaciones superiores</label>
+                 <div class="col-sm-3">
+                   <input type="checkbox" name="obj_padres" id="obj_padres" data-toggle="toggle" data-on="Objetivos superiores" data-off="Solo esta organización" data-width="200" data-offstyle="primary" data-onstyle="success">
+                 </div>
+              </div>
+            </div>
+
+			<div class="form-group">
 						<center>
 						{!!Form::submit('Seleccionar', ['class'=>'btn btn-success','id'=>'guardar'])!!}
 						</center>

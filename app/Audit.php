@@ -16,9 +16,23 @@ class Audit extends Model
     }
 
     //obtiene auditorías que contienen hallazgos
-    public static function getAuditsFromIssues($org)
+    public static function getAuditsFromIssues($org,$kind)
     {
-        $audits = DB::table('issues')
+        if ($kind != NULL)
+        {
+            $audits = DB::table('issues')
+                    ->join('audit_audit_plan','audit_audit_plan.id','=','issues.audit_audit_plan_id')
+                    ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                    ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                    ->where('audit_plans.organization_id','=',$org)
+                    ->where('audits.id','=',$kind)
+                    ->select('audits.id','audit_plans.name as audit_plan','audits.name','audits.description')
+                    ->groupBy('audits.id')
+                    ->get();
+        }
+        else
+        {
+            $audits = DB::table('issues')
                     ->join('audit_audit_plan','audit_audit_plan.id','=','issues.audit_audit_plan_id')
                     ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
                     ->join('audits','audits.id','=','audit_audit_plan.audit_id')
@@ -26,6 +40,7 @@ class Audit extends Model
                     ->select('audits.id','audit_plans.name as audit_plan','audits.name','audits.description')
                     ->groupBy('audits.id')
                     ->get();
+        }
 
         return $audits;
     }
@@ -80,5 +95,16 @@ class Audit extends Model
                 ->where('audit_plan_id','=',$audit_plan)
                 ->select('audit_id as id')
                 ->get();
+    }
+
+    public static function getAudits2($org)
+    {
+        return DB::table('audits')
+            ->join('audit_audit_plan','audit_audit_plan.audit_id','=','audits.id')
+            ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+            ->where('audit_plans.organization_id','=',$org)
+            ->where('audit_plans.status','=',0)
+            ->select('audits.id','audits.name')
+            ->get();
     }
 }

@@ -44,18 +44,35 @@ class Audit_program extends Model
             ->get();
     }
 
-    public static function getProgramsFromIssues($org)
+    public static function getProgramsFromIssues($org,$kind)
     {
-        //obtenemos programas que tienen issues
-        $programs = DB::table('issues')
-                    ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','issues.audit_audit_plan_audit_program_id')
-                    ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
-                    ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
-                    ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
-                    ->where('audit_plans.organization_id','=',$org)
-                    ->select('audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description')
-                    ->groupBy('audit_audit_plan_audit_program.id')
-                    ->get();
+        if ($kind != NULL)
+        {
+            //obtenemos programas que tienen issues
+            $programs = DB::table('issues')
+                        ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','issues.audit_audit_plan_audit_program_id')
+                        ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->where('audit_plans.organization_id','=',$org)
+                        ->where('audit_programs.id','=',$kind)
+                        ->select('audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description')
+                        ->groupBy('audit_audit_plan_audit_program.id')
+                        ->get();
+        }
+        else
+        {
+            //obtenemos programas que tienen issues
+            $programs = DB::table('issues')
+                        ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','issues.audit_audit_plan_audit_program_id')
+                        ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                        ->where('audit_plans.organization_id','=',$org)
+                        ->select('audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description')
+                        ->groupBy('audit_audit_plan_audit_program.id')
+                        ->get();
+        }
 
         return $programs;
     }
@@ -90,5 +107,17 @@ class Audit_program extends Model
                 ->where('audit_plans.organization_id','=',$org)
                 ->select('audit_plans.name as audit_plan','audits.name as audit')
                 ->get();
+    }
+
+    public static function getAuditPrograms($org)
+    {
+        return DB::table('audit_programs')
+            ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_program_id','=','audit_programs.id')
+            ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+            ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+            ->where('audit_plans.organization_id','=',$org)
+            ->where('audit_plans.status','=',0)
+            ->select('audit_programs.id','audit_programs.name')
+            ->get();
     }
 }

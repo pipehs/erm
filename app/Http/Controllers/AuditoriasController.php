@@ -3170,6 +3170,29 @@ class AuditoriasController extends Controller
             return json_encode($audit_programs);
         }
     }
+    //obtiene programas de auditoría de una organización
+    public function getAuditPrograms($org)
+    {
+        $audit_programs = \Ermtool\Audit_program::getAuditPrograms($org);
+        
+        return json_encode($audit_programs);
+    }
+
+    //obtiene auditorías de una organización
+    public function getAudits2($org)
+    {
+        $audits = \Ermtool\Audit::getAudits2($org);
+        
+        return json_encode($audits);
+    }
+
+    //obtiene pruebas de auditoría de una organización
+    public static function getAuditTests($org)
+    {
+        $audit_tests = \Ermtool\Audit_test::getAuditTests($org);
+        
+        return json_encode($audit_tests);
+    }
     //obtiene los controles relacionados a un plan de auditoría (según la organización que esté involucrada
     //con el plan de auditoría)
     public function getObjectiveControls($id)

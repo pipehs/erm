@@ -159,7 +159,7 @@
 <script>
 
 @if (isset($issues_om))
-	@if ($cont_ctrl > 0 || $cont_audit > 0 || $others > 0)
+	@if ($cont_ctrl > 0 || $cont_audit > 0 || $cont_audit_plan > 0 || $cont_program > 0 || $cont_org > 0 || $cont_subprocess > 0 || $cont_process > 0 || $cont_process_ctrl > 0 || $cont_bussiness_ctrl > 0)
       google.charts.load("visualization", "1", {packages:["corechart"]});
       google.charts.setOnLoadCallback(chart1);
       function chart1() {

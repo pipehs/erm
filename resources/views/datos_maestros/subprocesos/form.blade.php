@@ -17,14 +17,37 @@
 							{!!Form::date('expiration_date',null,['class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)'])!!}
 						</div>
 					</div>
-						{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}
-					<div class="row form-group">
-						<div class="col-sm-3">
-							{!!Form::select('organization_id[]',$organizaciones,
-							 	   null, 
-							 	   ['id' => 'el2','multiple'=>'true','required'=>'true'])!!}
+
+					<div class="form-group">
+							{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}
+							<div class="col-sm-3">
+							@if (strstr($_SERVER["REQUEST_URI"],'edit'))
+								<select name="organization_id[]" multiple id="organization_id">
+								@foreach ($organizaciones as $id=>$name)
+
+									<?php $i = 0; //contador de organizaciones 
+										  $cont = 0; //contador para ver si una organización está seleccionada ?>
+									@while (isset($orgs_selected[$i]))
+										@if ($orgs_selected[$i] == $id)
+											<option value="{{ $id }}" selected>{{ $name }}</option>
+											<?php $cont += 1; ?>
+										@endif
+										<?php $i += 1; ?>
+									@endwhile
+
+									@if ($cont == 0)
+										<option value="{{ $id }}">{{ $name }}</option>
+									@endif
+
+								@endforeach
+								</select>
+							@else
+								{!!Form::select('organization_id[]',$organizaciones,
+								 	   null, 
+								 	   ['id' => 'organization_id','multiple'=>'true'])!!}
+							@endif
+							</div>
 						</div>
-					</div>
 					<div class="form-group">
 						{!!Form::label('Proceso Involucrado',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">

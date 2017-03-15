@@ -30,13 +30,16 @@ class RiesgosController extends Controller
         {
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
+            //ACTUALIZACIÓN 02-03-17: Agregamos filtro de categorías de riesgos (todas las categorías)
+            $categories = \Ermtool\Risk_category::where('status',0)->lists('name','id');
+
             if (Session::get('languaje') == 'en')
             {
-                return view('en.riesgos.index',['organizations' => $organizations]);
+                return view('en.riesgos.index',['organizations' => $organizations,'categories' => $categories]);
             }
             else
             {
-                return view('riesgos.index',['organizations' => $organizations]);
+                return view('riesgos.index',['organizations' => $organizations, 'categories' => $categories]);
             }
         }
     }
@@ -50,6 +53,8 @@ class RiesgosController extends Controller
         else
         {
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+            //ACTUALIZACIÓN 02-03-17: Agregamos filtro de categorías de riesgos (todas las categorías)
+            $categories = \Ermtool\Risk_category::where('status',0)->lists('name','id');
 
             $org = \Ermtool\Organization::find($_GET['organization_id']);
 
@@ -57,23 +62,17 @@ class RiesgosController extends Controller
             $relacionados = array();
             $i = 0; //contador de riesgos
 
-            $riesgos_temp1 = DB::table('risks')
-                        ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
-                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                        ->where('organization_subprocess.organization_id','=',$_GET['organization_id'])
-                        ->where('risks.type2','=',1)
-                        ->groupBy('risks.id')
-                        ->select('risks.*')
-                        ->get(); //Selecciona todos los riesgos ya identificados de la org seleccionada
+            if (isset($_GET['risk_category_id']))
+            {
+                $category = $_GET['risk_category_id'];
+            }
+            else
+            {
+                $category = NULL;
+            }
 
-            $riesgos_temp2 = DB::table('risks')
-                        ->join('objective_risk','objective_risk.risk_id','=','risks.id')
-                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                        ->where('objectives.organization_id','=',$_GET['organization_id'])
-                        ->where('risks.type2','=',1)
-                        ->groupBy('risks.id')
-                        ->select('risks.*')
-                        ->get();
+            $riesgos_temp1 = \Ermtool\Risk::getRisksSubprocess($_GET['organization_id'],$category);
+            $riesgos_temp2 = \Ermtool\Risk::getObjectiveRisk($_GET['organization_id'],$category);
 
             $riesgos2 = array_merge($riesgos_temp1,$riesgos_temp2); //juntamos todos los riesgos de la org.
             $j = 0; //contador de subprocesos u objetivos relacionados
@@ -117,7 +116,6 @@ class RiesgosController extends Controller
 
                     foreach ($objectives as $objective)
                     {
-
                         //obtenemos organización
                         //$org = \Ermtool\Organization::where('id',$objective['organization_id'])->value('name');
                         $relacionados[$j] = array('risk_id'=>$riesgo->id,
@@ -239,11 +237,11 @@ class RiesgosController extends Controller
 
             if (Session::get('languaje') == 'en')
             {
-                return view('en.riesgos.index',['riesgos'=>$riesgos,'relacionados'=>$relacionados,'organizations' => $organizations,'org_selected' => $org->name, 'org_id' => $org->id]);
+                return view('en.riesgos.index',['riesgos'=>$riesgos,'relacionados'=>$relacionados,'organizations' => $organizations,'org_selected' => $org->name, 'org_id' => $org->id,'categories' => $categories]);
             }
             else
             {
-                return view('riesgos.index',['riesgos'=>$riesgos,'relacionados'=>$relacionados,'organizations' => $organizations,'org_selected' => $org->name, 'org_id' => $org->id]);
+                return view('riesgos.index',['riesgos'=>$riesgos,'relacionados'=>$relacionados,'organizations' => $organizations,'org_selected' => $org->name, 'org_id' => $org->id,'categories' => $categories]);
             }
             //return json_encode(['riesgos'=>$riesgos,'relacionados'=>$relacionados]);
             //print_r($relacionados);
@@ -836,30 +834,51 @@ class RiesgosController extends Controller
                     if ($riesgo->type == 0)
                     {
                         //primero eliminamos relaciones previas
-                        DB::table('risk_subprocess')
-                            ->where('risk_id','=',$riesgo->id)
-                            ->delete();
+                        //ACTUALIZACIÓN 02-03-2017: NO SE PUEDE ELIMINAR!!! YA QUE PUEDE TENER COSAS ASOCIADAS
+                        //DB::table('risk_subprocess')
+                        //    ->where('risk_id','=',$riesgo->id)
+                        //    ->delete();
 
                         //agregamos en tabla risk_subprocess
                         foreach ($_POST['subprocess_id'] as $subprocess_id)
                         {
-                            $subprocess = \Ermtool\Subprocess::find($subprocess_id);
-                            $subprocess->risks()->attach($riesgo);
+                            //vemos si el subproceso ya se encuentra para el riesgo
+                            $risk_sub = DB::table('risk_subprocess')
+                                        ->where('risk_id','=',$riesgo->id)
+                                        ->where('subprocess_id','=',$subprocess_id)
+                                        ->get(['id']);
+
+                            if (empty($risk_sub)) //si es que está vacío significa que la relación no existe
+                            {
+                                $subprocess = \Ermtool\Subprocess::find($subprocess_id);
+                                $subprocess->risks()->attach($riesgo);
+                            }
                         }       
                     }
 
                     else if ($riesgo->type == 1)
                     {
                         //primero eliminamos relaciones previas
-                        DB::table('objective_risk')
-                            ->where('risk_id','=',$riesgo->id)
-                            ->delete();
+                        //ACTUALIZACIÓN 02-03-2017: NO SE PUEDE ELIMINAR!!! YA QUE PUEDE TENER COSAS ASOCIADAS
+                        //DB::table('objective_risk')
+                        //    ->where('risk_id','=',$riesgo->id)
+                        //    ->delete();
 
                         //agregamos en tabla objective_risk
                         foreach ($_POST['objective_id'] as $objective_id)
                         {
-                            $objective = \Ermtool\Objective::find($objective_id);
-                            $objective->risks()->attach($riesgo);
+                            //vemos si el objetivo ya se encuentra para el riesgo
+                            $obj_risk = DB::table('objective_risk')
+                                        ->where('risk_id','=',$riesgo->id)
+                                        ->where('objective_id','=',$objective_id)
+                                        ->get(['id']);
+
+                            if (empty($obj_risk)) //si es que está vacío significa que la relación no existe
+                            {
+                                $objective = \Ermtool\Objective::find($objective_id);
+                                $objective->risks()->attach($riesgo);
+                            }
+                            
                         }       
                     }
 
@@ -935,13 +954,16 @@ class RiesgosController extends Controller
         else
         {
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+            //ACTUALIZACIÓN 02-03-17: Agregamos filtro de categorías de riesgos (todas las categorías)
+            $categories = \Ermtool\Risk_category::where('status',0)->lists('name','id');
+
             if (Session::get('languaje') == 'en')
             {
-                return view('en.reportes.matriz_riesgos',['organizations'=>$organizations]);
+                return view('en.reportes.matriz_riesgos',['organizations'=>$organizations,'categories' => $categories]);
             }
             else
             {
-                return view('reportes.matriz_riesgos',['organizations'=>$organizations]);  
+                return view('reportes.matriz_riesgos',['organizations'=>$organizations,'categories' => $categories]);  
             }
         }
     }
@@ -955,11 +977,26 @@ class RiesgosController extends Controller
         else
         {
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+            //ACTUALIZACIÓN 02-03-17: Agregamos filtro de categorías de riesgos (todas las categorías)
+            $categories = \Ermtool\Risk_category::where('status',0)->lists('name','id');
 
-            if (!strstr($_SERVER["REQUEST_URI"],'genexcel'))
+            if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //si no se está generando excel
             {
                 $value = $_GET['kind'];
                 $org = $_GET['organization_id'];
+
+                if (isset($_GET['risk_category_id']))
+                {
+                    $category = $_GET['risk_category_id'];
+                }
+                else
+                {
+                    $category = NULL;
+                }
+            } 
+            else //por ahora si es excel se deja como NULL la categoría (02-03-17)
+            {
+                $category = NULL;
             }
             
             $i = 0; //contador de controles/subprocesos o controles/objetivos
@@ -980,37 +1017,12 @@ class RiesgosController extends Controller
             {
 
                 //---------- OBS: EXISTE PROBLEMA SI ES QUE EL RIESGO NO CONTIENE CAUSA Y EFECTO --------//
-                $risks = DB::table('risk_subprocess')
-                                    ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                                    ->join('processes','subprocesses.process_id','=','processes.id')
-                                    ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                                    ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
-                                    ->where('risks.type2','=',1)
-                                    ->where('organization_subprocess.organization_id','=',$org)
-                                    ->select('risks.*',
-                                            'subprocesses.name as subprocess_name',
-                                            'processes.name as process_name',
-                                            'risk_categories.name as risk_category_name',
-                                            'risk_subprocess.id as risk_subprocess_id')
-                                    ->get();
+                $risks = \Ermtool\Risk::getRisksSubprocess($org,$category);
             }
 
             else if ($value == 1) //Se generará matriz para riesgos de negocio
             {
-                $risks = DB::table('objective_risk')
-                                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                    ->join('risks','risks.id','=','objective_risk.risk_id')
-                                    ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
-                                    ->join('organizations','organizations.id','=','objectives.organization_id')
-                                    ->where('risks.type2','=',1)
-                                    ->where('objectives.organization_id','=',$org)
-                                    ->select('risks.*',
-                                            'objectives.name as objective_name',
-                                            'organizations.name as organization_name',
-                                            'risk_categories.name as risk_category_name',
-                                            'objective_risk.id as objective_risk_id')
-                                    ->get();
+                $risks = \Ermtool\Risk::getObjectiveRisk($org,$category);
             }
 
             foreach ($risks as $risk)
@@ -1357,11 +1369,11 @@ class RiesgosController extends Controller
             {
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org]);
+                    return view('en.reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org,'categories' => $categories]);
                 }
                 else
                 {
-                    return view('reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org]);
+                    return view('reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org,'categories' => $categories]);
                 }
                 //return json_encode($datos);
             }

@@ -60,9 +60,26 @@ class Audit_test extends Model
         return $test;
     }
 
-    public static function getAuditTestsFromIssues($org)
+    public static function getAuditTestsFromIssues($org,$kind)
     {
-        $audits = DB::table('issues')
+        if ($kind != NULL)
+        {
+            $audits = DB::table('issues')
+                    ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
+                    ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                    ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                    ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                    ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                    ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                    ->where('audit_plans.organization_id','=',$org)
+                    ->where('audit_tests.id','=',$kind)
+                    ->select('audit_tests.id','audit_tests.name','audit_tests.description','audit_plans.name as audit_plan','audits.name as audit','audit_programs.name as program')
+                    ->groupBy('audit_tests.id')
+                    ->get();
+        }
+        else
+        {
+            $audits = DB::table('issues')
                     ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
                     ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
                     ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
@@ -73,7 +90,20 @@ class Audit_test extends Model
                     ->select('audit_tests.id','audit_tests.name','audit_tests.description','audit_plans.name as audit_plan','audits.name as audit','audit_programs.name as program')
                     ->groupBy('audit_tests.id')
                     ->get();
+        }
 
         return $audits;
+    }
+
+    public static function getAuditTests($org)
+    {
+        return DB::table('audit_tests')
+            ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+            ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+            ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+            ->where('audit_plans.organization_id','=',$org)
+            ->where('audit_plans.status','=',0)
+            ->select('audit_tests.id','audit_tests.name')
+            ->get();
     }
 }

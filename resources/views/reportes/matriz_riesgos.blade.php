@@ -53,6 +53,17 @@
                 	</div>
                 </div>
 
+                <div class="form-group">
+				   <div class="row">
+				     <label for="risk_category_id" class='col-sm-4 control-label'>Seleccione categor&iacute;a de Riesgo (opcional)</label>
+				     <div class="col-sm-3">
+				       {!!Form::select('risk_category_id',$categories, 
+				            null, 
+				           ['id' => 'risk_category_id','placeholder'=>'- Seleccione -'])!!}
+				     </div>
+				  </div>
+				</div>
+
                 <div class="form-group" id="tipo">
 	                <div class="row">
 	                  {!!Form::label('Seleccione tipo de matriz',null,['class'=>'col-sm-4 control-label'])!!}

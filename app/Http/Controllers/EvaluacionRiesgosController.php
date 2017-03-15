@@ -992,14 +992,16 @@ class EvaluacionRiesgosController extends Controller
             //obtenemos encuestas distintas a las que corresponden a una evaluación manual
             $encuestas = \Ermtool\Evaluation::where('description','<>','NULL')->lists('name','id');
             $organizaciones = \Ermtool\Organization::where('status',0)->lists('name','id');
+            //ACTUALIZACIÓN 02-03-17: Agregamos filtro de categorías de riesgos (todas las categorías)
+            $categories = \Ermtool\Risk_category::where('status',0)->lists('name','id');
 
             if (Session::get('languaje') == 'en')
             {
-                return view('en.reportes.heatmap',['encuestas'=>$encuestas,'organizaciones'=>$organizaciones]);
+                return view('en.reportes.heatmap',['encuestas'=>$encuestas,'organizaciones'=>$organizaciones,'categories' => $categories]);
             }
             else
             {
-                return view('reportes.heatmap',['encuestas'=>$encuestas,'organizaciones'=>$organizaciones]);
+                return view('reportes.heatmap',['encuestas'=>$encuestas,'organizaciones'=>$organizaciones,'categories' => $categories]);
             }
         }
     }
@@ -1027,45 +1029,52 @@ class EvaluacionRiesgosController extends Controller
             $riesgos = array();
             $i = 0;
 
-                $ano = $_GET['ano'];
+            $ano = $_GET['ano'];
 
-                if ($_GET['mes'] == NULL)
+            if ($_GET['mes'] == NULL)
+            {
+                $mes = "12";
+            }
+            else
+            {
+                $mes = $_GET['mes'];
+            }
+
+            //ACTUALIZACIÓN 02-03-2017: Filtro de categoría
+            if (isset($_GET['risk_category_id']) && $_GET['risk_category_id'] != '')
+            {
+                $category = $_GET['risk_category_id'];
+            }
+            else
+            {
+                $category = NULL;
+            }
+
+            //ACTUALIZACIÓN 02-03-2017: Vemos si se desea ver riesgos solo de org o tambien de org dependientes
+            if (isset($_GET['sub_organizations']))
+            {
+                $subs = TRUE;
+            }
+            else
+            {
+                $subs = FALSE;
+            }
+
+            //obtenemos nombre y descripción de organización
+            $datos = DB::table('organizations')->where('id',$_GET['organization_id'])->select('name','description')->get();
+
+            foreach ($datos as $datos)
+            {
+                    $nombre = $datos->name;
+                    $descripcion = $datos->description;
+            }
+            if ($_GET['kind'] == 0) //evaluaciones de riesgos de procesos
+            {
+                //---- consulta multiples join para obtener los subprocesos evaluados relacionados a la organización ----//
+                //para riesgos inherente 
+                $evaluations = \Ermtool\Evaluation::getEvaluationRiskSubprocess($_GET['organization_id'],$category,$subs,$ano,$mes);  
+                foreach ($evaluations as $evaluation)
                 {
-                    $mes = "12";
-                }
-                else
-                {
-                    $mes = $_GET['mes'];
-                }
-
-                //obtenemos nombre y descripción de organización
-                $datos = DB::table('organizations')->where('id',$_GET['organization_id'])->select('name','description')->get();
-
-                foreach ($datos as $datos)
-                {
-                     $nombre = $datos->name;
-                     $descripcion = $datos->description;
-                }
-                if ($_GET['kind'] == 0)
-                {
-                     //---- consulta multiples join para obtener los subprocesos evaluados relacionados a la organización ----//
-
-                    //para riesgos inherente 
-                    $evaluations = DB::table('evaluation_risk')
-                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                    ->join('risk_subprocess','risk_subprocess.id','=','evaluation_risk.risk_subprocess_id')
-                                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                                    ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                                    ->whereNotNull('evaluation_risk.risk_subprocess_id')
-                                    ->where('organization_subprocess.organization_id','=',$_GET['organization_id'])
-                                    ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
-                                    ->where('evaluations.consolidation','=',1)
-                                    ->select('evaluation_risk.risk_subprocess_id as risk_id','risks.id as risk')
-                                    ->groupBy('risks.id')
-                                    ->get();
-
-                    foreach ($evaluations as $evaluation)
-                    {                    
                         //obtenemos promedio de probabilidad e impacto (INHERENTE Y CONTROLADO)
                         $updated_at_in = DB::table('evaluation_risk')
                                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
@@ -1082,7 +1091,6 @@ class EvaluacionRiesgosController extends Controller
                             $updated_at_ctrl = DB::table('controlled_risk')
                                                 ->join('risk_subprocess','risk_subprocess.id','=','controlled_risk.risk_subprocess_id')
                                                 ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                                                ->where('organization_subprocess.organization_id','=',$_GET['organization_id'])
                                                 ->where('controlled_risk.risk_subprocess_id','=',$evaluation->risk_id)
                                                 ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-31 23:59:59'))
                                                 ->max('controlled_risk.created_at');
@@ -1169,24 +1177,15 @@ class EvaluacionRiesgosController extends Controller
                         //}
 
                         $i += 1;
-                    }
                 }
-                else if ($_GET['kind'] == 1) //evaluaciones de riesgos de negocio
-                {
-                    //---- consulta multiples join para obtener los objective_risk evaluados relacionados a la organización ----// 
-                    $evaluations = DB::table('evaluation_risk')
-                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                    ->join('objective_risk','objective_risk.id','=','evaluation_risk.objective_risk_id')
-                                    ->join('risks','risks.id','=','objective_risk.risk_id')
-                                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                    ->where('objectives.organization_id','=',$_GET['organization_id'])
-                                    ->where('evaluations.consolidation','=',1)
-                                    ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
-                                    ->select('evaluation_risk.objective_risk_id as risk_id','risks.id as risk')
-                                    ->groupBy('risks.id')->get();
+            }
+            else if ($_GET['kind'] == 1) //evaluaciones de riesgos de negocio
+            {
+
+                $evaluations = \Ermtool\Evaluation::getEvaluationObjectiveRisk($_GET['organization_id'],$category,$subs,$ano,$mes); 
                    
-                    foreach ($evaluations as $evaluation)
-                    {
+                foreach ($evaluations as $evaluation)
+                {
                         $updated_at_in = DB::table('evaluation_risk')
                                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                                     ->where('evaluation_risk.objective_risk_id','=',$evaluation->risk_id)
@@ -1201,7 +1200,6 @@ class EvaluacionRiesgosController extends Controller
                             $updated_at_ctrl = DB::table('controlled_risk')
                                                 ->join('objective_risk','objective_risk.id','=','controlled_risk.objective_risk_id')
                                                 ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                                ->where('objectives.organization_id','=',$_GET['organization_id'])
                                                 ->where('controlled_risk.objective_risk_id','=',$evaluation->risk_id)
                                                 ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-31 23:59:59'))
                                                 ->max('controlled_risk.created_at');
@@ -1214,6 +1212,7 @@ class EvaluacionRiesgosController extends Controller
                                     ->where('evaluation_risk.objective_risk_id','=',$evaluation->risk_id)
                                     ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
                                     ->first();
+
 
                         //proba controlado (si es que hay)
                         if (isset($updated_at_ctrl) && $updated_at_ctrl != NULL)

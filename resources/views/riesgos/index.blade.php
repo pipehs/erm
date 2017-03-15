@@ -47,7 +47,7 @@
 			<?php break; ?>
 
 			@else
-				<p>On this section you will be able to view all identified risks on the system.</p>
+				<p>En esta secci&oacute;n podr&aacute; ver los riesgos identificados en el sistema.</p>
 			@endif
 		@endforeach
 
@@ -56,13 +56,26 @@
 		<div class="form-group">
 		   <div class="row">
 		     {!!Form::label('Seleccione organizaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
-		     <div class="col-sm-4">
+		     <div class="col-sm-3">
 		       {!!Form::select('organization_id',$organizations, 
 		            null, 
 		           ['id' => 'org','placeholder'=>'- Seleccione -','required'=>'true'])!!}
 		     </div>
 		  </div>
 		</div>
+
+		<div class="form-group">
+		   <div class="row">
+		     <label for="risk_category_id" class='col-sm-4 control-label'>Seleccione categor&iacute;a de Riesgo (opcional)</label>
+		     <div class="col-sm-3">
+		       {!!Form::select('risk_category_id',$categories, 
+		            null, 
+		           ['id' => 'risk_category_id','placeholder'=>'- Seleccione -'])!!}
+		     </div>
+		  </div>
+		</div>
+
+
 		<br>
 		<div class="form-group">
 			<center>
@@ -187,6 +200,9 @@
 		</div>
 	</div>
 </div>
+@stop
+
+@section('scripts2')
 @stop
 
 

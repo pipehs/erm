@@ -155,7 +155,8 @@ class IssuesController extends Controller
 
     
     //obtiene hallazgos de tipo $kind para la org $org_id. Esto para mantenedor de hallazgos y reporte de hallazgos
-    public function getIssues($kind,$org_id,$kind2)
+    //ACTUALIZACIÓN 09-03-17: SE AGREGÓ 2DO TIPO PARA CUALQUIER HALLAZGO (EXCEPTO DE ORGANIZACIÓN)
+    public function getIssues($kind,$kind3,$org_id,$kind2)
     {
         $issues = array();
         $datos = array(); //se usará sólo para reportes
@@ -163,7 +164,15 @@ class IssuesController extends Controller
         if ($kind == 0)
         {
             //hallazgos de proceso creados directamente
-            $processes = \Ermtool\Process::getProcessFromIssues($org_id);
+            if ($kind3 != NULL)
+            {
+                $processes = \Ermtool\Process::getProcessFromIssues($org_id,$kind3);
+            }
+            else
+            {
+                $processes = \Ermtool\Process::getProcessFromIssues($org_id,NULL);
+            }
+
             $process_issues = array(); //se guardaran los procesos que tienen issues que además tienen documentos
             $i = 0;
             foreach ($processes as $process)
@@ -193,7 +202,15 @@ class IssuesController extends Controller
         else if ($kind == 1) 
         {
             //hallazgos de subproceso creados directamente
-            $subprocesses = \Ermtool\Subprocess::getSubprocessFromIssues($org_id);
+            if ($kind3 != NULL)
+            {
+                $subprocesses = \Ermtool\Subprocess::getSubprocessFromIssues($org_id,$kind3);
+            }
+            else
+            {
+                $subprocesses = \Ermtool\Subprocess::getSubprocessFromIssues($org_id,NULL);
+            }
+            
             $issues = array(); //se guardaran los subprocesos que tienen issues que además tienen documentos
             $issues2 = array();
             $i = 0;
@@ -234,7 +251,14 @@ class IssuesController extends Controller
         }
         else if ($kind == 3) //Hallazgos de control de proceso
         {
-            $controls = \Ermtool\Control::getProcessesControlsFromIssues($org_id);
+            if ($kind3 != NULL)
+            {
+                $controls = \Ermtool\Control::getProcessesControlsFromIssues($org_id,$kind3);
+            }
+            else
+            {
+                $controls = \Ermtool\Control::getProcessesControlsFromIssues($org_id,NULL);
+            }
 
             $issues = array(); //se guardaran los controles que tienen issues que además tienen documentos
             $i = 0;
@@ -262,7 +286,14 @@ class IssuesController extends Controller
         }
         else if ($kind == 4) //hallazgos de control de negocio
         {
-            $controls = \Ermtool\Control::getObjectivesControlsFromIssues($org_id);
+            if ($kind3 != NULL)
+            {
+                $controls = \Ermtool\Control::getObjectivesControlsFromIssues($org_id,$kind3);
+            }
+            else
+            {
+                $controls = \Ermtool\Control::getObjectivesControlsFromIssues($org_id,NULL);
+            }
 
             $issues = array(); //se guardaran los controles que tienen issues que además tienen documentos
             $i = 0;
@@ -290,7 +321,14 @@ class IssuesController extends Controller
         }
         else if ($kind == 5) //hallazgos de programa auditoría
         {
-            $audit_programs = \Ermtool\Audit_program::getProgramsFromIssues($org_id);
+            if ($kind3 != NULL)
+            {
+                $audit_programs = \Ermtool\Audit_program::getProgramsFromIssues($org_id,$kind3);
+            }
+            else
+            {
+                $audit_programs = \Ermtool\Audit_program::getProgramsFromIssues($org_id,NULL);
+            }
 
             $issues = array(); //se guardaran los programas que tienen issues que además tienen documentos
             $i = 0;
@@ -319,7 +357,14 @@ class IssuesController extends Controller
         }
         else if ($kind == 6) //hallazgos de auditoría
         {
-            $audits = \Ermtool\Audit::getAuditsFromIssues($org_id);
+            if ($kind3 != NULL)
+            {
+                $audits = \Ermtool\Audit::getAuditsFromIssues($org_id,$kind3);
+            }
+            else
+            {
+                $audits = \Ermtool\Audit::getAuditsFromIssues($org_id,NULL);
+            }
 
             $issues = array(); //se guardaran los programas que tienen issues que además tienen documentos
             $i = 0;
@@ -348,7 +393,14 @@ class IssuesController extends Controller
 
         else if ($kind == 7) //ACTUALIZACIÓN 31-01-2017: Hallazgos de pruebas de auditoría
         {
-            $tests = \Ermtool\Audit_test::getAuditTestsFromIssues($org_id);
+            if ($kind3 != NULL)
+            {
+                $tests = \Ermtool\Audit_test::getAuditTestsFromIssues($org_id,$kind3);
+            }
+            else
+            {
+                $tests = \Ermtool\Audit_test::getAuditTestsFromIssues($org_id,NULL);    
+            }
 
             $issues = array(); //se guardaran los programas que tienen issues que además tienen documentos
             $i = 0;
@@ -1093,7 +1145,15 @@ class IssuesController extends Controller
             
             $issues = array();
 
-            $issues = $this->getIssues($_GET['kind'],$_GET['organization_id'],1);
+            if (isset($_GET['second_select']) && $_GET['second_select'] != '') //si son hallazgos de organización no debería estar seteado
+            {
+                $issues = $this->getIssues($_GET['kind'],$_GET['second_select'],$_GET['organization_id'],1);
+            }
+            else
+            {
+                $issues = $this->getIssues($_GET['kind'],NULL,$_GET['organization_id'],1);
+            }
+            
             //print_r($_POST);
             
             if (Session::get('languaje') == 'en')
@@ -1980,7 +2040,8 @@ class IssuesController extends Controller
             
             $issues = array();
 
-            $issues = $this->getIssues($_GET['kind'],$_GET['organization_id'],2);
+            //ACTUALIZAR 09-03-17: YA QUE SE DEBERÍA PODER FILTRAR POR "SECOND SELECT" COMO EN INDEX2
+            $issues = $this->getIssues($_GET['kind'],NULL,$_GET['organization_id'],2);
             //print_r($_POST);
             if (Session::get('languaje') == 'en')
             {
@@ -1995,7 +2056,8 @@ class IssuesController extends Controller
 
     public function generarReporteIssuesExcel($kind,$org)
     {
-        $issues = $this->getIssues($kind,$org,2);
+        //ACTUALIZAR 09-03-17: YA QUE SE DEBERÍA PODER FILTRAR POR "SECOND SELECT" COMO EN INDEX2
+        $issues = $this->getIssues($kind,NULL,$org,2);
 
         return $issues;
     }

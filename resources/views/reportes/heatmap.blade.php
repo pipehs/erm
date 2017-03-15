@@ -69,6 +69,26 @@
                 </div>
             </div>
 
+            <div class="form-group">
+               <div class="row">
+                 <label for="risk_category_id" class='col-sm-4 control-label'>Seleccione categor&iacute;a de Riesgo (opcional)</label>
+                 <div class="col-sm-3">
+                   {!!Form::select('risk_category_id',$categories, 
+                        null, 
+                       ['id' => 'risk_category_id','placeholder'=>'- Seleccione -'])!!}
+                 </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+               <div class="row">
+                 <label for="sub_organizations" class='col-sm-4 control-label'>Active si desea ver tambi&eacute;n los riesgos de las organizaciones dependientes de la seleccionada</label>
+                 <div class="col-sm-3">
+                   <input type="checkbox" name="sub_organizations" id="sub_organizations" data-toggle="toggle" data-on="Organización + filiales" data-off="Solo organización" data-width="200" data-offstyle="primary" data-onstyle="success">
+                 </div>
+              </div>
+            </div>
+
             <div class="form-group" id="tipo" style="display: none;">
                 <div class="row">
                   {!!Form::label('Seleccione tipo de heatmap',null,['class'=>'col-sm-4 control-label'])!!}
@@ -359,8 +379,17 @@
  */
 
  $("#org").change(function() {
-    $("#tipo").show(500);
-    $("#tipo2").show(500);
+    if ($("#org").val() != '')
+    {
+        $("#tipo").show(500);
+        $("#tipo2").show(500);
+    }
+    else
+    {
+        $("#tipo").hide(500);
+        $("#tipo2").hide(500);
+    }
+    
  });
 
 
