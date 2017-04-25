@@ -92,23 +92,7 @@ function stakes()
 			});
 }
 
-
-function risks()
-{
-	//riesgos de proceso
-	var subprocess_risk = JSON.parse('{{ $riesgos_proc }}');
-	$(subprocess_risk).each( function() {
-				$("#risk_subprocess_id option[value='" + this + "']").attr("selected",true);
-				$("#risk_subprocess_id").change();
-			});
-
-	//riesgos de negocio
-	var objective_risk = JSON.parse('{{ $riesgos_neg }}');
-	$(objective_risk).each( function() {
-				$("#objective_risk_id option[value='" + this + "']").attr("selected",true);
-				$("#objective_risk_id").change();
-			});
-}
+//05-04-17: eliminada función risks
 
 </script>
 @stop

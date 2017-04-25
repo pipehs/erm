@@ -39,6 +39,7 @@
       En caso de que desee ver la matriz de control para los riesgos de negocio, deber&aacute; especificar si desea ver
       la matriz para todas las organizaciones o para alguna en espec&iacute;fica.</p>
 
+      @if (!isset($datos))
       	{!!Form::open(['route'=>'genmatriz','method'=>'GET','class'=>'form-horizontal'])!!}
 
       			<div class="form-group">
@@ -71,11 +72,10 @@
 				<br>
 				<br>
 				<hr>
-		@if (isset($datos))
+		@else
 			<hr>
 			<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 
-			@if ($value == 0)
 				<thead>
 				<th>ID Control<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -85,39 +85,13 @@
 				<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Costo control<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Evidencia<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Riesgo(s) / Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
-				</thead>
-				
-				
-				@foreach ($datos as $dato)
-					<tr>
-						<td>{{$dato['Control']}}</td>
-						<td>{{$dato['Descripción']}}</td>
-						<td>{{$dato['Responsable']}}</td>
-						<td>{{$dato['Tipo']}}</td>
-						<td>{{$dato['Periodicidad']}}</td>
-						<td>{{$dato['Propósito']}}</td>
-						<td>{{$dato['Costo_control']}}</td>
-						<td>{{$dato['Evidencia']}}</td>
-						<td>{{$dato['Riesgo_Subproceso']}}</td>
-					</tr>
-				@endforeach
-				</table>
-				<div id="boton_exportar">
-					{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "0,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
-				</div>
+				<th>Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 
+			@if ($value == 0)
+				<th>Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 			@elseif ($value == 1)
-				<thead>
-				<th>ID Control<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Tipo<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Periodicidad<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Costo control<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Evidencia<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Riesgo(s) / Objetivos(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Objetivos(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+			@endif	
 				</thead>
 				
 				
@@ -131,14 +105,33 @@
 						<td>{{$dato['Propósito']}}</td>
 						<td>{{$dato['Costo_control']}}</td>
 						<td>{{$dato['Evidencia']}}</td>
-						<td>{{$dato['Riesgo_Objetivo']}}</td>
+						<td>
+						@foreach ($dato['Riesgos'] as $risk)
+							<li>{{ $risk }}</li>
+						@endforeach
+						</td>
+						<td>
+						@if ($value == 0)
+							@foreach ($dato['Subprocesos'] as $sub)
+								<li>{{ $sub }}</li>
+							@endforeach
+						@elseif ($value == 1)
+							@foreach ($dato['Objetivos'] as $obj)
+								<li>{{ $obj }}</li>
+							@endforeach
+						@endif
+						</td>
 					</tr>
 				@endforeach
 				</table>
 				<div id="boton_exportar">
 					{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "1,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
 				</div>
-			@endif
+
+				<center>
+					{!! link_to_route('matrices', $title = 'Volver', $parameters = NULL,
+		                 $attributes = ['class'=>'btn btn-danger'])!!}
+				<center>
 		@endif
 
       </div>

@@ -1,7 +1,7 @@
 	<div class="form-group">
 		{!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
 		<div class="col-sm-4">
-			{!!Form::select('',$organizations,null, 
+			{!!Form::select('org_id',$organizations,null, 
 							 	   ['id' => 'organizations','required'=>'true','placeholder'=>'- Seleccione -'])!!}
 		</div>
 	</div>

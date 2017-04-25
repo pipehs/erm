@@ -9,6 +9,7 @@ use Session;
 use Redirect;
 use Auth;
 use DB;
+use DateTime;
 
 
 class EfectosController extends Controller
@@ -44,7 +45,9 @@ class EfectosController extends Controller
                 //damos formato a fecha de creación
                 if ($efecto['created_at'] != NULL)
                 {
-                    $fecha_creacion = date_format($efecto['created_at'],"d-m-Y");
+                    //$fecha_creacion = date_format($efecto['created_at'],"d-m-Y");
+                    $lala = new DateTime($efecto['created_at']);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
                 }
                 else
                     $fecha_creacion = NULL;
@@ -52,7 +55,9 @@ class EfectosController extends Controller
                 //damos formato a fecha de actualización
                 if ($efecto['updated_at'] != NULL)
                 {
-                    $fecha_act = date_format($efecto['updated_at'],"d-m-Y");
+                    //$fecha_act = date_format($efecto['updated_at'],"d-m-Y");
+                    $lala = new DateTime($efecto['updated_at']);
+                    $fecha_act = date_format($lala,"d-m-Y");
                 }
                 else
                     $fecha_act = NULL;

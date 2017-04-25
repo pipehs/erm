@@ -70,7 +70,7 @@
 								<option value="" selected disabled>-Seleccione-</option>
 								@foreach ($risk_subprocess as $risk)
 									<option value="{{ $risk['id'] }}">
-										{{ $risk['name'] }} - {{ $risk['subprocess_name']}} - {{ $risk['process_name'] }}
+										{{ $risk['name'] }} - {{ $risk['description']}}
 									</option>
 								@endforeach
 							</select>
@@ -86,7 +86,7 @@
 								<option value="" selected disabled>-Seleccione-</option>
 								@foreach ($objective_risk as $risk)
 									<option value="{{ $risk['id'] }}">
-										{{ $risk['name'] }} - {{ $risk['objective_name']}}
+										{{ $risk['name'] }} - {{ $risk['description']}}
 									</option>
 								@endforeach
 							</select>

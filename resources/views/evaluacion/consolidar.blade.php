@@ -55,7 +55,7 @@
 			{!!Form::open(['route'=>'evaluacion.consolidar2','method'=>'POST','class'=>'form-horizontal'])!!}
 				@foreach ($evaluations_risks as $evaluation)
 					<tr>
-					<td>{{ $evaluation['risk_name'] }} - {{ $evaluation['subobj_name']}} - {{ $evaluation['orgproc_name'] }}</td>
+					<td>{{ $evaluation['risk_name'] }} - {{ $evaluation['description']}}</td>
 					<td>
 					<center>
 					{!!Form::number('probability_'.$evaluation['id'],$evaluation['probability'],

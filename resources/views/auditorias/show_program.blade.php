@@ -131,9 +131,21 @@
 					@endif
 					</td>
 
-					<td>{{ $test['stakeholder'] }}</td>
+					<td>
+					@if ($test['stakeholder'] == '' || $test['stakeholder'] == NULL)
+						No se ha asignado
+					@else
+						{{ $test['stakeholder'] }}
+					@endif
+					</td>
 
-					<td>{{ $test['hh'] }}</td>
+					<td>
+					@if ($test['hh'] == '' || $test['hh'] == NULL || $test['hh'] == 0)
+						No se ha asignado
+					@else
+						{{ $test['hh'] }}
+					@endif
+					</td>
 					<td>
 					@if ($test['hh_real'] == NULL || $test['hh_real'] == "")
 						No especifica

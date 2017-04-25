@@ -56,7 +56,8 @@ class RiesgosTipoController extends Controller
                  //damos formato a fecha creación
                 if ($riesgo['created_at'] != NULL)
                 {
-                    $fecha_creacion = date_format($riesgo['created_at'],"d-m-Y");
+                    $lala = new DateTime($riesgo['created_at']);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
                 }
                 else
                     $fecha_creacion = NULL;
@@ -64,7 +65,8 @@ class RiesgosTipoController extends Controller
                 //damos formato a fecha de actualización 
                 if ($riesgo['updated_at'] != NULL)
                 {
-                    $fecha_act = date_format($riesgo['updated_at'],"d-m-Y");
+                    $lala = new DateTime($riesgo['updated_at']);
+                    $fecha_act = date_format($lala,"d-m-Y");
                 }
                 else
                     $fecha_act = NULL;
@@ -186,11 +188,16 @@ class RiesgosTipoController extends Controller
             {
                 $causa = array();
 
+                if ($_POST['expiration_date'] == NULL || $_POST['expiration_date'] == "")
+                    $exp_date = NULL;
+                else
+                    $exp_date = $_POST['expiration_date'];
+
                 $risk = \Ermtool\Risk::create([
                     'name'=>$_POST['name'],
                     'description'=>$_POST['description'],
                     'type2'=>0,
-                    'expiration_date'=>$_POST['expiration_date'],
+                    'expiration_date'=>$exp_date,
                     'risk_category_id'=>$_POST['risk_category_id'],
                     ]);
 
@@ -353,6 +360,11 @@ class RiesgosTipoController extends Controller
             {
                 $riesgo = \Ermtool\Risk::find($GLOBALS['id1']);
 
+                if ($_POST['expiration_date'] == NULL || $_POST['expiration_date'] == "")
+                    $exp_date = NULL;
+                else
+                    $exp_date = $_POST['expiration_date'];
+
                 //vemos si se agrego alguna causa nueva
                 if (isset($_POST['causa_nueva']))
                 {
@@ -486,7 +498,7 @@ class RiesgosTipoController extends Controller
 
                 $riesgo->name = $_POST['name'];
                 $riesgo->description = $_POST['description'];
-                $riesgo->expiration_date = $_POST['expiration_date'];
+                $riesgo->expiration_date = $exp_date;
                 $riesgo->risk_category_id = $_POST['risk_category_id'];
 
                 $riesgo->save();

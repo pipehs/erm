@@ -183,10 +183,15 @@ class OrganizationController extends Controller
                 else
                     $target_client = NULL;
 
+                if ($_POST['expiration_date'] == NULL || $_POST['expiration_date'] == "")
+                    $exp_date = NULL;
+                else
+                    $exp_date = $_POST['expiration_date'];
+
                 \Ermtool\Organization::create([
                     'name' => $_POST['name'],
                     'description' => $_POST['description'],
-                    'expiration_date' => $_POST['expiration_date'],
+                    'expiration_date' => $exp_date,
                     'shared_services' => $_POST['shared_services'],
                     'organization_id' => $organizacion_padre,
                     'mision' => $mision,
@@ -330,8 +335,6 @@ class OrganizationController extends Controller
             DB::transaction(function()
             {
                 $organization = \Ermtool\Organization::find($GLOBALS['id1']);
-                $fecha_creacion = $organization->created_at;
-                $fecha_exp = NULL;
 
                 //vemos si tiene organización padre
                 if($_POST['organization_id'] != "")
@@ -357,9 +360,14 @@ class OrganizationController extends Controller
                 else
                     $target_client = NULL;
 
+                if ($_POST['expiration_date'] == NULL || $_POST['expiration_date'] == "")
+                    $exp_date = NULL;
+                else
+                    $exp_date = $_POST['expiration_date'];
+
                 $organization->name = $_POST['name'];
                 $organization->description = $_POST['description'];
-                $organization->expiration_date = $_POST['expiration_date'];
+                $organization->expiration_date = $exp_date;
                 $organization->shared_services = $_POST['shared_services'];
                 $organization->organization_id = $organizacion_padre;
                 $organization->mision = $mision;

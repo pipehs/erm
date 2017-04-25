@@ -240,7 +240,7 @@
 					@else
 						<td>{!! link_to_route('editar_evaluacion', $title = 'Editar evaluaci&oacute;n', $parameters = $last_diseno['id'],
 				                 		$attributes = ['class'=>'btn btn-primary'])!!}</td>
-						<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $last_diseno['id'] }},'{{ $control['name'] }}','La prueba de diseño')">Cerrar prueba</button></td>
+						<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $last_diseno['id'] }}.{{ $org_id }},'{{ $control['name'] }}','La prueba de diseño')">Cerrar prueba</button></td>
 				    @endif
 				@endif
 				
@@ -308,7 +308,7 @@
 						<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.1" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
 					@else
 						<td>{!! link_to_route('editar_evaluacion', $title = 'Editar evaluaci&oacute;n', $parameters = $last_efectividad['id'],$attributes = ['class'=>'btn btn-primary'])!!}</td>
-						<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $last_efectividad['id'] }},'{{ $control['name'] }}','La prueba de efectividad operativa')">Cerrar prueba</button></td>
+						<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $last_efectividad['id'] }}.{{ $org_id }},'{{ $control['name'] }}','La prueba de efectividad operativa')">Cerrar prueba</button></td>
 				    @endif
 				@endif
 				
@@ -376,7 +376,7 @@
 						<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.2" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
 					@else
 						<td>{!! link_to_route('editar_evaluacion', $title = 'Editar evaluaci&oacute;n', $parameters = $last_sustantiva['id'],$attributes = ['class'=>'btn btn-primary'])!!}</td>
-						<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $last_sustantiva['id'] }},'{{ $control['name'] }}','La prueba sustantiva')">Cerrar prueba</button></td>
+						<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $last_sustantiva['id'] }}.{{ $org_id }},'{{ $control['name'] }}','La prueba sustantiva')">Cerrar prueba</button></td>
 				    @endif
 				@endif
 				</tr>
@@ -443,7 +443,7 @@
 						<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.3" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
 					@else
 						<td>{!! link_to_route('editar_evaluacion', $title = 'Editar evaluaci&oacute;n', $parameters = $last_cumplimiento['id'],$attributes = ['class'=>'btn btn-primary'])!!}</td>
-						<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $last_cumplimiento['id'] }},'{{ $control['name'] }}','La prueba de cumplimiento')">Cerrar prueba</button></td>
+						<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $last_cumplimiento['id'] }}.{{ $org_id }},'{{ $control['name'] }}','La prueba de cumplimiento')">Cerrar prueba</button></td>
 				    @endif
 				@endif
 				</tr>

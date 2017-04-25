@@ -9,6 +9,7 @@ use DB;
 use Session;
 use Redirect;
 use Auth;
+use DateTime;
 
 class RolesController extends Controller
 {
@@ -50,7 +51,8 @@ class RolesController extends Controller
                  //damos formato a fecha creación
                 if ($rol['created_at'] != NULL)
                 {
-                    $fecha_creacion = date_format($rol['created_at'],"d-m-Y");
+                    $lala = new DateTime($rol['created_at']);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
                 }
                 else
                     $fecha_creacion = NULL;
@@ -58,7 +60,8 @@ class RolesController extends Controller
                 //damos formato a fecha de actualización 
                 if ($rol['updated_at'] != NULL)
                 {
-                    $fecha_act = date_format($rol['updated_at'],"d-m-Y");
+                    $lala = new DateTime($rol['updated_at']);
+                    $fecha_act = date_format($lala,"d-m-Y");
                 }
 
                 else

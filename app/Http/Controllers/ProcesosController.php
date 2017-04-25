@@ -87,7 +87,9 @@ class ProcesosController extends Controller
 
                 else
                 {
-                    $fecha_creacion = date_format($process['created_at'],"d-m-Y");
+                	//$fecha_creacion = date('d-m-Y',strtotime($process['created_at']));
+                	$lala = new DateTime($process['created_at']);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
                 }
 
                 //damos formato a fecha expiración
@@ -104,7 +106,9 @@ class ProcesosController extends Controller
                 //damos formato a fecha de actualización 
                 if ($process['updated_at'] != NULL)
                 {
-                    $fecha_act = date_format($process['updated_at'],"d-m-Y");
+                	$lala = new DateTime($process['updated_at']);
+                    $fecha_act = date_format($lala,"d-m-Y");
+                	//$fecha_act = date('d-m-Y',strtotime($process['updated_at']));
                 }
 
                 else
@@ -119,6 +123,9 @@ class ProcesosController extends Controller
                 else
                     $proceso_dependiente = \Ermtool\Process::find($process['process_id']);
 
+                //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                $short_des = substr($process['description'],0,100);
+
                 $proceso[$i] = array('id'=>$process['id'],
                                     'nombre'=>$process['name'],
                                     'descripcion'=>$process['description'],
@@ -127,7 +134,8 @@ class ProcesosController extends Controller
                                     'fecha_exp'=>$fecha_exp,
                                     'proceso_dependiente'=>$proceso_dependiente['name'],
                                     'proceso_dependiente_id'=>$proceso_dependiente['id'],
-                                    'estado'=>$process['status']);
+                                    'estado'=>$process['status'],
+                                    'short_des' => $short_des);
                 $i += 1;
             }
 

@@ -65,6 +65,19 @@ Route::get('usuarios.destroy.{id}', [
 Route::put('usuarios.update.{id}', [
     'as' => 'usuarios.update', 'uses' => 'LogController@update'
 ]);
+
+Route::get('cambiopass', [
+	'as' => 'cambiopass', 'uses' => 'LogController@changePass'
+	]);
+
+Route::post('updatepass', [
+	'as' => 'updatepass', 'uses' => 'LogController@storeNewPass'
+	]);
+
+Route::get('help', [
+	'as' => 'help', 'uses' => 'HomeController@help'
+	]);
+
 // ----RUTAS PARA GESTIÓN DE DATOS MAESTROS---- //
 
 	//Rutas para CRUD + bloquear Organización//
@@ -519,7 +532,7 @@ Route::get('riesgos.setriesgotipo.{id}', [
 	'as' => 'riesgos.setriesgotipo', 'uses' => 'RiesgosController@setRiesgoTipo'
 ]);
 
-Route::get('riesgos.destroy.{id}', [
+Route::get('riesgos.destroy.{id}.{org}', [
 	'as' => 'riesgos.destroy', 'uses' => 'RiesgosController@destroy']);
 
 // ---- FIN RUTAS PARA IDENTIFICACIÓN DE RIESGO ---- //
@@ -600,7 +613,7 @@ Route::get('controles.create.{org}', [
 Route::post('controles.store', [
 	'as' =>'controles.store', 'uses' => 'ControlesController@store']);
 
-Route::get('controles.edit.{id}', [
+Route::get('controles.edit.{id}.{org}', [
 	'as' =>'controles.edit', 'uses' => 'ControlesController@edit']);
 
 Route::put('controles.update.{id}', [
@@ -619,7 +632,7 @@ Route::get('volver_evaluacion', [
 	'as' => 'volver_evaluacion', 'uses' => 'ControlesController@indexEvaluacion2'
 ]);
 
-Route::get('cerrar_evaluacion.{id}', [
+Route::get('cerrar_evaluacion.{id}.{org}', [
 	'as' => 'cerrar_evaluacion', 'uses' => 'ControlesController@closeEvaluation'
 ]);
 
@@ -660,13 +673,13 @@ Route::get('controles.get_evaluation2.{id_control}', [
 	'as' => 'controles.get_evaluation2', 'uses' => 'ControlesController@getEvaluacion2'
 ]);
 
-Route::get('controles.destroy.{id}', [
+Route::get('controles.destroy.{id}.{org_id}', [
 	'as' => 'controles.destroy', 'uses' => 'ControlesController@destroy']);
 
 Route::get('controles.get_objective_controls.{org_id}', [
 	'as' => 'controles.get_objective_controls', 'uses' => 'ControlesController@getObjectiveControls']);
 
-Route::get('controles.get_subprocess_controls.{org_id}', [
+Route::get('controles.get_subprocess_controls.{org_id}.{subprocess}', [
 	'as' => 'controles.get_subprocess_controls', 'uses' => 'ControlesController@getSubprocessControls']);
 
 // ----Rutas para reportes básicos---- //
@@ -891,9 +904,9 @@ Route::get('genexcelgraficosdinamicos.{kind},{id}.{org}', [
 
 //------ RUTAS PARA ENLACES A TRAVÉS DE JSON --------//
 
-//ruta para seleccionar a través de JSON los controles de negocio o de procesos en campo select
+//ruta para seleccionar a través de JSON los riesgos de negocio o de procesos en campo select (al crear controles)
 Route::get('controles.subneg.{value}.{org}', [
-	'as' => 'controles.subneg', 'uses' => 'ControlesController@subneg'
+	'as' => 'controles.subneg', 'uses' => 'RiesgosController@subneg'
 ]);
 
 Route::get('controles.docs.{id}', [
@@ -926,11 +939,11 @@ Route::get('auditorias.objetivos.{org}', [
 
 //ruta para obtener riesgos de negocio de una organización (al crear plan o evaluar riesgos)
 Route::get('get_objective_risk.{org}', [
-	'as' => 'get_objective_risk', 'uses' => 'AuditoriasController@getRiesgosObjetivos']);
+	'as' => 'get_objective_risk', 'uses' => 'RiesgosController@getRiesgosObjetivos']);
 
 //ruta para obtener riesgos de negocio de una organización (al crear plan o evaluar riesgos)
 Route::get('get_risk_subprocess.{org}', [
-	'as' => 'get_risk_subprocess', 'uses' => 'AuditoriasController@getRiesgosProcesos']);
+	'as' => 'get_risk_subprocess', 'uses' => 'RiesgosController@getRiesgosProcesos']);
 
 //ruta para obtener todos los stakeholders menos el auditor resposable al crear un plan de auditoría
 Route::get('auditorias.stakeholders.{id}', [
@@ -950,13 +963,13 @@ Route::get('auditorias.get_audit_program2.{id}', [
 
 //ruta para obtener controles de negocio asociados a un plan de auditoría
 //(según los objetivos corporativos que contemple este plan)
-Route::get('auditorias.objective_controls.{id}', [
-	'as' => 'auditorias.controls', 'uses' => 'AuditoriasController@getObjectiveControls']);
+//Route::get('auditorias.objective_controls.{id}', [
+//	'as' => 'auditorias.controls', 'uses' => 'AuditoriasController@getObjectiveControls']);
 
 //ruta para obtener controles de proceso asociados a un plan de auditoría
 //(según los objetivos corporativos que contemple este plan)
-Route::get('auditorias.subprocess_controls.{id}', [
-	'as' => 'auditorias.controls', 'uses' => 'AuditoriasController@getSubprocessControls']);
+//Route::get('auditorias.subprocess_controls.{id}', [
+//	'as' => 'auditorias.controls', 'uses' => 'AuditoriasController@getSubprocessControls']);
 
 //ruta para obtener auditorias según el plan seleccionado (al crear prueba de auditoría)
 Route::get('auditorias.auditorias.{id}', [
@@ -1264,6 +1277,15 @@ Route::get('breweries', ['middleware' => 'cors', function()
 }]);
 
 */
+
+//act 17-04-17: Rutas para eliminar notas y respuestas de notas
+Route::get('note.destroy.{id}', [
+	'as' => 'note.destroy', 'uses' => 'AuditoriasController@destroyNote'
+]);
+
+Route::get('note_answer.destroy.{id}', [
+	'as' => 'note_answer', 'uses' => 'AuditoriasController@destroyNoteAnswer'
+]);
 
 Route::get('error', function(){ 
     abort(404);

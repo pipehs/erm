@@ -78,27 +78,23 @@
 
 			<div class="form-group">
 				{!!Form::label('Valor mínimo de evaluación',null,['class'=>'col-sm-4 control-label'])!!}
+				<div class="col-sm-5">
 				@if ($green_min < $red_max)
-					<div class="col-sm-1">
-						{!!Form::number('min',$green_min,['class'=>'form-control','disabled'=>'true'])!!}
-					</div>
-					<div class="col-sm-3">
-					<center><b>Valor M&aacute;ximo De Evaluaci&oacute;n</b></center>
-					</div>
-					<div class="col-sm-1">
-						{!!Form::number('max',$red_max,['class'=>'form-control','disabled'=>'true'])!!}
-					</div>
+					{!!Form::number('min',$green_min,['class'=>'form-control','disabled'=>'true'])!!}
 				@elseif ($green_min > $red_max)
-					<div class="col-sm-1">
-						{!!Form::number('min',$red_max,['class'=>'form-control','disabled'=>'true'])!!}
-					</div>
-					<div class="col-sm-3">
-					<center><b>Valor M&aacute;ximo De Evaluaci&oacute;n</b></center>
-					</div>
-					<div class="col-sm-1">
-						{!!Form::number('max',$green_min,['class'=>'form-control','disabled'=>'true'])!!}
-					</div>
+					{!!Form::number('min',$red_max,['class'=>'form-control','disabled'=>'true'])!!}
 				@endif
+				</div>
+			</div>
+			<div class="form-group">	
+				{!!Form::label('Valor máximo de evaluación',null,['class'=>'col-sm-4 control-label'])!!}
+				<div class="col-sm-5">
+				@if ($green_min < $red_max)
+					{!!Form::number('max',$red_max,['class'=>'form-control','disabled'=>'true'])!!}
+				@elseif ($green_min > $red_max)
+					{!!Form::number('max',$green_min,['class'=>'form-control','disabled'=>'true'])!!}
+				@endif
+				</div>
 			</div>
 
 			<div class="form-group">

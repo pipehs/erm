@@ -11,17 +11,7 @@ use Storage;
 use stdClass;
 use Auth;
 class AuditoriasController extends Controller
-{
-    //compara scores para ordenar de mayor a menor
-    function cmp($a, $b)
-    {
-        if ($a['score'] == $b['score'])
-        {
-            return 0;
-        }
-        return ($a['score'] > $b['score']) ? -1 : 1;
-    }
-    /**
+{    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -46,12 +36,16 @@ class AuditoriasController extends Controller
                 }
                 else
                 {
-                    $fecha_creacion = date_format($plan['created_at'],"d-m-Y");
+                    $lala = new DateTime($plan['created_at']);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
+                    //$fecha_creacion = date_format($plan['created_at'],"d-m-Y");
                 }
                 //damos formato a fecha de actualización 
                 if ($plan['updated_at'] != NULL)
                 {
-                    $fecha_act = date_format($plan['updated_at'],"d-m-Y");
+                    $lala = new DateTime($plan['udpdated_at']);
+                    $fecha_act = date_format($lala,"d-m-Y");
+                    //$fecha_act = date_format($plan['updated_at'],"d-m-Y");
                 }
                 else
                     $fecha_act = NULL;
@@ -95,12 +89,16 @@ class AuditoriasController extends Controller
                 }
                 else
                 {
-                    $fecha_creacion = date_format($audit['created_at'],"d-m-Y");
+                    $lala = new DateTime($audit['created_at']);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
+                    //$fecha_creacion = date_format($audit['created_at'],"d-m-Y");
                 }
                 //damos formato a fecha de actualización 
                 if ($audit['updated_at'] != NULL)
                 {
-                    $fecha_act = date_format($audit['updated_at'],"d-m-Y");
+                    $lala = new DateTime($audit['updated_at']);
+                    $fecha_act = date_format($lala,"d-m-Y");
+                    //$fecha_act = date_format($audit['updated_at'],"d-m-Y");
                 }
                 else
                     $fecha_act = NULL;
@@ -161,14 +159,21 @@ class AuditoriasController extends Controller
     //Función con la que primero se seleccionará: Organización
     public function auditPrograms1()
     {
-        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-        if (Session::get('languaje') == 'en')
+        if (Auth::guest())
         {
-            return view('en.auditorias.programas',['organizations' => $organizations]);
+            return view('login');
         }
         else
         {
-            return view('auditorias.programas',['organizations' => $organizations]);
+            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.auditorias.programas',['organizations' => $organizations]);
+            }
+            else
+            {
+                return view('auditorias.programas',['organizations' => $organizations]);
+            }
         }
     }
     //función para abrir la vista de gestión de programas de auditoría
@@ -208,20 +213,25 @@ class AuditoriasController extends Controller
                 else
                 {
                     //damos formato a fecha inicial
-                    $fecha_creacion = date('d-m-Y',strtotime($program->created_at));
+                    $lala = new DateTime($program->created_at);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
+                    //$fecha_creacion = date('d-m-Y',strtotime($program->created_at));
                 }
                 //damos formato a fecha de actualización 
                 if ($program->updated_at != NULL)
                 {
                     //damos formato a fecha final
-                    $fecha_act = date('d-m-Y',strtotime($program->updated_at));
+                    $lala = new DateTime($program->updated_at);
+                    $fecha_act = date_format($lala,"d-m-Y");
+                    //$fecha_act = date('d-m-Y',strtotime($program->updated_at));
                 }
                 else
                     $fecha_act = NULL;
                 //formato a fecha expiración
                 if ($program->expiration_date)
                 {
-                    $fecha_exp = date('d-m-Y',strtotime($program->expiration_date));
+                    $lala = new DateTime($program->expiration_date);
+                    $fecha_exp = date_format($lala,"d-m-Y");
                 }
                 else
                     $fecha_exp = NULL;
@@ -260,9 +270,7 @@ class AuditoriasController extends Controller
             $audit_plans = \Ermtool\Audit_plan::where('status',0)->lists('name','id');
             $audit_programs = \Ermtool\Audit_program::lists('name','id');
              //obtenemos lista de stakeholders
-            $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-            ->orderBy('name')
-            ->lists('full_name', 'id');
+            $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
             //echo $audit_tests;
             if (Session::get('languaje') == 'en')
             {
@@ -306,7 +314,7 @@ class AuditoriasController extends Controller
             //creamos una transacción para cumplir con atomicidad
             DB::transaction(function()
             {
-                $fecha = date('Y-m-d H:i:s');
+                $fecha = date('Ymd H:i:s');
                     if (!isset($_POST['description']) || $_POST['description'] == '')
                     {
                         $description = NULL;
@@ -424,7 +432,7 @@ class AuditoriasController extends Controller
                             ->update([ 
                                 'status' => $_POST['status_'.$id],
                                 'results' => $_POST['test_result_'.$id],
-                                'updated_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Ymd H:i:s'),
                                 'hh_real' => $_POST['hh_real_'.$id],
                                 ]);
 
@@ -444,7 +452,7 @@ class AuditoriasController extends Controller
                                 {
                                     $result = $c->calcControlValue($control->control_id);
 
-                                    $eval = $c->calcControlledRisk($control->control_id);
+                                    $eval = $c->calcControlledRisk($control->control_id,$_POST['org_id']);
 
                                     $result = 0;
                                 }
@@ -488,7 +496,7 @@ class AuditoriasController extends Controller
                             ->where('id','=',$id)
                             ->update([ 
                                 'status' => $_POST['status_'.$id],
-                                'updated_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Ymd H:i:s'),
                                 ]);
                     }
                 }
@@ -541,11 +549,11 @@ class AuditoriasController extends Controller
                         ->insertGetId([
                             'name' => $_POST['name_'.$_POST['test_id']],
                             'description' => $_POST['description_'.$_POST['test_id']],
-                            'created_at' => date('Y-m-d H:i:s'),
-                            'updated_at' => date('Y-m-d H:i:s'),
+                            'created_at' => date('Ymd H:i:s'),
+                            'updated_at' => date('Ymd H:i:s'),
                             'audit_test_id' => $_POST['test_id'],
                             'status' => 0
-                            ]);
+                        ]);
             
                 //guardamos archivo de evidencia (si es que hay)
                 if($GLOBALS['evidence'] != NULL)
@@ -788,8 +796,8 @@ class AuditoriasController extends Controller
                         'methodology'=>$methodology,
                         'initial_date'=>$_POST['initial_date'],
                         'final_date'=>$_POST['final_date'],
-                        'created_at'=>date('Y-m-d H:i:s'),
-                        'updated_at'=>date('Y-m-d H:i:s'),
+                        'created_at'=>date('Ymd H:i:s'),
+                        'updated_at'=>date('Ymd H:i:s'),
                         'rules'=>$rules,
                         'organization_id'=>$_POST['organization_id']
                         ]);
@@ -853,8 +861,8 @@ class AuditoriasController extends Controller
                                     ->insertGetId([
                                         'name' => $_POST['audit_new'.$i.'_name'],
                                         'description' => $_POST['audit_new'.$i.'_description'],
-                                        'created_at' => date('Y-m-d H:i:s'),
-                                        'updated_at' => date('Y-m-d H:i:s')
+                                        'created_at' => date('Ymd H:i:s'),
+                                        'updated_at' => date('Ymd H:i:s')
                                         ]);
                         
                         //ahora insertamos en audit_audit_plan
@@ -989,7 +997,8 @@ class AuditoriasController extends Controller
             }
             else
             {
-                $expiration_date = date('d-m-Y',strtotime($audit_program->expiration_date));
+                $lala = new DateTime($audit_program->expiration_date);
+                $expiration_date = date_format($lala,"d-m-Y");
             }
             
             //obtenemos pruebas de auditoría del programa
@@ -1013,9 +1022,12 @@ class AuditoriasController extends Controller
                     $stakeholder2 = $stakeholder['name'].' '.$stakeholder['surnames'];
                 }
                 //damos formato a fecha creación
-                $fecha_creacion = date('d-m-Y',strtotime($audit_test->created_at));
+                $lala = new DateTime($audit_test->created_at);
+                $fecha_creacion = date_format($lala,"d-m-Y");
                 //damos formato a fecha de actualización
-                $fecha_act = date('d-m-Y',strtotime($audit_test->updated_at));
+                $lala = new DateTime($audit_test->updated_at);
+                $fecha_act = date_format($lala,"d-m-Y");
+
                 $type = $audit_test->type;
                 $status = $audit_test->status;
                 $results = $audit_test->results;            
@@ -1099,9 +1111,7 @@ class AuditoriasController extends Controller
                         ->where('audit_tests.audit_audit_plan_audit_program_id','=',$audit_test->audit_audit_plan_audit_program_id)
                         ->select('audit_plans.id')
                         ->first();
-            $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-            ->orderBy('name')
-            ->lists('full_name', 'id');
+            $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
             //seleccionamos tipo o categoría
             if ($audit_test->control_id != NULL)
             {
@@ -1149,16 +1159,24 @@ class AuditoriasController extends Controller
             $req = $request;
             //echo "POST: ";
             //print_r($_POST);
+
+
             DB::transaction(function (){
                 $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')->find($GLOBALS['id1']);
                 $audit_program = \Ermtool\Audit_program::find($audit_audit_plan_audit_program->audit_program_id);
                 $audit_program->name = $_POST['name'];
                 $audit_program->description = $_POST['description'];
+
+                if ($_POST['expiration_date'] == NULL || $_POST['expiration_date'] == "")
+                    $exp_date = NULL;
+                else
+                    $exp_date = $_POST['expiration_date'];
+
                 DB::table('audit_audit_plan_audit_program')
                     ->where('id',$audit_audit_plan_audit_program->id)
                     ->update([
-                            'expiration_date' => $_POST['expiration_date'],
-                            'updated_at' => date('Y-m-d H:i:s')
+                            'expiration_date' => $exp_date,
+                            'updated_at' => date('Ymd H:i:s')
                         ]);
                 //agregamos evidencias (si es que existe)
                 if ($GLOBALS['req']->file('file_program') != NULL)
@@ -1356,9 +1374,8 @@ class AuditoriasController extends Controller
                         ->where('audit_audit_plan_audit_program.id','=',$id_program)
                         ->select('audit_plans.id')
                         ->first();
-            $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-            ->orderBy('name')
-            ->lists('full_name', 'id');
+
+            $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
             $type2 = NULL;
             $type_id = NULL;
             if (Session::get('languaje') == 'en')
@@ -1383,8 +1400,8 @@ class AuditoriasController extends Controller
             global $req;
             $req = $request;
             DB::transaction(function () {
-                $fecha = date('Y-m-d H:i:s');
-                if (isset($_POST['description']))
+                $fecha = date('Ymd H:i:s');
+                if (isset($_POST['description']) && $_POST['description'] != '')
                 {
                     $description = $_POST['description'];
                 }
@@ -1393,7 +1410,7 @@ class AuditoriasController extends Controller
                     $description = NULL;
                 }
                 //si es que se ingreso tipo
-                if (isset($_POST['type']))
+                if (isset($_POST['type']) && $_POST['type'] != '')
                 {
                     $type = $_POST['type'];
                 }
@@ -1402,7 +1419,7 @@ class AuditoriasController extends Controller
                     $type = NULL;
                 }
                 //si es que se ingreso stakeholder
-                if (isset($_POST['stakeholder_id']))
+                if (isset($_POST['stakeholder_id']) && $_POST['stakeholder_id'] != '')
                 {
                     $stakeholder = $_POST['stakeholder_id'];
                 }
@@ -1411,7 +1428,7 @@ class AuditoriasController extends Controller
                     $stakeholder = NULL;
                 }
                 //si es que se ingreso HH
-                if (isset($_POST['hh']))
+                if (isset($_POST['hh']) && $_POST['hh'] != '')
                 {
                     $hh = $_POST['hh'];
                 }
@@ -1422,7 +1439,7 @@ class AuditoriasController extends Controller
 
                 //ACTUALIZACIÓN 07-12-16: La prueba ya no puede ser de riesgo; estará orientada a proceso o entidad; si es de proceso se dejará abierto si se seleccionan los controles o los subprocesos o sólo el proceso. A nivel de entidad se seleccionará sólo la perspectiva o se especificarán los controles a nivel de entidad
 
-                if (isset($_POST['process_id']))
+                if (isset($_POST['process_id']) && $_POST['process_id'] != '')
                 {
                     $process_id = $_POST['process_id'];
                 }
@@ -1606,9 +1623,7 @@ class AuditoriasController extends Controller
             $audits_selected = array();
             $stakeholder_team = array();
              //obtenemos lista de stakeholders
-            $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-            ->orderBy('name')
-            ->lists('full_name', 'id');
+            $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
             //obtenemos lista de organizaciones
             $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
             //ACTUALIZACIÓN 08-02-2017; OBTENEMOS UNIVERSO DE AUDITORÍAS DISTINTAS A LAS QUE YA EXISTEN
@@ -1622,7 +1637,8 @@ class AuditoriasController extends Controller
                         ->get();
             //cada una de las auditorías pertenecientes al plan
             //obtenemos riesgos de procesos que ya fueron seleccionados
-            $riesgos_selected = DB::table('audit_plan_risk')
+            //ACT 05-04-17: Ya no se usan
+            /*$riesgos_selected = DB::table('audit_plan_risk')
                                     ->join('risk_subprocess','risk_subprocess.id','=','audit_plan_risk.risk_subprocess_id')
                                     ->join('risks','risks.id','=','risk_subprocess.risk_id')
                                     ->where('audit_plan_risk.audit_plan_id','=',$id)
@@ -1648,7 +1664,7 @@ class AuditoriasController extends Controller
             {
                 $riesgos_neg[$i] = $risk->id;
                 $i += 1;
-            }
+            }*/
             //obtenemos stakeholder responsable
             $stakeholder1 = DB::table('audit_plan_stakeholder')
                             ->where('audit_plan_id','=',$id)
@@ -1673,16 +1689,14 @@ class AuditoriasController extends Controller
             if (Session::get('languaje') == 'en')
             {
                 return view('en.auditorias.edit',['stakeholders'=>$stakeholders,'organizations'=>$organizations,
-                                            'audits'=>$audits,'riesgos_neg' => json_encode($riesgos_neg),
-                                            'riesgos_proc'=>json_encode($riesgos_proc),'audits_selected'=>$audits_selected,
+                                            'audits'=>$audits,'audits_selected'=>$audits_selected,
                                             'stakeholder' => $stakeholder1, 'stakeholder_team' => json_encode($stakeholder_team),
                                             'id'=>$idorg,'audit_plan'=>$audit_plan]);
             }
             else
             {
                 return view('auditorias.edit',['stakeholders'=>$stakeholders,'organizations'=>$organizations,
-                                            'audits'=>$audits,'riesgos_neg' => json_encode($riesgos_neg),
-                                            'riesgos_proc'=>json_encode($riesgos_proc),'audits_selected'=>$audits_selected,
+                                            'audits'=>$audits,'audits_selected'=>$audits_selected,
                                             'stakeholder' => $stakeholder1, 'stakeholder_team' => json_encode($stakeholder_team),
                                             'id'=>$idorg,'audit_plan'=>$audit_plan]);
             }
@@ -1782,7 +1796,7 @@ class AuditoriasController extends Controller
                         'methodology'=>$methodology,
                         'initial_date'=>$fecha_inicio,
                         'final_date'=>$fecha_termino,
-                        'updated_at'=>date('Y-m-d H:i:s'),
+                        'updated_at'=>date('Ymd H:i:s'),
                         'rules'=>$_POST['rules'],
                         'organization_id'=>$_POST['organization_id']
                     ]);
@@ -1879,8 +1893,8 @@ class AuditoriasController extends Controller
                                         ->insertGetId([
                                             'name' => $_POST['audit_new'.$i.'_name'],
                                             'description' => $_POST['audit_new'.$i.'_description'],
-                                            'created_at' => date('Y-m-d H:i:s'),
-                                            'updated_at' => date('Y-m-d H:i:s')
+                                            'created_at' => date('Ymd H:i:s'),
+                                            'updated_at' => date('Ymd H:i:s')
                                             ]);
                         //ahora insertamos en audit_audit_plan
                         $audit_audit_plan_id = DB::table('audit_audit_plan')
@@ -2268,8 +2282,8 @@ class AuditoriasController extends Controller
                 $res = DB::table('notes_answers')
                         ->insertGetId([
                                 'answer' => $_POST['answer_'.$id],
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s'),
+                                'created_at' => date('Ymd H:i:s'),
+                                'updated_at' => date('Ymd H:i:s'),
                                 'note_id' => $id 
                             ]);
                 //guardamos archivo de evidencia (si es que hay)
@@ -2388,8 +2402,8 @@ class AuditoriasController extends Controller
                                         'issue_id' => $id,
                                         'stakeholder_id' => $stakeholder_id,
                                         'description' => $description,
-                                        'created_at' => date('Y-m-d H:i:s'),
-                                        'updated_at' => date('Y-m-d H:i:s'),
+                                        'created_at' => date('Ymd H:i:s'),
+                                        'updated_at' => date('Ymd H:i:s'),
                                         'final_date' => $final_date,
                                         'status' => 0
                                     ]);
@@ -2733,296 +2747,7 @@ class AuditoriasController extends Controller
             return json_encode($results);
         }
     }
-    //Función obtiene riesgos de negocio a través de JSON al crear plan de pruebas (también utilizado para crear encuesta de evaluación)
-    public function getRiesgosObjetivos($org)
-    {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
-            $results = array();
-            $i = 0; //contador de riesgos de negocio
-                //obtenemos riesgos de negocio para la organización seleccionada
-                $objective_risk = DB::table('objective_risk')
-                                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                    ->join('risks','risks.id','=','objective_risk.risk_id')
-                                    ->where('objectives.organization_id','=',(int)$org)
-                                    ->groupBy('risks.id')
-                                    ->orderBy('risks.name')
-                                    ->select('risks.name','objective_risk.id as riskid')
-                                    ->get();
-            foreach ($objective_risk as $risk)
-            {
-                //obtengo maxima fecha para obtener última evaluación
-                $fecha = DB::table('evaluation_risk')
-                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                ->where('evaluation_risk.objective_risk_id','=',$risk->riskid)
-                                ->max('updated_at');
-                //obtenemos evaluación de riesgo de negocio (si es que hay)---> Ultima (mayor fecha updated_at)
-                $evaluations = DB::table('evaluation_risk')
-                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                ->where('evaluation_risk.objective_risk_id','=',$risk->riskid)
-                                ->where('evaluations.consolidation','=',1)
-                                ->whereNotNull('evaluation_risk.avg_probability')
-                                ->whereNotNull('evaluation_risk.avg_impact')
-                                ->where('evaluations.updated_at','=',$fecha)
-                                ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
-                                ->get();
-                //seteamos por si no hay evaluación
-                $avg_probability = "Falta Eval.";
-                $avg_impact = "Falta Eval.";
-                $score = "Falta Eval.";
-                $proba_def = "";
-                $impact_def = "";
-                foreach ($evaluations as $evaluation)
-                {
-                    //seteamos nombres de probabilidad e impacto
-                    if (Session::get('languaje') == 'en')
-                    {
-                        switch ($evaluation->avg_probability)
-                        {
-                            case 1:
-                                $proba = 'Very improbable';
-                                break;
-                            case 2:
-                                $proba = 'unlikely';
-                                break;
-                            case 3:
-                                $proba = 'Possible';
-                                break;
-                            case 4:
-                                $proba = 'Likely';
-                                break;
-                            case 5:
-                                $proba = 'Very likely';
-                                break;
-                        }
-                        switch ($evaluation->avg_impact)
-                        {
-                            case 1:
-                                $impact = 'Despicable';
-                                break;
-                            case 2:
-                                $impact = 'Less';
-                                break;
-                            case 3:
-                                $impact = 'Moderate';
-                                break;
-                            case 4:
-                                $impact = 'Severe';
-                                break;
-                            case 5:
-                                $impact = 'Catastrophic';
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        switch ($evaluation->avg_probability)
-                        {
-                            case 1:
-                                $proba = 'Muy poco probable';
-                                break;
-                            case 2:
-                                $proba = 'Poco probable';
-                                break;
-                            case 3:
-                                $proba = 'Intermedio';
-                                break;
-                            case 4:
-                                $proba = 'Probable';
-                                break;
-                            case 5:
-                                $proba = 'Muy probable';
-                                break;
-                        }
-                        switch ($evaluation->avg_impact)
-                        {
-                            case 1:
-                                $impact = 'Muy poco impacto';
-                                break;
-                            case 2:
-                                $impact = 'Poco impacto';
-                                break;
-                            case 3:
-                                $impact = 'Intermedio';
-                                break;
-                            case 4:
-                                $impact = 'Alto impacto';
-                                break;
-                            case 5:
-                                $impact = 'Muy alto impacto';
-                                break;
-                        }
-                    }
-                    $avg_probability = $evaluation->avg_probability;
-                    $avg_impact = $evaluation->avg_impact;
-                    $impact_def = $impact;
-                    $proba_def = $proba;
-                    $score = $evaluation->avg_probability * $evaluation->avg_impact;
-                }
-                $results[$i] = [
-                            'name' => $risk->name,
-                             'id' => $risk->riskid,
-                             'avg_probability' => $avg_probability,
-                             'avg_impact' => $avg_impact,
-                             'proba_def' => $proba_def,
-                             'impact_def' => $impact_def,
-                             'score' => $score
-                            ];
-                $i += 1;
-            }
-            usort($results, array($this,"cmp"));
-            return json_encode($results);
-        }   
-    }
-    //Función obtiene riesgos de proceso a través de JSON al crear plan de pruebas
-    public function getRiesgosProcesos($org)
-    {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
-            $results = array();
-            $i = 0; //contador de riesgos de proceso
-                //obtenemos riesgos de proceso para la organización seleccionada
-                $risk_subprocess = DB::table('risk_subprocess')
-                                    ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                                    ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                                    ->join('organizations','organizations.id','=','organization_subprocess.organization_id')
-                                    ->where('organizations.id','=',(int)$org)
-                                    ->groupBy('risks.id')
-                                    ->select('risks.name','risk_subprocess.id as riskid')
-                                    ->get();
-            foreach ($risk_subprocess as $risk)
-            {
-                //obtengo maxima fecha para obtener última evaluación
-                $fecha = DB::table('evaluation_risk')
-                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                ->where('evaluation_risk.risk_subprocess_id','=',$risk->riskid)
-                                ->max('updated_at');
-                //obtenemos evaluación de riesgo de negocio (si es que hay)---> Ultima (mayor fecha updated_at)
-                $evaluations = DB::table('evaluation_risk')
-                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                ->where('evaluation_risk.risk_subprocess_id','=',$risk->riskid)
-                                ->where('evaluations.consolidation','=',1)
-                                ->whereNotNull('evaluation_risk.avg_probability')
-                                ->whereNotNull('evaluation_risk.avg_impact')
-                                ->where('evaluations.updated_at','=',$fecha)
-                                ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
-                                ->get();
-                //seteamos por si no hay evaluación
-                $avg_probability = "Falta Eval.";
-                $avg_impact = "Falta Eval.";
-                $proba_def = "";
-                $impact_def = "";
-                foreach ($evaluations as $evaluation)
-                {
-                //seteamos nombres de probabilidad e impacto
-                    if (Session::get('languaje') == 'en')
-                    {
-                        switch ($evaluation->avg_probability)
-                        {
-                            case 1:
-                                $proba = 'Very improbable';
-                                break;
-                            case 2:
-                                $proba = 'unlikely';
-                                break;
-                            case 3:
-                                $proba = 'Possible';
-                                break;
-                            case 4:
-                                $proba = 'Likely';
-                                break;
-                            case 5:
-                                $proba = 'Very likely';
-                                break;
-                        }
-                        switch ($evaluation->avg_impact)
-                        {
-                            case 1:
-                                $impact = 'Despicable';
-                                break;
-                            case 2:
-                                $impact = 'Less';
-                                break;
-                            case 3:
-                                $impact = 'Moderate';
-                                break;
-                            case 4:
-                                $impact = 'Severe';
-                                break;
-                            case 5:
-                                $impact = 'Catastrophic';
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        switch ($evaluation->avg_probability)
-                        {
-                            case 1:
-                                $proba = 'Muy poco probable';
-                                break;
-                            case 2:
-                                $proba = 'Poco probable';
-                                break;
-                            case 3:
-                                $proba = 'Intermedio';
-                                break;
-                            case 4:
-                                $proba = 'Probable';
-                                break;
-                            case 5:
-                                $proba = 'Muy probable';
-                                break;
-                        }
-                        switch ($evaluation->avg_impact)
-                        {
-                            case 1:
-                                $impact = 'Muy poco impacto';
-                                break;
-                            case 2:
-                                $impact = 'Poco impacto';
-                                break;
-                            case 3:
-                                $impact = 'Intermedio';
-                                break;
-                            case 4:
-                                $impact = 'Alto impacto';
-                                break;
-                            case 5:
-                                $impact = 'Muy alto impacto';
-                                break;
-                        }
-                    }
-                    $avg_probability = $evaluation->avg_probability;
-                    $avg_impact = $evaluation->avg_impact;
-                    $impact_def = $impact;
-                    $proba_def = $proba;
-                    $score = $evaluation->avg_probability * $evaluation->avg_impact;
-                }
-                $results[$i] = [
-                            'name' => $risk->name,
-                             'id' => $risk->riskid,
-                             'avg_probability' => $avg_probability,
-                             'avg_impact' => $avg_impact,
-                             'proba_def' => $proba_def,
-                             'impact_def' => $impact_def,
-                             'score' => $score,
-                            ];
-                $i += 1;
-            }
-            usort($results, array($this,"cmp"));
-            return json_encode($results);
-        }   
-    }
+    
     //Función que obtiene todos los stakeholders menos auditor responsable, al crear plan de auditoría
     public function getStakeholders($rut)
     {
@@ -3059,28 +2784,18 @@ class AuditoriasController extends Controller
         else
         {
             $results = array();
-            $tests = array();
             //Seleccionamos programa de auditoría y pruebas
-            $audit_program = DB::table('audit_programs')
+            $program = DB::table('audit_programs')
                         ->where('id','=',$id)
                         ->select('audit_programs.name','audit_programs.id','audit_programs.description')
-                        ->get();
-            foreach ($audit_program as $program)
-            {
-                $i = 0; //contador de pruebas
-                //obtenemos pruebas
-                $audit_tests = DB::table('audit_tests')
-                                ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
-                                ->where('audit_audit_plan_audit_program.audit_program_id','=',$program->id)
-                                ->select('audit_tests.name','audit_tests.description','audit_tests.type','audit_tests.hh_plan',
-                                        'audit_tests.control_id','audit_tests.subprocess_id','audit_tests.risk_id')
-                                ->get();
-                $results = [
-                        'name' => $program->name,
-                        'id' => $program->id,
-                        'description' => $program->description,
-                ];
-            }
+                        ->first();
+
+            $results = [
+                    'name' => $program->name,
+                    'id' => $program->id,
+                    'description' => $program->description,
+            ];
+
             return json_encode($results);
         }
     }
@@ -3118,7 +2833,7 @@ class AuditoriasController extends Controller
                 foreach ($audit_tests as $test)
                 {
                     $test_result = $test->results;
-                    if ($test->stakeholder_id == NULL)
+                    if ($test->stakeholder_id == NULL || $test->stakeholder_id == 0)
                     {
                         $stake = NULL;
                     }
@@ -3193,72 +2908,8 @@ class AuditoriasController extends Controller
         
         return json_encode($audit_tests);
     }
-    //obtiene los controles relacionados a un plan de auditoría (según la organización que esté involucrada
-    //con el plan de auditoría)
-    public function getObjectiveControls($id)
-    {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
-            $results = array();
-            $objective_risks = array();
-            $i = 0; //contador de pruebas
-            //obtendremos riesgos de negocio
-            $objective_risk = DB::table('audit_plan_risk')
-                        ->join('control_objective_risk','control_objective_risk.objective_risk_id','=','audit_plan_risk.objective_risk_id')
-                        ->join('controls','control_objective_risk.control_id','=','controls.id')
-                        ->where('audit_plan_risk.audit_plan_id','=',$id)
-                        ->where('audit_plan_risk.objective_risk_id','<>','NULL')
-                        ->select('controls.name','controls.id')
-                        ->groupBy('controls.id')
-                        ->get();
-            foreach ($objective_risk as $obj)
-            {
-                $results[$i] = [
-                        'name' => $obj->name,
-                        'id' => $obj->id,
-                ];
-                $i += 1;
-            }
-            return json_encode($results);
-        }
-    }
-    //obtiene los controles relacionados a un plan de auditoría (según la organización que esté involucrada
-    //con el plan de auditoría)
-    public function getSubprocessControls($id)
-    {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
-            $results = array();
-            $objective_risks = array();
-            $i = 0; //contador de pruebas
-            //obtendremos controles de procesos
-            $risk_subprocess = DB::table('audit_plan_risk')
-                        ->join('control_risk_subprocess','control_risk_subprocess.risk_subprocess_id','=','audit_plan_risk.risk_subprocess_id')
-                        ->join('controls','control_risk_subprocess.control_id','=','controls.id')
-                        ->where('audit_plan_risk.audit_plan_id','=',$id)
-                        ->whereNotNull('audit_plan_risk.risk_subprocess_id')
-                        ->select('controls.name','controls.id')
-                        ->groupBy('controls.id')
-                        ->get();
-            foreach ($risk_subprocess as $sub)
-            {
-                $results[$i] = [
-                        'name' => $sub->name,
-                        'id' => $sub->id,
-                ];
-                $i += 1;
-            }
-            return json_encode($results);
-        }
-    }
+
+
     //obtiene auditorías relacionadas a un plan de auditoría
     public function getAudits($id)
     {
@@ -3732,6 +3383,8 @@ class AuditoriasController extends Controller
                     
                 }
                  //obtenemos riesgos de negocio del plan
+                //ACT 11-04-17: Ya no hay riesgos asociados directamente al plan
+                /*
                 $objective_risks = DB::table('audit_plan_risk')
                                     ->join('objective_risk','objective_risk.id','=','audit_plan_risk.objective_risk_id')
                                     ->join('objectives','objectives.id','=','objective_risk.objective_id')
@@ -3749,6 +3402,7 @@ class AuditoriasController extends Controller
                                     ->select('risk_subprocess.id as id','risks.name as risk_name','subprocesses.name as subprocess_name',
                                             'processes.name as process_name')
                                     ->get();
+
                 $j = 0; //contador de riesgos en cero
                 //seteamos en variables los riesgos de negocio
                 foreach ($objective_risks as $objective_risk)
@@ -3767,7 +3421,7 @@ class AuditoriasController extends Controller
                                            'process_name' => $subprocess_risk->process_name];
                     $j += 1;
                 }
-                
+                */
                 //ahora obtenemos los datos requeridos de auditoría para el plan
                 $audits = DB::table('audit_audit_plan')
                                     ->join('audits','audits.id','=','audit_audit_plan.id')
@@ -3810,6 +3464,9 @@ class AuditoriasController extends Controller
                     }
                     else
                         $description = $audit->description;
+
+                    //ACT 11-04-17: Ya no hay riesgos asociados directamente a la auditoría
+                    /*
                     $obj_risks = array();
                     $sub_risks = array();
                     //obtenemos riesgos de negocio asociados a la auditoría
@@ -3830,6 +3487,8 @@ class AuditoriasController extends Controller
                                     ->select('risks.name as risk_name','subprocesses.name as subprocess_name',
                                             'processes.name as process_name')
                                     ->get();
+
+                    */
                     //obtenemos programas de auditoría realizadas en cada auditoría (si es que hay)
                     $audit_programs1 = DB::table('audit_audit_plan_audit_program')
                                 ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
@@ -3848,6 +3507,7 @@ class AuditoriasController extends Controller
                             $j += 1;
                         }
                     }
+                    /*
                     $j = 0; //contador de riesgos en cero
                     //seteamos en variables los riesgos de negocio (si es que hay)
                     foreach ($objective_risks as $objective_risk)
@@ -3867,14 +3527,13 @@ class AuditoriasController extends Controller
                                           'process_name' => $subprocess_risk->process_name];
                         $j += 1;
                     }
+                    */
                     //guardamos datos de pruebas de auditoría de la auditoría seleccionada
                     $auditorias[$i] = ['name' => $audit->name,
                                         'description' => $description,
                                         'initial_date' => $initial_date,
                                         'final_date' => $final_date,
                                         'resources' => $resources,
-                                        'obj_risks' => $obj_risks,
-                                        'sub_risks' => $sub_risks,
                                         'audit_programs' => $audit_programs,
                                     ];
                     $i += 1;
@@ -3897,8 +3556,6 @@ class AuditoriasController extends Controller
                             'rules' => $audit_plan_info['rules'],
                             'users' => $users,
                             'responsable' => $responsable,
-                            'obj_plan_risks' => $obj_plan_risks,
-                            'sub_plan_risks' => $sub_plan_risks,
                             'audits' => $auditorias
                     ];
                 return json_encode($results);
@@ -3964,8 +3621,8 @@ class AuditoriasController extends Controller
                     }
                     //obtenemos evidencias de la nota (si es que existe)
                     $evidences = getEvidences(0,$note->id);
-                    $fecha_creacion = date('d-m-Y',strtotime($note->created_at));
-                    $fecha_creacion .= ' a las '.date('H:i:s',strtotime($note->created_at));
+                    $lala = new DateTime($note->created_at);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
                     $results[$i] = [
                         'id' => $note->id,
                         'name' => $note->name,
@@ -3996,7 +3653,7 @@ class AuditoriasController extends Controller
                 ->where('id','=',$id)
                 ->update([
                     'status' => 1,
-                    'updated_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Ymd H:i:s'),
                     ]);
             $res = 1;
             return $res;
@@ -4389,5 +4046,42 @@ class AuditoriasController extends Controller
         $audit_info = \Ermtool\Audit::getAuditInfo($audit_plan,$audit);
 
         return json_encode($audit_info);
+    }
+
+    //ACT 17-04-17: Elimina nota 
+    public function destroyNote($id)
+    {
+        global $id1;
+        $id1 = $id;
+        global $res;
+        $res = 1;
+        DB::transaction(function() {
+            //revisaremos sólo si tiene respuestas
+            $rev = DB::table('notes_answers')
+                ->where('note_id','=',$GLOBALS['id1'])
+                ->select('id')
+                ->get();
+
+            if (empty($rev))
+            {
+                //si no tiene respuesta se puede eliminar
+                $rev = DB::table('notes')
+                        ->where('id','=',$GLOBALS['id1'])
+                        ->delete();
+
+                $GLOBALS['res'] = 0; 
+            }
+        });
+
+        return $res;
+    }
+    public static function destroyNoteAnswer($id)
+    {
+        //ACT 17-04-17: Simplemente eliminamos respuesta
+        DB::table('notes_answers')
+            ->where('id','=',$id)
+            ->delete();
+
+        return 0;
     }
 }

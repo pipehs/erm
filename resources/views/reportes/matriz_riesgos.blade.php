@@ -40,7 +40,9 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
       <p>En esta secci&oacute;n podr&aacute; ver la matriz para los riesgos de negocio y/o de procesos de las distintas organizaciones ingresadas en el sistema. </p>
-      {!!Form::open(['route'=>'genriskmatrix','method'=>'GET','class'=>'form-horizontal'])!!}
+
+      @if (!isset($datos))
+      	{!!Form::open(['route'=>'genriskmatrix','method'=>'GET','class'=>'form-horizontal'])!!}
 
       			<div class="form-group">
                  	<div class="row">
@@ -87,13 +89,13 @@
 
 	{!!Form::close()!!}
 
-		@if (isset($datos))
+	@else
 			<hr>
 			<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 
 			@if ($value == 0)
 				<thead>
-				<th>Proceso<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Proceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>ID Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Descripci&oacute;n Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -110,19 +112,59 @@
 
 				@foreach ($datos as $dato)
 					<tr>
-					<td>{{$dato['Proceso']}}</td>
-					<td>{{$dato['Subproceso']}}</td>
+					<td>
+					@if (!empty($dato['Procesos']))
+						@foreach($dato['Procesos'] as $process)
+							<li>{{$process}}</li>
+						@endforeach
+					@else
+						No se han definido procesos
+					@endif
+					</td>
+					<td>
+					@if (!empty($dato['Subprocesos']))
+						@foreach($dato['Subprocesos'] as $subprocess)
+							<li>{{$subprocess}}</li>
+						@endforeach
+					@else
+						No se han definido subprocesos
+					@endif
+					</td>
 					<td>{{$dato['Riesgo']}}</td>
 					<td>{{$dato['Descripción']}}</td>
 					<td>{{$dato['Categoría']}}</td>
-					<td>{{$dato['Causas']}}</td>
-					<td>{{$dato['Efectos']}}</td>
+					<td>
+					@if (!empty($dato['Causas']))
+						@foreach($dato['Causas'] as $c)
+							<li>{{$c}}</li>
+						@endforeach
+					@else
+						No se han definido causas
+					@endif
+					</td>
+					<td>
+					@if (!empty($dato['Efectos']))
+						@foreach($dato['Efectos'] as $e)
+							<li>{{$e}}</li>
+						@endforeach
+					@else
+						No se han definido efectos
+					@endif
+					</td>
 					<td>{{$dato['Pérdida_esperada']}}</td>
 					<td>{{$dato['Probabilidad']}}</td>
 					<td>{{$dato['Impacto']}}</td>
 					<td>{{$dato['Score']}}</td>
 					<td>{{$dato['Fecha_expiración']}}</td>
-					<td><ul>{{$dato['Controles']}}</ul></td>
+					<td>
+					@if (!empty($dato['Controles']))
+						@foreach($dato['Controles'] as $c)
+							<li>{{$c}}</li>
+						@endforeach
+					@else
+						No se han definido controles
+					@endif	
+					</td>
 					</tr>
 				@endforeach
 
@@ -134,7 +176,7 @@
 			@elseif ($value == 1)
 				<thead>
 				<th>Organizaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Objetivo<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Objetivo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>ID Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Descripci&oacute;n Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Categoría<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -151,18 +193,46 @@
 				@foreach ($datos as $dato)
 					<tr>
 					<td>{{$dato['Organización']}}</td>
-					<td>{{$dato['Objetivo']}}</td>
+					<td>
+					@foreach($dato['Objetivos'] as $obj)
+						<li>{{$obj}}</li>
+					@endforeach
+					</td>
 					<td>{{$dato['Riesgo']}}</td>
 					<td>{{$dato['Descripción']}}</td>
 					<td>{{$dato['Categoría']}}</td>
-					<td>{{$dato['Causas']}}</td>
-					<td>{{$dato['Efectos']}}</td>
+					<td>
+					@if (!empty($dato['Causas']))
+						@foreach($dato['Causas'] as $c)
+							<li>{{$c}}</li>
+						@endforeach
+					@else
+						No se han definido causas
+					@endif
+					</td>
+					<td>
+					@if (!empty($dato['Efectos']))
+						@foreach($dato['Efectos'] as $e)
+							<li>{{$e}}</li>
+						@endforeach
+					@else
+						No se han definido efectos
+					@endif
+					</td>
 					<td>{{$dato['Pérdida_esperada']}}</td>
 					<td>{{$dato['Probabilidad']}}</td>
 					<td>{{$dato['Impacto']}}</td>
 					<td>{{$dato['Score']}}</td>
 					<td>{{$dato['Fecha_expiración']}}</td>
-					<td><ul>{{$dato['Controles']}}</ul></td>
+					<td>
+					@if (!empty($dato['Controles']))
+						@foreach($dato['Controles'] as $c)
+							<li>{{$c}}</li>
+						@endforeach
+					@else
+						No se han definido controles
+					@endif
+					</td>
 					</tr>
 				@endforeach
 
@@ -172,6 +242,11 @@
 					{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "4,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
 				</div>
 			@endif
+
+			<center>
+					{!! link_to_route('risk_matrix', $title = 'Volver', $parameters = NULL,
+		                 $attributes = ['class'=>'btn btn-danger'])!!}
+			<center>
 		@endif
 
       </div>

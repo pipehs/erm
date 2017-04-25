@@ -569,7 +569,6 @@ function eliminaAcentos($String)
     return $String;
 }
 
-//esta función se debe actualizar, ya que estaba hecha para eliminar sólo un archivo (pensando que cada evidencia era única)
 function eliminarArchivo($id,$kind,$name)
 {
 	//Elimina evidencias de prueba (carpeta pruebas_auditoria)
@@ -596,11 +595,6 @@ function eliminarArchivo($id,$kind,$name)
 		$dir = "../storage/app/evidencias_notas/".$id;
 
 	}
-	/* NO DEBERÍAN HABER DOCS. DE EVAL DE CONTROLES YA QUE FINALMENTE SON HALLAZGOS
-	else if ($kind == 5) //eval controles
-	{
-		$dir = "../storage/app/eval_controles/".$id;
-	} */
 
 	else if ($kind == 5) //planes de acción
 	{
@@ -614,37 +608,41 @@ function eliminarArchivo($id,$kind,$name)
 	{
 		$dir = "../storage/app/evidencias_resp_notas/".$id;
 	}
-		
-	$handle = opendir($dir); 
-
-	if ($name == NULL)
+	
+	if (file_exists($dir))
 	{
-		while ($file = readdir($handle))  
-		{   
-			if (is_file($dir.'/'.$file)) 
-			{ 
-				//unlink($dir.'/'.$file);
-				File::delete($dir.'/'.$file);	         
-			}
-		}
+		$handle = opendir($dir); 
 
-		rmdir($dir);	
-	}
-	else
-	{
-		while ($file = readdir($handle))  
-		{   
-			if (is_file($dir.'/'.$file)) 
-			{
-				$file_name = explode('.',$file);
-				$file_name = $file_name[0];
-				if (strcmp($file_name,$name) == 0)
-				{
+		if ($name == NULL)
+		{
+			while ($file = readdir($handle))  
+			{   
+				if (is_file($dir.'/'.$file)) 
+				{ 
 					//unlink($dir.'/'.$file);
-					File::delete($dir.'/'.$file);	    
-				}     
+					File::delete($dir.'/'.$file);	         
+				}
+			}
+
+			rmdir($dir);	
+		}
+		else
+		{
+			while ($file = readdir($handle))  
+			{   
+				if (is_file($dir.'/'.$file)) 
+				{
+					$file_name = explode('.',$file);
+					$file_name = $file_name[0];
+					if (strcmp($file_name,$name) == 0)
+					{
+						//unlink($dir.'/'.$file);
+						File::delete($dir.'/'.$file);	    
+					}     
+				}
 			}
 		}
-	}
+	}	
+	
 } 
 ?>

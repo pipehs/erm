@@ -180,7 +180,9 @@ class ObjetivosController extends Controller
                         //damos formato a fecha creación
                         if ($objetivo['created_at'] != NULL)
                         {
-                            $fecha_creacion = date_format($objetivo['created_at'],"d-m-Y");
+                            //$fecha_creacion = date_format($objetivo['created_at'],"d-m-Y");
+                            $created_at = new DateTime($objetivo['created_at']);
+                            $created_at = date_format($created_at, 'd-m-Y');
                         }
                         else
                             $fecha_creacion = NULL;
@@ -188,7 +190,8 @@ class ObjetivosController extends Controller
                         //damos formato a fecha de actualización 
                         if ($objetivo['updated_at'] != NULL)
                         {
-                            $fecha_act = date_format($objetivo['updated_at'],"d-m-Y");
+                            $lala = new DateTime($objetivo['updated_at']);
+                            $fecha_act = date_format($lala,"d-m-Y");
                         }
                         else
                             $fecha_act = NULL;
@@ -213,7 +216,7 @@ class ObjetivosController extends Controller
                         $objectives[$i] = array('id'=>$objetivo['id'],
                                         'nombre'=>$objetivo['name'],
                                         'descripcion'=>$objetivo['description'],
-                                        'fecha_creacion'=>$fecha_creacion,
+                                        'fecha_creacion'=>$created_at,
                                         'fecha_act'=>$fecha_act,
                                         'fecha_exp'=>$fecha_exp,
                                         'categoria'=>$categoria,
@@ -253,7 +256,7 @@ class ObjetivosController extends Controller
 
             //ahora seleccionamos objetivos pertenecientes a este plan
             $objectives = \Ermtool\Objective::where('strategic_plan_id','=',$_GET['strategic_plan_id'])
-                                        ->select('id', DB::raw('CONCAT (code, " - ", name) AS code_name'))
+                                        ->select('id', DB::raw("CONCAT (code, ' - ', name) AS code_name"))
                                         ->orderBy('code')
                                         ->where('status','=',0)
                                         ->lists('code_name','id');
@@ -427,7 +430,7 @@ class ObjetivosController extends Controller
             //lista de objetivos
             $objectives = \Ermtool\Objective::where('strategic_plan_id','=',$objetivo['strategic_plan_id'])
                                         ->where('perspective','<',$objetivo['perspective'])
-                                        ->select('id', DB::raw('CONCAT (code, " - ", name) AS code_name'))
+                                        ->select('id', DB::raw("CONCAT (code, ' - ', name) AS code_name"))
                                         ->orderBy('code')
                                         ->where('status','=',0)
                                         ->lists('code_name','id');

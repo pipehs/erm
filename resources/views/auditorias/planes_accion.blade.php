@@ -121,7 +121,7 @@ $("#audit").change(function() {
 									var cont = 0; //contador de issues
 									$(test.issues).each( function(i,issue) {
 
-										if (issue.classification == null)
+										if (issue.classification == null || issue.classification == 0)
 										{
 											audit_test += '<hr><li>Clasificación: No se ha definido</li>';
 										}
@@ -243,10 +243,27 @@ function crear_plan(id)
 				//agregamos atributo hidden que señalará que se está guardando una nota y otro para identificar el id de la prueba
 				plan += '<input type="hidden" name="issue_id" value="'+id+'">';
 				plan += '<div class="form-group col-sm-12">';
-				plan += '<textarea name="description_'+id+'" disabled rows="3" cols="4" class="form-control" placeholder="'+this.description+'"></textarea></div>';
+
+				if (this.description == null || this.description == '')
+				{
+					plan += '<textarea name="description_'+id+'" disabled rows="3" cols="4" class="form-control" placeholder="No se ha definido"></textarea></div>';
+				}
+				else
+				{
+					plan += '<textarea name="description_'+id+'" disabled rows="3" cols="4" class="form-control" placeholder="'+this.description+'"></textarea></div>';
+				}
 
 				plan += '<label class="control-label">Responsable</label>';
-				plan += '<input type="text" value="'+this.stakeholder+'" class="form-control" disabled>';
+
+				if (this.stakeholder == null || this.stakeholder == '')
+				{
+					plan += '<input type="text" value="No se ha definido" class="form-control" disabled>';
+				}
+				else
+				{
+					plan += '<input type="text" value="'+this.stakeholder+'" class="form-control" disabled>';
+				}
+				
 
 				plan += '<label class="control-label">Ingrese fecha de término del plan de acción</label>';
 				plan += '<input type="date" class="form-control" name="final_date_'+id+'" onblur="validarFechaMayorActual(this.value)" disabled value="'+this.final_date+'"></div>';

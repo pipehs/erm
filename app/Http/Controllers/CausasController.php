@@ -9,6 +9,7 @@ use Session;
 use Redirect;
 use Auth;
 use DB;
+use DateTime;
 
 class CausasController extends Controller
 {
@@ -43,7 +44,9 @@ class CausasController extends Controller
                 //damos formato a fecha de creación
                 if ($causa['created_at'] != NULL)
                 {
-                    $fecha_creacion = date_format($causa['created_at'],"d-m-Y");
+                    $lala = new DateTime($causa['created_at']);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
+                    //$fecha_creacion = date_format($causa['created_at'],"d-m-Y");
                 }
                 else
                     $fecha_creacion = NULL;
@@ -51,7 +54,9 @@ class CausasController extends Controller
                 //damos formato a fecha de actualización
                 if ($causa['updated_at'] != NULL)
                 {
-                    $fecha_act = date_format($causa['updated_at'],"d-m-Y");
+                    $lala = new DateTime($causa['updated_at']);
+                    $fecha_act = date_format($lala,"d-m-Y");
+                    //$fecha_act = date_format($causa['updated_at'],"d-m-Y");
                 }
                 else
                     $fecha_act = NULL;

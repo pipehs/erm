@@ -43,9 +43,18 @@
 			<h4><center><b>Respuestas enviadas por: {{ $user->name.' '.$user->surnames }}</b></center></h4>
 
 			@foreach($riesgos as $riesgo)
-				<b>- {{ $riesgo['risk_name'] }} - {{ $riesgo['subobj'] }} - {{ $riesgo['orgproc'] }}:</b><br>
+				<b>{{ $riesgo['org'] }}- {{ $riesgo['risk_name'] }}:</b><br>
 				<b><p style="color: blue;">Descripci&oacute;n Riesgo</b>: 
 				{{ $riesgo['description'] }}</p><br>
+				@if ($riesgo['type'] == 'subprocess')
+					<b><p style="color: darkblue;">Subprocessos afectados</b>:</p>
+				@else
+					<b><p style="color: darkblue;">Objetivos afectados</b>:</p>
+				@endif
+					@foreach ($riesgo['subobj'] as $subobj)
+						<li>{{ $subobj->name }} - {{ $subobj->description }}</li>
+					@endforeach
+					<br/>
 				@foreach ($user_answers as $answer)
 					@if ($answer['id'] == $riesgo['evaluation_risk_id'])
 						Probabilidad: {{ $answer['probability']}}<br>

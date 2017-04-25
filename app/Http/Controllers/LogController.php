@@ -47,9 +47,9 @@ class LogController extends Controller
                     $roles[$j] = $rol->role;
                     $j += 1;
                 }
-
-                $created_at = new DateTime($user->created_at);
-                $created_at = date_format($created_at, 'd-m-Y');
+                
+                $lala = new DateTime($user->created_at);
+                $created_at = date_format($lala, 'd-m-Y');
 
                 $users[$i] = [
                     'id' => $user->id,
@@ -380,5 +380,60 @@ class LogController extends Controller
         });
 
         return $res;
+    }
+
+    public function changePass()
+    {
+        if (Auth::guest())
+        {
+            return Redirect::route('/');
+        }
+        else
+        {
+            //$id = Auth::user()->id;
+            if (Session::get('languaje') == 'en')
+            {
+               return view('en.usuarios.cambiopass',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled]); 
+            }
+            else
+            {
+                return view('usuarios.cambiopass');
+            }
+        }
+    }
+
+    public function storeNewPass()
+    {
+        //print_r($_POST);
+
+        //echo '<br>'.Auth::user()->id;
+        //echo '<br>'.Auth::user()->password;
+
+        //Verificamos que la contraseña antigua ingresada sea la misma
+        if (Hash::check($_POST['pass_old'], Auth::user()->password))
+        {
+            $user = \Ermtool\User::find(Auth::user()->id);
+            $newpass = Hash::make($_POST['password']);
+            //actualizamos pass de Auth por si se vuelve a cambiar
+            Auth::user()->password = $newpass;
+            $user->password = $newpass;
+            $user->save();
+
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Password successfully updated');
+            }
+            else
+            {
+                Session::flash('message','Contraseña actualizada con &eacute;xito');
+            }
+
+            return Redirect::route('home');
+        }
+        else
+        {
+            Session::flash('message','La contraseña actual ingresada no es correcta. Por favor inténtelo nuevamente');
+                return Redirect::to('usuarios.cambiopass')->withInput();
+        }
     }
 }

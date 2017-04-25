@@ -4,9 +4,24 @@ namespace Ermtool;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use Auth;
+use Carbon;
 
 class Process extends Model
 {
+    public function getCreatedAtAttribute($date)
+    {
+        if(Auth::check())
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
+        else
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
+    }
+
+    public function getUpdatedAtAttribute($date)
+    {
+        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
+    }
+
     protected $fillable = ['name','description','expiration_date','process_id','status'];
 
     //eliminamos created_at y updated_at
@@ -30,7 +45,7 @@ class Process extends Model
                     ->where('organization_subprocess.organization_id','=',$org)
                     ->where('processes.id','=',$kind)
                     ->select('processes.id','processes.name','processes.description')
-                    ->groupBy('processes.id')
+                    ->groupBy('processes.id','processes.name','processes.description')
                     ->get();
         }
         
@@ -43,7 +58,7 @@ class Process extends Model
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                     ->where('organization_subprocess.organization_id','=',$org)
                     ->select('processes.id','processes.name','processes.description')
-                    ->groupBy('processes.id')
+                    ->groupBy('processes.id','processes.name','processes.description')
                     ->get();
         }
 
@@ -57,7 +72,7 @@ class Process extends Model
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                     ->where('organization_subprocess.organization_id','=',$org)
                     ->where('processes.status','=',0)
-                    ->groupBy('processes.id')
+                    ->groupBy('processes.id','processes.name')
                     ->select('processes.id','processes.name')
                     ->get();
                     
@@ -68,13 +83,25 @@ class Process extends Model
     {
         return DB::table('processes')
                 ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+                ->join('control_organization_risk','control_organization_risk.organization_risk_id','=','organization_risk.id')
+                ->where('control_organization_risk.control_id','=',$control)
+                ->where('organization_risk.organization_id','=',$org)
+                ->select('processes.id','processes.name','processes.description')
+                ->groupBy('processes.id','processes.name','processes.description')
+                ->get();
+    }
+
+    public static function getProcessesFromRisk($org,$risk_id)
+    {
+        return DB::table('processes')
+                ->join('subprocesses','subprocesses.process_id','=','processes.id')
                 ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                 ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                ->join('control_risk_subprocess','control_risk_subprocess.risk_subprocess_id','=','risk_subprocess.id')
-                ->where('control_risk_subprocess.control_id','=',$control)
                 ->where('organization_subprocess.organization_id','=',$org)
+                ->where('risk_subprocess.risk_id','=',$risk_id)
                 ->select('processes.id','processes.name','processes.description')
-                ->groupBy('processes.id')
                 ->get();
     }
 

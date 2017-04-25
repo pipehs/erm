@@ -16,7 +16,7 @@
 								<?php break; ?>
 								@endif
 							@endforeach
-								<li>{!!HTML::link('ver_encuestas','Ver encuestas agregadas',['class'=>activeMenu('ver_encuestas')])!!}</li>
+								<li>{!!HTML::link('ver_encuestas','Ver Encuestas',['class'=>activeMenu('ver_encuestas')])!!}</li>
 							@foreach (Session::get('roles') as $role)
 								@if ($role != 6)
 								<li>{!!HTML::link('enviar_encuesta','Enviar Encuesta',['class'=>activeMenu('enviar_encuesta')])!!}</li>
@@ -41,10 +41,10 @@
 								<?php break; ?>
 								@endif
 							@endforeach
-								<li>{!!HTML::link('evaluacion_agregadas','Encuestas agregadas',['class'=>activeMenu('evaluacion_agregadas')])!!}</li>
+								<li>{!!HTML::link('evaluacion_agregadas','Ver Encuestas',['class'=>activeMenu('evaluacion_agregadas')])!!}</li>
 							@foreach (Session::get('roles') as $role)
 								@if ($role != 6)
-								<li>{!!HTML::link('evaluacion_manual','Evaluar riesgo',['class'=>activeMenu('evaluacion_manual')])!!}</li>
+								<li>{!!HTML::link('evaluacion_manual','Evaluar Riesgo',['class'=>activeMenu('evaluacion_manual')])!!}</li>
 								<?php break; ?>
 								@endif
 							@endforeach

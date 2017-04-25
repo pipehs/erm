@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Evaluaciones anteriores KRI')
+@section('title', 'Monitor KRI')
 
 @section('content')
 
@@ -9,7 +9,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li>{!!Html::link('kri','KRI')!!}</li>
-			<li><a href="kri.veranteriores.{{ $id }}">Evaluaciones anteriores KRI</a></li>
+			<li><a href="kri.veranteriores.{{ $id }}">Monitor KRI</a></li>
 		</ol>
 	</div>
 </div>
@@ -51,7 +51,7 @@
 				<tr>
 				<td style="width:40%; padding:20px;">
 				@if ($evaluations == null)
-					<h3>No existen evaluaciones previas para el KRI {{ $name }}</h3>
+					<h3>No existen evaluaciones para el KRI {{ $name }}</h3>
 				@else
 					
 					<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">

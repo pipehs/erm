@@ -4,13 +4,25 @@ namespace Ermtool;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use Auth;
+use Carbon;
 
 class Organization extends Model
 {
-    protected $fillable = ['name','description','expiration_date','shared_services','organization_id','status','mision','vision','target_client'];
+	public function getCreatedAtAttribute($date)
+    {
+        if(Auth::check())
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
+        else
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
+    }
 
-    //eliminamos created_at y updated_at
-    //public $timestamps = false;
+    public function getUpdatedAtAttribute($date)
+    {
+        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
+    }
+    
+    protected $fillable = ['name','description','expiration_date','shared_services','organization_id','status','mision','vision','target_client'];
 
     public static function name($organization_id)
     {
@@ -46,6 +58,11 @@ class Organization extends Model
     public function objectives()
     {
         return $this->hasMany('Ermtool\Objective');
+    }
+
+    public function risks()
+    {
+        return $this->belongsToMany('Ermtool\Risk');
     }
 
     public static function getOrgIdByTestId($id)
@@ -110,5 +127,36 @@ class Organization extends Model
         }
 
         return $control;
+    }
+    public static function organizationsWithoutRisk($risk_id)
+    {
+        /*return DB::table('organizations')
+            ->leftJoin('organization_risk','organization_risk.organization_id','=','organizations.id')
+            ->where('organization_risk.risk_id','<>',$risk_id)
+            ->where('organization_risk.id','=',NULL)
+            ->lists('organizations.name','organizations.id');*/
+
+        $orgs = DB::table('organizations')
+                ->where('status','=',0)
+                ->get(['name','id']);
+
+        $res = array();
+        $i = 0;
+        foreach ($orgs as $o)
+        {    
+            $org_risk = DB::table('organization_risk')
+                        ->where('organization_id','=',$o->id)
+                        ->where('risk_id','=',$risk_id)
+                        ->get();
+
+            if (empty($org_risk)) //significa que esta organización no tiene 
+            {
+                $res[$i] = $o->id.',';
+                $res[$i] .= $o->name;
+                $i+=1;
+            }
+        }
+
+        return $res;
     }
 }

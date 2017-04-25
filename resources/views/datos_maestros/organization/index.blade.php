@@ -162,3 +162,5 @@
 </div>
 @stop
 
+@section('scripts2')
+@stop

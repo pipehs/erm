@@ -4,9 +4,24 @@ namespace Ermtool;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use Auth;
+use Carbon;
 
 class Eval_description extends Model
 {
+    public function getCreatedAtAttribute($date)
+    {
+        if(Auth::check())
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
+        else
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
+    }
+
+    public function getUpdatedAtAttribute($date)
+    {
+        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
+    }
+    
     protected $table = 'eval_description';
 
     protected $fillable = ['value','kind','name_es','name_eng','description_es','description_eng','color'];

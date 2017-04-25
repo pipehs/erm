@@ -10,6 +10,7 @@ use DB;
 use Auth;
 use Redirect;
 use Ermtool\Http\Controllers\PlanesAccionController as PlanesAccion;
+use DateTime;
 
 class HomeController extends Controller
 {
@@ -56,7 +57,7 @@ class HomeController extends Controller
         $evaluations = DB::table('evaluation_risk')
                             ->where('evaluation_risk.evaluation_id',$id_eval)
                             ->select('evaluation_risk.id','evaluation_risk.risk_id',
-                                'evaluation_risk.objective_risk_id','evaluation_risk.risk_subprocess_id',
+                                'evaluation_risk.organization_risk_id',
                                 'evaluation_risk.avg_probability','evaluation_risk.avg_impact')
                             ->get();
 
@@ -73,49 +74,43 @@ class HomeController extends Controller
         $prom_criticidad = array();
         $riesgos = array();
         $i = 0;
+        $j = 0; //para obtener sólo una vez la organización (solución rápida)
 
+        $org2 = NULL; //inicializamos org por si no hay evaluaciones
         foreach ($evaluations as $evaluation)
         {
+            //obtenemos organización sólo una vez
+            if ($j == 0)
+            {
+                $org = DB::table('organizations')
+                        ->join('organization_risk','organization_risk.organization_id','=','organizations.id')
+                        ->where('organization_risk.id','=',$evaluation->organization_risk_id)
+                        ->select('organizations.name')
+                        ->first();
+                $j += 1;   
+            }
 
+            $org2 = $org->name;
+             
             //para cada riesgo evaluado, identificaremos promedio de probabilidad y de criticidad
             $prom_proba[$i] = $evaluation->avg_probability;
 
             $prom_criticidad[$i] = $evaluation->avg_impact;
 
-                //primero verificamos de que tipo de riesgo se trata
-                if($evaluation->risk_subprocess_id != NULL) //si es riesgo de subproceso
-                {
-                    //obtenemos nombre del riesgo y lo guardamos en array de riesgo junto al nombre de subproceso
-                    $riesgo_temp = DB::table('risk_subprocess')
-                                    ->where('risk_subprocess.id','=',$evaluation->risk_subprocess_id)
-                                    ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                                    ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                                    ->select('risks.name as name','subprocesses.name as subobj')->get();
-                }
+                //ACTUALIZACIÓN 29-03-17: Se mostrará sólo riesgo ya que ahora se evaluará sólo el riesgo (quizás después se pueden obtener los elementos asociados)
+            
 
-                else if ($evaluation->objective_risk_id != NULL) //es riesgo de negocio
-                {
-                    //obtenemos nombre del riesgo y lo guardamos en array de riesgo junto al nombre de organización
-                    $riesgo_temp = DB::table('objective_risk')
-                                    ->where('objective_risk.id','=',$evaluation->objective_risk_id)
-                                    ->join('risks','risks.id','=','objective_risk.risk_id')
-                                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                    ->join('organizations','organizations.id','=','objectives.organization_id')
-                                    ->select('risks.name as name','organizations.name as subobj')->get();
-                }
-
-                else
-                {
-                    //aun no se soluciona para riesgos generales
-                    $riesgo_temp = array();
-                }
+            $riesgo_temp = DB::table('organization_risk')
+                            ->where('organization_risk.id','=',$evaluation->organization_risk_id)
+                            ->join('risks','risks.id','=','organization_risk.risk_id')
+                            ->select('risks.name as name','risks.description')
+                            ->get();
             
             foreach ($riesgo_temp as $temp) //el riesgo recién obtenido (de subproceso o negocio) es almacenado en riesgos
             {
                 $riesgos[$i] = array('name' => $temp->name,
-                                    'subobj' => $temp->subobj);
+                                    'description' => $temp->description,);
             }
-            
             
             $i += 1;
         }
@@ -126,15 +121,25 @@ class HomeController extends Controller
         {
             return view('home',['nombre'=>$nombre,'descripcion'=>$descripcion,
                                         'riesgos'=>$riesgos,'prom_proba'=>$prom_proba,
-                                        'prom_criticidad'=>$prom_criticidad,'plans' => $plans]);
+                                        'prom_criticidad'=>$prom_criticidad,'plans' => $plans,'org' => $org2]);
         }
         else if (Session::get('languaje') == 'en')
         {
             return view('en.home',['nombre'=>$nombre,'descripcion'=>$descripcion,
                                         'riesgos'=>$riesgos,'prom_proba'=>$prom_proba,
-                                        'prom_criticidad'=>$prom_criticidad,'plans' => $plans]);
+                                        'prom_criticidad'=>$prom_criticidad,'plans' => $plans,'org' => $org2]);
         }
     }
 
-    
+    public function help()
+    {
+        if (Auth::guest())
+        {  
+            return view('login');
+        }
+        else
+        {
+            return view('help');
+        }
+    }
 }

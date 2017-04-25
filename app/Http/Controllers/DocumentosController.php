@@ -10,6 +10,7 @@ use DB;
 use Session;
 use Storage;
 use Auth;
+use DateTime;
 
 class DocumentosController extends Controller
 {
@@ -634,7 +635,10 @@ class DocumentosController extends Controller
                         if ($files1 != NULL)
                         {
                             //seteamos fecha
-                            $created_at = date_format($ans['created_at'], 'd-m-Y');
+                            //$created_at = date_format($ans['created_at'], 'd-m-Y');
+                            $lala = new DateTime($ans['created_at']);
+                            $created_at = date_format($lala,"d-m-Y");
+                            
                             $answers2[$j] = [
                                 'id' => $ans['id'],
                                 'answer' => $ans['answer'],
@@ -750,7 +754,7 @@ class DocumentosController extends Controller
                 //{
                 $files = Storage::files('riesgos/'.$risk->id);
                     //vemos si existe la carpeta (si existe es porque tiene archivos)
-                $controls = \Ermtool\Control::getControlsFromRisk($risk->id);
+                $controls = \Ermtool\Control::getControlsFromRisk($_GET['organization_id'],$risk->id);
 
                 //}
                 if (Session::get('languaje') == 'en')
@@ -802,38 +806,65 @@ class DocumentosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function deleteFiles($dir,$id)
+
+    //ACT 05-04-17: Al parecer no es necesario (existe función eliminarArchivos en helpers)
+    public function deleteFiles($dir,$id,$file)
     {
+        global $dir1;
+        global $id1;
+        global $file1;
+        $dir1 = $dir;
+        $id1 = $id;
+        $file1 = $file;
+        DB::transaction(function() {
+
+        });
         //obtenemos todos los archivos de la carpeta $dir
-        $files = Storage::files($dir);
+        //ACTUALIZACIÓN 03-04-17: Además seleccionamos carpeta $id
+        $files = Storage::files($GLOBALS['dir1'].'/'.$GLOBALS['id1']);
 
         //ahora buscamos los que terminen en $id
-        foreach ($files as $file)
+        if ($GLOBALS['file1'] == NULL) //eliminamos todos los archivos asociados
         {
-            //separamos id del archivo
-            $temp = explode('___',$file);
-
-            //ahora separamos id de la extensión del archivo (si es que hay extensión, sino sólo se elimina)
-            if (strpos($temp[1],'.'))
+            foreach ($files as $file)
             {
-                $temp = explode('.',$temp[1]);
-
-                //ahora vemos si el id corresponde
-                if ($temp[0] == $id)
-                {
-                    Storage::delete($file);
-                }
+                Storage::delete($file);
             }
-            else
+        }
+        else
+        {
+            foreach ($files as $file)
             {
-                //vemos si el id corresponde
-                if ($temp[1] == $id)
+                
+                if ($file == $GLOBALS['dir'].'/'.$GLOBALS['id1'].'/'.$GLOBALS['file1'])
                 {
                     Storage::delete($file);
                 }
-            }   
-        }
+                /*
+                //separamos id del archivo
+                $temp = explode('/',$file);
 
+                //ahora separamos id de la extensión del archivo (si es que hay extensión, sino sólo se elimina)
+                if (strpos($temp[1],'.'))
+                {
+                    $temp = explode('.',$temp[1]);
+
+                    //ahora vemos si el id corresponde
+                    if ($temp[0] == $id)
+                    {
+                        Storage::delete($file);
+                    }
+                }
+                else
+                {
+                    //vemos si el id corresponde
+                    if ($temp[1] == $id)
+                    {
+                        Storage::delete($file);
+                    }
+                } */ 
+            }
+        }
         return 0;
     }
 }

@@ -4,9 +4,24 @@ namespace Ermtool;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use Auth;
+use Carbon;
 
 class Audit_program extends Model
 {
+    public function getCreatedAtAttribute($date)
+    {
+        if(Auth::check())
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
+        else
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
+    }
+
+    public function getUpdatedAtAttribute($date)
+    {
+        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
+    }
+    
     protected $fillable = ['name','description','expiration_date'];
 
     public static function name($program_id)
@@ -57,7 +72,7 @@ class Audit_program extends Model
                         ->where('audit_plans.organization_id','=',$org)
                         ->where('audit_programs.id','=',$kind)
                         ->select('audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description')
-                        ->groupBy('audit_audit_plan_audit_program.id')
+                        ->groupBy('audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description')
                         ->get();
         }
         else
@@ -70,7 +85,7 @@ class Audit_program extends Model
                         ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
                         ->where('audit_plans.organization_id','=',$org)
                         ->select('audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description')
-                        ->groupBy('audit_audit_plan_audit_program.id')
+                        ->groupBy('audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description')
                         ->get();
         }
 
@@ -88,7 +103,7 @@ class Audit_program extends Model
                         ->where('audit_plans.id','=',$audit_plan)
                         ->where('audit_plans.organization_id','=',$org)
                         ->select('audits.name as audit','audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description')
-                        ->groupBy('audit_audit_plan_audit_program.id')
+                        ->groupBy('audits.name','audit_audit_plan_audit_program.id','audit_programs.name','audit_programs.description')
                         ->get();
 
         return $programs;
@@ -96,8 +111,6 @@ class Audit_program extends Model
 
     public static function getAudits($org,$audit_program_id)
     {
-
-        //QUEDE AQUI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CORREGIR ESTA FUNCIÓN
         return DB::table('audit_programs')
                 ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_program_id','=','audit_programs.id')
                 ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')

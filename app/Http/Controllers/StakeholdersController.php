@@ -9,6 +9,7 @@ use Session;
 use Redirect;
 use DB;
 use Auth;
+use DateTime;
 
 class StakeholdersController extends Controller
 {
@@ -78,7 +79,8 @@ class StakeholdersController extends Controller
                  //damos formato a fecha creación
                 if ($persona['created_at'] != NULL)
                 {
-                    $fecha_creacion = date_format($persona['created_at'],"d-m-Y");
+                    $lala = new DateTime($persona['created_at']);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
                 }
                 else
                     $fecha_creacion = NULL;
@@ -86,7 +88,8 @@ class StakeholdersController extends Controller
                 //damos formato a fecha de actualización 
                 if ($persona['updated_at'] != NULL)
                 {
-                    $fecha_act = date_format($persona['updated_at'],"d-m-Y");;
+                    $lala = new DateTime($persona['updated_at']);
+                    $fecha_act = date_format($lala,"d-m-Y");;
                 }
 
                 else
@@ -176,14 +179,28 @@ class StakeholdersController extends Controller
                 ]);
                 DB::transaction(function()
                 {
-                    \Ermtool\Stakeholder::create([
+                    if ($_POST['position'] == NULL || $_POST['position'] == "")
+                    {
+                        $pos = NULL;
+                    }
+                    else
+                    {
+                        $pos = $_POST['position'];
+                    }
+                    DB::statement("
+                        SET IDENTITY_INSERT stakeholders ON;
+                        insert into stakeholders
+                        (id, dv, name, surnames, mail, position, updated_at, created_at) 
+                        values (".$_POST["id"].",'".$_POST['dv']."','".$_POST['name']."','".$_POST['surnames']."','".$_POST['mail']."','".$pos."','".date("Ymd H:i:s")."','".date("Ymd H:i:s")."')");
+
+                    /*\Ermtool\Stakeholder::create([
                         'id' => $_POST['id'],
                         'dv' => $_POST['dv'],
                         'name' => $_POST['name'],
                         'surnames' => $_POST['surnames'],
                         'position' => $_POST['position'],
                         'mail' => $_POST['mail']
-                        ]);
+                        ]);*/
 
                     //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
                     foreach($_POST['organization_id'] as $organization_id)

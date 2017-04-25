@@ -108,7 +108,8 @@
 			Aun no hay subprocesos relacionados
 		@endif
 		</td>
-		<td>{{ $proceso['descripcion'] }}</td>
+		<td><div id="description" title="{{ $proceso['descripcion'] }}">{{ $proceso['short_des'] }}...
+		<a href="#" onclick="expandir()">Ver completo</a></div></td>
 		@if ($proceso['fecha_creacion'] == NULL)
 			<td>Error al guardar fecha de creaci&oacute;n</td>
 		@else
@@ -155,4 +156,19 @@
 		</div>
 	</div>
 </div>
+@stop
+
+@section('scripts2')
+<script>
+
+function expandir()
+{
+	$('#description').html('{{ $proceso["descripcion"] }} <a href="#" onclick="contraer()">Ocultar</a>')
+}
+
+function contraer()
+{
+	$('#description').html('{{ $proceso["short_des"] }} <a href="#" onclick="expandir()">Ver completo</a>')
+}
+</script>
 @stop

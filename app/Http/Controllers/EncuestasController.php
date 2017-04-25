@@ -72,9 +72,7 @@ class EncuestasController extends Controller
                 if ($request['destinatarios'] == 0) //Se asignaran los destinatarios manualmente
                 {
                     //seleccionamos lista de stakeholders
-                     $dest = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-                                                            ->orderBy('name')
-                                                            ->lists('full_name', 'id');
+                     $dest = \Ermtool\Stakeholder::listStakeholders(NULL);
                 }
                 else if ($request['destinatarios'] == 1) //Se enviará por organizacion
                 {
@@ -380,7 +378,7 @@ class EncuestasController extends Controller
                             ->insert([
                                 'stakeholder_id' => $stakeholder->id,
                                 'poll_id' => $request['poll_id'],
-                                'created_at' => date('Y-m-d H:i:s'),
+                                'created_at' => date('Ymd H:i:s'),
                                 ]);
 
                         $correos[$i] = $stakeholder->mail;
@@ -432,7 +430,7 @@ class EncuestasController extends Controller
                                 ->insert([
                                     'stakeholder_id' => $stakeholder->id,
                                     'poll_id' => $request['poll_id'],
-                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'created_at' => date('Ymd H:i:s'),
                                     ]);
 
                             $correos[$i] = $stakeholder->mail;
@@ -485,7 +483,7 @@ class EncuestasController extends Controller
                                 ->insert([
                                     'stakeholder_id' => $stakeholder->id,
                                     'poll_id' => $request['poll_id'],
-                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'created_at' => date('Ymd H:i:s'),
                                     ]);
 
                             $correos[$i] = $stakeholder->mail;

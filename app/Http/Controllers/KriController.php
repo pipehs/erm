@@ -87,7 +87,6 @@ class KriController extends Controller
                     //calculamos evaluacion (color)
 
                     $eval = $this->calc_sem($last_eval,$k->green_min,$k->interval_min,$k->interval_max,$k->red_max);
-
                     
                     if ($eval == 0) //0: verde
                     {
@@ -103,7 +102,9 @@ class KriController extends Controller
                     }
                 }
 
-                $created_at = date('d-m-Y',strtotime($k->created_at));
+                //$created_at = date('d-m-Y',strtotime($k->created_at));
+                $lala = new DateTime($k->created_at);
+                $created_at = date_format($lala,"d-m-Y");
 
                 //obtenemos stakeholder
                 if ($k->risk_stake == 0 || $k->risk_stake == NULL)
@@ -115,7 +116,7 @@ class KriController extends Controller
                     //obtenemos stakeholder
                     $stake = DB::table('stakeholders')
                                 ->where('id',$k->risk_stake)
-                                ->select(DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+                                ->select(DB::raw("CONCAT(name, ' ', surnames) AS full_name"))
                                 ->first();
                     $stakeholder = $stake->full_name;
                 }
@@ -366,8 +367,8 @@ class KriController extends Controller
                             'description_yellow' => $_POST['description_yellow'],
                             'red_max' => $_POST['red_max'],
                             'description_red' => $_POST['description_red'],
-                            'created_at' => date('Y-m-d H:i:s'),
-                            'updated_at' => date('Y-m-d H:i:s')
+                            'created_at' => date('Ymd H:i:s'),
+                            'updated_at' => date('Ymd H:i:s')
                         ]);
                 
 
@@ -595,46 +596,34 @@ class KriController extends Controller
             $enlaces = array();
 
             //primero obtenemos riesgos de subprocesso
-            $risk = DB::table('risk_subprocess')
-                        ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                        ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                        ->join('processes','processes.id','=','subprocesses.process_id')
-                        ->select('risks.id','risks.name','subprocesses.name as subprocess_name','processes.name as process_name')
-                        ->get();
+            //ACT 10-04-17: HAY QUE HACER GROUP_BY RISK (procesos u objetivos son aparte)
+            $risk = \Ermtool\Risk::getRiskSubprocess(NULL);
             $i = 0;
             foreach ($risk as $r)
             {
-                $risk_subprocess[$i] = ['id' => $r->id,
-                                        'name' => $r->name,
-                                        'subprocess_name' => $r->subprocess_name,
-                                        'process_name' => $r->process_name];
+                $risk_subprocess[$i] = ['id' => $r->risk_id,
+                                        'name' => $r->risk_name,
+                                        'description' => $r->description];
 
                 $i += 1;
             }
 
             //obtenemos riesgos de negocio
             //primero obtenemos riesgos de subprocesso
-            $risk = DB::table('objective_risk')
-                        ->join('risks','risks.id','=','objective_risk.risk_id')
-                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                        ->select('risks.id','risks.name','objectives.name as objective_name')
-                        ->get();
+            $risk = \Ermtool\Risk::getObjectiveRisks(NULL);
             $i = 0;
             foreach ($risk as $r)
             {
-                $objective_risk[$i] = ['id' => $r->id,
-                                        'name' => $r->name,
-                                        'objective_name' => $r->objective_name];
+                $objective_risk[$i] = ['id' => $r->risk_id,
+                                        'name' => $r->risk_name,
+                                        'description' => $r->description];
 
                 $i += 1;
             }
 
             //obtenemos lista de enlaces
-            $e = DB::table('objective_subprocess_risk')
-                    ->join('risks as risk_subprocess','risk_subprocess.id','=','objective_subprocess_risk.risk_subprocess_id')
-                    ->join('risks as objective_risk','objective_risk.id','=','objective_subprocess_risk.objective_risk_id')
-                    ->select('objective_subprocess_risk.id','objective_risk.name as obj_name','risk_subprocess.name as sub_name')
-                    ->get();
+            $e = \Ermtool\Risk::getEnlacedRisks();
+
             $i = 0;
             foreach ($e as $en)
             {
@@ -772,7 +761,7 @@ class KriController extends Controller
                 //verificamos en caso de que vaya de menos a más ó || de más a menos
                 if ($_POST['evaluation'] >= $kri->green_min && $_POST['evaluation'] <= $kri->red_max || $_POST['evaluation'] <= $kri->green_min && $_POST['evaluation'] >= $kri->red_max)
                 {
-                    $date = date('Y-m-d H:i:s');
+                    $date = date('Ymd H:i:s');
                     $id = DB::table('measurements')
                         ->insertGetId([
                             'value'=>$_POST['evaluation'],
@@ -850,7 +839,7 @@ class KriController extends Controller
             //obtenemos stakeholder
             $stake = DB::table('stakeholders')
                         ->where('id',$s->stakeholder_id)
-                        ->select(DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+                        ->select(DB::raw("CONCAT(name,' ', surnames) AS full_name"))
                         ->first();
             $stakeholder = $stake->full_name;
         }
@@ -946,9 +935,15 @@ class KriController extends Controller
         {
             //calculamos evaluacion (color)
             $res = $this->calc_sem($eval->value,$cotas->green_min,$cotas->interval_min,$cotas->interval_max,$cotas->red_max);    
-            $date = date('d-m-Y',strtotime($eval->created_at));
-            $date_min = date('d-m-Y',strtotime($eval->date_min));
-            $date_max = date('d-m-Y',strtotime($eval->date_max));
+            
+            $lala = new DateTime($eval->created_at);
+            $date = date_format($lala,"d-m-Y");
+            //$date = date('d-m-Y',strtotime($eval->created_at));
+            //$date_min = date('d-m-Y',strtotime($eval->date_min));
+            $date_min = date_format(new DateTime($eval->date_min),'d-m-Y');
+
+            //$date_max = date('d-m-Y',strtotime($eval->date_max));
+            $date_max = date_format(new DateTime($eval->date_max),'d-m-Y'); 
             $evaluations[$i] = [
                     'value' => $eval->value,
                     'eval' => $res,
@@ -982,6 +977,21 @@ class KriController extends Controller
                 $eval = 2; //2: rojo
             }
         }
+        else if ($value < $green_min && $value > $red_max) //ACT 10-04-17: Faltaba en caso de que la cota mayor sea verde y la mínima roja
+        {
+            if ($value <= $green_min && $value >= $interval_min)
+            {
+                $eval = 0; //0: verde
+            }
+            else if ($value < $interval_min && $value >= $interval_max)
+            {
+                $eval = 1; //1: amarillo
+            }
+            else if ($value < $interval_max && $value >= $red_max)
+            {
+                $eval = 2; //2: rojo
+            }
+        }
         else
         {
             $eval = NULL;
@@ -995,52 +1005,64 @@ class KriController extends Controller
     //lo mismo que getEvaluations solo que retorna vista en vez de JSON; por urgencia hice 2 funciones iguales en vez de buscar la forma de usar la misma en ambos casos
     public function showEvals($id)
     {
-        $evaluations = NULL;
-
-        //primero obtenemos cotas de semaforo
-        $cotas = DB::table('kri')
-                ->where('id','=',$id)
-                ->select('green_min','interval_min','interval_max','red_max','name','description')
-                ->first();
-
-        $evals = DB::table('measurements')
-                    ->where('kri_id','=',$id)
-                    ->select('value','created_at','date_min','date_max')
-                    ->orderBy('id','asc')
-                    ->get();
-
-        $i = 0;
-        foreach ($evals as $eval)
+        if (Auth::guest())
         {
-            //calculamos evaluacion (color)
-            $res = $this->calc_sem($eval->value,$cotas->green_min,$cotas->interval_min,$cotas->interval_max,$cotas->red_max);    
-            $date = date('d-m-Y',strtotime($eval->created_at));
-            $date_min = date('d-m-Y',strtotime($eval->date_min));
-            $date_max = date('d-m-Y',strtotime($eval->date_max));
-
-            //date text
-            $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-            $fechamod = explode('-',$date);
-
-            $fecha_array = $fechamod[0].' de '.$meses[$fechamod[1]-1].' del '.$fechamod[2];
-            $evaluations[$i] = [
-                    'value' => $eval->value,
-                    'eval' => $res,
-                    'date' => $date,
-                    'date_min' => $date_min,
-                    'date_max' => $date_max,
-                    'fecha_array' => $fecha_array,
-            ];
-            $i += 1;
-        }
-
-        if (Session::get('languaje') == 'en')
-        {
-            return view('en.kri.anteriores',['evaluations' => $evaluations, 'name' => $cotas->name, 'description' => $cotas->description,'id' => $id]);
+            return view('login');
         }
         else
         {
-            return view('kri.anteriores',['evaluations' => $evaluations, 'name' => $cotas->name, 'description' => $cotas->description, 'id' => $id]);
+            $evaluations = NULL;
+
+            //primero obtenemos cotas de semaforo
+            $cotas = DB::table('kri')
+                    ->where('id','=',$id)
+                    ->select('green_min','interval_min','interval_max','red_max','name','description')
+                    ->first();
+
+            $evals = DB::table('measurements')
+                        ->where('kri_id','=',$id)
+                        ->select('value','created_at','date_min','date_max')
+                        ->orderBy('id','asc')
+                        ->get();
+
+            $i = 0;
+            foreach ($evals as $eval)
+            {
+                //calculamos evaluacion (color)
+                $res = $this->calc_sem($eval->value,$cotas->green_min,$cotas->interval_min,$cotas->interval_max,$cotas->red_max);    
+                //$date = date('d-m-Y',strtotime($eval->created_at));
+                $lala = new DateTime($eval->created_at);
+                $date = date_format($lala,"d-m-Y");
+
+                $date_min = date_format(new DateTime($eval->date_min),'d-m-Y');
+                $date_max = date_format(new DateTime($eval->date_max),'d-m-Y');
+                //$date_min = date('d-m-Y',strtotime($eval->date_min));
+                //$date_max = date('d-m-Y',strtotime($eval->date_max));
+
+                //date text
+                $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+                $fechamod = explode('-',$date);
+
+                $fecha_array = $fechamod[0].' de '.$meses[$fechamod[1]-1].' del '.$fechamod[2];
+                $evaluations[$i] = [
+                        'value' => $eval->value,
+                        'eval' => $res,
+                        'date' => $date,
+                        'date_min' => $date_min,
+                        'date_max' => $date_max,
+                        'fecha_array' => $fecha_array,
+                ];
+                $i += 1;
+            }
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.kri.anteriores',['evaluations' => $evaluations, 'name' => $cotas->name, 'description' => $cotas->description,'id' => $id]);
+            }
+            else
+            {
+                return view('kri.anteriores',['evaluations' => $evaluations, 'name' => $cotas->name, 'description' => $cotas->description, 'id' => $id]);
+            }
         }
     }
 }

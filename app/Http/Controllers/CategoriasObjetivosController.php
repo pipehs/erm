@@ -48,7 +48,9 @@ class CategoriasObjetivosController extends Controller
                 }
                 else
                 {
-                    $fecha_creacion = date_format($category['created_at'],"d-m-Y");
+                    //$fecha_creacion = date_format($category['created_at'],"d-m-Y");
+                    $lala = new DateTime($category['created_at']);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
                 }
 
                  //damos formato a fecha expiración
@@ -65,7 +67,9 @@ class CategoriasObjetivosController extends Controller
                 //damos formato a fecha de actualización 
                 if ($category['updated_at'] != NULL)
                 {
-                    $fecha_act = date_format($category['updated_at'],"d-m-Y");
+                    //$fecha_act = date_format($category['updated_at'],"d-m-Y");
+                    $lala = new DateTime($category['updated_at']);
+                    $fecha_act = date_format($lala,"d-m-Y");
                 }
 
                 else
@@ -198,7 +202,6 @@ class CategoriasObjetivosController extends Controller
             $id1 = $id;
             DB::transaction(function() {
                 $objective_category = \Ermtool\Objective_category::find($GLOBALS['id1']);
-                $fecha_creacion = $objective_category->created_at; //Se debe obtener fecha de creación por si no fue modificada
 
                 $objective_category->name = $_POST['name'];
                 $objective_category->description = $_POST['description'];

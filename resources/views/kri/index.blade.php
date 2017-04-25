@@ -51,7 +51,7 @@
 					@if ($kri == null)
 						<center><b>Aun no se han creado ning&uacute;n KRI.</b></center><br><br>
 					@else
-						<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+						<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px;">
 						<thead>
 						<th style="vertical-align:top;">KRI</th>
 						<th style="vertical-align:top;">Descripci&oacute;n</th>
@@ -62,7 +62,6 @@
 						<th style="vertical-align:top;">Descripci&oacute;n de la evaluaci&oacute;n</th>
 						<th style="vertical-align:top;">Riesgo</th>
 						<th style="vertical-align:top;">Responsable del riesgo</th>
-						<th style="vertical-align:top;">Fecha creaci&oacute;n</th>
 						<th style="vertical-align:top;">Intervalo de evaluaci&oacute;n</th>
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
@@ -127,7 +126,6 @@
 								{{ $k['risk_stakeholder'] }}
 							@endif
 							</td>
-							<td>{{ $k['created_at'] }}</td>
 							<td>
 							@if ($k['date_min'] != null)
 								{{ $k['date_min'] }} al {{ $k['date_max'] }}

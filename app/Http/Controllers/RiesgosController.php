@@ -71,10 +71,8 @@ class RiesgosController extends Controller
                 $category = NULL;
             }
 
-            $riesgos_temp1 = \Ermtool\Risk::getRisksSubprocess($_GET['organization_id'],$category);
-            $riesgos_temp2 = \Ermtool\Risk::getObjectiveRisk($_GET['organization_id'],$category);
+            $riesgos2 = \Ermtool\Risk::getRisks($_GET['organization_id'],$category);
 
-            $riesgos2 = array_merge($riesgos_temp1,$riesgos_temp2); //juntamos todos los riesgos de la org.
             $j = 0; //contador de subprocesos u objetivos relacionados
 
             foreach ($riesgos2 as $riesgo)
@@ -172,7 +170,7 @@ class RiesgosController extends Controller
                     $k = 0;
                     foreach ($causes as $cause)
                     {
-                        $causas[$j] = $cause->name;
+                        $causas[$k] = $cause->name;
                         $k += 1;
                     }
                 }
@@ -211,7 +209,7 @@ class RiesgosController extends Controller
                     $k = 0;
                     foreach ($effects as $effect)
                     {
-                        $efectos[$j] = $effect->name;
+                        $efectos[$k] = $effect->name;
                         $k += 1;
                     }
                 }
@@ -276,10 +274,12 @@ class RiesgosController extends Controller
             //obtenemos lista de stakeholders
             $stakeholders = \Ermtool\Stakeholder::listStakeholders($_GET['org']);
 
+            //ACTUALIZACIÓN 29-03-17: SELECCIONAMOS SI SE DESEA AGREGAR A OTRAS ORGANIZACIONES
+            $organizations = \Ermtool\Organization::where('status',0)->where('id','<>',$_GET['org'])->lists('name','id');
+
             if(isset($_GET['P']))
             {
                 //ACTUALIZACIÓN 26-07: SOLO MOSTRAMOS PROCESOS PERTENECIENTES A LA EMPRESA QUE SE ESTÁ CONSULTANDO
-                //$subprocesos = \Ermtool\Subprocess::where('status',0)->lists('name','id');
                 $subprocesos = DB::table('subprocesses')
                                 ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                                 ->where('organization_subprocess.organization_id','=',$_GET['org'])
@@ -289,14 +289,12 @@ class RiesgosController extends Controller
                 if (Session::get('languaje') == 'en')
                 {
                     return view('en.riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                        'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,
-                        'stakeholders'=>$stakeholders,'org_id' => $_GET['org']]);
+                        'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations]);
                 }
                 else
                 {
                     return view('riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                        'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,
-                        'stakeholders'=>$stakeholders,'org_id' => $_GET['org']]);
+                        'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations]);
                 }
             }
 
@@ -311,14 +309,12 @@ class RiesgosController extends Controller
                 if (Session::get('languaje') == 'en')
                 {
                     return view('en.riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                            'efectos'=>$efectos,'objetivos'=>$objectives,'riesgos_tipo'=>$riesgos_tipo,
-                            'stakeholders'=>$stakeholders,'org_id' => $_GET['org']]);
+                            'efectos'=>$efectos,'objetivos'=>$objectives,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations]);
                 }
                 else
                 {
                     return view('riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                            'efectos'=>$efectos,'objetivos'=>$objectives,'riesgos_tipo'=>$riesgos_tipo,
-                            'stakeholders'=>$stakeholders,'org_id' => $_GET['org']]);
+                            'efectos'=>$efectos,'objetivos'=>$objectives,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations]);
                 }
             }
         }
@@ -389,12 +385,21 @@ class RiesgosController extends Controller
                             $expected_loss = $_POST['expected_loss'];
                         }
 
+                        if (!isset($_POST['expiration_date']) || $_POST['expiration_date'] == "")
+                        {
+                            $expiration_date = NULL;
+                        }
+                        else
+                        {
+                            $expiration_date = $_POST['expiration_date'];
+                        }
+
                         $risk = \Ermtool\Risk::create([
                             'name'=>$_POST['name'],
                             'description'=>$description,
                             'type'=>$type,
                             'type2'=>1,
-                            'expiration_date'=>$_POST['expiration_date'],
+                            'expiration_date'=>$expiration_date,
                             'risk_category_id'=>$risk_category_id,
                             'stakeholder_id'=>$stake,
                             'expected_loss'=>$expected_loss,
@@ -484,6 +489,21 @@ class RiesgosController extends Controller
                             $objective = \Ermtool\Objective::find($objective_id);
                             $objective->risks()->attach($risk);
                         }       
+                    }
+
+                    //ACTUALIZACIÓN 29-03-17: Agregamos en tabla organization_risk
+                    $organization = \Ermtool\Organization::find($_POST['org_id']);
+                    $organization->risks()->attach($risk);
+
+
+                    //ahora para cada posible organización agregada
+                    if (isset($_POST['organization_id']) && $_POST['organization_id'] != "")
+                    {
+                        foreach ($_POST['organization_id'] as $org)
+                        {
+                            $organization = \Ermtool\Organization::find($org);
+                            $organization->risks()->attach($risk);
+                        }
                     }
 
                     //guardamos archivos de evidencias (si es que hay)
@@ -624,9 +644,10 @@ class RiesgosController extends Controller
             $riesgos_tipo = \Ermtool\Risk::where('status',0)->where('type2',0)->lists('name','id');
 
             //obtenemos lista de stakeholders
-            $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-            ->orderBy('name')
-            ->lists('full_name', 'id');
+            $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
+
+            //ACTUALIZACIÓN 29-03-17: SELECCIONAMOS SI SE DESEA AGREGAR A OTRAS ORGANIZACIONES
+            $organizations = \Ermtool\Organization::organizationsWithoutRisk($id);
 
             if (Session::get('languaje') == 'en')
             {
@@ -635,14 +656,14 @@ class RiesgosController extends Controller
                     return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
                                         'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders,
                                         'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,
-                                        'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org']]);
+                                        'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org'],'organizations' => $organizations]);
                 }
                 else
                 {
                     return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
                                         'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders,
                                         'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,
-                                        'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org']]);
+                                        'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org'],'organizations' => $organizations]);
                 }
             }
             else
@@ -652,14 +673,14 @@ class RiesgosController extends Controller
                     return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
                                         'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders,
                                         'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,
-                                        'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org']]);
+                                        'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org'],'organizations' => $organizations]);
                 }
                 else
                 {
                     return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
                                         'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders,
                                         'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,
-                                        'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org']]);
+                                        'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org'],'organizations' => $organizations]);
                 }
             }
         }
@@ -851,7 +872,7 @@ class RiesgosController extends Controller
                             if (empty($risk_sub)) //si es que está vacío significa que la relación no existe
                             {
                                 $subprocess = \Ermtool\Subprocess::find($subprocess_id);
-                                $subprocess->risks()->attach($riesgo);
+                                $subprocess->risks()->attach($riesgo->id);
                             }
                         }       
                     }
@@ -876,10 +897,20 @@ class RiesgosController extends Controller
                             if (empty($obj_risk)) //si es que está vacío significa que la relación no existe
                             {
                                 $objective = \Ermtool\Objective::find($objective_id);
-                                $objective->risks()->attach($riesgo);
+                                $objective->risks()->attach($riesgo->id);
                             }
                             
                         }       
+                    }
+
+                    //ahora para cada posible organización agregada
+                    if (isset($_POST['organization_id']) && $_POST['organization_id'] != "")
+                    {
+                        foreach ($_POST['organization_id'] as $org)
+                        {
+                            $organization = \Ermtool\Organization::find($org);
+                            $organization->risks()->attach($riesgo->id);
+                        }
                     }
 
                     if($GLOBALS['evidence'] != NULL)
@@ -919,10 +950,18 @@ class RiesgosController extends Controller
                     {
                         $expected_loss = $_POST['expected_loss'];
                     }
+                    if (!isset($_POST['expiration_date']) || $_POST['expiration_date'] == "")
+                    {
+                        $expiration_date = NULL;
+                    }
+                    else
+                    {
+                        $expiration_date = $_POST['expiration_date'];
+                    }
 
                     $riesgo->name = $_POST['name'];
                     $riesgo->description = $description;
-                    $riesgo->expiration_date = $_POST['expiration_date'];
+                    $riesgo->expiration_date = $expiration_date;
                     $riesgo->type2 = 1;
                     $riesgo->risk_category_id = $risk_category_id;
                     $riesgo->expected_loss = $expected_loss;
@@ -999,7 +1038,7 @@ class RiesgosController extends Controller
                 $category = NULL;
             }
             
-            $i = 0; //contador de controles/subprocesos o controles/objetivos
+            $i = 0;
             $datos = array();
 
             if (Session::get('languaje') == 'en')
@@ -1012,24 +1051,13 @@ class RiesgosController extends Controller
                 $proba_string = ['Muy poco probable','Poco probable','Intermedio','Probable','Muy probable'];
                 $impact_string = ['Muy poco impacto','Poco impacto','Intermedio','Alto impacto','Muy alto impacto'];
             }
-
-            if ($value == 0) //Se generará la matriz de controles de procesos
-            {
-
-                //---------- OBS: EXISTE PROBLEMA SI ES QUE EL RIESGO NO CONTIENE CAUSA Y EFECTO --------//
-                $risks = \Ermtool\Risk::getRisksSubprocess($org,$category);
-            }
-
-            else if ($value == 1) //Se generará matriz para riesgos de negocio
-            {
-                $risks = \Ermtool\Risk::getObjectiveRisk($org,$category);
-            }
-
+            
+            //ACT 04-04-17: Obtenemos riesgos según tipo (value)
+            
+            $risks = \Ermtool\Risk::getRisksWithType($org,$category,$value);
+        
             foreach ($risks as $risk)
-            {
-                    $controles = NULL;
-                    $causas = NULL;
-                    $efectos = NULL;
+            {       
                     if (Session::get('languaje') == 'en')
                     {
                         $probabilidad = "No evaluation";
@@ -1045,83 +1073,220 @@ class RiesgosController extends Controller
                     // -- seteamos datos --//
                     //seteamos causa y efecto
 
-                    //obtenemos causas
-                    $causes = DB::table('cause_risk')
-                                    ->join('causes','causes.id','=','cause_risk.cause_id')
-                                    ->where('risk_id','=',$risk->id)
-                                    ->select('causes.name')
-                                    ->get();
-
-                    if ($causes)
+                    if ($value == 0) //obtenemos procesos y subprocesos
                     {
+                        $processes = \Ermtool\Process::getProcessesFromRisk($org,$risk->id);
+
+                        $subprocesses = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($org,$risk->id);
+
+                        if (!empty($processes))
+                        {
+                            if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //ver como mostrar datos
+                            {
+                                $procesos = array();
+                                $j = 0;
+                            }
+                            else
+                            {
+                                $procesos = '';
+                            }
+
+                            $last = end($processes);
+                            foreach ($processes as $p)
+                            {
+                                if (!strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                                {
+                                    $procesos[$j] = $p->name;
+                                    $j+=1;
+                                }
+                                else
+                                {
+                                    if ($last == $p)
+                                    {
+                                        $procesos .= $p->name;
+                                    }
+                                    else
+                                    {
+                                        $procesos .= $p->name.', ';
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            $procesos = array();
+                        }
+                        if (!empty($subprocesses))
+                        {
+                            if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //ver como mostrar datos
+                            {
+                                $subprocesos = array();
+                                $j = 0;
+                            }
+                            else
+                            {
+                                $subprocesos = '';
+                            }
+
+                            $last = end($subprocesses);
+                            foreach ($subprocesses as $s)
+                            {
+                                if (!strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                                {
+                                    $subprocesos[$j] = $p->name;
+                                    $j+=1;
+                                }
+                                else
+                                {
+                                    if ($last == $p)
+                                    {
+                                        $subprocesos .= $s->name;
+                                    }
+                                    else
+                                    {
+                                        $subprocesos .= $s->name.', ';
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            $subprocesos = array();
+                        }
+                    }
+                    else if ($value == 1) //obtenemos objetivos
+                    {
+                        $objectives = \Ermtool\Objective::getObjectivesFromOrgRisk($risk->id,$org);
+
+                        if (!empty($objectives))
+                        {
+                            if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //ver como mostrar datos
+                            {
+                                $objetivos = array();
+                                $j = 0;
+                            }
+                            else
+                            {
+                                $objetivos = '';
+                            }
+
+                            $last = end($objectives);
+                            foreach ($objectives as $o)
+                            {
+                                if (!strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                                {
+                                    $objetivos[$j] = $o->name;
+                                    $j+=1;
+                                }
+                                else
+                                {
+                                    if ($last == $o)
+                                    {
+                                        $objetivos .= $o->name;
+                                    }
+                                    else
+                                    {
+                                        $objetivos .= $o->name.', ';
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            $objetivos = array();
+                        }
+                        
+                    }
+                    //obtenemos causas
+                    $causes = \Ermtool\Cause::getCausesFromRisk($risk->id);
+
+                    if (!empty($causes))
+                    {
+                        if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //ver como mostrar datos
+                        {
+                            $causas = array();
+                            $j = 0;
+                        }
+                        else
+                        {
+                            $causas = '';
+                        }
+
                         $last = end($causes); //guardamos final para no agregarle coma
                         foreach ($causes as $cause)
                         {
-                            if ($cause != $last)
-                                $causas .= $cause->name.', ';
+                            if (!strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                            {
+                                $causas[$j] = $cause->name;
+                                $j+=1;
+                            }
                             else
-                                $causas .= $cause->name;
+                            {
+                                if ($cause != $last)
+                                    $causas .= $cause->name.', ';
+                                else
+                                    $causas .= $cause->name;
+                            }  
                         }
                     }
                     else
                     {
-                        //se realizarán acá los textos (y no en la vista) para el caso en que se esté exportando a excel
-                        if (Session::get('languaje') == 'en')
-                        {
-                            $causas = "No defined cause";
-                        }
-                        else
-                        {
-                            $causas = "No tiene causas definidas";
-                        }
+                        $causas = array();
                     }
 
                     //obtenemos efectos
-                    $effects = DB::table('effect_risk')
-                                    ->join('effects','effects.id','=','effect_risk.effect_id')
-                                    ->where('risk_id','=',$risk->id)
-                                    ->select('effects.name')
-                                    ->get();
+                    $effects = \Ermtool\Effect::getEffectsFromRisk($risk->id);
 
 
-                    if ($effects)
+                    if (!empty($effects))
                     {
+                        if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //ver como mostrar datos
+                        {
+                            $efectos = array();
+                            $j = 0;
+                        }
+                        else
+                        {
+                            $efectos = '';
+                        }
+
                         $last = end($effects); //guardamos final para no agregarle coma
                         foreach ($effects as $effect)
                         {
-                            if ($effect != $last)
-                                $efectos .= $effect->name.', ';
+                            if (!strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                            {
+                                $efectos[$j] = $effect->name;
+                                $j+=1;
+                            }
                             else
-                                $efectos .= $effect->name;
+                            {
+                                if ($effect != $last)
+                                    $efectos .= $effect->name.', ';
+                                else
+                                    $efectos .= $effect->name;
+                            }
                         }
                     }
                     else
                     {
-                        if (Session::get('languaje') == 'en')
-                        {
-                            $efectos = "No defined effects";
-                        }
-                        else
-                        {
-                            $efectos = "No tiene efectos definidos";
-                        }
+                        $efectos = array();
                     }
+                    //primero obtenemos maxima fecha de evaluacion para el riesgo
+                    $fecha = DB::table('evaluation_risk')
+                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->where('evaluation_risk.organization_risk_id','=',$risk->id)
+                                    ->max('evaluations.updated_at');
 
-                    if ($value == 0) //controles y eval para riesgos de proceso
-                    {
-                        //primero obtenemos maxima fecha de evaluacion para el riesgo
-                        $fecha = DB::table('evaluation_risk')
-                                        ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                        ->where('evaluation_risk.risk_subprocess_id','=',$risk->risk_subprocess_id)
-                                        ->max('evaluations.updated_at');
+                    //ACT 04-04-17: Sacamos guiones para SQL Server
+                    $fecha = str_replace('-','',$fecha);
 
-                        //obtenemos proba, impacto y score
-                        $eval_risk = DB::table('evaluation_risk')
-                                        ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                        ->where('evaluation_risk.risk_subprocess_id','=',$risk->risk_subprocess_id)
-                                        ->where('evaluations.updated_at','=',$fecha)
-                                        ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
-                                        ->get();
+                    //obtenemos proba, impacto y score
+                    $eval_risk = DB::table('evaluation_risk')
+                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->where('evaluation_risk.organization_risk_id','=',$risk->id)
+                                    ->where('evaluations.updated_at','=',$fecha)
+                                    ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                                    ->get();
 
                         foreach ($eval_risk as $eval)
                         {
@@ -1133,74 +1298,43 @@ class RiesgosController extends Controller
                             }
                         }
                         //obtenemos controles
-                        $controls = DB::table('controls')
-                                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
-                                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
-                                        ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                                        ->where('risks.id','=',$risk->id)
-                                        ->select('controls.name')
-                                        ->get();
-                    }               
-                    else if ($value == 1) //controles y eval para riesgos de negocio
-                    {
-                        //primero obtenemos maxima fecha de evaluacion para el riesgo
-                        $fecha = DB::table('evaluation_risk')
-                                        ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                        ->where('evaluation_risk.objective_risk_id','=',$risk->objective_risk_id)
-                                        ->max('evaluations.updated_at');
-
-                        //obtenemos proba, impacto y score
-                        $eval_risk = DB::table('evaluation_risk')
-                                        ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                        ->where('evaluation_risk.objective_risk_id','=',$risk->objective_risk_id)
-                                        ->where('evaluations.updated_at','=',$fecha)
-                                        ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
-                                        ->get();
-
-                        foreach ($eval_risk as $eval)
-                        {
-                            $impacto = $eval->avg_impact;
-                            $probabilidad = $eval->avg_probability;
-                            $score = $impacto * $probabilidad;
-                        }
-
-                        //obtenemos controles
-                        $controls = DB::table('controls')
-                                        ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
-                                        ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
-                                        ->join('risks','risks.id','=','objective_risk.risk_id')
-                                        ->where('risks.id','=',$risk->id)
-                                        ->select('controls.name')
-                                        ->get();
-                    }
+                        $controls = \Ermtool\Control::getControlsFromRisk($org,$risk->id);
 
                     //seteamos controles
-                    if ($controls == NULL)
+                    if ($controls == NULL || empty($controls))
                     {
-                        if (Session::get('languaje') == 'en')
-                        {
-                            $controles = "No controls specified";
-                        }
-                        else
-                        {
-                            $controles = "No se han especificado controles";
-                        }
+                        $controles = array();
                     }
                     else
                     {
+                        if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //ver como mostrar datos
+                        {
+                            $controles = array();
+                            $j = 0;
+                        }
+                        else
+                        {
+                            $controles = '';
+                        }
                         $last = end($controls); //guardamos final para no agregarle coma
                         foreach ($controls as $control)
                         {
-                            if ($control != $last)
-                                $controles .= $control->name.', ';
+                            if (!strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                            {
+                                $controles[$j] = $control->name;
+                                $j+=1;
+                            }
                             else
-                                $controles .= $control->name;
+                            {
+                                if ($control != $last)
+                                    $controles .= $control->name.', ';
+                                else
+                                    $controles .= $control->name; 
+                            }
+                            
                         }
                     }
-                    /* IMPORTANTE!!!
-                        Los nombres de las variables serán guardados en español para mostrarlos
-                        en el archivo excel que será exportado
-                    */
+
                     //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
                     if ($risk->created_at == NULL OR $risk->created_at == "0000-00-00" OR $risk->created_at == "")
                     {
@@ -1277,17 +1411,33 @@ class RiesgosController extends Controller
                         $description = $risk->description;
                     }
 
+                    if ($risk->risk_category_id != NULL && $risk->risk_category_id != '')
+                    {
+                        $risk_category = \Ermtool\Risk_category::name($risk->risk_category_id);
+                        $risk_category = $risk_category->name;
+                    } 
+                    else
+                    {
+                        if (Session::get('languaje') == 'en')
+                        {
+                            $risk_category = 'Not defined';
+                        }
+                        else
+                        {
+                            $risk_category = 'No definido';
+                        }
+                    }
                     //Seteamos datos
                     if ($value == 0) //guardamos datos de riesgos de procesos
                     {
                         if (Session::get('languaje') == 'en')
                         {
                             $datos[$i] = [//'id' => $control->id,
-                                        'Process' => $risk->process_name,
-                                        'Subprocess' => $risk->subprocess_name,
+                                        'Process' => $procesos,
+                                        'Subprocess' => $subprocesos,
                                         'Risk' => $risk->name,
                                         'Description' => $description,
-                                        'Category' => $risk->risk_category_name,
+                                        'Category' => $risk_category,
                                         'Causes' => $causas,
                                         'Effects' => $efectos,
                                         'Expected_loss' => $expected_loss,
@@ -1301,11 +1451,11 @@ class RiesgosController extends Controller
                         else
                         {
                             $datos[$i] = [//'id' => $control->id,
-                                        'Proceso' => $risk->process_name,
-                                        'Subproceso' => $risk->subprocess_name,
+                                        'Procesos' => $procesos,
+                                        'Subprocesos' => $subprocesos,
                                         'Riesgo' => $risk->name,
                                         'Descripción' => $description,
-                                        'Categoría' => $risk->risk_category_name,
+                                        'Categoría' => $risk_category,
                                         'Causas' => $causas,
                                         'Efectos' => $efectos,
                                         'Pérdida_esperada' => $expected_loss,
@@ -1321,14 +1471,15 @@ class RiesgosController extends Controller
 
                     else if ($value == 1) //guardamos datos de riesgos de negocio
                     {
+                        $org_name = \Ermtool\Organization::name($org);
                         if (Session::get('languaje') == 'en')
                         {
                             $datos[$i] = [//'id' => $control->id,
-                                        'Organization' => $risk->organization_name,
-                                        'Objective' => $risk->objective_name,
+                                        'Organization' => $org_name,
+                                        'Objective' => $objetivos,
                                         'Risk' => $risk->name,
                                         'Description' => $description,
-                                        'Category' => $risk->risk_category_name,
+                                        'Category' => $risk_category,
                                         'Causes' => $causas,
                                         'Effects' => $efectos,              
                                         'Expected_loss' => $risk->expected_loss,
@@ -1342,11 +1493,11 @@ class RiesgosController extends Controller
                         else
                         {
                             $datos[$i] = [//'id' => $control->id,
-                                        'Organización' => $risk->organization_name,
-                                        'Objetivo' => $risk->objective_name,
+                                        'Organización' => $org_name,
+                                        'Objetivos' => $objetivos,
                                         'Riesgo' => $risk->name,
                                         'Descripción' => $description,
-                                        'Categoría' => $risk->risk_category_name,
+                                        'Categoría' => $risk_category,
                                         'Causas' => $causas,
                                         'Efectos' => $efectos,              
                                         'Pérdida_esperada' => $risk->expected_loss,
@@ -1386,28 +1537,26 @@ class RiesgosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id,$org_id)
     {
         global $id1;
         $id1 = $id;
         global $res;
         $res = 1;
 
+        global $org;
+        $org = $org_id;
+
         DB::transaction(function() {
+            //ACTUALIZACIÓN 29-03-17: YA NO EXISTE CONTROL_OBJECTIVE_RISK O CONTROL_RISK_SUBPROCESS
             //CORRECCIÓN DISEÑO: SIEMPRE TENDRÁ O UN OBJECTIVE_RISK O UN RISK_SUBPROCESS
             //primero vemos si contiene algún objetivo asociado 
             
             //$rev = DB::table('action_plans')
             //    ->where('')
             //OJO: En evaluation_risk sólo se buscará en el campo risk_id, ya que después se revisará objective_risk o risk_subprocess
-            $rev = DB::table('evaluation_risk')
-                ->where('risk_id','=',$GLOBALS['id1'])
-                ->select('id')
-                ->get();
 
-            if (empty($rev))
-            {
-                //revisamos objective_subprocess_risk (hayq que ver objective_risk y subprocess_risk)
+                //revisamos objective_subprocess_risk (hay q que ver objective_risk y subprocess_risk)
                 $rev = DB::table('objective_subprocess_risk')
                     ->where('objective_risk_id','=',$GLOBALS['id1'])
                     ->select('id')
@@ -1421,194 +1570,158 @@ class RiesgosController extends Controller
                         ->select('id')
                         ->get();
 
-                        if (empty($rev))
-                        {
-                            //KRI
-                            $rev = DB::table('kri')
-                                ->where('risk_id','=',$GLOBALS['id1'])
+                    if (empty($rev))
+                    {
+                        //KRI
+                        $rev = DB::table('kri')
+                                ->where('kri.risk_id','=',$GLOBALS['id1'])
                                 ->select('id')
                                 ->get();
 
-                            if (empty($rev))
-                            {
+                        if (empty($rev))
+                        {
                                 //ahora vemos verificamos las uniones con objective_risk o subprocess_risk
                                 //primero usaremos una variable local para verificar posteriormente
-                                $res2 = 1;
+                                //ACTUALIZACIÓN 29-03-17: SOLO VEREMOS ORGANIZATION_RISK por lo tanto obtenemos su id
+                            $res2 = 1;
 
-                                $risks = DB::table('risk_subprocess')
-                                    ->where('risk_id','=',$GLOBALS['id1'])
-                                    ->select('id')
-                                    ->get();
+                            $risk = DB::table('organization_risk')
+                                ->where('risk_id','=',$GLOBALS['id1'])
+                                ->where('organization_id','=',$GLOBALS['org'])
+                                ->select('id')
+                                ->first();
 
-                                if (empty($risks)) //entonces es objective_risk
-                                {
-                                    $risks = DB::table('objective_risk')
-                                        ->where('risk_id','=',$GLOBALS['id1'])
+                                    //foreach ($risks as $risk)
+                                    //{
+                                        //evaluation_risk
+                            $rev = DB::table('evaluation_risk')
+                                        ->where('organization_risk_id','=',$risk->id)
                                         ->select('id')
                                         ->get();
 
-                                    foreach ($risks as $risk)
-                                    {
-                                        //vemos si tiene control_objective_risk
-                                        $rev = DB::table('control_objective_risk')
-                                            ->where('objective_risk_id','=',$risk->id)
+                            if (empty($rev))
+                            {
+                                $rev = DB::table('audit_plan_risk')
+                                    ->where('organization_risk_id','=',$risk->id)
+                                    ->select('id')
+                                    ->get();
+
+                                if (empty($rev))
+                                {
+                                    $rev = DB::table('audit_risk')
+                                            ->where('organization_risk_id','=',$risk->id)
                                             ->select('id')
                                             ->get();
 
+                                    if (empty($rev))
+                                    {
+                                            //para verificar que sea parar todos los objective_risk
+
+                                        $rev = DB::table('control_organization_risk')
+                                            ->where('organization_risk_id','=',$risk->id)
+                                            ->get();
+                                            
                                         if (empty($rev))
                                         {
-                                            //evaluation_risk
-                                            $rev = DB::table('evaluation_risk')
-                                                ->where('objective_risk_id','=',$risk->id)
-                                                ->select('id')
-                                                ->get();
-
-                                            if (empty($rev))
-                                            {
-                                                $rev = DB::table('audit_plan_risk')
-                                                    ->where('objective_risk_id','=',$risk->id)
-                                                    ->select('id')
-                                                    ->get();
-
-                                                if (empty($rev))
-                                                {
-                                                    $rev = DB::table('audit_risk')
-                                                        ->where('objective_risk_id','=',$risk->id)
-                                                        ->select('id')
-                                                        ->get();
-
-                                                    if (empty($rev))
-                                                    {
-                                                        //para verificar que sea parar todos los objective_risk
-                                                        $res2 = 0;
-                                                    }
-                                                    else
-                                                    {
-                                                        $res2 = 1;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    $res2 = 1;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                $res2 = 1;
-                                            }
+                                            //se puede borrar
+                                            $res2 = 0;
                                         }
-                                        else
-                                        {
-                                            $res2 = 1;
-                                        }
-
-                                        if ($res2 == 1)
-                                        {
-                                            break;
-                                        }
-                                    } 
+                                            
+                                    }
+                                    else
+                                    {
+                                        $res2 = 1;
+                                    }
                                 }
                                 else
                                 {
-                                    foreach ($risks as $risk)
-                                    {
-                                        //vemos si tiene control_risk_subprocess
-                                        $rev = DB::table('control_risk_subprocess')
-                                            ->where('risk_subprocess_id','=',$risk->id)
-                                            ->select('id')
-                                            ->get();
-
-                                        if (empty($rev))
-                                        {
-                                            //evaluation_risk
-                                            $rev = DB::table('evaluation_risk')
-                                                ->where('risk_subprocess_id','=',$risk->id)
-                                                ->select('id')
-                                                ->get();
-
-                                            if (empty($rev))
-                                            {
-                                                $rev = DB::table('audit_plan_risk')
-                                                    ->where('risk_subprocess_id','=',$risk->id)
-                                                    ->select('id')
-                                                    ->get();
-
-                                                if (empty($rev))
-                                                {
-                                                    $rev = DB::table('audit_risk')
-                                                        ->where('risk_subprocess_id','=',$risk->id)
-                                                        ->select('id')
-                                                        ->get();
-
-                                                    if (empty($rev))
-                                                    {
-                                                        $res2 = 0;
-                                                        //eliminamos risk(s)_subprocess asociados
-                                                        //DB::table('risk_subprocess')
-                                                        //    ->where('id','=',$risk->id)
-                                                        //    ->delete();
-                                                    }
-                                                    else
-                                                    {
-                                                        $res2 = 1;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    $res2 = 1;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                $res2 = 1;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            $res2 = 1;
-                                        }
-
-                                        if ($res2 == 1)
-                                        {
-                                            break;
-                                        }
-                                    } 
+                                    $res2 = 1;
                                 }
+                            }
+                            else
+                            {
+                                $res2 = 1;
+                            }
+                        }
+                        else
+                        {
+                            $res2 = 1;
+                        }
+                                    //} 
 
-                                if ($res2 == 0)
-                                {
+                        if ($res2 == 0)
+                        {
                                     //se puede borrar
 
                                     //eliminamos objective_risk(s) asociados (si es que hay)
-                                    DB::table('objective_risk')
-                                        ->where('risk_id','=',$GLOBALS['id1'])
-                                        ->delete();
+                                    //ACTUALIZACIÓN 30-03: Sólo los objective_risk asociados al riesgo que se está borrando
+                                    $objectives = DB::table('objectives')
+                                        ->where('objectives.organization_id','=',$GLOBALS['org'])
+                                        ->select('id')
+                                        ->get();
+
+                                    foreach ($objectives as $obj)
+                                    {
+                                        DB::table('objective_risk')
+                                            ->where('objective_risk.objective_id','=',$obj->id)
+                                            ->where('objective_risk.risk_id','=',$GLOBALS['id1'])
+                                            ->delete();
+                                    }                                    
 
                                     //eliminamos de risk(s)_subprocess asociados (si es que hay)
+                                    //ACTUALIZACIÓN 30-03: Por ahora los riesgos de proceso se eliminarán para todas las organizaciones, ya que un subproceso puede estar en muchas organizaciones
                                     DB::table('risk_subprocess')
                                         ->where('risk_id','=',$GLOBALS['id1'])
                                         ->delete();
 
-                                    //eliminamos posibles causas asociadas
-                                    DB::table('cause_risk')
+                                    //ACTUALIZACIÓN 30-03: Eliminaremos de la tabla de riesgos simplemente si es que no tiene ni organizaciones, ni objetivos ni subprocesos asociados
+                                    $revX = DB::table('risk_subprocess')
                                         ->where('risk_id','=',$GLOBALS['id1'])
-                                        ->delete();
+                                        ->get();
 
-                                    //eliminamos posibles efectos asociados
-                                    DB::table('effect_risk')
-                                        ->where('risk_id','=',$GLOBALS['id1'])
-                                        ->delete();
-                                    DB::table('risks')
-                                        ->where('id','=',$GLOBALS['id1'])
-                                        ->delete();
+                                    if (empty($revX))
+                                    {
+                                        $revX = DB::table('objective_risk')
+                                            ->where('risk_id','=',$GLOBALS['id1'])
+                                            ->get();
+
+                                        if (empty($revX))
+                                        {
+                                            $revX = DB::table('organization_risk')
+                                                    ->where('risk_id','=',$GLOBALS['id1'])
+                                                    ->get();
+
+                                            if (empty($revX))
+                                            {
+                                                //Sólo de esta manera (vacío en todas partes), eliminamos el riesgo de la tabla risks
+
+                                                //eliminamos posibles causas asociadas
+                                                DB::table('cause_risk')
+                                                    ->where('risk_id','=',$GLOBALS['id1'])
+                                                    ->delete();
+
+                                                //eliminamos posibles efectos asociados
+                                                DB::table('effect_risk')
+                                                    ->where('risk_id','=',$GLOBALS['id1'])
+                                                    ->delete();
+
+                                                //ACTUALIZACIÓN 29-03-17: Eliminamos de organization_risk
+                                                DB::table('organization_risk')
+                                                    ->where('risk_id','=',$GLOBALS['id1'])
+                                                    ->delete();
+
+                                                DB::table('risks')
+                                                    ->where('id','=',$GLOBALS['id1'])
+                                                    ->delete();
+                                            }
+                                        }
+                                    }
 
                                     $GLOBALS['res'] = 0;
-                                }
-                                
-                            }
                         }
+                                
+                    }
                 }
-            }
 
         });
 
@@ -1699,5 +1812,207 @@ class RiesgosController extends Controller
         $effects = \Ermtool\Effect::all(['id','name']);
         return json_encode($effects);
 
+    }
+
+    //Función obtiene riesgos de negocio a través de JSON al crear plan de pruebas (también utilizado para crear encuesta de evaluación)
+    public function getRiesgosObjetivos($org)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            //obtenemos riesgos de negocio para la organización seleccionada
+            $objective_risk = \Ermtool\Risk::getObjectiveRisks((int)$org);
+            //obtenemos evaluaciones
+            $results = $this->getEvaluationData($objective_risk);
+            //ordenamos resultados según función cmp
+            usort($results, array($this,"cmp"));
+            return json_encode($results);
+        }   
+    }
+
+    //Función obtiene riesgos de proceso a través de JSON al crear plan de pruebas
+    public function getRiesgosProcesos($org)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            //obtenemos riesgos de proceso para la organización seleccionada
+            $risk_subprocess = \Ermtool\Risk::getRiskSubprocess((int)$org);
+            $results = $this->getEvaluationData($risk_subprocess);
+            //ordenamos resultados según función cmp   
+            usort($results, array($this,"cmp"));
+            return json_encode($results);
+        }   
+    }
+
+    public function getEvaluationData($risks)
+    {
+        $results = array();
+        $i = 0; //contador de riesgos de negocio
+        foreach ($risks as $risk)
+        {
+        //obtengo maxima fecha para obtener última evaluación
+                $fecha = DB::table('evaluation_risk')
+                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                ->where('evaluation_risk.organization_risk_id','=',$risk->id)
+                                ->max('updated_at');
+
+                $fecha_up = new DateTime($fecha);
+                //$fecha_up = date_format($fecha_up,"d-m-Y");
+                //obtenemos evaluación de riesgo de negocio (si es que hay)---> Ultima (mayor fecha updated_at)
+                $evaluations = DB::table('evaluation_risk')
+                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                ->where('evaluation_risk.organization_risk_id','=',$risk->id)
+                                ->where('evaluations.consolidation','=',1)
+                                ->whereNotNull('evaluation_risk.avg_probability')
+                                ->whereNotNull('evaluation_risk.avg_impact')
+                                ->where('evaluations.updated_at','=',$fecha_up)
+                                ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                                ->get();
+                //seteamos por si no hay evaluación
+                $avg_probability = "Falta Eval.";
+                $avg_impact = "Falta Eval.";
+                $score = "Falta Eval.";
+                $proba_def = "";
+                $impact_def = "";
+                foreach ($evaluations as $evaluation)
+                {
+                    //seteamos nombres de probabilidad e impacto
+                    if (Session::get('languaje') == 'en')
+                    {
+                        switch ($evaluation->avg_probability)
+                        {
+                            case 1:
+                                $proba = 'Very improbable';
+                                break;
+                            case 2:
+                                $proba = 'unlikely';
+                                break;
+                            case 3:
+                                $proba = 'Possible';
+                                break;
+                            case 4:
+                                $proba = 'Likely';
+                                break;
+                            case 5:
+                                $proba = 'Very likely';
+                                break;
+                        }
+                        switch ($evaluation->avg_impact)
+                        {
+                            case 1:
+                                $impact = 'Despicable';
+                                break;
+                            case 2:
+                                $impact = 'Less';
+                                break;
+                            case 3:
+                                $impact = 'Moderate';
+                                break;
+                            case 4:
+                                $impact = 'Severe';
+                                break;
+                            case 5:
+                                $impact = 'Catastrophic';
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch ($evaluation->avg_probability)
+                        {
+                            case 1:
+                                $proba = 'Muy poco probable';
+                                break;
+                            case 2:
+                                $proba = 'Poco probable';
+                                break;
+                            case 3:
+                                $proba = 'Intermedio';
+                                break;
+                            case 4:
+                                $proba = 'Probable';
+                                break;
+                            case 5:
+                                $proba = 'Muy probable';
+                                break;
+                        }
+                        switch ($evaluation->avg_impact)
+                        {
+                            case 1:
+                                $impact = 'Muy poco impacto';
+                                break;
+                            case 2:
+                                $impact = 'Poco impacto';
+                                break;
+                            case 3:
+                                $impact = 'Intermedio';
+                                break;
+                            case 4:
+                                $impact = 'Alto impacto';
+                                break;
+                            case 5:
+                                $impact = 'Muy alto impacto';
+                                break;
+                        }
+                    }
+                    $avg_probability = $evaluation->avg_probability;
+                    $avg_impact = $evaluation->avg_impact;
+                    $impact_def = $impact;
+                    $proba_def = $proba;
+                    $score = $evaluation->avg_probability * $evaluation->avg_impact;
+                }
+                $results[$i] = [
+                            'name' => $risk->risk_name,
+                             'id' => $risk->id,
+                             'avg_probability' => $avg_probability,
+                             'avg_impact' => $avg_impact,
+                             'proba_def' => $proba_def,
+                             'impact_def' => $impact_def,
+                             'score' => $score
+                            ];
+                $i += 1;
+        }
+
+        return $results;
+    }
+
+    /*
+    función identifica si se seleccionarán riesgos/subprocesos o riesgos/objetivos
+    al momento de crear un control */
+    public function subneg($value,$org)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            if ($value == 0) //son riesgos de subprocesos
+            {
+                $datos = \Ermtool\Risk::getRiskSubprocess($org);
+            }
+            else if ($value == 1) //son riesgos de negocio
+            {
+                $datos = \Ermtool\Risk::getObjectiveRisks($org);
+            }
+            return json_encode($datos);
+        }
+    }
+
+    //compara scores para ordenar de mayor a menor
+    function cmp($a, $b)
+    {
+        if ($a['score'] == $b['score'])
+        {
+            return 0;
+        }
+        return ($a['score'] > $b['score']) ? -1 : 1;
     }
 }

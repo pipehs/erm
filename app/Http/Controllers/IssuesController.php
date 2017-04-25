@@ -158,6 +158,7 @@ class IssuesController extends Controller
     //ACTUALIZACIÓN 09-03-17: SE AGREGÓ 2DO TIPO PARA CUALQUIER HALLAZGO (EXCEPTO DE ORGANIZACIÓN)
     public function getIssues($kind,$kind3,$org_id,$kind2)
     {
+        //$kind = tipo de hallazgo; $kind3 = id de elemento (en caso de haber); $org_id = org id; $kind2 = si es excel (2) o no (1)
         $issues = array();
         $datos = array(); //se usará sólo para reportes
 
@@ -1242,12 +1243,7 @@ class IssuesController extends Controller
                 $org = \Ermtool\Organization::where('id',$_GET['org'])->value('name');
 
                 //obtenemos stakeholders de la misma organización
-                $stakes = DB::table('stakeholders')
-                            ->join('organization_stakeholder','organization_stakeholder.stakeholder_id','=','stakeholders.id')
-                            ->where('organization_stakeholder.organization_id','=',$_GET['org'])
-                            ->select('stakeholders.id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-                            ->orderBy('name')
-                            ->lists('full_name', 'id');
+                $stakes = \Ermtool\Stakeholder::listStakeholders($_GET['org']);
 
                 if ($_GET['kind'] == 0) //obtenemos procesos
                 {
@@ -1296,12 +1292,7 @@ class IssuesController extends Controller
                 }
                 else if ($_GET['kind'] == 3) //obtenemos controles de proceso
                 {
-                    $controls = DB::table('controls')
-                                    ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
-                                    ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
-                                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                                    ->where('organization_subprocess.organization_id','=',$_GET['org'])
-                                    ->lists('controls.name','controls.id');
+                    $controls = \Ermtool\Control::listControls($_GET['org'],0);
 
                     if (Session::get('languaje') == 'en')
                     {
@@ -1314,13 +1305,7 @@ class IssuesController extends Controller
                 }
                 else if ($_GET['kind'] == 4) //obtenemos controles de entidad
                 {
-                    $controls = DB::table('controls')
-                                    ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
-                                    ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
-                                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                    ->where('objectives.organization_id','=',$_GET['org'])
-                                    ->select('controls.*')
-                                    ->lists('controls.name','controls.id');
+                    $controls = \Ermtool\Control::listControls($_GET['org'],1);
 
                     if (Session::get('languaje') == 'en')
                     {
@@ -1355,7 +1340,7 @@ class IssuesController extends Controller
                             ->join('audits','audits.id','=','audit_audit_plan.audit_id')
                             ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
                             ->where('audit_plans.organization_id','=',$_GET['org'])
-                            ->select('audit_audit_plan.id',DB::raw('CONCAT(audit_plans.name, " - ", audits.name) AS audit_name'))
+                            ->select('audit_audit_plan.id',DB::raw("CONCAT(audit_plans.name, ' - ', audits.name) AS audit_name"))
                             ->lists('audit_name','audit_audit_plan.id');
                     
                     if (Session::get('languaje') == 'en')
@@ -1470,8 +1455,8 @@ class IssuesController extends Controller
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
                                     'process_id' => $_POST['process_id'],
-                                    'created_at' => date('Y-m-d H:i:s'),
-                                    'updated_at' => date('Y-m-d H:i:s'),
+                                    'created_at' => date('Ymd H:i:s'),
+                                    'updated_at' => date('Ymd H:i:s'),
                                 ]);
                     }
                     else if ($_POST['kind'] == 1) //hallazgo de subproceso
@@ -1483,8 +1468,8 @@ class IssuesController extends Controller
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
                                     'subprocess_id' => $_POST['subprocess_id'],
-                                    'created_at' => date('Y-m-d H:i:s'),
-                                    'updated_at' => date('Y-m-d H:i:s'),
+                                    'created_at' => date('Ymd H:i:s'),
+                                    'updated_at' => date('Ymd H:i:s'),
                                 ]);
                     }
                     else if ($_POST['kind'] == 2) //hallazgo de organización
@@ -1496,8 +1481,8 @@ class IssuesController extends Controller
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
                                     'organization_id' => $_POST['org_id'],
-                                    'created_at' => date('Y-m-d H:i:s'),
-                                    'updated_at' => date('Y-m-d H:i:s'),
+                                    'created_at' => date('Ymd H:i:s'),
+                                    'updated_at' => date('Ymd H:i:s'),
                                 ]);
                     }
                     else if ($_POST['kind'] == 3 || $_POST['kind'] == 4) //hallazgo de controles
@@ -1509,8 +1494,8 @@ class IssuesController extends Controller
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
                                     'control_id' => $_POST['control_id'],
-                                    'created_at' => date('Y-m-d H:i:s'),
-                                    'updated_at' => date('Y-m-d H:i:s'),
+                                    'created_at' => date('Ymd H:i:s'),
+                                    'updated_at' => date('Ymd H:i:s'),
                                 ]);
                     }
                     else if ($_POST['kind'] == 5) //hallazgo de programa de auditoría
@@ -1522,8 +1507,8 @@ class IssuesController extends Controller
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
                                     'audit_audit_plan_audit_program_id' => $_POST['audit_audit_plan_audit_program_id'],
-                                    'created_at' => date('Y-m-d H:i:s'),
-                                    'updated_at' => date('Y-m-d H:i:s'),
+                                    'created_at' => date('Ymd H:i:s'),
+                                    'updated_at' => date('Ymd H:i:s'),
                                 ]);
                     }
                     else if ($_POST['kind'] == 6) //hallazgo de auditoría
@@ -1535,8 +1520,8 @@ class IssuesController extends Controller
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
                                     'audit_audit_plan_id' => $_POST['audit_audit_plan_id'],
-                                    'created_at' => date('Y-m-d H:i:s'),
-                                    'updated_at' => date('Y-m-d H:i:s'),
+                                    'created_at' => date('Ymd H:i:s'),
+                                    'updated_at' => date('Ymd H:i:s'),
                                 ]);
                     }
                 }
@@ -1549,8 +1534,8 @@ class IssuesController extends Controller
                                 'recommendations' => $recommendations,
                                 'classification' => $classification,
                                 'audit_test_id' => $_POST['test_id'],
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s'),
+                                'created_at' => date('Ymd H:i:s'),
+                                'updated_at' => date('Ymd H:i:s'),
                             ]);
                 }
                 else if (isset($_POST['evaluation_id'])) //es un hallazgo de control
@@ -1562,8 +1547,8 @@ class IssuesController extends Controller
                                 'recommendations' => $recommendations,
                                 'classification' => $classification,
                                 'control_evaluation_id' => $_POST['evaluation_id'],
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s'),
+                                'created_at' => date('Ymd H:i:s'),
+                                'updated_at' => date('Ymd H:i:s'),
                             ]);
                 }
 
@@ -1691,12 +1676,7 @@ class IssuesController extends Controller
             $org_id = \Ermtool\Organization::where('id',$_GET['org'])->value('id');
 
             //obtenemos stakeholders de la misma organización
-            $stakes = DB::table('stakeholders')
-                        ->join('organization_stakeholder','organization_stakeholder.stakeholder_id','=','stakeholders.id')
-                        ->where('organization_stakeholder.organization_id','=',$_GET['org'])
-                        ->select('stakeholders.id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-                        ->orderBy('name')
-                        ->lists('full_name', 'id');
+            $stakes = \Ermtool\Stakeholder::listStakeholders(NULL);
 
             $issue = \Ermtool\Issue::find($_GET['id']);
 
@@ -1879,7 +1859,7 @@ class IssuesController extends Controller
                         'description' => $description,
                         'recommendations' => $recommendations,
                         'classification' => $classification,
-                        'updated_at' => date('Y-m-d H:i:s')
+                        'updated_at' => date('Ymd H:i:s')
                     ]);
                 
                 $id_action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($GLOBALS['id2']);
@@ -1895,7 +1875,7 @@ class IssuesController extends Controller
                             'stakeholder_id' => $stakeholder_id,
                             'final_date' => $final_date,
                             'status' => $status,
-                            'updated_at' => date('Y-m-d H:i:s')
+                            'updated_at' => date('Ymd H:i:s')
                         ]);
                 }
                 else
@@ -1907,7 +1887,7 @@ class IssuesController extends Controller
                                             'stakeholder_id' => $stakeholder_id,
                                             'final_date' => $final_date,
                                             'status' => $status,
-                                            'updated_at' => date('Y-m-d H:i:s')
+                                            'updated_at' => date('Ymd H:i:s')
                                         ]);
                 }
                 

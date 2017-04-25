@@ -46,6 +46,7 @@
 	<div class="row">
     <p><b> Nombre Evaluaci&oacute;n:</b> {{ $nombre }}.</p>
            <p><b> Descripci&oacute;n:</b> {{ $descripcion }}.</p>
+           <p><b>Organizaci&oacute;n involucrada:</b> {{ $org }}</p>
             <center>
       <div class="col-sm-5">
             <table style="text-align: center; font-weight: bold; float: left;">
@@ -131,9 +132,9 @@
               @for ($j=0; $j < 5; $j++)
                   @if (intval($prom_criticidad[$k]) == (5-$i))
                       @if (intval($prom_proba[$k]) == (5-$j))
-                         $('#{{(5-$i)}}_{{(5-$j)}}').append("<span class='circulo' title='{{ $riesgos[$k]['name'] }} - {{ $riesgos[$k]['subobj'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad[$k],1) }}'>{{ $cont }}</span>");
+                         $('#{{(5-$i)}}_{{(5-$j)}}').append("<span class='circulo' title='{{ $riesgos[$k]['name'] }} - {{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad[$k],1) }}'>{{ $cont }}</span>");
 
-                         $('#leyendas').append("<p><small><span class='circulo-small'>{{ $cont }}</span> : {{ $riesgos[$k]['name'] }} - {{ $riesgos[$k]['subobj'] }}")
+                         $('#leyendas').append("<p><small><span class='circulo-small'>{{ $cont }}</span> : {{ $riesgos[$k]['name'] }} - {{ $riesgos[$k]['description'] }}")
                        /*
                         $('#{{(5-$i)}}_{{(5-$j)}}').append("<img src='assets/img/circulo.png' height='20px' width='20px' title='{{ $riesgos[$k]['name'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Criticidad: {{ number_format($prom_criticidad[$k],1) }}'>");
                      

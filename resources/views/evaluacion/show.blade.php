@@ -15,7 +15,7 @@
 </div>
 <center>
 <div class="row">
-	<div class="col-xs-12 col-sm-6">
+	<div class="col-xs-12 col-sm-10">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -50,7 +50,7 @@
 			@if (!isset($tipo) && isset($encuesta))
 				<table class="table table-bordered table-striped table-hover table-heading table-datatable" width="50%">
 				<tr>
-				<th width="50%">Descripci&oacute;n</th>
+				<th width="25%">Descripci&oacute;n</th>
 				<td>{{ $encuesta['description'] }}</td>
 				</tr>
 				<tr>
@@ -66,13 +66,14 @@
 				@endif
 				</tr>
 				<tr>
-				<th>Riesgos Relacionados</th>
-				<td><ul>
+				<th>Riesgos Relacionados <br/>
+				(Organizaci&oacute;n - Riesgo - Descripci&oacute;n)
+				</th>
+				<td>
 						@foreach ($riesgos as $riesgo)
-							<li>{{ $riesgo['risk_name'] }} - {{ $riesgo['subobj'] }}</li>
-						@endforeach
-						</ul>					
-					</td>
+							<li>{{ $riesgo['org'] }} - {{ $riesgo['risk_name'] }} - {{ $riesgo['description'] }}</li>
+						@endforeach							
+				</td>
 				<tr>
 				</table>
 

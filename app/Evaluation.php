@@ -5,9 +5,24 @@ namespace Ermtool;
 use Illuminate\Database\Eloquent\Model;
 use DB;
 use stdClass;
+use Auth;
+use Carbon;
 
 class Evaluation extends Model
 {
+    public function getCreatedAtAttribute($date)
+    {
+        if(Auth::check())
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
+        else
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
+    }
+
+    public function getUpdatedAtAttribute($date)
+    {
+        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
+    }
+    
     protected $fillable = ['name','type','consolidation','description','expiration_date'];
 
     //eliminamos created_at y updated_at
@@ -23,26 +38,15 @@ class Evaluation extends Model
     	return $this->hasManyThrough('\Ermtool\Stakeholder','evaluation_risk');
     }
 */
-    public static function getEvaluationRiskSubprocess($org,$cat,$subs,$ano,$mes)
+    public static function getEvaluationRiskSubprocess($org,$cat,$subs,$ano,$mes,$dia)
     {
         //evals2 = new stdClass();
         $evals2 = array();
 
         if ($cat != NULL)
         {
-            $eval1 = DB::table('evaluation_risk')
-                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                ->join('risk_subprocess','risk_subprocess.id','=','evaluation_risk.risk_subprocess_id')
-                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                ->where('risks.risk_category_id','=',$cat)
-                ->whereNotNull('evaluation_risk.risk_subprocess_id')
-                ->where('organization_subprocess.organization_id','=',$org)
-                ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
-                ->where('evaluations.consolidation','=',1)
-                ->select('evaluation_risk.risk_subprocess_id as risk_id','risks.id as risk')
-                ->groupBy('risks.id')
-                ->get();
+
+            $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org,$cat,$ano,$mes,$dia);
 
             if ($subs) //se deben seleccionar tambien los riesgos de las organizaciones dependientes
             {
@@ -54,19 +58,7 @@ class Evaluation extends Model
 
                 foreach ($orgs as $org2) //para cada una de ellas guardamos sus evaluaciones en array temporal
                 {
-                    $eval_temp = DB::table('evaluation_risk')
-                        ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                        ->join('risk_subprocess','risk_subprocess.id','=','evaluation_risk.risk_subprocess_id')
-                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                        ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                        ->where('risks.risk_category_id','=',$cat)
-                        ->whereNotNull('evaluation_risk.risk_subprocess_id')
-                        ->where('organization_subprocess.organization_id','=',$org2->id)
-                        ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
-                        ->where('evaluations.consolidation','=',1)
-                        ->select('evaluation_risk.risk_subprocess_id as risk_id','risks.id as risk')
-                        ->groupBy('risks.id')
-                        ->get();
+                    $eval_temp = \Ermtool\Evaluation::getSubprocessRiskFromEval($org2,$cat,$ano,$mes,$dia);
 
                     foreach ($eval_temp as $e)
                     {
@@ -87,18 +79,7 @@ class Evaluation extends Model
         }
         else
         {
-            $eval1 = DB::table('evaluation_risk')
-                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                ->join('risk_subprocess','risk_subprocess.id','=','evaluation_risk.risk_subprocess_id')
-                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                ->whereNotNull('evaluation_risk.risk_subprocess_id')
-                ->where('organization_subprocess.organization_id','=',$org)
-                ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
-                ->where('evaluations.consolidation','=',1)
-                ->select('evaluation_risk.risk_subprocess_id as risk_id','risks.id as risk')
-                ->groupBy('risks.id')
-                ->get();
+            $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org,NULL,$ano,$mes,$dia);
 
             if ($subs) //se deben seleccionar tambien los riesgos de las organizaciones dependientes
             {
@@ -110,18 +91,7 @@ class Evaluation extends Model
 
                 foreach ($orgs as $org2) //para cada una de ellas guardamos sus evaluaciones en array temporal
                 {
-                    $eval_temp = DB::table('evaluation_risk')
-                        ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                        ->join('risk_subprocess','risk_subprocess.id','=','evaluation_risk.risk_subprocess_id')
-                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                        ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                        ->whereNotNull('evaluation_risk.risk_subprocess_id')
-                        ->where('organization_subprocess.organization_id','=',$org2->id)
-                        ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
-                        ->where('evaluations.consolidation','=',1)
-                        ->select('evaluation_risk.risk_subprocess_id as risk_id','risks.id as risk')
-                        ->groupBy('risks.id')
-                        ->get();
+                    $eval_temp = \Ermtool\Evaluation::getSubprocessRiskFromEval($org2,NULL,$ano,$mes,$dia);
 
                     foreach ($eval_temp as $e)
                     {
@@ -151,24 +121,14 @@ class Evaluation extends Model
         }
     }
 
-    public static function getEvaluationObjectiveRisk($org,$cat,$subs,$ano,$mes)
+    public static function getEvaluationObjectiveRisk($org,$cat,$subs,$ano,$mes,$dia)
     {
         $evals2 = array();
 
         if ($cat != NULL)
         {
             //---- consulta multiples join para obtener los objective_risk evaluados relacionados a la organización ----// 
-            $eval1= DB::table('evaluation_risk')
-                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                ->join('objective_risk','objective_risk.id','=','evaluation_risk.objective_risk_id')
-                ->join('risks','risks.id','=','objective_risk.risk_id')
-                ->where('risks.risk_category_id','=',$cat)
-                ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                ->where('objectives.organization_id','=',$org)
-                ->where('evaluations.consolidation','=',1)
-                ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
-                ->select('evaluation_risk.objective_risk_id as risk_id','risks.id as risk')
-                ->groupBy('risks.id')->get();
+            $eval1= \Ermtool\Evaluation::getObjectiveRiskFromEval($org,$cat,$ano,$mes,$dia); 
 
             if ($subs) //se deben seleccionar tambien los riesgos de las organizaciones dependientes
             {
@@ -180,17 +140,7 @@ class Evaluation extends Model
 
                 foreach ($orgs as $org2) //para cada una de ellas guardamos sus evaluaciones en array temporal
                 {
-                    $eval_temp = DB::table('evaluation_risk')
-                            ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                            ->join('objective_risk','objective_risk.id','=','evaluation_risk.objective_risk_id')
-                            ->join('risks','risks.id','=','objective_risk.risk_id')
-                            ->where('risks.risk_category_id','=',$cat)
-                            ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                            ->where('objectives.organization_id','=',$org2->id)
-                            ->where('evaluations.consolidation','=',1)
-                            ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
-                            ->select('evaluation_risk.objective_risk_id as risk_id','risks.id as risk')
-                            ->groupBy('risks.id')->get();
+                    $eval_temp = \Ermtool\Evaluation::getObjectiveRiskFromEval($org2,$cat,$ano,$mes,$dia);
 
                     foreach ($eval_temp as $e)
                     {
@@ -213,16 +163,7 @@ class Evaluation extends Model
         else //no se seleccionó una categoría de riesgos (por lo tanto no es un filtro en la consulta)
         {
             //---- consulta multiples join para obtener los objective_risk evaluados relacionados a la organización ----// 
-            $eval1= DB::table('evaluation_risk')
-                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                ->join('objective_risk','objective_risk.id','=','evaluation_risk.objective_risk_id')
-                ->join('risks','risks.id','=','objective_risk.risk_id')
-                ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                ->where('objectives.organization_id','=',$org)
-                ->where('evaluations.consolidation','=',1)
-                ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
-                ->select('evaluation_risk.objective_risk_id as risk_id','risks.id as risk')
-                ->groupBy('risks.id')->get();
+            $eval1 = \Ermtool\Evaluation::getObjectiveRiskFromEval($org,NULL,$ano,$mes,$dia);
 
             if ($subs) //se deben seleccionar tambien los riesgos de las organizaciones dependientes
             {
@@ -234,16 +175,7 @@ class Evaluation extends Model
 
                 foreach ($orgs as $org2) //para cada una de ellas guardamos sus evaluaciones en array temporal
                 {
-                    $eval_temp = DB::table('evaluation_risk')
-                            ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                            ->join('objective_risk','objective_risk.id','=','evaluation_risk.objective_risk_id')
-                            ->join('risks','risks.id','=','objective_risk.risk_id')
-                            ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                            ->where('objectives.organization_id','=',$org2->id)
-                            ->where('evaluations.consolidation','=',1)
-                            ->where('evaluations.updated_at','<=',date($ano.'-'.$mes).'-31 23:59:59')
-                            ->select('evaluation_risk.objective_risk_id as risk_id','risks.id as risk')
-                            ->groupBy('risks.id')->get();
+                    $eval_temp = \Ermtool\Evaluation::getObjectiveRiskFromEval($org,NULL,$ano,$mes,$dia);
 
                     foreach ($eval_temp as $e)
                     {
@@ -264,5 +196,80 @@ class Evaluation extends Model
             }
         }
 
+    }
+
+    public static function getSubprocessRiskFromEval($org,$cat,$ano,$mes,$dia)
+    {
+        if ($cat == NULL)
+        {
+           return $eval1 = DB::table('evaluation_risk')
+                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
+                ->join('risks','risks.id','=','organization_risk.risk_id')
+                ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                ->whereNotNull('evaluation_risk.organization_risk_id')
+                ->where('organization_risk.organization_id','=',$org)
+                ->where('organization_subprocess.organization_id','=',$org)
+                ->where('evaluations.updated_at','<=',date($ano.$mes).$dia.' 23:59:59')
+                ->where('evaluations.consolidation','=',1)
+                ->select('evaluation_risk.organization_risk_id as risk_id','risks.id as risk')
+                ->groupBy('evaluation_risk.organization_risk_id','risks.id')
+                ->get(); 
+        }
+        else
+        {
+            return $eval1 = DB::table('evaluation_risk')
+                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
+                ->join('risks','risks.id','=','organization_risk.risk_id')
+                ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                ->where('risks.risk_category_id','=',$cat)
+                ->whereNotNull('evaluation_risk.organization_risk_id')
+                ->where('organization_risk.organization_id','=',$org)
+                ->where('organization_subprocess.organization_id','=',$org)
+                ->where('evaluations.updated_at','<=',date($ano.$mes).$dia.' 23:59:59')
+                ->where('evaluations.consolidation','=',1)
+                ->select('evaluation_risk.organization_risk_id as risk_id','risks.id as risk')
+                ->groupBy('evaluation_risk.organization_risk_id','risks.id')
+                ->get();
+        }
+    }
+
+    public static function getObjectiveRiskFromEval($org,$cat,$ano,$mes,$dia)
+    {
+        //ahora validamos mes
+            if ($cat == NULL)
+            {
+                return DB::table('evaluation_risk')
+                        ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                        ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
+                        ->join('risks','risks.id','=','organization_risk.risk_id')
+                        ->join('objective_risk','objective_risk.risk_id','=','organization_risk.risk_id')
+                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                        ->where('objectives.organization_id','=',$org)
+                        ->where('evaluations.consolidation','=',1)
+                        ->where('evaluations.updated_at','<=',date($ano.$mes).$dia.' 23:59:59')
+                        ->select('evaluation_risk.organization_risk_id as risk_id','risks.id as risk')
+                        ->groupBy('evaluation_risk.organization_risk_id','risks.id')
+                        ->get();
+            }
+            else
+            {
+                return DB::table('evaluation_risk')
+                        ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                        ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
+                        ->join('risks','risks.id','=','organization_risk.risk_id')
+                        ->join('objective_risk','objective_risk.risk_id','=','organization_risk.risk_id')
+                        ->where('risks.risk_category_id','=',$cat)
+                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                        ->where('objectives.organization_id','=',$org)
+                        ->where('evaluations.consolidation','=',1)
+                        ->where('evaluations.updated_at','<=',date($ano.$mes).$dia.' 23:59:59')
+                        ->select('evaluation_risk.organization_risk_id as risk_id','risks.id as risk')
+                        ->groupBy('evaluation_risk.organization_risk_id','risks.id')
+                        ->get();
+            }
     }
 }

@@ -100,7 +100,7 @@ function subprocesscontrol()
 {
 	if ($('#process_id').val() != '' && $("#organization_id").val() != '' && $("#control_kind").val() == 2 && $('#subprocess_id').val() != '')
 	{
-		$.get('controles.get_subprocess_controls.'+$("#subprocess_id").val(), function (result) {
+		$.get('controles.get_subprocess_controls.'+$("#organization_id").val()+'.'+$("#subprocess_id").val(), function (result) {
 				var datos = JSON.parse(result);
 				var controles = '<div class="form-group">'
 				controles += '<label for="control_id" class="col-sm-4 control-label">Seleccione control</label>'

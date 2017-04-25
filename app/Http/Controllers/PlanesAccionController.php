@@ -25,7 +25,8 @@ class PlanesAccionController extends Controller
             $planes = DB::table('issues')
                         ->join('action_plans','action_plans.issue_id','=','issues.id')
                         ->where('issues.organization_id','=',$id)
-                        ->groupBy('action_plans.id')
+                        ->groupBy('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name','issues.organization_id')
                         ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
                                 'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.organization_id as org_id')
                         ->get();
@@ -36,7 +37,8 @@ class PlanesAccionController extends Controller
                         ->join('audit_audit_plan','audit_audit_plan.id','=','issues.audit_audit_plan_id')
                         ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
                         ->where('audit_plans.organization_id','=',$id)
-                        ->groupBy('action_plans.id')
+                        ->groupBy('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name','issues.audit_audit_plan_id')
                         ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
                                 'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.audit_audit_plan_id as audit_plan_id')
                         ->get();
@@ -48,7 +50,8 @@ class PlanesAccionController extends Controller
                         ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
                         ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
                         ->where('audit_plans.organization_id','=',$id)
-                        ->groupBy('action_plans.id')
+                        ->groupBy('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name','issues.audit_audit_plan_audit_program_id')
                         ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
                                 'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.audit_audit_plan_audit_program_id as program_id')
                         ->get();
@@ -61,7 +64,8 @@ class PlanesAccionController extends Controller
                         ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
                         ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
                         ->where('audit_plans.organization_id','=',$id)
-                        ->groupBy('action_plans.id')
+                        ->groupBy('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name','issues.audit_test_id')
                         ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
                                 'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.audit_test_id as test_id')
                         ->get();
@@ -69,26 +73,17 @@ class PlanesAccionController extends Controller
             //planes de control de entidad asociados a la organización
             $planes5 = DB::table('issues')
                         ->join('action_plans','action_plans.issue_id','=','issues.id')
-                        ->join('control_objective_risk','control_objective_risk.control_id','=','issues.control_id')
-                        ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
-                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                        ->where('objectives.organization_id','=',$id)
-                        ->groupBy('action_plans.id')
+                        ->join('control_organization_risk','control_organization_risk.control_id','=','issues.control_id')
+                        ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                        ->join('controls','controls.id','=','control_organization_risk.control_id')
+                        ->where('organization_risk.organization_id','=',$id)
+                        ->groupBy('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name','control_organization_risk.control_id','controls.type2')
                         ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
-                                'action_plans.status','action_plans.stakeholder_id','issues.name as issue','control_objective_risk.control_id as control_objective_risk_id')
+                                'action_plans.status','action_plans.stakeholder_id','issues.name as issue','control_organization_risk.control_id as control_organization_risk_id','controls.type2')
                         ->get();
 
-            //planes de control de proceso asociados a la organización
-            $planes6 = DB::table('issues')
-                        ->join('action_plans','action_plans.issue_id','=','issues.id')
-                        ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','issues.control_id')
-                        ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
-                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                        ->where('organization_subprocess.organization_id','=',$id)
-                        ->groupBy('action_plans.id')
-                        ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
-                                'action_plans.status','action_plans.stakeholder_id','issues.name as issue','control_risk_subprocess.control_id as control_risk_subprocess_id')
-                        ->get();
+            $planes6 = array(); //ACT 05-04 ya no se necesita diferenciar entre controles de entidad o de proceso ya que están todos dentro de planes5
 
             //planes asociados a un subproceso perteneciente a la organización
             $planes7 = DB::table('issues')
@@ -96,7 +91,8 @@ class PlanesAccionController extends Controller
                         ->join('subprocesses','subprocesses.id','=','issues.subprocess_id')
                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                         ->where('organization_subprocess.organization_id','=',$id)
-                        ->groupBy('action_plans.id')
+                        ->groupBy('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name','issues.subprocess_id')
                         ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
                                 'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.subprocess_id as subprocess_id')
                         ->get(); 
@@ -107,7 +103,8 @@ class PlanesAccionController extends Controller
                         ->join('subprocesses','subprocesses.process_id','=','processes.id')
                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                         ->where('organization_subprocess.organization_id','=',$id)
-                        ->groupBy('action_plans.id')
+                        ->groupBy('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                'action_plans.status','action_plans.stakeholder_id','issues.name','issues.process_id')
                         ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
                                 'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.process_id as process_id')
                         ->get(); 
@@ -148,8 +145,9 @@ class PlanesAccionController extends Controller
                         $resp = 'Responsable is not defined';
                         $resp_mail = 'Responsable is not defined';
                     }
-                    if ($plan->status === 0)
+                    if ($plan->status == 0)
                     {
+
                         $status = 'In progress';
                     }
                     else if ($plan->status == 1)
@@ -177,11 +175,11 @@ class PlanesAccionController extends Controller
                     {
                         $origin = 'Audit test issue';
                     }
-                    else if (isset($plan->control_objective_risk_id))
+                    else if (isset($plan->type2) && $plan->type2 == 1)
                     {
                         $origin = 'Entity control issue';
                     }
-                    else if (isset($plan->control_risk_subprocess_id))
+                    else if (isset($plan->type2) && $plan->type2 == 0)
                     {
                         $origin = 'Process control issue';
                     }
@@ -208,7 +206,7 @@ class PlanesAccionController extends Controller
                         $resp = 'No se ha definido responsable';
                         $resp_mail = 'No se ha definido responsable';
                     }
-                    if ($plan->status === 0)
+                    if ($plan->status == 0)
                     {
                         $status = 'En progreso';
                     }
@@ -237,11 +235,11 @@ class PlanesAccionController extends Controller
                     {
                         $origin = 'Hallazgo de prueba de auditoría';
                     }
-                    else if (isset($plan->control_objective_risk_id))
+                    else if (isset($plan->type2) && $plan->type2 == 1)
                     {
                         $origin = 'Hallazgo de control de entidad';
                     }
-                    else if (isset($plan->control_risk_subprocess_id))
+                    else if (isset($plan->type2) && $plan->type2 == 0)
                     {
                         $origin = 'Hallazgo de control de proceso';
                     }
@@ -417,12 +415,7 @@ class PlanesAccionController extends Controller
         $org_name = \Ermtool\Organization::where('id',$org)->value('name');
 
         //obtenemos stakeholders de la misma organización
-        $stakes = DB::table('stakeholders')
-                    ->join('organization_stakeholder','organization_stakeholder.stakeholder_id','=','stakeholders.id')
-                    ->where('organization_stakeholder.organization_id','=',$org)
-                    ->select('stakeholders.id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-                    ->orderBy('name')
-                    ->lists('full_name', 'id');
+        $stakes = \Ermtool\Stakeholder::listStakeholders($org);
 
         if (Session::get('languaje') == 'en')
         {
@@ -441,7 +434,7 @@ class PlanesAccionController extends Controller
         //encontramos hallazgos de organización
         $i = new Issues;
 
-        $issues_temp = $i->getIssues($kind,$org,3);
+        $issues_temp = $i->getIssues($kind,NULL,$org,NULL);
 
         //dentro de estas issues, vemos cuales ya tienen planes de acción y las omitimos
         $i = 0;
@@ -589,12 +582,7 @@ class PlanesAccionController extends Controller
             $org_id = \Ermtool\Organization::where('id',$_GET['org'])->value('id');
 
             //obtenemos stakeholders de la misma organización
-            $stakes = DB::table('stakeholders')
-                        ->join('organization_stakeholder','organization_stakeholder.stakeholder_id','=','stakeholders.id')
-                        ->where('organization_stakeholder.organization_id','=',$_GET['org'])
-                        ->select('stakeholders.id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-                        ->orderBy('name')
-                        ->lists('full_name', 'id');
+            $stakes = \Ermtool\Stakeholder::listStakeholders($_GET['org']);
 
             $action_plan = \Ermtool\Action_plan::find($id);
 
@@ -675,7 +663,7 @@ class PlanesAccionController extends Controller
                         'stakeholder_id' => $stakeholder_id,
                         'final_date' => $final_date,
                         'status' => $status,
-                        'updated_at' => date('Y-m-d H:i:s')
+                        'updated_at' => date('Ymd H:i:s')
                     ]);
 
                 if($GLOBALS['evidence'] != NULL)
@@ -2084,9 +2072,14 @@ class PlanesAccionController extends Controller
         {
             //verificaremos en una variable diferencia en días entre fecha final y fecha actual
             $date = $p->final_date;
-            $seconds=strtotime($date) - strtotime(date('Y-m-d'));
-            $dif = intval($seconds/60/60/24);
+            $date = new DateTime($date);
+            //$date = date_format($date,'Y-m-d');
+            $date_actual = new DateTime(date('Y-m-d'));
+            //$seconds= $date - $date_actual;
+            //$dif = intval($seconds/60/60/24);
 
+            $dif = $date_actual->diff($date);
+            $dif = (int)$dif->format('%a');
             //usaremos como estándar 2 semanas (14 días) para enviar alerta, sin embargo es modificable AQUÍ
             if ($dif <= 14)
             {
@@ -2120,7 +2113,7 @@ class PlanesAccionController extends Controller
                         }
                         else
                         {
-                            $msj->to($stakeholder_mail, $name)->subject('Plan de acción próximo a cerrar!');
+                            $msj->to($stakeholder_mail, $name)->subject('Plan de accion proximo a cerrar!');
                         }
                     });
                 }

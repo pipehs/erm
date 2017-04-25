@@ -89,7 +89,7 @@
 						<div class="col-sm-5">
 							{!!Form::select('risk_category_id',$categorias,
 							 	   null, 
-							 	   ['id'=>'categoria','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+							 	   ['id'=>'categoria','placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
 					<div class="form-group">
@@ -176,6 +176,23 @@
 							@endif
 							</div>
 							<div style="cursor:hand" onclick="agregar_efecto()"><font color="CornflowerBlue"><u>Agregar Nuevo Efecto</u></font></div> <br>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="organization_id" class="col-sm-4 control-label">Seleccione otras organizaciones que se encuentren expuestas al riesgo (opcionalmente)</label>
+						<div class="col-sm-5">
+						@if (strstr($_SERVER["REQUEST_URI"],'edit'))
+								<select name="organization_id[]" multiple id="organization_id">
+								@foreach ($organizations as $o)
+								<?php $org = explode(',',$o); ?>
+										<option value="{{ $org[0] }}">{{ $org[1] }}</option>
+								@endforeach
+								</select>
+						@else
+							{!!Form::select('organization_id[]',$organizations,null, 
+							 	   ['id' => 'el2','multiple'=>'true'])!!}
+						@endif
 						</div>
 					</div>
 

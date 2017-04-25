@@ -6,7 +6,7 @@
 					<ul class="dropdown-menu" style="{{ dropDown4() }}">
 						<li>{!!HTML::link('heatmap','Mapa de Calor',['class'=>activeMenu('heatmap')])!!}</li>
 						<li>{!!HTML::link('risk_matrix','Matriz de Riesgos',['class'=>activeMenu('risk_matrix')])!!}</li>
-						<li>{!!HTML::link('matrices','Matriz de Control',['class'=>activeMenu('matrices')])!!}</li>
+						<li>{!!HTML::link('matrices','Matriz de Controles',['class'=>activeMenu('matrices')])!!}</li>
 						<li>{!!HTML::link('reporte_hallazgos','Hallazgos',['class'=>activeMenu('reporte_hallazgos')])!!}</li>
 						<li>{!!HTML::link('reporte_audits','Planes de Auditor&iacute;a',['class'=>activeMenu('reporte_audits')])!!}</li>
 						<li>{!!HTML::link('reporte_planes','Planes de Acci&oacute;n',['class'=>activeMenu('reporte_planes')])!!}</li>

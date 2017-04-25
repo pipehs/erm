@@ -4,9 +4,25 @@ namespace Ermtool;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use Auth;
+use Carbon;
+use stdClass;
 
 class Control extends Model
 {
+    public function getCreatedAtAttribute($date)
+    {
+        if(Auth::check())
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
+        else
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
+    }
+
+    public function getUpdatedAtAttribute($date)
+    {
+        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
+    }
+    
      protected $fillable = ['name','description','expiration_date','type','type2','evidence','periodicity','purpose','stakeholder_id','expected_cost'];
 
     public function stakeholders()
@@ -22,31 +38,100 @@ class Control extends Model
 
     public static function getBussinessControls($org)
     {
-    	$ctrl = DB::table('controls')
-                    ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
-                    ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+        //ACTUALIZACIÓN 31-03-17: Obtenemos primero riesgos de negocio
+        $risks = DB::table('objective_risk')
                     ->join('objectives','objectives.id','=','objective_risk.objective_id')
                     ->where('objectives.organization_id','=',$org)
+                    ->groupBy('objective_risk.risk_id')
+                    ->select('objective_risk.risk_id')
+                    ->get();
+
+        $controls = array();
+        $i = 0;
+        foreach ($risks as $risk)
+        {
+            $ctrls = DB::table('controls')
+                    ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+                    ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                    ->where('organization_risk.organization_id','=',$org)
+                    ->where('organization_risk.risk_id','=',$risk->risk_id)
                     ->select('controls.*')
                     ->distinct('controls.id')
                     ->get();
 
-        return $ctrl;
+            foreach ($ctrls as $ctrl)
+            {
+                $controls[$i] = [
+                    'id' => $ctrl->id,
+                    'name' => $ctrl->name,
+                    'description' => $ctrl->description,
+                    'created_at' => $ctrl->created_at,
+                    'updated_at' => $ctrl->updated_at,
+                    'expiration_date' => $ctrl->expiration_date,
+                    'type' => $ctrl->type,
+                    'type2' => $ctrl->type2,
+                    'evidence' => $ctrl->evidence,
+                    'periodicity' => $ctrl->periodicity,
+                    'purpose' => $ctrl->purpose,
+                    'expected_cost' => $ctrl->expected_cost,
+                    'stakeholder_id' => $ctrl->stakeholder_id
+                ];
+
+                $i+=1;
+            }
+        }
+
+        $controls = array_unique($controls,SORT_REGULAR);
+        return $controls;
     }
 
     public static function getProcessesControls($org)
     {
-    	$ctrl = DB::table('controls')
-                    ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
-                    ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
-                    ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+        //ACTUALIZACIÓN 31-03-17: Obtenemos primero riesgos de proceso
+        $risks = DB::table('risk_subprocess')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                     ->where('organization_subprocess.organization_id','=',$org)
+                    ->groupBy('risk_subprocess.risk_id')
+                    ->select('risk_subprocess.risk_id')
+                    ->get();
+
+        $controls = array();
+        $i = 0;
+        foreach ($risks as $risk)
+        {
+            $ctrls = DB::table('controls')
+                    ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+                    ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                    ->where('organization_risk.organization_id','=',$org)
+                    ->where('organization_risk.risk_id','=',$risk->risk_id)
                     ->select('controls.*')
                     ->distinct('controls.id')
                     ->get();
 
-        return $ctrl;
+            foreach ($ctrls as $ctrl)
+            {
+                $controls[$i] = [
+                    'id' => $ctrl->id,
+                    'name' => $ctrl->name,
+                    'description' => $ctrl->description,
+                    'created_at' => $ctrl->created_at,
+                    'updated_at' => $ctrl->updated_at,
+                    'expiration_date' => $ctrl->expiration_date,
+                    'type' => $ctrl->type,
+                    'type2' => $ctrl->type2,
+                    'evidence' => $ctrl->evidence,
+                    'periodicity' => $ctrl->periodicity,
+                    'purpose' => $ctrl->purpose,
+                    'expected_cost' => $ctrl->expected_cost,
+                    'stakeholder_id' => $ctrl->stakeholder_id
+                ];
+
+                $i+=1;
+            }
+        }
+
+        $controls = array_unique($controls,SORT_REGULAR);
+        return $controls;
     }
 
     //obtiene controles de proceso de una organización que tienen issues
@@ -55,57 +140,57 @@ class Control extends Model
         if ($kind != NULL)
         {
             //controles de issues generados directamente a través de mantenedor de hallazgos
-            $controls1 = DB::table('control_risk_subprocess')
-                            ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+            $controls1 = DB::table('control_organization_risk')
+                            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                            ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
                             ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                            ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                            ->join('issues','issues.control_id','=','control_risk_subprocess.control_id')
-                            ->join('controls','controls.id','=','control_risk_subprocess.control_id')
-                            ->where('organization_subprocess.organization_id','=',$org)
-                            ->where('subprocesses.id','=',$kind)
+                            ->join('issues','issues.control_id','=','control_organization_risk.control_id')
+                            ->join('controls','controls.id','=','control_organization_risk.control_id')
+                            ->where('organization_risk.organization_id','=',$org)
+                            ->where('subprocesses.process_id','=',$kind)
                             ->select('controls.id','controls.name','controls.description')
-                            ->groupBy('controls.id')
+                            ->groupBy('controls.id','controls.name','controls.description')
                             ->get();
 
             //a través de evaluación de controles
             $controls2 = DB::table('control_evaluation')
-                            ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','control_evaluation.control_id')
-                            ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                            ->join('control_organization_risk','control_organization_risk.control_id','=','control_evaluation.control_id')
+                            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                            ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
                             ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                            ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                             ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
-                            ->join('controls','controls.id','=','control_risk_subprocess.control_id')
-                            ->where('organization_subprocess.organization_id','=',$org)
-                            ->where('subprocesses.id','=',$kind)
+                            ->join('controls','controls.id','=','control_organization_risk.control_id')
+                            ->where('organization_risk.organization_id','=',$org)
+                            ->where('subprocesses.process_id','=',$kind)
                             ->select('controls.id','controls.name','controls.description')
-                            ->groupBy('controls.id')
+                            ->groupBy('controls.id','controls.name','controls.description')
                             ->get();
         }
         else
         {
             //controles de issues generados directamente a través de mantenedor de hallazgos
-            $controls1 = DB::table('control_risk_subprocess')
-                            ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+            $controls1 = DB::table('control_organization_risk')
+                            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                            ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
                             ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                            ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                            ->join('issues','issues.control_id','=','control_risk_subprocess.control_id')
-                            ->join('controls','controls.id','=','control_risk_subprocess.control_id')
-                            ->where('organization_subprocess.organization_id','=',$org)
+                            ->join('issues','issues.control_id','=','control_organization_risk.control_id')
+                            ->join('controls','controls.id','=','control_organization_risk.control_id')
+                            ->where('organization_risk.organization_id','=',$org)
                             ->select('controls.id','controls.name','controls.description')
-                            ->groupBy('controls.id')
+                            ->groupBy('controls.id','controls.name','controls.description')
                             ->get();
 
             //a través de evaluación de controles
             $controls2 = DB::table('control_evaluation')
-                            ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','control_evaluation.control_id')
-                            ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+                            ->join('control_organization_risk','control_organization_risk.control_id','=','control_evaluation.control_id')
+                            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                            ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
                             ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                            ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                             ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
-                            ->join('controls','controls.id','=','control_risk_subprocess.control_id')
-                            ->where('organization_subprocess.organization_id','=',$org)
+                            ->join('controls','controls.id','=','control_organization_risk.control_id')
+                            ->where('organization_risk.organization_id','=',$org)
                             ->select('controls.id','controls.name','controls.description')
-                            ->groupBy('controls.id')
+                            ->groupBy('controls.id','controls.name','controls.description')
                             ->get();
         }
 
@@ -122,51 +207,55 @@ class Control extends Model
         if ($kind != NULL)
         {
             //controles de issues generados directamente a través de mantenedor de hallazgos
-            $controls1 = DB::table('control_objective_risk')
-                            ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+            $controls1 = DB::table('control_organization_risk')
+                            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                            ->join('objective_risk','objective_risk.risk_id','=','organization_risk.risk_id')
                             ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                            ->join('issues','issues.control_id','=','control_objective_risk.control_id')
-                            ->join('controls','controls.id','=','control_objective_risk.control_id')
+                            ->join('issues','issues.control_id','=','control_organization_risk.control_id')
+                            ->join('controls','controls.id','=','control_organization_risk.control_id')
                             ->where('objectives.id','=',$kind)
                             ->select('controls.id','controls.name','controls.description')
-                            ->groupBy('controls.id')
+                            ->groupBy('controls.id','controls.name','controls.description')
                             ->get();
 
             //a través de evaluación de controles
             $controls2 = DB::table('control_evaluation')
-                            ->join('control_objective_risk','control_objective_risk.control_id','=','control_evaluation.control_id')
-                            ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                            ->join('control_organization_risk','control_organization_risk.control_id','=','control_evaluation.control_id')
+                            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                            ->join('objective_risk','objective_risk.risk_id','=','organization_risk.risk_id')
                             ->join('objectives','objectives.id','=','objective_risk.objective_id')
                             ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
-                            ->join('controls','controls.id','=','control_objective_risk.control_id')
+                            ->join('controls','controls.id','=','control_organization_risk.control_id')
                             ->where('objectives.id','=',$kind)
                             ->select('controls.id','controls.name','controls.description')
-                            ->groupBy('controls.id')
+                            ->groupBy('controls.id','controls.name','controls.description')
                             ->get();
         }
         else
         {
             //controles de issues generados directamente a través de mantenedor de hallazgos
-            $controls1 = DB::table('control_objective_risk')
-                            ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+            $controls1 = DB::table('control_organization_risk')
+                            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                            ->join('objective_risk','objective_risk.risk_id','=','organization_risk.risk_id')
                             ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                            ->join('issues','issues.control_id','=','control_objective_risk.control_id')
-                            ->join('controls','controls.id','=','control_objective_risk.control_id')
+                            ->join('issues','issues.control_id','=','control_organization_risk.control_id')
+                            ->join('controls','controls.id','=','control_organization_risk.control_id')
                             ->where('objectives.organization_id','=',$org)
                             ->select('controls.id','controls.name','controls.description')
-                            ->groupBy('controls.id')
+                            ->groupBy('controls.id','controls.name','controls.description')
                             ->get();
 
             //a través de evaluación de controles
             $controls2 = DB::table('control_evaluation')
-                            ->join('control_objective_risk','control_objective_risk.control_id','=','control_evaluation.control_id')
-                            ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                            ->join('control_organization_risk','control_organization_risk.control_id','=','control_evaluation.control_id')
+                            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                            ->join('objective_risk','objective_risk.risk_id','=','organization_risk.risk_id')
                             ->join('objectives','objectives.id','=','objective_risk.objective_id')
                             ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
-                            ->join('controls','controls.id','=','control_objective_risk.control_id')
+                            ->join('controls','controls.id','=','control_organization_risk.control_id')
                             ->where('objectives.organization_id','=',$org)
                             ->select('controls.id','controls.name','controls.description')
-                            ->groupBy('controls.id')
+                            ->groupBy('controls.id','controls.name','controls.description')
                             ->get();
         }
 
@@ -178,22 +267,27 @@ class Control extends Model
     }
 
     //obtiene controles de un subproceso en específico
+    /* //ACT 03-04-17: Usaremos sólo función getControlsFromSubprocess 
     public static function getSubprocessControls($subprocess)
     {
+        
+        $risks = DB::table('risk_subprocess')
+                ->
         $controls = DB::table('controls')
                     ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
                     ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
                     ->where('risk_subprocess.subprocess_id','=',$subprocess)
                     ->select('controls.id','controls.name','controls.description')
-                    ->groupBy('controls.id')
+                    ->select('controls.id','controls.name','controls.description')
                     ->get();
 
         return $controls;
-    }
+    } */
 
+    /*
     public static function getControlsFromRiskSubprocess($risk_subprocess_id)
     {
-        return DB::table('control_risk_subprocess')
+        return DB::table('control_organization_risk')
                 ->where('risk_subprocess_id','=',$risk_subprocess_id)
                 ->select('control_id as id')
                 ->get();
@@ -205,96 +299,116 @@ class Control extends Model
                 ->where('objective_risk_id','=',$objective_risk_id)
                 ->select('control_id as id')
                 ->get();
-    }
+    }*/
 
     public static function getControlsFromProcess($org,$process)
     {
         return DB::table('controls')
-                ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
-                ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
+               ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+                ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
                 ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                ->where('organization_subprocess.organization_id','=',$org)
+                ->where('organization_risk.organization_id','=',$org)
                 ->where('subprocesses.process_id','=',$process)
                 ->select('controls.id','controls.name','controls.description')
-                ->groupBy('controls.id')
+                ->groupBy('controls.id','controls.name','controls.description')
                 ->get();
     }
 
     public static function getControlsFromSubprocess($org, $subprocess)
     {
-        return DB::table('controls')
-                ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
-                ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
-                ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                ->where('organization_subprocess.organization_id','=',$org)
-                ->where('subprocesses.id','=',$subprocess)
-                ->select('controls.id','controls.name','controls.description')
-                ->groupBy('controls.id')
-                ->get();
+        //ACT 03-04-17: Primero seleccionamos riesgos asociados al subproceso y a la org
+        $risks = DB::table('risk_subprocess')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->where('risk_subprocess.subprocess_id','=',$subprocess)
+                    ->select('risk_subprocess.risk_id as id')
+                    ->get();
+
+        foreach ($risks as $risk)
+        {
+            $controls = DB::table('controls')
+                        ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+                        ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                        ->where('organization_risk.organization_id','=',$org)
+                        ->where('organization_risk.risk_id','=',$risk->id)
+                        ->select('controls.id','controls.name','controls.description')
+                        ->groupBy('controls.id','controls.name','controls.description')
+                        ->get();
+        }
+        return $controls;
     }
 
     public static function getControlsFromPerspective($org,$perspective)
     {
         return DB::table('controls')
-                ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
-                ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
+                ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+                ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                ->join('objective_risk','objective_risk.risk_id','=','organization_risk.risk_id')
                 ->join('objectives','objectives.id','=','objective_risk.objective_id')
                 ->where('objectives.organization_id','=',$org)
                 ->where('objectives.perspective','=',$perspective)
                 ->select('controls.id','controls.name','controls.description')
-                ->groupBy('controls.id')
+                ->groupBy('controls.id','controls.name','controls.description')
                 ->get();
     }
 
     public static function getEvaluatedControls($org)
     {
-        $obj_controls = DB::table('control_eval_risk_temp')
-                ->join('control_objective_risk','control_objective_risk.control_id','=','control_eval_risk_temp.control_id')
-                ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
-                ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                ->where('objectives.organization_id','=',$org)
+        $controls = DB::table('control_eval_risk_temp')
+                ->join('control_organization_risk','control_organization_risk.control_id','=','control_eval_risk_temp.control_id')
+                ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                ->where('organization_risk.organization_id','=',$org)
                 ->select('control_eval_risk_temp.control_id as id')
                 ->distinct()
                 ->get();
 
-        $subprocess_controls = DB::table('control_eval_risk_temp')
-                ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','control_eval_risk_temp.control_id')
-                ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
-                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                ->where('organization_subprocess.organization_id','=',$org)
-                ->select('control_eval_risk_temp.control_id as id')
-                ->distinct()
-                ->get();
-        
-        $controls = array_merge($obj_controls,$subprocess_controls);
-        
         return $controls; 
     }
 
     //obtenemos controles de riesgo.
-    public static function getControlsFromRisk($risk)
+    public static function getControlsFromRisk($org,$risk)
     {
         $risks = DB::table('controls')
-                    ->join('control_risk_subprocess','control_risk_subprocess.control_id','=','controls.id')
-                    ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
-                    ->where('risk_subprocess.risk_id','=',$risk)
+                    ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+                    ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                    ->where('organization_risk.risk_id','=',$risk)
+                    ->where('organization_risk.organization_id','=',$org)
                     ->select('controls.id','controls.name','controls.description')
-                    ->groupBy('controls.id')
+                    ->groupBy('controls.id','controls.name','controls.description')
                     ->get();
-
-        if (empty($risks))
-        {
-            $risks = DB::table('controls')
-                    ->join('control_objective_risk','control_objective_risk.control_id','=','controls.id')
-                    ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
-                    ->where('objective_risk.risk_id','=',$risk)
-                    ->select('controls.id','controls.name','controls.description')
-                    ->groupBy('controls.id')
-                    ->get();
-        }
 
         return $risks;
+    }
+
+    public static function getControlOrganizationRisk($control_id,$org_id)
+    {
+        return DB::table('control_organization_risk')
+                    ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                    ->where('control_organization_risk.control_id','=',$control_id)
+                    ->where('organization_risk.organization_id','=',$org_id)
+                    ->select('control_organization_risk.id')
+                    ->get();
+    }
+
+    public static function listControls($org,$type)
+    {
+        return DB::table('controls')
+            ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+            ->where('organization_risk.organization_id','=',$_GET['org'])
+            ->where('controls.type2','=',$type)
+            ->lists('controls.name','controls.id');
+    }
+
+    public static function getControls($org)
+    {
+        return DB::table('controls')
+                ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+                ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                ->where('organization_risk.organization_id','=',(int)$org)
+                ->select('controls.*')
+                ->distinct()
+                ->get();
     }
 }

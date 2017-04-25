@@ -70,15 +70,24 @@
 				{!!Form::hidden('rut',$stakeholder)!!}
 			@endif
 
-			<p>Por cada riesgo identificado, señale un nivel de probabilidad e impacto del mismo. </p>
+			<p>Por cada riesgo identificado, señale un nivel de probabilidad e impacto del mismo.</p>
 
 			@foreach($riesgos as $riesgo)
 				@if ($tipo == 1)
 					{!!Form::hidden('evaluation_risk_id[]',$riesgo['evaluation_risk_id'])!!}
 				@else
-					{!!Form::hidden('evaluation_risk_id[]',$riesgo['risk_id'])!!}
+					{!!Form::hidden('evaluation_risk_id[]',$riesgo['org_risk_id'])!!}
 				@endif
-				<b>- {{ $riesgo['risk_name'] }} - {{ $riesgo['subobj'] }} - {{ $riesgo['orgproc'] }}:</b><br>
+				<b>- {{ $riesgo['risk_name'] }}:</b><br>
+				@if ($riesgo['type'] == 'subprocess')
+					<b>Subprocesos afectados</b><br>
+				@else
+					<b>Objetivos afectados</b><br>
+				@endif
+
+				@foreach ($riesgo['subobj'] as $subobj)
+					<li>{{ $subobj->name }} - {{ $subobj->description }}</li>
+				@endforeach
 				<b><p style="color: blue;">Descripci&oacute;n Riesgo</b>: 
 				{{ $riesgo['description'] }}</p><br>
 				Probabilidad:<br>
@@ -89,16 +98,16 @@
 							<?php $cont = 0; //verificador para ver si hay respuesta ?>
 							@foreach ($user_answers as $answer)
 								@if ($answer['id'] == $riesgo['evaluation_risk_id'] && $answer['probability'] == $i)
-									<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}" checked> {{ $i }} ({{ $tipos_proba[$i-1]->name }})
+									<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}" checked> {{ $i }} ({{ $tipos_proba[5-$i]->name }})
 								<?php $cont += 1; ?>
 								@endif		
 							@endforeach
 
 							@if ($cont == 0)
-								<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[$i-1]->name }})
+								<input type="radio" name="proba_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[5-$i]->name }})
 							@endif
 						@else
-							<input type="radio" name="proba_{{$riesgo['risk_id']}}_{{$riesgo['type']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[$i-1]->name }})
+							<input type="radio" name="proba_{{$riesgo['org_risk_id']}}_{{$riesgo['type']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_proba[5-$i]->name }})
 						@endif
 						<i class="fa fa-circle-o"></i>
 					</label>
@@ -119,10 +128,10 @@
 							@endforeach
 
 							@if ($cont == 0)
-								<input type="radio" name="criticidad_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[$i-1]->name }})
+								<input type="radio" name="criticidad_{{$riesgo['evaluation_risk_id']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[5-$i]->name }})
 							@endif
 						@else
-							<input type="radio" name="criticidad_{{$riesgo['risk_id']}}_{{$riesgo['type']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[$i-1]->name }})
+							<input type="radio" name="criticidad_{{$riesgo['org_risk_id']}}_{{$riesgo['type']}}" required="true" value="{{ $i }}"> {{ $i }} ({{ $tipos_impacto[5-$i]->name }})
 						@endif
 						<i class="fa fa-circle-o"></i>
 					</label>
@@ -145,8 +154,6 @@
 			</div>
 
 			{!!Form::close()!!}
-
-			
 			</div>
 		</div>
 	</div>

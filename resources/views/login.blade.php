@@ -9,6 +9,7 @@
 			<div class="box">
 				<div class="box-content">
 					<div class="text-center">
+						<img src="assets/img/NorteGrande/logo_norte_grande.png" title="Coca Cola Andina" width="300px" height="80px"></img>
 						<img src="assets/img/logoCompleto.PNG" title="Bussiness Governance and Risk Compliance"></img>
 						<h3 class="page-header">Business, Governance, Risk and Compliance</h3>
 					</div>

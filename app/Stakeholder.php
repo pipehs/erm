@@ -4,8 +4,24 @@ namespace Ermtool;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use Auth;
+use Carbon;
+
 class Stakeholder extends Model
 {
+    public function getCreatedAtAttribute($date)
+    {
+        if(Auth::check())
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
+        else
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
+    }
+
+    public function getUpdatedAtAttribute($date)
+    {
+        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
+    }
+    
     protected $fillable = ['id','dv','name','surnames','role','position','mail','organization_id','status'];
     //eliminamos created_at y updated_at
     //public $timestamps = false;
@@ -51,7 +67,7 @@ class Stakeholder extends Model
 
         if ($org == NULL)
         {
-            $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+            $stakeholders = \Ermtool\Stakeholder::where('status',0)->select('id', DB::raw("CONCAT(name, ' ', surnames) AS full_name"))
             ->orderBy('name')
             ->lists('full_name', 'id');
         }
@@ -60,7 +76,7 @@ class Stakeholder extends Model
             $stakeholders = \Ermtool\Stakeholder::where('status',0)
                 ->join('organization_stakeholder','organization_stakeholder.stakeholder_id','=','stakeholders.id')
                 ->where('organization_stakeholder.organization_id','=',$org)
-                ->select('stakeholders.id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
+                ->select('stakeholders.id', DB::raw("CONCAT(name,' ', surnames) AS full_name"))
                 ->orderBy('name')
                 ->lists('full_name', 'id');
         }

@@ -8,22 +8,12 @@
 					</div>
 				@endif
 
-					<div class="form-group" id="procesos" style="display: none;">
-						{!!Form::label('Seleccione Riesgo(s)/Subproceso(s)',null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="form-group" id="riesgos" style="display: none;">
+						<label for="select_riesgos" class="col-sm-4 control-label" id="label_riesgos">Seleccione Riesgo</label>
 						<div class="col-sm-4">
-							<select name="select_procesos[]" id="select_procesos" multiple="multiple">
+							<select name="select_riesgos[]" id="select_riesgos" multiple="multiple">
 								<option value="">-Seleccione-</option>
 								<!-- Aquí se agregarán los riesgos/subprocesos a través de Jquery (en caso de que el usuario lo solicite) -->
-							</select>
-						</div>
-					</div>
-
-					<div class="form-group" id="negocios" style="display: none;">
-						{!!Form::label('Seleccione Riesgo(s)/Negocio(s)',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							<select name="select_objetivos[]" id="select_objetivos" multiple="multiple">
-								<option value="">-Seleccione-</option>
-								<!-- Aquí se agregarán los riesgos/objetivos a través de Jquery (en caso de que el usuario lo solicite) -->
 							</select>
 						</div>
 					</div>
@@ -88,6 +78,8 @@
 							{!!Form::text('evidence',null,['id'=>'nombre','class'=>'form-control'])!!}
 						</div>
 					</div>
+
+					{!!Form::hidden('org_id',$org)!!}
 
 					<div class="form-group">
 						<label for="file" class="col-sm-4 control-label">Cargar documentos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>

@@ -74,46 +74,28 @@
 
 			if ($("#subneg").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 			{
-				if ($("#subneg").val() == 0) //Se seleccionó Riesgos / Procesos
-				{
 					$.get('controles.subneg.'+$("#subneg").val()+'.{{$org}}', function (result) {
 
-							$("#procesos").removeAttr("style").show(); //hacemos visible riesgos / procesos
-							$("#negocios").removeAttr("style").hide(); //ocultamos riesgos / objetivos
-							$("#select_procesos").empty();
-							$("#select_objetivos").empty();
-							$("#select_objetivos").prop('required',false);
-							$("#select_procesos").prop('required',true);
+							$("#riesgos").removeAttr("style").show(500); //hacemos visible riesgos objetivos
+							$("#select_riesgos").empty();
+							$("#select_riesgos").prop('required',true);
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
 							
 							//seteamos datos en select de riesgos / procesos
 							$(datos).each( function() {
-								$("#select_procesos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.subprocess_name +'</option>');
+
+								if (this.description == null)
+								{
+									$("#select_riesgos").append('<option value="' + this.id + '">' + this.risk_name + ' - (Sin descripción)</option>');
+								}
+								else
+								{
+									$("#select_riesgos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.description +'</option>');
+								}
+								
 							});
 					});
-				}
-
-				else if ($("#subneg").val() == 1) //Se seleccionó Riesgos / Objetivos
-				{
-					$.get('controles.subneg.'+$("#subneg").val()+'.{{$org}}', function (result) {
-
-							$("#negocios").removeAttr("style").show(); //hacemos visible riesgos / objetivos
-							$("#procesos").removeAttr("style").hide(); //ocultamos riesgos / procesos
-							$("#select_procesos").empty();
-							$("#select_objetivos").empty();
-							$("#select_objetivos").prop('required',true);
-							$("#select_procesos").prop('required',false);
-							//parseamos datos obtenidos
-							var datos = JSON.parse(result);
-							
-							//seteamos datos en select de riesgos / procesos
-							$(datos).each( function() {
-								$("#select_objetivos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.objective_name +'</option>');
-							});
-					});
-				}
-				
 			}
 
 			else

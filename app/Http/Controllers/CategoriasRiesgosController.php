@@ -61,7 +61,9 @@ class CategoriasRiesgosController extends Controller
                 }
                 else
                 {
-                    $fecha_creacion = date_format($category['created_at'],"d-m-Y");
+                    $lala = new DateTime($category['created_at']);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
+                    //$fecha_creacion = date_format($category['created_at'],"d-m-Y");
                 }
 
                  //damos formato a fecha expiración
@@ -137,7 +139,7 @@ class CategoriasRiesgosController extends Controller
         {
             DB::transaction(function()
             {
-                if ($_POST['risk_category_id'] == NULL)
+                if (!isset($_POST['risk_category_id']) || $_POST['risk_category_id'] == NULL || $_POST['risk_category_id'] == '')
                 {
                     $risk_category_id = NULL;
                 }
@@ -236,13 +238,13 @@ class CategoriasRiesgosController extends Controller
                 $fecha_exp = NULL;
 
                 //vemos si tiene categoría padre
-                if($_POST['risk_category_id'] != "")
+                if (!isset($_POST['risk_category_id']) || $_POST['risk_category_id'] == NULL || $_POST['risk_category_id'] == '')
                 {
-                    $risk_category_id = $_POST['risk_category_id'];
+                    $risk_category_id = NULL;
                 }
                 else
                 {
-                    $risk_category_id = NULL;
+                    $risk_category_id = $risk_category_id = $_POST['risk_category_id'];;
                 }
 
                 $risk_category->name = $_POST['name'];

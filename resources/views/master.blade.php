@@ -32,7 +32,7 @@
  	{!!Html::style('assets/plugins/jquery-ui/jquery-ui.min.css')!!}
  	{!!Html::style('assets/fonts/fontawesome.css')!!}
  	{!!Html::style('assets/fonts/righteous.css')!!}
- 	{!!Html::style('assets/plugins/fancybox/jquery.fancybox.css')!!}
+ 	{!!Html::style('assets/plugins/fancybox-3.0/dist/jquery.fancybox.min.css')!!}
  	{!!Html::style('assets/plugins/fullcalendar/fullcalendar.css')!!}
  	{!!Html::style('assets/plugins/xcharts/xcharts.min.css')!!}
  	{!!Html::style('assets/css/style.css')!!}
@@ -87,8 +87,7 @@
 <div id="content" class="col-xs-12 col-sm-10">
     @yield('content')
 </div>
-</body>
-</html>
+
 	{!!Html::script('http://cdn.jsdelivr.net/webshim/1.12.4/extras/modernizr-custom.js')!!}
 	<!-- polyfiller file to detect and load polyfills -->
 	{!!Html::script('http://cdn.jsdelivr.net/webshim/1.12.4/polyfiller.js')!!}
@@ -108,12 +107,11 @@
 	</script>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" type="text/javascript"></script>
 	{!!Html::script('assets/js/fileinput.min.js')!!}
-	{!!Html::script('assets/plugins/jquery/jquery-2.1.0.min.js')!!}
-	{!!Html::script('assets/plugins/jquery-ui/jquery-ui.min.js')!!}
 	{!!Html::script('assets/plugins/bootstrap/bootstrap.min.js')!!}
 	{!!Html::script('assets/plugins/justified-gallery/jquery.justifiedgallery.min.js')!!}
 	{!!Html::script('assets/plugins/tinymce/tinymce.min.js')!!}
 	{!!Html::script('assets/plugins/tinymce/jquery.tinymce.min.js')!!}
+	{!!Html::script('assets/plugins/fancybox-3.0/dist/jquery.fancybox.min.js')!!}
 	{!!Html::script('assets/js/devoops.js')!!}
 	{!!Html::script('assets/js/scripts.js')!!}
 	{!!Html::script('assets/js/upload.js')!!}
@@ -124,16 +122,14 @@
 
 	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}
 
-	{!!Html::script('assets/js/jquery.min.js')!!}
+
 	{!!Html::script('assets/js/ajax_jquery-ui.min.js')!!}
 	{!!Html::script('assets/js/descargar.js')!!}
 
 	{!!Html::script('assets/bootstrap-toggle-master/js/bootstrap2-toggle.min.js')!!}
 	
 
-
 	@yield('scripts2')
 
-	
-</body>
+</div></div></body>
 </html>

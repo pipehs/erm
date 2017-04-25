@@ -49,8 +49,7 @@
 
 							{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-6">
-								{!!Form::select('stakeholder_id',$stakeholders,null,['required'=>'true',
-								'placeholder'=>'- Seleccione -','id'=>'stakeholder_id','class'=>'first-disabled'])!!}
+								{!!Form::select('stakeholder_id',$stakeholders,null,['placeholder'=>'- Seleccione -','id'=>'stakeholder_id','class'=>'first-disabled'])!!}
 							</div>
 
 						</div>

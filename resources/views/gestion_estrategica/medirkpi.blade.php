@@ -333,7 +333,7 @@
 @section('scripts2')
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
-@if(isset($measurements) && $measurements != "0")
+@if(isset($measurements2) && $measurements2 != "0")
 
     google.charts.load('current', {packages: ['corechart', 'line']});
 	google.charts.setOnLoadCallback(drawBackgroundColor);
@@ -341,7 +341,7 @@
     function drawBackgroundColor() {
         var data = new google.visualization.arrayToDataTable([
           ['Periódo medición', 'Valor medición'],
-        @foreach ($measurements as $measure)
+        @foreach ($measurements2 as $measure)
         	@if (isset($measure->month))
 				["{{ $meses[$measure->month-1] }} de {{ $measure->year }}", {{ $measure->value }}],
 			@elseif (isset($measure->trimester))

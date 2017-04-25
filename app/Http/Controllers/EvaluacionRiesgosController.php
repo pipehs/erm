@@ -44,50 +44,33 @@ class EvaluacionRiesgosController extends Controller
                     $j += 1;
                 }
                     //-- vemos si es de proceso o de negocio --//
-                    if ($risk->risk_subprocess_id != NULL) //es de proceso
-                    {
-                        $sub = DB::table('risk_subprocess')
-                                ->where('risk_subprocess.id','=',$risk->risk_subprocess_id)
-                                ->join('risks','risk_subprocess.risk_id','=','risks.id')
-                                ->join('subprocesses','risk_subprocess.subprocess_id','=','subprocesses.id')
-                                ->join('processes','processes.id','=','subprocesses.process_id')
-                                ->select('risks.name as risk_name','risks.description','subprocesses.name as subprocess_name',
-                                        'processes.name as process_name')
-                                ->get();
+                    //ya no es necesario ver si es de proceso o de negocio
+
+                        $r = \Ermtool\Risk::getRisksFromOrgRisk($risk->organization_risk_id);
 
                         //guardamos el riesgo de subproceso junto a su id de evaluation_risk para crear form de encuesta
-                        foreach ($sub as $sub)
+                        foreach ($r as $r)
                         {
+                            //obtenemos subprocesos u objetivos
+                            $subobj = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($r->id,$r->org_id);
+
+                            if (empty($subobj)) //entonces es de negocio
+                            {
+                                $subobj = \Ermtool\Objective::getObjectivesFromOrgRisk($r->id,$r->org_id);
+                                $type = 'objective';
+                            }
+                            else
+                            {
+                                $type = 'subprocess';
+                            }
+
                             $riesgos[$i] = array('evaluation_risk_id' => $risk->id,
-                                                'risk_name' => $sub->risk_name,
-                                                'description' => $sub->description,
-                                                'subobj' => $sub->subprocess_name,
-                                                'orgproc' => $sub->process_name);
+                                                'risk_name' => $r->risk_name,
+                                                'description' => $r->description,
+                                                'subobj' => $subobj,
+                                                'org' => $r->org,
+                                                'type' => $type);
                         }
-                    }
-
-                    else if ($risk->objective_risk_id != NULL) //es un riesgo de negocio
-                    {
-                        //obtenemos nombre de riesgo y organizacion
-                        $neg = DB::table('objective_risk')
-                                ->where('objective_risk.id','=',$risk->objective_risk_id)
-                                ->join('risks','objective_risk.risk_id','=','risks.id')
-                                ->join('objectives','objective_risk.objective_id','=','objectives.id')
-                                ->join('organizations','objectives.organization_id','=','organizations.id')
-                                ->select('risks.name as risk_name','risks.description','organizations.name as organization_name',
-                                        'objectives.name as objective_name')
-                                ->get();
-
-                        foreach ($neg as $neg)
-                        {
-                            $riesgos[$i] = array('evaluation_risk_id' => $risk->id,
-                                                'risk_name' => $neg->risk_name,
-                                                'description' => $neg->description,
-                                                'subobj' => $neg->objective_name,
-                                                'orgproc' => $neg->organization_name);
-                        }
-                    }
-
                     $i += 1;
             }
 
@@ -195,12 +178,6 @@ class EvaluacionRiesgosController extends Controller
                 {
                     foreach ($_POST['objective_risk_id'] as $objective_risk_id)
                     {
-                        /*
-                            //insertamos riesgo de negocio en evaluation_risk
-                            DB::table('evaluation_risk')->insert([
-                                'evaluation_id' => $eval_id,
-                                'objective_risk_id' => $objective_risk_id,
-                                ]); */
                         $riesgos_objetivos[$i] = $objective_risk_id;
                         $i += 1;
                     }
@@ -211,12 +188,6 @@ class EvaluacionRiesgosController extends Controller
                 {
                     foreach ($_POST['risk_subprocess_id'] as $subprocess_risk_id)
                     {
-                            /*
-                            //inseratmos riesgo de subproceso en evaluation_risk
-                        DB::table('evaluation_risk')->insert([
-                            'evaluation_id' => $eval_id,
-                            'risk_subprocess_id' => $subprocess_risk_id,
-                            ]); */
                         $riesgos_subprocesos[$i] = $subprocess_risk_id;
                         $i += 1;
                     }
@@ -249,8 +220,8 @@ class EvaluacionRiesgosController extends Controller
                             'name' => $_POST['name'],
                             'consolidation' => 0,
                             'description' => $_POST['description'],
-                            'created_at' => date('Y-m-d H:i:s'),
-                            'updated_at' => date('Y-m-d H:i:s'),
+                            'created_at' => date('Ymd H:i:s'),
+                            'updated_at' => date('Ymd H:i:s'),
                             'expiration_date' => $exp_date,
                             ]);
 
@@ -260,9 +231,10 @@ class EvaluacionRiesgosController extends Controller
                             foreach ($_POST['objective_risk_id'] as $objective_risk_id)
                             {                   
                                 //insertamos riesgo de negocio en evaluation_risk
+                                //ACT 30-03-17: objective_risk_id => organizat...
                                 DB::table('evaluation_risk')->insert([
                                     'evaluation_id' => $eval_id,
-                                    'objective_risk_id' => $objective_risk_id,
+                                    'organization_risk_id' => $objective_risk_id,
                                     ]); 
                             }
                         }
@@ -273,9 +245,10 @@ class EvaluacionRiesgosController extends Controller
                             foreach ($_POST['risk_subprocess_id'] as $subprocess_risk_id)
                             {
                                 //inseratmos riesgo de subproceso en evaluation_risk
+                                //ACT 30-03-17: risk_subprocess_id => organizat...
                                 DB::table('evaluation_risk')->insert([
                                     'evaluation_id' => $eval_id,
-                                    'risk_subprocess_id' => $subprocess_risk_id,
+                                    'organization_risk_id' => $subprocess_risk_id,
                                     ]); 
                             }
                         }
@@ -384,39 +357,14 @@ class EvaluacionRiesgosController extends Controller
 
             foreach ($risks as $risk)
             {
-                if ($risk->risk_subprocess_id != NULL) //si es un riesgo de proceso
+                //obtenemos nombre de riesgo y de subproceso
+                $r = \Ermtool\Risk::getRisksFromOrgRisk($risk->organization_risk_id);
+
+                foreach ($r as $r)
                 {
-                    //obtenemos nombre de riesgo y de subproceso
-                    $sub = DB::table('risk_subprocess')
-                            ->where('risk_subprocess.id','=',$risk->risk_subprocess_id)
-                            ->join('risks','risk_subprocess.risk_id','=','risks.id')
-                            ->join('subprocesses','risk_subprocess.subprocess_id','=','subprocesses.id')
-                            ->select('risks.name as risk_name','subprocesses.name as subprocess_name')
-                            ->get();
-
-                    foreach ($sub as $sub)
-                    {
-                        $riesgos[$i] = array('risk_name' => $sub->risk_name,
-                                                'subobj' => $sub->subprocess_name);
-                    }
-                }
-
-                else if ($risk->objective_risk_id != NULL) //es un riesgo de negocio
-                {
-                    //obtenemos nombre de riesgo y organizacion
-                    $neg = DB::table('objective_risk')
-                            ->where('objective_risk.id','=',$risk->objective_risk_id)
-                            ->join('risks','objective_risk.risk_id','=','risks.id')
-                            ->join('objectives','objective_risk.objective_id','=','objectives.id')
-                            ->join('organizations','objectives.organization_id','=','organizations.id')
-                            ->select('risks.name as risk_name','organizations.name as organization_name')
-                            ->get();
-
-                    foreach ($neg as $neg)
-                    {
-                        $riesgos[$i] = array('risk_name' => $neg->risk_name,
-                                                'subobj' => $neg->organization_name);
-                    }
+                    $riesgos[$i] = array('risk_name' => $r->risk_name,
+                                         'description' => $r->description,
+                                         'org' => $r->org);
                 }
 
                 $i += 1;   
@@ -476,11 +424,7 @@ class EvaluacionRiesgosController extends Controller
         }
         else
         {
-            //Se debe inicializar en caso de que no haya sido ingresado ningún stakeholder aun
-            //$stakeholders = \Ermtool\Stakeholder::lists('CONCAT(nombre, " ", apellidos)','id');
-            $stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-            ->orderBy('name')
-            ->lists('full_name', 'id');
+            $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
 
             if (Session::get('languaje') == 'en')
             {
@@ -542,24 +486,19 @@ class EvaluacionRiesgosController extends Controller
             foreach ($subprocess_risk as $risk)
             {
 
-                    $sub = DB::table('risk_subprocess')
-                            ->where('risk_subprocess.id','=',$risk)
-                            ->join('risks','risk_subprocess.risk_id','=','risks.id')
-                            ->join('subprocesses','risk_subprocess.subprocess_id','=','subprocesses.id')
-                            ->join('processes','processes.id','=','subprocesses.process_id')
-                            ->select('risks.name as risk_name','risks.description','subprocesses.name as subprocess_name',
-                                    'processes.name as process_name')
-                            ->get();
+                    $risk1 = \Ermtool\Risk::getRisksFromOrgRisk($risk);
 
                     //guardamos el riesgo de subproceso junto a su id de evaluation_risk para crear form de encuesta
-                    foreach ($sub as $sub)
+                    foreach ($risk1 as $r)
                     {
+                        //obtenemos subprocesos relacionados
+                        $subobj = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($r->id,$r->org_id);
+
                         $riesgos[$i] = array('type' => 'subprocess',
-                                            'risk_id' => $risk,
-                                            'risk_name' => $sub->risk_name,
-                                            'description' => $sub->description,
-                                            'subobj' => $sub->subprocess_name,
-                                            'orgproc' => $sub->process_name);
+                                            'org_risk_id' => $risk,
+                                            'risk_name' => $r->risk_name,
+                                            'description' => $r->description,
+                                            'subobj' => $subobj);
                         $i += 1;
                     }
             }
@@ -567,34 +506,30 @@ class EvaluacionRiesgosController extends Controller
             foreach ($objective_risk as $risk)
             {
                     //obtenemos nombre de riesgo y organizacion
-                    $neg = DB::table('objective_risk')
-                            ->where('objective_risk.id','=',$risk)
-                            ->join('risks','objective_risk.risk_id','=','risks.id')
-                            ->join('objectives','objective_risk.objective_id','=','objectives.id')
-                            ->join('organizations','objectives.organization_id','=','organizations.id')
-                            ->select('risks.name as risk_name','risks.description','organizations.name as organization_name',
-                                    'objectives.name as objective_name')
-                            ->get();
+                    $risk1 = \Ermtool\Risk::getRisksFromOrgRisk($risk);
 
-                    foreach ($neg as $neg)
+                    foreach ($risk1 as $r)
                     {
+                        //obtenemos objetivos relacionados
+                        $subobj = \Ermtool\Objective::getObjectivesFromOrgRisk($r->id,$r->org_id);
+
                         $riesgos[$i] = array('type' => 'objective',
-                                            'risk_id' => $risk,
-                                            'risk_name' => $neg->risk_name,
-                                            'description' => $neg->description,
-                                            'subobj' => $neg->objective_name,
-                                            'orgproc' => $neg->organization_name);
+                                            'org_risk_id' => $risk,
+                                            'risk_name' => $r->risk_name,
+                                            'description' => $r->description,
+                                            'subobj' => $subobj);
                         $i += 1;
                     }
                 
             }
+            $user_answers = array();
             if (Session::get('languaje') == 'en')
             {
                 $tipos_impacto = \Ermtool\Eval_description::getImpactValues(2); //2 es inglés
                 $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(2);
 
                 return view('en.evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
-                        'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id]);
+                        'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id,'user_answers' => $user_answers]);
             }
             else
             {
@@ -602,7 +537,7 @@ class EvaluacionRiesgosController extends Controller
                 $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
 
                 return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
-                        'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id]);
+                        'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id,'user_answers' => $user_answers]);
             }
         }
     }
@@ -697,7 +632,7 @@ class EvaluacionRiesgosController extends Controller
                             ->insert([
                                 'stakeholder_id' => $stakeholder->id,
                                 'evaluation_id' => $request['encuesta_id'],
-                                'created_at' => date('Y-m-d H:i:s'),
+                                'created_at' => date('Ymd H:i:s'),
                                 ]);
 
                         $correos[$i] = $stakeholder->mail;
@@ -803,18 +738,18 @@ class EvaluacionRiesgosController extends Controller
                                 'name' => 'Evaluación Manual',
                                 'consolidation' => 1,
                                 'description' => 'Evaluación Manual',
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s'),
+                                'created_at' => date('Ymd H:i:s'),
+                                'updated_at' => date('Ymd H:i:s'),
                             ]);
                         //insertamos riesgos de evaluación
-                        foreach ($_POST['evaluation_risk_id'] as $risk_id) //OBS: Pueden haber riesgos de negocio y de proceso, por lo que se debe verificar
+                        foreach ($_POST['evaluation_risk_id'] as $risk_id) //OBS: Pueden haber riesgos de negocio y de proceso, por lo que se debe verificar ACT2 30-03-17: Da lo mismo ya que se guardará organization_risk
                         {
                             if (isset($_POST['proba_'.$risk_id.'_subprocess'])) //existe el id como riesgo de proceso
                             {
                                 //inseratmos riesgo de subproceso en evaluation_risk
                                 $evaluation_risk[$i] = DB::table('evaluation_risk')->insertGetId([
                                     'evaluation_id' => $eval_id,
-                                    'risk_subprocess_id' => $risk_id,
+                                    'organization_risk_id' => $risk_id,
                                     'avg_probability' => $_POST['proba_'.$risk_id.'_subprocess'],
                                     'avg_impact' => $_POST['criticidad_'.$risk_id.'_subprocess']
                                     ]);
@@ -835,7 +770,7 @@ class EvaluacionRiesgosController extends Controller
                                 //inseratmos riesgo de negocio en evaluation_risk
                                 $evaluation_risk[$i] = DB::table('evaluation_risk')->insertGetId([
                                     'evaluation_id' => $eval_id,
-                                    'objective_risk_id' => $risk_id,
+                                    'organization_risk_id' => $risk_id,
                                     'avg_probability' => $_POST['proba_'.$risk_id.'_objective'],
                                     'avg_impact' => $_POST['criticidad_'.$risk_id.'_objective']
                                     ]);
@@ -905,54 +840,67 @@ class EvaluacionRiesgosController extends Controller
                 {
                     $i = 0;
                     //volvemos a obtener riesgos para devolver vista correcta
-                    foreach ($_POST['evaluation_risk_id'] as $risk_id)
+                    foreach ($_POST['evaluation_risk_id'] as $risk)
                     {
-                        if (isset($_POST['proba_'.$risk_id.'_subprocess'])) //existe el id como riesgo de proceso
+                        if (isset($_POST['proba_'.$risk.'_subprocess'])) //existe el id como riesgo de proceso
                         {
-                            $sub = DB::table('risk_subprocess')
-                                ->where('risk_subprocess.id','=',$risk_id)
-                                ->join('risks','risk_subprocess.risk_id','=','risks.id')
-                                ->join('subprocesses','risk_subprocess.subprocess_id','=','subprocesses.id')
-                                ->join('processes','processes.id','=','subprocesses.process_id')
-                                ->select('risks.name as risk_name','risks.description','subprocesses.name as subprocess_name',
-                                        'processes.name as process_name')
-                                ->get();
+                            //ACTUALIZACIÓN 30-03: organization_risk
+                            $risk1 = \Ermtool\Risk::getRisksFromOrgRisk($risk);
 
                             //guardamos el riesgo de subproceso junto a su id de evaluation_risk para crear form de encuesta
-                            foreach ($sub as $sub)
+                            foreach ($risk1 as $r)
                             {
+                                //obtenemos subprocesos relacionados
+                                $subprocesses = array();
+
+                                $subs = DB::table('subprocesses')
+                                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                                        ->where('risk_subprocess.risk_id','=',$r->id)
+                                        ->select('subprocesses.name')
+                                        ->get();
+                                $j = 0;
+                                foreach ($subs as $sub)
+                                {
+                                    $subprocesses[$j] = $sub->name;
+                                    $j+=1;
+                                }
                                 $riesgos[$i] = array('type' => 'subprocess',
-                                                    'risk_id' => $risk_id,
-                                                    'risk_name' => $sub->risk_name,
-                                                    'description' => $sub->description,
-                                                    'subobj' => $sub->subprocess_name,
-                                                    'orgproc' => $sub->process_name);
+                                                    'org_risk_id' => $risk,
+                                                    'risk_name' => $r->risk_name,
+                                                    'description' => $r->description,
+                                                    'subobj' => $subprocesses);
                                 $i += 1;
                             }
                         }
 
-                        if (isset($_POST['proba_'.$risk_id.'_objective'])) //existe el id como riesgo de negocio
+                        if (isset($_POST['proba_'.$risk.'_objective'])) //existe el id como riesgo de negocio
                         {
                             //obtenemos nombre de riesgo y organizacion
-                            $neg = DB::table('objective_risk')
-                                    ->where('objective_risk.id','=',$risk_id)
-                                    ->join('risks','objective_risk.risk_id','=','risks.id')
-                                    ->join('objectives','objective_risk.objective_id','=','objectives.id')
-                                    ->join('organizations','objectives.organization_id','=','organizations.id')
-                                    ->select('risks.name as risk_name','risks.description','organizations.name as organization_name',
-                                            'objectives.name as objective_name')
-                                    ->get();
+                            $risk1 = \Ermtool\Risk::getRisksFromOrgRisk($risk);
 
-                            foreach ($neg as $neg)
+                            foreach ($risk1 as $r)
                             {
+                                //obtenemos objetivos relacionados
+                                $objectives = array();
+
+                                $objs = DB::table('objectives')
+                                        ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
+                                        ->where('objective_risk.risk_id','=',$r->id)
+                                        ->select('objectives.name')
+                                        ->get();
+                                $j = 0;
+                                foreach ($objs as $obj)
+                                {
+                                    $objectives[$j] = $obj->name;
+                                    $j+=1;
+                                }
                                 $riesgos[$i] = array('type' => 'objective',
-                                                    'risk_id' => $risk_id,
-                                                    'risk_name' => $neg->risk_name,
-                                                    'description' => $neg->description,
-                                                    'subobj' => $neg->objective_name,
-                                                    'orgproc' => $neg->organization_name);
+                                                    'org_risk_id' => $risk,
+                                                    'risk_name' => $r->risk_name,
+                                                    'description' => $r->description,
+                                                    'subobj' => $objectives);
                                 $i += 1;
-                            }     
+                            }
                         }
                     }
 
@@ -1038,6 +986,29 @@ class EvaluacionRiesgosController extends Controller
             else
             {
                 $mes = $_GET['mes'];
+
+                //ACT 11-04-17: formateamos mes en caso de que no se haya agregado un cero antes
+                if ((int)$mes < 10)
+                {
+                    if (strlen($mes) < 2) //falta un cero
+                    {
+                        $mes = '0'.$mes;
+                    }
+                }
+            }
+
+            //ACT 11-04-17: Formateamos $dia mes escogido
+            if ($mes == '01' || $mes == '03' || $mes == '05' || $mes == '07' || $mes == '08' || $mes == '10') //son 31 días
+            {
+                $dia = '31';
+            }
+            else if ($mes == '02') //febrero, sólo 28 días
+            {
+                $dia = '28';
+            }
+            else
+            {
+                $dia = '30';
             }
 
             //ACTUALIZACIÓN 02-03-2017: Filtro de categoría
@@ -1072,144 +1043,43 @@ class EvaluacionRiesgosController extends Controller
             {
                 //---- consulta multiples join para obtener los subprocesos evaluados relacionados a la organización ----//
                 //para riesgos inherente 
-                $evaluations = \Ermtool\Evaluation::getEvaluationRiskSubprocess($_GET['organization_id'],$category,$subs,$ano,$mes);  
-                foreach ($evaluations as $evaluation)
-                {
-                        //obtenemos promedio de probabilidad e impacto (INHERENTE Y CONTROLADO)
-                        $updated_at_in = DB::table('evaluation_risk')
-                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                    ->where('evaluation_risk.risk_subprocess_id',$evaluation->risk_id)
-                                    ->where('evaluations.consolidation','=',1)
-                                    ->where('evaluations.type','=',1)
-                                    ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-31 23:59:59'))
-                                    ->max('evaluations.updated_at');
-
-                        if ($_GET['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
-                        {
-
-                            //ACTUALIZACIÓN 22-11-16: Obtendremos los riesgos controlados a través de la tabla controlled_risk sólo para la organización y el tipo seleccionado
-                            $updated_at_ctrl = DB::table('controlled_risk')
-                                                ->join('risk_subprocess','risk_subprocess.id','=','controlled_risk.risk_subprocess_id')
-                                                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                                                ->where('controlled_risk.risk_subprocess_id','=',$evaluation->risk_id)
-                                                ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-31 23:59:59'))
-                                                ->max('controlled_risk.created_at');
-                        }
-
-                        $proba_impacto_in = DB::table('evaluation_risk')
-                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                    ->where('evaluations.updated_at','=',$updated_at_in)
-                                    ->where('evaluation_risk.risk_subprocess_id','=',$evaluation->risk_id)
-                                    ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
-                                    ->first();
-
-                        //proba controlado (si es que hay)
-                        if (isset($updated_at_ctrl) && $updated_at_ctrl != NULL)
-                        {
-                            //ACTUALIZACIÓN 01-12: Obtenemos valor de riesgo controlado de controlled_risk_criteria, según la evaluación de controlled_risk
-                            $eval = DB::table('controlled_risk')
-                                        ->where('controlled_risk.risk_subprocess_id','=',$evaluation->risk_id)
-                                        ->where('controlled_risk.created_at','=',$updated_at_ctrl)
-                                        ->select('results')
-                                        ->first();
-
-                            //obtenemos valor de evaluación controlada, para este resultado y con los valores del riesgo inherente
-                            $proba_ctrl = DB::table('controlled_risk_criteria')
-                                                    ->where('dim_eval','=',1)
-                                                    ->where('eval_in_risk','=',$proba_impacto_in->avg_probability)
-                                                    ->where('control_evaluation','=',$eval->results)
-                                                    ->select('eval_ctrl_risk as eval')
-                                                    ->first();
-
-                            $impacto_ctrl = DB::table('controlled_risk_criteria')
-                                                    ->where('dim_eval','=',2)
-                                                    ->where('eval_in_risk','=',$proba_impacto_in->avg_impact)
-                                                    ->where('control_evaluation','=',$eval->results)
-                                                    ->select('eval_ctrl_risk as eval')
-                                                    ->first();
-
-                        }
-
-                        //guardamos proba en $prom_proba_in para inherente
-                        $prom_proba_in[$i] = $proba_impacto_in->avg_probability;
-                        $prom_criticidad_in[$i] = $proba_impacto_in->avg_impact;
-                        
-
-                        //prom_proba_ctrl para controlado (si es que hay)
-                        if (isset($proba_impacto_ctrl))
-                        {
-
-                            $prom_proba_ctrl[$i] = $proba_ctrl->eval;
-                            $prom_criticidad_ctrl[$i] = $impacto_ctrl->eval;
-
-                        }
-                        else
-                        {
-                            $prom_proba_ctrl[$i] = NULL;
-                            $prom_criticidad_ctrl[$i] = NULL;
-                        }
-
-                        //unseteamos variable de proba_impacto_ctrl para que no se repita
-                        unset($proba_impacto_ctrl);
-
-                        //obtenemos nombre del riesgo y lo guardamos en array de riesgo junto al nombre de organización
-                        //ACTUALIZACIÓN 25-07: OBTENEMOS DATOS DEL RIESGO Y LOS POSIBLES SUBPROCESOS ASOCIADOS
-                        $riesgo_temp = \Ermtool\Risk::find($evaluation->risk);
-                        //$subprocesses = $riesgo_temp->subprocesses; ---> NO SIRVE MUESTRA SUBPR. DE OTRAS ORGS.
-
-                        $subprocesses = DB::table('subprocesses')
-                                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                                    ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                                    ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
-                                    ->where('organization_subprocess.organization_id','=',$_GET['organization_id'])
-                                    ->select('subprocesses.name')
-                                    ->get();
-
-                        //foreach ($riesgo_temp as $temp) //el riesgo recién obtenido es almacenado en riesgos
-                        //{
-                            //probamos eliminar espacios en descripcion
-                            $description = preg_replace('(\n)',' ',$riesgo_temp->description);
-                            $description = preg_replace('(\r)',' ',$description);
-
-                            $riesgos[$i] = array('name' => $riesgo_temp->name,
-                                                'subobj' => $subprocesses,
-                                                'description' => $description);
-                        //}
-
-                        $i += 1;
-                }
+                $evaluations = \Ermtool\Evaluation::getEvaluationRiskSubprocess($_GET['organization_id'],$category,$subs,$ano,$mes,$dia);  
             }
             else if ($_GET['kind'] == 1) //evaluaciones de riesgos de negocio
             {
 
-                $evaluations = \Ermtool\Evaluation::getEvaluationObjectiveRisk($_GET['organization_id'],$category,$subs,$ano,$mes); 
-                   
-                foreach ($evaluations as $evaluation)
-                {
+                $evaluations = \Ermtool\Evaluation::getEvaluationObjectiveRisk($_GET['organization_id'],$category,$subs,$ano,$mes,$dia); 
+            }
+
+            foreach ($evaluations as $evaluation)
+            {
                         $updated_at_in = DB::table('evaluation_risk')
                                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                    ->where('evaluation_risk.objective_risk_id','=',$evaluation->risk_id)
+                                    ->where('evaluation_risk.organization_risk_id','=',$evaluation->risk_id)
                                     ->where('evaluations.consolidation','=',1)
                                     ->where('evaluations.type','=',1)
-                                    ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-31 23:59:59'))
+                                    ->where('evaluations.updated_at','<=',date($ano.$mes.$dia.' 23:59:59'))
                                     ->max('evaluations.updated_at');
+
+                        $updated_at_in = str_replace('-','',$updated_at_in);
 
                         if ($_GET['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
                         {
                             //ACTUALIZACIÓN 22-11-16: Obtendremos los riesgos controlados a través de la tabla controlled_risk sólo para la organización y el tipo seleccionado
                             $updated_at_ctrl = DB::table('controlled_risk')
-                                                ->join('objective_risk','objective_risk.id','=','controlled_risk.objective_risk_id')
-                                                ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                                ->where('controlled_risk.objective_risk_id','=',$evaluation->risk_id)
-                                                ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-31 23:59:59'))
+                                                ->join('organization_risk','organization_risk.id','=','controlled_risk.organization_risk_id')
+                                                ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
+                                                ->where('controlled_risk.created_at','<=',date($ano.$mes.$dia.' 23:59:59'))
                                                 ->max('controlled_risk.created_at');
+
+                            $updated_at_ctrl = str_replace('-','',$updated_at_ctrl);
                         }
 
                         //obtenemos promedio de probabilidad e impacto
                         $proba_impacto_in = DB::table('evaluation_risk')
                                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                                     ->where('evaluations.updated_at','=',$updated_at_in)
-                                    ->where('evaluation_risk.objective_risk_id','=',$evaluation->risk_id)
+                                    ->where('evaluation_risk.organization_risk_id','=',$evaluation->risk_id)
                                     ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
                                     ->first();
 
@@ -1219,7 +1089,7 @@ class EvaluacionRiesgosController extends Controller
                         {
                             //ACTUALIZACIÓN 01-12: Obtenemos valor de riesgo controlado de controlled_risk_criteria, según la evaluación de controlled_risk
                             $eval = DB::table('controlled_risk')
-                                        ->where('controlled_risk.objective_risk_id','=',$evaluation->risk_id)
+                                        ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
                                         ->where('controlled_risk.created_at','=',$updated_at_ctrl)
                                         ->select('results')
                                         ->first();
@@ -1227,14 +1097,14 @@ class EvaluacionRiesgosController extends Controller
                             //obtenemos valor de evaluación controlada, para este resultado y con los valores del riesgo inherente
                             $proba_ctrl = DB::table('controlled_risk_criteria')
                                                     ->where('dim_eval','=',1)
-                                                    ->where('eval_in_risk','=',$proba_impacto_in->avg_probability)
+                                                    ->where('eval_in_risk','=',(int)$proba_impacto_in->avg_probability)
                                                     ->where('control_evaluation','=',$eval->results)
                                                     ->select('eval_ctrl_risk as eval')
                                                     ->first();
 
                             $impacto_ctrl = DB::table('controlled_risk_criteria')
                                                     ->where('dim_eval','=',2)
-                                                    ->where('eval_in_risk','=',$proba_impacto_in->avg_impact)
+                                                    ->where('eval_in_risk','=',(int)$proba_impacto_in->avg_impact)
                                                     ->where('control_evaluation','=',$eval->results)
                                                     ->select('eval_ctrl_risk as eval')
                                                     ->first();
@@ -1279,8 +1149,8 @@ class EvaluacionRiesgosController extends Controller
                                             'description' => $description);
 
                         $i += 1;
-                    }      
-                }
+            }      
+            
             
             if ($_GET['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
             {
@@ -1377,61 +1247,24 @@ class EvaluacionRiesgosController extends Controller
             $i = 0;
             //----obtenemos todos los riesgos asociados a la encuesta----//
             //primero obtenemos riesgos de negocio (de existir)
-            $objective_risks = DB::table('evaluation_risk')
-                                ->join('objective_risk','objective_risk.id','=','evaluation_risk.objective_risk_id')
-                                ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                ->join('organizations','organizations.id','=','objectives.organization_id')
-                                ->join('risks','risks.id','=','objective_risk.risk_id')
-                                ->where('evaluation_risk.evaluation_id','=',$id)
-                                ->where('objective_risk_id',"<>","'NULL'")
-                                ->select('evaluation_risk.id as id',
-                                        'risks.name as risk_name','objectives.name as objective_name',
-                                        'organizations.name as organization_name',
-                                        'evaluation_risk.avg_impact as impact',
-                                        'evaluation_risk.avg_probability as probability')->get();
+            //ACTUALIZACIÓN 31-03-17: Solo organization_risk
+            $risks = DB::table('evaluation_risk')
+                        ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
+                        ->join('risks','risks.id','=','organization_risk.risk_id')
+                        ->where('evaluation_risk.evaluation_id','=',$id)
+                        ->select('evaluation_risk.id as id','risks.name as risk_name','risks.description','evaluation_risk.avg_impact as impact','evaluation_risk.avg_probability as probability')
+                        ->get();
 
-            if ($objective_risks) //si es que hay
+            if ($risks) //si es que hay
             {
-                foreach ($objective_risks as $objective_risk)
+                foreach ($risks as $risk)
                 {
                     $evaluations_risks[$i] = array(
-                        'id' => $objective_risk->id,
-                        'risk_name' => $objective_risk->risk_name,
-                        'subobj_name' => $objective_risk->objective_name,
-                        'orgproc_name' => $objective_risk->organization_name,
-                        'impact' => $objective_risk->impact,
-                        'probability' => $objective_risk->probability
-                        );
-
-                    $i += 1;
-                }
-            }
-
-            //ahora obtenemos riesgos de procesos (de existir)
-            $risks_subprocesses = DB::table('evaluation_risk')
-                                ->join('risk_subprocess','risk_subprocess.id','=','evaluation_risk.risk_subprocess_id')
-                                ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                                ->join('processes','processes.id','=','subprocesses.process_id')
-                                ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                                ->where('evaluation_risk.evaluation_id','=',$id)
-                                ->where('risk_subprocess_id',"<>","'NULL'")
-                                ->select('evaluation_risk.id as id',
-                                        'risks.name as risk_name','subprocesses.name as subprocess_name',
-                                        'processes.name as process_name',
-                                        'evaluation_risk.avg_impact as impact',
-                                        'evaluation_risk.avg_probability as probability')->get();
-
-            if ($risks_subprocesses) //si es que hay
-            {
-                foreach ($risks_subprocesses as $risk_subprocess)
-                {
-                    $evaluations_risks[$i] = array(
-                        'id' => $risk_subprocess->id,
-                        'risk_name' => $risk_subprocess->risk_name,
-                        'subobj_name' => $risk_subprocess->subprocess_name,
-                        'orgproc_name' => $risk_subprocess->process_name,
-                        'impact' => $risk_subprocess->impact,
-                        'probability' => $risk_subprocess->probability
+                        'id' => $risk->id,
+                        'risk_name' => $risk->risk_name,
+                        'description' => $risk->description,
+                        'impact' => $risk->impact,
+                        'probability' => $risk->probability
                         );
 
                     $i += 1;

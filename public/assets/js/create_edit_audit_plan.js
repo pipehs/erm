@@ -65,33 +65,7 @@ horasPlan = 0;
 								$("#informacion").append('<small>Recursos: Sin definir </br>');
 							else
 								$("#informacion").append('<small>Recursos: ' + audit.resources +'</br>');
-								
-								if (audit.obj_risks.length > 0)
-								{
-									$("#informacion").append('<h5><b>Riesgos de negocio:<b></h5>');
-									//seteamos datos de cada riesgo de negocio
-									$(audit.obj_risks).each( function(i, risk) {
-										$("#informacion").append('<ul><li>Riesgo: ' + risk.name + '</li><li>Objetivo: ' + risk.objective_name + '</li></ul>');
-									});
-								}
-								else
-								{
-									$("#informacion").append('<h5><b>Riesgos de negocio:</b>Ninguno</h5>');
-								}
-
-								if (audit.sub_risks.length > 0)
-								{
-									$("#informacion").append('<h5><b>Riesgos de procesos:<b></h5>');
-
-									//seteamos datos de cada riesgo de proceso
-									$(audit.sub_risks).each( function(i, risk) {
-										$("#informacion").append('<ul><li>Riesgo: ' + risk.name + '</li><li>Subproceso: ' + risk.subprocess_name + '</li><li>Proceso: ' + risk.process_name + '</li></ul>');
-									});
-								}
-								else
-								{
-									$("#informacion").append('<h5><b>Riesgos de procesos:</b> Ninguno</h5>');
-								}
+					
 
 								if (audit.audit_programs.length > 0)
 								{

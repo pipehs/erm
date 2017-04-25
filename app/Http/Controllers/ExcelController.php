@@ -40,7 +40,7 @@ class ExcelController extends Controller
                     $sheet->fromArray($datos);
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:I1', function($cells) {
+                    $sheet->cells('A1:J1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');
@@ -77,7 +77,7 @@ class ExcelController extends Controller
                     $sheet->setAutoFilter();
 
                     //editamos formato de salida de celdas
-                    $sheet->cells('A1:I1', function($cells) {
+                    $sheet->cells('A1:J1', function($cells) {
                             $cells->setBackground('#013ADF');
                             $cells->setFontColor('#ffffff');
                             $cells->setFontFamily('Calibri');

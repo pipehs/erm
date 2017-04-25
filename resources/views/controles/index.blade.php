@@ -57,8 +57,8 @@
 		<thead>
 		<th>Nombre</th>
 		<th>Descripci&oacute;n</th>
-		<th>Origen del Control</th>
-		<th>Riesgo(s)/Objetivo(s)</th>
+		<th>Riesgo(s)</th>
+		<th width="12%">Objetivo(s)</th>
 		<th>Tipo Control</th>
 		<th>Fecha Agregado</th>
 		<th>Responsable del Control</th>
@@ -72,27 +72,26 @@
 		<?php break; ?>
 		@endif
 	@endforeach
-		<th>Acci&oacute;n</th>
 		</thead>
 
 		@foreach($controls1 as $control)
 			<tr>
 				<td>{{ $control['name'] }}</td>
 				<td>{{ $control['description'] }}</td>
-				<td>
-				@if ($control['type2'] == 0)
-					De Proceso
-				@elseif ($control['type2'] == 1)
-					De Negocio
-				@endif
-				</td>
 				<td><ul>
-				@foreach ($objective_risks as $subneg)
-					@if ($subneg['control_id'] == $control['id'])
-						<li>* {{ $subneg['risk'] }} - {{ $subneg['subneg'] }}</li>
-					@endif
+				@foreach ($control['risks'] as $risk)
+					<li>{{ $risk['name'] }}</li>
 				@endforeach
 				</ul></td>
+				<td>
+				@if ($control['type2'] == 1)
+					<ul>
+					@foreach ($control['objectives'] as $obj)
+							<li>{{ $obj['name'] }}</li>
+					@endforeach
+					</ul>
+				@endif
+				</td>
 				<td>
 				@if ($control['type'] === 0)
 					Manual
@@ -114,7 +113,7 @@
 				</td>
 				<td>
 				@if ($control['evidence'] === NULL)
-					No se ha agregado
+					No se ha definido
 				@else
 					{{ $control['evidence'] }}
 				@endif
@@ -139,12 +138,11 @@
 				</td>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)	
-				<td>{!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
-				<td><button class="btn btn-danger" onclick="eliminar2({{ $control['id'] }},'{{ $control['name'] }}','controles','El control')">Eliminar</button></td>
+				<td>{!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'].'.'.$org_id, $attributes = ['class'=>'btn btn-success']) !!}</td>
+				<td><button class="btn btn-danger" onclick="eliminar2({{ $control['id'] }}.{{ $org_id }},'{{ $control['name'] }}','controles','El control')">Eliminar</button></td>
 			<?php break; ?>
 			@endif
 		@endforeach
-			<td>{!! link_to_route('controles.docs', $title = 'Ver', $parameters = $control['id'], $attributes = ['class'=>'btn btn-warning']) !!}</td>
 			</tr>
 		@endforeach
 		</table>
@@ -160,8 +158,8 @@
 		<thead>
 		<th>Nombre</th>
 		<th>Descripci&oacute;n</th>
-		<th>Origen del Control</th>
-		<th>Riesgo(s)/Subproceso(s)</th>
+		<th>Riesgo(s)</th>
+		<th>Subproceso(s)</th>
 		<th>Tipo Control</th>
 		<th>Fecha Agregado</th>
 		<th>Responsable del Control</th>
@@ -175,27 +173,26 @@
 		<?php break; ?>
 		@endif
 	@endforeach
-		<th>Acci&oacute;n</th>
 		</thead>
 
 		@foreach($controls2 as $control)
 			<tr>
 				<td>{{ $control['name'] }}</td>
 				<td>{{ $control['description'] }}</td>
-				<td>
-				@if ($control['type2'] == 0)
-					De Proceso
-				@elseif ($control['type2'] == 1)
-					De Negocio
-				@endif
-				</td>
 				<td><ul>
-				@foreach ($risks_subprocess as $subneg)
-					@if ($subneg['control_id'] == $control['id'])
-						<li>* {{ $subneg['risk'] }} - {{ $subneg['subneg'] }}</li>
-					@endif
+				@foreach ($control['risks'] as $risk)
+					<li>{{ $risk['name'] }}</li>
 				@endforeach
 				</ul></td>
+				<td>
+				@if ($control['type2'] == 0)
+					<ul>
+					@foreach ($control['subprocesses'] as $sub)
+						<li>{{ $sub['name'] }}</li>
+					@endforeach
+					</ul>
+				@endif
+				</td>
 				<td>
 				@if ($control['type'] === 0)
 					Manual
@@ -218,7 +215,7 @@
 				</td>
 				<td>
 				@if ($control['evidence'] === NULL)
-					No se ha agregado
+					No se ha definido
 				@else
 					{{ $control['evidence'] }}
 				@endif
@@ -243,12 +240,11 @@
 				</td>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)	
-				<td>{!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
-				<td><button class="btn btn-danger" onclick="eliminar2({{ $control['id'] }},'{{ $control['name'] }}','controles','El control')">Eliminar</button></td>
+				<td>{!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'].'.'.$org_id, $attributes = ['class'=>'btn btn-success']) !!}</td>
+				<td><button class="btn btn-danger" onclick="eliminar2({{ $control['id'] }}.{{ $org_id }},'{{ $control['name'] }}','controles','El control')">Eliminar</button></td>
 			<?php break; ?>
 			@endif
 		@endforeach
-			<td>{!! link_to_route('controles.docs', $title = 'Ver', $parameters = $control['id'], $attributes = ['class'=>'btn btn-warning']) !!}</td>
 			</tr>
 		@endforeach
 		</table>

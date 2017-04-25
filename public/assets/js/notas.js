@@ -91,6 +91,11 @@ function notas(id)
 
 							resultado += 'Enviada el: '+answer.created_at+'</div>';
 
+							nombre = "'"+answer.answer+"'";
+							nom2 = "'note_answer'";
+							nom3 = "'La respuesta definida como '";
+							resultado += '<div style="cursor:hand" class="btn btn-danger" onclick="eliminar2('+this.id+','+nombre+','+nom2+','+nom3+')">Eliminar</div>';
+
 						});
 					}
 					var str1 = "notas";
@@ -100,11 +105,9 @@ function notas(id)
 					{
 						if (this.status_origin == 0)
 						{
-							resultado += '<div style="cursor:hand" id="responder_nota_'+this.id+'" onclick="responder_nota('+this.id+','+this.test_id+')" class="btn btn-primary">Responder</div>';
+							resultado += '<br><div style="cursor:hand" id="responder_nota_'+this.id+'" onclick="responder_nota('+this.id+','+this.test_id+')" class="btn btn-primary">Agregar Respuesta</div>';
 							//agregamos div para formulario de creación de nota
 							resultado += '<div id="respuesta_nota_'+this.id+'"  style="display: none; clear: left;"><br><br></div>';
-
-							resultado += "<div style='cursor:hand' class='btn btn-danger'onclick='eliminar2("+this.id+",'"+this.name+"','notas','La nota')'>Eliminar</div>";
 						}
 					}
 					resultado += '<hr style="border-style: inset; border-width: 1px;">';

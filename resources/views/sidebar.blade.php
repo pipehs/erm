@@ -11,7 +11,7 @@
 			</a>
 		</li>
 		
-		
+		<?php $cont = 0; //contador en caso de tener rol de auditor y de audit manager ?>
      	@foreach (Session::get('roles') as $role)
 			@if ($role == 1 || $role == 6) <!-- ADMIN TIENE ACCESO A TODO -->
 				@include('menu.datos_maestros')
@@ -20,18 +20,31 @@
 				@include('menu.controles')
 				@include('menu.auditorias')
 			<?php break; //si es admin terminamos ciclo para no repetir menú ?>
-			@elseif ($role == 8) <!-- Admin. de datos maestros -->
+			@endif
+		@endforeach
+		<!-- ACT 11-04-17: Vuelvo a hacer Foreach sólo para ordenar el menú (ya que por ejemplo, datos maestros aparecía al final por tener id mayor -->
+		@foreach (Session::get('roles') as $role)
+			@if ($role == 8) <!-- Admin. de datos maestros -->
 				@include('menu.datos_maestros')
-			@elseif ($role == 7) <!-- Admin. de estrategía -->
+			@endif
+		@endforeach
+
+		@foreach (Session::get('roles') as $role)
+			@if ($role == 7) <!-- Admin. de datos maestros -->
 				@include('menu.estrategia')
-			@elseif ($role == 2) <!-- Admin. de riesgo -->
+			@endif
+		@endforeach
+
+		@foreach (Session::get('roles') as $role)
+			@if ($role == 2) <!-- Admin. de riesgo -->
 				@include('menu.riesgos')
 			@elseif ($role == 3) <!-- Admin. de control -->
 				@include('menu.controles')
-			@elseif ($role == 4) <!-- Auditor Manager -->
-				@include('menu.auditorias')
-			@elseif ($role == 5) <!-- Auditor -->
-				@include('menu.auditorias')
+			@elseif ($role == 4 || $role == 5) <!-- Auditor Manager o Auditor-->
+				@if ($cont == 0)
+					@include('menu.auditorias')
+					<?php $cont = 1; //contador para ver si ya se agregó este menú ?>
+				@endif
 			@elseif ($role == 6) <!-- Display -->
 				<!-- Ver como hacer el visitante que solo puede ver -->
 			@endif
@@ -55,7 +68,19 @@
 			@endif
 		@endforeach
 
+		<li>
+			<a href="cambiopass" class="{{ activeMenu('cambiopass') }}">
+				<i class="fa fa-wrench"></i>
+				<span class="hidden-xs">Cambiar contraseña</span>
+			</a>
+		</li>
 
+		<li>
+			<a href="help" class="{{ activeMenu('help') }}">
+				<i class="fa fa-question"></i>
+				<span class="hidden-xs">Ayuda</span>
+			</a>
+		</li>
 	@endif
 @else
 					<li>&nbsp;</li>

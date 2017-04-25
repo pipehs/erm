@@ -11,8 +11,8 @@
 						<!--<li><a href="pruebas" class="{{ activeMenu('pruebas') }}">Reporte pruebas de <br>auditor&iacute;a</a></li>-->
 				@foreach (Session::get('roles') as $role)
 					@if ($role != 6)
-						<li><a href="ejecutar_pruebas" class="{{ activeMenu('ejecutar_pruebas') }}">Ejecutar auditor&iacute;a</a></li>
-						<li><a href="supervisar" class="{{ activeMenu('supervisar') }}">Supervisar auditor&iacute;a</a></li>
+						<li><a href="ejecutar_pruebas" class="{{ activeMenu('ejecutar_pruebas') }}">Ejecuci&oacute;n de auditor&iacute;as</a></li>
+						<li><a href="supervisar" class="{{ activeMenu('supervisar') }}">Supervici&oacute;n de auditor&iacute;as</a></li>
 						<li><a href="notas" class="{{ activeMenu('notas') }}">Revisi&oacute;n de notas</a></li>
 						<li><a href="planes_accion" class="{{ activeMenu('planes_accion') }}">Planes de acci&oacute;n</a></li>
 					<?php break; ?>

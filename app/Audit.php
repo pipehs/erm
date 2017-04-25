@@ -4,9 +4,24 @@ namespace Ermtool;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use Auth;
+use Carbon;
 
 class Audit extends Model
 {
+    public function getCreatedAtAttribute($date)
+    {
+        if(Auth::check())
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
+        else
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
+    }
+
+    public function getUpdatedAtAttribute($date)
+    {
+        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
+    }
+    
     protected $fillable = ['name','description'];
 
     public static function name($id)
@@ -27,7 +42,7 @@ class Audit extends Model
                     ->where('audit_plans.organization_id','=',$org)
                     ->where('audits.id','=',$kind)
                     ->select('audits.id','audit_plans.name as audit_plan','audits.name','audits.description')
-                    ->groupBy('audits.id')
+                    ->groupBy('audits.id','audit_plans.name','audits.name','audits.description')
                     ->get();
         }
         else
@@ -38,7 +53,7 @@ class Audit extends Model
                     ->join('audits','audits.id','=','audit_audit_plan.audit_id')
                     ->where('audit_plans.organization_id','=',$org)
                     ->select('audits.id','audit_plans.name as audit_plan','audits.name','audits.description')
-                    ->groupBy('audits.id')
+                    ->groupBy('audits.id','audit_plans.name','audits.name','audits.description')
                     ->get();
         }
 
@@ -56,7 +71,7 @@ class Audit extends Model
                     ->where('audit_plans.organization_id','=',$org)
                     ->whereNotNull('issues.audit_test_id')
                     ->select('audits.id','audits.name','audits.description')
-                    ->groupBy('audits.id')
+                    ->select('audits.id','audits.name','audits.description')
                     ->get();
 
         return $audits;

@@ -47,8 +47,7 @@
 			@endif
 
 			Ingrese la informaci&oacute;n que desea modificar del control.
-				{!!Form::model($control,['route'=>['controles.update',$control->id],'method'=>'PUT','class'=>'form-horizontal',
-				'enctype'=>'multipart/form-data'])!!}
+				{!!Form::model($control,['route'=>['controles.update',$control->id],'method'=>'PUT','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
 					@include('controles.form')
 				{!!Form::close()!!}
 
@@ -68,58 +67,56 @@ $(document).ready(function() {
 
 	if ({{ $control->type2 }} == 0) //control de proceso
 	{
-			$.get('controles.subneg.0', function (result) {
+			$.get('controles.subneg.0.{{$org}}', function (result) {
 
-							$("#procesos").removeAttr("style").show(); //hacemos visible riesgos / procesos
-							$("#negocios").removeAttr("style").hide(); //ocultamos riesgos / objetivos
-							$("#select_procesos").empty();
-							$("#select_objetivos").empty();
-							$("#select_objetivos").prop('required',false);
-							$("#select_procesos").prop('required',true);
+							$("#riesgos").removeAttr("style").show(); //hacemos visible riesgos
+							$("#select_riesgos").empty();
+							$("#select_riesgos").prop('required',true);
+
+							$("#select_riesgos").append('<option value="" disabled>- Seleccione -</option>')
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
 							
 							//seteamos datos en select de riesgos / procesos
 							$(datos).each( function() {
-								$("#select_procesos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.subprocess_name +'</option>');
+								$("#select_riesgos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.description + '<option>');
 							});
 
 				//riesgos seleccionados
 				var risks = JSON.parse('{{ $risks_selected }}');
 				$(risks).each( function() {
-					$("#select_procesos option[value='" + this + "']").attr("selected",true);
+					$("#select_riesgos option[value='" + this + "']").attr("selected",true);
 				});
 
-				$("#select_procesos").change();
+				$("#select_riesgos").change();
 
 			});
 	}
 	else if ({{ $control->type2 }} == 1) //riesgos de negocio
 	{
-			$.get('controles.subneg.1', function (result) {
+			$.get('controles.subneg.1.{{$org}}', function (result) {
 
-							$("#negocios").removeAttr("style").show(); //hacemos visible riesgos / objetivos
-							$("#procesos").removeAttr("style").hide(); //ocultamos riesgos / procesos
-							$("#select_procesos").empty();
-							$("#select_objetivos").empty();
-							$("#select_objetivos").prop('required',true);
-							$("#select_procesos").prop('required',false);
+							$("#riesgos").removeAttr("style").show(); //hacemos visible riesgos
+							$("#select_riesgos").empty();
+							$("#select_riesgos").prop('required',true);
+
+							$("#select_riesgos").append('<option value="" disabled>- Seleccione -</option>')
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
 							
 							//seteamos datos en select de riesgos / procesos
 							$(datos).each( function() {
-								$("#select_objetivos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.objective_name +' - ' + this.organization_name + '<option>');
+								$("#select_riesgos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.description + '<option>');
 							});
 			
 
 				//riesgos seleccionados
 				var risks = JSON.parse('{{ $risks_selected }}');
 				$(risks).each( function() {
-					$("#select_objetivos option[value='" + this + "']").attr("selected",true);
+					$("#select_riesgos option[value='" + this + "']").attr("selected",true);
 				});
 
-				$("#select_objetivos").change();
+				$("#select_riesgos").change();
 
 			});
 	}

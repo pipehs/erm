@@ -4,9 +4,24 @@ namespace Ermtool;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use Auth;
+use Carbon;
 
 class Risk extends Model
 {
+    public function getCreatedAtAttribute($date)
+    {
+        if(Auth::check())
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
+        else
+            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
+    }
+
+    public function getUpdatedAtAttribute($date)
+    {
+        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
+    }
+    
    	protected $fillable = ['name','type','type2','description','expiration_date',
                             'status','stakeholder_id','risk_category_id','cause_id','effect_id','expected_loss'];
 
@@ -35,168 +50,141 @@ class Risk extends Model
     {
         return $this->belongsToMany('Ermtool\Objective');
     }
+    public function organizations()
+    {
+        return $this->belongsToMany('Ermtool\Organization');
+    }
 
     public function evaluations()
     {
         return $this->belongsToMany('Ermtool\Evaluation');
     }
 
-    //obtenemos riesgos de control. type=0 (de proceso) type=1 (de negocio)
+    //obtenemos riesgos de control
     public static function getRisksFromControl($org,$control)
     {
         $risks = DB::table('risks')
-                    ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
-                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                    ->join('control_risk_subprocess','control_risk_subprocess.risk_subprocess_id','=','risk_subprocess.id')
-                    ->where('control_risk_subprocess.control_id','=',$control)
-                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                    ->join('control_organization_risk','control_organization_risk.organization_risk_id','=','organization_risk.id')
+                    ->where('control_organization_risk.control_id','=',$control)
+                    ->where('organization_risk.organization_id','=',(int)$org)
                     ->select('risks.id','risks.name','risks.description')
-                    ->groupBy('risks.id')
+                    ->groupBy('risks.id','risks.name','risks.description')
                     ->get();
-
-        if (empty($risks))
-        {
-            $risks = DB::table('risks')
-                    ->join('objective_risk','objective_risk.risk_id','=','risks.id')
-                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                    ->join('control_objective_risk','control_objective_risk.objective_risk_id','=','objective_risk.id')
-                    ->where('control_objective_risk.control_id','=',$control)
-                    ->where('objectives.organization_id','=',$org)
-                    ->select('risks.id','risks.name','risks.description')
-                    ->groupBy('risks.id')
-                    ->get();
-        }
 
         return $risks;
     }
 
     public static function getObjectiveRisks($org)
     {
-        return DB::table('objective_risk')
-                ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                ->join('risks','risks.id','=','objective_risk.risk_id')
-                ->join('organizations','organizations.id','=','objectives.organization_id')
-                ->where('organizations.id','=',$org)
+        //ACTUALIZACIÓN 29-03-17: Se obtendrán riesgos de la organización (organization_risk) que además sean riesgos de negocio
+        //ACT 10-04-17: Agregamos opción NULL por KRI
+        if ($org == NULL)
+        {
+            return DB::table('objective_risk')
+                ->join('organization_risk','organization_risk.risk_id','=','objective_risk.risk_id')
+                ->join('risks','risks.id','=','organization_risk.risk_id')
                 ->where('risks.type2','=',1)
-                ->select('objective_risk.id as id','risks.id as risk_id','risks.name as risk_name','objectives.name as objective_name')
+                ->groupBy('risks.id','risks.name','risks.description')
+                ->select('risks.id as risk_id','risks.name as risk_name','risks.description')
                 ->get();
+        }
+        else
+        {
+            return DB::table('objective_risk')
+                ->join('organization_risk','organization_risk.risk_id','=','objective_risk.risk_id')
+                ->join('risks','risks.id','=','organization_risk.risk_id')
+                ->where('organization_risk.organization_id','=',$org)
+                ->where('risks.type2','=',1)
+                ->groupBy('organization_risk.id','risks.id','risks.name','risks.description')
+                ->select('organization_risk.id as id','risks.id as risk_id','risks.name as risk_name','risks.description')
+                ->get();
+        }
+        
     }
 
     //Función para identificación y matrices de riesgos (igual a la de arriba sólo que para no causar posibles fallos se hizo una nueva agregando la categoría)
-    public static function getObjectiveRisk($org,$category)
+    public static function getRisks($org,$category)
     {
         if ($category == NULL)
         {
+            //primero obtenemos sólo el id de los riesgos y luego su información
+            //ACTUALIZACIÓN 29-03-17: Probablemente group by da lo mismo
             return DB::table('risks')
-                    ->join('objective_risk','objective_risk.risk_id','=','risks.id')
-                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                    ->join('organizations','organizations.id','=','objectives.organization_id')
-                    ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
-                    ->where('objectives.organization_id','=',$org)
+                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                    ->where('organization_risk.organization_id','=',$org)
                     ->where('risks.type2','=',1)
-                    ->groupBy('risks.id')
-                    ->select('risks.*','objectives.name as objective_name','organizations.name as organization_name','risk_categories.name as risk_category_name','objective_risk.id as objective_risk_id')
+                    ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','risks.stakeholder_id')
+                    ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','risks.stakeholder_id')
                     ->get();
         }
         else
         {
             return DB::table('risks')
-                    ->join('objective_risk','objective_risk.risk_id','=','risks.id')
-                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                    ->join('organizations','organizations.id','=','objectives.organization_id')
-                    ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
-                    ->where('objectives.organization_id','=',$org)
+                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                    ->where('organization_risk.organization_id','=',$org)
                     ->where('risks.risk_category_id','=',$category)
                     ->where('risks.type2','=',1)
-                    ->groupBy('risks.id')
-                    ->select('risks.*','objectives.name as objective_name','organizations.name as organization_name','risk_categories.name as risk_category_name','objective_risk.id as objective_risk_id')
+                    ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','risks.stakeholder_id')
+                    ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','risks.stakeholder_id')
+                    ->get();
+        }
+    }
+
+    //ACT 04-04-17: Igual a las de arriba solo que con where de type para proceso o negocio
+    public static function getRisksWithType($org,$category,$type)
+    {
+        if ($category == NULL)
+        {
+            //primero obtenemos sólo el id de los riesgos y luego su información
+            //ACTUALIZACIÓN 29-03-17: Probablemente group by da lo mismo
+            return DB::table('risks')
+                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                    ->where('organization_risk.organization_id','=',$org)
+                    ->where('risks.type2','=',1)
+                    ->where('risks.type','=',$type)
+                    ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','risks.stakeholder_id')
+                    ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','risks.stakeholder_id')
+                    ->get();
+        }
+        else
+        {
+            return DB::table('risks')
+                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                    ->where('organization_risk.organization_id','=',$org)
+                    ->where('risks.risk_category_id','=',$category)
+                    ->where('risks.type2','=',1)
+                    ->where('risks.type','=',$type)
+                    ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','risks.stakeholder_id')
+                    ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','risks.stakeholder_id')
                     ->get();
         }
     }
 
     public static function getRiskSubprocess($org)
     {
-        return DB::table('risk_subprocess')
-                ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                ->where('organization_subprocess.organization_id','=',$org)
-                ->where('risks.type2','=',1)
-                ->select('risk_subprocess.id as id','risks.id as risk_id','risks.name as risk_name','subprocesses.name as subprocess_name')
-                ->get();
-    }
-
-    //Función para identificación y matrices de riesgos (igual a la de arriba sólo que para no causar posibles fallos se hizo una nueva agregando la categoría)
-    public static function getRisksSubprocess($org,$category)
-    {
-        if ($category == NULL)
+        //ACT 10-04-17: Agregamos opción de NULL por KRI  
+        if ($org == NULL)
         {
-            return DB::table('risks')
-                    ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
-                    ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                    ->join('processes','subprocesses.process_id','=','processes.id')
-                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                    ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
-                    ->where('organization_subprocess.organization_id','=',$org)
-                    ->where('risks.type2','=',1)
-                    ->groupBy('risks.id')
-                    ->select('risks.*','subprocesses.name as subprocess_name','processes.name as process_name','risk_categories.name as risk_category_name','risk_subprocess.id as risk_subprocess_id')
-                    ->get();
+            return DB::table('risk_subprocess')
+                ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+                ->join('risks','risks.id','=','risk_subprocess.risk_id')
+                ->where('risks.type2','=',1)
+                ->groupBy('risks.id','risks.name','risks.description')
+                ->select('risks.id as risk_id','risks.name as risk_name','risks.description')
+                ->get();
         }
         else
         {
-            return DB::table('risks')
-                    ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
-                    ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                    ->join('processes','subprocesses.process_id','=','processes.id')
-                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                    ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
-                    ->where('organization_subprocess.organization_id','=',$org)
-                    ->where('risks.risk_category_id','=',$category)
-                    ->where('risks.type2','=',1)
-                    ->groupBy('risks.id')
-                    ->select('risks.*','subprocesses.name as subprocess_name','processes.name as process_name','risk_categories.name as risk_category_name','risk_subprocess.id as risk_subprocess_id')
-                    ->get();
+            return DB::table('risk_subprocess')
+                ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+                ->join('risks','risks.id','=','risk_subprocess.risk_id')
+                ->where('organization_risk.organization_id','=',$org)
+                ->where('risks.type2','=',1)
+                ->groupBy('organization_risk.id','risks.id','risks.name','risks.description')
+                ->select('organization_risk.id as id','risks.id as risk_id','risks.name as risk_name','risks.description')
+                ->get();
         }
-    }
-
-    public static function getRiskSubprocessFromControl($control_id)
-    {
-        return DB::table('control_risk_subprocess')
-                    ->where('control_id','=',$control_id)
-                    ->select('control_risk_subprocess.risk_subprocess_id as id')
-                    ->get();
-    }
-
-    public static function getObjectiveRiskFromControl($control_id)
-    {
-        return DB::table('control_objective_risk')
-                    ->where('control_id','=',$control_id)
-                    ->select('control_objective_risk.objective_risk_id as id')
-                    ->get();
-    }
-
-    public static function getObjectiveRisksFromControl($control_id)
-    {
-        return DB::table('control_objective_risk')
-                    ->join('objective_risk','control_objective_risk.objective_risk_id','=','objective_risk.id')
-                    ->join('objectives','objective_risk.objective_id','=','objectives.id')
-                    ->join('organizations','organizations.id','=','objectives.organization_id')
-                    ->join('risks','objective_risk.risk_id','=','risks.id')
-                    ->where('control_objective_risk.control_id','=',$control_id)
-                    ->select('objectives.name as obj_name','risks.name as risk_name')
-                    ->get();
-    }
-
-    public static function getRisksSubprocessFromControl($control_id)
-    {
-        return DB::table('control_risk_subprocess')
-                    ->join('risk_subprocess','control_risk_subprocess.risk_subprocess_id','=','risk_subprocess.id')
-                    ->join('subprocesses','risk_subprocess.subprocess_id','=','subprocesses.id')
-                    ->join('risks','risk_subprocess.risk_id','=','risks.id')
-                    ->where('control_risk_subprocess.control_id','=',$control_id)
-                    ->select('subprocesses.name as sub_name','risks.name as risk_name')
-                    ->get();
     }
 
     public static function getRisksFromProcess($org,$process_id)
@@ -208,7 +196,7 @@ class Risk extends Model
                 ->where('organization_subprocess.organization_id','=',$org)
                 ->where('subprocesses.process_id','=',$process_id)
                 ->select('risks.id','risks.name','risks.description')
-                ->groupBy('risks.id')
+                ->groupBy('risks.id','risks.name','risks.description')
                 ->get();
     }
 
@@ -221,7 +209,35 @@ class Risk extends Model
                 ->where('organization_subprocess.organization_id','=',$org)
                 ->where('subprocesses.id','=',$subprocess_id)
                 ->select('risks.id','risks.name','risks.description')
-                ->groupBy('risks.id')
+                ->groupBy('risks.id','risks.name','risks.description')
                 ->get();
+    }
+
+    public static function getRisksFromOrgRisk($org_risk)
+    {
+        return DB::table('organization_risk')
+                        ->where('organization_risk.id','=',$org_risk)
+                        ->join('risks','organization_risk.risk_id','=','risks.id')
+                        ->join('organizations','organizations.id','=','organization_risk.organization_id')
+                        ->select('risks.id','risks.name as risk_name','risks.description','organizations.name as org','organizations.id as org_id')
+                        ->get();
+    }
+
+    public static function getOrganizationRisk($org,$risk_id)
+    {
+        return DB::table('organization_risk')
+                ->where('organization_id','=',$org)
+                ->where('risk_id','=',$risk_id)
+                ->select('id')
+                ->first();
+    }
+
+    public static function getEnlacedRisks()
+    {
+        return DB::table('objective_subprocess_risk')
+            ->join('risks as risk_subprocess','risk_subprocess.id','=','objective_subprocess_risk.risk_subprocess_id')
+            ->join('risks as objective_risk','objective_risk.id','=','objective_subprocess_risk.objective_risk_id')
+            ->select('objective_subprocess_risk.id','objective_risk.name as obj_name','risk_subprocess.name as sub_name')
+            ->get();
     }
 }

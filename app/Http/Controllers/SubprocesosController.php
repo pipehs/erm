@@ -82,7 +82,8 @@ class SubprocesosController extends Controller
                 //damos formato a fecha creación
                 if ($subprocess['created_at'] != NULL)
                 {
-                    $fecha_creacion = date_format($subprocess['created_at'],"d-m-Y");
+                    $lala = new DateTime($subprocess['created_at']);
+                    $fecha_creacion = date_format($lala,"d-m-Y");
                 }
                 else
                     $fecha_creacion = NULL;
@@ -90,7 +91,8 @@ class SubprocesosController extends Controller
                 //damos formato a fecha de actualización 
                 if ($subprocess['updated_at'] != NULL)
                 {
-                    $fecha_act = date_format($subprocess['updated_at'],"d-m-Y");
+                    $lala = new DateTime($subprocess['updated_at']);
+                    $fecha_act = date_format($lala,"d-m-Y");
                 }
                 else
                     $fecha_act = NULL;
@@ -166,7 +168,7 @@ class SubprocesosController extends Controller
         {
             DB::transaction(function()
             {
-                if($_POST['subprocess_id'] == NULL)
+                if($_POST['subprocess_id'] == NULL || $_POST['subprocess_id'] == '' || !isset($_POST['subprocess_id']))
                 {
                     $subprocess_id = NULL;
                 }
@@ -175,10 +177,19 @@ class SubprocesosController extends Controller
                     $subprocess_id = $_POST['subprocess_id'];
                 }
 
+                if (isset($_POST['expiration_date']) && $_POST['expiration_date'] != '')
+                {
+                    $expiration_date = $_POST['expiration_date'];
+                }
+                else
+                {
+                    $expiration_date = NULL;
+                }
+
                 $new_subprocess = \Ermtool\Subprocess::create([
                     'name' => $_POST['name'],
                     'description' => $_POST['description'],
-                    'expiration_date' => $_POST['expiration_date'],
+                    'expiration_date' => $expiration_date,
                     'process_id' => $_POST['process_id'],
                     'subprocess_id' => $subprocess_id,
                     ]);
@@ -297,7 +308,16 @@ class SubprocesosController extends Controller
 
                 $subproceso->name = $_POST['name'];
                 $subproceso->description = $_POST['description'];
-                $subproceso->expiration_date = $_POST['expiration_date'];
+
+                if (isset($_POST['expiration_date']) && $_POST['expiration_date'] != '')
+                {
+                    $expiration_date = $_POST['expiration_date'];
+                }
+                else
+                {
+                    $expiration_date = NULL;
+                }
+                $subproceso->expiration_date = $expiration_date;
                 $subproceso->process_id = $_POST['process_id'];
                 $subproceso->subprocess_id = $subprocess_id;
 
@@ -420,15 +440,6 @@ class SubprocesosController extends Controller
 
                 if (empty($rev))
                 {
-                    //ahora si es que tiene alguna prueba de auditoría
-                    $rev = DB::table('audit_tests')
-                            ->where('subprocess_id','=',$GLOBALS['id1'])
-                            ->select('id')
-                            ->get();
-
-                    if (empty($rev))
-                    {
-
                         //ahora se puede eliminar, primero que todo se deben cambiar aquellos subprocesos que dependan de éste
                         DB::table('subprocesses')
                             ->where('subprocess_id','=',$GLOBALS['id1'])
@@ -444,7 +455,6 @@ class SubprocesosController extends Controller
                             ->delete();
 
                         $GLOBALS['res'] = 0;
-                    }
                 }
             }
         });
