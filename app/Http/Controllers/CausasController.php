@@ -61,12 +61,16 @@ class CausasController extends Controller
                 else
                     $fecha_act = NULL;
 
+                //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                $short_des = substr($causa['description'],0,100);
+
                 $causas[$i] = array('id'=>$causa['id'],
                                     'nombre'=>$causa['name'],
                                     'descripcion'=>$causa['description'],
                                     'fecha_creacion'=>$fecha_creacion,
                                     'fecha_act'=>$fecha_act,
-                                    'estado'=>$causa['status']);
+                                    'estado'=>$causa['status'],
+                                    'short_des'=>$short_des);
                 $i += 1;
             }
 

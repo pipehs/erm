@@ -73,10 +73,17 @@
 		<tr>
 		<td>{{ $causa['nombre'] }}</td>
 		<td>
-		@if ($causa['descripcion'] == NULL)
-			Ninguna
+		@if ($causa['descripcion'] == NULL || $causa['descripcion'] == "")
+			No se ha definido descripci&oacute;n
 		@else
-			{{ $causa['descripcion'] }}
+			@if (strlen($causa['descripcion']) > 100)
+				<div id="description_{{$causa['id']}}" title="{{ $causa['descripcion'] }}">{{ $causa['short_des'] }}...
+				<div style="cursor:hand" onclick="expandir({{ $causa['id'] }},'{{ $causa['descripcion'] }}','{{ $causa['short_des'] }}')">
+				<font color="CornflowerBlue">Ver completo</font>
+				</div></div>
+			@else
+				{{ $causa['descripcion'] }}
+			@endif
 		@endif
 		</td>
 		<td>{{ $causa['fecha_creacion'] }}</td>

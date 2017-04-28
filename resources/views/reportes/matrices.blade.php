@@ -98,7 +98,20 @@
 				@foreach ($datos as $dato)
 					<tr>
 						<td>{{$dato['Control']}}</td>
-						<td>{{$dato['Descripción']}}</td>
+						<td>
+						@if ($dato['Descripción'] == NULL || $dato['Descripción'] == "")
+							No se ha definido descripci&oacute;n
+						@else
+							@if (strlen($dato['Descripción']) > 100)
+								<div id="description_{{$dato['id']}}" title="{{ $dato['Descripción'] }}">{{ $dato['short_des'] }}...
+								<div style="cursor:hand" onclick="expandir({{ $dato['id'] }},'{{ $dato['Descripción'] }}','{{ $dato['short_des'] }}')">
+								<font color="CornflowerBlue">Ver completo</font>
+								</div></div>
+							@else
+								{{ $dato['Descripción'] }}
+							@endif
+						@endif
+						</td>
 						<td>{{$dato['Responsable']}}</td>
 						<td>{{$dato['Tipo']}}</td>
 						<td>{{$dato['Periodicidad']}}</td>

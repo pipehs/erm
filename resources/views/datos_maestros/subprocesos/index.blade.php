@@ -92,7 +92,16 @@
 		</ul></td>
 		<td>{{ $subproceso['proceso_relacionado'] }}</td>
 		<td>{{ $subproceso['nombre'] }}</td>
-		<td>{{ $subproceso['descripcion'] }}</td>
+		<td>
+		@if (strlen($subproceso['descripcion']) > 100)
+			<div id="description_{{$subproceso['id']}}" title="{{ $subproceso['descripcion'] }}">{{ $subproceso['short_des'] }}...
+			<div style="cursor:hand" onclick="expandir({{ $subproceso['id'] }},'{{ $subproceso['descripcion'] }}','{{ $subproceso['short_des'] }}')">
+			<font color="CornflowerBlue">Ver completo</font>
+			</div></div>
+		@else
+			{{ $subproceso['descripcion'] }}
+		@endif
+		</td>
 		@if ($subproceso['fecha_creacion'] == NULL)
 			<td>Error al registrar fecha de creaci&oacute;n</td>
 		@else

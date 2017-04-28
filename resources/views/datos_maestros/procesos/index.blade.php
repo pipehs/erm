@@ -108,8 +108,16 @@
 			Aun no hay subprocesos relacionados
 		@endif
 		</td>
-		<td><div id="description" title="{{ $proceso['descripcion'] }}">{{ $proceso['short_des'] }}...
-		<a href="#" onclick="expandir()">Ver completo</a></div></td>
+		<td>
+		@if (strlen($proceso['descripcion']) > 100)
+			<div id="description_{{$proceso['id']}}" title="{{ $proceso['descripcion'] }}">{{ $proceso['short_des'] }}...
+			<div style="cursor:hand" onclick="expandir({{ $proceso['id'] }},'{{ $proceso['descripcion'] }}','{{ $proceso['short_des'] }}')">
+			<font color="CornflowerBlue">Ver completo</font>
+			</div></div>
+		@else
+			{{ $proceso['descripcion'] }}
+		@endif
+		</td>
 		@if ($proceso['fecha_creacion'] == NULL)
 			<td>Error al guardar fecha de creaci&oacute;n</td>
 		@else
@@ -159,16 +167,4 @@
 @stop
 
 @section('scripts2')
-<script>
-
-function expandir()
-{
-	$('#description').html('{{ $proceso["descripcion"] }} <a href="#" onclick="contraer()">Ocultar</a>')
-}
-
-function contraer()
-{
-	$('#description').html('{{ $proceso["short_des"] }} <a href="#" onclick="expandir()">Ver completo</a>')
-}
-</script>
 @stop

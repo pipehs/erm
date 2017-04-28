@@ -91,6 +91,8 @@ class OrganizationController extends Controller
                     $target_client = $organizaciones['target_client'];
                 }
                 
+                //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                $short_des = substr($organizaciones['description'],0,100);
 
                 $organization[$i] = array('id'=>$organizaciones['id'],
                                     'nombre'=>$organizaciones['name'],
@@ -100,7 +102,8 @@ class OrganizationController extends Controller
                                     'vision'=>$vision,
                                     'fecha_exp'=>$fecha_exp,
                                     'serv_compartidos'=>$organizaciones['shared_services'],
-                                    'estado'=>$organizaciones['status']);
+                                    'estado'=>$organizaciones['status'],
+                                    'short_des'=>$short_des);
                 $i += 1;
             }
 

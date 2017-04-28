@@ -77,12 +77,16 @@ class CategoriasRiesgosController extends Controller
                     $fecha_exp = date_format($expiration_date, 'd-m-Y');
                 }
 
+                //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                $short_des = substr($category['description'],0,100);
+
                 $risk_category[$i] = array('id'=>$category['id'],
                                     'nombre'=>$category['name'],
                                     'descripcion'=>$category['description'],
                                     'fecha_creacion'=>$fecha_creacion,
                                     'fecha_exp'=>$fecha_exp,
-                                    'estado'=>$category['status']);
+                                    'estado'=>$category['status'],
+                                    'short_des'=>$short_des);
                 $i += 1;
             }
 

@@ -73,10 +73,17 @@
 		<tr>
 		<td>{{ $efecto['nombre'] }}</td>
 		<td>
-		@if ($efecto['descripcion'] == NULL)
-			Ninguna
+		@if ($efecto['descripcion'] == NULL || $efecto['descripcion'] == "")
+			No se ha definido descripci&oacute;n
 		@else
-			{{ $efecto['descripcion'] }}
+			@if (strlen($efecto['descripcion']) > 100)
+				<div id="description_{{$efecto['id']}}" title="{{ $efecto['descripcion'] }}">{{ $efecto['short_des'] }}...
+				<div style="cursor:hand" onclick="expandir({{ $efecto['id'] }},'{{ $efecto['descripcion'] }}','{{ $efecto['short_des'] }}')">
+				<font color="CornflowerBlue">Ver completo</font>
+				</div></div>
+			@else
+				{{ $efecto['descripcion'] }}
+			@endif
 		@endif
 		</td>
 		<td>{{ $efecto['fecha_creacion'] }}</td>

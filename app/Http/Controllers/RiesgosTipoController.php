@@ -118,6 +118,9 @@ class RiesgosTipoController extends Controller
                     $efectos = NULL;
                 }   
 
+                //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                $short_des = substr($riesgo['description'],0,100);
+
                 $riesgostipo[$i] = array('id'=>$riesgo['id'],
                                     'nombre'=>$riesgo['name'],
                                     'descripcion'=>$riesgo['description'],
@@ -127,7 +130,8 @@ class RiesgosTipoController extends Controller
                                     'causas'=>$causas,
                                     'efectos'=>$efectos,
                                     'categoria'=>$categoria['name'],
-                                    'estado'=>$riesgo['status']);
+                                    'estado'=>$riesgo['status'],
+                                    'short_des'=>$short_des);
                 $i += 1;
             }
             if (Session::get('languaje') == 'en')

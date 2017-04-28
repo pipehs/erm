@@ -120,9 +120,16 @@ class ControlesController extends Controller
                 {
                     $stakeholder2 = NULL;
                 }
-                $controls1[$i] = array('id'=>$control->id,
+
+                //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                $short_des = substr($control->description,0,100);
+                //ACT 27-04-17: eliminamos saltos de línea
+                $description = preg_replace('(\n)',' ',$control->description);
+                $description = preg_replace('(\r)',' ',$description);
+
+                $controls1[$i] = ['id'=>$control->id,
                                     'name'=>$control->name,
-                                    'description'=>$control->description,
+                                    'description'=>$description,
                                     'type'=>$control->type,
                                     'type2'=>$control->type2,
                                     'created_at'=>$fecha_creacion,
@@ -132,7 +139,8 @@ class ControlesController extends Controller
                                     'stakeholder'=>$stakeholder2,
                                    	'expected_cost' => $control->expected_cost,
                                     'risks' => $risks,
-                                    'objectives' => $objectives);
+                                    'objectives' => $objectives,
+                                    'short_des' => $short_des];
                 $i += 1;
             }
 
@@ -1287,8 +1295,11 @@ class ControlesController extends Controller
                         }
                     }
                 }
+
+                //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                $short_des = substr($control->description,0,100);
                         
-                if ($value == 0)
+                if ($value == 0) // matriz de controles de proceso
                 {
 
                     $subprocesses = \Ermtool\Subprocess::getSubprocessesFromControl($org,$control->id);
@@ -1329,31 +1340,68 @@ class ControlesController extends Controller
 
                         if (Session::get('languaje') == 'en')
                         {
-                            $datos[$i] = [//'id' => $control->id,
-                                    'Control' => $control->name,
-                                    'Description' => $control->description,
-                                    'Responsable' => $stakeholder2,
-                                    'Kind' => $type,
-                                    'Periodicity' => $periodicity,
-                                    'Purpose' => $purpose,
-                                    'Expected_cost' => $expected_cost,
-                                    'Evidence' => $evidence,
-                                    'Subprocesses' => $sub,
-                                    'Risks' => $risks2];
+                            if (strstr($_SERVER["REQUEST_URI"],'genexcel')) 
+                            {
+                                $datos[$i] = [//'id' => $control->id,
+                                        'Control' => $control->name,
+                                        'Description' => $control->description,
+                                        'Responsable' => $stakeholder2,
+                                        'Kind' => $type,
+                                        'Periodicity' => $periodicity,
+                                        'Purpose' => $purpose,
+                                        'Expected_cost' => $expected_cost,
+                                        'Evidence' => $evidence,
+                                        'Subprocesses' => $sub,
+                                        'Risks' => $risks2];
+                            }
+                            else
+                            {
+                                $datos[$i] = ['id' => $control->id,
+                                        'Control' => $control->name,
+                                        'Description' => $control->description,
+                                        'Responsable' => $stakeholder2,
+                                        'Kind' => $type,
+                                        'Periodicity' => $periodicity,
+                                        'Purpose' => $purpose,
+                                        'Expected_cost' => $expected_cost,
+                                        'Evidence' => $evidence,
+                                        'Subprocesses' => $sub,
+                                        'Risks' => $risks2,
+                                        'short_des' => $short_des];
+                            }
+
                         }
                         else
                         {
-                            $datos[$i] = [//'id' => $control->id,
-                                    'Control' => $control->name,
-                                    'Descripción' => $control->description,
-                                    'Responsable' => $stakeholder2,
-                                    'Tipo' => $type,
-                                    'Periodicidad' => $periodicity,
-                                    'Propósito' => $purpose,
-                                    'Costo_control' => $expected_cost,
-                                    'Evidencia' => $evidence,
-                                    'Riesgos' => $risks2,
-                                    'Subprocesos' => $sub];
+                            if (strstr($_SERVER["REQUEST_URI"],'genexcel')) 
+                            {
+                                $datos[$i] = [//'id' => $control->id,
+                                        'Control' => $control->name,
+                                        'Descripción' => $control->description,
+                                        'Responsable' => $stakeholder2,
+                                        'Tipo' => $type,
+                                        'Periodicidad' => $periodicity,
+                                        'Propósito' => $purpose,
+                                        'Costo_control' => $expected_cost,
+                                        'Evidencia' => $evidence,
+                                        'Riesgos' => $risks2,
+                                        'Subprocesos' => $sub];
+                            }
+                            else
+                            {
+                                $datos[$i] = ['id' => $control->id,
+                                        'Control' => $control->name,
+                                        'Descripción' => $control->description,
+                                        'Responsable' => $stakeholder2,
+                                        'Tipo' => $type,
+                                        'Periodicidad' => $periodicity,
+                                        'Propósito' => $purpose,
+                                        'Costo_control' => $expected_cost,
+                                        'Evidencia' => $evidence,
+                                        'Riesgos' => $risks2,
+                                        'Subprocesos' => $sub,
+                                        'short_des' => $short_des];
+                            }
                         }
                         $i += 1;
                     }
@@ -1397,8 +1445,10 @@ class ControlesController extends Controller
                         }
                                 
                         if (Session::get('languaje') == 'en')
-                        {         
-                            $datos[$i] = [//'id' => $control->id,
+                        {
+                            if (strstr($_SERVER["REQUEST_URI"],'genexcel')) 
+                            {
+                                $datos[$i] = [//'id' => $control->id,
                                         'Control' => $control->name,
                                         'Description' => $control->description,
                                         'Responsable' => $stakeholder2,
@@ -1409,20 +1459,56 @@ class ControlesController extends Controller
                                         'Evidence' => $evidence,
                                         'Objectives' => $objs,
                                         'Risks' => $risks2];
+                            }
+                            else
+                            {
+                                $datos[$i] = ['id' => $control->id,
+                                        'Control' => $control->name,
+                                        'Description' => $control->description,
+                                        'Responsable' => $stakeholder2,
+                                        'Kind' => $type,
+                                        'Periodicity' => $periodicity,
+                                        'Purpose' => $purpose,
+                                        'Expected_cost' => $expected_cost,
+                                        'Evidence' => $evidence,
+                                        'Objectives' => $objs,
+                                        'Risks' => $risks2,
+                                        'short_des' => $short_des];
+                            }        
+                            
                         }
                         else
                         {
-                            $datos[$i] = [//'id' => $control->id,
-                                        'Control' => $control->name,
-                                        'Descripción' => $control->description,
-                                        'Responsable' => $stakeholder2,
-                                        'Tipo' => $type,
-                                        'Periodicidad' => $periodicity,
-                                        'Propósito' => $purpose,
-                                        'Costo_control' => $expected_cost,
-                                        'Evidencia' => $evidence,
-                                        'Objetivos' => $objs,
-                                        'Riesgos' => $risks2];
+                            if (strstr($_SERVER["REQUEST_URI"],'genexcel')) 
+                            {
+                                $datos[$i] = [//'id' => $control->id,
+                                            'Control' => $control->name,
+                                            'Descripción' => $control->description,
+                                            'Responsable' => $stakeholder2,
+                                            'Tipo' => $type,
+                                            'Periodicidad' => $periodicity,
+                                            'Propósito' => $purpose,
+                                            'Costo_control' => $expected_cost,
+                                            'Evidencia' => $evidence,
+                                            'Objetivos' => $objs,
+                                            'Riesgos' => $risks2];
+                            }
+                            else
+                            {
+                                $datos[$i] = ['id' => $control->id,
+                                            'Control' => $control->name,
+                                            'Descripción' => $control->description,
+                                            'Responsable' => $stakeholder2,
+                                            'Tipo' => $type,
+                                            'Periodicidad' => $periodicity,
+                                            'Propósito' => $purpose,
+                                            'Costo_control' => $expected_cost,
+                                            'Evidencia' => $evidence,
+                                            'Objetivos' => $objs,
+                                            'Riesgos' => $risks2,
+                                            'short_des' => $short_des];
+                            }
+
                         }
                         $i += 1;
                     }

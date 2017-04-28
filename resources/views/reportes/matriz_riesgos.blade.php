@@ -14,7 +14,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Reportes B&aacute;sicos</a></li>
-			<li><a href="heatmap">Matriz de riesgos</a></li>
+			<li><a href="risk_matrix">Matriz de riesgos</a></li>
 		</ol>
 	</div>
 <div class="row">
@@ -131,7 +131,20 @@
 					@endif
 					</td>
 					<td>{{$dato['Riesgo']}}</td>
-					<td>{{$dato['Descripción']}}</td>
+					<td> 
+					@if ($dato['Descripción'] == NULL || $dato['Descripción'] == "")
+						No se ha definido descripci&oacute;n
+					@else
+						@if (strlen($dato['Descripción']) > 100)
+							<div id="description_{{$dato['id']}}" title="{{ $dato['Descripción'] }}">{{ $dato['short_des'] }}...
+							<div style="cursor:hand" onclick="expandir({{ $dato['id'] }},'{{ $dato['Descripción'] }}','{{ $dato['short_des'] }}')">
+							<font color="CornflowerBlue">Ver completo</font>
+							</div></div>
+						@else
+							{{ $dato['Descripción'] }}
+						@endif
+					@endif
+					</td>
 					<td>{{$dato['Categoría']}}</td>
 					<td>
 					@if (!empty($dato['Causas']))
@@ -199,7 +212,20 @@
 					@endforeach
 					</td>
 					<td>{{$dato['Riesgo']}}</td>
-					<td>{{$dato['Descripción']}}</td>
+					<td>
+					@if ($dato['Descripción'] == NULL || $dato['Descripción'] == "")
+						No se ha definido descripci&oacute;n
+					@else
+						@if (strlen($dato['Descripción']) > 100)
+							<div id="description_{{$dato['id']}}" title="{{ $dato['Descripción'] }}">{{ $dato['short_des'] }}...
+							<div style="cursor:hand" onclick="expandir({{ $dato['id'] }},'{{ $dato['Descripción'] }}','{{ $dato['short_des'] }}')">
+							<font color="CornflowerBlue">Ver completo</font>
+							</div></div>
+						@else
+							{{ $dato['Descripción'] }}
+						@endif
+					@endif
+					</td>
 					<td>{{$dato['Categoría']}}</td>
 					<td>
 					@if (!empty($dato['Causas']))

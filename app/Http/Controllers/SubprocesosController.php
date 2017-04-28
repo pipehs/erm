@@ -100,6 +100,9 @@ class SubprocesosController extends Controller
                 //$proceso = \Ermtool\Subprocess::find($subprocess['id'])->processes; No me funciono
                 $proceso = \Ermtool\Process::find($subprocess['process_id']);
 
+                //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                $short_des = substr($subprocess['description'],0,100);
+
                 $subproceso[$i] = array('id'=>$subprocess['id'],
                                     'nombre'=>$subprocess['name'],
                                     'descripcion'=>$subprocess['description'],
@@ -107,7 +110,8 @@ class SubprocesosController extends Controller
                                     'fecha_act'=>$fecha_act,
                                     'fecha_exp'=>$fecha_exp,
                                     'proceso_relacionado'=>$proceso['name'],
-                                    'estado'=>$subprocess['status']);
+                                    'estado'=>$subprocess['status'],
+                                    'short_des'=>$short_des);
                 $i += 1;
             }
 

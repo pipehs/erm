@@ -81,7 +81,16 @@
 	@foreach ($organizations as $organization)
 		<tr>
 		<td>{{$organization['nombre']}}</td>
-		<td>{{$organization['descripcion']}}</td>
+		<td>
+		@if (strlen($organization['descripcion']) > 100)
+			<div id="description_{{$organization['id']}}" title="{{ $organization['descripcion'] }}">{{ $organization['short_des'] }}...
+			<div style="cursor:hand" onclick="expandir({{ $organization['id'] }},'{{ $organization['descripcion'] }}','{{ $organization['short_des'] }}')">
+			<font color="CornflowerBlue">Ver completo</font>
+			</div></div>
+		@else
+			{{ $organization['descripcion'] }}
+		@endif
+		</td>
 		@if ($organization['mision'] == NULL)
 			<td>No se ha especificado la misi&oacute;n</td>
 		@else

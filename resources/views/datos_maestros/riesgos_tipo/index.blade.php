@@ -74,7 +74,20 @@
 	@foreach ($riesgos as $riesgo)
 		<tr>
 		<td>{{ $riesgo['nombre'] }}</td>
-		<td>{{ $riesgo['descripcion'] }}</td>
+		<td>
+		@if ($riesgo['descripcion'] == NULL || $riesgo['descripcion'] == "")
+			No se ha definido descripci&oacute;n
+		@else
+			@if (strlen($riesgo['descripcion']) > 100)
+				<div id="description_{{$riesgo['id']}}" title="{{ $riesgo['descripcion'] }}">{{ $riesgo['short_des'] }}...
+				<div style="cursor:hand" onclick="expandir({{ $riesgo['id'] }},'{{ $riesgo['descripcion'] }}','{{ $riesgo['short_des'] }}')">
+				<font color="CornflowerBlue">Ver completo</font>
+				</div></div>
+			@else
+				{{ $riesgo['descripcion'] }}
+			@endif
+		@endif
+		</td>
 		<td>{{ $riesgo['categoria'] }}</td>
 		@if ($riesgo['fecha_creacion'] == NULL)
 			<td>Error al registrar fecha de creaci&oacute;n</td>

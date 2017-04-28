@@ -364,6 +364,24 @@ function cerrar_evaluacion(id,name,kind)
 		   	});
 }
 
+//funciones de expandir y contraer para descripción en index de distintos elementos
+function expandir(id,description,short_des)
+{
+	description2 = "'"+description+"'";
+	short_des2 = "'"+short_des+"'";
+
+	$('#description_'+id).html(description+'<div style="cursor:hand" onclick="contraer('+id+','+description2+','+short_des2+')"><font color="CornflowerBlue">Ocultar</font></div>')
+}
+
+function contraer(id, description,short_des)
+{
+	description2 = "'"+description+"'";
+	short_des2 = "'"+short_des+"'";
+
+	$('#description_'+id).html(short_des+'... <div style="cursor:hand" onclick="expandir('+id+','+description2+','+short_des2+')"><font color="CornflowerBlue">Ver completo</font></div>')
+}
+
+
 $(document).ready(function() {
 	// Load Datatables and run plugin on tables 
 	LoadDataTablesScripts(AllTables);
@@ -385,7 +403,5 @@ $(document).ready(function() {
 	WinMove();
 
 	$( "first-disabled option:first-child").attr("disabled", "disabled");
-
-	
-
 });
+

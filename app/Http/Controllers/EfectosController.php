@@ -62,12 +62,16 @@ class EfectosController extends Controller
                 else
                     $fecha_act = NULL;
 
+                //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                $short_des = substr($efecto['description'],0,100);
+
                 $efectos[$i] = array('id'=>$efecto['id'],
                                     'nombre'=>$efecto['name'],
                                     'descripcion'=>$efecto['description'],
                                     'fecha_creacion'=>$fecha_creacion,
                                     'fecha_act'=>$fecha_act,
-                                    'estado'=>$efecto['status']);
+                                    'estado'=>$efecto['status'],
+                                    'short_des'=>$short_des);
                 $i += 1;
             }
             if (Session::get('languaje') == 'en')

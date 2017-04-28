@@ -77,7 +77,16 @@
 		@foreach($controls1 as $control)
 			<tr>
 				<td>{{ $control['name'] }}</td>
-				<td>{{ $control['description'] }}</td>
+				<td>
+				@if (strlen($control['description']) > 100)
+					<div id="description_{{$control['id']}}" title="{{ $control['description'] }}">{{ $control['short_des'] }}...
+					<div style="cursor:hand" onclick="expandir({{ $control['id'] }},'{{ $control['description'] }}','{{ $control['short_des'] }}');">
+					<font color="CornflowerBlue">Ver completo</font>
+					</div></div>
+				@else
+					{{ $control['description'] }}
+				@endif
+				</td>
 				<td><ul>
 				@foreach ($control['risks'] as $risk)
 					<li>{{ $risk['name'] }}</li>
@@ -178,7 +187,16 @@
 		@foreach($controls2 as $control)
 			<tr>
 				<td>{{ $control['name'] }}</td>
-				<td>{{ $control['description'] }}</td>
+				<td>
+				@if (strlen($control['description']) > 100)
+					<div id="description_{{$control['id']}}" title="{{ $control['description'] }}">{{ $control['short_des'] }}...
+					<div style="cursor:hand" onclick="expandir({{ $control['id'] }},'{{ $control['description'] }}','{{ $control['short_des'] }}');">
+					<font color="CornflowerBlue">Ver completo</font>
+					</div></div>
+				@else
+					{{ $control['description'] }}
+				@endif
+				</td>
 				<td><ul>
 				@foreach ($control['risks'] as $risk)
 					<li>{{ $risk['name'] }}</li>

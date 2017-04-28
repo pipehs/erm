@@ -218,16 +218,25 @@ class RiesgosController extends Controller
                     $efectos = NULL;
                 }
 
+                //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                $short_des = substr($riesgo->description,0,100);
+                //ACT 27-04-17: eliminamos saltos de línea
+                //$description = preg_replace('\n',' ',$riesgo->description);
+                //$description = preg_replace('\r',' ',$description);
+
+                $description = preg_replace("[\n|\r|\n\r]", ' ', $riesgo->description); 
+
                 $riesgos[$i] = array('id'=>$riesgo->id,
                                     'nombre'=>$riesgo->name,
-                                    'descripcion'=>$riesgo->description,
+                                    'descripcion'=>$description,
                                     'tipo'=>$tipo,
                                     'fecha_creacion'=>$fecha_creacion,
                                     'stakeholder'=>$stakeholder->name.' '.$stakeholder->surnames,
                                     'fecha_exp'=>$fecha_exp,
                                     'categoria'=>$categoria,
                                     'causas'=>$causas,
-                                    'efectos'=>$efectos);
+                                    'efectos'=>$efectos,
+                                    'short_des'=>$short_des);
 
                 $i += 1;
 
@@ -1036,6 +1045,7 @@ class RiesgosController extends Controller
             else //por ahora si es excel se deja como NULL la categoría (02-03-17)
             {
                 $category = NULL;
+                $org = (int)$org;
             }
             
             $i = 0;
@@ -1427,12 +1437,16 @@ class RiesgosController extends Controller
                             $risk_category = 'No definido';
                         }
                     }
+                    //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                    $short_des = substr($description,0,100);
                     //Seteamos datos
                     if ($value == 0) //guardamos datos de riesgos de procesos
                     {
                         if (Session::get('languaje') == 'en')
                         {
-                            $datos[$i] = [//'id' => $control->id,
+                            if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                            {
+                                $datos[$i] = [//'id' => $control->id,
                                         'Process' => $procesos,
                                         'Subprocess' => $subprocesos,
                                         'Risk' => $risk->name,
@@ -1447,24 +1461,66 @@ class RiesgosController extends Controller
                                         'Identification_date' => $fecha_creacion,
                                         'Expiration_date' => $expiration_date,
                                         'Controls' => $controles,];
+                            }
+                            else
+                            {
+                                $datos[$i] = ['id' => $control->id,
+                                        'Process' => $procesos,
+                                        'Subprocess' => $subprocesos,
+                                        'Risk' => $risk->name,
+                                        'Description' => $description,
+                                        'Category' => $risk_category,
+                                        'Causes' => $causas,
+                                        'Effects' => $efectos,
+                                        'Expected_loss' => $expected_loss,
+                                        'Probability' => $probabilidad,
+                                        'Impact' => $impacto,
+                                        'Score' => $score,
+                                        'Identification_date' => $fecha_creacion,
+                                        'Expiration_date' => $expiration_date,
+                                        'Controls' => $controles,
+                                        'short_des' => $short_des];
+                            }
                         }
                         else
                         {
-                            $datos[$i] = [//'id' => $control->id,
-                                        'Procesos' => $procesos,
-                                        'Subprocesos' => $subprocesos,
-                                        'Riesgo' => $risk->name,
-                                        'Descripción' => $description,
-                                        'Categoría' => $risk_category,
-                                        'Causas' => $causas,
-                                        'Efectos' => $efectos,
-                                        'Pérdida_esperada' => $expected_loss,
-                                        'Probabilidad' => $probabilidad,
-                                        'Impacto' => $impacto,
-                                        'Score' => $score,
-                                        'Fecha_identificación' => $fecha_creacion,
-                                        'Fecha_expiración' => $expiration_date,
-                                        'Controles' => $controles,];
+                            if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                            {
+                                $datos[$i] = [//'id' => $control->id,
+                                            'Procesos' => $procesos,
+                                            'Subprocesos' => $subprocesos,
+                                            'Riesgo' => $risk->name,
+                                            'Descripción' => $description,
+                                            'Categoría' => $risk_category,
+                                            'Causas' => $causas,
+                                            'Efectos' => $efectos,
+                                            'Pérdida_esperada' => $expected_loss,
+                                            'Probabilidad' => $probabilidad,
+                                            'Impacto' => $impacto,
+                                            'Score' => $score,
+                                            'Fecha_identificación' => $fecha_creacion,
+                                            'Fecha_expiración' => $expiration_date,
+                                            'Controles' => $controles,];
+                            }
+                            else
+                            {
+                                $datos[$i] = ['id' => $control->id,
+                                            'Procesos' => $procesos,
+                                            'Subprocesos' => $subprocesos,
+                                            'Riesgo' => $risk->name,
+                                            'Descripción' => $description,
+                                            'Categoría' => $risk_category,
+                                            'Causas' => $causas,
+                                            'Efectos' => $efectos,
+                                            'Pérdida_esperada' => $expected_loss,
+                                            'Probabilidad' => $probabilidad,
+                                            'Impacto' => $impacto,
+                                            'Score' => $score,
+                                            'Fecha_identificación' => $fecha_creacion,
+                                            'Fecha_expiración' => $expiration_date,
+                                            'Controles' => $controles,
+                                            'short_des' => $short_des];
+                            }
                         }
                         $i += 1;
                     }
@@ -1474,39 +1530,85 @@ class RiesgosController extends Controller
                         $org_name = \Ermtool\Organization::name($org);
                         if (Session::get('languaje') == 'en')
                         {
-                            $datos[$i] = [//'id' => $control->id,
-                                        'Organization' => $org_name,
-                                        'Objective' => $objetivos,
-                                        'Risk' => $risk->name,
-                                        'Description' => $description,
-                                        'Category' => $risk_category,
-                                        'Causes' => $causas,
-                                        'Effects' => $efectos,              
-                                        'Expected_loss' => $risk->expected_loss,
-                                        'Probability' => $probabilidad,
-                                        'Impact' => $impacto,
-                                        'Score' => $score,
-                                        'Identification_date' => $fecha_creacion,
-                                        'Expiration_date' => $expiration_date,
-                                        'Controls' => $controles];
+                            if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                            {
+                                $datos[$i] = [//'id' => $control->id,
+                                            'Organization' => $org_name,
+                                            'Objective' => $objetivos,
+                                            'Risk' => $risk->name,
+                                            'Description' => $description,
+                                            'Category' => $risk_category,
+                                            'Causes' => $causas,
+                                            'Effects' => $efectos,              
+                                            'Expected_loss' => $risk->expected_loss,
+                                            'Probability' => $probabilidad,
+                                            'Impact' => $impacto,
+                                            'Score' => $score,
+                                            'Identification_date' => $fecha_creacion,
+                                            'Expiration_date' => $expiration_date,
+                                            'Controls' => $controles];
+                            }
+                            else
+                            {
+                                $datos[$i] = ['id' => $control->id,
+                                            'Organization' => $org_name,
+                                            'Objective' => $objetivos,
+                                            'Risk' => $risk->name,
+                                            'Description' => $description,
+                                            'Category' => $risk_category,
+                                            'Causes' => $causas,
+                                            'Effects' => $efectos,              
+                                            'Expected_loss' => $risk->expected_loss,
+                                            'Probability' => $probabilidad,
+                                            'Impact' => $impacto,
+                                            'Score' => $score,
+                                            'Identification_date' => $fecha_creacion,
+                                            'Expiration_date' => $expiration_date,
+                                            'Controls' => $controles,
+                                            'short_des' => $short_des];
+                            }
+
                         }
                         else
                         {
-                            $datos[$i] = [//'id' => $control->id,
-                                        'Organización' => $org_name,
-                                        'Objetivos' => $objetivos,
-                                        'Riesgo' => $risk->name,
-                                        'Descripción' => $description,
-                                        'Categoría' => $risk_category,
-                                        'Causas' => $causas,
-                                        'Efectos' => $efectos,              
-                                        'Pérdida_esperada' => $risk->expected_loss,
-                                        'Probabilidad' => $probabilidad,
-                                        'Impacto' => $impacto,
-                                        'Score' => $score,
-                                        'Fecha_identificación' => $fecha_creacion,
-                                        'Fecha_expiración' => $expiration_date,
-                                        'Controles' => $controles];
+                            if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                            {
+                                $datos[$i] = [//'id' => $control->id,
+                                            'Organización' => $org_name,
+                                            'Objetivos' => $objetivos,
+                                            'Riesgo' => $risk->name,
+                                            'Descripción' => $description,
+                                            'Categoría' => $risk_category,
+                                            'Causas' => $causas,
+                                            'Efectos' => $efectos,              
+                                            'Pérdida_esperada' => $risk->expected_loss,
+                                            'Probabilidad' => $probabilidad,
+                                            'Impacto' => $impacto,
+                                            'Score' => $score,
+                                            'Fecha_identificación' => $fecha_creacion,
+                                            'Fecha_expiración' => $expiration_date,
+                                            'Controles' => $controles];
+                            }
+                            else
+                            {
+                                $datos[$i] = ['id' => $control->id,
+                                            'Organización' => $org_name,
+                                            'Objetivos' => $objetivos,
+                                            'Riesgo' => $risk->name,
+                                            'Descripción' => $description,
+                                            'Categoría' => $risk_category,
+                                            'Causas' => $causas,
+                                            'Efectos' => $efectos,              
+                                            'Pérdida_esperada' => $risk->expected_loss,
+                                            'Probabilidad' => $probabilidad,
+                                            'Impacto' => $impacto,
+                                            'Score' => $score,
+                                            'Fecha_identificación' => $fecha_creacion,
+                                            'Fecha_expiración' => $expiration_date,
+                                            'Controles' => $controles,
+                                            'short_des' => $short_des];
+                            }
+
                         }
                         $i += 1;
                     }
