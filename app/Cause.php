@@ -37,4 +37,9 @@ class Cause extends Model
                 ->select('causes.name','causes.description')
                 ->get();
     }
+
+    public static function name($id)
+    {
+        return DB::table('causes')->where('id',$id)->value('name');
+    }
 }

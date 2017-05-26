@@ -40,4 +40,13 @@ class Poll extends Model
     {
         return $this->belongsToMany('Ermtool\Stakeholder');
     }
+
+    public static function getPollByQuestion($question_id)
+    {
+        return DB::table('polls')
+                ->join('questions','questions.poll_id','=','polls.id')
+                ->where('questions.id','=',$question_id)
+                ->select('polls.id','polls.name')
+                ->first();
+    }
 }

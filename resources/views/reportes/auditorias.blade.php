@@ -61,18 +61,18 @@
 	<div id="auditorias">
 		<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 		<thead>
-		<th>Plan de auditor&iacute;a</th>
-		<th>Descripci&oacute;n plan</th>
-		<th>Auditor&iacute;as</th>
-		<th>Objetivos</th>
-		<th>Alcances</th>
-		<th>Recursos</th>
-		<th>Metodolog&iacute;a</th>
-		<th>Normas</th>
-		<th>Horas-hombre planificadas</th>
-		<th>Horas-hombre utilizadas</th>
-		<th>Fecha inicial</th>
-		<th>Fecha final</th>
+		<th>Plan de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Descripci&oacute;n plan<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Auditor&iacute;as<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Objetivos<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Alcances<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Recursos<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Metodolog&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Normas<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Horas-hombre planificadas<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Horas-hombre utilizadas<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Fecha inicial<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Fecha final<label><input type="text" placeholder="Filtrar" /></label></th>
 		</thead>
 
 		@foreach ($audit_plans as $plan)

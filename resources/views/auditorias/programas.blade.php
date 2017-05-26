@@ -66,7 +66,7 @@
 	</ul>
 	</p>
 	@foreach (Session::get('roles') as $role)
-		@if ($role != 6)
+		@if ($role == 1 || $role == 4)
 			<a href="crear_pruebas.{{ $audit_id }}" class="btn btn-primary">Agregar Nuevo Programa</a>
 		<?php break; ?>
 		@endif
@@ -103,7 +103,14 @@
 			@endif
 			</td>
 			<td>{!! link_to_route('programas_auditoria.show', $title = 'Ver', $parameters = $program['id'], $attributes = ['class'=>'btn btn-success']) !!}</td>
-			<td><button class="btn btn-danger" onclick="eliminar2({{ $program['id'] }},'{{ $program['name'] }}','programas_auditoria','El programa de auditoría')">Eliminar</button></td>
+			<td>
+			@foreach (Session::get('roles') as $role)
+			@if ($role == 1 || $role == 4)
+				<button class="btn btn-danger" onclick="eliminar2({{ $program['id'] }},'{{ $program['name'] }}','programas_auditoria','El programa de auditoría')">Eliminar</button>
+					<?php break; ?>
+				@endif
+			@endforeach
+			</td>
 		</tr>
 	@endforeach
 	</table>

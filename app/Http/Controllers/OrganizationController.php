@@ -11,6 +11,12 @@ use DateTime;
 use DB;
 use Auth;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class OrganizationController extends Controller
 {
     /**
@@ -18,6 +24,17 @@ class OrganizationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('organizaciones');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/organizaciones.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     public function index()
     {
         if (Auth::guest())
@@ -161,6 +178,7 @@ class OrganizationController extends Controller
         {
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 //vemos si tiene organización padre
                 if($_POST['organization_id'] != "")
                 {
@@ -191,7 +209,7 @@ class OrganizationController extends Controller
                 else
                     $exp_date = $_POST['expiration_date'];
 
-                \Ermtool\Organization::create([
+                $org = \Ermtool\Organization::create([
                     'name' => $_POST['name'],
                     'description' => $_POST['description'],
                     'expiration_date' => $exp_date,
@@ -210,6 +228,8 @@ class OrganizationController extends Controller
                 {
                     Session::flash('message','Organizaci&oacute;n creada correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado la organización con Id: '.$org->id.' llamada: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('/organization');
@@ -269,6 +289,7 @@ class OrganizationController extends Controller
             $id1 = $id;
             DB::transaction(function() 
             {
+                $logger = $this->logger;
                 $organization = \Ermtool\Organization::find($GLOBALS['id1']);
                 $organization->status = 1;
                 $organization->save();
@@ -281,6 +302,8 @@ class OrganizationController extends Controller
                 {
                     Session::flash('message','Organizaci&oacute;n bloqueada correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado la organización con Id: '.$organization->id.' llamada: '.$organization->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/organization');
         }
@@ -298,6 +321,7 @@ class OrganizationController extends Controller
             $id1 = $id;
             DB::transaction(function() 
             {
+                $logger = $this->logger;
                 $organization = \Ermtool\Organization::find($GLOBALS['id1']);
                 $organization->status = 0;
                 $organization->save();
@@ -311,6 +335,8 @@ class OrganizationController extends Controller
                 {
                     Session::flash('message','Organizaci&oacute;n desbloqueada correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha desbloqueado la organización con Id: '.$organization->id.' llamada: '.$organization->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 
             });
             return Redirect::to('/organization');
@@ -337,6 +363,7 @@ class OrganizationController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $organization = \Ermtool\Organization::find($GLOBALS['id1']);
 
                 //vemos si tiene organización padre
@@ -386,6 +413,8 @@ class OrganizationController extends Controller
                 {
                     Session::flash('message','Organizaci&oacute;n actualizada correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado la organización con Id: '.$GLOBALS['id1'].' llamada: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('/organization');
@@ -433,6 +462,8 @@ class OrganizationController extends Controller
                 if (empty($rev))
                 {
                     //Eliminamos, primero de los datos no únicos
+                    $logger = $this->logger;
+                    $name = \Ermtool\Organization::name($id);
 
                     DB::table('organization_subprocess')
                         ->where('organization_id','=',$id)
@@ -445,6 +476,8 @@ class OrganizationController extends Controller
                     DB::table('organizations')
                         ->where('id','=',$id)
                         ->delete();
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la organización con Id: '.$id.' llamada: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
                     return 0;
                 }

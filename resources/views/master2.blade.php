@@ -45,8 +45,6 @@
  	{!!Html::style('assets/css/upload.css')!!}
  	{!!Html::style('assets/css/fileinput.css')!!}
 
- 	{!!Html::style('assets/css/imprimir.css',['media'=>'print'])!!}	
-
  	{!!Html::style('assets/bootstrap-toggle-master/css/bootstrap2-toggle.min.css')!!}
 
 </head>
@@ -55,9 +53,9 @@
 @include('header2')
 
 <!--Start Container-->
-<div id="main" class="container-fluid" style="padding-left: 15%;">
+<div id="main" class="container-fluid" style="padding-left: 2%;">
 
-<div id="content" class="col-xs-12 col-sm-10">
+<div id="content" class="col-xs-12 col-sm-12">
     @yield('content')
 </div>
 

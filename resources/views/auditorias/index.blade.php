@@ -44,7 +44,7 @@
 					</div>
 				@endif
 @foreach (Session::get('roles') as $role)
-	@if ($role != 6)
+	@if ($role == 1 || $role == 4)
 		{!! link_to_route('plan_auditoria.create', $title = 'Agregar Nuevo Plan', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 	<?php break; ?>
 	@endif

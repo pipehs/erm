@@ -26,16 +26,13 @@ class Risk_category extends Model
     //eliminamos created_at y updated_at
     //public $timestamps = false;
 
-    public function risks()
-    {
-    	return $this->hasMany('Ermtool\Risk');
-    }
-
     public static function name($id)
     {
-        return DB::table('risk_categories')
-                ->where('id','=',$id)
-                ->select('name')
-                ->first();
+        $res = DB::table('risk_categories')->where('id', $id)->value('name');
+        return $res;
+    }
+    public function risks()
+    {
+        return $this->hasMany('Ermtool\Risk');
     }
 }

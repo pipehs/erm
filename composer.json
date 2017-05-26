@@ -10,7 +10,9 @@
         "twbs/bootstrap": "^3.3",
         "sallar/jdatetime": "dev-master",
         "laravelcollective/html": "5.1.*",
-        "yajra/laravel-oci8": "5.1.*"
+        "yajra/laravel-oci8": "5.1.*",
+        "monolog/monolog": "^1.22",
+        "rap2hpoutre/laravel-log-viewer": "^0.10.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

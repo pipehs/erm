@@ -11,6 +11,11 @@ use Auth;
 use DB;
 use DateTime;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
 
 class EfectosController extends Controller
 {
@@ -19,6 +24,17 @@ class EfectosController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('efectos');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/efectos.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     public function index()
     {
         if (Auth::guest())
@@ -123,7 +139,15 @@ class EfectosController extends Controller
         }
         else
         {
-            \Ermtool\Effect::create([
+            //Validación: Si la validación es pasada, el código continua
+            $this->validate($request, [
+                'name' => 'unique:effects',
+                'description' => 'required',
+            ]);
+
+            $logger = $this->logger;
+
+            $effect = \Ermtool\Effect::create([
                 'name' => $request['name'],
                 'description' => $request['description'],
                 ]);
@@ -136,6 +160,8 @@ class EfectosController extends Controller
             {
                 Session::flash('message','Efecto agregado correctamente');
             }
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el efecto con Id: '.$effect->id.' llamado: '.$effect->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
             return Redirect::to('/efectos');
         }
@@ -183,6 +209,14 @@ class EfectosController extends Controller
         }
         else
         {
+            //Validación: Si la validación es pasada, el código continua
+            $this->validate($request, [
+                'name' => 'unique:effects',
+                'description' => 'required',
+            ]);
+
+            $logger = $this->logger;
+
             $efecto = \Ermtool\Effect::find($id);
 
             $efecto->name = $request['name'];
@@ -199,6 +233,8 @@ class EfectosController extends Controller
                 Session::flash('message','Efecto actualizado correctamente');
             }
 
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el efecto con Id: '.$efecto->id.' llamado: '.$efecto->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             return Redirect::to('/efectos');
         }
     }
@@ -211,6 +247,7 @@ class EfectosController extends Controller
         }
         else
         {
+            $logger = $this->logger;
             $efecto = \Ermtool\Effect::find($id);
             $efecto->status = 1;
             $efecto->save();
@@ -224,6 +261,8 @@ class EfectosController extends Controller
                 Session::flash('message','Efecto bloqueado correctamente');
             }
 
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado el efecto con Id: '.$efecto->id.' llamado: '.$efecto->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             return Redirect::to('/efectos');
         }
     }
@@ -236,6 +275,8 @@ class EfectosController extends Controller
         }
         else
         {
+            $logger = $this->logger;
+
             $efecto = \Ermtool\Effect::find($id);
             $efecto->status = 0;
             $efecto->save();
@@ -248,6 +289,8 @@ class EfectosController extends Controller
             {
                 Session::flash('message','Efecto desbloqueado correctamente');
             }
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha desbloqueado el efecto con Id: '.$efecto->id.' llamado: '.$efecto->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
             return Redirect::to('/efectos');
         }
@@ -267,7 +310,8 @@ class EfectosController extends Controller
         $res = 1;
 
         DB::transaction(function() {
-
+            $logger = $this->logger;
+            $name = \Ermtool\Effect::name($GLOBALS['id1']);
             //eliminamos primero de effect_risk
             DB::table('effect_risk')
                 ->where('effect_id','=',$GLOBALS['id1'])
@@ -277,6 +321,8 @@ class EfectosController extends Controller
             DB::table('effects')
                 ->where('id','=',$GLOBALS['id1'])
                 ->delete();
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el efecto con Id: '.$GLOBALS['id1'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
             $GLOBALS['res'] = 0;
         });

@@ -10,10 +10,10 @@
 					$("#stakeholder_id").empty(); //vaciamos lista de stakeholders para que no se repitan
 
 					//Añadimos la imagen de carga en el contenedor
-					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
+					$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 
 					//Añadimos la imagen de carga en el contenedor de plan anterior
-					$('#informacion').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
+					$('#informacion').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 
 					//Añadimos la imagen de carga en el contenedor de riesgos
 					$("#riesgos").removeAttr("style").show();	
@@ -185,7 +185,7 @@
 				$("#stakeholder_team").empty();
 				$("#stakeholder_team").change();
 				//Añadimos la imagen de carga en el contenedor
-					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
+					$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 
 				//se obtienen stakeholders (menos el auditor jefe)
 					$.get('auditorias.stakeholders.'+$("#stakeholder").val(), function (result) {

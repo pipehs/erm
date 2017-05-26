@@ -415,6 +415,7 @@ class Issue extends Model
         $issues8 = DB::table('issues')
                     ->join('control_organization_risk','control_organization_risk.control_id','=','issues.control_id')
                     ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                    ->join('objective_risk','objective_risk.risk_id','=','organization_risk.risk_id')
                     ->where('organization_risk.organization_id','=',$org)
                     ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification','issues.updated_at']);
 

@@ -10,63 +10,104 @@ use dateTime;
 use Storage;
 use stdClass;
 use Auth;
+
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class AuditoriasController extends Controller
 {    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger;
+    public $logger2;
+    public $logger3;
+    public $logger4;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('auditorias');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/auditorias.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+
+        $this->logger2 = new Logger('programas_auditoria');
+        $this->logger2->pushHandler(new StreamHandler($dir.'/storage/logs/programas_auditoria.log', Logger::INFO));
+        $this->logger2->pushHandler(new FirePHPHandler());
+
+        $this->logger3 = new Logger('pruebas_auditoria');
+        $this->logger3->pushHandler(new StreamHandler($dir.'/storage/logs/pruebas_auditoria.log', Logger::INFO));
+        $this->logger3->pushHandler(new FirePHPHandler());
+
+        $this->logger4 = new Logger('notas');
+        $this->logger4->pushHandler(new StreamHandler($dir.'/storage/logs/notas.log', Logger::INFO));
+        $this->logger4->pushHandler(new FirePHPHandler());
+    }
+
     public function index()
     {
-        if (Auth::guest())
+
+        try 
         {
-            return view('login');
-        }
-        else
-        {
-            $planes = array();
-            $plans = \Ermtool\Audit_plan::orderBy('created_at','DESC')->get();
-            $i = 0; //contador de planes
-            foreach ($plans as $plan)
+            if (Auth::guest())
             {
-                //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
-                if ($plan['created_at'] == NULL OR $plan['created_at'] == "0000-00-00" OR $plan['created_at'] == "")
-                {
-                    $fecha_creacion = NULL;
-                }
-                else
-                {
-                    $lala = new DateTime($plan['created_at']);
-                    $fecha_creacion = date_format($lala,"d-m-Y");
-                    //$fecha_creacion = date_format($plan['created_at'],"d-m-Y");
-                }
-                //damos formato a fecha de actualización 
-                if ($plan['updated_at'] != NULL)
-                {
-                    $lala = new DateTime($plan['udpdated_at']);
-                    $fecha_act = date_format($lala,"d-m-Y");
-                    //$fecha_act = date_format($plan['updated_at'],"d-m-Y");
-                }
-                else
-                    $fecha_act = NULL;
-                $planes[$i] = [
-                                'id' => $plan['id'],
-                                'name' => $plan['name'],
-                                'description' => $plan['description'],
-                                'created_at' => $fecha_creacion,
-                                'updated_at' => $fecha_act,
-                                'status' => $plan['status'],
-                            ];
-                $i += 1;
-            }
-            if (Session::get('languaje') == 'en')
-            {
-                return view('en.auditorias.index',['planes' => $planes]);
+                return view('login');
             }
             else
             {
-                return view('auditorias.index',['planes' => $planes]);
+                $planes = array();
+                $plans = \Ermtool\Audit_plan::orderBy('created_at','DESC')->get();
+                $i = 0; //contador de planes
+                foreach ($plans as $plan)
+                {
+                    //damos formato a fecha de creación (se verifica si no es NULL en caso de algún error en la creación)
+                    if ($plan['created_at'] == NULL OR $plan['created_at'] == "0000-00-00" OR $plan['created_at'] == "")
+                    {
+                        $fecha_creacion = NULL;
+                    }
+                    else
+                    {
+                        $lala = new DateTime($plan['created_at']);
+                        $fecha_creacion = date_format($lala,"d-m-Y");
+                        //$fecha_creacion = date_format($plan['created_at'],"d-m-Y");
+                    }
+                    //damos formato a fecha de actualización 
+                    if ($plan['updated_at'] != NULL)
+                    {
+                        $lala = new DateTime($plan['udpdated_at']);
+                        $fecha_act = date_format($lala,"d-m-Y");
+                        //$fecha_act = date_format($plan['updated_at'],"d-m-Y");
+                    }
+                    else
+                        $fecha_act = NULL;
+                    $planes[$i] = [
+                                    'id' => $plan['id'],
+                                    'name' => $plan['name'],
+                                    'description' => $plan['description'],
+                                    'created_at' => $fecha_creacion,
+                                    'updated_at' => $fecha_act,
+                                    'status' => $plan['status'],
+                                ];
+                    $i += 1;
+                }
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.auditorias.index',['planes' => $planes]);
+                }
+                else
+                {
+                    return view('auditorias.index',['planes' => $planes]);
+                }
             }
+        }
+        catch (\Exception $e)
+        {
+            return view('errors.query',['e' => $e]);
         }
     }
     public function indexAuditorias()
@@ -314,6 +355,7 @@ class AuditoriasController extends Controller
             //creamos una transacción para cumplir con atomicidad
             DB::transaction(function()
             {
+                $logger = $this->logger2;
                 $fecha = date('Ymd H:i:s');
                     if (!isset($_POST['description']) || $_POST['description'] == '')
                     {
@@ -328,8 +370,8 @@ class AuditoriasController extends Controller
                                 'description' => $description
                                 ]);
                     $audit_program_id = $audit_program->id;
-                //insertamos en audit_audit_plan_audit_program
-                $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')
+                    //insertamos en audit_audit_plan_audit_program
+                    $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')
                     ->insertGetId([
                             'audit_program_id' => $audit_program_id,
                             'audit_audit_plan_id' => $_POST['audit_id'],
@@ -357,6 +399,8 @@ class AuditoriasController extends Controller
                 {
                     Session::flash('message','Programa de auditor&iacute;a creado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el programa con Id: '.$audit_program_id.' llamado: '.$_POST['name'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/programas_auditoria');
         }
@@ -369,7 +413,8 @@ class AuditoriasController extends Controller
         }
         else
         {
-            \Ermtool\Audit::create([
+            $logger = $this->logger;
+            $audit = \Ermtool\Audit::create([
                 'name' => $request['name'],
                 'description' => $request['description']
                 ]);
@@ -381,6 +426,9 @@ class AuditoriasController extends Controller
             {
                 Session::flash('message','Auditor&iacute;a creada correctamente');
             }
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado la auditoría con Id: '.$audit->id.' llamada: '.$_POST['name'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             return Redirect::to('/auditorias');
         }
     }
@@ -417,6 +465,7 @@ class AuditoriasController extends Controller
             //print_r($_POST);
             DB::transaction(function() {
 
+                $logger = $this->logger3;
                 $c = new ControlesController;
                 //primero que todo, actualizamos las pruebas
                 //para esto, separamos primer string del array id_pruebas por sus comas
@@ -426,6 +475,14 @@ class AuditoriasController extends Controller
                     //actualizamos resultados (ACTUALIZACIÓN 28-10-2016) Solo actualizamos resultados ya que el issue no se tocará en esta sección) (si es que el estado de la prueba es cerrado (igual a 2))
                     if ($_POST['status_'.$id] == 2)
                     {
+                        if (isset($_POST['comments_'.$id]) && $_POST['comments_'.$id] != '')
+                        {
+                            $comments = $_POST['comments_'.$id];
+                        }
+                        else
+                        {
+                            $comments = NULL;
+                        }
                         //actualizamos resultado de prueba de identificador $id (status y results)
                         DB::table('audit_tests')
                             ->where('id','=',$id)
@@ -434,7 +491,8 @@ class AuditoriasController extends Controller
                                 'results' => $_POST['test_result_'.$id],
                                 'updated_at' => date('Ymd H:i:s'),
                                 'hh_real' => $_POST['hh_real_'.$id],
-                                ]);
+                                'comments' => $comments
+                            ]);
 
                         //obtenemos id de control para la evaluación de riesgo controlado
                         //ACTUALIZACIÓN 27-01: Obtenemos id de controles asociados a la prueba
@@ -499,6 +557,12 @@ class AuditoriasController extends Controller
                                 'updated_at' => date('Ymd H:i:s'),
                                 ]);
                     }
+                    $test = DB::table('audit_tests')
+                            ->where('id','=',$id)
+                            ->select('name')
+                            ->first();
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha ejecutado la prueba de auditoría con Id: '.$id.' llamado: '.$test->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 }
                 if (Session::get('languaje') == 'en')
                 {
@@ -508,8 +572,9 @@ class AuditoriasController extends Controller
                 {
                     Session::flash('message','Auditor&iacute;a ejecutada correctamente');
                 }
-            });
             
+            });
+
             return Redirect::to('/ejecutar_pruebas');
         }
     }
@@ -545,6 +610,7 @@ class AuditoriasController extends Controller
             $evidence = $request->file('evidencia_'.$request['test_id']);
             //primero vemos si se está agregando una nota o una evidencia
             DB::transaction(function() {
+                $logger = $this->logger4;
                 $res = DB::table('notes')
                         ->insertGetId([
                             'name' => $_POST['name_'.$_POST['test_id']],
@@ -552,7 +618,9 @@ class AuditoriasController extends Controller
                             'created_at' => date('Ymd H:i:s'),
                             'updated_at' => date('Ymd H:i:s'),
                             'audit_test_id' => $_POST['test_id'],
-                            'status' => 0
+                            'status' => 0,
+                            'user_id' => Auth::user()->id,
+                            'stakeholder_id' => $_POST['stakeholder_id']
                         ]);
             
                 //guardamos archivo de evidencia (si es que hay)
@@ -576,6 +644,8 @@ class AuditoriasController extends Controller
                     {
                         Session::flash('message','Nota agregada correctamente');
                     }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha agregado la nota con Id: '.$res.' llamada: '.$_POST['name_'.$_POST['test_id']].' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 }
                 else
                 {
@@ -743,6 +813,7 @@ class AuditoriasController extends Controller
             //Mantenemos atomicidad y consistencia
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 //verificamos datos que no hayan sido ingresados
                 if ($_POST['objectives'] == "")
                 {
@@ -886,6 +957,8 @@ class AuditoriasController extends Controller
                 {
                     Session::flash('message','Plan de auditor&iacute;a generado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el plan de auditoría con Id: '.$audit_plan_id.' llamado: '.$_POST['name'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/plan_auditoria'); 
         }
@@ -1162,6 +1235,8 @@ class AuditoriasController extends Controller
 
 
             DB::transaction(function (){
+
+                $logger = $this->logger2;
                 $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')->find($GLOBALS['id1']);
                 $audit_program = \Ermtool\Audit_program::find($audit_audit_plan_audit_program->audit_program_id);
                 $audit_program->name = $_POST['name'];
@@ -1200,6 +1275,8 @@ class AuditoriasController extends Controller
                 {
                     Session::flash('message','Programa actualizado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el programa de auditoría con Id: '.$audit_audit_plan_audit_program->id.' llamado: '.$_POST['name'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             
             return Redirect::to('/programas_auditoria');
@@ -1221,6 +1298,8 @@ class AuditoriasController extends Controller
             global $req;
             $req = $request;
             DB::transaction(function (){
+
+                $logger = $this->logger3;
                 $GLOBALS['audit_test']->name = $_POST['name'];
                 //si es que se ingreso descripción
                 if (isset($_POST['description']))
@@ -1241,7 +1320,7 @@ class AuditoriasController extends Controller
                     $GLOBALS['audit_test']->type = NULL;
                 }
                 //si es que se ingreso stakeholder
-                if (isset($_POST['stakeholder_id']))
+                if (isset($_POST['stakeholder_id']) && $_POST['stakeholder_id'] != '')
                 {
                     $GLOBALS['audit_test']->stakeholder_id = $_POST['stakeholder_id'];
                 }
@@ -1354,6 +1433,9 @@ class AuditoriasController extends Controller
                 {
                     Session::flash('message','Prueba actualizada correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado la prueba de auditoría con Id: '.$GLOBALS['audit_test']->id.' llamado: '.$_POST['name'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             });
             
             return Redirect::to('programas_auditoria.show.'.$GLOBALS['audit_test']->audit_audit_plan_audit_program_id);
@@ -1400,6 +1482,8 @@ class AuditoriasController extends Controller
             global $req;
             $req = $request;
             DB::transaction(function () {
+
+                $logger = $this->logger3;
                 $fecha = date('Ymd H:i:s');
                 if (isset($_POST['description']) && $_POST['description'] != '')
                 {
@@ -1483,7 +1567,7 @@ class AuditoriasController extends Controller
                         }
                     }
                     //sino se agregaron controles, vemos si se especificaron subprocesos
-                    else if ($_POST['subprocess_id'])
+                    else if (isset($_POST['subprocess_id']) && $_POST['subprocess_id'])
                     {
                         foreach ($_POST['subprocess_id'] as $s)
                         {
@@ -1555,6 +1639,8 @@ class AuditoriasController extends Controller
                 {
                     Session::flash('message','Prueba de auditor&iacute;a creada correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado la prueba de auditoría con Id: '.$test_id.' llamada: '.$_POST['name'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/programas_auditoria.show.'.$_POST['audit_audit_plan_audit_program_id']);
         }
@@ -1723,6 +1809,7 @@ class AuditoriasController extends Controller
             //creamos una transacción para cumplir con atomicidad
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 //verificamos datos que no hayan sido ingresados
                 if ($_POST['objectives'] == "")
                 {
@@ -1917,6 +2004,8 @@ class AuditoriasController extends Controller
                 {
                     Session::flash('message','Plan de auditor&iacute;a actualizado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el plan de auditoría con Id: '.$GLOBALS['id'].' llamado: '.$_POST['name'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/plan_auditoria');
         }
@@ -1934,6 +2023,8 @@ class AuditoriasController extends Controller
         global $res;
         $res = 1;
         DB::transaction(function() {
+
+            $logger = $this->logger;
             //primero obtenemos audit_audit_plan para hacer las validaciones
             $audit_audit_plan = DB::table('audit_audit_plan')
                         ->where('audit_plan_id','=',$GLOBALS['id1'])
@@ -2000,6 +2091,8 @@ class AuditoriasController extends Controller
                         ->where('id','=',$audit->id)
                         ->delete();
                 }
+
+                $name = \Ermtool\Audit_plan::name($GLOBALS['id1']);
                 //eliminamos audit_plan_risk
                 DB::table('audit_plan_risk')
                     ->where('audit_plan_id','=',$GLOBALS['id1'])
@@ -2013,6 +2106,8 @@ class AuditoriasController extends Controller
                     ->where('id','=',$GLOBALS['id1'])
                     ->delete();
                 $GLOBALS['res'] = 0;
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el plan de auditoría con Id: '.$GLOBALS['id1'].' llamado: '.$name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             }
         });
         return $res;
@@ -2024,6 +2119,9 @@ class AuditoriasController extends Controller
         global $res;
         $res = 1;
         DB::transaction(function() {
+
+            $logger = $this->logger2;
+            
             //revisaremos las pruebas de auditoría asociadas al programa
             $audit_tests = DB::table('audit_tests')
                     ->where('audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
@@ -2137,11 +2235,27 @@ class AuditoriasController extends Controller
                     ->delete();
                 if (empty($rev3)) //si no hay otros planes, borramos
                 {
+                    //nombre de program para log
+                    $name = DB::table('audit_programs')
+                        ->where('id','=',$program->audit_program_id)
+                        ->select('name')->first();
+
+                    //nombre de audit y audit_plan para log
+                    $a = DB::table('audits')
+                            ->join('audit_audit_plan','audit_audit_plan.audit_id','=','audits.id')
+                            ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                            ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_audit_plan_id','=','audit_audit_plan.id')
+                            ->where('audit_audit_plan_audit_program.id','=',$GLOBALS['id1'])
+                            ->select('audit_plans.name as audit_plan','audits.name as audit')
+                            ->first();
+
                     DB::table('audit_programs')
                         ->where('id','=',$program->audit_program_id)
                         ->delete();
                 }
                 $GLOBALS['res'] = 0;
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el programa de auditoría con Id: '.$GLOBALS['id1'].' llamado: '.$name->name.', asociado a la auditoría: '.$a->audit.' perteneciente al plan: '.$a->audit_plan.',  con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             }
             
         });
@@ -2154,6 +2268,7 @@ class AuditoriasController extends Controller
         global $res;
         $res = 1;
         DB::transaction(function() {
+            $logger = $this->logger3;
             //revisaremos los campos para audit_test
             $rev = DB::table('issues')
                 ->where('audit_test_id','=',$GLOBALS['id1'])
@@ -2175,10 +2290,26 @@ class AuditoriasController extends Controller
                         ->get();
                     if (empty($rev))
                     {
+                        //nombre
+                        $name = DB::table('audit_tests')->where('id',$GLOBALS['id1'])->value('name');
                         //ahora se puede eliminar
                         DB::table('audit_tests')
                             ->where('id','=',$GLOBALS['id1'])
                             ->delete();
+
+                        //nombre de audit y audit_plan para log
+                        $a = DB::table('audits')
+                                ->join('audit_audit_plan','audit_audit_plan.audit_id','=','audits.id')
+                                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                                ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_audit_plan_id','=','audit_audit_plan.id')
+                                ->join('audit_tests','audit_tests.audit_audit_plan_audit_program_id','=','audit_audit_plan_audit_program.id')
+                                ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                                ->where('audit_tests.audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
+                                ->select('audit_plans.name as audit_plan','audits.name as audit','audit_programs.name as program')
+                                ->first();
+
+                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la prueba de auditoría con Id: '.$GLOBALS['id1'].' llamado: '.$name.', asociado al programa '.$a->program.' de la auditoría: '.$a->audit.' perteneciente al plan: '.$a->audit_plan.',  con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
                         $GLOBALS['res'] = 0;
                     } 
                 } 
@@ -2307,6 +2438,10 @@ class AuditoriasController extends Controller
                     {
                         Session::flash('message','Respuesta agregada correctamente');
                     }
+
+                    $name = DB::table('notes')->where('id',$id)->value('name');
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha respondido la nota con Id: '.$id.' llamada: '.$name.',  con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 }
                 else
                 {
@@ -2434,26 +2569,7 @@ class AuditoriasController extends Controller
             return Redirect::to('/planes_accion');
         }
     }
-    //función para reporte de planes de acción
-    public function actionPlansReport()
-    {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
-        {
-            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-            if (Session::get('languaje') == 'en')
-            {
-                return view('en.reportes.planes_accion',['organizations' => $organizations]);
-            }
-            else
-            {
-                return view('reportes.planes_accion',['organizations' => $organizations]);
-            }
-        }
-    }
+    
     //función para reporte de auditorías
     public function auditsReport()
     {
@@ -2826,7 +2942,7 @@ class AuditoriasController extends Controller
                 $audit_tests = DB::table('audit_tests')
                                 ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
                                 ->where('audit_audit_plan_audit_program.id','=',$program->id)
-                                ->select('audit_tests.name','audit_tests.description','audit_tests.results','audit_tests.id','audit_tests.status','audit_tests.stakeholder_id','audit_tests.hh_real')
+                                ->select('audit_tests.name','audit_tests.description','audit_tests.results','audit_tests.id','audit_tests.status','audit_tests.stakeholder_id','audit_tests.hh_real','audit_tests.comments')
                                 ->get();
                 $audit_tests2 = array(); //seteamos en 0 variable de pruebas
                 $i = 0; //contador de pruebas
@@ -2870,7 +2986,8 @@ class AuditoriasController extends Controller
                             'results' => $test->results,
                             'hh_real' => $test->hh_real,
                             'stakeholder' => $stake,
-                            'issues' => $debilidades
+                            'issues' => $debilidades,
+                            'comments' => $test->comments
                             ];
                     $i += 1;
                 }
@@ -3581,7 +3698,7 @@ class AuditoriasController extends Controller
             $notes = DB::table('notes')
                         ->where('audit_test_id','=',$id)
                         ->select('notes.id','notes.name','notes.description','notes.created_at','notes.status',
-                                 'notes.audit_test_id as test_id')
+                                 'notes.audit_test_id as test_id','stakeholder_id','user_id')
                         ->get();
             if (empty($notes))
             {
@@ -3619,6 +3736,11 @@ class AuditoriasController extends Controller
                         }
                         
                     }
+
+                    //obtenemos stakeholder y user
+                    $stakeholder = \Ermtool\Stakeholder::getName($note->stakeholder_id);
+                    $user = \Ermtool\User::getName($note->user_id);
+
                     //obtenemos evidencias de la nota (si es que existe)
                     $evidences = getEvidences(0,$note->id);
                     $lala = new DateTime($note->created_at);
@@ -3632,7 +3754,9 @@ class AuditoriasController extends Controller
                         'status_origin' => $note->status,
                         'test_id' => $note->test_id,
                         'answers' => $answers,
-                        'evidences' => $evidences
+                        'evidences' => $evidences,
+                        'stakeholder' => $stakeholder,
+                        'user' => $user,
                         ];
                     $i += 1;
                 }
@@ -3648,14 +3772,21 @@ class AuditoriasController extends Controller
         }
         else
         {
+            $logger = $this->logger4;
+
             $res = 0;
             DB::table('notes')
                 ->where('id','=',$id)
                 ->update([
                     'status' => 1,
-                    'updated_at' => date('Ymd H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
                     ]);
             $res = 1;
+
+            $name = DB::table('notes')->where('id',$id)->value('name');
+            
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha cerrado la nota con Id: '.$id.' llamada: '.$name.',  con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             return $res;
         }
     }
@@ -4024,6 +4155,7 @@ class AuditoriasController extends Controller
             $id1 = $id;
             DB::transaction(function() 
             {
+                $logger = $this->logger;
                 $audit_plan = \Ermtool\Audit_plan::find($GLOBALS['id1']);
                 $audit_plan->status = 0;
                 $audit_plan->save();
@@ -4035,6 +4167,8 @@ class AuditoriasController extends Controller
                 {
                     Session::flash('message','Plan de auditoría ha sido re abierto');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha re abierto el plan de auditoría con Id: '.$audit_plan->id.' llamada: '.$audit_plan->name.',  con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('plan_auditoria');
         }
@@ -4056,6 +4190,7 @@ class AuditoriasController extends Controller
         global $res;
         $res = 1;
         DB::transaction(function() {
+            $logger = $this->logger4;
             //revisaremos sólo si tiene respuestas
             $rev = DB::table('notes_answers')
                 ->where('note_id','=',$GLOBALS['id1'])
@@ -4064,12 +4199,15 @@ class AuditoriasController extends Controller
 
             if (empty($rev))
             {
+                $name = DB::table('notes')->where('id',$GLOBALS['id1'])->value('name');
                 //si no tiene respuesta se puede eliminar
                 $rev = DB::table('notes')
                         ->where('id','=',$GLOBALS['id1'])
                         ->delete();
 
-                $GLOBALS['res'] = 0; 
+                $GLOBALS['res'] = 0;
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la nota con Id: '.$GLOBALS['id1'].' llamado: '.$name.',  con fecha '.date('d-m-Y').' a las '.date('H:i:s')); 
             }
         });
 
@@ -4077,10 +4215,20 @@ class AuditoriasController extends Controller
     }
     public static function destroyNoteAnswer($id)
     {
+        $logger = $this->logger4;
+        $answer = DB::table('notes_answers')->where('id',$id)->value('answer');
+
+        $note = DB::table('notes')
+                ->join('notes_answers','notes_answers.note_id','=','notes.id')
+                ->where('notes_answers.id','=',$id)
+                ->select('notes.id','notes.name');
+
         //ACT 17-04-17: Simplemente eliminamos respuesta
         DB::table('notes_answers')
             ->where('id','=',$id)
             ->delete();
+
+        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la respuesta definida como '.$answer.' asociada a la nota con Id: '.$note->id.' llamada: '.$note->name.',  con fecha '.date('d-m-Y').' a las '.date('H:i:s')); 
 
         return 0;
     }

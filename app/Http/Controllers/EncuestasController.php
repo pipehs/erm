@@ -14,8 +14,23 @@ use ArrayObject;
 use Auth;
 use DateTime;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class EncuestasController extends Controller
 {
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('eventos_riesgos');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/eventos_riesgos.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
 
     public function mensaje($id)
     {
@@ -26,7 +41,7 @@ class EncuestasController extends Controller
 
                         We send to you the following poll for the identification of risk events. Answer each one of the questions associated to the poll. To answer it you have to access to the following link:
 
-                        http://www.ixus.cl/bgrc/identificacion.encuesta.{$id}
+                        http://10.0.0.2:100/identificacion.encuesta.{$id}
 
                         Best Regards,
                         Administration.";
@@ -40,7 +55,7 @@ class EncuestasController extends Controller
                     Responda cada una de las preguntas asociadas a la encuesta. 
                     Para responderla deberá acceder al siguiente link.
 
-                    http://www.ixus.cl/bgrc/identificacion.encuesta.{$id}
+                    http://10.0.0.2:100/identificacion.encuesta.{$id}
 
                     Saludos cordiales,
                     Administrador.";
@@ -201,6 +216,9 @@ class EncuestasController extends Controller
         else
         {
             DB::transaction(function() {
+
+                $logger = $this->logger;
+
                 $cont = $_POST['contpreguntas'];
 
                 //primero agregamos encuesta
@@ -245,6 +263,8 @@ class EncuestasController extends Controller
                 {
                     Session::flash('message','Encuesta creada con &eacute;xito');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado la encuesta de eventos de riesgo con Id: '.$poll->id.' llamada: '.$poll->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             
             if (Session::get('languaje') == 'en')
@@ -585,7 +605,7 @@ class EncuestasController extends Controller
     public function guardarEvaluacion($id)
     {
         DB::transaction(function() {
-
+            $logger = $this->logger;
             if (isset($_POST['pregunta_id'])) //para verificar en caso de que sea una encuesta sin preguntas (mal hecha)
             {
                 foreach ($_POST['pregunta_id'] as $pregunta_id) //vemos cada pregunta
@@ -641,6 +661,16 @@ class EncuestasController extends Controller
                 {
                     Session::flash('message','Respuestas enviadas correctamente');
                 }
+
+                $stakeholder = \Ermtool\Stakeholder::getName($_POST['stakeholder_id']);
+
+                foreach ($_POST['pregunta_id'] as $pregunta_id)
+                {
+                    $poll = \Ermtool\Poll::getPollByQuestion($pregunta_id);
+                    break;
+                }
+
+                $logger->info('El usuario '.$stakeholder. ', Rut: '.$_POST['stakeholder_id'].', ha respondido la encuesta '.$poll->name.'con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             }
             else
             {
@@ -653,7 +683,6 @@ class EncuestasController extends Controller
                     Session::flash('error','No se puede responder una encuesta sin preguntas');
                 }
             }
-             
         });
         
         if (Session::get('languaje') == 'en')
@@ -671,6 +700,9 @@ class EncuestasController extends Controller
     {
 
         DB::transaction(function () {
+
+            $logger = $this->logger;
+
                 foreach ($_POST['pregunta_id'] as $pregunta_id) //vemos cada pregunta
                 {
                     if (gettype($_POST['respuesta'.$pregunta_id]) == "array") //vemos si la respuesta es un array (caso de checkbox)
@@ -731,6 +763,16 @@ class EncuestasController extends Controller
                 {
                     Session::flash('message','Respuestas modificadas correctamente');
                 }
+
+                foreach ($_POST['pregunta_id'] as $pregunta_id)
+                {
+                    $poll = \Ermtool\Poll::getPollByQuestion($pregunta_id);
+                    break;
+                }
+
+                $stakeholder = \Ermtool\Stakeholder::getName($_POST['stakeholder_id']);
+
+                $logger->info('El usuario '.$stakeholder. ', Rut: '.$_POST['stakeholder_id'].', ha modificado sus respuestas para la encuesta '.$poll->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
         });
          
         if (Session::get('languaje') == 'en')
@@ -981,7 +1023,7 @@ class EncuestasController extends Controller
         $res = 1;
 
         DB::transaction(function() {
-
+            $logger = $this->logger;
             //vemos si es que tiene alguna respuesta asociada
             $rev = DB::table('answers')
                     ->join('questions','questions.id','=','answers.question_id')
@@ -1021,6 +1063,8 @@ class EncuestasController extends Controller
                         ->delete();
                 }
 
+                $poll = \Ermtool\Poll::find($GLOBALS['id1']);
+
                 //primero eliminamos posible relación en poll_stakeholder (ACTUALIZACIÓN 23-01-17)
                 DB::table('poll_stakeholder')
                     ->where('poll_id','=',$GLOBALS['id1'])
@@ -1030,6 +1074,8 @@ class EncuestasController extends Controller
                 DB::table('polls')
                     ->where('id','=',$GLOBALS['id1'])
                     ->delete();
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la encuesta '.$poll->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
                 $GLOBALS['res'] = 0;
             }

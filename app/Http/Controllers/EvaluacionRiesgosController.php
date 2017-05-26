@@ -14,8 +14,24 @@ use ArrayObject;
 use Auth;
 use Input;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class EvaluacionRiesgosController extends Controller
 {
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('evaluacion_riesgos');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/evaluacion_riesgos.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     public function getEvalRisks($eval_id,$rut)
     {
             //obtenemos datos
@@ -85,7 +101,7 @@ class EvaluacionRiesgosController extends Controller
 
                         We send to you the following poll for risk assessments. You must assign a value on probability and impact for each one of the risks associated to the survey. To answer this poll you have to access to the following link:
 
-                        http://www.ixus.cl/bgrc/evaluacion_encuesta.{$id}
+                        http://10.0.0.2:100/evaluacion_encuesta.{$id}
 
                         Best Regards,
                         Administration.";
@@ -98,7 +114,7 @@ class EvaluacionRiesgosController extends Controller
 
                         Le enviamos la siguiente encuesta para la evaluación de riesgos. Ud deberá asignar un valor de probabilidad y criticidad para cada uno de los riesgos asociados a la encuesta. Para responderla deberá acceder al siguiente link.
 
-                        http://www.ixus.cl/bgrc/evaluacion_encuesta.{$id}
+                        http://10.0.0.2:100/evaluacion_encuesta.{$id}
 
                         Saludos cordiales,
                         Administrador.";
@@ -200,6 +216,7 @@ class EvaluacionRiesgosController extends Controller
             else //se está creando encuesta de evaluación
             {
                 DB::transaction(function () {
+                    $logger = $this->logger;
                     if (!isset($_POST['objective_risk_id']) && !isset($_POST['objective_risk_id'])) //no se ingresó ningún riesgo
                     {
                         Session::flash('error','Debe ingresar a lo menos un riesgo');
@@ -260,6 +277,8 @@ class EvaluacionRiesgosController extends Controller
                         {
                             Session::flash('message','Encuesta de evaluacion agregada correctamente');
                         }
+
+                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado la encuesta de evaluación de Id: '.$eval_id.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                     }
                     
                 });
@@ -725,8 +744,14 @@ class EvaluacionRiesgosController extends Controller
 
             if ($stakeholder) //si es que el rut ingresado es correcto, procedemos a guardar evaluación
             {   
-                DB::transaction(function() {
+                global $rut;
+                global $name;
 
+                $rut = $stakeholder->id;
+                $name = $stakeholder->name.' '.$stakeholder->surnames;
+
+                DB::transaction(function() {
+                    $logger = $this->logger;
                     //verificamos si tipo = 0 (significaria que es evaluación manual por lo tanto se debe crear)
                     $i = 0;
                     $evaluation_risk = array(); //array que guarda los riesgos que se estarán almacenando
@@ -829,6 +854,8 @@ class EvaluacionRiesgosController extends Controller
                     {
                         Session::flash('message','Respuestas enviadas correctamente');
                     }
+
+                    $logger->info('El usuario '.$GLOBALS['name']. ', Rut: '.$GLOBALS['rut'].', ha realizado una evaluación de riesgos con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 });
                 
                 return view('evaluacion.encuestaresp');
@@ -972,6 +999,7 @@ class EvaluacionRiesgosController extends Controller
             //controlado
             $prom_proba_ctrl = array();
             $prom_criticidad_ctrl = array();
+            $control = array(); //define si un riesgo está siendo controlado o no
 
             $riesgo_temp = array();
             $riesgos = array();
@@ -1119,11 +1147,15 @@ class EvaluacionRiesgosController extends Controller
                         {
                             $prom_proba_ctrl[$i] = $proba_ctrl->eval;
                             $prom_criticidad_ctrl[$i] = $impacto_ctrl->eval;
+                            $control[$i] = 1;
                         }
+                        //ACTUALIZACIÓN 05-05-17: SI ES QUE NO HAY EVALUACIÓN DE RIESGO CONTROLADO (ES DECIR, NO HAY CONTROL). MOSTRAREMOS EL RIESGO INHERENTE COMO RESIDUAL
                         else
                         {
-                            $prom_proba_ctrl[$i] = NULL;
-                            $prom_criticidad_ctrl[$i] = NULL;
+                            //agregamos variable para definir que el riesgo no está siendo controlado
+                            $control[$i] = 0;
+                            $prom_proba_ctrl[$i] = $proba_impacto_in->avg_probability;
+                            $prom_criticidad_ctrl[$i] = $proba_impacto_in->avg_impact;
                         }
 
                         //unseteamos variable de proba_impacto_ctrl para que no se repita
@@ -1162,6 +1194,7 @@ class EvaluacionRiesgosController extends Controller
                                             'prom_criticidad_in'=>$prom_criticidad_in,
                                             'prom_proba_ctrl'=>$prom_proba_ctrl,
                                             'prom_criticidad_ctrl'=>$prom_criticidad_ctrl,
+                                            'control' => $control,
                                             'kind' => $_GET['kind'],
                                             'kind2' => $_GET['kind2']]);
                 }
@@ -1172,6 +1205,7 @@ class EvaluacionRiesgosController extends Controller
                                             'prom_criticidad_in'=>$prom_criticidad_in,
                                             'prom_proba_ctrl'=>$prom_proba_ctrl,
                                             'prom_criticidad_ctrl'=>$prom_criticidad_ctrl,
+                                            'control' => $control,
                                             'kind' => $_GET['kind'],
                                             'kind2' => $_GET['kind2']]);
                 } 
@@ -1334,6 +1368,7 @@ class EvaluacionRiesgosController extends Controller
             $id = $id1;
 
             DB::transaction(function() {
+                $logger = $this->logger;
                 //intentaremos obtener respuestas en evaluation_risk
                 $val = DB::table('evaluation_risk')
                             ->where('evaluation_id','=',$GLOBALS['id'])
@@ -1390,6 +1425,7 @@ class EvaluacionRiesgosController extends Controller
                 {
                     try
                     {
+                        $name = DB::table('evaluations')->where('id',$GLOBALS['id']);
                         //eliminamos de evaluation_stakeholder (si es que hay)
                         DB::table('evaluation_stakeholder')
                             ->where('evaluation_id','=',$GLOBALS['id'])
@@ -1399,6 +1435,8 @@ class EvaluacionRiesgosController extends Controller
                         DB::table('evaluations')
                             ->where('id','=',$GLOBALS['id'])
                             ->delete();
+
+                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la encuesta de riesgos con Id: '.$GLOBALS['id'].' llamada: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
                         echo 0;
                     }
@@ -1471,11 +1509,19 @@ class EvaluacionRiesgosController extends Controller
     {
 
             DB::transaction(function() {
-
+                $logger = $this->logger;
                 //verificamos si tipo = 0 (significaria que es evaluación manual por lo tanto se debe crear)
                 $i = 0;
                 $evaluation_risk = array(); //array que guarda los riesgos que se estarán actualizando
-                
+                //obtenemos stakeholder para logger
+                $stakeholder = \Ermtool\Stakeholder::find($_POST['rut']);
+
+                global $rut;
+                global $name;
+
+                $rut = $stakeholder->id;
+                $name = $stakeholder->name.' '.$stakeholder->surnames;
+
                 foreach ($_POST['evaluation_risk_id'] as $evaluation_risk) //para cada riesgo de la encuesta hacemos un insert
                 {
                             DB::table('evaluation_risk_stakeholder')
@@ -1516,11 +1562,90 @@ class EvaluacionRiesgosController extends Controller
                 {
                     Session::flash('message','Respuestas actualizadas correctamente');
                 }
+
+                $logger->info('El usuario '.$GLOBALS['name']. ', Rut: '.$GLOBALS['rut'].', ha realizado una evaluación de riesgos con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             
             return view('evaluacion.encuestaresp');
             //print_r($_POST);
     
+    }
+
+    //heatmap última evaluación
+    public function heatmapLastEvaluation()
+    {
+        //obtenemos id de última evaluación
+        $id_eval = DB::table('evaluations')->max('id');
+        //seteamos datos en NULL por si no existe evaluación
+        $nombre = NULL;
+        $descripcion = NULL;
+        $riesgos = NULL;
+        $prom_proba = NULL;
+        $prom_criticidad = NULL;
+
+        //---- consulta multiples join para obtener las respuestas relacionada a la encuesta ----// 
+        $evaluations = DB::table('evaluation_risk')
+                            ->where('evaluation_risk.evaluation_id',$id_eval)
+                            ->select('evaluation_risk.id','evaluation_risk.risk_id',
+                                'evaluation_risk.organization_risk_id',
+                                'evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                            ->get();
+
+        //obtenemos nombre y descripcion de la última encuesta
+        $datos = DB::table('evaluations')->where('id',$id_eval)->select('name','description')->get();
+
+        foreach ($datos as $datos)
+        {
+             $nombre = $datos->name;
+             $descripcion = $datos->description;
+        }
+
+        $prom_proba = array();
+        $prom_criticidad = array();
+        $riesgos = array();
+        $i = 0;
+        $j = 0; //para obtener sólo una vez la organización (solución rápida)
+
+        $org2 = NULL; //inicializamos org por si no hay evaluaciones
+        foreach ($evaluations as $evaluation)
+        {
+            //obtenemos organización sólo una vez
+            if ($j == 0)
+            {
+                $org = DB::table('organizations')
+                        ->join('organization_risk','organization_risk.organization_id','=','organizations.id')
+                        ->where('organization_risk.id','=',$evaluation->organization_risk_id)
+                        ->select('organizations.name')
+                        ->first();
+                $j += 1;   
+            }
+
+            $org2 = $org->name;
+             
+            //para cada riesgo evaluado, identificaremos promedio de probabilidad y de criticidad
+            $prom_proba[$i] = $evaluation->avg_probability;
+
+            $prom_criticidad[$i] = $evaluation->avg_impact;
+
+                //ACTUALIZACIÓN 29-03-17: Se mostrará sólo riesgo ya que ahora se evaluará sólo el riesgo (quizás después se pueden obtener los elementos asociados)
+            
+
+            $riesgo_temp = DB::table('organization_risk')
+                            ->where('organization_risk.id','=',$evaluation->organization_risk_id)
+                            ->join('risks','risks.id','=','organization_risk.risk_id')
+                            ->select('risks.name as name','risks.description')
+                            ->get();
+            
+            foreach ($riesgo_temp as $temp) //el riesgo recién obtenido (de subproceso o negocio) es almacenado en riesgos
+            {
+                $riesgos[$i] = array('name' => $temp->name,
+                                    'description' => $temp->description,);
+            }
+            
+            $i += 1;
+        }
+
+        return (['riesgos' => $riesgos, 'prom_proba' => $prom_proba, 'prom_criticidad' => $prom_criticidad, 'nombre' => $nombre, 'descripcion' => $descripcion,'org' => $org2]);
     }
 
 }

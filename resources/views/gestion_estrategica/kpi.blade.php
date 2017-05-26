@@ -118,6 +118,7 @@
 							<td></td>
 							<td></td>
 							<td></td>
+							<td></td>
 						</tr>
 						@else
 							<?php $cont = 0; ?>
@@ -125,7 +126,7 @@
 								@if ($k['perspective'] == 1)
 									@if ($cont == 0)
 									<tr>
-										<th rowspan="{{ $procesos }}">Financiera</th>
+										<th rowspan="{{ $financiera }}">Financiera</th>
 										<td>{{ $k['objective'] }}</td>
 										<td>{{ $k['name'] }}</td>
 										<td>{{ $k['description'] }}</td>
@@ -179,6 +180,7 @@
 				@if ($procesos == 0)
 						<tr>
 							<th rowspan="1">Procesos</th>
+							<td></td>
 							<td></td>
 							<td></td>
 							<td></td>
@@ -259,6 +261,7 @@
 							<td></td>
 							<td></td>
 							<td></td>
+							<td></td>
 						</tr>
 						@else
 							<?php $cont = 0; ?>
@@ -320,6 +323,7 @@
 						@if ($aprendizaje == 0)
 						<tr>
 							<th rowspan="1">Aprendizaje</th>
+							<td></td>
 							<td></td>
 							<td></td>
 							<td></td>

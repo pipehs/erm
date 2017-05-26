@@ -17,6 +17,11 @@ class kpi extends Model
             return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
     }
 
+    public static function name($id)
+    {
+    	return DB::table('kpi')->where('id',$id)->value('name');
+    }
+    
     public function getUpdatedAtAttribute($date)
     {
         return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');

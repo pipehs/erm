@@ -36,8 +36,8 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
       <p>En esta secci&oacute;n podr&aacute; ver los planes de acci&oacute;n de cada organización con su información correspondiente.</p>
-
-      	{!!Form::open()!!}
+@if (!isset($action_plans))
+      	{!!Form::open(['route'=>'genplanes_accion','method'=>'GET','class'=>'form-horizontal'])!!}
 				<div class="form-group">
 							{!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-3">
@@ -46,91 +46,61 @@
 								 	   ['id' => 'organization','placeholder'=>'- Seleccione -'])!!}
 							</div>
 				</div>
+				<br>
+				<div class="form-group">
+	                <center>
+	                {!!Form::submit('Seleccionar', ['class'=>'btn btn-success'])!!}
+	                </center>
+	            </div>
 
-				{!!Form::close()!!}
-				<br>
-				<br>
-				<hr>
-				<table id="planesaccion" class="table table-bordered table-striped table-hover table-heading table-datatable" style="display: none;">
-				</table>
+		{!!Form::close()!!}
 		
-				<div id="boton_exportar">
-				</div>
+@else
+	<hr>
+	<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px;">
+		<thead>
+			<th>Origen de hallazgo<label><input type='text' placeholder='Filtrar'/></label></th>
+			<th>Hallazgo<label><input type='text' placeholder='Filtrar'/></label></th>
+			<th>Plan de acción<label><input type='text' placeholder='Filtrar'/></label></th>
+			<th>Responsable<label><input type='text' placeholder='Filtrar'/></label></th>
+			<th>Correo responsable<label><input type='text' placeholder='Filtrar'/></label></th>
+			<th>Estado<label><input type='text' placeholder='Filtrar'/></label></th>
+			<th>Fecha final<label><input type='text' placeholder='Filtrar'/></label></th>
+		</thead>
 
-      </div>
+		@foreach ($action_plans as $plan)
+			<tr>
+				<td>{{$plan['origin']}}</td>
+				<td>{{$plan['issue']}}</td>
+				<td>{{$plan['description']}}</td>
+				<td>{{$plan['stakeholder']}}</td>
+				<td>{{$plan['stakeholder_mail']}}</td>
+				<td>{{$plan['status']}}</td>
+				<td>{{$plan['final_date']}}</td>
+			</tr>
+		@endforeach	
+	</table>
+		
+	<div id="boton_exportar">
+		{!! link_to_route('genexcelplan', $title = 'Exportar', $parameters = $org_id, $attributes = ['class'=>'btn btn-success']) !!}
+	</div>
+	<br\>
+	<center>
+		{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}			
+	<center>
+
+@endif
+				
 		</div>
 	</div>
-</div>
+</div>	
+      
 
 				
 
 @stop
 @section('scripts2')
 <script>
-
-//Mostraremos planes de accion
-	$("#organization").change(function() {
-
-
-			if ($("#organization").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
-			{
-					$("#planesaccion").removeAttr("style").show();
-					//Seteamos cabecera
-					var table_head = "<thead>";
-					table_head += "<th>Origen de hallazgo</th><th>Hallazgo</th>";
-					table_head += "<th>Plan de acción</th><th>Responsable</th><th>Correo responsable</th><th>Estado</th><th>Fecha final</th>";
-					table_head += "</thead>";
-
-					//Añadimos la imagen de carga en el contenedor
-					$('#planesaccion').html('<div><center><img src="../public/assets/img/loading.gif"/></center></div>');
-					//generamos matriz a través de JSON y PHP
-
-					
-      				
-					$.get('genplanes_accion.'+$("#organization").val(), function (result) {
-
-							//con la función html se BORRAN los datos existentes anteriormente (de existir)
-							$("#planesaccion").html(table_head);
-							
-
-							var table_row ="";
-							//parseamos datos obtenidos
-							var datos = JSON.parse(result);
-
-
-							 
-							//seteamos datos en tabla para riesgos a través de un ciclo por todos los controles de procesos
-							$(datos).each( function() {	
-								
-								table_row += '<tr><td>' + this.origin + '</td><td>' + this.issue + '</td><td>';
-								table_row += this.description + '</td><td>' + this.stakeholder + '</td><td>' + this.stakeholder_mail + '</td><td>' + this.status;
-								table_row += '</td><td>' + this.final_date +'</td></tr>';
-							});
-
-							$("#planesaccion").append(table_row);
-					});
-
-					var value = $("#organization").val();
-					//agregamos botón para exportar y array con datos
-					var insert = "<input type='hidden' name='datos[]' value='" + $("#organization").val() + "'>";
-					insert += '<button type="button" id="btnExport" class="btn btn-success">Exportar Excel</button>';
-					$("#boton_exportar").html(insert);
-
-
-					$("#btnExport").click(function(e) {
-						
-					        window.location.href = "genexcelplan."+value;
-					        e.preventDefault();
-					});
-				
-			}
-
-			else
-			{
-				//REseteamos datos
-			}
-
-	    });
 
 </script>
 @stop

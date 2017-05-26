@@ -72,7 +72,7 @@ $("#audit").change(function() {
 			if ($("#audit").val() != '') //Si es que se ha seleccionado valor válido de plan
 			{
 				//Añadimos la imagen de carga en el contenedor
-					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
+					$('#cargando').html('<div><center><img src="/bgrcdemo2/assets/img/loading.gif" width="19" height="19"/></center></div>');
 				//se obtienen controles asociados a los riesgos presentes en el plan de prueba seleccionado
 					//primero obtenemos controles asociados a los riesgos de negocio
 
@@ -217,6 +217,14 @@ function crear_nota(id)
 	nota += '<input type="text" name="name_'+id+'" class="form-control" placeholder="Nombre de la nota" required></div>';
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<textarea name="description_'+id+'" rows="3" cols="4" class="form-control" placeholder="Nota" required></textarea></div>';
+	nota += '<div class="form-group col-sm-12">';
+	nota += '<select name="stakeholder_id" class="form-control">'
+	nota += '<option value="" disabled selected>- Seleccione a quien irá dirigida la nota -</option>';
+	//seteamos datos en select de auditorías
+	$(stakeholders).each( function() {
+			nota += '<option value="' + this.rut + '">' + this.fullname +'</option>';
+	});
+	nota += '´</select>';
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<label class="control-label">Cargar evidencias (opcional)</label>';
 

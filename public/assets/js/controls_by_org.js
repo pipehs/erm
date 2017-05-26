@@ -13,7 +13,7 @@ function selectControls()
 			$('#create_edit').hide(500)
 			$('#button').hide(500)
 
-			$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>')
+			$('#cargando').html('<div><center><img src="/bgrcdemo/assets/img/loading.gif" width="19" height="19"/></center></div>')
 
 			$.get('controles.get_objective_controls.'+$("#organization_id").val(), function (result) {
 				var datos = JSON.parse(result);
@@ -39,7 +39,7 @@ function selectControls()
 			$('#create_edit').hide(500)
 			$('#button').hide(500)
 
-			$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>')
+			$('#cargando').html('<div><center><img src="/bgrcdemo/assets/img/loading.gif" width="19" height="19"/></center></div>')
 			$.get('get_processes.'+$("#organization_id").val(), function (result) {
 				var datos = JSON.parse(result);
 				var procesos = '<div class="form-group">'
@@ -71,7 +71,7 @@ function subprocesos()
 {
 	if ($('#process_id').val() != '' && $("#organization_id").val() != '' && $("#control_kind").val() == 2)
 	{
-		$.get('get_subprocesses.'+$("#organization_id").val(), function (result) {
+		$.get('get_subprocesses2.'+$("#organization_id").val()+'.'+$('#process_id').val(), function (result) {
 				var datos = JSON.parse(result);
 				var subprocesos = '<div class="form-group">'
 				subprocesos += '<label for="subprocess_id" class="col-sm-4 control-label">Seleccione subproceso</label>'
@@ -107,8 +107,12 @@ function subprocesscontrol()
 				controles += '<div class="col-sm-3">'
 				controles += '<select name="control_id" id="control_id" onChange="selectControls2()" class="form-control" required>'
 				controles += '<option value="" disabled selected>- Seleccione -</option>'
+
 				$(datos).each( function() {
-					controles += '<option value="'+this.id+'">'+this.name+'</option>'
+					$(this).each(function() {
+						controles += '<option value="'+this.id+'">'+this.name+'</option>'
+					});
+					
 				});
 
 				controles += '</select>'

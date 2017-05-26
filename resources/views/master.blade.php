@@ -45,8 +45,6 @@
  	{!!Html::style('assets/css/upload.css')!!}
  	{!!Html::style('assets/css/fileinput.css')!!}
 
- 	{!!Html::style('assets/css/imprimir.css',['media'=>'print'])!!}	
-
  	{!!Html::style('assets/bootstrap-toggle-master/css/bootstrap2-toggle.min.css')!!}
 
  	<!--<link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">

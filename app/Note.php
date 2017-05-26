@@ -22,7 +22,7 @@ class Note extends Model
         return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
     }
     
-    protected $fillable = ['name','description','status','results','hh'];
+    protected $fillable = ['name','description','status','results','hh','user_id','stakeholder_id'];
 
     public static function getNotes($org,$audit_plan)
     {

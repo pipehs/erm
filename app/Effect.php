@@ -37,4 +37,9 @@ class Effect extends Model
                 ->select('effects.name','effects.description')
                 ->get();
     }
+
+    public static function name($id)
+    {
+        return DB::table('effects')->where('id',$id)->value('name');
+    }
 }

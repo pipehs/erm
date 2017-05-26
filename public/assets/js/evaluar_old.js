@@ -8,7 +8,7 @@ $("#control_id").change(function() {
 				
 				$('#cargando').fadeIn(1);
 				//Añadimos la imagen de carga en el contenedor
-				$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
+				$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 
 				$('#cargando').delay(400).fadeOut(5);
 

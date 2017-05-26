@@ -125,6 +125,7 @@
 						<th>Prueba de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
 					@endif
 					<th>Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -143,9 +144,37 @@
 					<tr>
 						<td>{{ $issue['origin'] }}</td>
 						<td>{{ $issue['name'] }}</td>
+						<td>
+						@if (strlen($issue['description']) > 100)
+							<div id="description_{{$issue['id']}}" title="{{ $issue['description'] }}">{{ $issue['short_des'] }}...
+							<div style="cursor:hand" onclick="expandir({{ $issue['id'] }},'{{ $issue['description'] }}','{{ $issue['short_des'] }}')">
+							<font color="CornflowerBlue">Ver completo</font>
+							</div></div>
+						@else
+							{{ $issue['description'] }}
+						@endif
+						</td>
 						<td>{{ $issue['classification'] }}</td>
-						<td>{{ $issue['recommendations'] }}</td>
-						<td>{{ $issue['plan'] }}</td>
+						<td>
+						@if (strlen($issue['recommendations']) > 100)
+							<div id="recommendation_{{$issue['id']}}" title="{{ $issue['recommendations'] }}">{{ $issue['short_rec'] }}...
+							<div style="cursor:hand" onclick="expandir2({{ $issue['id'] }},'{{ $issue['recommendations'] }}','{{ $issue['short_rec'] }}')">
+							<font color="CornflowerBlue">Ver completo</font>
+							</div></div>
+						@else
+							{{ $issue['recommendations'] }}
+						@endif
+						</td>
+						<td>
+						@if (strlen($issue['plan']) > 100)
+							<div id="action_plan_{{$issue['id']}}" title="{{ $issue['plan'] }}">{{ $issue['short_plan'] }}...
+							<div style="cursor:hand" onclick="expandir3({{ $issue['id'] }},'{{ $issue['plan'] }}','{{ $issue['short_plan'] }}')">
+							<font color="CornflowerBlue">Ver completo</font>
+							</div></div>
+						@else
+							{{ $issue['plan'] }}
+						@endif
+						</td>
 						<td>{{ $issue['status'] }}</td>
 						<td>{{ $issue['final_date'] }}</td>
 				@foreach (Session::get('roles') as $role)

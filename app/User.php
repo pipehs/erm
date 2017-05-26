@@ -55,4 +55,11 @@ class User extends Model implements AuthenticatableContract,
     {
         return $this->belongsToMany('Ermtool\System_role');
     }
+
+    public static function getName($rut)
+    {
+        $user = \Ermtool\User::where('id',$rut)->first(['name','surnames']);
+        
+        return $user->name.' '.$user->surnames;
+    }
 }

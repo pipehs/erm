@@ -13,6 +13,12 @@ use dateTime;
 use Storage;
 use Auth;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class GestionEstrategicaController extends Controller
 {
      /**
@@ -20,6 +26,21 @@ class GestionEstrategicaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger1;
+    public $logger2;
+
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger1 = new Logger('gestion_estrategica');
+        $this->logger1->pushHandler(new StreamHandler($dir.'/storage/logs/gestion_estrategica.log', Logger::INFO));
+        $this->logger1->pushHandler(new FirePHPHandler());
+
+        $this->logger2 = new Logger('kpi');
+        $this->logger2->pushHandler(new StreamHandler($dir.'/storage/logs/kpi.log', Logger::INFO));
+        $this->logger2->pushHandler(new FirePHPHandler());
+    }
 
     //index de planes estratégicos
     public function indexPlanes()
@@ -112,7 +133,7 @@ class GestionEstrategicaController extends Controller
             //obtenemos planes para redirección a index
             $planes = \Ermtool\Strategic_plan::all();
             DB::transaction(function () {
-
+                $logger = $this->logger1;
                 //primero, debemos asegurarnos de cambiar el status a todos los planes estratégicos existentes para la misma organización
                 DB::table('strategic_plans')
                     ->where('organization_id','=',$_POST['organization_id'])
@@ -134,8 +155,8 @@ class GestionEstrategicaController extends Controller
 
                 $final_date = $initial_date[0]+$_POST['duration'].'-'.$initial_date[1].'-'.$initial_date[2];
 
-                DB::table('strategic_plans')
-                    ->insert([
+                $plan = DB::table('strategic_plans')
+                    ->insertGetId([
                         'name' => $_POST['name'],
                         'comments' => $comments,
                         'initial_date' => $_POST['initial_date'],
@@ -154,6 +175,8 @@ class GestionEstrategicaController extends Controller
                 {
                     Session::flash('message','Plan estratégico fue generado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el plan estratégico con Id: '.$plan.' llamado: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('plan_estrategico?organizacion='.$_POST['organization_id']);
@@ -197,6 +220,7 @@ class GestionEstrategicaController extends Controller
                 $id1 = $id;
                 DB::transaction(function() 
                 {
+                    $logger = $this->logger1;
                     $strategic_plan = \Ermtool\Strategic_plan::find($GLOBALS['id1']);
 
                     if ($_POST['comments'] != "")
@@ -227,6 +251,8 @@ class GestionEstrategicaController extends Controller
                     {
                         Session::flash('message','Plan estratégico actualizado correctamente');
                     }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el plan estratégico con Id: '.$GLOBALS['id1'].' llamado: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                     
                 });
             return Redirect::to('plan_estrategico?organizacion='.$_POST['org_id']);
@@ -764,7 +790,7 @@ class GestionEstrategicaController extends Controller
         else
         {
             DB::transaction(function() {
-
+                $logger = $this->logger2;
                 if ($_POST['calculation_method'] == "")
                 {
                     $calc_method = NULL;
@@ -954,6 +980,8 @@ class GestionEstrategicaController extends Controller
                     {
                         Session::flash('message','KPI generado correctamente');
                     }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el KPI con Id: '.$kpi->id.' llamado: '.$kpi->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 }
                 else
                 {
@@ -981,6 +1009,8 @@ class GestionEstrategicaController extends Controller
         else
         {
             DB::transaction(function() {
+
+                $logger = $this->logger2;
 
                 if ($_POST['calculation_method'] == "")
                 {
@@ -1169,6 +1199,8 @@ class GestionEstrategicaController extends Controller
                     {
                         Session::flash('message','KPI generado correctamente');
                     }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el KPI con Id: '.$kpi->id.' llamado: '.$kpi->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 }
                 else
                 {
@@ -1567,7 +1599,7 @@ class GestionEstrategicaController extends Controller
             else
             {
                 DB::transaction(function() {
-
+                    $logger = $this->logger2;
                     if (isset($_POST['trimestre']))
                     {
                             //ahora vemos si se está actualizando o creando una nueva evaluación
@@ -1739,6 +1771,19 @@ class GestionEstrategicaController extends Controller
                                 Session::flash('message','Medición guardada con éxito');
                             }
                     }
+
+                    //get name of kpi
+                    $name = \Ermtool\kpi::name($_POST['kpi_id']);
+                    //guardamos logger
+                    if ($eval2)
+                    {
+                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado una medición para el KPI de Id: '.$_POST['kpi_id'].' llamado: '.$name.', con el valor de: '.$_POST['value'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s')); 
+                    }
+                    else
+                    {
+                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha agregado una medición para el KPI de Id: '.$_POST['kpi_id'].' llamado: '.$name.', con el valor de: '.$_POST['value'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s')); 
+                    }
+
                 });
                 
                 if (isset($_POST['org_id']))
@@ -1765,6 +1810,9 @@ class GestionEstrategicaController extends Controller
             $id = $id1;
             //cambiamos estado de kpi validado
             DB::transaction(function() {
+
+                $logger = $this->logger2;
+
                 $kpi = DB::table('kpi_measurements')
                     ->where('kpi_id','=',$GLOBALS['id'])
                     ->where('status','=',0)
@@ -1783,6 +1831,11 @@ class GestionEstrategicaController extends Controller
                         Session::flash('message','KPI validado con éxito');
                     }
                 }
+
+                //get name of kpi
+                $name = \Ermtool\kpi::name($GLOBALS['id']);
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha validado la última medición para el KPI de Id: '.$GLOBALS['id'].' llamado: '.$name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));  
             });
         }
     }
@@ -1806,6 +1859,8 @@ class GestionEstrategicaController extends Controller
             global $id;
             $id = $id1;
             DB::transaction(function() {
+
+                $logger = $this->logger2;
 
                 $kpi = \Ermtool\kpi::find($GLOBALS['id']);
 
@@ -1887,6 +1942,8 @@ class GestionEstrategicaController extends Controller
                 {
                     Session::flash('message','KPI generado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el KPI de Id: '.$GLOBALS['id'].' llamado: '.$kpi->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s')); 
             });
 
             if (isset($_POST['objectives_id']))

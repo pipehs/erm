@@ -108,23 +108,12 @@ class Organization extends Model
     public static function getOrganizationIdFromControl($id)
     {
         //vemos si es de proceso o de entidad
-        $control = DB::table('control_risk_subprocess')
-                    ->join('risk_subprocess','risk_subprocess.id','=','control_risk_subprocess.risk_subprocess_id')
-                    ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                    ->where('control_risk_subprocess.control_id','=',$id)
-                    ->select('organization_subprocess.organization_id as id')
+        $control = DB::table('controls')
+                    ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+                    ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                    ->where('control_organization_risk.control_id','=',$id)
+                    ->select('organization_risk.organization_id as id')
                     ->first();
-
-        if (empty($control)) //es de entidad
-        {
-            $control = DB::table('control_objective_risk')
-                    ->join('objective_risk','objective_risk.id','=','control_objective_risk.objective_risk_id')
-                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                    ->where('control_objective_risk.control_id','=',$id)
-                    ->select('objectives.organization_id as id')
-                    ->first();
-        }
 
         return $control;
     }

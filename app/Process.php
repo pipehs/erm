@@ -102,6 +102,7 @@ class Process extends Model
                 ->where('organization_subprocess.organization_id','=',$org)
                 ->where('risk_subprocess.risk_id','=',$risk_id)
                 ->select('processes.id','processes.name','processes.description')
+                ->groupBy('processes.id','processes.name','processes.description')
                 ->get();
     }
 

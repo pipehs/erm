@@ -120,7 +120,13 @@
 										<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 										{{ $file_name }}
 									@endif
-										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $issue['id'] }},2,'{{ $file_name }}')"><br/>
+
+									@foreach (Session::get('roles') as $role)
+										@if ($role == 1)
+											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $issue['id'] }},2,'{{ $file_name }}')"><br/>
+											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+										@endif
+									@endforeach
 									@if ($cont == 4)
 										</td></tr>
 										<?php $cont = 0; ?>
@@ -183,7 +189,12 @@
 											<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 											{{ $file_name }}<br/>
 										@endif
-										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $file_name }}')"><br/>
+										@foreach (Session::get('roles') as $role)
+											@if ($role == 1)
+												<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $file_name }}')"><br/>
+											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+											@endif
+										@endforeach
 										@if ($cont == 4)
 											</td></tr>
 											<?php $cont = 0; ?>
@@ -258,7 +269,12 @@
 									<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 									{{ $file_name }}
 								@endif
-									<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $issue['id'] }},2,'{{ $file_name }}')"><br/>
+								@foreach (Session::get('roles') as $role)
+									@if ($role == 1)
+										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $issue['id'] }},2,'{{ $file_name }}')"><br/>
+										<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+									@endif
+								@endforeach
 								@if ($cont == 4)
 									</td></tr>
 									<?php $cont = 0; ?>
@@ -331,7 +347,12 @@
 										<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 										{{ $file_name }}
 									@endif
-										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $control->id }},3,'{{ $file_name }}')"><br/>
+									@foreach (Session::get('roles') as $role)
+										@if ($role == 1)
+											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $control->id }},3,'{{ $file_name }}')"><br/>
+											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+										@endif
+									@endforeach
 									@if ($cont == 4)
 										</td></tr>
 										<?php $cont = 0; ?>
@@ -392,7 +413,12 @@
 									<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 									{{ $file_name }}<br/>
 								@endif
-								<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},4,'{{ $file_name }}')"><br/>
+								@foreach (Session::get('roles') as $role)
+									@if ($role == 1)
+										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},4,'{{ $file_name }}')"><br/>
+										<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+									@endif
+								@endforeach
 								@if ($cont == 4)
 									</td></tr>
 									<?php $cont = 0; ?>
@@ -451,7 +477,12 @@
 											<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 											{{ $file_name }}<br/>
 										@endif
-										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $file_name }}')"><br/>
+										@foreach (Session::get('roles') as $role)
+											@if ($role == 1)
+												<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $file_name }}')"><br/>
+												<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+											@endif
+										@endforeach
 										@if ($cont == 4)
 											</td></tr>
 											<?php $cont = 0; ?>
@@ -527,9 +558,19 @@
 								@endif
 
 								@if ($kind == 4)
-									<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},1,'{{ $file_name }}')"><br/>
+									@foreach (Session::get('roles') as $role)
+										@if ($role == 1)
+											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},1,'{{ $file_name }}')"><br/>
+											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+										@endif
+									@endforeach
 								@elseif ($kind == 5)
-									<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},0,'{{ $file_name }}')"><br/>
+									@foreach (Session::get('roles') as $role)
+										@if ($role == 1)
+											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},0,'{{ $file_name }}')"><br/>
+											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+										@endif
+									@endforeach
 								@endif
 								@if ($cont == 4)
 									</td></tr>
@@ -600,7 +641,12 @@
 										<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 										{{ $file_name }}
 									@endif
-										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $risk['id'] }},6,'{{ $file_name }}')"><br/>
+									@foreach (Session::get('roles') as $role)
+										@if ($role == 1)
+											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $risk['id'] }},6,'{{ $file_name }}')"><br/>
+											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+										@endif
+									@endforeach
 									@if ($cont == 4)
 										</td></tr>
 										<?php $cont = 0; ?>

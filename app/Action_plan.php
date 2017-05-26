@@ -22,7 +22,7 @@ class Action_plan extends Model
         return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
     }
 
-    protected $fillable = ['issue_id','description','final_date','status'];
+    protected $fillable = ['issue_id','description','final_date','status','stakeholder_id'];
 
 
     public static function getActionPlanFromIssue($issue)

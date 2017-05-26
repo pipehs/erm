@@ -11,6 +11,12 @@ use DB;
 use dateTime;
 use Auth;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class SubprocesosController extends Controller
 {
     /**
@@ -18,6 +24,15 @@ class SubprocesosController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('subprocesos');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/subprocesos.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     public function index()
     {
         if (Auth::guest())
@@ -172,6 +187,7 @@ class SubprocesosController extends Controller
         {
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 if($_POST['subprocess_id'] == NULL || $_POST['subprocess_id'] == '' || !isset($_POST['subprocess_id']))
                 {
                     $subprocess_id = NULL;
@@ -217,6 +233,8 @@ class SubprocesosController extends Controller
                     {
                         Session::flash('message','Subproceso agregado correctamente');
                     }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el subproceso con Id: '.$subprocess.' llamado: '.$new_subprocess->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/subprocesos');
         }
@@ -298,6 +316,7 @@ class SubprocesosController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $subproceso = \Ermtool\Subprocess::find($GLOBALS['id1']);
 
                 //vemos si tiene subproceso padre
@@ -351,6 +370,8 @@ class SubprocesosController extends Controller
                 {
                     Session::flash('message','Subproceso actualizado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el subproceso con Id: '.$GLOBALS['id1'].' llamado: '.$subproceso->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('/subprocesos');
@@ -369,6 +390,7 @@ class SubprocesosController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $subproceso = \Ermtool\Subprocess::find($GLOBALS['id1']);
                 $subproceso->status = 1;
                 $subproceso->save();
@@ -380,6 +402,8 @@ class SubprocesosController extends Controller
                 {
                     Session::flash('message','Subproceso bloqueado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado el subproceso con Id: '.$GLOBALS['id1'].' llamado: '.$subproceso->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/subprocesos');
         }
@@ -397,6 +421,7 @@ class SubprocesosController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $subproceso = \Ermtool\Subprocess::find($GLOBALS['id1']);
                 $subproceso->status = 0;
                 $subproceso->save();
@@ -408,6 +433,9 @@ class SubprocesosController extends Controller
                 {
                     Session::flash('message','Subproceso desbloqueado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha desbloqueado el subproceso con Id: '.$GLOBALS['id1'].' llamado: '.$subproceso->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             });
             return Redirect::to('/subprocesos');
         }
@@ -445,6 +473,10 @@ class SubprocesosController extends Controller
                 if (empty($rev))
                 {
                         //ahora se puede eliminar, primero que todo se deben cambiar aquellos subprocesos que dependan de éste
+                    
+                        //obtenemos nombre
+                        $name = \Ermtool\Subprocess::name($GLOBALS['id1']);
+
                         DB::table('subprocesses')
                             ->where('subprocess_id','=',$GLOBALS['id1'])
                             ->update(['subprocess_id' => NULL]);
@@ -459,6 +491,8 @@ class SubprocesosController extends Controller
                             ->delete();
 
                         $GLOBALS['res'] = 0;
+
+                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el subproceso con Id: '.$GLOBALS['id1'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 }
             }
         });
@@ -469,6 +503,13 @@ class SubprocesosController extends Controller
     public function getSubprocesses($org)
     {
         $subprocesses = \Ermtool\Subprocess::getSubprocesses($org);
+        
+        return json_encode($subprocesses);
+    }
+
+    public function getSubprocesses2($org,$process)
+    {
+        $subprocesses = \Ermtool\Subprocess::getSubprocesses2($org,$process);
         
         return json_encode($subprocesses);
     }

@@ -643,6 +643,14 @@ function eliminarArchivo($id,$kind,$name)
 			}
 		}
 	}	
-	
 } 
+
+function eliminarSaltos($cadenaDeTexto)
+{
+	$buscar=array(chr(13).chr(10), "\r\n", "\n", "\r");
+	$reemplazar=array(" ", " ", " ", " ");
+	$cadena=str_ireplace($buscar,$reemplazar,$cadenaDeTexto);
+
+	return $cadena;
+}
 ?>

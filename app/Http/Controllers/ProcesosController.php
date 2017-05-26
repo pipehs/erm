@@ -11,8 +11,24 @@ use DB;
 use DateTime;
 use Auth;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class ProcesosController extends Controller
 {
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('procesos');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/procesos.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -190,6 +206,7 @@ class ProcesosController extends Controller
         {
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 //vemos si tiene proceso dependiente
                 if ($_POST['process_id'] != "")
                 {
@@ -212,6 +229,8 @@ class ProcesosController extends Controller
                 {
                     Session::flash('message','Proceso agregado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el proceso con Id: '.$process->id.' llamado: '.$process->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('/procesos');
@@ -269,6 +288,7 @@ class ProcesosController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $proceso = \Ermtool\Process::find($GLOBALS['id1']);
                 $proceso->status = 1;
                 $proceso->save();
@@ -281,6 +301,8 @@ class ProcesosController extends Controller
                 {
                     Session::flash('message','Proceso bloqueado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado el proceso con Id: '.$GLOBALS['id1'].' llamado: '.$proceso->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 
             });
 
@@ -300,6 +322,7 @@ class ProcesosController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $proceso = \Ermtool\Process::find($GLOBALS['id1']);
                 $proceso->status = 0;
                 $proceso->save();
@@ -312,6 +335,8 @@ class ProcesosController extends Controller
                 {
                     Session::flash('message','Proceso desbloqueado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha desbloqueado el proceso con Id: '.$GLOBALS['id1'].' llamado: '.$proceso->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/procesos');
         }
@@ -336,6 +361,7 @@ class ProcesosController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $proceso = \Ermtool\Process::find($GLOBALS['id1']);
                 $fecha_exp = NULL;
 
@@ -364,6 +390,8 @@ class ProcesosController extends Controller
                     Session::flash('message','Proceso actualizado correctamente');
                 }
 
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el proceso con Id: '.$GLOBALS['id1'].' llamado: '.$proceso->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             });
             return Redirect::to('/procesos');
         }
@@ -384,6 +412,7 @@ class ProcesosController extends Controller
 
         DB::transaction(function() {
 
+            $logger = $this->logger;
             //vemos si es que tiene algún subproceso asociado
             $rev = DB::table('subprocesses')
                     ->where('process_id','=',$GLOBALS['id1'])
@@ -405,10 +434,18 @@ class ProcesosController extends Controller
                     DB::table('processes')
                         ->where('process_id','=',$GLOBALS['id1'])
                         ->update(['process_id' => NULL]);
+                        
+                    //obtenemos el nombre para guardar en log
+                    $p = DB::table('processes')
+                        ->where('id','=',$GLOBALS['id1'])
+                        ->select('name')
+                        ->first();
                     //ahora eliminamos
                     DB::table('processes')
                         ->where('id','=',$GLOBALS['id1'])
                         ->delete();
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el proceso con Id: '.$GLOBALS['id1'].' llamado: '.$p->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
                     $GLOBALS['res'] = 0;
                 }

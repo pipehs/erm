@@ -70,7 +70,7 @@ $("#audit").change(function() {
 			if ($("#audit").val() != '') //Si es que se ha seleccionado valor válido de plan
 			{
 				//Añadimos la imagen de carga en el contenedor
-					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
+					$('#cargando').html('<div><center><img src="/bgrcdemo2/assets/img/loading.gif" width="19" height="19"/></center></div>');
 				//se obtienen controles asociados a los riesgos presentes en el plan de prueba seleccionado
 					//primero obtenemos controles asociados a los riesgos de negocio
 
@@ -138,7 +138,7 @@ function responder_nota(id,id_prueba)
 	nota += '<textarea name="answer_'+id+'" rows="3" cols="4" class="form-control" placeholder="Ingrese comentarios" required></textarea></div>';
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<label class="control-label">Cargar evidencias (opcional)</label>';
-	nota += '<input type="file" id="input-1a" name="evidencia_'+id+'[]" multiple class="file" data-show-preview="false"></div>';
+	nota += '<input type="file" name="evidencia_'+id+'[]" multiple class="file" data-show-preview="true"></div>';
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<button class="btn btn-success">Guardar</button></div><hr><br>';
 	$("#respuesta_nota_"+id).append(nota);

@@ -10,7 +10,10 @@ use DB;
 use Auth;
 use Redirect;
 use Ermtool\Http\Controllers\PlanesAccionController as PlanesAccion;
+use Ermtool\Http\Controllers\EvaluacionRiesgosController as Evaluations;
 use DateTime;
+use Mail;
+use Storage;
 
 class HomeController extends Controller
 {
@@ -44,90 +47,20 @@ class HomeController extends Controller
 
         //--- GENERAMOS HEATMAP PARA ÚLTIMA ENCUESTA DE EVALUACIÓN AGREGADA ---//
 
-        //obtenemos id de última evaluación
-        $id_eval = DB::table('evaluations')->max('id');
-        //seteamos datos en NULL por si no existe evaluación
-        $nombre = NULL;
-        $descripcion = NULL;
-        $riesgos = NULL;
-        $prom_proba = NULL;
-        $prom_criticidad = NULL;
-
-        //---- consulta multiples join para obtener las respuestas relacionada a la encuesta ----// 
-        $evaluations = DB::table('evaluation_risk')
-                            ->where('evaluation_risk.evaluation_id',$id_eval)
-                            ->select('evaluation_risk.id','evaluation_risk.risk_id',
-                                'evaluation_risk.organization_risk_id',
-                                'evaluation_risk.avg_probability','evaluation_risk.avg_impact')
-                            ->get();
-
-        //obtenemos nombre y descripcion de la última encuesta
-        $datos = DB::table('evaluations')->where('id',$id_eval)->select('name','description')->get();
-
-        foreach ($datos as $datos)
-        {
-             $nombre = $datos->name;
-             $descripcion = $datos->description;
-        }
-
-        $prom_proba = array();
-        $prom_criticidad = array();
-        $riesgos = array();
-        $i = 0;
-        $j = 0; //para obtener sólo una vez la organización (solución rápida)
-
-        $org2 = NULL; //inicializamos org por si no hay evaluaciones
-        foreach ($evaluations as $evaluation)
-        {
-            //obtenemos organización sólo una vez
-            if ($j == 0)
-            {
-                $org = DB::table('organizations')
-                        ->join('organization_risk','organization_risk.organization_id','=','organizations.id')
-                        ->where('organization_risk.id','=',$evaluation->organization_risk_id)
-                        ->select('organizations.name')
-                        ->first();
-                $j += 1;   
-            }
-
-            $org2 = $org->name;
-             
-            //para cada riesgo evaluado, identificaremos promedio de probabilidad y de criticidad
-            $prom_proba[$i] = $evaluation->avg_probability;
-
-            $prom_criticidad[$i] = $evaluation->avg_impact;
-
-                //ACTUALIZACIÓN 29-03-17: Se mostrará sólo riesgo ya que ahora se evaluará sólo el riesgo (quizás después se pueden obtener los elementos asociados)
-            
-
-            $riesgo_temp = DB::table('organization_risk')
-                            ->where('organization_risk.id','=',$evaluation->organization_risk_id)
-                            ->join('risks','risks.id','=','organization_risk.risk_id')
-                            ->select('risks.name as name','risks.description')
-                            ->get();
-            
-            foreach ($riesgo_temp as $temp) //el riesgo recién obtenido (de subproceso o negocio) es almacenado en riesgos
-            {
-                $riesgos[$i] = array('name' => $temp->name,
-                                    'description' => $temp->description,);
-            }
-            
-            $i += 1;
-        }
+        $evalclass = new Evaluations;
+        $evals = $evalclass->heatmapLastEvaluation();
 
         //retornamos la vista HOME con datos
         //OBS: desde 15-07-2016 verificaremos idioma seleccionado
         if (Session::get('languaje') == 'es')
         {
-            return view('home',['nombre'=>$nombre,'descripcion'=>$descripcion,
-                                        'riesgos'=>$riesgos,'prom_proba'=>$prom_proba,
-                                        'prom_criticidad'=>$prom_criticidad,'plans' => $plans,'org' => $org2]);
+            return view('home',['nombre'=>$evals['nombre'],'descripcion'=>$evals['descripcion'],
+                                        'riesgos'=>$evals['riesgos'],'prom_proba'=>$evals['prom_proba'],'prom_criticidad'=>$evals['prom_criticidad'],'plans' => $plans,'org' => $evals['org']]);
         }
         else if (Session::get('languaje') == 'en')
         {
-            return view('en.home',['nombre'=>$nombre,'descripcion'=>$descripcion,
-                                        'riesgos'=>$riesgos,'prom_proba'=>$prom_proba,
-                                        'prom_criticidad'=>$prom_criticidad,'plans' => $plans,'org' => $org2]);
+            return view('home',['nombre'=>$evals['nombre'],'descripcion'=>$evals['descripcion'],
+                                        'riesgos'=>$evals['riesgos'],'prom_proba'=>$evals['prom_proba'],'prom_criticidad'=>$evals['prom_criticidad'],'plans' => $plans,'org' => $evals['org']]);
         }
     }
 
@@ -140,6 +73,132 @@ class HomeController extends Controller
         else
         {
             return view('help');
+        }
+    }
+
+    public function support()
+    {
+        if (Auth::guest())
+        {  
+            return view('login');
+        }
+        else
+        {
+            return view('support');
+        }
+    }
+
+    public function supportStore(Request $request)
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            $evidence = $request->file('evidence_problem');
+
+            $mail = 'fherrera@ixus.cl';
+
+            $name = Auth::user()->name.' '.Auth::user()->surnames;
+            $user_mail = Auth::user()->email;
+            //verificamos que sea una imagen
+            if ($evidence)
+            {
+                $test = explode('.',$evidence->getClientOriginalName());
+            }
+            else
+            {
+                $test = null;
+            }
+
+            if (isset($test[1])) //existe una extensión
+            {
+                //verificamos que tenga extensión de imagen
+                if ($test[1] == 'png' || $test[1] == 'jpg' || $test[1] == 'jpeg' || $test[1] == 'gif' || $test[1] == 'PNG' || $test[1] == 'JPG' || $test[1] == 'JPEG' || $test[1] == 'GIF' || $test[1] == 'jpg')
+                {
+                    //PROBAMOS GUARDAR IMAGEN TEMPORALMENTE
+                    $guardado = Storage::put('temporal_mail/'.$evidence->getClientOriginalName(), file_get_contents($evidence->getRealPath())
+                        );
+                    //si es imagen, proseguimos con el envío de mail
+                    Mail::send('mail_support',['user' => $name,'user_mail' => $user_mail,'problem' => $_POST['description'], 'imagen' => $evidence->getClientOriginalName()], function ($message) use ($mail,$name)
+                    {
+                        if (Session::get('languaje') == 'en')
+                        {
+                            $message->to($mail, $name)->subject('Support ticket from B-GRC');
+                        }
+                        else
+                        {
+                            $message->to($mail, $name)->subject('Ticket de consulta B-GRC');
+                        }
+                    });
+
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','Support ticket successfully sent');
+                    }
+                    else
+                    {
+                        Session::flash('message','Ticket de soporte enviado correctamente');
+                    }
+
+                    return Redirect::to('support');
+                }
+                else
+                {
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('error','The file uploaded is not an image');
+                    }
+                    else
+                    {
+                        Session::flash('error','El archivo cargado no es una imagen');
+                    }
+
+                    return Redirect::to('support')->withInput();
+                }
+            }
+            
+            else if (isset($test[0])) //significa que es un archivo sin extensión
+            {
+                if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('error','The file uploaded is not an image');
+                    }
+                    else
+                    {
+                        Session::flash('error','El archivo cargado no es una imagen');
+                    }
+
+                    return Redirect::to('support')->withInput();
+            }
+
+            else //no se agregó imagen
+            {
+                Mail::send('mail_support',['user' => $name,'user_mail' => $user_mail,'problem' => $_POST['description']], function ($message) use ($mail,$name)
+                    {
+                        if (Session::get('languaje') == 'en')
+                        {
+                            $message->to($mail, $name)->subject('Support ticket from B-GRC');
+                        }
+                        else
+                        {
+                            $message->to($mail, $name)->subject('Ticket de consulta B-GRC');
+                        }
+                    });
+
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','Support ticket successfully sent');
+                    }
+                    else
+                    {
+                        Session::flash('message','Ticket de soporte enviado correctamente');
+                    }
+
+                    return Redirect::to('support');
+            }
+            //print_r($_POST);
         }
     }
 }

@@ -114,13 +114,13 @@
 
 @stop
 
-@section('scripts2')po
+@section('scripts2')
   <script type="text/javascript">
 
 
   @if (!empty($plans))
     @foreach ($plans as $p)
-        alert('El plan de acción descrito como "{{$p["description"]}}" se encuentra próximo a su fecha límite, o bien ésta ya pasó');
+        swal('Atención!','El plan de acción descrito como "{{$p["description"]}}" se encuentra próximo a su fecha límite, o bien ésta ya pasó','warning');
     @endforeach
   @endif
   

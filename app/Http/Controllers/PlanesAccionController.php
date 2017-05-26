@@ -14,8 +14,24 @@ use stdClass;
 use Mail;
 use Ermtool\Http\Controllers\IssuesController as Issues;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class PlanesAccionController extends Controller
 {
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('planes_accion');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/planes_accion.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     //función que obtiene todos los planes de acción de una organización
     public function getActionPlans($id)
     {
@@ -266,6 +282,8 @@ class PlanesAccionController extends Controller
                 }
                 else
                 {
+                    $short_des = substr($plan->description,0,100);
+
                     $action_plans[$i] = [
                         'origin' => $origin,
                         'id' => $plan->id,
@@ -276,6 +294,7 @@ class PlanesAccionController extends Controller
                         'final_date' => $final_date,
                         'status' => $status,
                         'status_number' => $plan->status,
+                        'short_des' => $short_des,
                     ];
                 }
 
@@ -465,6 +484,7 @@ class PlanesAccionController extends Controller
      */
     public function store($issue_id,$description,$stakeholder,$final_date)
     {
+        $logger = $this->logger;
         $new_plan = \Ermtool\Action_plan::create([
                         'issue_id' => $issue_id,
                         'description' => $description,
@@ -472,6 +492,8 @@ class PlanesAccionController extends Controller
                         'final_date' => $final_date,
                         'status' => 0,
                     ]);
+
+        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el plan de acción con Id: '.$new_plan->id.' definido como: '.$new_plan->description.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
         return $new_plan;
     }
@@ -489,7 +511,7 @@ class PlanesAccionController extends Controller
             global $evidence;
             $evidence = $request->file('evidence_doc');
             DB::transaction(function() {
-                
+                $logger = $this->logger;
                 $status = 0;
 
                 //verificamos ingreso de datos
@@ -546,6 +568,8 @@ class PlanesAccionController extends Controller
                 {
                     Session::flash('message','Plan de acción creado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el plan de acción con Id: '.$action_plan->id.' definido como: '.$action_plan->description.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
             });
 
@@ -627,7 +651,7 @@ class PlanesAccionController extends Controller
             global $evidence;
             $evidence = $request->file('evidence_doc');
             DB::transaction(function() {
-                
+                $logger = $this->logger;
                 $status = 0;
 
                 //verificamos ingreso de datos
@@ -657,14 +681,12 @@ class PlanesAccionController extends Controller
                 }
 
                 //actualizamos action_plan de issue_id = $id
-                DB::table('action_plans')->where('id','=',$GLOBALS['id2'])
-                    ->update([
-                        'description' => $description,
-                        'stakeholder_id' => $stakeholder_id,
-                        'final_date' => $final_date,
-                        'status' => $status,
-                        'updated_at' => date('Ymd H:i:s')
-                    ]);
+                $action_plan = \Ermtool\Action_plan::find($GLOBALS['id2']);
+                $action_plan->description = $description;
+                $action_plan->stakeholder_id = $stakeholder_id;
+                $action_plan->final_date = $final_date;
+                $action_plan->status = $status;
+                $action_plan->save();
 
                 if($GLOBALS['evidence'] != NULL)
                 {
@@ -685,6 +707,8 @@ class PlanesAccionController extends Controller
                 {
                     Session::flash('message','Plan de acción actualizado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el plan de acción con Id: '.$action_plan->id.' definido como: '.$action_plan->description.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
             });
 
@@ -712,7 +736,10 @@ class PlanesAccionController extends Controller
             global $res;
             $res = 1;
             DB::transaction(function() {
+                $logger = $this->logger;
 
+                //obtenemos nombre (descripción)
+                $description = DB::table('action_plans')->where('id',$GLOBALS['id1'])->value('description');
                 //primero que todo, eliminamos plan de acción (si es que hay)
                 DB::table('action_plans')
                 ->where('id','=',$GLOBALS['id1'])
@@ -720,6 +747,7 @@ class PlanesAccionController extends Controller
 
                 $GLOBALS['res'] = 0;
 
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el plan de acción con Id: '.$GLOBALS['id1'].' definido como: '.$description.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 //eliminamos evidencia si es que existe (SE DEBE AGREGAR)
                 eliminarArchivo($GLOBALS['id1'],5,NULL);
             });
@@ -773,12 +801,41 @@ class PlanesAccionController extends Controller
         return json_encode($results);
     }
 
+    //función para reporte de planes de acción
+    public function actionPlansReport()
+    {
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.reportes.planes_accion',['organizations' => $organizations]);
+            }
+            else
+            {
+                return view('reportes.planes_accion',['organizations' => $organizations]);
+            }
+        }
+    }
+
     //ACTUALIZACIÓN 25-08: Se deben mostrar los planes de acción para todos los tipos de hallazgo del sistema
     public function generarReportePlanes($org)
     {
         $results = array();
         $i = 0;
         
+        if (strstr($_SERVER["REQUEST_URI"],'genexcelplan'))
+        {
+            $org = $org;
+        }
+        else
+        {
+            $org = $_GET['organization'];
+        }
         //$action_plans = $this->getActionPlanAudit($org);
             
         //ACTUALIZACIÓN 25-08-2016: Función extraida para que esté disponible en el mantenedor y en el reporte de planes de acción
@@ -789,7 +846,16 @@ class PlanesAccionController extends Controller
             return $results;
         }
         else
-            return json_encode($results);
+        {
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.reportes.planes_accion',['action_plans' => $results,'org_id' => $org]);
+            }
+            else
+            {
+                return view('reportes.planes_accion',['action_plans' => $results,'org_id' => $org]);
+            }
+        }
     }
 
     public function indexGraficos()
@@ -981,7 +1047,7 @@ class PlanesAccionController extends Controller
                                 'updated_at' => $updated_at,
                                 'stakeholder' => $user->name.' '.$user->surnames,
                                 'issue' => $issue->description,
-                                'recommendations' => $plan->recommendations,
+                                'recommendations' => $issue->recommendations,
                             ];
                         }
                         else
@@ -1031,7 +1097,7 @@ class PlanesAccionController extends Controller
                                     'final_date' => $final_date,
                                     'updated_at' => $updated_at,
                                     'stakeholder' => $user->name.' '.$user->surnames,
-                                    'issue' => $action_plan->issue,
+                                    'issue' => $issue->description,
                                     'recommendations' => $issue->recommendations,
                                 ];
                             }
@@ -2042,6 +2108,7 @@ class PlanesAccionController extends Controller
             $res = 1;
             DB::transaction(function() 
             {
+                $logger = $this->logger;
                 $action_plan = \Ermtool\Action_plan::find($GLOBALS['id1']);
                 $action_plan->status = 1;
                 $action_plan->save();
@@ -2055,6 +2122,8 @@ class PlanesAccionController extends Controller
                     Session::flash('message','Plan de acción cerrado correctamente');
                 }
 
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el plan de acción con Id: '.$action_plan->id.' definido como: '.$action_plan->description.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                
                 $GLOBALS['res'] = 0;
             });
 

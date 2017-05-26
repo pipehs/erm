@@ -102,9 +102,9 @@
 
             <div class="form-group" id="tipo2" style="display: none;">
                 <div class="row">
-                  {!!Form::label('Riesgos inherentes o controlados',null,['class'=>'col-sm-4 control-label'])!!}
+                  {!!Form::label('Riesgo inherente o residual',null,['class'=>'col-sm-4 control-label'])!!}
                   <div class="col-sm-3">
-                    {!!Form::select('kind2',(['0'=>'Riesgos inherentes','1'=>'Riesgos inherentes v/s Riesgos controlados']), 
+                    {!!Form::select('kind2',(['0'=>'Riesgos inherentes','1'=>'Riesgo inherente v/s Riesgo residual']), 
                          null, 
                          ['id' => 'kind2','placeholder'=>'- Seleccione -','required'=>'true'])!!}
                   </div>
@@ -141,7 +141,6 @@
                 </div>
 -->
       @else
-
         <div class="row">
            <p><b> Nombre:</b> {{ $nombre }}.</p>
            <p><b> Descripci&oacute;n:</b> {{ $descripcion }}.</p>
@@ -149,11 +148,11 @@
                <!-- Heatmap riesgo inherente -->
               <div class="row">
                 <div class="col-sm-6">
-                  <h4><b>&nbsp;&nbsp;Evaluación de Riesgos Inherentes</b></h4>
+                  <h4><b>&nbsp;&nbsp;Evaluación de Riesgo Inherente</b></h4>
                 </div>
               @if ($kind2 == 1)
                 <div class="col-sm-6">
-                  <h4><b>Evaluación de Riesgos Controlados</b></h4>
+                  <h4><b>Evaluación de Riesgo Residual</b></h4>
                 </div>
               @endif
               </div>
@@ -335,7 +334,12 @@
                   //controlado
                   @if (intval($prom_criticidad_ctrl[$k]) == (5-$i))
                       @if (intval($prom_proba_ctrl[$k]) == (5-$j))
-                         $('#{{(5-$i)}}_{{(5-$j)}}_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_ctrl[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_ctrl[$k],1) }}'>{{ $cont }}</span>");
+                          //verificamos color de círculo
+                          @if ($control[$k] == 0)
+                              $('#{{(5-$i)}}_{{(5-$j)}}_ctrl').append("<span class='circulo-azul' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_ctrl[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_ctrl[$k],1) }}'>{{ $cont }}</span>");
+                          @else
+                              $('#{{(5-$i)}}_{{(5-$j)}}_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_ctrl[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_ctrl[$k],1) }}'>{{ $cont }}</span>");
+                          @endif
                       @endif
                   @endif
                 @endif

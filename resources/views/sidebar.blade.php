@@ -61,16 +61,16 @@
 				<?php break; ?>
 			@endif
 		@endforeach
-
-		@foreach (Session::get('roles') as $role)
-			@if ($role == 1) {{-- Administración del sistema --}}
-				@include('menu.admin')
-			@endif
-		@endforeach
-
+		<!--
+			@foreach (Session::get('roles') as $role)
+				@if ($role == 1) {{-- Administración del sistema --}}
+					@include('menu.admin')
+				@endif
+			@endforeach
+		-->
 		<li>
 			<a href="cambiopass" class="{{ activeMenu('cambiopass') }}">
-				<i class="fa fa-wrench"></i>
+				<i class="fa fa-lock"></i>
 				<span class="hidden-xs">Cambiar contraseña</span>
 			</a>
 		</li>
@@ -81,6 +81,26 @@
 				<span class="hidden-xs">Ayuda</span>
 			</a>
 		</li>
+
+		<li>
+			<a href="support" class="{{ activeMenu('support') }}">
+				<i class="fa fa-wrench"></i>
+				<span class="hidden-xs">Soporte</span>
+			</a>
+		</li>
+
+		@foreach (Session::get('roles') as $role)
+			@if ($role != 6)
+				<li>
+					<a href="logs" class="{{ activeMenu('logs') }}">
+						<i class="fa fa-th-list"></i>
+						<span class="hidden-xs">Registro actividades</span>
+					</a>
+				</li>
+			<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+			@endif
+		@endforeach
+
 	@endif
 @else
 					<li>&nbsp;</li>

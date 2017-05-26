@@ -10,6 +10,12 @@ use DateTime;
 use DB;
 use Auth;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class CategoriasRiesgosController extends Controller
 {
     /**
@@ -17,6 +23,17 @@ class CategoriasRiesgosController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('categorias_riesgos');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/categorias_riesgos.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+    
     public function index()
     {
         if (Auth::guest())
@@ -143,6 +160,7 @@ class CategoriasRiesgosController extends Controller
         {
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 if (!isset($_POST['risk_category_id']) || $_POST['risk_category_id'] == NULL || $_POST['risk_category_id'] == '')
                 {
                     $risk_category_id = NULL;
@@ -152,7 +170,7 @@ class CategoriasRiesgosController extends Controller
                     $risk_category_id = $_POST['risk_category_id'];
                 }
 
-                \Ermtool\Risk_category::create([
+                $category = \Ermtool\Risk_category::create([
                     'name' => $_POST['name'],
                     'description' => $_POST['description'],
                     'expiration_date' => $_POST['expiration_date'],
@@ -167,6 +185,8 @@ class CategoriasRiesgosController extends Controller
                     {
                         Session::flash('message','Categor&iacute;a agregada correctamente');
                     }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado la categoría de riesgo con Id: '.$category->id.' llamada: '.$category->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('/categorias_risks');
@@ -238,6 +258,7 @@ class CategoriasRiesgosController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
                 $fecha_exp = NULL;
 
@@ -265,6 +286,8 @@ class CategoriasRiesgosController extends Controller
                 {
                     Session::flash('message','Categor&iacute;a de riesgo actualizada correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado la categoría de riesgo con Id: '.$GLOBALS['id1'].' llamada: '.$risk_category->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('/categorias_risks');
@@ -283,6 +306,7 @@ class CategoriasRiesgosController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
                 $risk_category->status = 1;
                 $risk_category->save();
@@ -295,6 +319,8 @@ class CategoriasRiesgosController extends Controller
                 {
                     Session::flash('message','Categor&iacute;a de riesgo bloqueada correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado la categoría de riesgo con Id: '.$GLOBALS['id1'].' llamada: '.$risk_category->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/categorias_risks');
         }
@@ -312,6 +338,7 @@ class CategoriasRiesgosController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $risk_category = \Ermtool\Risk_category::find($GLOBALS['id1']);
                 $risk_category->status = 0;
                 $risk_category->save();
@@ -323,6 +350,8 @@ class CategoriasRiesgosController extends Controller
                 {
                     Session::flash('message','Categor&iacute;a de riesgo desbloqueada correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha desbloqueado la categoría de riesgo con Id: '.$GLOBALS['id1'].' llamada: '.$risk_category->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/categorias_risks');
         }
@@ -341,6 +370,10 @@ class CategoriasRiesgosController extends Controller
         global $res;
         $res = 1;
         DB::transaction(function() {
+
+            $logger = $this->logger;
+
+            $name = \Ermtool\Risk_category::name($GLOBALS['id1']);
             //borramos de riesgo (si es que existe)
             DB::table('risks')
             ->where('risk_category_id','=',$GLOBALS['id1'])
@@ -358,6 +391,8 @@ class CategoriasRiesgosController extends Controller
 
             //Si todo pasa, res se asigna como 0
             $GLOBALS['res'] = 0;
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la categoría de riesgo con Id: '.$GLOBALS['id1'].' llamada: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
         });
         
         return $res;

@@ -78,6 +78,14 @@ Route::get('help', [
 	'as' => 'help', 'uses' => 'HomeController@help'
 	]);
 
+Route::get('support', [
+	'as' => 'support', 'uses' => 'HomeController@support'
+	]);
+
+Route::post('support.store', [
+	'as' => 'support.store', 'uses' => 'HomeController@supportStore'
+	]);
+
 // ----RUTAS PARA GESTIÓN DE DATOS MAESTROS---- //
 
 	//Rutas para CRUD + bloquear Organización//
@@ -707,7 +715,7 @@ Route::get('genmatriz.{value},{org}', [
 	'as' => 'genmatriz', 'uses' => 'ControlesController@generarMatriz']);
 
 Route::get('reporte_planes', [
-	'as' => 'reporte_planes', 'uses' => 'AuditoriasController@actionPlansReport']);
+	'as' => 'reporte_planes', 'uses' => 'PlanesAccionController@actionPlansReport']);
 
 Route::get('reporte_hallazgos', [
 	'as' => 'reporte_hallazgos', 'uses' => 'IssuesController@issuesReport']);
@@ -1011,6 +1019,10 @@ Route::get('get_processes.{id}', [
 Route::get('get_subprocesses.{id}', [
 	'as' => 'get_subprocesses', 'uses' => 'SubprocesosController@getSubprocesses']);
 
+//ruta para obtener subprocesos de un proceso específico de una organización
+Route::get('get_subprocesses2.{org}.{process}', [
+	'as' => 'get_subprocesses2', 'uses' => 'SubprocesosController@getSubprocesses2']);
+
 //ruta para obtener subprocesos de una organizacion y además de un proceso en específico
 Route::get('get_subprocesses_from_process.{id}.{process}', [
 	'as' => 'get_subprocesses_from_process', 'uses' => 'SubprocesosController@getSubprocessesFromProcess']);
@@ -1290,3 +1302,5 @@ Route::get('note_answer.destroy.{id}', [
 Route::get('error', function(){ 
     abort(404);
 });
+
+Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');

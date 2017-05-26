@@ -53,7 +53,10 @@ function notas(id)
 					{
 						resultado += 'Estado: Cerrada<br>'
 					}
-					resultado += '<h4>Nota: '+this.description+'</h4>';
+					resultado += 'Realizada por: '+this.user+'<br>';
+					resultado += 'Dirigida a: '+this.stakeholder+'<br>';
+					
+					resultado += '<h4>Nota: '+this.description+'</h4>'
 
 					//agregamos evidencias
 					//ACTUALIZACIÓN 30-01-17: No se muestran evidencias ya que pueden ser muchas

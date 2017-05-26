@@ -36,6 +36,17 @@
 				<div class="no-move"></div>
 			</div>
 			<div class="box-content">
+
+			@if ($errors->any())
+				<div class="alert alert-danger alert-dismissible" role="alert">
+					<ul>
+					@foreach ($errors->all() as $error)
+						<li>{{ $error }}</li>
+					@endforeach
+					</ul>
+				</div>
+			@endif
+			
 			Ingrese los datos del nuevo efecto gen&eacute;rico.
 			{!!Form::open(['route'=>'efectos.store','method'=>'POST','class'=>'form-horizontal'])!!}
 				@include('datos_maestros.efectos.form')

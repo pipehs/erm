@@ -11,6 +11,12 @@ use dateTime;
 use DB;
 use Auth;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class ObjetivosController extends Controller
 {
     /**
@@ -18,6 +24,16 @@ class ObjetivosController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('objetivos');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/objetivos.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     public function index()
     {
         if (Auth::guest())
@@ -298,6 +314,7 @@ class ObjetivosController extends Controller
             global $verificador;
             DB::transaction(function() 
             {
+                $logger = $this->logger;
                 //si es que se agrego categoría de objetivo
                 /*if ($_POST['objective_category_id'])
                 {
@@ -368,7 +385,9 @@ class ObjetivosController extends Controller
                     else
                     {
                         Session::flash('message','Objetivo corporativo agregado correctamente');
-                    } 
+                    }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el objetivo corporativo de Id: '.$objective->id.' llamado '.$objective->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s')); 
                 }
                 else
                 {
@@ -475,6 +494,7 @@ class ObjetivosController extends Controller
             $id1 = $id;
             DB::transaction(function() 
             {
+                $logger = $this->logger;
                 $objetivo = \Ermtool\Objective::find($GLOBALS['id1']);
                 $objetivo->status = 1;
                 $objetivo->save();
@@ -487,6 +507,8 @@ class ObjetivosController extends Controller
                 {
                     Session::flash('message','Objetivo bloqueado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado el objetivo corporativo de Id: '.$GLOBALS['id1'].' llamado '.$objetivo->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('/objetivos');
@@ -505,6 +527,7 @@ class ObjetivosController extends Controller
             $id1 = $id;
             DB::transaction(function() 
             {
+                $logger = $this->logger;
                 $objetivo = \Ermtool\Objective::find($GLOBALS['id1']);
                 $objetivo->status = 0;
                 $objetivo->save();
@@ -517,6 +540,8 @@ class ObjetivosController extends Controller
                 {
                     Session::flash('message','Objetivo desbloqueado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha desbloqueado el objetivo corporativo de Id: '.$GLOBALS['id1'].' llamado '.$objetivo->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             //obtenemos org
@@ -631,6 +656,7 @@ class ObjetivosController extends Controller
                 $id1 = $id;
                 DB::transaction(function() 
                 {
+                    $logger = $this->logger;
                     $objetivo = \Ermtool\Objective::find($GLOBALS['id1']);
 
                     if ($_POST['perspective'] != "")
@@ -684,6 +710,7 @@ class ObjetivosController extends Controller
                         Session::flash('message','Objetivo actualizado correctamente');
                     }
                     
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el objetivo corporativo de Id: '.$GLOBALS['id1'].' llamado '.$objetivo->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 });
             }
             else
@@ -735,8 +762,11 @@ class ObjetivosController extends Controller
 
                 if (empty($rev))
                 {
+                    $name = DB::table('objectives')->where('id',$GLOBALS['id1'])->value('name');
                     //si pasa ambas validaciones se puede borrar
                     $GLOBALS['res'] = \Ermtool\Objective::deleteObjective($GLOBALS['id1']);
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el objetivo corporativo de Id: '.$GLOBALS['id1'].' llamado '.$name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 }
             }
         });

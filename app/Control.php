@@ -324,10 +324,11 @@ class Control extends Model
                     ->where('risk_subprocess.subprocess_id','=',$subprocess)
                     ->select('risk_subprocess.risk_id as id')
                     ->get();
-
+        $controls = array();
+        $i = 0;
         foreach ($risks as $risk)
         {
-            $controls = DB::table('controls')
+            $controls[$i] = DB::table('controls')
                         ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
                         ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
                         ->where('organization_risk.organization_id','=',$org)
@@ -335,6 +336,7 @@ class Control extends Model
                         ->select('controls.id','controls.name','controls.description')
                         ->groupBy('controls.id','controls.name','controls.description')
                         ->get();
+            $i += 1;
         }
         return $controls;
     }

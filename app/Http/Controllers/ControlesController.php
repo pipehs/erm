@@ -11,6 +11,13 @@ use DateTime;
 use Auth;
 use ArrayObject;
 use Ermtool\Http\Controllers\DocumentosController as Documentos;
+
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 //sleep(2);
 class ControlesController extends Controller
 {
@@ -19,6 +26,21 @@ class ControlesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger;
+    public $logger2;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('controles');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/controles.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+
+        $this->logger2 = new Logger('evaluacion_controles');
+        $this->logger2->pushHandler(new StreamHandler($dir.'/storage/logs/evaluacion_controles.log', Logger::INFO));
+        $this->logger2->pushHandler(new FirePHPHandler());
+    }
 
     public function index()
     {
@@ -124,8 +146,7 @@ class ControlesController extends Controller
                 //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
                 $short_des = substr($control->description,0,100);
                 //ACT 27-04-17: eliminamos saltos de línea
-                $description = preg_replace('(\n)',' ',$control->description);
-                $description = preg_replace('(\r)',' ',$description);
+                $description = eliminarSaltos($control->description);
 
                 $controls1[$i] = ['id'=>$control->id,
                                     'name'=>$control->name,
@@ -283,6 +304,7 @@ class ControlesController extends Controller
             //creamos una transacción para cumplir con atomicidad
             DB::transaction(function()
             {
+                $logger = $this->logger;
                     if ($_POST['stakeholder_id'] == NULL)
                         $stakeholder = NULL;
                     else
@@ -395,6 +417,8 @@ class ControlesController extends Controller
                     {
                         Session::flash('message','Control agregado correctamente');
                     }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el control con Id: '.$control_id.' llamado: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('controles.index2?organization_id='.$_POST['org_id']);
         }
@@ -479,6 +503,7 @@ class ControlesController extends Controller
             $evidencedoc = $request->file('evidence_doc');
             DB::transaction(function() 
             {
+                $logger = $this->logger;
                 $control = \Ermtool\Control::find($GLOBALS['id1']);
                 if ($_POST['stakeholder_id'] == NULL)
                     $stakeholder = NULL;
@@ -573,6 +598,8 @@ class ControlesController extends Controller
                 {
                     Session::flash('message','Control actualizado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el control con Id: '.$GLOBALS['id1'].' llamado: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('controles.index2?organization_id='.$_POST['org_id']);
@@ -594,7 +621,7 @@ class ControlesController extends Controller
         $res = 1;
 
         DB::transaction(function() {
-
+            $logger = $this->logger;
             //vemos si tiene evaluaciones
             $rev = DB::table('control_evaluation')
                     ->where('control_id','=',$GLOBALS['id1'])
@@ -650,6 +677,10 @@ class ControlesController extends Controller
                         eliminarArchivo($GLOBALS['id1'],3,NULL);
 
                         $GLOBALS['res'] = 0;
+
+                        $name = \Ermtool\Control::name($GLOBALS['id1']);
+
+                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el control con Id: '.$GLOBALS['id1'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                     }
                 }
                 
@@ -885,6 +916,9 @@ class ControlesController extends Controller
         else
         {
             DB::transaction(function() {
+
+                $logger = $this->logger2;
+
                 if (isset($_POST['comments']) && $_POST['comments'] != '')
                 {
                     $comments = $_POST['comments'];
@@ -913,6 +947,28 @@ class ControlesController extends Controller
                 {
                     Session::flash('message','Evaluación de control generada correctamente');
                 }
+
+                switch ($_POST['kind']) {
+                    case 0:
+                        $kind = 'de Diseño';
+                        break;
+                    case 1:
+                        $kind = 'de Efectividad operativa';
+                        break;
+                    case 2:
+                        $kind = 'Sustantiva';
+                        break;
+                    case 3:
+                        $kind = 'de Cumplimiento';
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
+
+                $name = \Ermtool\Control::name($_POST['control_id']);
+                
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha realizado una prueba '.$kind.' para el control con Id: '.$_POST['control_id'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('editar_evaluacion.'.$GLOBALS['eval2']->id);
@@ -924,6 +980,7 @@ class ControlesController extends Controller
         global $id1;
         $id1 = $id;
         DB::transaction(function() {
+            $logger = $this->logger2;
             $evaluation = \Ermtool\Control_evaluation::find($GLOBALS['id1']);
 
             $evaluation->description = $_POST['description'];
@@ -955,6 +1012,28 @@ class ControlesController extends Controller
             {
                 Session::flash('message','Evaluación de control actualizada correctamente');
             }
+
+            switch ($evaluation->kind) {
+                    case 0:
+                        $kind = 'de Diseño';
+                        break;
+                    case 1:
+                        $kind = 'de Efectividad operativa';
+                        break;
+                    case 2:
+                        $kind = 'Sustantiva';
+                        break;
+                    case 3:
+                        $kind = 'de Cumplimiento';
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
+
+                $name = \Ermtool\Control::name($evaluation->control_id);
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado la prueba '.$kind.' para el control con Id: '.$evaluation->control_id.' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
         });
 
         return Redirect::to('editar_evaluacion.'.$id);
@@ -970,6 +1049,8 @@ class ControlesController extends Controller
         $org1 = $org;
 
         DB::transaction(function() {
+            $logger = $this->logger2;
+
             //primero que todo, cerramos el estado de la prueba de id = $id
             $eval = \Ermtool\Control_evaluation::find($GLOBALS['id1']);
             $eval->status = 2;
@@ -989,6 +1070,28 @@ class ControlesController extends Controller
             {
                 Session::flash('message','La prueba fue cerrada satisfactoriamente');
             }
+
+            switch ($eval->kind) {
+                    case 0:
+                        $kind = 'de Diseño';
+                        break;
+                    case 1:
+                        $kind = 'de Efectividad operativa';
+                        break;
+                    case 2:
+                        $kind = 'Sustantiva';
+                        break;
+                    case 3:
+                        $kind = 'de Cumplimiento';
+                        break;
+                    default:
+                        # code...
+                        break;
+                }
+
+            $name = \Ermtool\Control::name($eval->control_id);
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha cerrado la prueba '.$kind.' para el control con Id: '.$eval->control_id.' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
         });
 
         return 0;

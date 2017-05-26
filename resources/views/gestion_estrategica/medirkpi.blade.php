@@ -190,7 +190,7 @@
 				<div class="form-group">
 	                {!!Form::label('Valor de medición',
 	                null,['class'=>'col-sm-5 control-label'])!!}
-	                <div class="col-sm-2">
+	                <div class="col-sm-4">
 	                @if (isset($eval)) {{-- Si se está editando no se puede editar el periodo --}}
 	                	{!!Form::number('value',$eval->value,
 	                  	['id'=>'value','class'=>'form-control','requierd'=>'true'])!!}

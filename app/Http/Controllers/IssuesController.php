@@ -15,8 +15,24 @@ use Ermtool\Http\Controllers\PlanesAccionController as PlanesAccion;
 use Auth;
 use Ermtool\Issue as Issue;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class IssuesController extends Controller
 {
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('riesgos_tipo');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/riesgos_tipo.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     public function setIssue1($processes,$subprocesses,$risks,$controls,$name,$classification,$recommendations,$plan,$status,$final_date)
     {
         if (Session::get('languaje') == 'en')
@@ -183,6 +199,10 @@ class IssuesController extends Controller
 
                 foreach ($issues2 as $issue)
                 {
+                    //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                    $short_des = substr($issue->description,0,100);
+                    $short_rec = substr($issue->recommendations,0,100);
+
                     $issues[$i] = [
                         'element_id' => $process->id,
                         'process' => $process->name,
@@ -191,7 +211,9 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations
+                        'recommendations' => $issue->recommendations,
+                        'short_des' => $short_des,
+                        'short_rec' => $short_rec
                     ];
 
                     $i += 1; 
@@ -224,6 +246,9 @@ class IssuesController extends Controller
                 {
                     foreach ($issues2 as $issue)
                     {
+                        $short_des = substr($issue->description,0,100);
+                        $short_rec = substr($issue->recommendations,0,100);
+
                         $issues[$i] = [
                             'element_id' => $subprocess->id,
                             'subprocess' => $subprocess->name,
@@ -232,7 +257,9 @@ class IssuesController extends Controller
                             'name' => $issue->name,
                             'description' => $issue->description,
                             'classification' => $issue->classification,
-                            'recommendations' => $issue->recommendations
+                            'recommendations' => $issue->recommendations,
+                            'short_des' => $short_des,
+                            'short_rec' => $short_rec
                         ];
 
                         $i += 1; 
@@ -270,6 +297,9 @@ class IssuesController extends Controller
 
                 foreach ($issues2 as $issue)
                 {
+                    $short_des = substr($issue->description,0,100);
+                    $short_rec = substr($issue->recommendations,0,100);
+
                     $issues[$i] = [
                         'element_id' => $control->id,
                         'control' => $control->name,
@@ -278,7 +308,9 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations
+                        'recommendations' => $issue->recommendations,
+                        'short_des' => $short_des,
+                        'short_rec' => $short_rec
                     ];
 
                     $i += 1; 
@@ -305,6 +337,9 @@ class IssuesController extends Controller
 
                 foreach ($issues2 as $issue)
                 {
+                    $short_des = substr($issue->description,0,100);
+                    $short_rec = substr($issue->recommendations,0,100);
+
                     $issues[$i] = [
                         'element_id' => $control->id,
                         'control' => $control->name,
@@ -313,7 +348,9 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations
+                        'recommendations' => $issue->recommendations,
+                        'short_des' => $short_des,
+                        'short_rec' => $short_rec
                     ];
 
                     $i += 1; 
@@ -340,6 +377,9 @@ class IssuesController extends Controller
 
                 foreach ($issues2 as $issue)
                 {
+                    $short_des = substr($issue->description,0,100);
+                    $short_rec = substr($issue->recommendations,0,100);
+
                     $issues[$i] = [
                         'element_id' => $audit_program->id,
                         'audit_program' => $audit_program->name,
@@ -348,7 +388,9 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations
+                        'recommendations' => $issue->recommendations,
+                        'short_des' => $short_des,
+                        'short_rec' => $short_rec
                     ];
 
                     $i += 1; 
@@ -376,6 +418,9 @@ class IssuesController extends Controller
 
                 foreach ($issues2 as $issue)
                 {
+                    $short_des = substr($issue->description,0,100);
+                    $short_rec = substr($issue->recommendations,0,100);
+
                     $issues[$i] = [
                         'element_id' => $audit->id,
                         'audit' => $audit->name,
@@ -384,7 +429,9 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations
+                        'recommendations' => $issue->recommendations,
+                        'short_des' => $short_des,
+                        'short_rec' => $short_rec
                     ];
 
                     $i += 1; 
@@ -412,6 +459,9 @@ class IssuesController extends Controller
 
                 foreach ($issues2 as $issue)
                 {
+                    $short_des = substr($issue->description,0,100);
+                    $short_rec = substr($issue->recommendations,0,100);
+
                     $issues[$i] = [
                         'element_id' => $test->id,
                         'audit_test' => $test->name,
@@ -420,7 +470,9 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations
+                        'recommendations' => $issue->recommendations,
+                        'short_des' => $short_des,
+                        'short_rec' => $short_rec
                     ];
 
                     $i += 1; 
@@ -499,6 +551,8 @@ class IssuesController extends Controller
 
                 $origin = Issue::getOrigin($kind,$issue['element_id'],$org_id);
 
+                $short_plan = substr($temp['plan'],0,100);
+
                 $issues[$i] = [
                     'id' => $temp['id'],
                     'origin' => $origin,
@@ -510,6 +564,10 @@ class IssuesController extends Controller
                     'status_origin' => $temp['status_origin'],
                     'final_date' => $temp['final_date'],
                     'datos' => $datos,
+                    'description' => $issue['description'],
+                    'short_des' => $issue['short_des'],
+                    'short_rec' => $issue['short_rec'],
+                    'short_plan' => $short_plan
                 ];
             }
 
@@ -1416,11 +1474,12 @@ class IssuesController extends Controller
             global $evidence;
             $evidence = $request->file('evidence_doc2');
             DB::transaction(function() {
-
+                $logger = $this->logger;
                 //verificamos ingreso de datos
                 if (isset($_POST['description']))
                 {
                     $description = $_POST['description'];
+                    $description = eliminarSaltos($description);
                 }
                 else
                 {
@@ -1430,6 +1489,7 @@ class IssuesController extends Controller
                 if (isset($_POST['recommendations']))
                 {
                     $recommendations = $_POST['recommendations'];
+                    $recommendations = eliminarSaltos($recommendations);
                 }
                 else
                 {
@@ -1587,6 +1647,8 @@ class IssuesController extends Controller
 
                     $plan = new PlanesAccion;
 
+                    $_POST['description_plan'] = eliminarSaltos($_POST['description_plan']);
+
                     $newplan = $plan->store($issue,$_POST['description_plan'],$stakeholder,$final_date);
 
                     $id_action_plan = $newplan->id;
@@ -1625,9 +1687,18 @@ class IssuesController extends Controller
                         Session::flash('message','Hallazgo creado correctamente');
                     }
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha generado el hallazgo con Id: '.$issue.' llamado: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
-            return Redirect::to('hallazgos');
+            if (isset($_POST['kind']))
+            {
+                return Redirect::to('hallazgos_lista?organization_id='.$_POST['organization_id'].'&kind='.$_POST['kind']);
+            }
+            else
+            {
+                return Redirect::to('hallazgos');
+            }
         }
     }
 
@@ -1769,7 +1840,7 @@ class IssuesController extends Controller
             global $evidence;
             $evidence = $request->file('evidence_doc2');
             DB::transaction(function() {
-
+                $logger = $this->logger;
                 //vemos si el plan se mandó cerrado o abierto y damos formato a campos de plan de acción
                 if (isset($_POST['status']))
                 {
@@ -1777,7 +1848,7 @@ class IssuesController extends Controller
 
                     if ($_POST['description_plan2'] != "")
                     {
-                        $description_plan = $_POST['description_plan2'];
+                        $description_plan = eliminarSaltos($_POST['description_plan2']);
                     }
                     else
                         $description_plan = NULL;
@@ -1804,7 +1875,7 @@ class IssuesController extends Controller
 
                     if ($_POST['description_plan'] != "")
                     {
-                        $description_plan = $_POST['description_plan'];
+                        $description_plan = eliminarSaltos($_POST['description_plan']);
                     }
                     else
                         $description_plan = NULL;
@@ -1925,6 +1996,8 @@ class IssuesController extends Controller
                     Session::flash('message','Hallazgo y plan de acción actualizado correctamente');
                 }
 
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el hallazgo con Id: '.$GLOBALS['id2'].' llamado: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             });
             
             if (isset($_POST['test_id']))
@@ -1958,7 +2031,8 @@ class IssuesController extends Controller
             global $res;
             $res = 1;
             DB::transaction(function() {
-
+                $logger = $this->logger;
+                $name = DB::table('issues')->where('id',$GLOBALS['id1'])->value('name');
                 //primero que todo, eliminamos plan de acción (si es que hay)
                 DB::table('action_plans')
                 ->where('issue_id','=',$GLOBALS['id1'])
@@ -1973,6 +2047,8 @@ class IssuesController extends Controller
                 eliminarArchivo($GLOBALS['id1'],2,NULL);
 
                 $GLOBALS['res'] = 0;
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el hallazgo con Id: '.$GLOBALS['id1'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return $res;

@@ -11,6 +11,12 @@ use DB;
 use DateTime;
 use Auth;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class RiesgosTipoController extends Controller
 {
     /**
@@ -18,6 +24,17 @@ class RiesgosTipoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('riesgos_tipo');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/riesgos_tipo.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     public function index()
     {
         if (Auth::guest())
@@ -190,6 +207,7 @@ class RiesgosTipoController extends Controller
         {
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $causa = array();
 
                 if ($_POST['expiration_date'] == NULL || $_POST['expiration_date'] == "")
@@ -277,6 +295,8 @@ class RiesgosTipoController extends Controller
                 {
                     Session::flash('message','Riesgo tipo agregado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el riesgo tipo con Id: '.$risk->id.' llamado: '.$risk->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/riskstype');
         }
@@ -362,6 +382,7 @@ class RiesgosTipoController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $riesgo = \Ermtool\Risk::find($GLOBALS['id1']);
 
                 if ($_POST['expiration_date'] == NULL || $_POST['expiration_date'] == "")
@@ -514,6 +535,8 @@ class RiesgosTipoController extends Controller
                 {
                     Session::flash('message','Riesgo tipo actualizado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el riesgo tipo con Id: '.$riesgo->id.' llamado: '.$riesgo->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('/riskstype');
@@ -532,6 +555,7 @@ class RiesgosTipoController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $riesgo = \Ermtool\Risk::find($GLOBALS['id1']);
                 $riesgo->status = 1;
                 $riesgo->save();
@@ -544,6 +568,8 @@ class RiesgosTipoController extends Controller
                 {
                     Session::flash('message','Riesgo tipo bloqueado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado el riesgo tipo con Id: '.$GLOBALS['id1'].' llamado: '.$riesgo->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/riskstype');
         }
@@ -561,6 +587,7 @@ class RiesgosTipoController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $riesgo = \Ermtool\Risk::find($GLOBALS['id1']);
                 $riesgo->status = 0;
                 $riesgo->save();
@@ -573,6 +600,9 @@ class RiesgosTipoController extends Controller
                 {
                     Session::flash('message','Riesgo tipo desbloqueado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha desbloqueado el riesgo tipo con Id: '.$GLOBALS['id1'].' llamado: '.$riesgo->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             });
 
             return Redirect::to('/riskstype');
@@ -593,7 +623,10 @@ class RiesgosTipoController extends Controller
         $res = 1;
 
         DB::transaction(function() {
+            $logger = $this->logger;
 
+            //nombre
+            $name = \Ermtool\Risk::name($GLOBALS['id1']);
             //eliminamos primero causas y efectos (si es que tiene)
             DB::table('cause_risk')
                 ->where('risk_id','=',$GLOBALS['id1'])
@@ -610,6 +643,9 @@ class RiesgosTipoController extends Controller
                 ->delete();
 
             $GLOBALS['res'] = 0;
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el riesgo tipo con Id: '.$GLOBALS['id1'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
         });
 
         return $res;

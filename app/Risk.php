@@ -27,7 +27,11 @@ class Risk extends Model
 
     //eliminamos created_at y updated_at
     //public $timestamps = false;
-
+    public static function name($id)
+    {
+        return DB::table('risks')->where('id', $id)->value('name');
+    }
+    
     public function causes()
     {
     	return $this->belongsToMany('Ermtool\Cause');

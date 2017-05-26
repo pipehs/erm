@@ -36,6 +36,16 @@
 				<div class="no-move"></div>
 			</div>
 			<div class="box-content">
+			@if ($errors->any())
+				<div class="alert alert-danger alert-dismissible" role="alert">
+					<ul>
+					@foreach ($errors->all() as $error)
+						<li>{{ $error }}</li>
+					@endforeach
+					</ul>
+				</div>
+			@endif
+			
 			Ingrese los datos de la nueva causa gen&eacute;rica.
 			{!!Form::open(['route'=>'causas.store','method'=>'POST','class'=>'form-horizontal'])!!}
 				@include('datos_maestros.causas.form')

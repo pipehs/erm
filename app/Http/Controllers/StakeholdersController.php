@@ -11,6 +11,12 @@ use DB;
 use Auth;
 use DateTime;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class StakeholdersController extends Controller
 {
     /**
@@ -18,6 +24,17 @@ class StakeholdersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('roles');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/roles.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     public function index()
     {
         if (Auth::guest())
@@ -179,6 +196,8 @@ class StakeholdersController extends Controller
                 ]);
                 DB::transaction(function()
                 {
+                    $logger = $this->logger;
+
                     if ($_POST['position'] == NULL || $_POST['position'] == "")
                     {
                         $pos = NULL;
@@ -187,6 +206,7 @@ class StakeholdersController extends Controller
                     {
                         $pos = $_POST['position'];
                     }
+
                     DB::statement("
                         SET IDENTITY_INSERT stakeholders ON;
                         insert into stakeholders
@@ -246,6 +266,8 @@ class StakeholdersController extends Controller
                         {
                             Session::flash('message','Usuario agregado correctamente');
                         }
+
+                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el usuario (stakeholder) con Rut: '.$usuario->id.' llamado: '.$usuario->name.' '.$usuario->surnames.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 });
 
                 return Redirect::to('/stakeholders');
@@ -350,6 +372,7 @@ class StakeholdersController extends Controller
         }
         else
         {
+            $logger = $this->logger;
             global $id1;
             $id1 = $id;
             DB::transaction(function()
@@ -413,6 +436,8 @@ class StakeholdersController extends Controller
                 {
                     Session::flash('message','Usuario actualizado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el usuario (stakeholder) con Rut: '.$GLOBALS['id1'].' llamado: '.$stakeholder->name.' '.$stakeholder->surnames.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
                 return Redirect::to('/stakeholders');
         }
@@ -430,6 +455,7 @@ class StakeholdersController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
                 $stakeholder->status = 1;
                 $stakeholder->save();
@@ -442,6 +468,9 @@ class StakeholdersController extends Controller
                 {
                     Session::flash('message','Usuario bloqueado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado el usuario (stakeholder) con Rut: '.$GLOBALS['id1'].' llamado: '.$stakeholder->name.' '.$stakeholder->surnames.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             });
             return Redirect::to('/stakeholders');
         }
@@ -459,6 +488,7 @@ class StakeholdersController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
                 $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
                 $stakeholder->status = 0;
                 $stakeholder->save();
@@ -470,6 +500,8 @@ class StakeholdersController extends Controller
                 {
                     Session::flash('message','Usuario desbloqueado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha desbloqueado el usuario (stakeholder) con Rut: '.$GLOBALS['id1'].' llamado: '.$stakeholder->name.' '.$stakeholder->surnames.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
             return Redirect::to('/stakeholders');
         }
@@ -590,6 +622,8 @@ class StakeholdersController extends Controller
 
                                                     if (empty($rev))
                                                     {
+                                                        //obtenemos nombre
+                                                        $name = \Ermtool\Stakeholder::getName($GLOBALS['id1']);
                                                         //ahora se puede borrar
                                                         DB::table ('organization_stakeholder')
                                                             ->where('stakeholder_id','=',$GLOBALS['id1'])
@@ -602,6 +636,8 @@ class StakeholdersController extends Controller
                                                         DB::table('stakeholders')
                                                             ->where('id','=',$GLOBALS['id1'])
                                                             ->delete();
+
+                                                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el usuario (stakeholder) con Rut: '.$GLOBALS['id1'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
                                                         $GLOBALS['res'] = 0;
                                                     }

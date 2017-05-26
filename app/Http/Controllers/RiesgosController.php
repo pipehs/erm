@@ -11,6 +11,12 @@ use DB;
 use dateTime;
 use Auth;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class RiesgosController extends Controller
 {
     /**
@@ -18,6 +24,16 @@ class RiesgosController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('riesgos');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/riesgos.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
 
     //AGREGADO 26-07 SELECCIONAR PRIMERO ORGANIZACIÓN
     public function index()
@@ -348,6 +364,7 @@ class RiesgosController extends Controller
             //creamos una transacción para cumplir con atomicidad
             DB::transaction(function()
             {
+                $logger = $this->logger;
                     //vemos si es de proceso o de negocio
                         if (isset($_POST['subprocess_id']))
                         {
@@ -476,7 +493,7 @@ class RiesgosController extends Controller
 
                     //agregamos en tabla risk_subprocess o objective_risk
                     //obtenemos id de riesgo recien ingresado
-                    $risk = $risk->id;
+                    //$risk = $risk->id;
 
                     if ($type == 0)
                     {        
@@ -485,7 +502,7 @@ class RiesgosController extends Controller
                         foreach ($_POST['subprocess_id'] as $subprocess_id)
                         {
                             $subprocess = \Ermtool\Subprocess::find($subprocess_id);
-                            $subprocess->risks()->attach($risk);
+                            $subprocess->risks()->attach($risk->id);
                         }       
                     }
 
@@ -496,13 +513,13 @@ class RiesgosController extends Controller
                         foreach ($_POST['objective_id'] as $objective_id)
                         {
                             $objective = \Ermtool\Objective::find($objective_id);
-                            $objective->risks()->attach($risk);
+                            $objective->risks()->attach($risk->id);
                         }       
                     }
 
                     //ACTUALIZACIÓN 29-03-17: Agregamos en tabla organization_risk
                     $organization = \Ermtool\Organization::find($_POST['org_id']);
-                    $organization->risks()->attach($risk);
+                    $organization->risks()->attach($risk->id);
 
 
                     //ahora para cada posible organización agregada
@@ -511,7 +528,7 @@ class RiesgosController extends Controller
                         foreach ($_POST['organization_id'] as $org)
                         {
                             $organization = \Ermtool\Organization::find($org);
-                            $organization->risks()->attach($risk);
+                            $organization->risks()->attach($risk->id);
                         }
                     }
 
@@ -522,7 +539,7 @@ class RiesgosController extends Controller
                         {
                             if ($evidence != NULL)
                             {
-                                upload_file($evidence,'riesgos',$risk);
+                                upload_file($evidence,'riesgos',$risk->id);
                             }
                         }                    
                     }
@@ -535,6 +552,8 @@ class RiesgosController extends Controller
                     {
                         Session::flash('message','Riesgo agregado correctamente');
                     }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el riesgo con Id: '.$risk->id.' llamado: '.$risk->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('riesgos.index2?organization_id='.$_POST['org_id']);
@@ -717,6 +736,7 @@ class RiesgosController extends Controller
             //creamos una transacción para cumplir con atomicidad
             DB::transaction(function()
             {
+                $logger = $this->logger;
                     $riesgo = \Ermtool\Risk::find($GLOBALS['id1']);
                         
                     //vemos si se agrego alguna causa nueva
@@ -986,6 +1006,8 @@ class RiesgosController extends Controller
                     {
                         Session::flash('message','Riesgo actualizado correctamente');
                     }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el riesgo con Id: '.$riesgo->id.' llamado: '.$riesgo->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('riesgos.index2?organization_id='.$_POST['org_id']);
@@ -1087,7 +1109,7 @@ class RiesgosController extends Controller
                     {
                         $processes = \Ermtool\Process::getProcessesFromRisk($org,$risk->id);
 
-                        $subprocesses = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($org,$risk->id);
+                        $subprocesses = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($risk->id,$org);
 
                         if (!empty($processes))
                         {
@@ -1143,12 +1165,12 @@ class RiesgosController extends Controller
                             {
                                 if (!strstr($_SERVER["REQUEST_URI"],'genexcel'))
                                 {
-                                    $subprocesos[$j] = $p->name;
+                                    $subprocesos[$j] = $s->name;
                                     $j+=1;
                                 }
                                 else
                                 {
-                                    if ($last == $p)
+                                    if ($last == $s)
                                     {
                                         $subprocesos .= $s->name;
                                     }
@@ -1424,7 +1446,6 @@ class RiesgosController extends Controller
                     if ($risk->risk_category_id != NULL && $risk->risk_category_id != '')
                     {
                         $risk_category = \Ermtool\Risk_category::name($risk->risk_category_id);
-                        $risk_category = $risk_category->name;
                     } 
                     else
                     {
@@ -1650,6 +1671,8 @@ class RiesgosController extends Controller
         $org = $org_id;
 
         DB::transaction(function() {
+            $logger = $this->logger;
+            $name = \Ermtool\Risk::name($GLOBALS['id1']);
             //ACTUALIZACIÓN 29-03-17: YA NO EXISTE CONTROL_OBJECTIVE_RISK O CONTROL_RISK_SUBPROCESS
             //CORRECCIÓN DISEÑO: SIEMPRE TENDRÁ O UN OBJECTIVE_RISK O UN RISK_SUBPROCESS
             //primero vemos si contiene algún objetivo asociado 
@@ -1815,6 +1838,8 @@ class RiesgosController extends Controller
                                                 DB::table('risks')
                                                     ->where('id','=',$GLOBALS['id1'])
                                                     ->delete();
+
+                                                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el riesgo con Id: '.$GLOBALS['id1'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                                             }
                                         }
                                     }

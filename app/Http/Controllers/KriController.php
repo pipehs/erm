@@ -12,6 +12,12 @@ use dateTime;
 use Storage;
 use Auth;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class KriController extends Controller
 {
     /**
@@ -350,7 +356,7 @@ class KriController extends Controller
 
             //creamos NUEVO KRI
             DB::transaction(function() {
-
+                $logger = $this->logger;
                 $in = DB::table('kri')
                         ->insertGetId([
                             'risk_id' => $_POST['risk_id'],
@@ -382,6 +388,8 @@ class KriController extends Controller
                     {
                         Session::flash('message','KRI generado correctamente');   
                     }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el KRI con Id: '.$in.' llamado: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 }
                 else
                 {
@@ -514,6 +522,8 @@ class KriController extends Controller
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
+
                 $kri = \Ermtool\KRI::find($GLOBALS['id1']);
 
                 $kri->risk_id = $_POST['risk_id'];
@@ -540,6 +550,8 @@ class KriController extends Controller
                 {
                     Session::flash('message','KRI actualizado correctamente');   
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el KRI con Id: '.$kri->id.' llamado: '.$kri->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('kri');
@@ -560,7 +572,7 @@ class KriController extends Controller
         $res = 1;
 
         DB::transaction(function() {
-
+            $logger = $this->logger;
             //vemos si es que tiene alguna medición
             $rev = DB::table('measurements')
                     ->where('kri_id','=',$GLOBALS['id1'])
@@ -569,6 +581,7 @@ class KriController extends Controller
 
             if (empty($rev))
             {
+                $kri = \Ermtool\KRI::find($GLOBALS['id1']);
                 //si es que se llega a esta instancia, se puede eliminar
                 DB::table('kri')
                     ->where('id','=',$GLOBALS['id1'])
@@ -576,6 +589,7 @@ class KriController extends Controller
 
                 $GLOBALS['res'] = 0;
                 
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el KRI con Id: '.$kri->id.' llamado: '.$kri->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             }
         });
 
@@ -753,7 +767,7 @@ class KriController extends Controller
         else
         {
             DB::transaction(function() {
-
+                $logger = $this->logger;
                 //verificamos que la evaluacion se encuentre dentro de los margenes establecidos, para esto obtenemos primero que todo los valores de green_min y red_max en la tabla KRI
 
                 $kri = \Ermtool\KRI::find($_POST['id']);
@@ -774,6 +788,7 @@ class KriController extends Controller
 
                     if (isset($id))
                     {
+                        $kri = \Ermtool\KRI::find($_POST['id']);
                         //insertamos también en last_evaluation y date_evaluation de KRI
                         DB::table('kri')
                         ->where('id','=',$_POST['id'])
@@ -791,6 +806,8 @@ class KriController extends Controller
                         {
                             Session::flash('message','Evaluación realizada correctamente');
                         }
+
+                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha realizado una medición del KRI con Id: '.$kri->id.' llamado: '.$kri->name.', con valor de '.$_POST['evaluation'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                     }
                 }
                 else

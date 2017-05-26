@@ -36,6 +36,17 @@
 				<div class="no-move"></div>
 			</div>
 			<div class="box-content">
+
+			@if ($errors->any())
+				<div class="alert alert-danger alert-dismissible" role="alert">
+					<ul>
+					@foreach ($errors->all() as $error)
+						<li>{{ $error }}</li>
+					@endforeach
+					</ul>
+				</div>
+			@endif
+			
 			Modifique los datos que desee del efecto gen&eacute;rico.
 			{!!Form::model($efecto,['route'=>['efectos.update',$efecto->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
 				@include('datos_maestros.efectos.form')

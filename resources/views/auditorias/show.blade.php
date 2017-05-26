@@ -144,9 +144,8 @@
 			</table>
 
 			<center>
-				{!! link_to_route('plan_auditoria', $title = 'Volver', $parameters = NULL,
-				 $attributes = ['class'=>'btn btn-danger'])!!}
-			<center>
+   				{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
+   			<center>
 			</div>
 		</div>
 	</div>

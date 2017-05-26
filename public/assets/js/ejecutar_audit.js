@@ -2,7 +2,7 @@ $("#audit").change(function() {
 			if ($("#audit").val() != '') //Si es que se ha seleccionado valor válido de auditoría
 			{
 				//Añadimos la imagen de carga en el contenedor
-					$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
+					$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 				//se obtienen controles asociados a los riesgos presentes en el plan de prueba seleccionado
 					//primero obtenemos controles asociados a los riesgos de negocio
 
@@ -31,7 +31,7 @@ $("#audit").change(function() {
 										
 										var pruebas = '<div id="audit_tests_'+this.id+'" style="display: none;">';
 										pruebas += '<table class="table table-bordered table-striped table-hover table-heading table-datatable">';
-										pruebas += '<thead><th>Prueba</th><th>Descripci&oacute;n</th><th>Responsable</th><th>Estado</th>';
+										pruebas += '<thead><th width="15%">Prueba</th><th width="20%">Descripci&oacute;n</th><th width="15%">Responsable</th><th>Estado</th>';
 										pruebas += '<th>Resultado</th></thead>';
 										$(this.audit_tests).each( function(i, test) {
 											audit_tests_id.push(this.id);
@@ -59,7 +59,7 @@ $("#audit").change(function() {
 												pruebas += '<option value="0">Abierta</option>';
 												pruebas += '<option value="2" selected>Cerrada</option>';
 												//alert(activity.results);
-												pruebas += '<script>result('+test.id+','+test.results+','+test.hh_real+')</script>'
+												pruebas += '<script>result('+test.id+','+test.results+','+test.hh_real+',"'+test.comments+'")</script>'
 											}
 
 											//ACTUALIZACIÓN 02-11: Se eliminó resultado de prueba en ejecución (pero no de la base de datos para evitar inconsistencias),
@@ -120,7 +120,7 @@ function ocultar(id)
 
 //agrega select de resultado de una prueba (efectiva o inefectiva), en el caso de que ésta haya sido señalada como cerrada.
 //En caso de ser inefectiva, se debe agregar los campos para issue y para agregar evidencias
-function result(id,result,hh_real)
+function result(id,result,hh_real,comments)
 {
 	if ($("#status_"+id).val() == 2)
 	{
@@ -142,7 +142,7 @@ function result(id,result,hh_real)
 			resultado += '<option value="0">Inefectiva</option>';
 			resultado += '<option value="1" selected>Efectiva</option></div>';
 
-			resultado += '<script>testResult('+id+','+hh_real+');</script>';
+			resultado += '<script>testResult('+id+','+hh_real+',"'+comments+'");</script>';
 		}
 		else
 		{
@@ -165,22 +165,23 @@ function result(id,result,hh_real)
 //declaramos contador para issues
 contador = 0;
 //agrega campo de issue de una prueba en caso de que esta haya sido mencionada como inefectiva
-//ACTUALIZACIÓN 25-10: Sacaremos campo de issue y botones de agregar más issues para ordenar un poco la interfaz gráfica: Sólo agregaremos botón para ir a gestionar Issues
-function testResult(id,hh)
+//ACTUALIZACIÓN 25-10-16: Sacaremos campo de issue y botones de agregar más issues para ordenar un poco la interfaz gráfica: Sólo agregaremos botón para ir a gestionar Issues
+//ACTUALIZACIÓN 24-05-17: Agregamos comentarios en caso de ser efectiva 
+function testResult(id,hh,comments)
 {
 	if (hh != undefined)
 	{
-		resultado = '</br><div class="col-sm-6 control-label"><label for="hh_real_'+id+'"><b>HH utilizadas</b></label></div><div class="col-sm-6"><input type="text" name="hh_real_'+id+'" class="form-control" value="'+hh+'"></input>'
+		resultado = '</br><div class="col-sm-6 control-label"><label for="hh_real_'+id+'"><b>HH utilizadas</b></label></div><div class="col-sm-6"><input type="text" name="hh_real_'+id+'" class="form-control" value="'+hh+'"></input></div>'
 	}
 	else
 	{
-		resultado = '</br><div class="col-sm-6 control-label"><label for="hh_real_'+id+'"><b>HH utilizadas</b></label></div><div class="col-sm-6"><input type="text" name="hh_real_'+id+'" class="form-control" placeholder="Ingrese Horas-hombre"></input>'
+		resultado = '</br><div class="col-sm-6 control-label"><label for="hh_real_'+id+'"><b>HH utilizadas</b></label></div><div class="col-sm-6"><input type="text" name="hh_real_'+id+'" class="form-control" placeholder="Ingrese Horas-hombre"></input></div>'
 	}
 	
 	if ($("#test_result_"+id).val() == 0) //el resultado de la prueba es inefectivo
 	{
 		$("#issues_"+id).empty();
-		resultado += '</br><a href="#" onclick="gestionarHallazgos('+id+')" class="btn btn-info">Gestionar Hallazgos</button>';
+		resultado += '</br></br><a href="#" onclick="gestionarHallazgos('+id+')" class="btn btn-info">Gestionar Hallazgos</button>';
 		$("#issues_"+id).append(resultado);
 	}
 	else if ($("#test_result_"+id).val() == 1)
@@ -188,6 +189,19 @@ function testResult(id,hh)
 		$("#issues_"+id).empty();
 		$("#boton_add_"+id).empty();
 		new_issues = 0;
+		resultado += '</br></br><div class="col-sm-6 control-label">';
+		resultado += '<label for="comments_'+id+'"><b>Comentarios</b></label></div>';
+		resultado += '<div class="col-sm-6">';
+
+		if (comments != "null" && comments != undefined)
+		{
+			resultado += '<textarea name="comments_'+id+'" class="form-control">'+comments+'</textarea>';
+		}
+		else
+		{
+			resultado += '<textarea name="comments_'+id+'" class="form-control"></textarea>';
+		}
+
 		$("#issues_"+id).append(resultado);
 	}
 	else

@@ -26,6 +26,11 @@ class Subprocess extends Model
 
 	//eliminamos created_at y updated_at
     //public $timestamps = false;
+    public static function name($id)
+    {
+        $res = DB::table('subprocesses')->where('id', $id)->value('name');
+        return $res;
+    }
     
     public function organizations()
     {
@@ -48,6 +53,20 @@ class Subprocess extends Model
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                     ->where('organization_subprocess.organization_id','=',$org)
                     ->where('subprocesses.status','=',0)
+                    ->select('subprocesses.id','subprocesses.name')
+                    ->distinct('subprocesses.id')
+                    ->get();
+
+        return $subprocesses;
+    }
+
+    public static function getSubprocesses2($org,$process)
+    {
+        $subprocesses = DB::table('subprocesses')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->where('subprocesses.status','=',0)
+                    ->where('subprocesses.process_id','=',$process)
                     ->select('subprocesses.id','subprocesses.name')
                     ->distinct('subprocesses.id')
                     ->get();

@@ -8,21 +8,21 @@
 					<div class="form-group">
 						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
+							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'5','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
 						{!!Form::label('Misi&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::textarea('mision',null,['class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
+							{!!Form::textarea('mision',null,['class'=>'form-control','rows'=>'4','cols'=>'4'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
 						{!!Form::label('Visi&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::textarea('vision',null,['class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
+							{!!Form::textarea('vision',null,['class'=>'form-control','rows'=>'4','cols'=>'4'])!!}
 						</div>
 					</div>
 

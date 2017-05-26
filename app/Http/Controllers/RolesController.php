@@ -11,6 +11,12 @@ use Redirect;
 use Auth;
 use DateTime;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class RolesController extends Controller
 {
     /**
@@ -18,6 +24,17 @@ class RolesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('roles');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/roles.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     public function index()
     {
         if (Auth::guest())
@@ -124,7 +141,9 @@ class RolesController extends Controller
         }
         else
         {
-            \Ermtool\Role::create([
+            $logger = $this->logger;
+
+            $rol = \Ermtool\Role::create([
                 'name' => $request['name'],
                 'status' => 0
                 ]);
@@ -137,6 +156,8 @@ class RolesController extends Controller
                 {
                     Session::flash('message','Rol agregado correctamente');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el rol con Id: '.$rol->id.' llamado: '.$rol->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
             return Redirect::to('/roles');
         }
@@ -194,6 +215,8 @@ class RolesController extends Controller
         }
         else
         {
+            $logger = $this->logger;
+
             $role = \Ermtool\Role::find($id);
 
             $role->name = $request['name'];
@@ -208,6 +231,8 @@ class RolesController extends Controller
                 Session::flash('message','Rol actualizado correctamente');
             }
 
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el rol con Id: '.$id.' llamado: '.$role->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             return Redirect::to('/roles');
         }
     }
@@ -220,6 +245,8 @@ class RolesController extends Controller
         }
         else
         {
+            $logger = $this->logger;
+
             $role = \Ermtool\Role::find($id);
             $role->status = 1;
             $role->save();
@@ -233,6 +260,8 @@ class RolesController extends Controller
                 Session::flash('message','Rol bloqueado correctamente');
             }
 
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado el rol con Id: '.$id.' llamado: '.$role->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             return Redirect::to('/roles');
         }
     }
@@ -245,6 +274,8 @@ class RolesController extends Controller
         }
         else
         {
+            $logger = $this->logger;
+
             $role = \Ermtool\Role::find($id);
             $role->status = 0;
             $role->save();
@@ -257,6 +288,8 @@ class RolesController extends Controller
             {
                 Session::flash('message','Rol desbloqueado correctamente');
             }
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha desbloqueado el rol con Id: '.$id.' llamado: '.$role->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
             return Redirect::to('/roles');
         }
@@ -277,6 +310,10 @@ class RolesController extends Controller
 
         DB::transaction(function() {
 
+            $logger = $this->logger;
+
+            //obtenemos nombre
+            $name = \Ermtool\Role::name($GLOBALS['id1']);
             //eliminamos primero role_stakeholder (si es que tiene)
             DB::table('role_stakeholder')
                 ->where('role_id','=',$GLOBALS['id1'])
@@ -286,6 +323,8 @@ class RolesController extends Controller
             DB::table('roles')
                 ->where('id','=',$GLOBALS['id1'])
                 ->delete();
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el rol con Id: '.$GLOBALS['id1'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
             $GLOBALS['res'] = 0;
         });

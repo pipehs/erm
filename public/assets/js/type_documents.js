@@ -44,7 +44,7 @@ $("#kind").change(function() {
 		else if ($('#kind').val() == 3 || $('#kind').val() == 4 || $('#kind').val() == 5) //para ver documentos de notas, programas de auditoría, o pruebas de auditoría, se debe seleccionar el plan de auditoría
 		{
 			//Añadimos la imagen de carga en el contenedor
-			$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
+			$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 			//obtenemos los datos necesarios según sea el caso
 			$.get('auditorias.get_planes.'+ $("#orgs").val(), function (result) {
 					//alert("entro2");
@@ -117,7 +117,7 @@ function getControls()
 	if ($('#orgs').val() != '' && $('#control_type').val() != '')
 	{
 			//Añadimos la imagen de carga en el contenedor
-			$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
+			$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 			//obtenemos los datos necesarios según sea el caso
 			$.get('get_controls2.'+ $("#orgs").val() +','+$("#control_type").val(), function (result) {
 					//alert("entro2");
@@ -150,7 +150,7 @@ function getRisks()
 	if ($('#orgs').val() != '' && $('#risk_type').val() != '')
 	{
 			//Añadimos la imagen de carga en el contenedor
-			$('#cargando').html('<div><center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center></div>');
+			$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 			//obtenemos los datos necesarios según sea el caso
 			$.get('get_risks2.'+ $("#orgs").val() +','+$("#risk_type").val(), function (result) {
 					//alert("entro2");

@@ -29,4 +29,9 @@ class Role extends Model
     {
     	return $this->belongsToMany('Ermtool\Stakeholder');
     }
+
+    public static function name($id)
+    {
+        return DB::table('roles')->where('id',$id)->value('name');
+    }
 }

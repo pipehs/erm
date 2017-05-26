@@ -11,6 +11,12 @@ use Auth;
 use DB;
 use DateTime;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class CausasController extends Controller
 {
     /**
@@ -18,6 +24,17 @@ class CausasController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('causas');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/causas.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     public function index()
     {
         if (Auth::guest())
@@ -123,7 +140,14 @@ class CausasController extends Controller
         }
         else
         {
-            \Ermtool\Cause::create([
+            $logger = $this->logger;
+            //Validación: Si la validación es pasada, el código continua
+            $this->validate($request, [
+                'name' => 'unique:causes',
+                'description' => 'required',
+            ]);
+
+            $cause = \Ermtool\Cause::create([
                 'name' => $request['name'],
                 'description' => $request['description'],
                 ]);
@@ -136,6 +160,8 @@ class CausasController extends Controller
             {
                 Session::flash('message','Causa agregada correctamente');
             }
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado la causa con Id: '.$cause->id.' llamado: '.$cause->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             return Redirect::to('/causas');
         }
     }
@@ -182,6 +208,14 @@ class CausasController extends Controller
         }
         else
         {
+            //Validación: Si la validación es pasada, el código continua
+            $this->validate($request, [
+                'name' => 'unique:causes',
+                'description' => 'required',
+            ]);
+
+            $logger = $this->logger;
+            
             $causa = \Ermtool\Cause::find($id);
 
             $causa->name = $request['name'];
@@ -198,6 +232,8 @@ class CausasController extends Controller
                 Session::flash('message','Causa actualizada correctamente');
             }
 
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado la causa con Id: '.$causa->id.' llamado: '.$causa->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             return Redirect::to('/causas');
         }
     }
@@ -210,6 +246,8 @@ class CausasController extends Controller
         }
         else
         {
+            $logger = $this->logger;
+            
             $causa = \Ermtool\Cause::find($id);
             $causa->status = 1;
             $causa->save();
@@ -223,6 +261,8 @@ class CausasController extends Controller
                 Session::flash('message','Causa bloqueada correctamente');
             }
 
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado la causa con Id: '.$causa->id.' llamada: '.$causa->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             return Redirect::to('/causas');
         }
     }
@@ -235,6 +275,8 @@ class CausasController extends Controller
         }
         else
         {
+            $logger = $this->logger;
+
             $causa = \Ermtool\Cause::find($id);
             $causa->status = 0;
             $causa->save();
@@ -247,6 +289,8 @@ class CausasController extends Controller
             {
                 Session::flash('message','Causa desbloqueada correctamente');
             }
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha desbloqueado la causa con Id: '.$causa->id.' llamada: '.$causa->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
             return Redirect::to('/causas');
         }
@@ -267,6 +311,8 @@ class CausasController extends Controller
 
         DB::transaction(function() {
 
+            $logger = $this->logger;
+            $name = \Ermtool\Cause::name($GLOBALS['id1']);
             //eliminamos primero de cause_risk
             DB::table('cause_risk')
                 ->where('cause_id','=',$GLOBALS['id1'])
@@ -278,6 +324,8 @@ class CausasController extends Controller
                 ->delete();
 
             $GLOBALS['res'] = 0;
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la causa con Id: '.$GLOBALS['id1'].' llamada: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
         });
 
         return $res;

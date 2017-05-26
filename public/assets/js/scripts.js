@@ -381,6 +381,40 @@ function contraer(id, description,short_des)
 	$('#description_'+id).html(short_des+'... <div style="cursor:hand" onclick="expandir('+id+','+description2+','+short_des2+')"><font color="CornflowerBlue">Ver completo</font></div>')
 }
 
+//funciones expandir y contraer para recomendaciones de hallazgos
+function expandir2(id,description,short_des)
+{
+	description2 = "'"+description+"'";
+	short_des2 = "'"+short_des+"'";
+
+	$('#recommendation_'+id).html(description+'<div style="cursor:hand" onclick="contraer2('+id+','+description2+','+short_des2+')"><font color="CornflowerBlue">Ocultar</font></div>')
+}
+
+function contraer2(id, description,short_des)
+{
+	description2 = "'"+description+"'";
+	short_des2 = "'"+short_des+"'";
+
+	$('#recommendation_'+id).html(short_des+'... <div style="cursor:hand" onclick="expandir2('+id+','+description2+','+short_des2+')"><font color="CornflowerBlue">Ver completo</font></div>')
+}
+
+//funciones expandir y contraer para recomendaciones de planes de acción
+function expandir3(id,description,short_des)
+{
+	description2 = "'"+description+"'";
+	short_des2 = "'"+short_des+"'";
+
+	$('#action_plan_'+id).html(description+'<div style="cursor:hand" onclick="contraer3('+id+','+description2+','+short_des2+')"><font color="CornflowerBlue">Ocultar</font></div>')
+}
+
+function contraer3(id, description,short_des)
+{
+	description2 = "'"+description+"'";
+	short_des2 = "'"+short_des+"'";
+
+	$('#action_plan_'+id).html(short_des+'... <div style="cursor:hand" onclick="expandir3('+id+','+description2+','+short_des2+')"><font color="CornflowerBlue">Ver completo</font></div>')
+}
+
 
 $(document).ready(function() {
 	// Load Datatables and run plugin on tables 

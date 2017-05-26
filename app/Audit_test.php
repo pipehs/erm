@@ -44,7 +44,7 @@ class Audit_test extends Model
                     'audit_tests.name','audit_tests.type','audit_tests.status','audit_tests.results',
                     'audit_tests.hh_plan','audit_tests.hh_real','audit_tests.process_id',
                     'audit_tests.stakeholder_id')
-    			->groupBy('audit_plans.name','audits.name','audit_programs.name','audit_tests.id','audit_tests.description','audit_tests.name','audit_tests.type','audit_tests.status','audit_tests.results','audit_tests.hh_plan','audit_tests.hh_real','audit_tests.process_id','audit_tests.stakeholder_id')
+    			->groupBy('audit_plans.name','audits.name','audit_programs.name','audit_tests.id','audit_tests.description','audit_tests.name','audit_tests.type','audit_tests.status','audit_tests.results','audit_tests.hh_plan','audit_tests.hh_real','audit_tests.process_id','audit_tests.stakeholder_id','audit_tests.comments')
     			->get();
 
     	return $tests;
@@ -88,7 +88,7 @@ class Audit_test extends Model
                     ->where('audit_plans.organization_id','=',$org)
                     ->where('audit_tests.id','=',$kind)
                     ->select('audit_tests.id','audit_tests.name','audit_tests.description','audit_plans.name as audit_plan','audits.name as audit','audit_programs.name as program')
-                    ->groupBy('audit_tests.id','audit_tests.name','audit_tests.description','audit_plans.name','audits.name','audit_programs.name')
+                    ->groupBy('audit_tests.id','audit_tests.name','audit_tests.description','audit_plans.name','audits.name','audit_programs.name','audit_tests.comments')
                     ->get();
         }
         else

@@ -13,6 +13,12 @@ use Ermtool\Http\Requests\LoginRequest;
 use Ermtool\Http\Controllers\Controller;
 use DateTime;
 
+//15-05-2017: MONOLOG
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
+use Log;
+
 class LogController extends Controller
 {
     /**
@@ -20,6 +26,17 @@ class LogController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('usuarios_sistema');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/usuarios_sistema.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     public function index()
     {
         if (Auth::guest())
@@ -132,7 +149,7 @@ class LogController extends Controller
             $req = $request;
 
             DB::transaction(function() {
-
+                $logger = $this->logger;
                 $GLOBALS['req']->merge(['password' => Hash::make($GLOBALS['req']->password)]);
 
                 $user = \Ermtool\User::create($GLOBALS['req']->all());
@@ -154,6 +171,8 @@ class LogController extends Controller
                 {
                     Session::flash('message','Usuario creado con &eacute;xito');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el usuario con Id: '.$GLOBALS['req']['id'].' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
             });
         
             return Redirect::to('usuarios');
@@ -315,7 +334,7 @@ class LogController extends Controller
         $id1 = $id;
 
         DB::transaction(function() {
-
+            $logger = $this->logger;
             $user = \Ermtool\User::find($GLOBALS['id1']);
 
             $GLOBALS['req']->merge(['password' => Hash::make($GLOBALS['req']->password)]);
@@ -348,6 +367,8 @@ class LogController extends Controller
             {
                 Session::flash('message','Usuario actualizado con &eacute;xito');
             }
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualzado el usuario con Id: '.$user->id.' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
         });
         
         return Redirect::to('usuarios');
@@ -367,7 +388,15 @@ class LogController extends Controller
         $res = 1;
         
         DB::transaction(function() {
+
+            $logger = $this->logger;
             //primero eliminamos de system_role_user
+            //obtenemos nombre
+            $user = DB::table('users')
+                    ->where('id','=',$GLOBALS['id1'])
+                    ->select('name','surnames')
+                    ->first();
+
             DB::table('system_role_user')
                 ->where('user_id','=',$GLOBALS['id1'])
                 ->delete();
@@ -377,6 +406,8 @@ class LogController extends Controller
                 ->delete();
 
             $GLOBALS['res'] = 0;
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el usuario con Id: '.$GLOBALS['id1'].' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
         });
 
         return $res;

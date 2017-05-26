@@ -101,7 +101,14 @@
 						@if ($action_plan['description'] == '')
 							No se ha definido descripci&oacute;n
 						@else
-							{{ $action_plan['description'] }}
+							@if (strlen($action_plan['description']) > 100)
+								<div id="action_plan_{{$action_plan['id']}}" title="{{ $action_plan['description'] }}">{{ $action_plan['short_des'] }}...
+								<div style="cursor:hand" onclick="expandir3({{ $action_plan['id'] }},'{{ $action_plan['description'] }}','{{ $action_plan['short_des'] }}')">
+								<font color="CornflowerBlue">Ver completo</font>
+								</div></div>
+							@else
+								{{ $action_plan['description'] }}
+							@endif
 						@endif
 						</td>
 						<td>{{ $action_plan['stakeholder'] }}.<br>{{ $action_plan['stakeholder_mail'] }}</td>

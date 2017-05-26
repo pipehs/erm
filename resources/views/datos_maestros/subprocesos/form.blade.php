@@ -22,7 +22,7 @@
 							{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-3">
 							@if (strstr($_SERVER["REQUEST_URI"],'edit'))
-								<select name="organization_id[]" multiple id="organization_id">
+								<select name="organization_id[]" multiple id="organization_id" required>
 								@foreach ($organizaciones as $id=>$name)
 
 									<?php $i = 0; //contador de organizaciones 
@@ -44,7 +44,7 @@
 							@else
 								{!!Form::select('organization_id[]',$organizaciones,
 								 	   null, 
-								 	   ['id' => 'organization_id','multiple'=>'true'])!!}
+								 	   ['id' => 'organization_id','multiple'=>'true','required'=>'true'])!!}
 							@endif
 							</div>
 						</div>

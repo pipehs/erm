@@ -49,14 +49,14 @@
 					<div class="form-group">
 						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
+							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'6','cols'=>'4'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
 						{!!Form::label('Recomendaciones',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::textarea('recommendations',null,['id'=>'recommendations','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
+							{!!Form::textarea('recommendations',null,['id'=>'recommendations','class'=>'form-control','rows'=>'6','cols'=>'4'])!!}
 						</div>
 					</div>
 				
@@ -101,7 +101,7 @@
 					<div class="form-group">
 						{!!Form::label('Descripci&oacute;n del plan',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::textarea('description_plan',null,['id'=>'descripcion_plan','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
+							{!!Form::textarea('description_plan',null,['id'=>'descripcion_plan','class'=>'form-control','rows'=>'6','cols'=>'4'])!!}
 						</div>
 					</div>
 
@@ -127,7 +127,7 @@
 					<div class="form-group">
 						{!!Form::label('Descripci&oacute;n del plan',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							<textarea rows="3" cols="4" name="description_plan" class="form-control" id="description_plan">{{ $action_plan->description }}</textarea>
+							<textarea rows="6" cols="4" name="description_plan" class="form-control" id="description_plan">{{ $action_plan->description }}</textarea>
 						</div>
 					</div>
 
@@ -181,6 +181,9 @@
 						{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
 					</center>
 				@else
+
+					{!!Form::hidden('kind',$kind)!!}
+					{!!Form::hidden('organization_id',$org_id)!!}
 					<center>
 						{!! link_to_route('hallazgos_lista', $title = 'Volver', $parameters = ['organization_id' => $org_id, 'kind' => $kind], $attributes = ['class'=>'btn btn-danger'])!!}
 					<center>
