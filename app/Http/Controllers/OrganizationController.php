@@ -55,13 +55,14 @@ class OrganizationController extends Controller
 
             $org_dependientes = array();
             $i = 0;
+            $j = 0;
             // ---recorremos todas las organizaciones para asignar formato de datos correspondientes--- //
             foreach ($organizations as $organizaciones)
             {
                 //buscamos organizaciones que dependen de ésta
                 $organizaciones_dependientes = \Ermtool\Organization::where('organization_id',$organizaciones['id'])->get();
                 
-                $j = 0;
+                
                 foreach ($organizaciones_dependientes as $hijos)
                 {
                     $org_dependientes[$j] = array('organization_id'=>$organizaciones['id'],
@@ -229,7 +230,7 @@ class OrganizationController extends Controller
                     Session::flash('message','Organizaci&oacute;n creada correctamente');
                 }
 
-                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado la organización con Id: '.$org->id.' llamada: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado la organización con Id: '.$org->id.' llamada: '.$org->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('/organization');
@@ -414,7 +415,7 @@ class OrganizationController extends Controller
                     Session::flash('message','Organizaci&oacute;n actualizada correctamente');
                 }
 
-                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado la organización con Id: '.$GLOBALS['id1'].' llamada: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado la organización con Id: '.$organization->id.' llamada: '.$organization->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('/organization');
@@ -461,8 +462,9 @@ class OrganizationController extends Controller
 
                 if (empty($rev))
                 {
-                    //Eliminamos, primero de los datos no únicos
                     $logger = $this->logger;
+                    //Eliminamos, primero de los datos no únicos
+                    //nombre de org
                     $name = \Ermtool\Organization::name($id);
 
                     DB::table('organization_subprocess')
@@ -478,7 +480,6 @@ class OrganizationController extends Controller
                         ->delete();
 
                     $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la organización con Id: '.$id.' llamada: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
-
                     return 0;
                 }
                 else

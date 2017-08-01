@@ -18,6 +18,8 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\FirePHPHandler;
 use Log;
 
+
+
 class KriController extends Controller
 {
     /**
@@ -25,137 +27,154 @@ class KriController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
+    public function __construct()
+    {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
+        $this->logger = new Logger('kri');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/kri.log', Logger::INFO));
+        $this->logger->pushHandler(new FirePHPHandler());
+    }
+
     public function index()
     {
-        if (Auth::guest())
+        try 
         {
-            return view('login');
-        }
-        else
-        {
-            $kri = NULL;
-
-            //seleccionamos todos los kri
-            $kri_query = DB::table('kri')
-                    ->join('risks','risks.id','=','kri.risk_id')
-                    ->select('kri.*','risks.name as risk_name','risks.stakeholder_id as risk_stake')
-                    ->get();
-
-            $i=0;
-            foreach ($kri_query as $k)
+            if (Auth::guest())
             {
-
-                $tipo = $k->type;
-                $uni_med = $k->uni_med;
-                $periodicity = $k->periodicity;
-
-                if ($k->kri_last_evaluation === NULL)
-                {
-                    if (Session::get('languaje') == 'en')
-                    {
-                        $last_eval = "Still have not evaluated";
-                        $date_last = "Still have not evaluated";
-                        $eval = 3; //probamos con el valor 3 ya que escribiendo "Ninguna" lo toma como = a 0
-                        $description_eval = "None";
-                        $date_min = null;
-                        $date_max = null;
-                    }
-                    else
-                    {
-                        $last_eval = "Aun no ha sido evaluado";
-                        $date_last = "Aun no ha sido evaluado";
-                        $eval = 3; //probamos con el valor 3 ya que escribiendo "Ninguna" lo toma como = a 0
-                        $description_eval = "Ninguna";
-                        $date_min = null;
-                        $date_max = null;
-                    }
-                }
-                else
-                {
-                    $last_eval = $k->kri_last_evaluation;
-                    $date_last0 = new DateTime($k->date_evaluation);
-                    $date_last = date_format($date_last0, 'd-m-Y');
-                    
-                    //obtenemos periodo de evaluación
-
-                    $periodo = DB::table('measurements')
-                                ->where('kri_id','=',$k->id)
-                                ->where('created_at','=',$k->date_evaluation)
-                                ->select('date_min','date_max')
-                                ->first();
-
-                    $date_min_temp = new DateTime($periodo->date_min);
-                    $date_min = date_format($date_min_temp,'d-m-Y');
-
-                    $date_max_temp = new DateTime($periodo->date_max);
-                    $date_max = date_format($date_max_temp,'d-m-Y');
-
-                    //calculamos evaluacion (color)
-
-                    $eval = $this->calc_sem($last_eval,$k->green_min,$k->interval_min,$k->interval_max,$k->red_max);
-                    
-                    if ($eval == 0) //0: verde
-                    {
-                        $description_eval = $k->description_green;
-                    }
-                    else if ($eval == 1) //1: amarillo
-                    {
-                        $description_eval = $k->description_yellow;
-                    }
-                    else if ($eval == 2) //2: rojo
-                    {
-                        $description_eval = $k->description_red;
-                    }
-                }
-
-                //$created_at = date('d-m-Y',strtotime($k->created_at));
-                $lala = new DateTime($k->created_at);
-                $created_at = date_format($lala,"d-m-Y");
-
-                //obtenemos stakeholder
-                if ($k->risk_stake == 0 || $k->risk_stake == NULL)
-                {
-                    $stakeholder = $k->risk_stake;
-                }
-                 else
-                {
-                    //obtenemos stakeholder
-                    $stake = DB::table('stakeholders')
-                                ->where('id',$k->risk_stake)
-                                ->select(DB::raw("CONCAT(name, ' ', surnames) AS full_name"))
-                                ->first();
-                    $stakeholder = $stake->full_name;
-                }
-                $kri[$i] = [
-                    'id' => $k->id,
-                    'name' => $k->name,
-                    'description' => $k->description,
-                    'last_eval' => $last_eval,
-                    'date_last' => $date_last,
-                    'uni_med' => $uni_med,
-                    'created_at' => $created_at, 
-                    'type' => $tipo,
-                    'periodicity' => $periodicity,
-                    'risk' => $k->risk_name,
-                    'risk_stakeholder' => $stakeholder,
-                    'eval' => $eval,
-                    'description_eval' => $description_eval,
-                    'last_evaluation' => $last_eval,
-                    'date_min' => $date_min,
-                    'date_max' => $date_max,
-                ];
-
-                $i += 1;
-            }
-            if (Session::get('languaje') == 'en')
-            {
-                return view('en.kri.index',['kri'=>$kri]);
+                return view('login');
             }
             else
             {
-                return view('kri.index',['kri'=>$kri]);   
+                $kri = NULL;
+
+                //seleccionamos todos los kri
+                $kri_query = DB::table('kri')
+                        ->join('risks','risks.id','=','kri.risk_id')
+                        ->select('kri.*','risks.name as risk_name','risks.stakeholder_id as risk_stake')
+                        ->get();
+
+                $i=0;
+                foreach ($kri_query as $k)
+                {
+
+                    $tipo = $k->type;
+                    $uni_med = $k->uni_med;
+                    $periodicity = $k->periodicity;
+
+                    if ($k->kri_last_evaluation === NULL)
+                    {
+                        if (Session::get('languaje') == 'en')
+                        {
+                            $last_eval = "Still have not evaluated";
+                            $date_last = "Still have not evaluated";
+                            $eval = 3; //probamos con el valor 3 ya que escribiendo "Ninguna" lo toma como = a 0
+                            $description_eval = "None";
+                            $date_min = null;
+                            $date_max = null;
+                        }
+                        else
+                        {
+                            $last_eval = "Aun no ha sido evaluado";
+                            $date_last = "Aun no ha sido evaluado";
+                            $eval = 3; //probamos con el valor 3 ya que escribiendo "Ninguna" lo toma como = a 0
+                            $description_eval = "Ninguna";
+                            $date_min = null;
+                            $date_max = null;
+                        }
+                    }
+                    else
+                    {
+                        $last_eval = $k->kri_last_evaluation;
+                        $date_last0 = new DateTime($k->date_evaluation);
+                        $date_last = date_format($date_last0, 'd-m-Y');
+                        
+                        //obtenemos periodo de evaluación
+
+                        $periodo = DB::table('measurements')
+                                    ->where('kri_id','=',$k->id)
+                                    ->where('created_at','=',$k->date_evaluation)
+                                    ->select('date_min','date_max')
+                                    ->first();
+
+                        $date_min_temp = new DateTime($periodo->date_min);
+                        $date_min = date_format($date_min_temp,'d-m-Y');
+
+                        $date_max_temp = new DateTime($periodo->date_max);
+                        $date_max = date_format($date_max_temp,'d-m-Y');
+
+                        //calculamos evaluacion (color)
+
+                        $eval = $this->calc_sem($last_eval,$k->green_min,$k->interval_min,$k->interval_max,$k->red_max);
+                        
+                        if ($eval == 0) //0: verde
+                        {
+                            $description_eval = $k->description_green;
+                        }
+                        else if ($eval == 1) //1: amarillo
+                        {
+                            $description_eval = $k->description_yellow;
+                        }
+                        else if ($eval == 2) //2: rojo
+                        {
+                            $description_eval = $k->description_red;
+                        }
+                    }
+
+                    //$created_at = date('d-m-Y',strtotime($k->created_at));
+                    $lala = new DateTime($k->created_at);
+                    $created_at = date_format($lala,"d-m-Y");
+
+                    //obtenemos stakeholder
+                    if ($k->risk_stake == 0 || $k->risk_stake == NULL)
+                    {
+                        $stakeholder = $k->risk_stake;
+                    }
+                     else
+                    {
+                        //obtenemos stakeholder
+                        $stake = DB::table('stakeholders')
+                                    ->where('id',$k->risk_stake)
+                                    ->select(DB::raw("CONCAT(name, ' ', surnames) AS full_name"))
+                                    ->first();
+                        $stakeholder = $stake->full_name;
+                    }
+                    $kri[$i] = [
+                        'id' => $k->id,
+                        'name' => $k->name,
+                        'description' => $k->description,
+                        'last_eval' => $last_eval,
+                        'date_last' => $date_last,
+                        'uni_med' => $uni_med,
+                        'created_at' => $created_at, 
+                        'type' => $tipo,
+                        'periodicity' => $periodicity,
+                        'risk' => $k->risk_name,
+                        'risk_stakeholder' => $stakeholder,
+                        'eval' => $eval,
+                        'description_eval' => $description_eval,
+                        'last_evaluation' => $last_eval,
+                        'date_min' => $date_min,
+                        'date_max' => $date_max,
+                    ];
+
+                    $i += 1;
+                }
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.kri.index',['kri'=>$kri]);
+                }
+                else
+                {
+                    return view('kri.index',['kri'=>$kri]);   
+                }
             }
+        } catch (\Exception $e) {
+            return view('errors.query',['e' => $e]);
         }
+        
     }
 
     public function index2()
@@ -373,8 +392,8 @@ class KriController extends Controller
                             'description_yellow' => $_POST['description_yellow'],
                             'red_max' => $_POST['red_max'],
                             'description_red' => $_POST['description_red'],
-                            'created_at' => date('Ymd H:i:s'),
-                            'updated_at' => date('Ymd H:i:s')
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s')
                         ]);
                 
 
@@ -523,7 +542,6 @@ class KriController extends Controller
             DB::transaction(function()
             {
                 $logger = $this->logger;
-
                 $kri = \Ermtool\KRI::find($GLOBALS['id1']);
 
                 $kri->risk_id = $_POST['risk_id'];
@@ -573,6 +591,7 @@ class KriController extends Controller
 
         DB::transaction(function() {
             $logger = $this->logger;
+
             //vemos si es que tiene alguna medición
             $rev = DB::table('measurements')
                     ->where('kri_id','=',$GLOBALS['id1'])
@@ -588,8 +607,9 @@ class KriController extends Controller
                     ->delete();
 
                 $GLOBALS['res'] = 0;
-                
+
                 $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el KRI con Id: '.$kri->id.' llamado: '.$kri->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                
             }
         });
 
@@ -775,7 +795,7 @@ class KriController extends Controller
                 //verificamos en caso de que vaya de menos a más ó || de más a menos
                 if ($_POST['evaluation'] >= $kri->green_min && $_POST['evaluation'] <= $kri->red_max || $_POST['evaluation'] <= $kri->green_min && $_POST['evaluation'] >= $kri->red_max)
                 {
-                    $date = date('Ymd H:i:s');
+                    $date = date('Y-m-d H:i:s');
                     $id = DB::table('measurements')
                         ->insertGetId([
                             'value'=>$_POST['evaluation'],

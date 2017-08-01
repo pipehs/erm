@@ -51,7 +51,7 @@
 					@if ($kri == null)
 						<center><b>Aun no se han creado ning&uacute;n KRI.</b></center><br><br>
 					@else
-						<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px;">
+						<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 						<thead>
 						<th style="vertical-align:top;">KRI</th>
 						<th style="vertical-align:top;">Descripci&oacute;n</th>
@@ -65,9 +65,6 @@
 						<th style="vertical-align:top;">Intervalo de evaluaci&oacute;n</th>
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
-						<th style="vertical-align:top;">Acci&oacute;n</th>
-						<th style="vertical-align:top;">Acci&oacute;n</th>
-						<th style="vertical-align:top;">Acci&oacute;n</th>
 						<th style="vertical-align:top;">Acci&oacute;n</th>
 				<?php break; ?>
 				@endif
@@ -135,10 +132,11 @@
 							</td>
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
-							<td><a href="kri.edit.{{ $k['id'] }}" class="btn btn-primary">Editar</a></td>
-							<td><a href="kri.evaluar.{{ $k['id'] }}" class="btn btn-success">Evaluar</a></td>
-							<td><a href="kri.veranteriores.{{ $k['id'] }}" class="btn btn-info" id="ver_evaluaciones">Monitorear</a></td>
-							<td><button class="btn btn-danger" onclick="eliminar2({{ $k['id'] }},'{{ $k['name'] }}','kri','El KRI')">Eliminar</button></td>
+							<td>
+							<a href="kri.edit.{{ $k['id'] }}" class="btn btn-primary">Editar</a>
+							<a href="kri.evaluar.{{ $k['id'] }}" class="btn btn-success">Evaluar</a>
+							<a href="kri.veranteriores.{{ $k['id'] }}" class="btn btn-info" id="ver_evaluaciones">Monitorear</a>
+							<button class="btn btn-danger" onclick="eliminar2({{ $k['id'] }},'{{ $k['name'] }}','kri','El KRI')">Eliminar</button></td>
 				<?php break; ?>
 				@endif
 			@endforeach

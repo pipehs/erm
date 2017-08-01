@@ -110,6 +110,7 @@ class AuditoriasController extends Controller
             return view('errors.query',['e' => $e]);
         }
     }
+    
     public function indexAuditorias()
     {
         if (Auth::guest())
@@ -356,7 +357,7 @@ class AuditoriasController extends Controller
             DB::transaction(function()
             {
                 $logger = $this->logger2;
-                $fecha = date('Ymd H:i:s');
+                $fecha = date('Y-m-d H:i:s');
                     if (!isset($_POST['description']) || $_POST['description'] == '')
                     {
                         $description = NULL;
@@ -464,7 +465,6 @@ class AuditoriasController extends Controller
             $req = $request;
             //print_r($_POST);
             DB::transaction(function() {
-
                 $logger = $this->logger3;
                 $c = new ControlesController;
                 //primero que todo, actualizamos las pruebas
@@ -554,15 +554,28 @@ class AuditoriasController extends Controller
                             ->where('id','=',$id)
                             ->update([ 
                                 'status' => $_POST['status_'.$id],
-                                'updated_at' => date('Ymd H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
                                 ]);
                     }
+
                     $test = DB::table('audit_tests')
                             ->where('id','=',$id)
                             ->select('name')
                             ->first();
 
                     $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha ejecutado la prueba de auditoría con Id: '.$id.' llamado: '.$test->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
+                    //guardamos archivos de evidencias (si es que hay)
+                    if($GLOBALS['req']->file('evidence_doc_'.$id) != NULL)
+                    {
+                        foreach ($GLOBALS['req']->file('evidence_doc_'.$id) as $evidencedoc)
+                        {
+                            if ($evidencedoc != NULL)
+                            {
+                                upload_file($evidencedoc,'ejecucion_auditoria',$id);
+                            }
+                        }                    
+                    }
                 }
                 if (Session::get('languaje') == 'en')
                 {
@@ -572,10 +585,12 @@ class AuditoriasController extends Controller
                 {
                     Session::flash('message','Auditor&iacute;a ejecutada correctamente');
                 }
-            
+
             });
 
-            return Redirect::to('/ejecutar_pruebas');
+            $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+            
+            return Redirect::to('/ejecutar_pruebas')->with(['organizations' => $organizations,'org_id' => $_POST['org_id'],'audit_plan_id' => $_POST['audit_plans'],'audit_id' => $_POST['audit_id']]);
         }
     }
     public function supervisar()
@@ -615,8 +630,8 @@ class AuditoriasController extends Controller
                         ->insertGetId([
                             'name' => $_POST['name_'.$_POST['test_id']],
                             'description' => $_POST['description_'.$_POST['test_id']],
-                            'created_at' => date('Ymd H:i:s'),
-                            'updated_at' => date('Ymd H:i:s'),
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
                             'audit_test_id' => $_POST['test_id'],
                             'status' => 0,
                             'user_id' => Auth::user()->id,
@@ -867,8 +882,8 @@ class AuditoriasController extends Controller
                         'methodology'=>$methodology,
                         'initial_date'=>$_POST['initial_date'],
                         'final_date'=>$_POST['final_date'],
-                        'created_at'=>date('Ymd H:i:s'),
-                        'updated_at'=>date('Ymd H:i:s'),
+                        'created_at'=>date('Y-m-d H:i:s'),
+                        'updated_at'=>date('Y-m-d H:i:s'),
                         'rules'=>$rules,
                         'organization_id'=>$_POST['organization_id']
                         ]);
@@ -932,8 +947,8 @@ class AuditoriasController extends Controller
                                     ->insertGetId([
                                         'name' => $_POST['audit_new'.$i.'_name'],
                                         'description' => $_POST['audit_new'.$i.'_description'],
-                                        'created_at' => date('Ymd H:i:s'),
-                                        'updated_at' => date('Ymd H:i:s')
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s')
                                         ]);
                         
                         //ahora insertamos en audit_audit_plan
@@ -1237,6 +1252,7 @@ class AuditoriasController extends Controller
             DB::transaction(function (){
 
                 $logger = $this->logger2;
+
                 $audit_audit_plan_audit_program = DB::table('audit_audit_plan_audit_program')->find($GLOBALS['id1']);
                 $audit_program = \Ermtool\Audit_program::find($audit_audit_plan_audit_program->audit_program_id);
                 $audit_program->name = $_POST['name'];
@@ -1251,7 +1267,7 @@ class AuditoriasController extends Controller
                     ->where('id',$audit_audit_plan_audit_program->id)
                     ->update([
                             'expiration_date' => $exp_date,
-                            'updated_at' => date('Ymd H:i:s')
+                            'updated_at' => date('Y-m-d H:i:s')
                         ]);
                 //agregamos evidencias (si es que existe)
                 if ($GLOBALS['req']->file('file_program') != NULL)
@@ -1435,7 +1451,6 @@ class AuditoriasController extends Controller
                 }
 
                 $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado la prueba de auditoría con Id: '.$GLOBALS['audit_test']->id.' llamado: '.$_POST['name'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
-
             });
             
             return Redirect::to('programas_auditoria.show.'.$GLOBALS['audit_test']->audit_audit_plan_audit_program_id);
@@ -1484,7 +1499,7 @@ class AuditoriasController extends Controller
             DB::transaction(function () {
 
                 $logger = $this->logger3;
-                $fecha = date('Ymd H:i:s');
+                $fecha = date('Y-m-d H:i:s');
                 if (isset($_POST['description']) && $_POST['description'] != '')
                 {
                     $description = $_POST['description'];
@@ -1883,7 +1898,7 @@ class AuditoriasController extends Controller
                         'methodology'=>$methodology,
                         'initial_date'=>$fecha_inicio,
                         'final_date'=>$fecha_termino,
-                        'updated_at'=>date('Ymd H:i:s'),
+                        'updated_at'=>date('Y-m-d H:i:s'),
                         'rules'=>$_POST['rules'],
                         'organization_id'=>$_POST['organization_id']
                     ]);
@@ -1980,8 +1995,8 @@ class AuditoriasController extends Controller
                                         ->insertGetId([
                                             'name' => $_POST['audit_new'.$i.'_name'],
                                             'description' => $_POST['audit_new'.$i.'_description'],
-                                            'created_at' => date('Ymd H:i:s'),
-                                            'updated_at' => date('Ymd H:i:s')
+                                            'created_at' => date('Y-m-d H:i:s'),
+                                            'updated_at' => date('Y-m-d H:i:s')
                                             ]);
                         //ahora insertamos en audit_audit_plan
                         $audit_audit_plan_id = DB::table('audit_audit_plan')
@@ -2121,7 +2136,6 @@ class AuditoriasController extends Controller
         DB::transaction(function() {
 
             $logger = $this->logger2;
-            
             //revisaremos las pruebas de auditoría asociadas al programa
             $audit_tests = DB::table('audit_tests')
                     ->where('audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
@@ -2249,6 +2263,7 @@ class AuditoriasController extends Controller
                             ->select('audit_plans.name as audit_plan','audits.name as audit')
                             ->first();
 
+                    //obtenemos nombre de programa
                     DB::table('audit_programs')
                         ->where('id','=',$program->audit_program_id)
                         ->delete();
@@ -2408,13 +2423,14 @@ class AuditoriasController extends Controller
             global $evidence;
             $evidence = $request->file('evidencia_'.$id);
             DB::transaction(function() {
+                $logger = $this->logger4;
                 $id = $_POST['note_id'];
                 //insertamos y obtenemos id para verificar que se guarde
                 $res = DB::table('notes_answers')
                         ->insertGetId([
                                 'answer' => $_POST['answer_'.$id],
-                                'created_at' => date('Ymd H:i:s'),
-                                'updated_at' => date('Ymd H:i:s'),
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
                                 'note_id' => $id 
                             ]);
                 //guardamos archivo de evidencia (si es que hay)
@@ -2537,8 +2553,8 @@ class AuditoriasController extends Controller
                                         'issue_id' => $id,
                                         'stakeholder_id' => $stakeholder_id,
                                         'description' => $description,
-                                        'created_at' => date('Ymd H:i:s'),
-                                        'updated_at' => date('Ymd H:i:s'),
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s'),
                                         'final_date' => $final_date,
                                         'status' => 0
                                     ]);
@@ -2977,6 +2993,10 @@ class AuditoriasController extends Controller
                         ];
                         $j += 1;
                     }
+
+                    //obtenemos documentos asociados a la ejecución de la prueba
+                    $files = Storage::files('ejecucion_auditoria/'.$test->id);
+
                     $audit_tests2[$i] = [
                             'name' => $test->name,
                             'description' => $test->description,
@@ -2987,7 +3007,8 @@ class AuditoriasController extends Controller
                             'hh_real' => $test->hh_real,
                             'stakeholder' => $stake,
                             'issues' => $debilidades,
-                            'comments' => $test->comments
+                            'comments' => $test->comments,
+                            'files' => $files
                             ];
                     $i += 1;
                 }
@@ -3682,7 +3703,8 @@ class AuditoriasController extends Controller
     //obtiene todos los planes asociados a una organización
     public function getPlanes($org)
     {
-        return json_encode(\Ermtool\Organization::find($org)->audit_plans);
+        $audit_plans = \Ermtool\Audit_plan::getPlanes($org);
+        return json_encode($audit_plans);
     }
     //obtiene notas asociadas a una prueba de auditoría
     public function getNotes($id)
@@ -3740,7 +3762,7 @@ class AuditoriasController extends Controller
                     //obtenemos stakeholder y user
                     $stakeholder = \Ermtool\Stakeholder::getName($note->stakeholder_id);
                     $user = \Ermtool\User::getName($note->user_id);
-
+                    
                     //obtenemos evidencias de la nota (si es que existe)
                     $evidences = getEvidences(0,$note->id);
                     $lala = new DateTime($note->created_at);
@@ -3784,7 +3806,7 @@ class AuditoriasController extends Controller
             $res = 1;
 
             $name = DB::table('notes')->where('id',$id)->value('name');
-            
+
             $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha cerrado la nota con Id: '.$id.' llamada: '.$name.',  con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
             return $res;
@@ -4156,6 +4178,7 @@ class AuditoriasController extends Controller
             DB::transaction(function() 
             {
                 $logger = $this->logger;
+
                 $audit_plan = \Ermtool\Audit_plan::find($GLOBALS['id1']);
                 $audit_plan->status = 0;
                 $audit_plan->save();
@@ -4190,6 +4213,7 @@ class AuditoriasController extends Controller
         global $res;
         $res = 1;
         DB::transaction(function() {
+
             $logger = $this->logger4;
             //revisaremos sólo si tiene respuestas
             $rev = DB::table('notes_answers')
@@ -4231,5 +4255,441 @@ class AuditoriasController extends Controller
         $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la respuesta definida como '.$answer.' asociada a la nota con Id: '.$note->id.' llamada: '.$note->name.',  con fecha '.date('d-m-Y').' a las '.date('H:i:s')); 
 
         return 0;
+    }
+
+    public function docxGraficos()
+    {
+        //$pdf = \App::make('dompdf.wrapper');
+        //$nombre = "Reporte de auditorías ".date("Y-m-d H:i:s").".pdf";
+        //$pdf->loadHTML($_POST['cuerpo']);
+        //return $pdf->stream();
+
+        $word = new \PhpOffice\PhpWord\PhpWord();
+        $section = $word->createSection();
+
+        $word->setDefaultFontName('Verdana');
+        $word->setDefaultFontSize(10);
+
+        //estilos
+        $titleStyle = array('size' => 18, 'color' => '045FB4');
+        $subTitle = array('size' => 16);
+        $subsubTitle = array('bold' => true);
+
+        //estilos de tablas
+        $tableStyleName = 'Audit Plans';
+        $tableStyle = array('borderSize' => 6, 'borderColor' => '006699', 'cellMargin' => 80, 'alignment' => \PhpOffice\PhpWord\SimpleType\JcTable::CENTER);
+        $tableFirstRowStyle = array('borderBottomSize' => 18, 'borderBottomColor' => '0000FF', 'bgColor' => '66BBFF','bold' => true);
+        $tableFirstRowStyle2 = array('borderBottomSize' => 18, 'borderBottomColor' => '0000FF', 'bgColor' => '66BBFF','bold' => true,'size' => 7);
+        $tableCellStyle = array('valign' => 'center');
+        $tableCellBtlrStyle = array('valign' => 'center', 'textDirection' => \PhpOffice\PhpWord\Style\Cell::TEXT_DIR_BTLR);
+        $tableFontStyle = array('bold' => false);
+        $tableFontStyle2 = array('bold' => false, 'size' => 7);
+        $word->addTableStyle($tableStyleName, $tableStyle, $tableFirstRowStyle);
+
+        $section->addText(
+            'Reporte de Gráficos de Auditoría',$titleStyle
+        );
+
+        $section->addText(
+            'Estado de planes de auditoría', $subTitle   
+        );
+
+        //decodificamos los gráficos y los guardamos temporalmente
+        $data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $_POST['grafico1']));
+        file_put_contents('image.png', $data);
+
+        $data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $_POST['grafico2']));
+        file_put_contents('image2.png', $data);
+
+        $imageStyle = array('width'=>500, 'height'=>300, 'align'=>'center');
+        $section->addImage('image.png', $imageStyle);
+
+        $section->addTextBreak(1);
+
+        //ACTUALIZACIÓN 08-06-17: CREAREMOS TABLAS MANUALMENTE AQUÍ
+
+        $plans = $this->getReportePlanes($_POST['org']);
+
+        $section->addText('Planes de auditoría abiertos',$subsubTitle);
+        $table1 = $section->addTable($tableStyleName);
+        $table1->addRow();
+        $table1->addCell(1750)->addText('Nombre',$tableFirstRowStyle);
+        $table1->addCell(1750)->addText('Descripción',$tableFirstRowStyle);
+        $table1->addCell(1750)->addText('Auditorías',$tableFirstRowStyle);
+        $table1->addCell(1750)->addText('Programas',$tableFirstRowStyle);
+        $table1->addCell(1750)->addText('Pruebas',$tableFirstRowStyle);
+
+        $section->addTextBreak(1);
+
+        $section->addText('Planes de auditoría en ejecución',$subsubTitle);
+        $table2 = $section->addTable($tableStyleName);
+        $table2->addRow();
+        $table2->addCell(1750)->addText('Nombre',$tableFirstRowStyle);
+        $table2->addCell(1750)->addText('Descripción',$tableFirstRowStyle);
+        $table2->addCell(1750)->addText('Auditorías',$tableFirstRowStyle);
+        $table2->addCell(1750)->addText('Programas',$tableFirstRowStyle);
+        $table2->addCell(1750)->addText('Pruebas',$tableFirstRowStyle);
+
+        $section->addTextBreak(1);
+
+        $section->addText('Planes de auditoría cerrados',$subsubTitle);
+        $table3 = $section->addTable($tableStyleName);
+        $table3->addRow();
+        $table3->addCell(1750)->addText('Nombre',$tableFirstRowStyle);
+        $table3->addCell(1750)->addText('Descripción',$tableFirstRowStyle);
+        $table3->addCell(1750)->addText('Auditorías',$tableFirstRowStyle);
+        $table3->addCell(1750)->addText('Programas',$tableFirstRowStyle);
+        $table3->addCell(1750)->addText('Pruebas',$tableFirstRowStyle);
+
+        
+        foreach ($plans['audit_plans'] as $plan)
+        {
+            if ($plan['abiertas'] >= 0 && $plan['ejecucion'] == 0 && $plan['status'] == 0) //planes abiertos
+            {
+                $table1->addRow();
+                $table1->addCell(1750)->addText($plan['name'],$tableFontStyle);
+                $table1->addCell(1750)->addText($plan['description'],$tableFontStyle);
+
+                $audit_string = '';
+                foreach ($plan['audits'] as $audit)
+                {
+                    if ($audit == end($plan['audits']))
+                    {
+                        $audit_string .= $audit;
+                    }
+                    else
+                    {
+                       $audit_string .= $audit.', '; 
+                    }          
+                }
+                $table1->addCell(1750)->addText($audit_string,$tableFontStyle);
+
+                $program_string = '';
+                foreach ($plan['programs'] as $program)
+                {
+                    if ($program == end($plan['programs']))
+                    {
+                        $program_string .= $program;
+                    }
+                    else
+                    {
+                       $program_string .= $program.', '; 
+                    }
+                }
+
+                $table1->addCell(1750)->addText($program_string,$tableFontStyle);
+
+                $test_string = '';
+                foreach ($plan['tests'] as $test)
+                {
+                    if ($test == end($plan['tests']))
+                    {
+                        $test_string .= $test;
+                    }
+                    else
+                    {
+                       $test_string .= $test.', '; 
+                    }
+                }
+
+                $table1->addCell(1750)->addText($test_string,$tableFontStyle);                     
+            }
+            else if ($plan['ejecucion'] > 0 && $plan['status'] == 0) //planes en ejecución
+            {
+                $table2->addRow();
+                $table2->addCell(1750)->addText($plan['name']);
+                $table2->addCell(1750)->addText($plan['description']);
+
+                $audit_string = '';
+                foreach ($plan['audits'] as $audit)
+                {
+                    if ($audit == end($plan['audits']))
+                    {
+                        $audit_string .= $audit;
+                    }
+                    else
+                    {
+                       $audit_string .= $audit.', '; 
+                    }          
+                }
+                $table2->addCell(1750)->addText($audit_string);
+
+                $program_string = '';
+                foreach ($plan['programs'] as $program)
+                {
+                    if ($program == end($plan['programs']))
+                    {
+                        $program_string .= $program;
+                    }
+                    else
+                    {
+                       $program_string .= $program.', '; 
+                    }
+                }
+
+                $table2->addCell(1750)->addText($program_string);
+
+                $test_string = '';
+                foreach ($plan['tests'] as $test)
+                {
+                    if ($test == end($plan['tests']))
+                    {
+                        $test_string .= $test;
+                    }
+                    else
+                    {
+                       $test_string .= $test.', '; 
+                    }
+                }
+
+                $table2->addCell(1750)->addText($test_string); 
+            }
+            else if ($plan['status'] == 1) //planes cerrados
+            {
+                $table3->addRow();
+                $table3->addCell(1750)->addText($plan['name']);
+                $table3->addCell(1750)->addText($plan['description']);
+
+                $audit_string = '';
+                foreach ($plan['audits'] as $audit)
+                {
+                    if ($audit == end($plan['audits']))
+                    {
+                        $audit_string .= $audit;
+                    }
+                    else
+                    {
+                       $audit_string .= $audit.', '; 
+                    }          
+                }
+                $table3->addCell(1750)->addText($audit_string);
+
+                $program_string = '';
+                foreach ($plan['programs'] as $program)
+                {
+                    if ($program == end($plan['programs']))
+                    {
+                        $program_string .= $program;
+                    }
+                    else
+                    {
+                       $program_string .= $program.', '; 
+                    }
+                }
+
+                $table3->addCell(1750)->addText($program_string);
+
+                $test_string = '';
+                foreach ($plan['tests'] as $test)
+                {
+                    if ($test == end($plan['tests']))
+                    {
+                        $test_string .= $test;
+                    }
+                    else
+                    {
+                       $test_string .= $test.', '; 
+                    }
+                }
+
+                $table3->addCell(1750)->addText($test_string); 
+            }
+        }
+
+        $section->addTextBreak(1);
+
+        //nombre de plan de auditoría seleccionado
+        $plan_name = \Ermtool\Audit_plan::name($_POST['audit_plan']);
+
+
+        //obtenemos todas las pruebas (0 es para pruebas abiertas en caso de ser excel, pero aquí da lo mismo)
+        $tests = json_decode($this->getTests(0,$_POST['audit_plan']));
+
+        //si es que hay pruebas continuamos (OBS! veremos sólo pruebas de auditoría abiertas o cerradas)
+        if ($tests->pruebas_abiertas > 0 || $tests->pruebas_cerradas > 0)
+        {
+            $section->addText(
+                'Pruebas de Plan de Auditoría: '.$plan_name, $subTitle   
+            );
+            
+            $section->addImage('image2.png', $imageStyle);
+
+            $section->addText('Pruebas de auditoría abiertas',$subsubTitle);
+            $table1 = $section->addTable($tableStyleName);
+            $table1->addRow();
+            $table1->addCell(1750)->addText('Auditoría',$tableFirstRowStyle2);
+            $table1->addCell(1750)->addText('Programa',$tableFirstRowStyle2);
+            $table1->addCell(1750)->addText('Prueba',$tableFirstRowStyle2);
+            $table1->addCell(1750)->addText('Descripción',$tableFirstRowStyle2);
+            $table1->addCell(1750)->addText('Tipo',$tableFirstRowStyle2);
+            $table1->addCell(1750)->addText('Resultado',$tableFirstRowStyle2);
+            $table1->addCell(1750)->addText('HH Planificadas',$tableFirstRowStyle2);
+            $table1->addCell(1750)->addText('HH Reales',$tableFirstRowStyle2);
+            $table1->addCell(1750)->addText('Responsable',$tableFirstRowStyle2);
+
+            $section->addTextBreak(1);
+
+            $section->addText('Pruebas de auditoría cerradas',$subsubTitle);
+            $table2 = $section->addTable($tableStyleName);
+            $table2->addRow();
+            $table2->addCell(1750)->addText('Auditoría',$tableFirstRowStyle2);
+            $table2->addCell(1750)->addText('Programa',$tableFirstRowStyle2);
+            $table2->addCell(1750)->addText('Prueba',$tableFirstRowStyle2);
+            $table2->addCell(1750)->addText('Descripción',$tableFirstRowStyle2);
+            $table2->addCell(1750)->addText('Tipo',$tableFirstRowStyle2);
+            $table2->addCell(1750)->addText('Resultado',$tableFirstRowStyle2);
+            $table2->addCell(1750)->addText('HH Planificadas',$tableFirstRowStyle2);
+            $table2->addCell(1750)->addText('HH Reales',$tableFirstRowStyle2);
+            $table2->addCell(1750)->addText('Responsable',$tableFirstRowStyle2);
+
+            foreach ($tests->audit_tests as $test)
+            {
+                if ($test->status == 0) //tabla de pruebas abiertas
+                {
+                    $table1->addRow();
+                    $table1->addCell(1750)->addText($test->audit_name,$tableFontStyle2);
+                    $table1->addCell(1750)->addText($test->audit_program_name,$tableFontStyle2);
+                    $table1->addCell(1750)->addText($test->name,$tableFontStyle2);
+                    $table1->addCell(1750)->addText($test->description,$tableFontStyle2);
+
+                    if ($test->type == 0)
+                    {
+                        $table1->addCell(1750)->addText('Prueba de diseño',$tableFontStyle2);
+                    }
+                    else if ($test->type == 1)
+                    {
+                        $table1->addCell(1750)->addText('Prueba de efectividad operativa',$tableFontStyle2);
+                    }
+                    else if ($test->type == 2)
+                    {
+                        $table1->addCell(1750)->addText('Prueba sustantiva',$tableFontStyle2);
+                    }
+                    else if ($test->type == 3)
+                    {
+                        $table1->addCell(1750)->addText('Prueba de cumplimiento',$tableFontStyle2);
+                    }
+                    else
+                    {
+                        $table1->addCell(1750)->addText('Tipo no definido',$tableFontStyle2);
+                    }
+
+                    if ($test->results == 0)
+                    {
+                        $table1->addCell(1750)->addText('Inefectiva',$tableFontStyle2);
+                    }
+                    else if ($test->results == 1)
+                    {
+                        $table1->addCell(1750)->addText('Efectiva',$tableFontStyle2);
+                    }
+                    else if ($test->results == 2)
+                    {
+                        $table1->addCell(1750)->addText('En proceso',$tableFontStyle2);
+                    }
+
+                    if (!$test->hh_plan)
+                    {
+                        $table1->addCell(1750)->addText('No se han planificado horas hombre',$tableFontStyle2);
+                    }   
+                    else
+                    {
+                        $table1->addCell(1750)->addText($test->hh_plan,$tableFontStyle2);
+                    } 
+
+                    if (!$test->hh_real)
+                    {
+                        $table1->addCell(1750)->addText('No se han agregado horas hombre',$tableFontStyle2);
+                    }   
+                    else
+                    {
+                        $table1->addCell(1750)->addText($test->hh_real,$tableFontStyle2);
+                    }
+
+                    $table1->addCell(1750)->addText($test->stakeholder,$tableFontStyle2);                
+                }
+
+                else if ($test->status == 2) //tabla de pruebas cerradas
+                {
+                    $table2->addRow();
+                    $table2->addCell(1750)->addText($test->audit_name,$tableFontStyle2);
+                    $table2->addCell(1750)->addText($test->audit_program_name,$tableFontStyle2);
+                    $table2->addCell(1750)->addText($test->name,$tableFontStyle2);
+                    $table2->addCell(1750)->addText($test->description,$tableFontStyle2);
+
+                    if ($test->type == 0)
+                    {
+                        $table2->addCell(1750)->addText('Prueba de diseño',$tableFontStyle2);
+                    }
+                    else if ($test->type == 1)
+                    {
+                        $table2->addCell(1750)->addText('Prueba de efectividad operativa',$tableFontStyle2);
+                    }
+                    else if ($test->type == 2)
+                    {
+                        $table2->addCell(1750)->addText('Prueba sustantiva',$tableFontStyle2);
+                    }
+                    else if ($test->type == 3)
+                    {
+                        $table2->addCell(1750)->addText('Prueba de cumplimiento',$tableFontStyle2);
+                    }
+                    else
+                    {
+                        $table2->addCell(1750)->addText('Tipo no definido',$tableFontStyle2);
+                    }
+
+                    if ($test->results == 0)
+                    {
+                        $table2->addCell(1750)->addText('Inefectiva',$tableFontStyle2);
+                    }
+                    else if ($test->results == 1)
+                    {
+                        $table2->addCell(1750)->addText('Efectiva',$tableFontStyle2);
+                    }
+                    else if ($test->results == 2)
+                    {
+                        $table2->addCell(1750)->addText('En proceso',$tableFontStyle2);
+                    }
+
+                    if (!$test->hh_plan)
+                    {
+                        $table2->addCell(1750)->addText('No se han planificado horas hombre',$tableFontStyle2);
+                    }   
+                    else
+                    {
+                        $table2->addCell(1750)->addText($test->hh_plan,$tableFontStyle2);
+                    } 
+
+                    if (!$test->hh_real)
+                    {
+                        $table2->addCell(1750)->addText('No se han agregado horas hombre',$tableFontStyle2);
+                    }   
+                    else
+                    {
+                        $table2->addCell(1750)->addText($test->hh_real,$tableFontStyle2);
+                    }
+
+                    $table2->addCell(1750)->addText($test->stakeholder,$tableFontStyle2);   
+                }
+            }
+        }
+        else
+        {
+            $section->addText(
+                'No se han agregado pruebas de auditoría para el plan seleccionado', $subTitle   
+            );
+        }
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($word, 'Word2007');
+        $objWriter->save('auditorias_graficos.docx');
+        
+        //generamos doc para guardar
+        $file_url = 'auditorias_graficos.docx';
+        header('Content-Type: application/octet-stream');
+        header("Content-Transfer-Encoding: Binary"); 
+        header("Content-disposition: attachment; filename=\"" . basename($file_url) . "\""); 
+        readfile($file_url); // do the double-download-dance (dirty but worky)
+
+        //ahora borramos archivos temporales
+        unlink('auditorias_graficos.docx');
+        unlink('image.png');
+        unlink('image2.png');
     }
 }

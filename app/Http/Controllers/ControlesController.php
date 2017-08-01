@@ -42,6 +42,244 @@ class ControlesController extends Controller
         $this->logger2->pushHandler(new FirePHPHandler());
     }
 
+    public function getControlReport($controles,$value)
+    {
+        $controls = array();  
+        $controls_temp = array();
+        $no_ejecutados = array();
+        $efectivos = 0;
+        $inefectivos = 0;
+        $j = 0; //contador para ids de efectivos e inefectivos
+        $id_inefectivos = array();
+        $id_efectivos = array();
+        $i = 0;
+            foreach ($controles as $control)
+            {
+                //primero obtenemos fecha del último resultado de evaluación del control
+                $max_date = DB::table('control_eval_risk_temp')
+                                ->where('control_id','=',$control->id)
+                                ->max('created_at');
+
+                //ACT 17-04-17: str_replace
+                $max_date = str_replace('-','',$max_date);
+
+                $controls_temp[$i] = $control->id;
+                $i += 1;
+                //para cada uno vemos si son efectivos o inefectivos: Si al menos una de las pruebas es inefectiva, el control es inefectivo
+                //ACTUALIZACIÓN 22-11-16: Sólo verificaremos en tabla control_eval_risk_temp
+                $res = DB::table('control_eval_risk_temp')
+                            ->where('control_id','=',$control->id)
+                            ->where('created_at','=',$max_date)
+                            ->select('result')
+                            ->first();
+
+                if (!empty($res))
+                {
+                    if ($res->result == 2)
+                    {
+                        array_push($id_inefectivos,$control->id);
+                        $inefectivos += 1;
+                    }
+                    else
+                    {
+                        array_push($id_efectivos,$control->id);
+                        $efectivos += 1;
+                    }
+                }
+            }
+            
+            //ahora obtenemos los datos de los controles seleccionados
+            $i = 0;
+            foreach ($controls_temp as $id)
+            {
+                $control = \Ermtool\Control::find($id);
+                //obtenemos resultado del control
+                //fecha de actualización del control
+                $updated_at = new DateTime($control->updated_at);
+                $updated_at = date_format($updated_at, 'd-m-Y');
+                $description = preg_replace("[\n|\r|\n\r]", ' ', $control->description); 
+                foreach ($id_efectivos as $id_ef)
+                {
+                    if ($id_ef == $control->id)
+                    {
+                        $controls[$i] = [
+                            'id' => $control->id,
+                            'name' => $control->name,
+                            'description' => $description,
+                            'updated_at' => $updated_at,
+                            'results' => 2
+                        ];
+                        $i += 1;
+                    }
+                }
+                foreach ($id_inefectivos as $id_inef)
+                {
+                    if ($id_inef == $control->id)
+                    {
+                        $controls[$i] = [
+                            'id' => $control->id,
+                            'name' => $control->name,
+                            'description' => $description,
+                            'updated_at' => $updated_at,
+                            'results' => 1
+                        ];
+                        $i += 1;
+                    }
+                }
+                
+            }
+            //guardamos cantidad de ejecutados
+            $cont_ejec = $i;
+            //ahora obtenemos el resto de controles (para obtener los no ejecutados)
+            $controles = DB::table('controls')
+                            ->whereNotIn('controls.id',$controls_temp)
+                            ->select('id','name','description','updated_at')
+                            ->get();
+            //guardamos en array
+            $i = 0;
+            foreach ($controles as $control)
+            {
+                $updated_at = new DateTime($control->updated_at);
+                $updated_at = date_format($updated_at, 'd-m-Y');
+                $description = preg_replace("[\n|\r|\n\r]", ' ', $control->description);  
+                $no_ejecutados[$i] = [
+                            'id' => $control->id,
+                            'name' => $control->name,
+                            'description' => $description,
+                            'updated_at' => $updated_at,
+                        ];
+                $i += 1;
+            }
+            //guardamos cantidad de no ejecutados
+            $cont_no_ejec = $i;
+            //return json_encode($controls);
+            //echo $cont_ejec.' y '.$cont_no_ejec;
+            //echo $efectivos. ' y '.$inefectivos;
+            //print_r($id_efectivos);
+            //print_r($id_inefectivos);
+            //print_r($no_ejecutados);
+            if (strstr($_SERVER["REQUEST_URI"],'genexcelgraficos')) 
+            {
+                $res2 = array();
+                if ($value == 1) //reporte excel de controles ejecutados
+                {
+                    $i = 0;
+                    foreach ($controls as $control)
+                    {
+                        if (Session::get('languaje') == 'en')
+                        {
+                            $res2[$i] = [
+                                'Name' => $control['name'],
+                                'Description' => $control['description'],
+                                'Updated date' => $control['updated_at'],
+                            ];
+                        }
+                        else
+                        {
+                            $res2[$i] = [
+                                'Nombre' => $control['name'],
+                                'Descripción' => $control['description'],
+                                'Actualizado' => $control['updated_at'],
+                            ];
+                        }
+                        $i += 1;
+                    }
+                    return $res2;
+                }
+                else if ($value == 2) //reporte excel de controles no ejecutados
+                {
+                    $i = 0;
+                    foreach ($no_ejecutados as $control)
+                    {
+                        if (Session::get('languaje') == 'en')
+                        {
+                            $res2[$i] = [
+                                'Name' => $control['name'],
+                                'Description' => $control['description'],
+                                'Updated date' => $control['updated_at'],
+                            ];
+                        }
+                        else
+                        {
+                            $res2[$i] = [
+                                'Nombre' => $control['name'],
+                                'Descripción' => $control['description'],
+                                'Actualizado' => $control['updated_at'],
+                            ];
+                        }
+                        $i += 1;
+                    }
+                    return $res2;
+                }
+                else if ($value == 3) //reporte excel de controles efectivos
+                {
+                    $i = 0;
+                    foreach ($controls as $control)
+                    {
+                        if ($control['results'] == 2)
+                        {
+                            if (Session::get('languaje') == 'en')
+                            {
+                                $res2[$i] = [
+                                    'Name' => $control['name'],
+                                    'Description' => $control['description'],
+                                    'Updated date' => $control['updated_at'],
+                                ];
+                            }
+                            else
+                            {
+                                $res2[$i] = [
+                                    'Nombre' => $control['name'],
+                                    'Descripción' => $control['description'],
+                                    'Actualizado' => $control['updated_at'],
+                                ];
+                            }    
+                        }
+                        $i += 1;
+                    }
+                    return $res2;
+                }
+                else if ($value == 4) //reporte excel de controles no efectivos
+                {
+                    $i = 0;
+                    foreach ($controls as $control)
+                    {
+                        if ($control['results'] == 1)
+                        {
+                            if (Session::get('languaje') == 'en')
+                            {
+                                $res2[$i] = [
+                                    'Name' => $control['name'],
+                                    'Description' => $control['description'],
+                                    'Updated date' => $control['updated_at'],
+                                ];
+                            }
+                            else
+                            {
+                                $res2[$i] = [
+                                    'Nombre' => $control['name'],
+                                    'Descripción' => $control['description'],
+                                    'Actualizado' => $control['updated_at'],
+                                ];
+                            }    
+                        }
+                        $i += 1;
+                    }
+                    return $res2;
+                }
+                
+            }
+            else
+            {
+                return ['controls' => $controls,
+                        'no_ejecutados' => $no_ejecutados,
+                        'cont_ejec' => $cont_ejec,
+                        'cont_no_ejec' => $cont_no_ejec,
+                        'efectivos' => $efectivos,
+                        'inefectivos' => $inefectivos];
+            }
+    }
+
     public function index()
     {
         if (Auth::guest())
@@ -142,13 +380,12 @@ class ControlesController extends Controller
                 {
                     $stakeholder2 = NULL;
                 }
-
                 //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
                 $short_des = substr($control->description,0,100);
                 //ACT 27-04-17: eliminamos saltos de línea
                 $description = eliminarSaltos($control->description);
 
-                $controls1[$i] = ['id'=>$control->id,
+                $controls1[$i] = array('id'=>$control->id,
                                     'name'=>$control->name,
                                     'description'=>$description,
                                     'type'=>$control->type,
@@ -158,10 +395,11 @@ class ControlesController extends Controller
                                     'periodicity'=>$control->periodicity,
                                     'purpose'=>$control->purpose,
                                     'stakeholder'=>$stakeholder2,
-                                   	'expected_cost' => $control->expected_cost,
+                                    'expected_cost' => $control->expected_cost,
                                     'risks' => $risks,
                                     'objectives' => $objectives,
-                                    'short_des' => $short_des];
+                                    'short_des' => $short_des,
+                                    'porcentaje_cont' => $control->porcentaje_cont);
                 $i += 1;
             }
 
@@ -227,9 +465,15 @@ class ControlesController extends Controller
                 {
                     $stakeholder2 = NULL;
                 }
+
+                //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
+                $short_des = substr($control->description,0,100);
+                //ACT 27-04-17: eliminamos saltos de línea
+                $description = eliminarSaltos($control->description);
+
                 $controls2[$i] = array('id'=>$control->id,
                                     'name'=>$control->name,
-                                    'description'=>$control->description,
+                                    'description'=>$description,
                                     'type'=>$control->type,
                                     'type2'=>$control->type2,
                                     'created_at'=>$fecha_creacion,
@@ -240,16 +484,20 @@ class ControlesController extends Controller
                                     'stakeholder'=>$stakeholder2,
                                     'expected_cost' => $control->expected_cost,
                                     'risks' => $risks,
-                                    'subprocesses' => $subprocesses);
+                                    'subprocesses' => $subprocesses,
+                                    'short_des' => $short_des,
+                                    'porcentaje_cont' => $control->porcentaje_cont);
                 $i += 1;
             }
+
+            $cocacola = 1; //Insertamos variable para mostrar en vista que es de coca cola
             if (Session::get('languaje') == 'en')
             {
-                return view('en.controles.index',['controls1' => $controls1,'controls2'=>$controls2,'org_id' => $_GET['organization_id']]);
+                return view('en.controles.index',['controls1' => $controls1,'controls2'=>$controls2,'org_id' => $_GET['organization_id'],'cocacola' => $cocacola]);
             }
             else
             {
-                return view('controles.index',['controls1' => $controls1,'controls2'=>$controls2,'org_id' => $_GET['organization_id']]);
+                return view('controles.index',['controls1' => $controls1,'controls2'=>$controls2,'org_id' => $_GET['organization_id'],'cocacola' => $cocacola]);
             }
         }
     }
@@ -299,8 +547,8 @@ class ControlesController extends Controller
             ]);
             //print_r($_POST);
             //guardamos variable global de evidencia
-            global $evidencedoc;
-            $evidencedoc = $request->file('evidence_doc');
+            global $request2;
+            $request2 = $request;
             //creamos una transacción para cumplir con atomicidad
             DB::transaction(function()
             {
@@ -328,27 +576,44 @@ class ControlesController extends Controller
                     }
                     if ($_POST['type'] == NULL || $_POST['type'] == "")
                     {
-                    	$type = NULL;
+                        $type = NULL;
                     }
                     else
                     {
-                    	$type = $_POST['type'];
+                        $type = $_POST['type'];
                     }
                     if ($_POST['expected_cost'] == NULL || $_POST['expected_cost'] == "")
                     {
-                    	$expected_cost = NULL;
+                        $expected_cost = NULL;
                     }
                     else
                     {
-                    	$expected_cost = $_POST['expected_cost'];
+                        $expected_cost = $_POST['expected_cost'];
                     }
                     if ($_POST['evidence'] == NULL || $_POST['evidence'] == "")
                     {
-                    	$evidence = NULL;
+                        $evidence = NULL;
                     }
                     else
                     {
-                    	$evidence = $_POST['evidence'];
+                        $evidence = $_POST['evidence'];
+                    }
+
+                    //ACT 03-07-17: Se agrega porcentaje de contribución (específicamente para Coca Cola Andina)
+                    if (isset($_POST['porcentaje_cont']))
+                    {
+                        if ($_POST['porcentaje_cont'] == NULL || $_POST['porcentaje_cont'] == "")
+                        {
+                            $porcentaje_cont = NULL;
+                        }
+                        else
+                        {
+                            $porcentaje_cont = $_POST['porcentaje_cont'];
+                        }
+                    }
+                    else
+                    {
+                        $porcentaje_cont = NULL;
                     }
 
                     //insertamos control y obtenemos ID
@@ -363,31 +628,10 @@ class ControlesController extends Controller
                             'stakeholder_id'=>$stakeholder,
                             'created_at'=>date('Ymd H:i:s'),
                             'updated_at'=>date('Ymd H:i:s'),
-                            'expected_cost'=>$expected_cost
+                            'expected_cost'=>$expected_cost,
+                            'porcentaje_cont'=>$porcentaje_cont
                             ]);
-                    //insertamos en control_risk_subprocess o control_objective_risk
-                    /*if ($_POST['subneg'] == 0) //es control de proceso
-                    {
-                        foreach ($_POST['select_procesos'] as $subproceso)
-                        {
-                            DB::table('control_risk_subprocess')
-                                ->insert([
-                                    'risk_subprocess_id' => $subproceso,
-                                    'control_id' => $control_id
-                                    ]);
-                        }
-                    }
-                    else if ($_POST['subneg'] == 1) //es control de objetivo
-                    {
-                        foreach ($_POST['select_objetivos'] as $objetivo)
-                        {
-                            DB::table('control_objective_risk')
-                                ->insert([
-                                    'objective_risk_id' => $objetivo,
-                                    'control_id' => $control_id
-                                    ]);
-                        }
-                    } */
+                    
                     //ACTUALIZACIÓN 31-03-17: Agregamos en control_organization_risk
                     foreach ($_POST['select_riesgos'] as $riesgo)
                     {
@@ -398,10 +642,28 @@ class ControlesController extends Controller
                             ]);
                     }
 
+                    //ACTUALIZACION 05-07-2017: Para Coca Cola Andina, calcularemos aquí el valor del control y almacenaremos porcentaje de resultado (según evaluaciones y autoevaluaciones) en tabla control_eval_risk_temp
+
+                    //Guardamos en control_eval_risk_temp valor del control (autoevaluación)
+
+                    DB::table('control_eval_risk_temp')
+                        ->insert([
+                            'result' => $_POST['porcentaje_cont'],
+                            'control_id' => $control_id,
+                            'organization_id' => $_POST['org_id'],
+                            'auto_evaluation' => 1,
+                            'status' => 1,
+                            'created_at' => date('Y-m-d H:i:s')
+                            ]);
+
+                    //ahora calcularemos el valor de el o los riesgos a los que apunte este control
+                    $eval_risk = $this->calcControlledRisk($control_id,$_POST['org_id']);
+
+
                     //guardamos archivos de evidencias (si es que hay)
-                    if($GLOBALS['evidencedoc'] != NULL)
+                    if($GLOBALS['request2']->file('evidence_doc') != NULL)
                     {
-                        foreach ($GLOBALS['evidencedoc'] as $evidencedoc)
+                        foreach ($GLOBALS['request2']->file('evidence_doc') as $evidencedoc)
                         {
                             if ($evidencedoc != NULL)
                             {
@@ -528,28 +790,46 @@ class ControlesController extends Controller
                 }
                 if ($_POST['type'] == NULL || $_POST['type'] == "")
                 {
-                  	$type = NULL;
+                    $type = NULL;
                 }
                 else
                 {
-                   	$type = $_POST['type'];
+                    $type = $_POST['type'];
                 }
                 if ($_POST['expected_cost'] == NULL || $_POST['expected_cost'] == "")
                 {
-                 	$expected_cost = NULL;
+                    $expected_cost = NULL;
                 }
                 else
                 {
-                 	$expected_cost = $_POST['expected_cost'];
+                    $expected_cost = $_POST['expected_cost'];
                 }
                 if ($_POST['evidence'] == NULL || $_POST['evidence'] == "")
                 {
-                 	$evidence = NULL;
+                    $evidence = NULL;
                 }
                 else
                 {
-                 	$evidence = $_POST['evidence'];
+                    $evidence = $_POST['evidence'];
                 }
+
+                //ACT 03-07-17: Se agrega porcentaje de contribución (específicamente para Coca Cola Andina)
+                if (isset($_POST['porcentaje_cont']))
+                {
+                    if ($_POST['porcentaje_cont'] == NULL || $_POST['porcentaje_cont'] == "")
+                    {
+                        $porcentaje_cont = NULL;
+                    }
+                    else
+                    {
+                        $porcentaje_cont = $_POST['porcentaje_cont'];
+                    }
+                }
+                else
+                {
+                    $porcentaje_cont = NULL;
+                }
+
                 //guardamos archivos de evidencia (si es que hay)
                 if($GLOBALS['evidencedoc'] != NULL)
                 {
@@ -569,7 +849,30 @@ class ControlesController extends Controller
                 $control->purpose = $purpose;
                 $control->stakeholder_id = $stakeholder;
                 $control->expected_cost = $expected_cost;
+                $control->porcentaje_cont = $porcentaje_cont;
                 $control->save();
+
+                //ACTUALIZACION 05-07-2017: Para Coca Cola Andina, calcularemos aquí el valor del control y almacenaremos porcentaje de resultado (según evaluaciones y autoevaluaciones) en tabla control_eval_risk_temp
+
+                //Guardamos en control_eval_risk_temp valor del control (autoevaluación)
+                //primero seteamos en 0 las otras evaluaciones (si es que hay)
+                DB::table('control_eval_risk_temp')
+                    ->where('control_id','=',$GLOBALS['id1'])
+                    ->where('organization_id','=',$_POST['org_id'])
+                    ->update(['status' => 0]);
+                    
+                DB::table('control_eval_risk_temp')
+                        ->insert([
+                            'result' => $_POST['porcentaje_cont'],
+                            'control_id' => $GLOBALS['id1'],
+                            'organization_id' => $_POST['org_id'],
+                            'auto_evaluation' => 1,
+                            'status' => 1,
+                            'created_at' => date('Y-m-d H:i:s')
+                        ]);
+
+                //ahora calcularemos el valor de el o los riesgos a los que apunte este control
+                $eval_risk = $this->calcControlledRisk($GLOBALS['id1'],$_POST['org_id']);
 
                 //ACTUALIZACIÓN 03-04-17: primero eliminamos los riesgos antiguos para no repetir
                 $control_organization_risk_id = \Ermtool\Control::getControlOrganizationRisk($control->id,$_POST['org_id']);
@@ -639,7 +942,7 @@ class ControlesController extends Controller
                 if (empty($rev))
                 {
                     //audit_tests
-                    //ACTUALIZACIÓN 25-01: Ahora audit_test se relaciona con control a través de la tabla audit_test_control
+                    //ACTUALIZACIÓN 25-01-17: Ahora audit_test se relaciona con control a través de la tabla audit_test_control
                     $rev = DB::table('audit_test_control')
                         ->where('control_id','=',$GLOBALS['id1'])
                         ->select('id')
@@ -647,6 +950,32 @@ class ControlesController extends Controller
 
                     if (empty($rev))
                     {
+                        //ACTUALIZACIÓN 26-07-17: ahora vemos si existe en control_eval_risk_temp
+                        $rev = DB::table('control_eval_risk_temp')
+                                ->where('control_id','=',$GLOBALS['id1'])
+                                ->select('id')
+                                ->get();
+
+                        if (!empty($rev))
+                        {
+                            //ACTUALIZACIÓN 18-07: Si tiene evaluaciones
+                            //ACTUALIZACIÓN 18-07: Además, debemos eliminar de control_eval_risk_temp (para Coca Cola Andina), y volver a calcular el valor de riesgo controlado (riesgo residua)
+
+                            DB::table('control_eval_risk_temp')
+                                ->where('control_id','=',$GLOBALS['id1'])
+                                ->where('organization_id','=',$GLOBALS['org1'])
+                                ->delete();
+
+                            //obtenemos todos los riesgos asociados al control (para posteriormente, volver a cálcular su valor residual)
+                            $risks = DB::table('risks')
+                                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                                    ->join('control_organization_risk','control_organization_risk.organization_risk_id','=','organization_risk.id')
+                                    ->where('control_organization_risk.control_id','=',$GLOBALS['id1'])
+                                    ->select('risks.id')
+                                    ->get();            
+                        }
+
+                        $name = \Ermtool\Control::name($GLOBALS['id1']);
                         //se puede borrar
                         //ACTUALIZACIÓN 03-04-17: Obtenemos control_organization_risk
                         $ctrl_org_risks = \Ermtool\Control::getControlOrganizationRisk($GLOBALS['id1'],$GLOBALS['org1']);
@@ -676,14 +1005,20 @@ class ControlesController extends Controller
                         //$docs->deleteFiles('controles',$GLOBALS['id1'],NULL);
                         eliminarArchivo($GLOBALS['id1'],3,NULL);
 
-                        $GLOBALS['res'] = 0;
+                        //volvemos a calcular riesgo residual para cada uno de los riesgos obtenidos anteriormente
+                        if (isset($risks))
+                        {
+                            foreach ($risks as $risk)
+                            {
+                                $this->calcResidualRisk($GLOBALS['org1'],$risk->id);
+                            }
+                        }
 
-                        $name = \Ermtool\Control::name($GLOBALS['id1']);
+                        $GLOBALS['res'] = 0;
 
                         $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el control con Id: '.$GLOBALS['id1'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                     }
                 }
-                
             }
         });
 
@@ -967,7 +1302,7 @@ class ControlesController extends Controller
                 }
 
                 $name = \Ermtool\Control::name($_POST['control_id']);
-                
+
                 $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha realizado una prueba '.$kind.' para el control con Id: '.$_POST['control_id'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
@@ -980,6 +1315,7 @@ class ControlesController extends Controller
         global $id1;
         $id1 = $id;
         DB::transaction(function() {
+
             $logger = $this->logger2;
             $evaluation = \Ermtool\Control_evaluation::find($GLOBALS['id1']);
 
@@ -1041,6 +1377,9 @@ class ControlesController extends Controller
 
     /*ACTUALIZACIÓN 21-11 función para cerrar una prueba; al cerrar una prueba se re evalua el valor del control (para ver si es efectivo o inefectivo), y su resultado es almacenado en la tabla
     control_eval_risk_temp, para luego re calcular el valor del riesgo controlado (a través de todos los controles que se encuentren en la tabla control_eval_risk_temp y que apunten a los riesgos creados en el sistema) */
+
+    /* ACTUALIZACIÓN 04-07-2017: Esta función no se utilizará en Coca Cola, y serán modificadas las funciones calcControlValue y calcControlledRisk, de modo que cada vez que se cree o actualice un control, se calculará el promedio de los controles, y luego este valor será aplicado a todos los riesgos asociados
+
     public function closeEvaluation($id,$org)
     {
         global $id1;
@@ -1050,7 +1389,6 @@ class ControlesController extends Controller
 
         DB::transaction(function() {
             $logger = $this->logger2;
-
             //primero que todo, cerramos el estado de la prueba de id = $id
             $eval = \Ermtool\Control_evaluation::find($GLOBALS['id1']);
             $eval->status = 2;
@@ -1095,7 +1433,7 @@ class ControlesController extends Controller
         });
 
         return 0;
-    }
+    } */
     
     //función que retornará documento de evidencia subidos, junto al control que corresponden
     public function docs($id)
@@ -1717,8 +2055,6 @@ class ControlesController extends Controller
                     ->max('updated_at');
         if ($max_update != NULL)
         {
-            //ACT 18-04: STR_REPLACE
-            $max_update = $max_date = str_replace('-','',$max_update);
             //ahora obtenemos los datos de la evaluación de fecha máxima
             $evals = DB::table('control_evaluation')
                         ->where('control_id','=',$id)
@@ -1860,9 +2196,6 @@ class ControlesController extends Controller
                 $max_date = DB::table('control_eval_risk_temp')
                                 ->where('control_id','=',$control->id)
                                 ->max('created_at');
-
-                //ACT 17-04-17: str_replace
-                $max_date = str_replace('-','',$max_date);
 
                 $controls_temp[$i] = $control->id;
                 $i += 1;
@@ -2188,7 +2521,7 @@ class ControlesController extends Controller
     }
 
     //calculamos el valor del control según las pruebas que posea
-    public function calcControlValue($id)
+    /*public function calcControlValue($id)
     {
         //obtenemos la última evaluación de cada una de las pruebas (independientes de si están abiertas o cerradas)
         //primero obtenemos la fecha
@@ -2198,7 +2531,7 @@ class ControlesController extends Controller
                             ->max('updated_at');
 
         //ACT 03-04-17: sacamos guiones de updated_at
-        $last_diseno_updated = str_replace('-','',$last_diseno_updated);
+        //$last_diseno_updated = str_replace('-','',$last_diseno_updated);
 
         if (isset($last_diseno_updated) && !empty($last_diseno_updated))
         {
@@ -2223,7 +2556,7 @@ class ControlesController extends Controller
                             ->max('updated_at');
 
         //ACT 03-04-17: sacamos guiones de updated_at
-        $last_efectividad_updated = str_replace('-','',$last_efectividad_updated);
+        //$last_efectividad_updated = str_replace('-','',$last_efectividad_updated);
 
         if (isset($last_efectividad_updated) && !empty($last_efectividad_updated))
         {
@@ -2246,7 +2579,7 @@ class ControlesController extends Controller
                             ->max('updated_at');
 
         //ACT 03-04-17: sacamos guiones de updated_at
-        $last_sustantiva_updated = str_replace('-','',$last_sustantiva_updated);
+        //$last_sustantiva_updated = str_replace('-','',$last_sustantiva_updated);
 
         if (isset($last_sustantiva_updated) && !empty($last_sustantiva_updated))
         {
@@ -2269,7 +2602,7 @@ class ControlesController extends Controller
                             ->max('updated_at');
 
         //ACT 03-04-17: sacamos guiones de updated_at
-        $last_cumplimiento_updated = str_replace('-','',$last_cumplimiento_updated);
+        //$last_cumplimiento_updated = str_replace('-','',$last_cumplimiento_updated);
 
         if (isset($last_cumplimiento_updated) && !empty($last_cumplimiento_updated))
         {
@@ -2292,7 +2625,7 @@ class ControlesController extends Controller
         $max_date = \Ermtool\Audit_test::getMaxDate($id);
 
         //ACT 03-04-17: Sacamos guiones de max_date
-        $max_date = str_replace('-','',$max_date);
+        //$max_date = str_replace('-','',$max_date);
         //ahora obtenemos la prueba
         $test = \Ermtool\Audit_test::getTestFromDate($max_date,$id);
 
@@ -2352,7 +2685,7 @@ class ControlesController extends Controller
                 ->insert([
                     'result' => 1,
                     'control_id' => $id,
-                    'created_at' => date('Ymd H:i:s'),
+                    'created_at' => date('Y-m-d H:i:s'),
                 ]);
         }
         else
@@ -2362,12 +2695,12 @@ class ControlesController extends Controller
                 ->insert([
                     'result' => 2,
                     'control_id' => $id,
-                    'created_at' => date('Ymd H:i:s'),
+                    'created_at' => date('Y-m-d H:i:s'),
                 ]);
         }
 
         return 0;
-    }
+    } */
 
     //función que calcula el valor del o los riesgos controlados (a través de una nueva agregación o modificación en el valor de un control)
     public function calcControlledRisk($control_id,$org)
@@ -2379,75 +2712,94 @@ class ControlesController extends Controller
         //ahora recorremos cada uno de esos riesgos, y obtenemos los controles que tiene asociado y cuáles de estos controles posee una evaluación en la tabla control_eval_risk_temp
         foreach ($risks as $risk)
         {
-            //obtenemos todos los controles de este riesgo
-        
-            $controls = \Ermtool\Control::getControlsFromRisk($org,$risk->id);
-
-            //ACT 03-04-17: Obtenemos organization_risk
-            $risk2 = \Ermtool\Risk::getOrganizationRisk($org,$risk->id);
-            //ahora para cada uno de estos controles, verificamos su ÚLTIMO resultado en la tabla control_eval_risk_temp
-            $efectivos = 0;
-            $inefectivos = 0;
-            foreach ($controls as $control)
-            {
-                //obtenemos ÚLTIMA fecha de creación
-                $max_date = DB::table('control_eval_risk_temp')
-                                ->where('control_id','=',$control->id)
-                                ->max('created_at');
-
-                //ACT 03-04-17: Sacamos guiones para SQL Server
-                $max_date = str_replace('-','',$max_date);
-                //obtenemos resultado del control
-                $eval = DB::table('control_eval_risk_temp')
-                            ->where('control_id','=',$control->id)
-                            ->where('created_at','=',$max_date)
-                            ->select('result')
-                            ->first();
-
-                
-                if (isset($eval) && $eval != NULL)
-                {
-                    if ($eval->result  == 1)
-                    {
-                        $efectivos += 1;
-                    }
-                    else
-                    {
-                        $inefectivos += 1;
-                    }
-                }
-            }
-
-            //ahora hacemos una división de todos los efectivos con la suma de efectivos más inefectivos, y si esta división es mayor o igual a 0.5, entonces el riesgo es guardado como efectivo, sino será guardado como inefectivo
-
-            $res = $efectivos / ($efectivos + $inefectivos);
-
-            if ($res >= 0.5)
-            {
-                //el riesgo es efectivo
-                if ($kind == 1)
-                {
-                    \Ermtool\Control_evaluation::insertControlledRisk($risk2->id,1,1);
-                }
-                else
-                {
-                    \Ermtool\Control_evaluation::insertControlledRisk($risk2->id,1,2);
-                }
-            }
-            else //inefectivo
-            {
-                if ($kind == 1)
-                {
-                    \Ermtool\Control_evaluation::insertControlledRisk($risk2->id,2,1);
-                }
-                else
-                {
-                    \Ermtool\Control_evaluation::insertControlledRisk($risk2->id,2,2);
-                }
-            }
+            $this->calcResidualRisk($org,$risk->id);
         }
 
         return 0;
+    }
+
+    public function calcResidualRisk($org,$risk_id)
+    {
+        //obtenemos todos los controles de este riesgo
+        
+           $controls = \Ermtool\Control::getControlsFromRisk($org,$risk_id);
+
+           //ACT 03-04-17: Obtenemos organization_risk
+           $risk2 = \Ermtool\Risk::getOrganizationRisk($org,$risk_id);
+
+           $prom_controls = 0; //promedio de todos los controles
+           $cont_controls = 0; //contador de todos los controles asociados a cada riesgo
+           foreach ($controls as $control)
+           {
+                //ACT 05-07-17 (KOAndina): Obtenemos todas las pruebas vigentes
+                //para cada control, obtenemos las pruebas vigentes (Auto evaluaciones o no)
+
+                $evals = DB::table('control_eval_risk_temp')
+                            ->where('control_id','=',$control->id)
+                            ->where('organization_id','=',$org)
+                            ->where('status',1)
+                            ->select('result')
+                            ->get();
+
+                //creamos variable donde se guardará ponderado y contador
+                $prom = 0;
+                $cont = 0;
+
+                if (isset($evals) && $evals != NULL)
+                {
+                    foreach ($evals as $eval)
+                    {
+                        $prom += $eval->result;
+                        $cont += 1;
+                    }
+
+                    //calculamos promedio (OBS: POR AHORA (05-07-2017) SERÁ PROMEDIO, QUIZÁS DESPUÉS TENGAN DISTINTAS PONDERACIONES CADA PRUEBA)
+                    $prom = $prom / $cont;
+                }
+
+                //sumamos el promedio de este control, al que será el promedio de todos los controles (primero será la suma, y una vez contados todos los controles (en cont_controles), será el promedio)
+                $prom_controls += $prom;
+                $cont_controls += 1;
+           }
+
+            //ahora calculamos el porcentaje de contribución de acciones mitigantes (obteniendo el promedio entre el promedio de todos sus controles evaluados)
+            if ($cont_controls != 0)
+            {
+                $prom_controls = $prom_controls / $cont_controls;
+
+                //---Cálculo de Riesgo Residual---//
+                //primero obtenemos fecha máx de evaluación para el riesgo indicado
+                $max_update = DB::table('evaluation_risk')
+                            ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                            ->where('evaluation_risk.organization_risk_id','=',$risk2->id)
+                            ->max('evaluations.updated_at');
+
+                //verificamos que haya alguna evaluación para este riesgo (sino, no se calcula el riesgo residual)
+                if (isset($max_update) && $max_update != null)
+                {
+                    //ahora debemos obtener severidad actual del riesgo
+                    $s = DB::table('evaluation_risk')
+                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                ->where('evaluations.updated_at','=',$max_update)
+                                ->where('evaluation_risk.organization_risk_id','=',$risk2->id)
+                                ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                                ->first();
+
+                    //ahora calculamos nivel de exposición al riesgo (riesgo residual) según fórmula de KOAndina
+                    $riesgo_residual = ($s->avg_probability * $s->avg_impact)*(1-($prom_controls/100));
+                    $riesgo_residual = round($riesgo_residual, 2);
+                    \Ermtool\Control_evaluation::insertControlledRisk($risk2->id,$riesgo_residual,2);
+                }
+            }
+            else
+            {
+                //ACTUALIZACIÓN 19-07-17: significa que no hay controles, entonces eliminamos valor de riesgo residual
+                DB::table('controlled_risk')
+                    ->where('organization_risk_id','=',$risk2->id)
+                    ->delete();
+            }
+            
+            
     }
 
     public function hallazgos($id)
@@ -2583,5 +2935,146 @@ class ControlesController extends Controller
         $controls = \Ermtool\Control::getControlsFromPerspective($org,$perspective);
 
         return json_encode($controls);
+    }
+
+    public function docxGraficos()
+    {
+
+        $word = new \PhpOffice\PhpWord\PhpWord();
+        $section = $word->createSection();
+
+        $word->setDefaultFontName('Verdana');
+        $word->setDefaultFontSize(10);
+
+        //estilos
+        $titleStyle = array('size' => 18, 'color' => '045FB4');
+        $subTitle = array('size' => 16);
+        $subsubTitle = array('bold' => true);
+
+        //estilos de tablas
+        $tableStyleName = 'Audit Plans';
+        $tableStyle = array('borderSize' => 6, 'borderColor' => '006699', 'cellMargin' => 80, 'alignment' => \PhpOffice\PhpWord\SimpleType\JcTable::CENTER);
+        $tableFirstRowStyle = array('borderBottomSize' => 18, 'borderBottomColor' => '0000FF', 'bgColor' => '66BBFF','bold' => true);
+        $tableFirstRowStyle2 = array('borderBottomSize' => 18, 'borderBottomColor' => '0000FF', 'bgColor' => '66BBFF','bold' => true,'size' => 7);
+        $tableCellStyle = array('valign' => 'center');
+        $tableCellBtlrStyle = array('valign' => 'center', 'textDirection' => \PhpOffice\PhpWord\Style\Cell::TEXT_DIR_BTLR);
+        $tableFontStyle = array('bold' => false);
+        $tableFontStyle2 = array('bold' => false, 'size' => 7);
+        $word->addTableStyle($tableStyleName, $tableStyle, $tableFirstRowStyle);
+
+        $imageStyle = array('width'=>500, 'height'=>300, 'align'=>'center');
+
+        $section->addText(
+                'Reporte de Gráficos de Controles',$titleStyle
+            );
+
+        //decodificamos los gráficos y los guardamos temporalmente
+        $data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $_POST['grafico1']));
+        file_put_contents('image.png', $data);
+
+        $data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $_POST['grafico2']));
+        file_put_contents('image2.png', $data);
+
+        $section->addTextBreak(1);
+
+        $section->addText(
+            'Controles ejecutados y no ejecutados', $subTitle   
+        );  
+
+        $section->addImage('image.png', $imageStyle);
+
+        $section->addTextBreak(1);
+
+        $section->addText('Controles Ejecutados',$subsubTitle);
+        $table1 = $section->addTable($tableStyleName);
+        $table1->addRow();
+        $table1->addCell(1000)->addText('Nombre',$tableFirstRowStyle);
+        $table1->addCell(5000)->addText('Descripción',$tableFirstRowStyle);
+        $table1->addCell(1000)->addText('Fecha Actualizado',$tableFirstRowStyle);
+
+        $section->addTextBreak(1);
+
+        $section->addText('Controles No Ejecutados',$subsubTitle);
+        $table2 = $section->addTable($tableStyleName);
+        $table2->addRow();
+        $table2->addCell(1000)->addText('Nombre',$tableFirstRowStyle);
+        $table2->addCell(5000)->addText('Descripción',$tableFirstRowStyle);
+        $table2->addCell(1000)->addText('Fecha Actualizado',$tableFirstRowStyle);
+
+        $section->addTextBreak(1);
+
+        $section->addText(
+            'Controles efectivos y no efectivos', $subTitle   
+        );  
+
+        $section->addImage('image2.png', $imageStyle);
+
+        $section->addText('Controles Efectivos',$subsubTitle);
+        $table3 = $section->addTable($tableStyleName);
+        $table3->addRow();
+        $table3->addCell(1000)->addText('Nombre',$tableFirstRowStyle);
+        $table3->addCell(5000)->addText('Descripción',$tableFirstRowStyle);
+        $table3->addCell(1000)->addText('Fecha Actualizado',$tableFirstRowStyle);
+
+        $section->addTextBreak(1);
+
+        $section->addText('Controles Inefectivos',$subsubTitle);
+        $table4 = $section->addTable($tableStyleName);
+        $table4->addRow();
+        $table4->addCell(1000)->addText('Nombre',$tableFirstRowStyle);
+        $table4->addCell(5000)->addText('Descripción',$tableFirstRowStyle);
+        $table4->addCell(1000)->addText('Fecha Actualizado',$tableFirstRowStyle);
+
+
+        $controles = \Ermtool\Control::getEvaluatedControls($_POST['org']);
+
+        $c = $this->getControlReport($controles,0);
+
+        foreach ($c['controls'] as $ctrl)
+        {
+            $table1->addRow();
+            $table1->addCell(1000)->addText($ctrl['name'],$tableFontStyle2);
+            $table1->addCell(5000)->addText($ctrl['description'],$tableFontStyle2);
+            $table1->addCell(1000)->addText($ctrl['updated_at'],$tableFontStyle2);
+
+            if ($ctrl['results'] == 2) //efectivos
+            {
+                $table3->addRow();
+                $table3->addCell(1000)->addText($ctrl['name'],$tableFontStyle2);
+                $table3->addCell(5000)->addText($ctrl['description'],$tableFontStyle2);
+                $table3->addCell(1000)->addText($ctrl['updated_at'],$tableFontStyle2);
+            }
+            else if ($ctrl['results'] == 1) //inefectivos
+            {
+                $table4->addRow();
+                $table4->addCell(1000)->addText($ctrl['name'],$tableFontStyle2);
+                $table4->addCell(5000)->addText($ctrl['description'],$tableFontStyle2);
+                $table4->addCell(1000)->addText($ctrl['updated_at'],$tableFontStyle2);    
+            }
+        }
+
+        foreach ($c['no_ejecutados'] as $ctrl)
+        {
+            $table2->addRow();
+            $table2->addCell(1000)->addText($ctrl['name'],$tableFontStyle2);
+            $table2->addCell(5000)->addText($ctrl['description'],$tableFontStyle2);
+            $table2->addCell(1000)->addText($ctrl['updated_at'],$tableFontStyle2);
+        }
+
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($word, 'Word2007');
+        $objWriter->save('controles_graficos.docx');
+        
+        //generamos doc para guardar
+        $file_url = 'controles_graficos.docx';
+        header('Content-Type: application/octet-stream');
+        header("Content-Transfer-Encoding: Binary"); 
+        header("Content-disposition: attachment; filename=\"" . basename($file_url) . "\""); 
+        readfile($file_url); // do the double-download-dance (dirty but worky)
+
+        //ahora borramos archivos temporales
+        unlink('controles_graficos.docx');
+        unlink('image.png');
+        unlink('image2.png');
+
     }
 }

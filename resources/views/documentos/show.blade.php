@@ -73,12 +73,13 @@
 							@if (isset($element['process']))
 								<p><b><u>Proceso afectado: {{ $element['process']}}</u></b></p>
 							@endif
+							
+							@foreach ($element['issues'] as $issue)
 							<table class="table" border="1">
 							<thead>
 							<th style="padding-left:5%; width:35%;">Hallazgo</th>
 							<th style="padding-left:5%; width:65%;">Documentos</th>
 							</thead>
-							@foreach ($element['issues'] as $issue)
 							<tr>
 								<td style="padding-left:5%">
 								<p style="color:#3A01DF"><b>Nombre: {{ $issue['name'] }}</b></p>
@@ -137,83 +138,83 @@
 								</table>
 							</tr>
 							<tr>
-							@if ($issue['action_plan'] != NULL)
-								<table class="table" style="background-color: #BCF3C5;" border="1">
-								<thead>
-								<th style="padding-left:5%;">Plan de acción: {{ $issue['action_plan']['description'] }}</th>
-								<th style="padding-left:5%;">Documentos</th>
-								</thead>
-								
-								<tr>
-									<td style="padding-left:5%">
-									<p style="color:#3A01DF"><b>
-									@if ($issue['action_plan']['status'] == 0)
-										Estado: En progreso
-									@elseif ($issue['action_plan']['status'] == 1)
-										Estado: Cerrado
-									@endif
-									</b></p>
-									</td>
-									<?php $cont = 0; ?>
-									<td style="padding-left:5%">
-									<table class="table" style="background-color: #BCF3C5;">
+								@if ($issue['action_plan'] != NULL)
+									<table class="table" style="background-color: #BCF3C5;" border="1">
+									<thead>
+									<th style="padding-left:5%;">Plan de acción: {{ $issue['action_plan']['description'] }}</th>
+									<th style="padding-left:5%;">Documentos</th>
+									</thead>
+									
 									<tr>
-									@foreach ($issue['action_plan']['files'] as $file2)
-										<td>
-										<?php //pequeño módulo php para ver el tipo de archivo y nombre
-											$archivo = explode('.',$file2);
-											$file_name = explode('/',$archivo[0]);
-											$file_name = $file_name[2];
-											$cont += 1;
-										?>
-										
-										@if ($archivo[1] == 'pdf')
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
-										@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/word.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
-										@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
-										@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
-										@elseif ($archivo[1] == 'png')
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/png.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
-										@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
-										@else
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
+										<td style="padding-left:5%">
+										<p style="color:#3A01DF"><b>
+										@if ($issue['action_plan']['status'] == 0)
+											Estado: En progreso
+										@elseif ($issue['action_plan']['status'] == 1)
+											Estado: Cerrado
 										@endif
-										@foreach (Session::get('roles') as $role)
-											@if ($role == 1)
-												<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $file_name }}')"><br/>
-											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+										</b></p>
+										</td>
+										<?php $cont = 0; ?>
+										<td style="padding-left:5%">
+										<table class="table" style="background-color: #BCF3C5;">
+										<tr>
+										@foreach ($issue['action_plan']['files'] as $file2)
+											<td>
+											<?php //pequeño módulo php para ver el tipo de archivo y nombre
+												$archivo = explode('.',$file2);
+												$file_name = explode('/',$archivo[0]);
+												$file_name = $file_name[2];
+												$cont += 1;
+											?>
+											
+											@if ($archivo[1] == 'pdf')
+												<a href="../storage/app/{{$file}}" download><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+												{{ $file_name }}<br/>
+											@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
+												<a href="../storage/app/{{$file}}" download><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+												{{ $file_name }}<br/>
+											@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
+												<a href="../storage/app/{{$file}}" download><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+												{{ $file_name }}<br/>
+											@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
+												<a href="../storage/app/{{$file}}" download><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+												{{ $file_name }}<br/>
+											@elseif ($archivo[1] == 'png')
+												<a href="../storage/app/{{$file}}" download><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+												{{ $file_name }}<br/>
+											@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
+												<a href="../storage/app/{{$file}}" download><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+												{{ $file_name }}<br/>
+											@else
+												<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+												{{ $file_name }}<br/>
+											@endif
+											@foreach (Session::get('roles') as $role)
+												@if ($role == 1)
+													<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $file_name }}')"><br/>
+												<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+												@endif
+											@endforeach
+											@if ($cont == 4)
+												</td></tr>
+												<?php $cont = 0; ?>
+											@else
+												</td>
 											@endif
 										@endforeach
-										@if ($cont == 4)
-											</td></tr>
-											<?php $cont = 0; ?>
-										@else
-											</td>
-										@endif
-									@endforeach
+										</tr>
+										</table>
+								@else
+									<table class="table" style="background-color: #BCF3C5;" border="1">
+									<tr><td>
+									<p style="background-color: #BCF3C5; padding:1%"><b>Hallazgo sin plan de acción aun</b></p></td></tr>
 									</table>
-								</tr>
-								</table>
-							@else
-								<table class="table" style="background-color: #BCF3C5;" border="1">
-								<tr><td>
-								<p style="background-color: #BCF3C5; padding:1%"><b>Hallazgo sin plan de acción aun</b></p></td></tr>
-								</table>
-							@endif
+								@endif
 							</tr>
-							@endforeach
 							</table>
+							@endforeach
+							
 						@endforeach
 					@endif
 				@elseif ($kind2 == 2) {{-- Hallazgos de organización --}}

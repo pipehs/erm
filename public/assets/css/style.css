@@ -19,6 +19,7 @@ h1, .h1, h2, .h2, h3, .h3 {
 #logo {
   position:relative;
   background: #525252 url(../img/devoops_pattern_b10.png) 0 0 repeat;
+  /*background: #908C8C url(../img/devoops_pattern_b10.png) 0 0 repeat;*/
 }
 #logo a {
   color: #fff;
@@ -26,7 +27,6 @@ h1, .h1, h2, .h2, h3, .h3 {
   display: block;
   font-size: 20px;
   line-height: 50px;
-  background: url(../img/logo.png) right 42px no-repeat;
   -webkit-transition: 0.5s;
   -moz-transition: 0.5s;
   -o-transition: 0.5s;

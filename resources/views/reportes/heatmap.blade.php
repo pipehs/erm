@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes B&aacute;sicos</a></li>
+			<li><a href="#">Reportes</a></li>
 			<li><a href="heatmap">Mapa de Calor</a></li>
 		</ol>
 	</div>
@@ -82,6 +82,16 @@
 
             <div class="form-group">
                <div class="row">
+                 <label for="risk_subcategory_id" class='col-sm-4 control-label'>Seleccione sub-categor&iacute;a de Riesgo o Riesgo General (opcional)</label>
+                 <div class="col-sm-3">
+                    <select id="risk_subcategory_id" name="risk_subcategory_id"></select>
+                 </div>
+              </div>
+            </div>
+
+
+            <div class="form-group">
+               <div class="row">
                  <label for="sub_organizations" class='col-sm-4 control-label'>Active si desea ver tambi&eacute;n los riesgos de las organizaciones dependientes de la seleccionada</label>
                  <div class="col-sm-3">
                    <input type="checkbox" name="sub_organizations" id="sub_organizations" data-toggle="toggle" data-on="Organización + filiales" data-off="Solo organización" data-width="200" data-offstyle="primary" data-onstyle="success">
@@ -152,7 +162,7 @@
                 </div>
               @if ($kind2 == 1)
                 <div class="col-sm-6">
-                  <h4><b>Evaluación de Riesgo Residual</b></h4>
+                  <h4><b>Riesgo Residual (Exposición efectiva al riesgo)</b></h4>
                 </div>
               @endif
               </div>
@@ -210,36 +220,35 @@
 
               </div>
 
-    @if ($kind2)
+        @if ($kind2)
                <!-- Heatmap riesgo controlado -->
-
-              <div class="col-sm-5">
-            <table style="text-align: center; font-weight: bold; float: left;">
+            <?php $sev = ['25','20','16','15','12','10','9','8','6','5','4','3','2','1']; ?>
+            <div class="col-sm-5">
+            <table style="text-align: center; font-weight: bold; float: left; margin-left: 50px;">
             <tr><td bgcolor="#000000" style="padding:5px;">
-              <div  style="width: 12px; background-color:#000000; word-wrap: break-word; text-align: center; color:white;">Impacto
+              <div  style="width: 12px; background-color:#000000; word-wrap: break-word; text-align: center; color:white;">Severidad
                     </div></td>
                 <td  bgcolor="#CCCCCC">
-                  <table height="395px" width="100%" border="1">
-                    <tr><td>5<br>Cr&iacute;tico</td></tr>
-                    <tr><td>4<br>Alto</td></tr>
-                    <tr><td>3<br>Moderado</td></tr>
-                    <tr><td>2<br>Bajo</td></tr>
-                    <tr><td>1<br>Menor</td></tr>
+                  <table height="400px" width="100%" border="1">
+                    @foreach ($sev as $s)
+                      <tr><td>{{ $s }}</td></tr>
+                    @endforeach
                   </table>
                 </td>
                 <td >
-                  <table class="heatmap1" border="1">
+                  <table class="heatmap2" border="1">
 
-                  <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
-                  @for ($i=0; $i<5; $i++)
+                  <!-- Damos niveles de severidad y exposición efectiva de Coca Cola 25 x 100 -->
 
-                    <tr style="height: 20%; ">
-                    @for ($j=1; $j<=5; $j++)
-                        <td id="{{(5-$i)}}_{{($j)}}_ctrl" style="width: 20%; text-align: center;"></td>
+                  @foreach ($sev as $s)
+
+                    <tr>
+                    @for ($j=1; $j<=4; $j++)
+                        <td id="{{ $s }}_{{ $j }}_ctrl" style="width: 25%; text-align: center; height: 29px;"></td>
                     @endfor
                     </tr>
                     
-                  @endfor
+                  @endforeach
                   </table>
                 </td>
               </tr>
@@ -248,25 +257,26 @@
                     <td ></td>
                     <td  bgcolor="#CCCCCC">
                         <table height="50px" width="100%" border="1">
-                            <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
-                            <td width="20%" style="vertical-align:top;">2<br>No probable</td>
-                            <td width="20%" style="vertical-align:top;">3<br>Probable</td>
-                            <td width="20%" style="vertical-align:top;">4<br>Altamente probable</td>
-                            <td width="20%" style="vertical-align:top;">5<br>Esperado</td>
+                            <td style="min-width: 95px; vertical-align:top;">95 - 100 % <br>&Oacute;ptima</td>
+                            <td style="min-width: 95px; vertical-align:top;">85 - 94 %<br>Buena</td>
+                            <td style="min-width: 95px; vertical-align:top;">50 - 84 %<br>Media</td>
+                            <td style="min-width: 95px; vertical-align:top;">0 - 49 %<br>Deficiente</td>
+
+
                         </table>
                     </td>
               </tr>
                 <tr>
                     <td ></td>
                     <td ></td>
-                    <td bgcolor="#000000" style="letter-spacing:5px; text-align: center; color:white;">Probabilidad
+                    <td bgcolor="#000000" style="letter-spacing:4px; text-align: center; color:white;">Contribuci&oacute;n acciones mitigantes
                     </td>
                 </tr>
               </table>
               </div>
             </div>
 
-    @endif
+        @endif
              </center>
 
             <div class="row">
@@ -328,29 +338,36 @@
 
                          leyendas += "</ul>";
                          $('#leyendas').append(leyendas);
-                      @endif
-                  @endif
-                @if ($kind2 == 1)
-                  //controlado
-                  @if (intval($prom_criticidad_ctrl[$k]) == (5-$i))
-                      @if (intval($prom_proba_ctrl[$k]) == (5-$j))
-                          //verificamos color de círculo
-                          @if ($control[$k] == 0)
-                              $('#{{(5-$i)}}_{{(5-$j)}}_ctrl').append("<span class='circulo-azul' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_ctrl[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_ctrl[$k],1) }}'>{{ $cont }}</span>");
-                          @else
-                              $('#{{(5-$i)}}_{{(5-$j)}}_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_ctrl[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_ctrl[$k],1) }}'>{{ $cont }}</span>");
-                          @endif
-                      @endif
                   @endif
                 @endif
               @endfor
           @endfor
+        <?php $cont += 1; ?>
+    @endfor
 
-          <?php $cont += 1; ?>
-      @endfor
+                @if ($kind2 == 1)
+                  <?php $cont = 1; //contador de riesgos ?>
+                  //controlado
+                  @for($k=0; $k < count($riesgos); $k++)
+                    @foreach ($sev as $s)
+                      @if (intval($prom_criticidad_ctrl[$k]) == $s)
 
-      
-      
+                          @if ($prom_proba_ctrl[$k] <= 0.05 && $prom_proba_ctrl[$k] >= 0)
+                              $('#{{($s)}}_1_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. &nbsp; &nbsp; Exposición efectiva al riesgo: {{ round($prom_proba_ctrl[$k],2) * $s }} &nbsp; &nbsp; Contribución acciones mitigantes: {{ intval((1-$prom_proba_ctrl[$k])*100) }}% &nbsp; &nbsp; Severidad: {{ $prom_criticidad_ctrl[$k] }}'>{{ $cont }}</span>");
+                          @elseif ($prom_proba_ctrl[$k] <= 0.15 && $prom_proba_ctrl[$k] > 0.05)
+                              $('#{{($s)}}_2_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. &nbsp; &nbsp; Exposición efectiva al riesgo: {{ round($prom_proba_ctrl[$k],2) * $s }} &nbsp; &nbsp; Contribución acciones mitigantes: {{ intval((1-$prom_proba_ctrl[$k])*100) }}% &nbsp; &nbsp; Severidad: {{ $prom_criticidad_ctrl[$k] }}'>{{ $cont }}</span>");
+                          @elseif ($prom_proba_ctrl[$k] <= 0.5 && $prom_proba_ctrl[$k] > 0.15)
+                              $('#{{($s)}}_3_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. &nbsp; &nbsp; Exposición efectiva al riesgo: {{ round($prom_proba_ctrl[$k],2) * $s }} &nbsp; &nbsp; Contribución acciones mitigantes: {{ intval((1-$prom_proba_ctrl[$k])*100) }}% &nbsp; &nbsp; Severidad: {{ $prom_criticidad_ctrl[$k] }}'>{{ $cont }}</span>");
+                          @elseif ($prom_proba_ctrl[$k] <= 1 && $prom_proba_ctrl[$k] > 0.5)
+                              $('#{{($s)}}_4_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. &nbsp; &nbsp; Exposición efectiva al riesgo: {{ round($prom_proba_ctrl[$k],2) * $s }} &nbsp; &nbsp; Contribución acciones mitigantes: {{ intval((1-$prom_proba_ctrl[$k])*100) }}% &nbsp; &nbsp; Severidad: {{ $prom_criticidad_ctrl[$k] }}'>{{ $cont }}</span>");
+                          @endif
+        
+                      @endif
+                    @endforeach
+                    <?php $cont += 1; ?>
+                  @endfor
+                @endif
+
   @endif
 
   $(function() {
@@ -396,7 +413,31 @@
     
  });
 
+$('#risk_category_id').change(function() {
 
+  if ($('#risk_category_id').val() != '')
+  {
+    $('#risk_subcategory_id').empty();
+    var options = '<option value="" selected disabled>- Seleccione -</option>'
+    //obtenemos todas las causas
+    $.get('get_subcategories.'+$('#risk_category_id').val(), function (result) {
+      //parseamos datos obtenidos
+      var datos = JSON.parse(result);
+
+      $(datos).each( function() {
+        options += '<option value='+this.id+'>'+this.name+'</option>';
+      });
+
+      $('#risk_subcategory_id').html(options)
+
+    });
+    
+  }
+  else
+  {
+    $('#risk_subcategory_id').html('')
+  }
+});
 
 </script>
 

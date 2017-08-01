@@ -12,7 +12,9 @@
         "laravelcollective/html": "5.1.*",
         "yajra/laravel-oci8": "5.1.*",
         "monolog/monolog": "^1.22",
-        "rap2hpoutre/laravel-log-viewer": "^0.10.0"
+        "rap2hpoutre/laravel-log-viewer": "^0.10.0",
+        "barryvdh/laravel-dompdf": "0.6.*",
+        "phpoffice/phpword": "v0.13.*"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

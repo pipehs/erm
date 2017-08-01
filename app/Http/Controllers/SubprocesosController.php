@@ -25,6 +25,8 @@ class SubprocesosController extends Controller
      * @return \Illuminate\Http\Response
      */
 
+    public $logger;
+    //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
     public function __construct()
     {
         $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
@@ -114,7 +116,7 @@ class SubprocesosController extends Controller
 
                 //$proceso = \Ermtool\Subprocess::find($subprocess['id'])->processes; No me funciono
                 $proceso = \Ermtool\Process::find($subprocess['process_id']);
-
+                
                 //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
                 $short_des = substr($subprocess['description'],0,100);
 
@@ -185,58 +187,66 @@ class SubprocesosController extends Controller
         }
         else
         {
-            DB::transaction(function()
-            {
-                $logger = $this->logger;
-                if($_POST['subprocess_id'] == NULL || $_POST['subprocess_id'] == '' || !isset($_POST['subprocess_id']))
-                {
-                    $subprocess_id = NULL;
-                }
-                else
-                {
-                    $subprocess_id = $_POST['subprocess_id'];
-                }
 
-                if (isset($_POST['expiration_date']) && $_POST['expiration_date'] != '')
+            try {
+
+                DB::transaction(function()
                 {
-                    $expiration_date = $_POST['expiration_date'];
-                }
-                else
-                {
-                    $expiration_date = NULL;
-                }
+                    $logger = $this->logger;
 
-                $new_subprocess = \Ermtool\Subprocess::create([
-                    'name' => $_POST['name'],
-                    'description' => $_POST['description'],
-                    'expiration_date' => $expiration_date,
-                    'process_id' => $_POST['process_id'],
-                    'subprocess_id' => $subprocess_id,
-                    ]);
-
-                //agregamos la relación a cada organización
-                    // primero obtenemos subproceso que acabamos de agregar   
-                    $subprocess = $new_subprocess->id;
-
-                    foreach ($_POST['organization_id'] as $organization_id)
+                    if($_POST['subprocess_id'] == NULL || $_POST['subprocess_id'] == '' || !isset($_POST['subprocess_id']))
                     {
-                        $organization = \Ermtool\Organization::find($organization_id);
-                        //agregamos la relación (para agregar en atributos)
-                        $organization->subprocesses()->attach($subprocess);
-                    }
-
-                    if (Session::get('languaje') == 'en')
-                    {
-                        Session::flash('message','Process successfully created');
+                        $subprocess_id = NULL;
                     }
                     else
                     {
-                        Session::flash('message','Subproceso agregado correctamente');
+                        $subprocess_id = $_POST['subprocess_id'];
                     }
 
-                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el subproceso con Id: '.$subprocess.' llamado: '.$new_subprocess->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
-            });
-            return Redirect::to('/subprocesos');
+                    if (isset($_POST['expiration_date']) && $_POST['expiration_date'] != '')
+                    {
+                        $expiration_date = $_POST['expiration_date'];
+                    }
+                    else
+                    {
+                        $expiration_date = NULL;
+                    }
+
+                    $new_subprocess = \Ermtool\Subprocess::create([
+                        'name' => $_POST['name'],
+                        'description' => $_POST['description'],
+                        'expiration_date' => $expiration_date,
+                        'process_id' => $_POST['process_id'],
+                        'subprocess_id' => $subprocess_id,
+                        ]);
+
+                    //agregamos la relación a cada organización
+                        // primero obtenemos subproceso que acabamos de agregar   
+                        $subprocess = $new_subprocess->id;
+
+                        foreach ($_POST['organization_id'] as $organization_id)
+                        {
+                            $organization = \Ermtool\Organization::find($organization_id);
+                            //agregamos la relación (para agregar en atributos)
+                            $organization->subprocesses()->attach($subprocess);
+                        }
+
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('message','Process successfully created');
+                        }
+                        else
+                        {
+                            Session::flash('message','Subproceso agregado correctamente');
+                        }
+
+                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el subproceso con Id: '.$subprocess.' llamado: '.$new_subprocess->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                });
+                return Redirect::to('/subprocesos');
+            } catch(\Exception $e) {
+                Session::flash('message','Subproceso no pudo agregarse. '.$e);
+                return Redirect::to('/subprocesos');
+            }
         }
     }
 
@@ -435,7 +445,6 @@ class SubprocesosController extends Controller
                 }
 
                 $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha desbloqueado el subproceso con Id: '.$GLOBALS['id1'].' llamado: '.$subproceso->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
-
             });
             return Redirect::to('/subprocesos');
         }
@@ -456,6 +465,7 @@ class SubprocesosController extends Controller
 
         DB::transaction(function() {
 
+            $logger = $this->logger;
             //vemos si es que tiene issues agregadas
             $rev = DB::table('issues')
                     ->where('subprocess_id','=',$GLOBALS['id1'])
@@ -473,7 +483,7 @@ class SubprocesosController extends Controller
                 if (empty($rev))
                 {
                         //ahora se puede eliminar, primero que todo se deben cambiar aquellos subprocesos que dependan de éste
-                    
+
                         //obtenemos nombre
                         $name = \Ermtool\Subprocess::name($GLOBALS['id1']);
 

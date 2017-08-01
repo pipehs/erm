@@ -236,15 +236,10 @@ class RiesgosController extends Controller
 
                 //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
                 $short_des = substr($riesgo->description,0,100);
-                //ACT 27-04-17: eliminamos saltos de línea
-                //$description = preg_replace('\n',' ',$riesgo->description);
-                //$description = preg_replace('\r',' ',$description);
-
-                $description = preg_replace("[\n|\r|\n\r]", ' ', $riesgo->description); 
 
                 $riesgos[$i] = array('id'=>$riesgo->id,
                                     'nombre'=>$riesgo->name,
-                                    'descripcion'=>$description,
+                                    'descripcion'=>$riesgo->description,
                                     'tipo'=>$tipo,
                                     'fecha_creacion'=>$fecha_creacion,
                                     'stakeholder'=>$stakeholder->name.' '.$stakeholder->surnames,
@@ -419,6 +414,8 @@ class RiesgosController extends Controller
                         {
                             $expiration_date = $_POST['expiration_date'];
                         }
+
+                        $description = eliminarSaltos($description);
 
                         $risk = \Ermtool\Risk::create([
                             'name'=>$_POST['name'],
@@ -744,7 +741,7 @@ class RiesgosController extends Controller
                     {
 
                         $new_causa = \Ermtool\Cause::create([
-                            'name'=>$_POST['causa']
+                            'name'=>$_POST['causa_nueva']
                         ]);
 
                         //guardamos en cause_risk
@@ -783,7 +780,7 @@ class RiesgosController extends Controller
                     {
 
                         $new_effect = \Ermtool\Effect::create([
-                            'name'=>$_POST['efecto']
+                            'name'=>$_POST['efecto_nuevo']
                             ]);
 
                          //guardamos en cause_risk
@@ -824,26 +821,31 @@ class RiesgosController extends Controller
                                 ->select('cause_id')
                                 ->get();
 
-                    foreach($causas as $cause)
+                    //ACTUALIZACIÓN 28-07-17: Hay que verificar que se estén seleccionando causas
+                    if (isset($_POST['cause_id']))
                     {
-                        $cont = 0; //si se mantiene en cero, nunca habrán sido iguales, por lo que significa que se habria borrado
-                        //ahora recorremos todas las causas que se agregaron para comparar
-                        foreach ($_POST['cause_id'] as $cause_add)
+                        foreach($causas as $cause)
                         {
-                            if ($cause_add == $cause->cause_id)
+                            $cont = 0; //si se mantiene en cero, nunca habrán sido iguales, por lo que significa que se habria borrado
+                            //ahora recorremos todas las causas que se agregaron para comparar
+                            foreach ($_POST['cause_id'] as $cause_add)
                             {
-                                $cont += 1;
+                                if ($cause_add == $cause->cause_id)
+                                {
+                                    $cont += 1;
+                                }
+                            }
+
+                            if ($cont == 0) //hay que eliminar la causa; por ahora solo la eliminaremos de cause_risk
+                            {
+                                DB::table('cause_risk')
+                                    ->where('risk_id','=',$riesgo->id)
+                                    ->where('cause_id','=',$cause->cause_id)
+                                    ->delete();
                             }
                         }
-
-                        if ($cont == 0) //hay que eliminar la causa; por ahora solo la eliminaremos de cause_risk
-                        {
-                            DB::table('cause_risk')
-                                ->where('risk_id','=',$riesgo->id)
-                                ->where('cause_id','=',$cause->cause_id)
-                                ->delete();
-                        }
                     }
+                    
 
                     //lo mismo ahora para efectos
                     $efectos = DB::table('effect_risk')
@@ -851,24 +853,28 @@ class RiesgosController extends Controller
                                 ->select('effect_id')
                                 ->get();
 
-                    foreach($efectos as $effect)
+                    //ACTUALIZACIÓN 28-07-17: Hay que verificar que se estén seleccionando efectos
+                    if (isset($_POST['effect_id']))
                     {
-                        $cont = 0; //si se mantiene en cero, nunca habrán sido iguales, por lo que significa que se habria borrado
-                        //ahora recorremos todas las causas que se agregaron para comparar
-                        foreach ($_POST['effect_id'] as $effect_add)
+                        foreach($efectos as $effect)
                         {
-                            if ($effect_add == $effect->effect_id)
+                            $cont = 0; //si se mantiene en cero, nunca habrán sido iguales, por lo que significa que se habria borrado
+                            //ahora recorremos todas las causas que se agregaron para comparar
+                            foreach ($_POST['effect_id'] as $effect_add)
                             {
-                                $cont += 1;
+                                if ($effect_add == $effect->effect_id)
+                                {
+                                    $cont += 1;
+                                }
                             }
-                        }
 
-                        if ($cont == 0) //hay que eliminar la causa; por ahora solo la eliminaremos de cause_risk
-                        {
-                            DB::table('effect_risk')
-                                ->where('risk_id','=',$riesgo->id)
-                                ->where('effect_id','=',$effect->effect_id)
-                                ->delete();
+                            if ($cont == 0) //hay que eliminar la causa; por ahora solo la eliminaremos de cause_risk
+                            {
+                                DB::table('effect_risk')
+                                    ->where('risk_id','=',$riesgo->id)
+                                    ->where('effect_id','=',$effect->effect_id)
+                                    ->delete();
+                            }
                         }
                     }
 
@@ -988,6 +994,8 @@ class RiesgosController extends Controller
                         $expiration_date = $_POST['expiration_date'];
                     }
 
+                    $description = eliminarSaltos($description);
+                    
                     $riesgo->name = $_POST['name'];
                     $riesgo->description = $description;
                     $riesgo->expiration_date = $expiration_date;
@@ -1310,7 +1318,7 @@ class RiesgosController extends Controller
                                     ->max('evaluations.updated_at');
 
                     //ACT 04-04-17: Sacamos guiones para SQL Server
-                    $fecha = str_replace('-','',$fecha);
+                    //$fecha = str_replace('-','',$fecha);
 
                     //obtenemos proba, impacto y score
                     $eval_risk = DB::table('evaluation_risk')
@@ -1485,7 +1493,7 @@ class RiesgosController extends Controller
                             }
                             else
                             {
-                                $datos[$i] = ['id' => $control->id,
+                                $datos[$i] = ['id' => $risk->id,
                                         'Process' => $procesos,
                                         'Subprocess' => $subprocesos,
                                         'Risk' => $risk->name,
@@ -1525,7 +1533,7 @@ class RiesgosController extends Controller
                             }
                             else
                             {
-                                $datos[$i] = ['id' => $control->id,
+                                $datos[$i] = ['id' => $risk->id,
                                             'Procesos' => $procesos,
                                             'Subprocesos' => $subprocesos,
                                             'Riesgo' => $risk->name,
@@ -1795,29 +1803,41 @@ class RiesgosController extends Controller
 
                                     //eliminamos de risk(s)_subprocess asociados (si es que hay)
                                     //ACTUALIZACIÓN 30-03: Por ahora los riesgos de proceso se eliminarán para todas las organizaciones, ya que un subproceso puede estar en muchas organizaciones
-                                    DB::table('risk_subprocess')
+
+                                    
+
+                                            //ACT 29-06-17: Debemos eliminar en organization_risk, risk_subprocess y/o objective_risk
+                                            //$revX = DB::table('organization_risk')
+                                            //        ->where('risk_id','=',$GLOBALS['id1'])
+                                            //        ->get();
+                                            //Seleccionamos subprocesos u objetivos que sean de la organización y se encuentre el riesgo
+
+                                    $risk_subprocesses = DB::table('risk_subprocess')
+                                                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                                                    ->where('organization_subprocess.organization_id','=',$GLOBALS['org'])
+                                                    ->select('risk_subprocess.id')
+                                                    ->get();
+
+                                    foreach ($risk_subprocesses as $r)
+                                    {
+                                        DB::table('risk_subprocess')        
+                                            ->where('risk_subprocess.id','=',$r->id)
+                                            ->delete();
+                                    }
+
+                                    DB::table('organization_risk')
+                                        ->where('organization_id','=',$GLOBALS['org'])
                                         ->where('risk_id','=',$GLOBALS['id1'])
                                         ->delete();
+                                    
+                                    //Ahora si podemos revisar si se puede eliminar lo demás (en caso de que el riesgo no exista para otras organizaciones)
 
-                                    //ACTUALIZACIÓN 30-03: Eliminaremos de la tabla de riesgos simplemente si es que no tiene ni organizaciones, ni objetivos ni subprocesos asociados
-                                    $revX = DB::table('risk_subprocess')
+                                    $revX = DB::table('organization_risk')
                                         ->where('risk_id','=',$GLOBALS['id1'])
-                                        ->get();
+                                        ->first();
 
                                     if (empty($revX))
                                     {
-                                        $revX = DB::table('objective_risk')
-                                            ->where('risk_id','=',$GLOBALS['id1'])
-                                            ->get();
-
-                                        if (empty($revX))
-                                        {
-                                            $revX = DB::table('organization_risk')
-                                                    ->where('risk_id','=',$GLOBALS['id1'])
-                                                    ->get();
-
-                                            if (empty($revX))
-                                            {
                                                 //Sólo de esta manera (vacío en todas partes), eliminamos el riesgo de la tabla risks
 
                                                 //eliminamos posibles causas asociadas
@@ -1830,21 +1850,14 @@ class RiesgosController extends Controller
                                                     ->where('risk_id','=',$GLOBALS['id1'])
                                                     ->delete();
 
-                                                //ACTUALIZACIÓN 29-03-17: Eliminamos de organization_risk
-                                                DB::table('organization_risk')
-                                                    ->where('risk_id','=',$GLOBALS['id1'])
-                                                    ->delete();
-
                                                 DB::table('risks')
                                                     ->where('id','=',$GLOBALS['id1'])
                                                     ->delete();
 
                                                 $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el riesgo con Id: '.$GLOBALS['id1'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
-                                            }
-                                        }
                                     }
 
-                                    $GLOBALS['res'] = 0;
+                            $GLOBALS['res'] = 0;
                         }
                                 
                     }

@@ -1304,3 +1304,27 @@ Route::get('error', function(){
 });
 
 Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
+
+Route::post('export_audit_graphics', [
+	'as' => 'export_audit_graphics', 'uses' => 'AuditoriasController@docxGraficos'
+]);
+
+Route::post('export_control_graphics', [
+	'as' => 'export_control_graphics', 'uses' => 'ControlesController@docxGraficos'
+]);
+
+Route::post('export_action_plan_graphics', [
+	'as' => 'export_action_plan_graphics', 'uses' => 'PlanesAccionController@docxGraficos'
+]);
+
+Route::get('reporte_personalizado', [
+	'as' => 'reporte_personalizado', 'uses' => 'WordController@index'
+]);
+
+Route::post('gentotalreport', [
+	'as' => 'gentotalreport', 'uses' => 'wordController@genReport'
+]);
+
+Route::get('get_subcategories.{cat_id}', [
+	'as' => 'get_subcategories', 'uses' => 'CategoriasRiesgosController@getSubCategories'
+]);

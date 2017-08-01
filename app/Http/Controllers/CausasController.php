@@ -141,12 +141,12 @@ class CausasController extends Controller
         else
         {
             $logger = $this->logger;
-            //Validación: Si la validación es pasada, el código continua
+
             $this->validate($request, [
                 'name' => 'unique:causes',
                 'description' => 'required',
             ]);
-
+            
             $cause = \Ermtool\Cause::create([
                 'name' => $request['name'],
                 'description' => $request['description'],
@@ -162,6 +162,7 @@ class CausasController extends Controller
             }
 
             $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado la causa con Id: '.$cause->id.' llamado: '.$cause->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             return Redirect::to('/causas');
         }
     }
@@ -215,7 +216,7 @@ class CausasController extends Controller
             ]);
 
             $logger = $this->logger;
-            
+
             $causa = \Ermtool\Cause::find($id);
 
             $causa->name = $request['name'];
@@ -247,7 +248,7 @@ class CausasController extends Controller
         else
         {
             $logger = $this->logger;
-            
+
             $causa = \Ermtool\Cause::find($id);
             $causa->status = 1;
             $causa->save();

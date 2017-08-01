@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes B&aacute;sicos</a></li>
+			<li><a href="#">Reportes</a></li>
 			<li><a href="graficos_controles">Gr&aacute;ficos Auditor&iacute;as</a></li>
 		</ol>
 	</div>
@@ -136,6 +136,51 @@
 	</div>
 </div>
 <!-- FIN Gráfico de pruebas de auditoría -->
+<div class="row">
+	<div class="col-xs-12 col-sm-12">
+		<div class="box">
+			<div class="box-header">
+				<div class="box-name">
+					<i class="fa fa-circle"></i>
+					<span>Exportar</span>
+				</div>
+				<div class="box-icons">
+					<a class="collapse-link">
+						<i class="fa fa-chevron-up"></i>
+					</a>
+					<a class="expand-link">
+						<i class="fa fa-expand"></i>
+					</a>
+					<a class="close-link">
+						<i class="fa fa-times"></i>
+					</a>
+				</div>
+				<div class="no-move"></div>
+			</div>
+			<div class="box-content">
+			<div id="cuerpo" style="display: none;">
+				<h1>Reporte de Auditorías</h1>
+				<div id="grafico1"></div>
+				<div id="grafico2"></div>
+			</div>
+			<div id="boton_exportar" style="display: none;">
+			{!!Form::open(['route'=>'export_audit_graphics','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::hidden('grafico1','',['id' => 'grafico12'])!!}
+				{!!Form::hidden('grafico2','',['id' => 'grafico22'])!!}
+				{!!Form::hidden('org',$org,['id' => 'org'])!!}
+				{!!Form::hidden('audit_plan','',['id' => 'audit_plan'])!!}
+				<div class="form-group">
+						<center>
+						{!!Form::submit('Exportar a Word', ['class'=>'btn btn-info'])!!}
+						</center>
+				</div>
+			{!!Form::close()!!}
+			</div>
+			</div>
+			</div>
+		</div>
+	</div>
+</div>
 @endif				
 
 @stop
@@ -144,6 +189,42 @@
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
 @if(isset($audit_plans))
+
+
+	$(document).ready(function() {
+		var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Descripción</th><th>Auditorías</th><th>Programas</th><th>Pruebas</th></thead>';
+
+					@foreach ($audit_plans as $plan)
+						@if ($plan['abiertas'] >= 0 && $plan['ejecucion'] == 0 && $plan['status'] == 0)
+
+							text += '<tr><td>{{$plan["name"]}}</td>';
+							text += '<td>{{$plan["description"]}}</td>';
+							text += '<td>';
+							@foreach ($plan['audits'] as $audit)
+								text += '<li>{{$audit}}</li>';
+							@endforeach
+							text += '</td>';
+
+							text += '<td>';
+							@foreach ($plan['programs'] as $program)
+								text += '<li>{{$program}}</li>';
+							@endforeach
+							text += '</td>';
+
+							text += '<td>';
+							@foreach ($plan['tests'] as $test)
+								text += '<li>{{$test}}</li>';
+							@endforeach
+							text += '</td></tr>';
+						@endif
+					@endforeach
+
+					text += '</table>'
+
+
+	});
+	
+
 	@if ($planes_ejec > 0 || $planes_abiertos > 0 || $planes_cerrados > 0)
       google.charts.load("visualization", "1", {packages:["corechart"]});
       google.charts.setOnLoadCallback(chart1);
@@ -162,7 +243,18 @@
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+
+        //agregamos imagen para reporte
+        var my_div = document.getElementById('grafico1');
+		google.visualization.events.addListener(chart, 'ready', function () {
+			my_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+			//console.log(my_div.innerHTML);
+		});
+
         chart.draw(data, options);
+
+        //guardamos imagen en form hidden para reporte
+        document.getElementById('grafico12').value = chart.getImageURI();
 
         //agregamos evento de click
         google.visualization.events.addListener(chart, 'select', clickHandler);
@@ -176,11 +268,11 @@
 				if (sel[0].row == 1) //planes abiertos
 				{
 					var title = '<b>Planes Abiertos</b>';
-
 					var text ='<table class="table table-striped table-datatable"><thead><th>Plan</th><th>Descripción</th><th>Auditorías</th><th>Programas</th><th>Pruebas</th></thead>';
 
 					@foreach ($audit_plans as $plan)
 						@if ($plan['abiertas'] >= 0 && $plan['ejecucion'] == 0 && $plan['status'] == 0)
+
 							text += '<tr><td>{{$plan["name"]}}</td>';
 							text += '<td>{{$plan["description"]}}</td>';
 							text += '<td>';
@@ -309,8 +401,10 @@
 $("#audit_plan_id").change(function() {
 	if ($("#audit_plan_id").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 	{
+		//asignamos valor de audit plan id
+		document.getElementById('audit_plan').value = $("#audit_plan_id").val();
 		//Añadimos la imagen de carga en el contenedor
-		$('#cargando').html('<div><center><img src="/bgrcdemo2/assets/img/loading.gif" width="19" height="19"/></center></div>');
+		$('#cargando').html('<div><center><img src="/bgrcdemo/assets/img/loading.gif" width="19" height="19"/></center></div>');
 		
 		//se obtienen datos de pruebas de auditoría para el plan seleccionado
 		$.get('auditorias.getpruebas.0,'+$("#audit_plan_id").val(), function (result) {
@@ -338,7 +432,19 @@ $("#audit_plan_id").change(function() {
 				        };
 
 				        var chart2 = new google.visualization.PieChart(document.getElementById('piechart2'));
+
+				        //agregamos imagen para reporte
+				        var my_div = document.getElementById('grafico2');
+						google.visualization.events.addListener(chart2, 'ready', function () {
+							my_div.innerHTML = '<img src="' + chart2.getImageURI() + '">';
+							//console.log(my_div.innerHTML);
+						});
 				        chart2.draw(data, options);
+
+				        //asignamos valores a variable hidden
+				        document.getElementById('grafico22').value = chart2.getImageURI();
+				        //hacemos visible botón exportar
+				        $('#boton_exportar').show(500);
 
 				        //agregamos evento de click
 				        google.visualization.events.addListener(chart2, 'select', clickHandler);
@@ -609,8 +715,12 @@ $("#audit_plan_id").change(function() {
 				}	
 		});
 	}
+	else
+	{
+		$('#boton_exportar').hide(500);
+	}
 });    
 
-@endif 
+@endif
 </script>
 @stop

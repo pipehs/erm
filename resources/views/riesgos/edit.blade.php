@@ -145,4 +145,6 @@
 		});
 
 </script>
+
+{!!Html::script('assets/js/create_edit_risks.js')!!}
 @stop

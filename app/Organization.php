@@ -9,18 +9,6 @@ use Carbon;
 
 class Organization extends Model
 {
-	public function getCreatedAtAttribute($date)
-    {
-        if(Auth::check())
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
-        else
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
-    }
-
-    public function getUpdatedAtAttribute($date)
-    {
-        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
-    }
     
     protected $fillable = ['name','description','expiration_date','shared_services','organization_id','status','mision','vision','target_client'];
 
@@ -147,5 +135,25 @@ class Organization extends Model
         }
 
         return $res;
+    }
+
+    public static function getFatherOrgName($org)
+    {
+        $father_org = DB::table('organizations')
+                    ->where('id','=',$org)
+                    ->select('organization_id as id')
+                    ->first();
+
+        if ($father_org != NULL && !empty($father_org))
+        {
+            $father_org_name = DB::table('organizations')->where('id', $father_org->id)->value('name');
+
+            return $father_org_name;
+        }
+        else
+        {
+            return NULL;
+        }
+        
     }
 }

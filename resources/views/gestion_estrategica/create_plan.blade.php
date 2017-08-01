@@ -53,6 +53,18 @@
 					</div>
 				</div>
 
+				@if (isset($father_org_name) && $father_org_name != NULL && $father_objectives != NULL && isset($father_objectives))
+					<div class="form-group">
+					<label class="col-sm-4 control-label">Seleccione los objetivos que desea heredar de {{ $father_org_name }}</label>
+						<div class="col-sm-3">
+						<select name="objectives_id[]" multiple id="el2">
+							@foreach ($father_objectives as $obj)
+								<option value="{{ $obj->id }}" selected>{{ $obj->code }} - {{ $obj->name }}</option>
+							@endforeach
+						</select>
+						</div>
+					</div>
+				@endif
 				<div class="form-group">
 					{!!Form::label('Comentarios',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">

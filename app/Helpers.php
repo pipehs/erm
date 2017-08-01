@@ -574,12 +574,12 @@ function eliminarArchivo($id,$kind,$name)
 	//Elimina evidencias de prueba (carpeta pruebas_auditoria)
 	if ($kind == 0)
 	{
-		$dir = "../storage/app/pruebas_auditoria/".$id;
+		$dir = "../../bgrcdemo2.ixus.cl/storage/app/pruebas_auditoria/".$id;
 	}
 	//Elimina evidencias de programa (carpeta programas_auditoria)
 	else if ($kind == 1)
 	{
-		$dir = "../storage/app/programas_auditoria/".$id;
+		$dir = "../../bgrcdemo2.ixus.cl/storage/app/programas_auditoria/".$id;
 	}
 	//Elimina evidencias de hallazgos (carpeta evidencias_hallazgos)
 	else if ($kind == 2)
@@ -593,7 +593,6 @@ function eliminarArchivo($id,$kind,$name)
 	else if ($kind == 4) //notas
 	{
 		$dir = "../storage/app/evidencias_notas/".$id;
-
 	}
 
 	else if ($kind == 5) //planes de acción
@@ -607,6 +606,10 @@ function eliminarArchivo($id,$kind,$name)
 	else if ($kind == 7) //respuestas de notas
 	{
 		$dir = "../storage/app/evidencias_resp_notas/".$id;
+	}
+	else if ($kind == 8) //evidencias para ejecución de pruebas de auditoría
+	{
+		$dir = "../storage/app/ejecucion_auditoria/".$id;
 	}
 	
 	if (file_exists($dir))

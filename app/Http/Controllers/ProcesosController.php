@@ -1,7 +1,6 @@
 <?php
 
 namespace Ermtool\Http\Controllers;
-
 use Illuminate\Http\Request;
 use Ermtool\Http\Requests;
 use Ermtool\Http\Controllers\Controller;
@@ -17,6 +16,10 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\FirePHPHandler;
 use Log;
 
+//$logger = new Logger('my_logger');
+//$logger->pushHandler(new StreamHandler(__DIR__.'/procesos.log', Logger::INFO));
+//$logger->pushHandler(new FirePHPHandler());
+
 class ProcesosController extends Controller
 {
     public $logger;
@@ -28,7 +31,6 @@ class ProcesosController extends Controller
         $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/procesos.log', Logger::INFO));
         $this->logger->pushHandler(new FirePHPHandler());
     }
-
     /**
      * Display a listing of the resource.
      *
@@ -103,8 +105,8 @@ class ProcesosController extends Controller
 
                 else
                 {
-                	//$fecha_creacion = date('d-m-Y',strtotime($process['created_at']));
-                	$lala = new DateTime($process['created_at']);
+                    //$fecha_creacion = date('d-m-Y',strtotime($process['created_at']));
+                    $lala = new DateTime($process['created_at']);
                     $fecha_creacion = date_format($lala,"d-m-Y");
                 }
 
@@ -122,9 +124,9 @@ class ProcesosController extends Controller
                 //damos formato a fecha de actualización 
                 if ($process['updated_at'] != NULL)
                 {
-                	$lala = new DateTime($process['updated_at']);
+                    $lala = new DateTime($process['updated_at']);
                     $fecha_act = date_format($lala,"d-m-Y");
-                	//$fecha_act = date('d-m-Y',strtotime($process['updated_at']));
+                    //$fecha_act = date('d-m-Y',strtotime($process['updated_at']));
                 }
 
                 else
@@ -215,12 +217,15 @@ class ProcesosController extends Controller
                 else
                     $process_id = NULL;
 
-                \Ermtool\Process::create([
+                $process = \Ermtool\Process::create([
                     'name' => $_POST['name'],
                     'description' => $_POST['description'],
                     'expiration_date' => $_POST['expiration_date'],
                     'process_id' => $process_id,
                     ]);
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el proceso con Id: '.$process->id.' llamado: '.$process->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
                 if (Session::get('languaje') == 'en')
                 {
                     Session::flash('message','Process successfully created');
@@ -229,8 +234,6 @@ class ProcesosController extends Controller
                 {
                     Session::flash('message','Proceso agregado correctamente');
                 }
-
-                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el proceso con Id: '.$process->id.' llamado: '.$process->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
 
             return Redirect::to('/procesos');
@@ -362,6 +365,7 @@ class ProcesosController extends Controller
             DB::transaction(function()
             {
                 $logger = $this->logger;
+
                 $proceso = \Ermtool\Process::find($GLOBALS['id1']);
                 $fecha_exp = NULL;
 
@@ -381,6 +385,9 @@ class ProcesosController extends Controller
                 $proceso->process_id = $process_id;
 
                 $proceso->save();
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el proceso con Id: '.$GLOBALS['id1'].' llamado: '.$proceso->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
                 if (Session::get('languaje') == 'en')
                 {
                     Session::flash('message','Process successfully updated');
@@ -389,8 +396,6 @@ class ProcesosController extends Controller
                 {
                     Session::flash('message','Proceso actualizado correctamente');
                 }
-
-                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el proceso con Id: '.$GLOBALS['id1'].' llamado: '.$proceso->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
             });
             return Redirect::to('/procesos');
@@ -434,7 +439,7 @@ class ProcesosController extends Controller
                     DB::table('processes')
                         ->where('process_id','=',$GLOBALS['id1'])
                         ->update(['process_id' => NULL]);
-                        
+
                     //obtenemos el nombre para guardar en log
                     $p = DB::table('processes')
                         ->where('id','=',$GLOBALS['id1'])

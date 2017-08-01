@@ -55,14 +55,12 @@
 @endforeach
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 	<thead>
-	<th>Nombre<label><input type='text' placeholder='Filtrar' /></label></th>
-	<th width="30%">Descripci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th width="10%">Nombre<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th width="20%">Descripci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Categor&iacute;a<label><input type='text' placeholder='Filtrar' /></label></th>
 	<th>Fecha Creaci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
-	<th>Fecha Actualizaci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
-	<th>Fecha Expiraci&oacute;n<label><input type='text' placeholder='Filtrar' /></label></th>
-	<th>Causa(s)<label><input type='text' placeholder='Filtrar' /></label></th>
-	<th>Efecto(s)<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th width="15%">Causa(s)<label><input type='text' placeholder='Filtrar' /></label></th>
+	<th width="15%">Efecto(s)<label><input type='text' placeholder='Filtrar' /></label></th>
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
 	<th style="vertical-align:top;">Acci&oacute;n</th>
@@ -93,18 +91,6 @@
 			<td>Error al registrar fecha de creaci&oacute;n</td>
 		@else
 			<td>{{$riesgo['fecha_creacion']}}</td>
-		@endif
-
-		@if ($riesgo['fecha_act'] == NULL)
-			<td>Error al registrar fecha de actualizaci&oacute;n</td>
-		@else
-			<td>{{$riesgo['fecha_act']}}</td>
-		@endif
-
-		@if ($riesgo['fecha_exp'] == NULL)
-			<td>Ninguna</td>
-		@else
-			<td>{{$riesgo['fecha_exp']}}</td>
 		@endif
 		<td>
 		@if (gettype($riesgo['causas']) == "array") 

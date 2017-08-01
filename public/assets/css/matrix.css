@@ -27,6 +27,19 @@ background-image:-ms-linear-gradient(right top, #f20505 33%, #c2f01d 75%,#0ccc16
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6bce0e', endColorstr='#db2a0f',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
 }
 
+/* Heatmap Coca Cola Andina¨*/
+.heatmap2{
+    width:100%;height:400px;
+    background: rgba(23,196,4,1);
+background: -moz-linear-gradient(45deg, rgba(23,196,4,1) 0%, rgba(23,196,4,1) 0%, rgba(23,196,4,1) 35%, rgba(240,228,93,1) 65%, rgba(240,47,23,1) 84%, rgba(246,41,12,1) 99%, rgba(231,56,39,1) 100%);
+background: -webkit-gradient(left bottom, right top, color-stop(0%, rgba(23,196,4,1)), color-stop(0%, rgba(23,196,4,1)), color-stop(35%, rgba(23,196,4,1)), color-stop(65%, rgba(240,228,93,1)), color-stop(84%, rgba(240,47,23,1)), color-stop(99%, rgba(246,41,12,1)), color-stop(100%, rgba(231,56,39,1)));
+background: -webkit-linear-gradient(45deg, rgba(23,196,4,1) 0%, rgba(23,196,4,1) 0%, rgba(23,196,4,1) 35%, rgba(240,228,93,1) 65%, rgba(240,47,23,1) 84%, rgba(246,41,12,1) 99%, rgba(231,56,39,1) 100%);
+background: -o-linear-gradient(45deg, rgba(23,196,4,1) 0%, rgba(23,196,4,1) 0%, rgba(23,196,4,1) 35%, rgba(240,228,93,1) 65%, rgba(240,47,23,1) 84%, rgba(246,41,12,1) 99%, rgba(231,56,39,1) 100%);
+background: -ms-linear-gradient(45deg, rgba(23,196,4,1) 0%, rgba(23,196,4,1) 0%, rgba(23,196,4,1) 35%, rgba(240,228,93,1) 65%, rgba(240,47,23,1) 84%, rgba(246,41,12,1) 99%, rgba(231,56,39,1) 100%);
+background: linear-gradient(45deg, rgba(23,196,4,1) 0%, rgba(23,196,4,1) 0%, rgba(23,196,4,1) 35%, rgba(240,228,93,1) 65%, rgba(240,47,23,1) 84%, rgba(246,41,12,1) 99%, rgba(231,56,39,1) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#17c404', endColorstr='#e73827', GradientType=1 );
+}
+
 /*Circulo para heatmap*/
 .circulo {
      width: 20px;
@@ -42,7 +55,7 @@ background-image:-ms-linear-gradient(right top, #f20505 33%, #c2f01d 75%,#0ccc16
     color: #ffffff;
     display: inline-block;
     font-weight: bold;
-    line-height: 1.8em;
+    line-height: 1.4em;
     font-size: 12px;
     text-align: center;
 

@@ -2,7 +2,7 @@ $("#audit").change(function() {
 			if ($("#audit").val() != '') //Si es que se ha seleccionado valor válido de auditoría
 			{
 				//Añadimos la imagen de carga en el contenedor
-					$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
+					$('#cargando').html('<div><center><img src="/bgrcdemo/assets/img/loading.gif" width="19" height="19"/></center></div>');
 				//se obtienen controles asociados a los riesgos presentes en el plan de prueba seleccionado
 					//primero obtenemos controles asociados a los riesgos de negocio
 
@@ -31,8 +31,8 @@ $("#audit").change(function() {
 										
 										var pruebas = '<div id="audit_tests_'+this.id+'" style="display: none;">';
 										pruebas += '<table class="table table-bordered table-striped table-hover table-heading table-datatable">';
-										pruebas += '<thead><th width="15%">Prueba</th><th width="20%">Descripci&oacute;n</th><th width="15%">Responsable</th><th>Estado</th>';
-										pruebas += '<th>Resultado</th></thead>';
+										pruebas += '<thead><th width="12%">Prueba</th><th width="20%">Descripci&oacute;n</th><th width="15%">Responsable</th><th width="13%">Estado</th>';
+										pruebas += '<th width="20%">Resultado</th></thead>';
 										$(this.audit_tests).each( function(i, test) {
 											audit_tests_id.push(this.id);
 											pruebas += '<tr><td>'+test.name+'</td>';
@@ -46,20 +46,21 @@ $("#audit").change(function() {
 											{
 												pruebas += '<td>'+test.stakeholder+'</td>';
 											}
-											
-											pruebas += '<td><div class="col-sm-8"><select class="form-control" name="status_'+test.id+'" id="status_'+test.id+'" onchange="result('+test.id+','+test.results+')">';
 
+											
 											if (test.status == 0)
 											{
+												pruebas += '<td><div class="col-sm-8"><select class="form-control" name="status_'+test.id+'" id="status_'+test.id+'" onchange=\'result('+test.id+','+test.results+',null,null,null)\'>';
 												pruebas += '<option value="0" selected>Abierta</option>';
 												pruebas += '<option value="2">Cerrada</option>';
 											}
 											else if (test.status == 2)
 											{
+												pruebas += '<td><div class="col-sm-8"><select class="form-control" name="status_'+test.id+'" id="status_'+test.id+'" onchange=\'result('+test.id+','+test.results+','+test.hh_real+',"'+test.comments+'","'+test.files+'")\'>';
 												pruebas += '<option value="0">Abierta</option>';
 												pruebas += '<option value="2" selected>Cerrada</option>';
 												//alert(activity.results);
-												pruebas += '<script>result('+test.id+','+test.results+','+test.hh_real+',"'+test.comments+'")</script>'
+												pruebas += '<script>result('+test.id+','+test.results+','+test.hh_real+',"'+test.comments+'","'+test.files+'")</script>'
 											}
 
 											//ACTUALIZACIÓN 02-11: Se eliminó resultado de prueba en ejecución (pero no de la base de datos para evitar inconsistencias),
@@ -120,27 +121,46 @@ function ocultar(id)
 
 //agrega select de resultado de una prueba (efectiva o inefectiva), en el caso de que ésta haya sido señalada como cerrada.
 //En caso de ser inefectiva, se debe agregar los campos para issue y para agregar evidencias
-function result(id,result,hh_real,comments)
+function result(id,result,hh_real,comments,files)
 {
+	if (files == 'undefined' || files == null || files == '')
+	{
+		filestemp = null
+	}
+	else
+	{
+		//dividimos files por la coma
+		filestemp = files.split(',')
+	}
+	
+
 	if ($("#status_"+id).val() == 2)
 	{
 		var resultado = '<div class="col-sm-8"><select class="form-control" name="test_result_'+id+'" id="test_result_'+id+'"';
-		resultado += 'onchange="testResult('+id+','+hh_real+')" required>';
+		if (comments == null)
+		{
+			resultado += 'onchange="testResult('+id+','+hh_real+',null)" required>';
+		}
+		else
+		{
+			resultado += 'onchange="testResult('+id+','+hh_real+',"'+comments+'")" required>';
+		}
+		
 
 		//seteamos resultado previo si es que existe
 		if (result == 0)
 		{
 			resultado += '<option value="">- Seleccione resultado -</option>';
 			resultado += '<option value="0" selected>Inefectiva</option>';
-			resultado += '<option value="1">Efectiva</option></div>';
+			resultado += '<option value="1">Efectiva</option>';
 
-			resultado += '<script>testResult('+id+','+hh_real+');</script>';
+			resultado += '<script>testResult('+id+','+hh_real+',"");</script>';
 		}
 		else if (result == 1)
 		{
 			resultado += '<option value="">- Seleccione resultado -</option>';
 			resultado += '<option value="0">Inefectiva</option>';
-			resultado += '<option value="1" selected>Efectiva</option></div>';
+			resultado += '<option value="1" selected>Efectiva</option>';
 
 			resultado += '<script>testResult('+id+','+hh_real+',"'+comments+'");</script>';
 		}
@@ -153,6 +173,73 @@ function result(id,result,hh_real,comments)
 
 		resultado += '</select>';
 		resultado += '<div id="issues_'+id+'" class="col-sm-12"></div>'
+
+		if (filestemp != null)
+		{
+			resultado += '<div class="col-sm-6 control-label"></br>';
+			resultado += '<label><b>Docs. de trabajo</b></label></div>';
+			$(filestemp).each( function(i,file) {
+
+				filetemp = file.split('.')
+				filename = filetemp[0].split('/')
+				filename = filename[2]
+
+				resultado += '<div class="col-sm-6 control-label"></br>';
+				resultado += '<label></label></div>';
+				resultado += '<div class="col-sm-6">'
+
+				if (filetemp[1] == 'jpg' || filetemp[1] == 'jpeg' || filetemp[1] == 'JPG')
+				{
+					resultado += '<div class="col-sm-6"><a href="../storage/app/'+file+'" download><img src="assets/img/jpg.png" width="30" height="30" />'+filename+'</a></div>'
+				}
+				else if (filetemp[1] == 'pdf')
+				{
+
+					resultado += '<div class="col-sm-6"><a href="/bgrcdemo/storage/app/'+file+'" download><img src="assets/img/pdf.png" width="30" height="30" />'+filename+'</a></div>'
+				}
+				else if (filetemp[1] == 'doc' || filetemp[1] == 'docx')
+				{
+					resultado += '<div class="col-sm-6"><a href="../storage/app/'+file+'" download><img src="assets/img/word.png" width="30" height="30" />'+filename+'</a></div>'
+				}
+				else if (filetemp[1] == 'xls' || filetemp[1] == 'xlsx')
+				{
+					resultado += '<div class="col-sm-6"><a href="../storage/app/'+file+'" download><img src="assets/img/excel.png" width="30" height="30" />'+filename+'</a></div>'
+				}
+				else if (filetemp[1] == 'ppt' || filetemp[1] == 'pptx')
+				{
+					resultado += '<div class="col-sm-6"><a href="../storage/app/'+file+'" download><img src="assets/img/powerpoint.png" width="30" height="30" />'+filename+'</a></div>'
+				}
+				else if (filetemp[1] == 'png' || filetemp[1] == 'PNG')
+				{
+					resultado += '<div class="col-sm-6"><a href="../storage/app/'+file+'" download><img src="assets/img/png.png" width="30" height="30" />'+filename+'</a></div>'
+				}
+				else
+				{
+					resultado += '<div class="col-sm-6"><a href="../storage/app/'+file+'" download><img src="assets/img/desconocido.png" width="30" height="30" />'+filename+'</a></div>'
+				}
+
+				if (rol == 1)
+				{
+					resultado += '<img src="assets/img/btn_eliminar2.png" style="width:20px; height:20px;" onclick="eliminar_ev('+id+',8,\''+filename+'\')"><br/>'
+				}
+				
+
+				resultado += '</div>'
+			});
+		}
+		
+
+		resultado += '<br><br>'
+		
+		//resultado += '<label for="file" class="col-sm-2 control-label">Opcionalmente, puede cargar documentos</label>'
+		resultado += '<div class="col-sm-2"><br>'
+		resultado += '<input id="file-1" type="file" class="file" name="evidence_doc_'+id+'[]" multiple=true data-preview-file-type="any">'
+		resultado += '</div>'
+
+		resultado += '<div class="col-sm-2"><br><br><br>'
+		resultado += '<input class="btn btn-success" id="btn_guardar" type="submit" value="Guardar">'
+		resultado += '</div>'
+
 		$("#results_"+id).append(resultado);
 		$("#results_"+id).show(500);
 	}
@@ -169,7 +256,7 @@ contador = 0;
 //ACTUALIZACIÓN 24-05-17: Agregamos comentarios en caso de ser efectiva 
 function testResult(id,hh,comments)
 {
-	if (hh != undefined)
+	if (hh != undefined && hh != "null")
 	{
 		resultado = '</br><div class="col-sm-6 control-label"><label for="hh_real_'+id+'"><b>HH utilizadas</b></label></div><div class="col-sm-6"><input type="text" name="hh_real_'+id+'" class="form-control" value="'+hh+'"></input></div>'
 	}
@@ -201,6 +288,8 @@ function testResult(id,hh,comments)
 		{
 			resultado += '<textarea name="comments_'+id+'" class="form-control"></textarea>';
 		}
+
+		resultado += '</div>';
 
 		$("#issues_"+id).append(resultado);
 	}

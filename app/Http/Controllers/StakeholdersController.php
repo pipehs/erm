@@ -30,8 +30,8 @@ class StakeholdersController extends Controller
     public function __construct()
     {
         $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
-        $this->logger = new Logger('roles');
-        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/roles.log', Logger::INFO));
+        $this->logger = new Logger('usuarios');
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/usuarios.log', Logger::INFO));
         $this->logger->pushHandler(new FirePHPHandler());
     }
 
@@ -206,21 +206,21 @@ class StakeholdersController extends Controller
                     {
                         $pos = $_POST['position'];
                     }
-
+                    /*
                     DB::statement("
                         SET IDENTITY_INSERT stakeholders ON;
                         insert into stakeholders
                         (id, dv, name, surnames, mail, position, updated_at, created_at) 
-                        values (".$_POST["id"].",'".$_POST['dv']."','".$_POST['name']."','".$_POST['surnames']."','".$_POST['mail']."','".$pos."','".date("Ymd H:i:s")."','".date("Ymd H:i:s")."')");
+                        values (".$_POST["id"].",'".$_POST['dv']."','".$_POST['name']."','".$_POST['surnames']."','".$_POST['mail']."','".$pos."','".date("Ymd H:i:s")."','".date("Ymd H:i:s")."')"); */
 
-                    /*\Ermtool\Stakeholder::create([
+                    $usuario = \Ermtool\Stakeholder::create([
                         'id' => $_POST['id'],
                         'dv' => $_POST['dv'],
                         'name' => $_POST['name'],
                         'surnames' => $_POST['surnames'],
                         'position' => $_POST['position'],
                         'mail' => $_POST['mail']
-                        ]);*/
+                        ]);
 
                     //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
                     foreach($_POST['organization_id'] as $organization_id)
@@ -372,11 +372,12 @@ class StakeholdersController extends Controller
         }
         else
         {
-            $logger = $this->logger;
             global $id1;
             $id1 = $id;
             DB::transaction(function()
             {
+                $logger = $this->logger;
+
                 $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
 
                 $stakeholder->name = $_POST['name'];
@@ -451,11 +452,12 @@ class StakeholdersController extends Controller
         }
         else
         {
+            $logger = $this->logger;
+
             global $id1;
             $id1 = $id;
             DB::transaction(function()
             {
-                $logger = $this->logger;
                 $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
                 $stakeholder->status = 1;
                 $stakeholder->save();
@@ -470,7 +472,6 @@ class StakeholdersController extends Controller
                 }
 
                 $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado el usuario (stakeholder) con Rut: '.$GLOBALS['id1'].' llamado: '.$stakeholder->name.' '.$stakeholder->surnames.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
-
             });
             return Redirect::to('/stakeholders');
         }
@@ -489,6 +490,7 @@ class StakeholdersController extends Controller
             DB::transaction(function()
             {
                 $logger = $this->logger;
+
                 $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
                 $stakeholder->status = 0;
                 $stakeholder->save();
@@ -502,6 +504,7 @@ class StakeholdersController extends Controller
                 }
 
                 $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha desbloqueado el usuario (stakeholder) con Rut: '.$GLOBALS['id1'].' llamado: '.$stakeholder->name.' '.$stakeholder->surnames.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             });
             return Redirect::to('/stakeholders');
         }

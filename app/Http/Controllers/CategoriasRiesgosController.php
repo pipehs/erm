@@ -33,7 +33,7 @@ class CategoriasRiesgosController extends Controller
         $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/categorias_riesgos.log', Logger::INFO));
         $this->logger->pushHandler(new FirePHPHandler());
     }
-    
+
     public function index()
     {
         if (Auth::guest())
@@ -396,5 +396,15 @@ class CategoriasRiesgosController extends Controller
         });
         
         return $res;
+    }
+
+    public function getSubCategories($risk_category_id)
+    {
+        $cat = DB::table('risk_categories')
+                    ->where('risk_category_id','=',$risk_category_id)
+                    ->select('id','name')
+                    ->get();
+
+        return json_encode($cat);
     }
 }

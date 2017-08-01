@@ -9,6 +9,7 @@ td {
 	vertical-align:top;
 }
 </style>
+
 <!-- header menu de arbol -->
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
@@ -87,6 +88,39 @@ td {
 {!!Html::script('assets/js/descargar.js')!!}
 
 <script>
+
+$(document).ready(function () {
+	rol = 0; //para ver si puede eliminar archivos o no
+	@foreach (Session::get('roles') as $role)
+		@if ($role == 1)
+			rol = 1
+			<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+		@endif
+	@endforeach
+
+	@if (Session::has('org_id'))
+		setTimeout(organizations, 0)
+		setTimeout(audit_plans,1000)
+		setTimeout(audits,2000)	
+	@endif
+});
+
+function organizations()
+{
+	$("#organizations").val({{Session::get('org_id')}});
+	$("#organizations").change();
+}
+function audit_plans()
+{
+	$("#audit_plans").val({{Session::get('audit_plan_id')}});
+	$("#audit_plans").change();
+}
+function audits()
+{
+	$("#audit").val({{Session::get('audit_id')}});
+	$("#audit").change();
+}
+
 function gestionarHallazgos(id)
 {
 	@if(Session::has('message'))

@@ -9,8 +9,8 @@
 			<div class="box">
 				<div class="box-content">
 					<div class="text-center">
-						<img src="assets/img/CocaCola/coca_andina.png" title="Coca Cola Andina" width="300px" height="80px"></img>
-						<img src="assets/img/logoCompleto.PNG" title="Bussiness Governance and Risk Compliance"></img>
+						<img src="assets/img/CocaCola/coca_andina.png" title="Coca Cola Andina" width="240px" height="60px"></img>
+						<img src="assets/img/logoCompleto.PNG" title="Bussiness Governance and Risk Compliance" width="250px" height="80px"></img>
 						<h3 class="page-header">Business, Governance, Risk and Compliance</h3>
 					</div>
 					

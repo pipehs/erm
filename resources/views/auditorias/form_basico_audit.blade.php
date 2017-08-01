@@ -8,7 +8,7 @@
 	<div class="form-group">
 		{!!Form::label('Plan de auditor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
 		<div class="col-sm-4">
-			<select id="audit_plans" required>
+			<select id="audit_plans" name="audit_plans" required>
 				<!-- Aquí se agregarán los planes de auditoría pertenecientes a la organización a través de Jquery -->
 			</select>
 		</div>

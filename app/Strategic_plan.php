@@ -9,18 +9,6 @@ use Carbon;
 
 class Strategic_plan extends Model
 {
-    public function getCreatedAtAttribute($date)
-    {
-        if(Auth::check())
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
-        else
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
-    }
-
-    public function getUpdatedAtAttribute($date)
-    {
-        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
-    }
     
     protected $fillable = ['name','comments','initial_date','status'];
 
@@ -36,6 +24,16 @@ class Strategic_plan extends Model
     {
     	$res = DB::table('strategic_plans')->where('id', $id)->value('name');
     	return $res;
+    }
+
+    //obtiene plan estratégico vigente de organización
+    public static function getActivePlan($org)
+    {
+        return DB::table('strategic_plans')
+                ->where('organization_id','=',$org)
+                ->where('status','=',1)
+                ->select('id','name','comments','initial_date','final_date')
+                ->first();
     }
 
 }

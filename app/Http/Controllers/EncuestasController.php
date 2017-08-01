@@ -41,7 +41,7 @@ class EncuestasController extends Controller
 
                         We send to you the following poll for the identification of risk events. Answer each one of the questions associated to the poll. To answer it you have to access to the following link:
 
-                        http://10.0.0.2:100/identificacion.encuesta.{$id}
+                        http://www.ixus.cl/bgrc/identificacion.encuesta.{$id}
 
                         Best Regards,
                         Administration.";
@@ -55,7 +55,7 @@ class EncuestasController extends Controller
                     Responda cada una de las preguntas asociadas a la encuesta. 
                     Para responderla deberá acceder al siguiente link.
 
-                    http://10.0.0.2:100/identificacion.encuesta.{$id}
+                    http://www.ixus.cl/bgrc/identificacion.encuesta.{$id}
 
                     Saludos cordiales,
                     Administrador.";
@@ -398,7 +398,7 @@ class EncuestasController extends Controller
                             ->insert([
                                 'stakeholder_id' => $stakeholder->id,
                                 'poll_id' => $request['poll_id'],
-                                'created_at' => date('Ymd H:i:s'),
+                                'created_at' => date('Y-m-d H:i:s'),
                                 ]);
 
                         $correos[$i] = $stakeholder->mail;
@@ -450,7 +450,7 @@ class EncuestasController extends Controller
                                 ->insert([
                                     'stakeholder_id' => $stakeholder->id,
                                     'poll_id' => $request['poll_id'],
-                                    'created_at' => date('Ymd H:i:s'),
+                                    'created_at' => date('Y-m-d H:i:s'),
                                     ]);
 
                             $correos[$i] = $stakeholder->mail;
@@ -503,7 +503,7 @@ class EncuestasController extends Controller
                                 ->insert([
                                     'stakeholder_id' => $stakeholder->id,
                                     'poll_id' => $request['poll_id'],
-                                    'created_at' => date('Ymd H:i:s'),
+                                    'created_at' => date('Y-m-d H:i:s'),
                                     ]);
 
                             $correos[$i] = $stakeholder->mail;
@@ -606,6 +606,7 @@ class EncuestasController extends Controller
     {
         DB::transaction(function() {
             $logger = $this->logger;
+
             if (isset($_POST['pregunta_id'])) //para verificar en caso de que sea una encuesta sin preguntas (mal hecha)
             {
                 foreach ($_POST['pregunta_id'] as $pregunta_id) //vemos cada pregunta
@@ -683,6 +684,7 @@ class EncuestasController extends Controller
                     Session::flash('error','No se puede responder una encuesta sin preguntas');
                 }
             }
+             
         });
         
         if (Session::get('languaje') == 'en')
@@ -700,9 +702,7 @@ class EncuestasController extends Controller
     {
 
         DB::transaction(function () {
-
             $logger = $this->logger;
-
                 foreach ($_POST['pregunta_id'] as $pregunta_id) //vemos cada pregunta
                 {
                     if (gettype($_POST['respuesta'.$pregunta_id]) == "array") //vemos si la respuesta es un array (caso de checkbox)

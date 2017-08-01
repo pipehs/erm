@@ -7,18 +7,6 @@ use Carbon;
 
 class Audit_plan extends Model
 {
-    public function getCreatedAtAttribute($date)
-    {
-        if(Auth::check())
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
-        else
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
-    }
-
-    public function getUpdatedAtAttribute($date)
-    {
-        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
-    }
     
     protected $fillable = ['name','description','objectives','scopes','status','resources','methodology','initial_date','final_date','rules','hh'];
     public function stakeholders()
@@ -65,6 +53,15 @@ class Audit_plan extends Model
                 ->where('audits.id','=',$audit_id)
                 ->where('audit_plans.organization_id','=',$org)
                 ->select('audit_plans.id','audit_plans.name','audit_plans.description')
+                ->get();
+    }
+
+    public static function getPlanes($org)
+    {
+        return DB::table('audit_plans')
+                ->where('organization_id','=',$org)
+                ->where('status','=',0)
+                ->select('*')
                 ->get();
     }
 }

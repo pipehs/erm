@@ -60,11 +60,13 @@
 		<th>Riesgo(s)</th>
 		<th width="12%">Objetivo(s)</th>
 		<th>Tipo Control</th>
-		<th>Fecha Agregado</th>
 		<th>Responsable del Control</th>
 		<th>Evidencia</th>
 		<th>Prop&oacute;sito</th>
 		<th>Costo esperado</th>
+		@if (isset($cocacola))
+			<th>% de contribuci&oacute;n</th>
+		@endif
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 		<th>Acci&oacute;n</th>
@@ -111,8 +113,7 @@
 				@else
 					No se ha definido
 				@endif	
-				</td>
-				<td>{{ $control['created_at'] }}</td>			
+				</td>			
 				<td>
 				@if ($control['stakeholder'])
 					{{ $control['stakeholder'] }}
@@ -145,6 +146,16 @@
 					{{ $control['expected_cost'] }}
 				@endif
 				</td>
+
+				@if (isset($cocacola))
+					<td>
+					@if ($control['porcentaje_cont'] === NULL)
+						No se ha definido
+					@else
+						{{ $control['porcentaje_cont'] }} %
+					@endif
+					</td>
+				@endif
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)	
 				<td>{!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'].'.'.$org_id, $attributes = ['class'=>'btn btn-success']) !!}</td>
@@ -170,11 +181,13 @@
 		<th>Riesgo(s)</th>
 		<th>Subproceso(s)</th>
 		<th>Tipo Control</th>
-		<th>Fecha Agregado</th>
 		<th>Responsable del Control</th>
 		<th>Evidencia</th>
 		<th>Prop&oacute;sito</th>
 		<th>Costo esperado</th>
+		@if (isset($cocacola))
+			<th>% de contribuci&oacute;n</th>
+		@endif
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 		<th>Acci&oacute;n</th>
@@ -222,7 +235,6 @@
 					No se ha definido
 				@endif
 				</td>
-				<td>{{ $control['created_at'] }}</td>
 				
 				<td>
 				@if ($control['stakeholder'])
@@ -256,6 +268,16 @@
 					{{ $control['expected_cost'] }}
 				@endif
 				</td>
+
+				@if (isset($cocacola))
+					<td>
+					@if ($control['porcentaje_cont'] === NULL)
+						No se ha definido
+					@else
+						{{ $control['porcentaje_cont'] }} %
+					@endif
+					</td>
+				@endif
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)	
 				<td>{!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'].'.'.$org_id, $attributes = ['class'=>'btn btn-success']) !!}</td>

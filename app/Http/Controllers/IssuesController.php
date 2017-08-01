@@ -211,9 +211,7 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations,
-                        'short_des' => $short_des,
-                        'short_rec' => $short_rec
+                        'recommendations' => $issue->recommendations
                     ];
 
                     $i += 1; 
@@ -257,9 +255,7 @@ class IssuesController extends Controller
                             'name' => $issue->name,
                             'description' => $issue->description,
                             'classification' => $issue->classification,
-                            'recommendations' => $issue->recommendations,
-                            'short_des' => $short_des,
-                            'short_rec' => $short_rec
+                            'recommendations' => $issue->recommendations
                         ];
 
                         $i += 1; 
@@ -297,9 +293,6 @@ class IssuesController extends Controller
 
                 foreach ($issues2 as $issue)
                 {
-                    $short_des = substr($issue->description,0,100);
-                    $short_rec = substr($issue->recommendations,0,100);
-
                     $issues[$i] = [
                         'element_id' => $control->id,
                         'control' => $control->name,
@@ -308,9 +301,7 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations,
-                        'short_des' => $short_des,
-                        'short_rec' => $short_rec
+                        'recommendations' => $issue->recommendations
                     ];
 
                     $i += 1; 
@@ -337,9 +328,6 @@ class IssuesController extends Controller
 
                 foreach ($issues2 as $issue)
                 {
-                    $short_des = substr($issue->description,0,100);
-                    $short_rec = substr($issue->recommendations,0,100);
-
                     $issues[$i] = [
                         'element_id' => $control->id,
                         'control' => $control->name,
@@ -348,9 +336,7 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations,
-                        'short_des' => $short_des,
-                        'short_rec' => $short_rec
+                        'recommendations' => $issue->recommendations
                     ];
 
                     $i += 1; 
@@ -377,9 +363,6 @@ class IssuesController extends Controller
 
                 foreach ($issues2 as $issue)
                 {
-                    $short_des = substr($issue->description,0,100);
-                    $short_rec = substr($issue->recommendations,0,100);
-
                     $issues[$i] = [
                         'element_id' => $audit_program->id,
                         'audit_program' => $audit_program->name,
@@ -388,9 +371,7 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations,
-                        'short_des' => $short_des,
-                        'short_rec' => $short_rec
+                        'recommendations' => $issue->recommendations
                     ];
 
                     $i += 1; 
@@ -418,9 +399,6 @@ class IssuesController extends Controller
 
                 foreach ($issues2 as $issue)
                 {
-                    $short_des = substr($issue->description,0,100);
-                    $short_rec = substr($issue->recommendations,0,100);
-
                     $issues[$i] = [
                         'element_id' => $audit->id,
                         'audit' => $audit->name,
@@ -429,9 +407,7 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations,
-                        'short_des' => $short_des,
-                        'short_rec' => $short_rec
+                        'recommendations' => $issue->recommendations
                     ];
 
                     $i += 1; 
@@ -459,9 +435,6 @@ class IssuesController extends Controller
 
                 foreach ($issues2 as $issue)
                 {
-                    $short_des = substr($issue->description,0,100);
-                    $short_rec = substr($issue->recommendations,0,100);
-
                     $issues[$i] = [
                         'element_id' => $test->id,
                         'audit_test' => $test->name,
@@ -470,9 +443,7 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations,
-                        'short_des' => $short_des,
-                        'short_rec' => $short_rec
+                        'recommendations' => $issue->recommendations
                     ];
 
                     $i += 1; 
@@ -552,6 +523,8 @@ class IssuesController extends Controller
                 $origin = Issue::getOrigin($kind,$issue['element_id'],$org_id);
 
                 $short_plan = substr($temp['plan'],0,100);
+                $short_des = substr($issue['description'],0,100);
+                $short_rec = substr($temp['recommendations'],0,100);
 
                 $issues[$i] = [
                     'id' => $temp['id'],
@@ -565,8 +538,8 @@ class IssuesController extends Controller
                     'final_date' => $temp['final_date'],
                     'datos' => $datos,
                     'description' => $issue['description'],
-                    'short_des' => $issue['short_des'],
-                    'short_rec' => $issue['short_rec'],
+                    'short_des' => $short_des,
+                    'short_rec' => $short_rec,
                     'short_plan' => $short_plan
                 ];
             }
@@ -1479,6 +1452,7 @@ class IssuesController extends Controller
                 if (isset($_POST['description']))
                 {
                     $description = $_POST['description'];
+
                     $description = eliminarSaltos($description);
                 }
                 else
@@ -1515,8 +1489,8 @@ class IssuesController extends Controller
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
                                     'process_id' => $_POST['process_id'],
-                                    'created_at' => date('Ymd H:i:s'),
-                                    'updated_at' => date('Ymd H:i:s'),
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
                                 ]);
                     }
                     else if ($_POST['kind'] == 1) //hallazgo de subproceso
@@ -1528,8 +1502,8 @@ class IssuesController extends Controller
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
                                     'subprocess_id' => $_POST['subprocess_id'],
-                                    'created_at' => date('Ymd H:i:s'),
-                                    'updated_at' => date('Ymd H:i:s'),
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
                                 ]);
                     }
                     else if ($_POST['kind'] == 2) //hallazgo de organización
@@ -1541,8 +1515,8 @@ class IssuesController extends Controller
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
                                     'organization_id' => $_POST['org_id'],
-                                    'created_at' => date('Ymd H:i:s'),
-                                    'updated_at' => date('Ymd H:i:s'),
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
                                 ]);
                     }
                     else if ($_POST['kind'] == 3 || $_POST['kind'] == 4) //hallazgo de controles
@@ -1554,8 +1528,8 @@ class IssuesController extends Controller
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
                                     'control_id' => $_POST['control_id'],
-                                    'created_at' => date('Ymd H:i:s'),
-                                    'updated_at' => date('Ymd H:i:s'),
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
                                 ]);
                     }
                     else if ($_POST['kind'] == 5) //hallazgo de programa de auditoría
@@ -1567,8 +1541,8 @@ class IssuesController extends Controller
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
                                     'audit_audit_plan_audit_program_id' => $_POST['audit_audit_plan_audit_program_id'],
-                                    'created_at' => date('Ymd H:i:s'),
-                                    'updated_at' => date('Ymd H:i:s'),
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
                                 ]);
                     }
                     else if ($_POST['kind'] == 6) //hallazgo de auditoría
@@ -1580,8 +1554,8 @@ class IssuesController extends Controller
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
                                     'audit_audit_plan_id' => $_POST['audit_audit_plan_id'],
-                                    'created_at' => date('Ymd H:i:s'),
-                                    'updated_at' => date('Ymd H:i:s'),
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s'),
                                 ]);
                     }
                 }
@@ -1594,8 +1568,8 @@ class IssuesController extends Controller
                                 'recommendations' => $recommendations,
                                 'classification' => $classification,
                                 'audit_test_id' => $_POST['test_id'],
-                                'created_at' => date('Ymd H:i:s'),
-                                'updated_at' => date('Ymd H:i:s'),
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
                             ]);
                 }
                 else if (isset($_POST['evaluation_id'])) //es un hallazgo de control
@@ -1607,8 +1581,8 @@ class IssuesController extends Controller
                                 'recommendations' => $recommendations,
                                 'classification' => $classification,
                                 'control_evaluation_id' => $_POST['evaluation_id'],
-                                'created_at' => date('Ymd H:i:s'),
-                                'updated_at' => date('Ymd H:i:s'),
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s'),
                             ]);
                 }
 
@@ -1690,7 +1664,7 @@ class IssuesController extends Controller
 
                 $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha generado el hallazgo con Id: '.$issue.' llamado: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
             });
-
+            
             if (isset($_POST['kind']))
             {
                 return Redirect::to('hallazgos_lista?organization_id='.$_POST['organization_id'].'&kind='.$_POST['kind']);
@@ -1699,6 +1673,7 @@ class IssuesController extends Controller
             {
                 return Redirect::to('hallazgos');
             }
+            
         }
     }
 
@@ -1901,6 +1876,7 @@ class IssuesController extends Controller
                 if (isset($_POST['description']) AND $_POST['description'] != "")
                 {
                     $description = $_POST['description'];
+                    $description = eliminarSaltos($description);
                 }
                 else
                 {
@@ -1910,6 +1886,7 @@ class IssuesController extends Controller
                 if (isset($_POST['recommendations']) AND $_POST['recommendations'] != "")
                 {
                     $recommendations = $_POST['recommendations'];
+                    $recommendations = eliminarSaltos($recommendations);
                 }
                 else
                 {
@@ -1930,7 +1907,7 @@ class IssuesController extends Controller
                         'description' => $description,
                         'recommendations' => $recommendations,
                         'classification' => $classification,
-                        'updated_at' => date('Ymd H:i:s')
+                        'updated_at' => date('Y-m-d H:i:s')
                     ]);
                 
                 $id_action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($GLOBALS['id2']);
@@ -1946,7 +1923,7 @@ class IssuesController extends Controller
                             'stakeholder_id' => $stakeholder_id,
                             'final_date' => $final_date,
                             'status' => $status,
-                            'updated_at' => date('Ymd H:i:s')
+                            'updated_at' => date('Y-m-d H:i:s')
                         ]);
                 }
                 else
@@ -1958,7 +1935,7 @@ class IssuesController extends Controller
                                             'stakeholder_id' => $stakeholder_id,
                                             'final_date' => $final_date,
                                             'status' => $status,
-                                            'updated_at' => date('Ymd H:i:s')
+                                            'updated_at' => date('Y-m-d H:i:s')
                                         ]);
                 }
                 
@@ -2004,9 +1981,13 @@ class IssuesController extends Controller
             {
                 return Redirect::to('hallazgos_test.'.$_POST['test_id']);
             }
+            else if (isset($_POST['kind']))
+            {
+                return Redirect::to('hallazgos_lista?organization_id='.$_POST['organization_id'].'&kind='.$_POST['kind']);
+            }
             else
             {
-                return Redirect::to('hallazgos');   
+                return Redirect::to('hallazgos');
             }
             
         }

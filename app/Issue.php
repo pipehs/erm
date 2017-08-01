@@ -9,20 +9,8 @@ use Carbon;
 
 class Issue extends Model
 {
-    public function getCreatedAtAttribute($date)
-    {
-        if(Auth::check())
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
-        else
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
-    }
-
-    public function getUpdatedAtAttribute($date)
-    {
-        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
-    }
     
-    protected $fillable = ['name','description','observations','recommendations','evidence','classification',
+    protected $fillable = ['name','description','recommendations','evidence','classification',
     						'audit_test_id','audit_audit_plan_id','control_evaluation_id'];
 
 

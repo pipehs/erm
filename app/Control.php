@@ -10,20 +10,8 @@ use stdClass;
 
 class Control extends Model
 {
-    public function getCreatedAtAttribute($date)
-    {
-        if(Auth::check())
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
-        else
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
-    }
-
-    public function getUpdatedAtAttribute($date)
-    {
-        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
-    }
     
-     protected $fillable = ['name','description','expiration_date','type','type2','evidence','periodicity','purpose','stakeholder_id','expected_cost'];
+     protected $fillable = ['name','description','expiration_date','type','type2','evidence','periodicity','purpose','stakeholder_id','expected_cost','porcentaje_cont'];
 
     public function stakeholders()
     {
@@ -74,7 +62,8 @@ class Control extends Model
                     'periodicity' => $ctrl->periodicity,
                     'purpose' => $ctrl->purpose,
                     'expected_cost' => $ctrl->expected_cost,
-                    'stakeholder_id' => $ctrl->stakeholder_id
+                    'stakeholder_id' => $ctrl->stakeholder_id,
+                    'porcentaje_cont' => $ctrl->porcentaje_cont
                 ];
 
                 $i+=1;
@@ -123,7 +112,8 @@ class Control extends Model
                     'periodicity' => $ctrl->periodicity,
                     'purpose' => $ctrl->purpose,
                     'expected_cost' => $ctrl->expected_cost,
-                    'stakeholder_id' => $ctrl->stakeholder_id
+                    'stakeholder_id' => $ctrl->stakeholder_id,
+                    'porcentaje_cont' => $ctrl->porcentaje_cont
                 ];
 
                 $i+=1;

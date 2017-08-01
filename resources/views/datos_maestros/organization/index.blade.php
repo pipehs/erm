@@ -126,13 +126,16 @@
 		@if ($org_dependientes == NULL)
 			Ninguna
 		@else
+			<?php $cont = 0; //contador por si es que "Esta" organización no tiene organizaciones dependientes ?>
 			@foreach ($org_dependientes as $organizaciones)
-				<?php $cont = 0; //contador por si es que "Esta" organización no tiene organizaciones dependientes ?>
 				@if ($organizaciones['organization_id'] == $organization['id'])
 					<li>{{ $organizaciones['nombre'] }}</li>
 					<?php $cont += 1; ?>
 				@endif
-			@endforeach
+			@endforeach	
+		@endif
+
+		@if (isset($cont))
 			@if ($cont == 0)
 				Ninguna
 			@endif

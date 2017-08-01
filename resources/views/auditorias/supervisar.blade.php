@@ -132,6 +132,57 @@ $("#audit").change(function() {
 										audit_test += '<b>Resultado: En proceso</b><br>';	
 									}
 
+									if (test.files == 'undefined' || test.files == null || test.files == '')
+									{
+										filestemp = null
+									}
+									else
+									{
+										files = "'"+test.files+"'";
+										//dividimos files por la coma
+										filestemp = files.split(',')
+										audit_test += '<b>Documentos cargados:</b> ';
+
+									}
+									$(filestemp).each( function(i,file) {
+
+										filetemp = file.split('.')
+										filename = filetemp[0].split('/')
+										filename = filename[2]
+
+
+										if (filetemp[1] == 'jpg' || filetemp[1] == 'jpeg' || filetemp[1] == 'JPG')
+										{
+											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/jpg.png" width="30" height="30" />'+filename+'</a>'
+										}
+										else if (filetemp[1] == 'pdf')
+										{
+											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/pdf.png" width="30" height="30" />'+filename+'</a>'
+										}
+										else if (filetemp[1] == 'doc' || filetemp[1] == 'docx')
+										{
+											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/word.png" width="30" height="30" />'+filename+'</a>'
+										}
+										else if (filetemp[1] == 'xls' || filetemp[1] == 'xlsx')
+										{
+											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/excel.png" width="30" height="30" />'+filename+'</a>'
+										}
+										else if (filetemp[1] == 'ppt' || filetemp[1] == 'pptx')
+										{
+											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/powerpoint.png" width="30" height="30" />'+filename+'</a>'
+										}
+										else if (filetemp[1] == 'png' || filetemp[1] == 'PNG')
+										{
+											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/png.png" width="30" height="30" />'+filename+'</a>'
+										}
+										else
+										{
+											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/desconocido.png" width="30" height="30" />'+filename+'</a>'
+										}
+
+									});
+
+									audit_test += '</br>';
 									audit_test += '<b>Hallazgos encontrados</b><hr>';
 									cont = 1; //contador de hallazgos
 									$(test.issues).each( function(i,issue) {

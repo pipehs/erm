@@ -34,7 +34,7 @@ class RolesController extends Controller
         $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/roles.log', Logger::INFO));
         $this->logger->pushHandler(new FirePHPHandler());
     }
-
+    
     public function index()
     {
         if (Auth::guest())
@@ -143,7 +143,7 @@ class RolesController extends Controller
         {
             $logger = $this->logger;
 
-            $rol = \Ermtool\Role::create([
+            $role = \Ermtool\Role::create([
                 'name' => $request['name'],
                 'status' => 0
                 ]);
@@ -157,7 +157,7 @@ class RolesController extends Controller
                     Session::flash('message','Rol agregado correctamente');
                 }
 
-                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el rol con Id: '.$rol->id.' llamado: '.$rol->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el rol con Id: '.$role->id.' llamado: '.$role->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
             return Redirect::to('/roles');
         }

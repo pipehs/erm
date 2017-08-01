@@ -13,7 +13,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes B&aacute;sicos</a></li>
+			<li><a href="#">Reportes</a></li>
 			<li><a href="risk_matrix">Matriz de riesgos</a></li>
 		</ol>
 	</div>

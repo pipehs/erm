@@ -209,12 +209,6 @@ class EfectosController extends Controller
         }
         else
         {
-            //Validación: Si la validación es pasada, el código continua
-            $this->validate($request, [
-                'name' => 'unique:effects',
-                'description' => 'required',
-            ]);
-
             $logger = $this->logger;
 
             $efecto = \Ermtool\Effect::find($id);
@@ -310,6 +304,7 @@ class EfectosController extends Controller
         $res = 1;
 
         DB::transaction(function() {
+
             $logger = $this->logger;
             $name = \Ermtool\Effect::name($GLOBALS['id1']);
             //eliminamos primero de effect_risk

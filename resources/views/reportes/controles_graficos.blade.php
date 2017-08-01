@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes B&aacute;sicos</a></li>
+			<li><a href="#">Reportes</a></li>
 			<li><a href="graficos_controles">Gr&aacute;ficos Controles</a></li>
 		</ol>
 	</div>
@@ -121,6 +121,46 @@
 	</div>
 </div>
 <!-- FIN Gráfico de controles efectivos v/s inefectivos -->
+<!-- Botón exportar-->
+<div class="row">
+	<div class="col-xs-12 col-sm-12">
+		<div class="box">
+			<div class="box-header">
+				<div class="box-name">
+					<i class="fa fa-circle"></i>
+					<span>Exportar</span>
+				</div>
+				<div class="box-icons">
+					<a class="collapse-link">
+						<i class="fa fa-chevron-up"></i>
+					</a>
+					<a class="expand-link">
+						<i class="fa fa-expand"></i>
+					</a>
+					<a class="close-link">
+						<i class="fa fa-times"></i>
+					</a>
+				</div>
+				<div class="no-move"></div>
+			</div>
+			<div class="box-content">
+			<div id="boton_exportar">
+			{!!Form::open(['route'=>'export_control_graphics','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::hidden('grafico1','',['id' => 'grafico1'])!!}
+				{!!Form::hidden('grafico2','',['id' => 'grafico2'])!!}
+				{!!Form::hidden('org',$org,['id' => 'org'])!!}
+				<div class="form-group">
+						<center>
+						{!!Form::submit('Exportar a Word', ['class'=>'btn btn-info'])!!}
+						</center>
+				</div>
+			{!!Form::close()!!}
+			</div>
+			</div>
+			</div>
+		</div>
+	</div>
+</div>
 @endif
       		
 
@@ -152,6 +192,9 @@
 
         var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
         chart.draw(data, options);
+
+        //guardamos imagen en form hidden para reporte
+        document.getElementById('grafico1').value = chart.getImageURI();
 
         //agregamos evento de click
         google.visualization.events.addListener(chart, 'select', clickHandler);
@@ -227,6 +270,9 @@
 
         var chart2 = new google.visualization.PieChart(document.getElementById('piechart2'));
         chart2.draw(data, options);
+
+        //guardamos imagen en form hidden para reporte
+        document.getElementById('grafico2').value = chart2.getImageURI();
 
         //agregamos evento de click
         google.visualization.events.addListener(chart2, 'select', clickHandler2);

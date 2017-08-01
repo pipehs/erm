@@ -9,18 +9,6 @@ use Carbon;
 
 class Objective extends Model
 {
-    public function getCreatedAtAttribute($date)
-    {
-        if(Auth::check())
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
-        else
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
-    }
-
-    public function getUpdatedAtAttribute($date)
-    {
-        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
-    }
     
     protected $fillable = ['code','name','description','organization_id','objective_category_id','status','perspective','perspective2','strategic_plan_id'];
 
@@ -40,6 +28,15 @@ class Objective extends Model
     public function strategic_plans()
     {
     	return $this->belongsTo('\Ermtool\Strategic_plan');
+    }
+
+    public static function getObjectives($strategic_plan_id)
+    {
+        return DB::table('objectives')
+                ->where('strategic_plan_id','=',$strategic_plan_id)
+                ->where('status','=',0)
+                ->select('id','name','description','perspective','perspective2')
+                ->get();
     }
 
     public static function getObjectivesFromControl($org,$control_id)
@@ -93,5 +90,38 @@ class Objective extends Model
                 ->where('objectives.organization_id','=',$org)
                 ->select('objectives.name','objectives.description')
                 ->get();
+    }
+
+    public static function getFatherObjectives($org)
+    {
+        //obtenemos organization_id (si es que hay)
+        $father_org = DB::table('organizations')
+                        ->where('id','=',$org)
+                        ->select('organization_id as id')
+                        ->first();
+
+        if ($father_org->id != NULL) //existe organization_id
+        {
+            //obtenemos objetivos estratégicos vigentes de la organización padre (si es que existen)
+            $father_objectives = DB::table('objectives')
+                        ->join('strategic_plans','strategic_plans.id','=','objectives.strategic_plan_id')
+                        ->where('strategic_plans.status','=',1)
+                        ->where('strategic_plans.organization_id','=',$father_org->id)
+                        ->select('objectives.id','objectives.name','objectives.description','objectives.code')
+                        ->get();
+
+            if (!empty($father_objectives))
+            {
+                return $father_objectives;
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        else
+        {
+            return NULL;
+        }
     }
 }

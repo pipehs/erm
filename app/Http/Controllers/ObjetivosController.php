@@ -495,6 +495,7 @@ class ObjetivosController extends Controller
             DB::transaction(function() 
             {
                 $logger = $this->logger;
+
                 $objetivo = \Ermtool\Objective::find($GLOBALS['id1']);
                 $objetivo->status = 1;
                 $objetivo->save();
@@ -508,7 +509,7 @@ class ObjetivosController extends Controller
                     Session::flash('message','Objetivo bloqueado correctamente');
                 }
 
-                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado el objetivo corporativo de Id: '.$GLOBALS['id1'].' llamado '.$objetivo->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado el objetivo corporativo de Id: '.$GLOBALS['id1'].' llamado '.$objetivo->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s')); 
             });
 
             return Redirect::to('/objetivos');
@@ -709,8 +710,9 @@ class ObjetivosController extends Controller
                     {
                         Session::flash('message','Objetivo actualizado correctamente');
                     }
-                    
+
                     $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el objetivo corporativo de Id: '.$GLOBALS['id1'].' llamado '.$objetivo->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                    
                 });
             }
             else
@@ -746,6 +748,7 @@ class ObjetivosController extends Controller
         $res = 1;
 
         DB::transaction(function() {
+            $logger = $this->logger;
             //verificamos que no posea riesgos
             $rev = DB::table('objective_risk')
                     ->where('objective_id','=',$GLOBALS['id1'])

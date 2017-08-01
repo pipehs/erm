@@ -485,6 +485,7 @@ class PlanesAccionController extends Controller
     public function store($issue_id,$description,$stakeholder,$final_date)
     {
         $logger = $this->logger;
+
         $new_plan = \Ermtool\Action_plan::create([
                         'issue_id' => $issue_id,
                         'description' => $description,
@@ -518,6 +519,7 @@ class PlanesAccionController extends Controller
                 if (isset($_POST['description']) AND $_POST['description'] != "")
                 {
                     $description = $_POST['description'];
+                    $description = eliminarSaltos($description);
                 }
                 else
                 {
@@ -658,6 +660,7 @@ class PlanesAccionController extends Controller
                 if (isset($_POST['description']) AND $_POST['description'] != "")
                 {
                     $description = $_POST['description'];
+                    $description = eliminarSaltos($description);
                 }
                 else
                 {
@@ -687,6 +690,7 @@ class PlanesAccionController extends Controller
                 $action_plan->final_date = $final_date;
                 $action_plan->status = $status;
                 $action_plan->save();
+
 
                 if($GLOBALS['evidence'] != NULL)
                 {

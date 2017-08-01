@@ -537,6 +537,7 @@ class RiesgosTipoController extends Controller
                 }
 
                 $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el riesgo tipo con Id: '.$riesgo->id.' llamado: '.$riesgo->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+
             });
 
             return Redirect::to('/riskstype');

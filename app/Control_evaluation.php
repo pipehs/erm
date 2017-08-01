@@ -9,18 +9,6 @@ use Carbon;
 
 class Control_evaluation extends Model
 {
-    public function getCreatedAtAttribute($date)
-    {
-        if(Auth::check())
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
-        else
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
-    }
-
-    public function getUpdatedAtAttribute($date)
-    {
-        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
-    }
     
     protected $table = 'control_evaluation';
 
@@ -37,7 +25,7 @@ class Control_evaluation extends Model
     	if (!empty($last_updated))
     	{
             //ACTUALIZACIÓN 03-04-17: Para SQL Server: Damos formato de Ymd a last_updated
-            $last_updated = str_replace('-','',$last_updated);
+            //$last_updated = str_replace('-','',$last_updated);
     		//ahora obtenemos los datos de esta evaluación
     		$last_eval1 = DB::table('control_evaluation')
     					->where('control_id','=',$control_id)
@@ -96,24 +84,14 @@ class Control_evaluation extends Model
 
     public static function insertControlledRisk($risk,$result,$kind)
     {
-        if ($kind == 1) //es riesgo de proceso
-        {
+        //ACT 05-07-17: Kind ya no se usa
+
             DB::table('controlled_risk')
                 ->insert([
                     'organization_risk_id' => $risk,
                     'results' => $result,
-                    'created_at' => date('Ymd H:i:s')
+                    'created_at' => date('Y-m-d H:i:s')
                     ]);
-        }
-        else //riesgo de entidad
-        {
-            DB::table('controlled_risk')
-                ->insert([
-                    'organization_risk_id' => $risk,
-                    'results' => $result,
-                    'created_at' => date('Ymd H:i:s')
-                    ]);
-        }
     }
 
 }

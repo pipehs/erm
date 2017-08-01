@@ -9,26 +9,14 @@ use Carbon;
 
 class kpi extends Model
 {
-	public function getCreatedAtAttribute($date)
-    {
-        if(Auth::check())
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz(Auth::user()->timezone)->format('Y-m-d H:i:s');
-        else
-            return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->copy()->tz('America/Toronto')->format('Y-m-d H:i:s');
-    }
+    
+    protected $table = 'kpi';
+    protected $fillable = ['name','description','calculation_method','periodicity','stakeholder_id','initial_date','initial_value','final_date','goal','measurement_unit'];
 
     public static function name($id)
     {
     	return DB::table('kpi')->where('id',$id)->value('name');
     }
-    
-    public function getUpdatedAtAttribute($date)
-    {
-        return Carbon\Carbon::createFromFormat('Y-m-d H:i:s.000', $date)->format('Y-m-d H:i:s');
-    }
-    
-    protected $table = 'kpi';
-    protected $fillable = ['name','description','calculation_method','periodicity','stakeholder_id','initial_date','initial_value','final_date','goal','measurement_unit'];
 
     public static function getLastEvaluationPeriod($id)
     {
@@ -37,7 +25,7 @@ class kpi extends Model
                     ->where('status','=',1)
                     ->max('updated_at');
 
-        $max_updated = str_replace('-','',$max_updated);
+        //$max_updated = str_replace('-','',$max_updated);
 
         if ($max_updated)
         {

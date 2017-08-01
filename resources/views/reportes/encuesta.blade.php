@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Reportes básicos</a></li>
+			<li><a href="#">Reportes</a></li>
 			<li><a href="encuestas">Encuestas</a></li>
 		</ol>
 	</div>
