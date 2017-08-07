@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Modifique los datos que desee cambiar de la categor&iacute;a.
-			{!!Form::model($risk_category,['route'=>['categorias_risks.update',$risk_category->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+			{!!Form::model($risk_category,['route'=>['categorias_risks.update',$risk_category->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.categorias_riesgos.form')
 			{!!Form::close()!!}
 				<center>

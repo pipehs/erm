@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Ingrese los nuevos datos del subproceso.
-				{!!Form::model($subproceso,['route'=>['subprocesos.update',$subproceso->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::model($subproceso,['route'=>['subprocesos.update',$subproceso->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.subprocesos.form')
 				{!!Form::close()!!}
 

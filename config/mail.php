@@ -54,7 +54,7 @@ return [
     |
     */
 
-    'from' => ['address' => 'bgrc@nortegran.cl', 'name' => 'Administrador B-GRC'],
+    'from' => ['address' => 'soporte@ixus.cl', 'name' => 'Administrador B-GRC'],
 
     /*
     |--------------------------------------------------------------------------

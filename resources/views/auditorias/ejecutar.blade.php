@@ -57,7 +57,7 @@ td {
 
 				<div id="cargando"><br></div>
 
-				{!!Form::open(['route'=>'agregar_ejecucion','method'=>'POST','class'=>'form-horizontal','id'=>'form','enctype'=>'multipart/form-data'])!!}
+				{!!Form::open(['route'=>'agregar_ejecucion','method'=>'POST','class'=>'form-horizontal','id'=>'form','enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 	      			
 	      			@include('auditorias.form_basico_audit')
 
@@ -65,7 +65,7 @@ td {
 
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-success','id'=>'btn_guardar','disabled'=>'true'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-success','id'=>'btnsubmit','disabled'=>'true'])!!}
 						</center>
 					</div>
 					
@@ -98,6 +98,7 @@ $(document).ready(function () {
 		@endif
 	@endforeach
 
+	//seteamos datos si es que se está editando
 	@if (Session::has('org_id'))
 		setTimeout(organizations, 0)
 		setTimeout(audit_plans,1000)

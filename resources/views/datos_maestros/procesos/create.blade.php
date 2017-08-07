@@ -36,7 +36,7 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos del proceso.
-				{!!Form::open(['route'=>'procesos.store','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'procesos.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.procesos.form')
 				{!!Form::close()!!}
 

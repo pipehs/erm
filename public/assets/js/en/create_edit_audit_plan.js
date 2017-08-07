@@ -5,7 +5,7 @@
 
 			if ($("#orgs").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 			{
-					$("#guardar").prop("disabled",false);
+					$("#btnsubmit").prop("disabled",false);
 					$("#stakeholder").val("");
 					$("#stakeholder_id").empty(); //vaciamos lista de stakeholders para que no se repitan
 
@@ -172,7 +172,7 @@
 				$("#riesgos").change();
 				$("#auditorias").empty();
 				$("#auditorias").change();
-				$("#guardar").prop("disabled",true);
+				$("#btnsubmit").prop("disabled",true);
 			}
 			
 	    });

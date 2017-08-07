@@ -48,7 +48,7 @@
 			@endif
 			<br><br>
 
-			{!!Form::open(['route'=>'store_hallazgo','method'=>'POST','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
+			{!!Form::open(['route'=>'store_hallazgo','method'=>'POST','class'=>'form-horizontal','enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 					@include('hallazgos.form')
 			{!!Form::close()!!}
 

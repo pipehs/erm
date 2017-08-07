@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
 
-			{!!Form::open(['route'=>'evaluacion.enviarCorreo','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'evaluacion.enviarCorreo','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 
 				{!!Form::label('Seleccione usuarios',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="row form-group">
@@ -63,7 +63,7 @@
 
 				<div class="row form-group">
 						<center>
-						{!!Form::submit('Enviar', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Enviar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 						</center>
 				</div>
 

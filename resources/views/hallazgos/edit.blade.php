@@ -43,7 +43,7 @@
 
 			Ingrese los datos del hallazgo para la organizaci&oacute;n <b>{{ $org }}</b> <br><br>
 
-			{!!Form::model($issue,['route'=>['update_hallazgo',$issue['id']],'method'=>'PUT','class'=>'form-horizontal','id'=>'form','enctype'=>'multipart/form-data'])!!}
+			{!!Form::model($issue,['route'=>['update_hallazgo',$issue['id']],'method'=>'PUT','class'=>'form-horizontal','id'=>'form','enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 					@include('hallazgos.form')
 			{!!Form::close()!!}
 

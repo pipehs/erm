@@ -47,7 +47,7 @@
 				</div>
 		@endif
 
-{!!Form::open(['route'=>'identificacion.enviarCorreo','method'=>'POST','class'=>'form-horizontal'])!!}
+{!!Form::open(['route'=>'identificacion.enviarCorreo','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 
 	@if ($tipo == 0)
 		Seleccione los destinatarios manualmente a trav&eacute;s de la siguiente lista.
@@ -81,7 +81,7 @@
 			<div class="col-sm-3">
 				{!!Form::hidden('tipo',$tipo)!!}
 				{!!Form::hidden('poll_id',$encuesta['id'])!!}
-				{!!Form::submit('Enviar', ['class'=>'btn btn-primary'])!!}
+				{!!Form::submit('Enviar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 			</div>
 		</div>
 

@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos del subproceso.
-				{!!Form::open(['route'=>'subprocesos.store','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'subprocesos.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.subprocesos.form')
 
 				{!!Form::close()!!}

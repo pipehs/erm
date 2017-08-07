@@ -48,7 +48,7 @@
 
 			Ingrese la informaci&oacute;n para el nuevo indicador.
 
-			{!!Form::open(['route'=>'kpi.store','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'kpi.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 				@include('gestion_estrategica.kpiform')
 
 			{!!Form::close()!!}

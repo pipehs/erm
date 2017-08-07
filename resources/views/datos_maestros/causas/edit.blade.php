@@ -48,7 +48,7 @@
 			@endif
 			
 			Modifique los datos que desee de la causa gen&eacute;rica.
-			{!!Form::model($causa,['route'=>['causas.update',$causa->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+			{!!Form::model($causa,['route'=>['causas.update',$causa->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 				@include('datos_maestros.causas.form')
 			{!!Form::close()!!}
 				<center>

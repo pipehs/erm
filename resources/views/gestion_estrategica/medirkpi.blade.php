@@ -62,7 +62,7 @@
 
 				<hr>
 
-				{!!Form::open(['route'=>'kpi.store_eval','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'kpi.store_eval','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'s])!!}
 					<h4 style="color:blue;"><center><b>Meta del KPI: {{ $kpi->goal }} {{ $kpi->initial_value }}</b></center></h4>
 					<h5><center><b>Fecha final del KPI: {{ $final_date }}</b></center></h5>
 				@if ($kpi->periodicity == 1) {{-- Mensual --}}
@@ -210,7 +210,7 @@
 	            @endif
 	            <div class="form-group">
 					<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-success'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-success','id'=>'btnsubmit'])!!}
 					</center>
 				</div>
 

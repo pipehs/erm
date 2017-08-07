@@ -50,12 +50,12 @@
 				<div id="cargando"><br></div>
 
 				{!!Form::model($program,['route'=>['programas_auditoria.update_program',
-				$audit_audit_plan_audit_program->id],'method'=>'PUT','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
+				$audit_audit_plan_audit_program->id],'method'=>'PUT','class'=>'form-horizontal','enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 					@include('auditorias.form_program')
 
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'guardar'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 						</center>
 					</div>
 				{!!Form::close()!!}

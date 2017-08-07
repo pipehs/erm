@@ -48,7 +48,7 @@
 
 			Ingrese la informaci&oacute;n que desea modificar o agregar del indicador.
 
-			{!!Form::model($kpi,['route'=>['kpi.update2',$kpi->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+			{!!Form::model($kpi,['route'=>['kpi.update2',$kpi->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('gestion_estrategica.form2')
 			{!!Form::close()!!}
 

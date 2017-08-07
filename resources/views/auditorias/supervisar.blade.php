@@ -72,7 +72,7 @@ $("#audit").change(function() {
 			if ($("#audit").val() != '') //Si es que se ha seleccionado valor válido de plan
 			{
 				//Añadimos la imagen de carga en el contenedor
-					$('#cargando').html('<div><center><img src="/bgrcdemo2/assets/img/loading.gif" width="19" height="19"/></center></div>');
+					$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 				//se obtienen controles asociados a los riesgos presentes en el plan de prueba seleccionado
 					//primero obtenemos controles asociados a los riesgos de negocio
 

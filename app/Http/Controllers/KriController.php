@@ -171,7 +171,10 @@ class KriController extends Controller
                     return view('kri.index',['kri'=>$kri]);   
                 }
             }
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
             return view('errors.query',['e' => $e]);
         }
         
@@ -179,58 +182,66 @@ class KriController extends Controller
 
     public function index2()
     {
-        if (Auth::guest())
+        try
         {
-            return view('login');
-        }
-        else
-        {
-            $kri_risk_subprocess = array();
-            $kri_objective_risk = array();
-            //seleccionamos todos los riesgos de proceso que estén enlazados a algún riesgo de negocio
-            $risks = DB::table('objective_subprocess_risk')
-                        ->join('risks as risk_subprocess','risk_subprocess.id','=','objective_subprocess_risk.risk_subprocess_id')
-                        ->select('risk_subprocess.id as id','risk_subprocess.name as name')
-                        ->distinct()
-                        ->get();
-
-            $i = 0;
-            foreach ($risks as $risk)
+            if (Auth::guest())
             {
-                $kri_risk_subprocess[$i] = [
-                        'id' => $risk->id,
-                        'name' => $risk->name,
-                ];
-
-                $i += 1;
-            }
-
-            //ahora seleccionamos todos los riesgos de negocio
-            $obj_risks = DB::table('objective_risk')
-                        ->join('risks','risks.id','=','objective_risk.risk_id')
-                        ->select('risks.id as id','risks.name as name')
-                        ->distinct()
-                        ->get();
-
-            $i = 0;
-            foreach ($obj_risks as $risk)
-            {
-                $kri_objective_risk[$i] = [
-                        'id' => $risk->id,
-                        'name' => $risk->name,
-                ];
-
-                $i += 1;
-            }
-
-            if (Session::get('languaje') == 'en')
-            {
-                return view('en.kri.index2',['risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
+                return view('login');
             }
             else
             {
-                return view('kri.index2',['risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
+                $kri_risk_subprocess = array();
+                $kri_objective_risk = array();
+                //seleccionamos todos los riesgos de proceso que estén enlazados a algún riesgo de negocio
+                $risks = DB::table('objective_subprocess_risk')
+                            ->join('risks as risk_subprocess','risk_subprocess.id','=','objective_subprocess_risk.risk_subprocess_id')
+                            ->select('risk_subprocess.id as id','risk_subprocess.name as name')
+                            ->distinct()
+                            ->get();
+
+                $i = 0;
+                foreach ($risks as $risk)
+                {
+                    $kri_risk_subprocess[$i] = [
+                            'id' => $risk->id,
+                            'name' => $risk->name,
+                    ];
+
+                    $i += 1;
+                }
+
+                //ahora seleccionamos todos los riesgos de negocio
+                $obj_risks = DB::table('objective_risk')
+                            ->join('risks','risks.id','=','objective_risk.risk_id')
+                            ->select('risks.id as id','risks.name as name')
+                            ->distinct()
+                            ->get();
+
+                $i = 0;
+                foreach ($obj_risks as $risk)
+                {
+                    $kri_objective_risk[$i] = [
+                            'id' => $risk->id,
+                            'name' => $risk->name,
+                    ];
+
+                    $i += 1;
+                }
+
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.kri.index2',['risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
+                }
+                else
+                {
+                    return view('kri.index2',['risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
+                }
             }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
@@ -241,106 +252,122 @@ class KriController extends Controller
      */
     public function create()
     {
-        if (Auth::guest())
+        try
         {
-            return view('login');
-        }
-        else
-        {
-        /*
-        if (strpos($id,"obj")) //se está creando un KRI para un riesgo de negocio directamente
-        {
-            //separamos id 
-            $id2 = explode('_',$id);
-
-            //obtenemos nombre del riesgo
-            $name = DB::table('risks')
-                        ->where('risks.id','=',$id2[0])
-                        ->value('risks.name');
-
-            return view('kri.create',['obj_risk_id' => $id2[0], 'name' => $name]);
-        }
-
-        else if (strpos($id,"sub")) //si es que se está creando KRI para un riesgo de proceso ASOCIADO a un riesgo de negocio
-        {
-            //separamos id 
-            $id2 = explode('_',$id);
-
-            //obtenemos nombre del riesgo //FALTARIA AGREGAR EL NOMBRE DEL RIESGO DE NEGOCIO
-            $name = DB::table('risks')
-                        ->where('risks.id','=',$id2[0])
-                        ->value('risks.name');
-
-            return view('kri.create',['sub_risk_id' => $id2[0], 'name' => $name]);
-        }
-        */
-
-            //seleccionamos riesgos de negocio y riesgos de proceso asociados a un riesgo de negocio
-            $kri_risk_subprocess = array();
-            $kri_objective_risk = array();
-            //seleccionamos todos los riesgos de proceso que estén enlazados a algún riesgo de negocio
-            $risks = DB::table('objective_subprocess_risk')
-                        ->join('risks','risks.id','=','objective_subprocess_risk.risk_subprocess_id')
-                        ->select('risks.id as id','risks.name as name')
-                        ->distinct()
-                        ->get();
-
-            $i = 0;
-            foreach ($risks as $risk)
+            if (Auth::guest())
             {
-                $kri_risk_subprocess[$i] = [
-                        'id' => $risk->id,
-                        'name' => $risk->name,
-                ];
-
-                $i += 1;
-            }
-
-            //ahora seleccionamos todos los riesgos de negocio
-            $obj_risks = DB::table('objective_risk')
-                        ->join('risks','risks.id','=','objective_risk.risk_id')
-                        ->select('risks.id as id','risks.name as name')
-                        ->distinct()
-                        ->get();
-
-            $i = 0;
-            foreach ($obj_risks as $risk)
-            {
-                $kri_objective_risk[$i] = [
-                        'id' => $risk->id,
-                        'name' => $risk->name,
-                ];
-
-                $i += 1;
-            }
-
-            if (Session::get('languaje') == 'en')
-            {
-                return view('en.kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
+                return view('login');
             }
             else
             {
-                return view('kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
+            /*
+            if (strpos($id,"obj")) //se está creando un KRI para un riesgo de negocio directamente
+            {
+                //separamos id 
+                $id2 = explode('_',$id);
+
+                //obtenemos nombre del riesgo
+                $name = DB::table('risks')
+                            ->where('risks.id','=',$id2[0])
+                            ->value('risks.name');
+
+                return view('kri.create',['obj_risk_id' => $id2[0], 'name' => $name]);
             }
+
+            else if (strpos($id,"sub")) //si es que se está creando KRI para un riesgo de proceso ASOCIADO a un riesgo de negocio
+            {
+                //separamos id 
+                $id2 = explode('_',$id);
+
+                //obtenemos nombre del riesgo //FALTARIA AGREGAR EL NOMBRE DEL RIESGO DE NEGOCIO
+                $name = DB::table('risks')
+                            ->where('risks.id','=',$id2[0])
+                            ->value('risks.name');
+
+                return view('kri.create',['sub_risk_id' => $id2[0], 'name' => $name]);
+            }
+            */
+
+                //seleccionamos riesgos de negocio y riesgos de proceso asociados a un riesgo de negocio
+                $kri_risk_subprocess = array();
+                $kri_objective_risk = array();
+                //seleccionamos todos los riesgos de proceso que estén enlazados a algún riesgo de negocio
+                $risks = DB::table('objective_subprocess_risk')
+                            ->join('risks','risks.id','=','objective_subprocess_risk.risk_subprocess_id')
+                            ->select('risks.id as id','risks.name as name')
+                            ->distinct()
+                            ->get();
+
+                $i = 0;
+                foreach ($risks as $risk)
+                {
+                    $kri_risk_subprocess[$i] = [
+                            'id' => $risk->id,
+                            'name' => $risk->name,
+                    ];
+
+                    $i += 1;
+                }
+
+                //ahora seleccionamos todos los riesgos de negocio
+                $obj_risks = DB::table('objective_risk')
+                            ->join('risks','risks.id','=','objective_risk.risk_id')
+                            ->select('risks.id as id','risks.name as name')
+                            ->distinct()
+                            ->get();
+
+                $i = 0;
+                foreach ($obj_risks as $risk)
+                {
+                    $kri_objective_risk[$i] = [
+                            'id' => $risk->id,
+                            'name' => $risk->name,
+                    ];
+
+                    $i += 1;
+                }
+
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
+                }
+                else
+                {
+                    return view('kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
+                }
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
     public function create2($id)
     {
-        if (Auth::guest())
+        try
         {
-            return view('login');
-        }
-        else
-        {
-            if (Session::get('languaje') == 'en')
+            if (Auth::guest())
             {
-                return view('en.kri.create',['risk_id' => $id]);
+                return view('login');
             }
             else
             {
-                return view('kri.create',['risk_id' => $id]);   
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.kri.create',['risk_id' => $id]);
+                }
+                else
+                {
+                    return view('kri.create',['risk_id' => $id]);   
+                }
             }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
@@ -353,77 +380,85 @@ class KriController extends Controller
      */
     public function store(Request $request)
     {
-        if (Auth::guest())
+        try
         {
-            return view('login');
-        }
-        else
-        {
-            //print_r($_POST);
-
-            if ($_POST['uni_med'] == 0) //porcentaje, se deben volver a validar las medidas
+            if (Auth::guest())
             {
-                //Validación: Si la validación es pasada, el código continua
-                $this->validate($request, [
-                    'green_min' => 'required|max:100|min:0',
-                    'interval_min' => 'required|max:100|min:0',
-                    'interval_max' => 'required|max:100|min:0',
-                    'red_max' => 'required|max:100|min:0',
-                ]);
+                return view('login');
             }
-            
+            else
+            {
+                //print_r($_POST);
 
-            //creamos NUEVO KRI
-            DB::transaction(function() {
-                $logger = $this->logger;
-                $in = DB::table('kri')
-                        ->insertGetId([
-                            'risk_id' => $_POST['risk_id'],
-                            'name' => $_POST['name'],
-                            'description' => $_POST['description'],
-                            'type' => $_POST['type'],
-                            'periodicity' => $_POST['periodicity'],
-                            'uni_med' => $_POST['uni_med'],
-                            'min_max' => $_POST['min_max'],
-                            'green_min' => $_POST['green_min'],
-                            'description_green' => $_POST['description_green'],
-                            'interval_min' => $_POST['interval_min'],
-                            'interval_max' => $_POST['interval_max'],
-                            'description_yellow' => $_POST['description_yellow'],
-                            'red_max' => $_POST['red_max'],
-                            'description_red' => $_POST['description_red'],
-                            'created_at' => date('Y-m-d H:i:s'),
-                            'updated_at' => date('Y-m-d H:i:s')
-                        ]);
+                if ($_POST['uni_med'] == 0) //porcentaje, se deben volver a validar las medidas
+                {
+                    //Validación: Si la validación es pasada, el código continua
+                    $this->validate($request, [
+                        'green_min' => 'required|max:100|min:0',
+                        'interval_min' => 'required|max:100|min:0',
+                        'interval_max' => 'required|max:100|min:0',
+                        'red_max' => 'required|max:100|min:0',
+                    ]);
+                }
                 
 
-                if (isset($in))
-                {
-                    if (Session::get('languaje') == 'en')
+                //creamos NUEVO KRI
+                DB::transaction(function() {
+                    $logger = $this->logger;
+                    $in = DB::table('kri')
+                            ->insertGetId([
+                                'risk_id' => $_POST['risk_id'],
+                                'name' => $_POST['name'],
+                                'description' => $_POST['description'],
+                                'type' => $_POST['type'],
+                                'periodicity' => $_POST['periodicity'],
+                                'uni_med' => $_POST['uni_med'],
+                                'min_max' => $_POST['min_max'],
+                                'green_min' => $_POST['green_min'],
+                                'description_green' => $_POST['description_green'],
+                                'interval_min' => $_POST['interval_min'],
+                                'interval_max' => $_POST['interval_max'],
+                                'description_yellow' => $_POST['description_yellow'],
+                                'red_max' => $_POST['red_max'],
+                                'description_red' => $_POST['description_red'],
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ]);
+                    
+
+                    if (isset($in))
                     {
-                        Session::flash('message','KRI successfully created');
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('message','KRI successfully created');
+                        }
+                        else
+                        {
+                            Session::flash('message','KRI generado correctamente');   
+                        }
+
+                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el KRI con Id: '.$in.' llamado: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                     }
                     else
                     {
-                        Session::flash('message','KRI generado correctamente');   
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('errors','Error storing KRI');
+                        }
+                        else
+                        {
+                            Session::flash('errors','Error al grabar KRI');   
+                        }
                     }
+                });
 
-                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el KRI con Id: '.$in.' llamado: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
-                }
-                else
-                {
-                    if (Session::get('languaje') == 'en')
-                    {
-                        Session::flash('errors','Error storing KRI');
-                    }
-                    else
-                    {
-                        Session::flash('errors','Error al grabar KRI');   
-                    }
-                }
-            });
-
-            return Redirect::to('kri');
+                return Redirect::to('kri');
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
@@ -446,67 +481,75 @@ class KriController extends Controller
      */
     public function edit($id)
     {
-        if (Auth::guest())
+        try
         {
-            return view('login');
-        }
-        else
-        {
-            //seleccionamos riesgos de negocio y riesgos de proceso asociados a un riesgo de negocio
-            $kri_risk_subprocess = array();
-            $kri_objective_risk = array();
-            //seleccionamos todos los riesgos de proceso que estén enlazados a algún riesgo de negocio
-            $risks = DB::table('objective_subprocess_risk')
-                        ->join('risks as risk_subprocess','risk_subprocess.id','=','objective_subprocess_risk.risk_subprocess_id')
-                        ->select('risk_subprocess.id as id','risk_subprocess.name as name')
-                        ->distinct()
-                        ->get();
-
-            $i = 0;
-            foreach ($risks as $risk)
+            if (Auth::guest())
             {
-                $kri_risk_subprocess[$i] = [
-                        'id' => $risk->id,
-                        'name' => $risk->name,
-                ];
-
-                $i += 1;
-            }
-
-            //ahora seleccionamos todos los riesgos de negocio
-            $obj_risks = DB::table('objective_risk')
-                        ->join('risks','risks.id','=','objective_risk.risk_id')
-                        ->select('risks.id as id','risks.name as name')
-                        ->distinct()
-                        ->get();
-
-            $i = 0;
-            foreach ($obj_risks as $risk)
-            {
-                $kri_objective_risk[$i] = [
-                        'id' => $risk->id,
-                        'name' => $risk->name,
-                ];
-
-                $i += 1;
-            }
-
-            $kri = \Ermtool\KRI::find($id);
-
-            //redondeamos valores de kri (ya que no sirvio redondearlos al guardar)
-            $kri->green_min = round($kri->green_min,1);
-            $kri->interval_min = round($kri->interval_min,1);
-            $kri->interval_max = round($kri->interval_max,1);
-            $kri->red_max  = round($kri->red_max,1);
-
-            if (Session::get('languaje') == 'en')
-            {
-                return view('en.kri.edit',['kri'=>$kri,'risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
+                return view('login');
             }
             else
             {
-                return view('kri.edit',['kri'=>$kri,'risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);   
+                //seleccionamos riesgos de negocio y riesgos de proceso asociados a un riesgo de negocio
+                $kri_risk_subprocess = array();
+                $kri_objective_risk = array();
+                //seleccionamos todos los riesgos de proceso que estén enlazados a algún riesgo de negocio
+                $risks = DB::table('objective_subprocess_risk')
+                            ->join('risks as risk_subprocess','risk_subprocess.id','=','objective_subprocess_risk.risk_subprocess_id')
+                            ->select('risk_subprocess.id as id','risk_subprocess.name as name')
+                            ->distinct()
+                            ->get();
+
+                $i = 0;
+                foreach ($risks as $risk)
+                {
+                    $kri_risk_subprocess[$i] = [
+                            'id' => $risk->id,
+                            'name' => $risk->name,
+                    ];
+
+                    $i += 1;
+                }
+
+                //ahora seleccionamos todos los riesgos de negocio
+                $obj_risks = DB::table('objective_risk')
+                            ->join('risks','risks.id','=','objective_risk.risk_id')
+                            ->select('risks.id as id','risks.name as name')
+                            ->distinct()
+                            ->get();
+
+                $i = 0;
+                foreach ($obj_risks as $risk)
+                {
+                    $kri_objective_risk[$i] = [
+                            'id' => $risk->id,
+                            'name' => $risk->name,
+                    ];
+
+                    $i += 1;
+                }
+
+                $kri = \Ermtool\KRI::find($id);
+
+                //redondeamos valores de kri (ya que no sirvio redondearlos al guardar)
+                $kri->green_min = round($kri->green_min,1);
+                $kri->interval_min = round($kri->interval_min,1);
+                $kri->interval_max = round($kri->interval_max,1);
+                $kri->red_max  = round($kri->red_max,1);
+
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.kri.edit',['kri'=>$kri,'risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
+                }
+                else
+                {
+                    return view('kri.edit',['kri'=>$kri,'risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);   
+                }
             }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
@@ -519,60 +562,68 @@ class KriController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (Auth::guest())
+        try
         {
-            return view('login');
-        }
-        else
-        {
-            //print_r($_POST);
-            if ($_POST['uni_med'] == 0) //porcentaje, se deben volver a validar las medidas
+            if (Auth::guest())
             {
-                //Validación: Si la validación es pasada, el código continua
-                $this->validate($request, [
-                    'green_min' => 'required|numeric|between:0,100',
-                    'interval_min' => 'required|numeric|between:0,100',
-                    'interval_max' => 'required|numeric|between:0,100',
-                    'red_max' => 'required|numeric|between:0,100',
-                ]);
+                return view('login');
             }
-
-            global $id1;
-            $id1 = $id;
-            DB::transaction(function()
+            else
             {
-                $logger = $this->logger;
-                $kri = \Ermtool\KRI::find($GLOBALS['id1']);
-
-                $kri->risk_id = $_POST['risk_id'];
-                $kri->name = $_POST['name'];
-                $kri->description = $_POST['description'];
-                $kri->type = $_POST['type'];
-                $kri->min_max = $_POST['min_max'];
-                $kri->uni_med = $_POST['uni_med'];
-                $kri->green_min = $_POST['green_min'];
-                $kri->description_green = $_POST['description_green'];
-                $kri->interval_min = $_POST['interval_min'];
-                $kri->interval_max = $_POST['interval_max'];
-                $kri->description_yellow = $_POST['description_yellow'];
-                $kri->red_max = $_POST['red_max'];
-                $kri->description_red = $_POST['description_red'];
-
-                $kri->save();
-
-                if (Session::get('languaje') == 'en')
+                //print_r($_POST);
+                if ($_POST['uni_med'] == 0) //porcentaje, se deben volver a validar las medidas
                 {
-                    Session::flash('message','KRI successfully updated');
-                }
-                else
-                {
-                    Session::flash('message','KRI actualizado correctamente');   
+                    //Validación: Si la validación es pasada, el código continua
+                    $this->validate($request, [
+                        'green_min' => 'required|numeric|between:0,100',
+                        'interval_min' => 'required|numeric|between:0,100',
+                        'interval_max' => 'required|numeric|between:0,100',
+                        'red_max' => 'required|numeric|between:0,100',
+                    ]);
                 }
 
-                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el KRI con Id: '.$kri->id.' llamado: '.$kri->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
-            });
+                global $id1;
+                $id1 = $id;
+                DB::transaction(function()
+                {
+                    $logger = $this->logger;
+                    $kri = \Ermtool\KRI::find($GLOBALS['id1']);
 
-            return Redirect::to('kri');
+                    $kri->risk_id = $_POST['risk_id'];
+                    $kri->name = $_POST['name'];
+                    $kri->description = $_POST['description'];
+                    $kri->type = $_POST['type'];
+                    $kri->min_max = $_POST['min_max'];
+                    $kri->uni_med = $_POST['uni_med'];
+                    $kri->green_min = $_POST['green_min'];
+                    $kri->description_green = $_POST['description_green'];
+                    $kri->interval_min = $_POST['interval_min'];
+                    $kri->interval_max = $_POST['interval_max'];
+                    $kri->description_yellow = $_POST['description_yellow'];
+                    $kri->red_max = $_POST['red_max'];
+                    $kri->description_red = $_POST['description_red'];
+
+                    $kri->save();
+
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','KRI successfully updated');
+                    }
+                    else
+                    {
+                        Session::flash('message','KRI actualizado correctamente');   
+                    }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el KRI con Id: '.$kri->id.' llamado: '.$kri->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                });
+
+                return Redirect::to('kri');
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
@@ -584,482 +635,437 @@ class KriController extends Controller
      */
     public function destroy($id)
     {
-        global $id1;
-        $id1 = $id;
-        global $res;
-        $res = 1;
+        try
+        {
+            global $id1;
+            $id1 = $id;
+            global $res;
+            $res = 1;
 
-        DB::transaction(function() {
-            $logger = $this->logger;
+            DB::transaction(function() {
+                $logger = $this->logger;
 
-            //vemos si es que tiene alguna medición
-            $rev = DB::table('measurements')
-                    ->where('kri_id','=',$GLOBALS['id1'])
-                    ->select('id')
-                    ->get();
+                //vemos si es que tiene alguna medición
+                $rev = DB::table('measurements')
+                        ->where('kri_id','=',$GLOBALS['id1'])
+                        ->select('id')
+                        ->get();
 
-            if (empty($rev))
-            {
-                $kri = \Ermtool\KRI::find($GLOBALS['id1']);
-                //si es que se llega a esta instancia, se puede eliminar
-                DB::table('kri')
-                    ->where('id','=',$GLOBALS['id1'])
-                    ->delete();
+                if (empty($rev))
+                {
+                    $kri = \Ermtool\KRI::find($GLOBALS['id1']);
+                    //si es que se llega a esta instancia, se puede eliminar
+                    DB::table('kri')
+                        ->where('id','=',$GLOBALS['id1'])
+                        ->delete();
 
-                $GLOBALS['res'] = 0;
+                    $GLOBALS['res'] = 0;
 
-                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el KRI con Id: '.$kri->id.' llamado: '.$kri->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
-                
-            }
-        });
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el KRI con Id: '.$kri->id.' llamado: '.$kri->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                    
+                }
+            });
 
-        return $res;
+            return $res;
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
     }
 
     //vista de enlazador de riesgos de proceso a riesgos de negocio
     public function enlazar()
     {
-        if (Auth::guest())
+        try
         {
-            return view('login');
-        }
-        else
-        {
-            $risk_subprocess = array();
-            $objective_risk = array();
-            $enlaces = array();
-
-            //primero obtenemos riesgos de subprocesso
-            //ACT 10-04-17: HAY QUE HACER GROUP_BY RISK (procesos u objetivos son aparte)
-            $risk = \Ermtool\Risk::getRiskSubprocess(NULL);
-            $i = 0;
-            foreach ($risk as $r)
+            if (Auth::guest())
             {
-                $risk_subprocess[$i] = ['id' => $r->risk_id,
-                                        'name' => $r->risk_name,
-                                        'description' => $r->description];
-
-                $i += 1;
-            }
-
-            //obtenemos riesgos de negocio
-            //primero obtenemos riesgos de subprocesso
-            $risk = \Ermtool\Risk::getObjectiveRisks(NULL);
-            $i = 0;
-            foreach ($risk as $r)
-            {
-                $objective_risk[$i] = ['id' => $r->risk_id,
-                                        'name' => $r->risk_name,
-                                        'description' => $r->description];
-
-                $i += 1;
-            }
-
-            //obtenemos lista de enlaces
-            $e = \Ermtool\Risk::getEnlacedRisks();
-
-            $i = 0;
-            foreach ($e as $en)
-            {
-                $enlaces[$i] = ['id' => $en->id,
-                            'sub_name' => $en->sub_name,
-                            'obj_name' => $en->obj_name,];
-                $i += 1;
-            }
-
-            if (Session::get('languaje') == 'en')
-            {
-                return view('en.kri.enlazar',['risk_subprocess' => $risk_subprocess, 'objective_risk' => $objective_risk,
-                                        'enlaces' => $enlaces]);
+                return view('login');
             }
             else
             {
-                return view('kri.enlazar',['risk_subprocess' => $risk_subprocess, 'objective_risk' => $objective_risk,
-                                        'enlaces' => $enlaces]);
+                $risk_subprocess = array();
+                $objective_risk = array();
+                $enlaces = array();
+
+                //primero obtenemos riesgos de subprocesso
+                //ACT 10-04-17: HAY QUE HACER GROUP_BY RISK (procesos u objetivos son aparte)
+                $risk = \Ermtool\Risk::getRiskSubprocess(NULL);
+                $i = 0;
+                foreach ($risk as $r)
+                {
+                    $risk_subprocess[$i] = ['id' => $r->risk_id,
+                                            'name' => $r->risk_name,
+                                            'description' => $r->description];
+
+                    $i += 1;
+                }
+
+                //obtenemos riesgos de negocio
+                //primero obtenemos riesgos de subprocesso
+                $risk = \Ermtool\Risk::getObjectiveRisks(NULL);
+                $i = 0;
+                foreach ($risk as $r)
+                {
+                    $objective_risk[$i] = ['id' => $r->risk_id,
+                                            'name' => $r->risk_name,
+                                            'description' => $r->description];
+
+                    $i += 1;
+                }
+
+                //obtenemos lista de enlaces
+                $e = \Ermtool\Risk::getEnlacedRisks();
+
+                $i = 0;
+                foreach ($e as $en)
+                {
+                    $enlaces[$i] = ['id' => $en->id,
+                                'sub_name' => $en->sub_name,
+                                'obj_name' => $en->obj_name,];
+                    $i += 1;
+                }
+
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.kri.enlazar',['risk_subprocess' => $risk_subprocess, 'objective_risk' => $objective_risk,
+                                            'enlaces' => $enlaces]);
+                }
+                else
+                {
+                    return view('kri.enlazar',['risk_subprocess' => $risk_subprocess, 'objective_risk' => $objective_risk,
+                                            'enlaces' => $enlaces]);
+                }
             }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
     //función que almacena el enlace señalado entre un riesgo de proceso y de negocio
     public function guardarEnlace()
     {
-        if (Auth::guest())
+        try
         {
-            return view('login');
+            if (Auth::guest())
+            {
+                return view('login');
+            }
+            else
+            {
+                //print_r($_POST);
+                DB::transaction(function () {
+                    //primero verificamos que el enlace no existe previamente
+                    $enlace_previo = DB::table('objective_subprocess_risk')
+                                    ->where('risk_subprocess_id','=',$_POST['risk_subprocess_id'])
+                                    ->where('objective_risk_id','=',$_POST['objective_risk_id'])
+                                    ->select('id')
+                                    ->first();
+
+                    if ($enlace_previo)
+                    {
+                        Session::forget('message');
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('warning','Selected risks are already attached');
+                        }
+                        else
+                        {
+                            Session::flash('warning','Los riesgos seleccionados ya se encuentran enlazados');
+                        }
+                    }
+                    else
+                    {
+                        Session::forget('warning'); 
+                        //agregamos enlace
+                        $in = DB::table('objective_subprocess_risk')
+                        ->insertGetId([
+                            'risk_subprocess_id' => $_POST['risk_subprocess_id'],
+                            'objective_risk_id' => $_POST['objective_risk_id']
+                            ]);
+
+                        if (isset($in))
+                        {
+                            if (Session::get('languaje') == 'en')
+                            {
+                                Session::flash('message','Link successfully created');
+                            }
+                            else
+                            {
+                                Session::flash('message','Enlace generado correctamente');
+                            }
+                        }
+                        else
+                        {
+                            if (Session::get('languaje') == 'en')
+                            {
+                                Session::flash('errors','Error storing KRI');
+                            }
+                            else
+                            {
+                                Session::flash('errors','Error al grabar KRI');
+                            }
+                        }
+                    }
+
+                });
+
+                return $this->enlazar();
+            }
         }
-        else
+        catch (\Exception $e)
         {
-            //print_r($_POST);
-            DB::transaction(function () {
-                //primero verificamos que el enlace no existe previamente
-                $enlace_previo = DB::table('objective_subprocess_risk')
-                                ->where('risk_subprocess_id','=',$_POST['risk_subprocess_id'])
-                                ->where('objective_risk_id','=',$_POST['objective_risk_id'])
-                                ->select('id')
-                                ->first();
-
-                if ($enlace_previo)
-                {
-                    Session::forget('message');
-                    if (Session::get('languaje') == 'en')
-                    {
-                        Session::flash('warning','Selected risks are already attached');
-                    }
-                    else
-                    {
-                        Session::flash('warning','Los riesgos seleccionados ya se encuentran enlazados');
-                    }
-                }
-                else
-                {
-                    Session::forget('warning'); 
-                    //agregamos enlace
-                    $in = DB::table('objective_subprocess_risk')
-                    ->insertGetId([
-                        'risk_subprocess_id' => $_POST['risk_subprocess_id'],
-                        'objective_risk_id' => $_POST['objective_risk_id']
-                        ]);
-
-                    if (isset($in))
-                    {
-                        if (Session::get('languaje') == 'en')
-                        {
-                            Session::flash('message','Link successfully created');
-                        }
-                        else
-                        {
-                            Session::flash('message','Enlace generado correctamente');
-                        }
-                    }
-                    else
-                    {
-                        if (Session::get('languaje') == 'en')
-                        {
-                            Session::flash('errors','Error storing KRI');
-                        }
-                        else
-                        {
-                            Session::flash('errors','Error al grabar KRI');
-                        }
-                    }
-                }
-
-            });
-
-            return $this->enlazar();
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
     public function evaluar($id)
     {
-        if (Auth::guest())
+        try
         {
-            return view('login');
-        }
-        else
-        {
-            $kri = \Ermtool\KRI::find($id);
-            //obtenemos unidad de medida
-            $uni_med = \Ermtool\KRI::where('id',$id)->value('uni_med');
-
-            //obtenemos nombre
-            $name = \Ermtool\KRI::where('id',$id)->value('name');
-
-            if (Session::get('languaje') == 'en')
+            if (Auth::guest())
             {
-                return view('en.kri.evaluar',['id' => $id,'uni_med'=>$kri->uni_med,'name'=>$kri->name,
-                                        'green_min' => $kri->green_min, 'red_max' => $kri->red_max]);
+                return view('login');
             }
             else
             {
-                return view('kri.evaluar',['id' => $id,'uni_med'=>$kri->uni_med,'name'=>$kri->name,
-                                        'green_min' => $kri->green_min, 'red_max' => $kri->red_max]);
+                $kri = \Ermtool\KRI::find($id);
+                //obtenemos unidad de medida
+                $uni_med = \Ermtool\KRI::where('id',$id)->value('uni_med');
+
+                //obtenemos nombre
+                $name = \Ermtool\KRI::where('id',$id)->value('name');
+
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.kri.evaluar',['id' => $id,'uni_med'=>$kri->uni_med,'name'=>$kri->name,
+                                            'green_min' => $kri->green_min, 'red_max' => $kri->red_max]);
+                }
+                else
+                {
+                    return view('kri.evaluar',['id' => $id,'uni_med'=>$kri->uni_med,'name'=>$kri->name,
+                                            'green_min' => $kri->green_min, 'red_max' => $kri->red_max]);
+                }
             }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
     public function storeEval()
     {
-        if (Auth::guest())
+        try
         {
-            return view('login');
-        }
-        else
-        {
-            DB::transaction(function() {
-                $logger = $this->logger;
-                //verificamos que la evaluacion se encuentre dentro de los margenes establecidos, para esto obtenemos primero que todo los valores de green_min y red_max en la tabla KRI
+            if (Auth::guest())
+            {
+                return view('login');
+            }
+            else
+            {
+                DB::transaction(function() {
+                    $logger = $this->logger;
+                    //verificamos que la evaluacion se encuentre dentro de los margenes establecidos, para esto obtenemos primero que todo los valores de green_min y red_max en la tabla KRI
 
-                $kri = \Ermtool\KRI::find($_POST['id']);
+                    $kri = \Ermtool\KRI::find($_POST['id']);
 
-                //verificamos en caso de que vaya de menos a más ó || de más a menos
-                if ($_POST['evaluation'] >= $kri->green_min && $_POST['evaluation'] <= $kri->red_max || $_POST['evaluation'] <= $kri->green_min && $_POST['evaluation'] >= $kri->red_max)
-                {
-                    $date = date('Y-m-d H:i:s');
-                    $id = DB::table('measurements')
-                        ->insertGetId([
-                            'value'=>$_POST['evaluation'],
-                            'kri_id' => $_POST['id'],
-                            'created_at' => $date,
-                            'date_min' => $_POST['date_min'],
-                            'date_max' => $_POST['date_max'],
-                            ]);
-                
-
-                    if (isset($id))
+                    //verificamos en caso de que vaya de menos a más ó || de más a menos
+                    if ($_POST['evaluation'] >= $kri->green_min && $_POST['evaluation'] <= $kri->red_max || $_POST['evaluation'] <= $kri->green_min && $_POST['evaluation'] >= $kri->red_max)
                     {
-                        $kri = \Ermtool\KRI::find($_POST['id']);
-                        //insertamos también en last_evaluation y date_evaluation de KRI
-                        DB::table('kri')
-                        ->where('id','=',$_POST['id'])
-                        ->update([
-                            'kri_last_evaluation' => $_POST['evaluation'],
-                            'date_evaluation' => $date,
-                            'updated_at' => $date,
-                            ]);
+                        $date = date('Y-m-d H:i:s');
+                        $id = DB::table('measurements')
+                            ->insertGetId([
+                                'value'=>$_POST['evaluation'],
+                                'kri_id' => $_POST['id'],
+                                'created_at' => $date,
+                                'date_min' => $_POST['date_min'],
+                                'date_max' => $_POST['date_max'],
+                                ]);
+                    
 
-                        if (Session::get('languaje') == 'en')
+                        if (isset($id))
                         {
-                            Session::flash('message','Measurement successfully created');
-                        }
-                        else
-                        {
-                            Session::flash('message','Evaluación realizada correctamente');
-                        }
+                            $kri = \Ermtool\KRI::find($_POST['id']);
+                            //insertamos también en last_evaluation y date_evaluation de KRI
+                            DB::table('kri')
+                            ->where('id','=',$_POST['id'])
+                            ->update([
+                                'kri_last_evaluation' => $_POST['evaluation'],
+                                'date_evaluation' => $date,
+                                'updated_at' => $date,
+                                ]);
 
-                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha realizado una medición del KRI con Id: '.$kri->id.' llamado: '.$kri->name.', con valor de '.$_POST['evaluation'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
-                    }
-                }
-                else
-                {
-                    if (Session::get('languaje') == 'en')
-                    {
-                        Session::flash('error','Error storing measurement. Check if you entered a correct measurement value');
+                            if (Session::get('languaje') == 'en')
+                            {
+                                Session::flash('message','Measurement successfully created');
+                            }
+                            else
+                            {
+                                Session::flash('message','Evaluación realizada correctamente');
+                            }
+
+                            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha realizado una medición del KRI con Id: '.$kri->id.' llamado: '.$kri->name.', con valor de '.$_POST['evaluation'].' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                        }
                     }
                     else
                     {
-                        Session::flash('error','Error al grabar evaluación. Compruebe que ingreso un valor de evaluación correcto');
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('error','Error storing measurement. Check if you entered a correct measurement value');
+                        }
+                        else
+                        {
+                            Session::flash('error','Error al grabar evaluación. Compruebe que ingreso un valor de evaluación correcto');
+                        }
+
                     }
+                });
+                if(Session::has('message'))
+                    return Redirect::to('kri');
 
-                }
-            });
-            if(Session::has('message'))
-                return Redirect::to('kri');
-
-            else if(Session::has('error'))
-                return Redirect::to('kri.evaluar.'.$_POST['id']);
+                else if(Session::has('error'))
+                    return Redirect::to('kri.evaluar.'.$_POST['id']);
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
     //obtiene KRIs para un riesgo en específico
     public function getKri($id)
     {
-        $kri = NULL;
-
-        //hay más de un kri, buscamos todos
-        $kri_query = DB::table('kri')
-                ->where('risk_id','=',$id)
-                ->select('kri.*')
-                ->get();
-
-        //obtenemos id de stakeholder
-        $s = DB::table('risks')
-                    ->where('id','=',$id)
-                    ->select('stakeholder_id')
-                    ->first();
-
-        if ($s->stakeholder_id == 0 || $s->stakeholder_id == NULL)
+        try
         {
-            $stakeholder = NULL;
-        }
-         else
-        {
-            //obtenemos stakeholder
-            $stake = DB::table('stakeholders')
-                        ->where('id',$s->stakeholder_id)
-                        ->select(DB::raw("CONCAT(name,' ', surnames) AS full_name"))
+            $kri = NULL;
+
+            //hay más de un kri, buscamos todos
+            $kri_query = DB::table('kri')
+                    ->where('risk_id','=',$id)
+                    ->select('kri.*')
+                    ->get();
+
+            //obtenemos id de stakeholder
+            $s = DB::table('risks')
+                        ->where('id','=',$id)
+                        ->select('stakeholder_id')
                         ->first();
-            $stakeholder = $stake->full_name;
-        }
 
-        $i=0;
-        foreach ($kri_query as $k)
-        {
-
-            $tipo = $k->type;
-            $uni_med = $k->uni_med;
-
-            if ($k->kri_last_evaluation == NULL)
+            if ($s->stakeholder_id == 0 || $s->stakeholder_id == NULL)
             {
-                if (Session::get('languaje') == 'en')
+                $stakeholder = NULL;
+            }
+             else
+            {
+                //obtenemos stakeholder
+                $stake = DB::table('stakeholders')
+                            ->where('id',$s->stakeholder_id)
+                            ->select(DB::raw("CONCAT(name,' ', surnames) AS full_name"))
+                            ->first();
+                $stakeholder = $stake->full_name;
+            }
+
+            $i=0;
+            foreach ($kri_query as $k)
+            {
+
+                $tipo = $k->type;
+                $uni_med = $k->uni_med;
+
+                if ($k->kri_last_evaluation == NULL)
                 {
-                    $last_eval = "Still have not evaluated";
-                    $date_last = "Still have not evaluated";
-                    $eval = "None";
-                    $description_eval = "None";
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $last_eval = "Still have not evaluated";
+                        $date_last = "Still have not evaluated";
+                        $eval = "None";
+                        $description_eval = "None";
+                    }
+                    else
+                    {
+                        $last_eval = "Aun no ha sido evaluado";
+                        $date_last = "Aun no ha sido evaluado";
+                        $eval = "Ninguna";
+                        $description_eval = "Ninguna";   
+                    }
                 }
                 else
                 {
-                    $last_eval = "Aun no ha sido evaluado";
-                    $date_last = "Aun no ha sido evaluado";
-                    $eval = "Ninguna";
-                    $description_eval = "Ninguna";   
+                    $last_eval = $k->kri_last_evaluation;
+                    $date_last = date('d-m-Y',strtotime($k->date_evaluation));
+                    
+                    //calculamos evaluacion (color)
+
+                    $eval = $this->calc_sem($last_eval,$k->green_min,$k->interval_min,$k->interval_max,$k->red_max);
+
+                    
+                    if ($eval == 0) //0: verde
+                    {
+                        $description_eval = $k->description_green;
+                    }
+                    else if ($eval == 1) //1: amarillo
+                    {
+                        $description_eval = $k->description_yellow;
+                    }
+                    else if ($eval == 2) //2: rojo
+                    {
+                        $description_eval = $k->description_red;
+                    }
+
                 }
+
+                $kri[$i] = [
+                    'id' => $k->id,
+                    'name' => $k->name,
+                    'description' => $k->description,
+                    'last_eval' => $last_eval,
+                    'date_last' => $date_last,
+                    'uni_med' => $uni_med,
+                    'created_at' => $k->created_at, 
+                    'type' => $tipo,
+                    'eval' => $eval,
+                    'description_eval' => $description_eval,
+                    'stakeholder' => $stakeholder
+                ];
+
+                $i += 1;
             }
-            else
-            {
-                $last_eval = $k->kri_last_evaluation;
-                $date_last = date('d-m-Y',strtotime($k->date_evaluation));
-                
-                //calculamos evaluacion (color)
 
-                $eval = $this->calc_sem($last_eval,$k->green_min,$k->interval_min,$k->interval_max,$k->red_max);
-
-                
-                if ($eval == 0) //0: verde
-                {
-                    $description_eval = $k->description_green;
-                }
-                else if ($eval == 1) //1: amarillo
-                {
-                    $description_eval = $k->description_yellow;
-                }
-                else if ($eval == 2) //2: rojo
-                {
-                    $description_eval = $k->description_red;
-                }
-
-            }
-
-            $kri[$i] = [
-                'id' => $k->id,
-                'name' => $k->name,
-                'description' => $k->description,
-                'last_eval' => $last_eval,
-                'date_last' => $date_last,
-                'uni_med' => $uni_med,
-                'created_at' => $k->created_at, 
-                'type' => $tipo,
-                'eval' => $eval,
-                'description_eval' => $description_eval,
-                'stakeholder' => $stakeholder
-            ];
-
-            $i += 1;
+            return json_encode($kri);
         }
-
-        return json_encode($kri);
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
     }
 
     //obtiene evaluaciones anteriores de un riesgo (a través de evaluar)
     public function getEvaluations($id)
     {
-        $evaluations = NULL;
-
-        //primero obtenemos cotas de semaforo
-        $cotas = DB::table('kri')
-                ->where('id','=',$id)
-                ->select('green_min','interval_min','interval_max','red_max')
-                ->first();
-
-        $evals = DB::table('measurements')
-                    ->where('kri_id','=',$id)
-                    ->select('value','created_at','date_min','date_max')
-                    ->orderBy('id','desc')
-                    ->get();
-
-        $i = 0;
-        foreach ($evals as $eval)
-        {
-            //calculamos evaluacion (color)
-            $res = $this->calc_sem($eval->value,$cotas->green_min,$cotas->interval_min,$cotas->interval_max,$cotas->red_max);    
-            
-            $lala = new DateTime($eval->created_at);
-            $date = date_format($lala,"d-m-Y");
-            //$date = date('d-m-Y',strtotime($eval->created_at));
-            //$date_min = date('d-m-Y',strtotime($eval->date_min));
-            $date_min = date_format(new DateTime($eval->date_min),'d-m-Y');
-
-            //$date_max = date('d-m-Y',strtotime($eval->date_max));
-            $date_max = date_format(new DateTime($eval->date_max),'d-m-Y'); 
-            $evaluations[$i] = [
-                    'value' => $eval->value,
-                    'eval' => $res,
-                    'date' => $date,
-                    'date_min' => $date_min,
-                    'date_max' => $date_max,
-            ];
-            $i += 1;
-        }
-
-        return json_encode($evaluations);
-    }
-
-    //función para calcular semaforo
-    function calc_sem($value,$green_min,$interval_min,$interval_max,$red_max)
-    {
-        if ($value >= $green_min && $value <= $red_max)
-        {
-            //OBS: También verificamos en caso de que las cotas sean de mayor a menor Ó de menor a mayor
-            if ($value < $interval_min)
-            {
-                $eval = 0; //0: verde
-            }
-            else if ($value >= $interval_min && $value < $interval_max)
-            {
-                $eval = 1; //1: amarillo
-            }
-            //en este caso se deja >= $red_max en el último tramo ya que no hay más cotas
-            else if ($value >= $interval_max && $value <= $red_max)
-            {
-                $eval = 2; //2: rojo
-            }
-        }
-        else if ($value < $green_min && $value > $red_max) //ACT 10-04-17: Faltaba en caso de que la cota mayor sea verde y la mínima roja
-        {
-            if ($value <= $green_min && $value >= $interval_min)
-            {
-                $eval = 0; //0: verde
-            }
-            else if ($value < $interval_min && $value >= $interval_max)
-            {
-                $eval = 1; //1: amarillo
-            }
-            else if ($value < $interval_max && $value >= $red_max)
-            {
-                $eval = 2; //2: rojo
-            }
-        }
-        else
-        {
-            $eval = NULL;
-        }
-
-        $r = $eval;
-
-        return $r;
-    }
-
-    //lo mismo que getEvaluations solo que retorna vista en vez de JSON; por urgencia hice 2 funciones iguales en vez de buscar la forma de usar la misma en ambos casos
-    public function showEvals($id)
-    {
-        if (Auth::guest())
-        {
-            return view('login');
-        }
-        else
+        try
         {
             $evaluations = NULL;
 
             //primero obtenemos cotas de semaforo
             $cotas = DB::table('kri')
                     ->where('id','=',$id)
-                    ->select('green_min','interval_min','interval_max','red_max','name','description')
+                    ->select('green_min','interval_min','interval_max','red_max')
                     ->first();
 
             $evals = DB::table('measurements')
                         ->where('kri_id','=',$id)
                         ->select('value','created_at','date_min','date_max')
-                        ->orderBy('id','asc')
+                        ->orderBy('id','desc')
                         ->get();
 
             $i = 0;
@@ -1067,39 +1073,156 @@ class KriController extends Controller
             {
                 //calculamos evaluacion (color)
                 $res = $this->calc_sem($eval->value,$cotas->green_min,$cotas->interval_min,$cotas->interval_max,$cotas->red_max);    
-                //$date = date('d-m-Y',strtotime($eval->created_at));
+                
                 $lala = new DateTime($eval->created_at);
                 $date = date_format($lala,"d-m-Y");
-
-                $date_min = date_format(new DateTime($eval->date_min),'d-m-Y');
-                $date_max = date_format(new DateTime($eval->date_max),'d-m-Y');
+                //$date = date('d-m-Y',strtotime($eval->created_at));
                 //$date_min = date('d-m-Y',strtotime($eval->date_min));
+                $date_min = date_format(new DateTime($eval->date_min),'d-m-Y');
+
                 //$date_max = date('d-m-Y',strtotime($eval->date_max));
-
-                //date text
-                $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-                $fechamod = explode('-',$date);
-
-                $fecha_array = $fechamod[0].' de '.$meses[$fechamod[1]-1].' del '.$fechamod[2];
+                $date_max = date_format(new DateTime($eval->date_max),'d-m-Y'); 
                 $evaluations[$i] = [
                         'value' => $eval->value,
                         'eval' => $res,
                         'date' => $date,
                         'date_min' => $date_min,
                         'date_max' => $date_max,
-                        'fecha_array' => $fecha_array,
                 ];
                 $i += 1;
             }
 
-            if (Session::get('languaje') == 'en')
+            return json_encode($evaluations);
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    //función para calcular semaforo
+    function calc_sem($value,$green_min,$interval_min,$interval_max,$red_max)
+    {
+        try
+        {
+            if ($value >= $green_min && $value <= $red_max)
             {
-                return view('en.kri.anteriores',['evaluations' => $evaluations, 'name' => $cotas->name, 'description' => $cotas->description,'id' => $id]);
+                //OBS: También verificamos en caso de que las cotas sean de mayor a menor Ó de menor a mayor
+                if ($value < $interval_min)
+                {
+                    $eval = 0; //0: verde
+                }
+                else if ($value >= $interval_min && $value < $interval_max)
+                {
+                    $eval = 1; //1: amarillo
+                }
+                //en este caso se deja >= $red_max en el último tramo ya que no hay más cotas
+                else if ($value >= $interval_max && $value <= $red_max)
+                {
+                    $eval = 2; //2: rojo
+                }
+            }
+            else if ($value < $green_min && $value > $red_max) //ACT 10-04-17: Faltaba en caso de que la cota mayor sea verde y la mínima roja
+            {
+                if ($value <= $green_min && $value >= $interval_min)
+                {
+                    $eval = 0; //0: verde
+                }
+                else if ($value < $interval_min && $value >= $interval_max)
+                {
+                    $eval = 1; //1: amarillo
+                }
+                else if ($value < $interval_max && $value >= $red_max)
+                {
+                    $eval = 2; //2: rojo
+                }
             }
             else
             {
-                return view('kri.anteriores',['evaluations' => $evaluations, 'name' => $cotas->name, 'description' => $cotas->description, 'id' => $id]);
+                $eval = NULL;
             }
+
+            $r = $eval;
+
+            return $r;
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    //lo mismo que getEvaluations solo que retorna vista en vez de JSON; por urgencia hice 2 funciones iguales en vez de buscar la forma de usar la misma en ambos casos
+    public function showEvals($id)
+    {
+        try
+        {
+            if (Auth::guest())
+            {
+                return view('login');
+            }
+            else
+            {
+                $evaluations = NULL;
+
+                //primero obtenemos cotas de semaforo
+                $cotas = DB::table('kri')
+                        ->where('id','=',$id)
+                        ->select('green_min','interval_min','interval_max','red_max','name','description')
+                        ->first();
+
+                $evals = DB::table('measurements')
+                            ->where('kri_id','=',$id)
+                            ->select('value','created_at','date_min','date_max')
+                            ->orderBy('id','asc')
+                            ->get();
+
+                $i = 0;
+                foreach ($evals as $eval)
+                {
+                    //calculamos evaluacion (color)
+                    $res = $this->calc_sem($eval->value,$cotas->green_min,$cotas->interval_min,$cotas->interval_max,$cotas->red_max);    
+                    //$date = date('d-m-Y',strtotime($eval->created_at));
+                    $lala = new DateTime($eval->created_at);
+                    $date = date_format($lala,"d-m-Y");
+
+                    $date_min = date_format(new DateTime($eval->date_min),'d-m-Y');
+                    $date_max = date_format(new DateTime($eval->date_max),'d-m-Y');
+                    //$date_min = date('d-m-Y',strtotime($eval->date_min));
+                    //$date_max = date('d-m-Y',strtotime($eval->date_max));
+
+                    //date text
+                    $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+                    $fechamod = explode('-',$date);
+
+                    $fecha_array = $fechamod[0].' de '.$meses[$fechamod[1]-1].' del '.$fechamod[2];
+                    $evaluations[$i] = [
+                            'value' => $eval->value,
+                            'eval' => $res,
+                            'date' => $date,
+                            'date_min' => $date_min,
+                            'date_max' => $date_max,
+                            'fecha_array' => $fecha_array,
+                    ];
+                    $i += 1;
+                }
+
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.kri.anteriores',['evaluations' => $evaluations, 'name' => $cotas->name, 'description' => $cotas->description,'id' => $id]);
+                }
+                else
+                {
+                    return view('kri.anteriores',['evaluations' => $evaluations, 'name' => $cotas->name, 'description' => $cotas->description, 'id' => $id]);
+                }
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 }

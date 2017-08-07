@@ -48,7 +48,7 @@
 
 			Ingrese la informaci&oacute;n asociada al nuevo control
 				{!!Form::open(['route'=>'controles.store','method'=>'POST','class'=>'form-horizontal',
-				'enctype'=>'multipart/form-data'])!!}
+				'enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 					@include('controles.form')
 				{!!Form::close()!!}
 

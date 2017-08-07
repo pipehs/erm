@@ -53,7 +53,7 @@
 			@endif
 			
 			Ingrese los datos del usuario.
-				{!!Form::open(['route'=>'stakeholders.store','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'stakeholders.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.stakeholders.form')
 				{!!Form::close()!!}
 

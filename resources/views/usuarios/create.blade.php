@@ -51,13 +51,13 @@
 			@endif
 
 			En esta secci&oacute;n podr&aacute; agregar usuarios con distintos privilegios al sistema.
-			{!!Form::open(['route'=>'usuario.store','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'usuario.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 
 				@include('usuarios.form')
 					
 				<div class="form-group">
 					<center>
-					{!!Form::submit('Agregar', ['class'=>'btn btn-primary','id'=>'guardar'])!!}
+					{!!Form::submit('Agregar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 					</center>
 				</div>
 			{!!Form::close()!!}

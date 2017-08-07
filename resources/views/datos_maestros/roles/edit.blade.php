@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Ingrese los nuevos datos del rol.
-				{!!Form::model($rol,['route'=>['roles.update',$rol->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::model($rol,['route'=>['roles.update',$rol->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.roles.form')
 				{!!Form::close()!!}
 

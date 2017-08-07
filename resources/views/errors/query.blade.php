@@ -34,18 +34,16 @@
             <div id="content" class="col-xs-12 col-sm-10">
             <div class="content">
             </br></br><hr>
-                <div class="title">Ocurrio un problema en el servidor. Por favor vuelva a intentarlo y si el problema persiste comuniquese con soporte t&eacute;cnico de B-GRC.</div>
-                <hr>
-                <div id="boton">
-                    <a href="#" class="btn btn-info btn-warning" id="boton" onclick="verError()">Ver código de error</a>
+                <div class="title">
+                <p>Ocurrio un problema en el servidor. Se ha enviado un correo informando de esta situación a nuestro equipo de Soporte. Esperamos solucionarlo a la brevedad. Disculpe las molestias.<p>
+
+                <p>Equipo B-GRC</p>
                 </div>
-                <div id="error_message" style="display: none;">
-                    <div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-                                {{ $e }}
-                    </div>
-                </div>
+                
                 <hr>
-                    <a href="home" class="btn btn-info btn-lg">Ir a Inicio</a>
+                    <center>
+                        {!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
+                    <center>
             </div>
         </div>
         </div>
@@ -55,7 +53,7 @@
 
 @section('scripts2')
 <script>
-
+/*
 function verError()
 {
     $("#boton").html('<a href="#" class="btn btn-success" id="boton" onclick="ocultarError()">Ocultar código de error</a>');
@@ -66,5 +64,6 @@ function ocultarError()
     $("#boton").html('<a href="#" class="btn btn-warning" id="boton" onclick="verError()">Ver código de error</a>');
     $("#error_message").hide(500);
 }
+*/
 </script>
 @stop

@@ -656,4 +656,28 @@ function eliminarSaltos($cadenaDeTexto)
 
 	return $cadena;
 }
+
+//función para enviar correo de soporte para cuando se produce algún error en el sistema
+function enviarMailSoporte($e)
+{
+    $mail = 'soporte@ixus.cl';
+
+    $name = Auth::user()->name.' '.Auth::user()->surnames;
+    $user_mail = Auth::user()->email;
+
+    //OBS: Deberia agregar también organización (o súper organización) para saber de que empresa se está enviando. Para esto se debe agregar en BBDD algún atributo que identifique la organización (Pendiente Agregado el 02-08-2017)
+    
+    Mail::send('mail_error',['user' => $name,'user_mail' => $user_mail,'e' => $e], function ($message) use ($mail,$name)
+    {
+    	
+        if (Session::get('languaje') == 'en')
+        {
+            $message->to($mail, $name)->subject('Error from B-GRC');
+        }
+        else
+        {
+            $message->to($mail, $name)->subject('Se produjo un error en B-GRC');
+        }
+    });
+}
 ?>

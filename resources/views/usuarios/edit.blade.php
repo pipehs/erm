@@ -51,13 +51,13 @@
 			@endif
 
 			En esta secci&oacute;n podr&aacute; editar los datos del usuario.
-			{!!Form::model($user,['route'=>['usuarios.update',$user->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+			{!!Form::model($user,['route'=>['usuarios.update',$user->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 
 				@include('usuarios.form')
 					
 				<div class="form-group">
 					<center>
-					{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'guardar'])!!}
+					{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 					</center>
 				</div>
 			{!!Form::close()!!}

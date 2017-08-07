@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos del riesgo.
-				{!!Form::open(['route'=>'riskstype.store','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'riskstype.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.riesgos_tipo.form')
 				{!!Form::close()!!}
 

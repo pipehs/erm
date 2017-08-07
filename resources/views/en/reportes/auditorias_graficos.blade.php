@@ -280,7 +280,7 @@ $("#audit_plan_id").change(function() {
 	if ($("#audit_plan_id").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 	{
 		//Añadimos la imagen de carga en el contenedor
-		$('#cargando').html('<div><center><img src="/bgrcdemo2/assets/img/loading.gif" width="19" height="19"/></center></div>');
+		$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 		
 		//se obtienen datos de pruebas de auditoría para el plan seleccionado
 		$.get('auditorias.getpruebas.0,'+$("#audit_plan_id").val(), function (result) {

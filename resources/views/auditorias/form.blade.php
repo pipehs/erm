@@ -148,7 +148,7 @@
 
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-success','id'=>'guardar','disabled'=>'true'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-success','id'=>'btnsubmit','disabled'=>'true'])!!}
 						</center>
 					</div>
 					

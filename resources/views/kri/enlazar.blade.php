@@ -60,7 +60,7 @@
 
 			Seleccione el riesgo de proceso y el riesgo de negocio que desea enlazar para la posterior medición de KRI
 				{!!Form::open(['route'=>'kri.guardar_enlace','method'=>'POST','class'=>'form-horizontal',
-				'enctype'=>'multipart/form-data'])!!}
+				'enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 
 				<div id="risk_subprocess" style="float: left; width: 50%">
 					<div class="form-group">
@@ -96,7 +96,7 @@
 
 				<div class="form-group">
 						<center>
-						{!!Form::submit('Enlazar', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Enlazar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 						</center>
 					</div>
 

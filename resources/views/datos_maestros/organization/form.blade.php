@@ -69,6 +69,6 @@
 					
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['id'=>'submit','class'=>'btn btn-success'])!!}
+						{!!Form::submit('Guardar', ['id'=>'submit','class'=>'btn btn-success','id'=>'btnsubmit'])!!}
 						</center>
 					</div>

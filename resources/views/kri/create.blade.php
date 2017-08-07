@@ -48,7 +48,7 @@
 
 			Ingrese la informaci&oacute;n para el nuevo indicador.
 
-			{!!Form::open(['route'=>'kri.store','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'kri.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 				@include('kri.form')
 
 			{!!Form::close()!!}

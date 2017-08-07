@@ -38,158 +38,182 @@ class LogController extends Controller
 
     public function index()
     {
-        if (Auth::guest())
+        try
         {
-            return Redirect::route('/');
-        }
-        else
-        {
-            $users = array();
-            $usuarios = \Ermtool\User::all();
-
-            $i = 0;
-            foreach ($usuarios as $user)
+            if (Auth::guest())
             {
-                //obtenemos roles
-                $roles = array();
-                $roles1 = DB::table('system_role_user')
-                            ->join('system_roles','system_roles.id','=','system_role_user.system_role_id')
-                            ->where('system_role_user.user_id','=',$user->id)
-                            ->select('system_roles.role')
-                            ->get();
-                $j = 0;
-                foreach ($roles1 as $rol)
-                {
-                    $roles[$j] = $rol->role;
-                    $j += 1;
-                }
-                
-                $lala = new DateTime($user->created_at);
-                $created_at = date_format($lala, 'd-m-Y');
-
-                $users[$i] = [
-                    'id' => $user->id,
-                    'dv' => $user->dv,
-                    'name' => $user->name,
-                    'surnames' => $user->surnames,
-                    'email' => $user->email,
-                    'created_at' => $created_at,
-                    'roles' => $roles,
-                ];
-                $i += 1;
-            }
-
-            if (Session::get('languaje') == 'en')
-            {
-               return view('en.usuarios.index',['users' => $users]); 
+                return Redirect::route('/');
             }
             else
             {
-                return view('usuarios.index',['users' => $users]);
+                $users = array();
+                $usuarios = \Ermtool\User::all();
+
+                $i = 0;
+                foreach ($usuarios as $user)
+                {
+                    //obtenemos roles
+                    $roles = array();
+                    $roles1 = DB::table('system_role_user')
+                                ->join('system_roles','system_roles.id','=','system_role_user.system_role_id')
+                                ->where('system_role_user.user_id','=',$user->id)
+                                ->select('system_roles.role')
+                                ->get();
+                    $j = 0;
+                    foreach ($roles1 as $rol)
+                    {
+                        $roles[$j] = $rol->role;
+                        $j += 1;
+                    }
+                    
+                    $lala = new DateTime($user->created_at);
+                    $created_at = date_format($lala, 'd-m-Y');
+
+                    $users[$i] = [
+                        'id' => $user->id,
+                        'dv' => $user->dv,
+                        'name' => $user->name,
+                        'surnames' => $user->surnames,
+                        'email' => $user->email,
+                        'created_at' => $created_at,
+                        'roles' => $roles,
+                    ];
+                    $i += 1;
+                }
+
+                if (Session::get('languaje') == 'en')
+                {
+                   return view('en.usuarios.index',['users' => $users]); 
+                }
+                else
+                {
+                    return view('usuarios.index',['users' => $users]);
+                }
             }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
     public function createUser()
     {
-        if (Auth::guest())
+        try
         {
-            return Redirect::route('/');
-        }
-        else
-        {
-            foreach (Session::get('roles') as $role)
+            if (Auth::guest())
             {
-                if ($role != 1)
+                return Redirect::route('/');
+            }
+            else
+            {
+                foreach (Session::get('roles') as $role)
                 {
-                    return Redirect::route('home');
-                }
-                else
-                {
-                    break;
+                    if ($role != 1)
+                    {
+                        return Redirect::route('home');
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
+
+            $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
+            //si es create, campo rut estara desbloqueado
+            $required = 'required';
+            $disabled = "";
+
+            $system_roles = \Ermtool\System_role::lists('role','id');
+
+            if (Session::get('languaje') == 'en')
+            {
+               return view('en.usuarios.create',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled]); 
+            }
+            else
+            {
+                return view('usuarios.create',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled]);
+            }
         }
-
-        $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
-        //si es create, campo rut estara desbloqueado
-        $required = 'required';
-        $disabled = "";
-
-        $system_roles = \Ermtool\System_role::lists('role','id');
-
-        if (Session::get('languaje') == 'en')
+        catch (\Exception $e)
         {
-           return view('en.usuarios.create',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled]); 
-        }
-        else
-        {
-            return view('usuarios.create',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled]);
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
     public function storeUser(Request $request)
     {
-        //validamos rut
-        $rut = $_POST['id'].'-'.$_POST['dv'];
-        $res = validaRut($rut);
-
-        if ($res)
+        try
         {
-            //Validación: Si la validación es pasada, el código continua
-            $this->validate($request, [
-                'id' => 'unique:users|min:7',
-                'name' => 'required|max:45|min:4',
-                'email' => 'unique:users',
-                'password' => 'required|min:4'
-            ]);
+            //validamos rut
+            $rut = $_POST['id'].'-'.$_POST['dv'];
+            $res = validaRut($rut);
 
-            global $req;
-            $req = $request;
-
-            DB::transaction(function() {
-
-                $logger = $this->logger;
-
-                $GLOBALS['req']->merge(['password' => Hash::make($GLOBALS['req']->password)]);
-
-                $user = \Ermtool\User::create($GLOBALS['req']->all());
-
-                //agregamos en system_role_user
-                foreach ($GLOBALS['req']['system_roles_id'] as $role)
-                {
-                    DB::table('system_role_user')
-                        ->insert([
-                            'user_id' => $GLOBALS['req']['id'],
-                            'system_role_id' => $role,
-                        ]);
-                }
-                if (Session::get('languaje') == 'en')
-                {
-                    Session::flash('message','User successfully created');
-                }
-                else
-                {
-                    Session::flash('message','Usuario creado con &eacute;xito');
-                }
-
-                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el usuario con Id: '.$user->id.' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
-            });
-        
-            return Redirect::to('usuarios');
-        }
-        else
-        {
-            if (Session::get('languaje') == 'en')
+            if ($res)
             {
-                Session::flash('message','The entered id was incorrect. Try again');
-                return Redirect::to('usuario.create')->withInput();
+                //Validación: Si la validación es pasada, el código continua
+                $this->validate($request, [
+                    'id' => 'unique:users|min:7',
+                    'name' => 'required|max:45|min:4',
+                    'email' => 'unique:users',
+                    'password' => 'required|min:4'
+                ]);
+
+                global $req;
+                $req = $request;
+
+                DB::transaction(function() {
+
+                    $logger = $this->logger;
+
+                    $GLOBALS['req']->merge(['password' => Hash::make($GLOBALS['req']->password)]);
+
+                    $user = \Ermtool\User::create($GLOBALS['req']->all());
+
+                    //agregamos en system_role_user
+                    foreach ($GLOBALS['req']['system_roles_id'] as $role)
+                    {
+                        DB::table('system_role_user')
+                            ->insert([
+                                'user_id' => $GLOBALS['req']['id'],
+                                'system_role_id' => $role,
+                            ]);
+                    }
+                    if (Session::get('languaje') == 'en')
+                    {
+                        Session::flash('message','User successfully created');
+                    }
+                    else
+                    {
+                        Session::flash('message','Usuario creado con &eacute;xito');
+                    }
+
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el usuario con Id: '.$user->id.' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
+                });
+            
+                return Redirect::to('usuarios');
             }
             else
             {
-                Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente');
-                return Redirect::to('usuario.create')->withInput();
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','The entered id was incorrect. Try again');
+                    return Redirect::to('usuario.create')->withInput();
+                }
+                else
+                {
+                    Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente');
+                    return Redirect::to('usuario.create')->withInput();
+                }
             }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
@@ -201,38 +225,46 @@ class LogController extends Controller
      */
     public function store(LoginRequest $request)
     {
-        Session::put('languaje',$request['languaje']);
-        //return $request->email;
-        if (Auth::attempt(['email'=>$request['email'], 'password' => $request['password']]))
+        try
         {
-            //echo Auth::user()->id.'<br>'.Auth::user()->name;
-            
-            //obtenemos roles del usuario
-            $id = Auth::user()->id;
-
-            $roles1 = DB::table('system_role_user')
-                        ->join('system_roles','system_roles.id','=','system_role_user.system_role_id')
-                        ->where('system_role_user.user_id','=',$id)
-                        ->select('system_roles.id','system_roles.role')
-                        ->get();
-
-            $i = 0;
-            foreach ($roles1 as $role)
+            Session::put('languaje',$request['languaje']);
+            //return $request->email;
+            if (Auth::attempt(['email'=>$request['email'], 'password' => $request['password']]))
             {
-                Session::push('roles',$role->id);
-                Session::push('roles_name',$role->role);
-                $i += 1;
+                //echo Auth::user()->id.'<br>'.Auth::user()->name;
+                
+                //obtenemos roles del usuario
+                $id = Auth::user()->id;
+
+                $roles1 = DB::table('system_role_user')
+                            ->join('system_roles','system_roles.id','=','system_role_user.system_role_id')
+                            ->where('system_role_user.user_id','=',$id)
+                            ->select('system_roles.id','system_roles.role')
+                            ->get();
+
+                $i = 0;
+                foreach ($roles1 as $role)
+                {
+                    Session::push('roles',$role->id);
+                    Session::push('roles_name',$role->role);
+                    $i += 1;
+                }
             }
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message-error','Incorrect User and/or Pass. Try again.');
+            }
+            else
+            {
+                Session::flash('message-error','Usuario y/o contraseña incorrecta! vuelva a intentarlo');
+            }
+            return Redirect::to('/');
         }
-        if (Session::get('languaje') == 'en')
+        catch (\Exception $e)
         {
-            Session::flash('message-error','Incorrect User and/or Pass. Try again.');
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
-        else
-        {
-            Session::flash('message-error','Usuario y/o contraseña incorrecta! vuelva a intentarlo');
-        }
-        return Redirect::to('/');
     }
 
     public function logout()
@@ -263,53 +295,61 @@ class LogController extends Controller
      */
     public function edit($id)
     {
-        if (Auth::guest())
+        try
         {
-            return Redirect::route('/');
-        }
-        else
-        {
-            foreach (Session::get('roles') as $role)
+            if (Auth::guest())
             {
-                if ($role != 1)
+                return Redirect::route('/');
+            }
+            else
+            {
+                foreach (Session::get('roles') as $role)
                 {
-                    return Redirect::route('home');
-                }
-                else
-                {
-                    break;
+                    if ($role != 1)
+                    {
+                        return Redirect::route('home');
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
+
+            $user = \Ermtool\User::find($id);
+            $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
+            //si es create, campo rut estara desbloqueado
+            $required = '';
+            $disabled = "disabled";
+            $system_roles_selected = array();
+            $system_roles = \Ermtool\System_role::lists('role','id');
+
+            //obtenemos roles seleccionados
+            $roles = DB::table('system_role_user')
+                        ->where('user_id','=',$user->id)
+                        ->select('system_role_id')
+                        ->get();
+
+            $i = 0;
+            foreach ($roles as $rol)
+            {
+                $system_roles_selected[$i] = $rol->system_role_id;
+                $i += 1;
+            }
+
+            if (Session::get('languaje') == 'en')
+            {
+               return view('en.usuarios.edit',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled,'user' => $user, 'system_roles_selected' => $system_roles_selected]); 
+            }
+            else
+            {
+                return view('usuarios.edit',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled, 'user' => $user, 'system_roles_selected' => $system_roles_selected]);
+            }
         }
-
-        $user = \Ermtool\User::find($id);
-        $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
-        //si es create, campo rut estara desbloqueado
-        $required = '';
-        $disabled = "disabled";
-        $system_roles_selected = array();
-        $system_roles = \Ermtool\System_role::lists('role','id');
-
-        //obtenemos roles seleccionados
-        $roles = DB::table('system_role_user')
-                    ->where('user_id','=',$user->id)
-                    ->select('system_role_id')
-                    ->get();
-
-        $i = 0;
-        foreach ($roles as $rol)
+        catch (\Exception $e)
         {
-            $system_roles_selected[$i] = $rol->system_role_id;
-            $i += 1;
-        }
-
-        if (Session::get('languaje') == 'en')
-        {
-           return view('en.usuarios.edit',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled,'user' => $user, 'system_roles_selected' => $system_roles_selected]); 
-        }
-        else
-        {
-            return view('usuarios.edit',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled, 'user' => $user, 'system_roles_selected' => $system_roles_selected]);
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
@@ -322,60 +362,67 @@ class LogController extends Controller
      */
     public function update(Request $request, $id)
     {
+        try
+        {
+            //OBS: Hacer validación manual de e-mail
+            $this->validate($request, [
+                'name' => 'required|max:45|min:4',
+                'password' => 'required|min:4'
+            ]);
 
-        //OBS: Hacer validación manual de e-mail
-        $this->validate($request, [
-            'name' => 'required|max:45|min:4',
-            'password' => 'required|min:4'
-        ]);
+            global $req;
+            $req = $request;
 
-        global $req;
-        $req = $request;
+            global $id1;
+            $id1 = $id;
 
-        global $id1;
-        $id1 = $id;
+            DB::transaction(function() {
 
-        DB::transaction(function() {
+                $logger = $this->logger;
 
-            $logger = $this->logger;
+                $user = \Ermtool\User::find($GLOBALS['id1']);
 
-            $user = \Ermtool\User::find($GLOBALS['id1']);
+                $GLOBALS['req']->merge(['password' => Hash::make($GLOBALS['req']->password)]);
 
-            $GLOBALS['req']->merge(['password' => Hash::make($GLOBALS['req']->password)]);
+                $user->name = $_POST['name'];
+                $user->surnames = $_POST['surnames'];
+                $user->email = $_POST['email'];
+                $user->password = $GLOBALS['req']->password;
+                
+                $user->save();
 
-            $user->name = $_POST['name'];
-            $user->surnames = $_POST['surnames'];
-            $user->email = $_POST['email'];
-            $user->password = $GLOBALS['req']->password;
+                //nuevamente eliminaremos los roles anteriores del stakeholder para evitar repeticiones
+                DB::table('system_role_user')->where('user_id',$GLOBALS['id1'])->delete();
+
+                //ahora agregamos en system_role_user
+                foreach ($GLOBALS['req']['system_roles_id'] as $role)
+                {
+                    DB::table('system_role_user')
+                        ->insert([
+                            'user_id' => $GLOBALS['id1'],
+                            'system_role_id' => $role,
+                        ]);
+                }
+
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','User successfully created');
+                }
+                else
+                {
+                    Session::flash('message','Usuario actualizado con &eacute;xito');
+                }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el usuario con Id: '.$user->id.' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
+            });
             
-            $user->save();
-
-            //nuevamente eliminaremos los roles anteriores del stakeholder para evitar repeticiones
-            DB::table('system_role_user')->where('user_id',$GLOBALS['id1'])->delete();
-
-            //ahora agregamos en system_role_user
-            foreach ($GLOBALS['req']['system_roles_id'] as $role)
-            {
-                DB::table('system_role_user')
-                    ->insert([
-                        'user_id' => $GLOBALS['id1'],
-                        'system_role_id' => $role,
-                    ]);
-            }
-
-            if (Session::get('languaje') == 'en')
-            {
-                Session::flash('message','User successfully created');
-            }
-            else
-            {
-                Session::flash('message','Usuario actualizado con &eacute;xito');
-            }
-
-            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el usuario con Id: '.$user->id.' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
-        });
-        
-        return Redirect::to('usuarios');
+            return Redirect::to('usuarios');
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
     }
 
     /**
@@ -386,91 +433,115 @@ class LogController extends Controller
      */
     public function destroy($id)
     {
-        global $id1;
-        $id1 = $id;
-        global $res;
-        $res = 1;
-        
-        DB::transaction(function() {
+        try
+        {
+            global $id1;
+            $id1 = $id;
+            global $res;
+            $res = 1;
+            
+            DB::transaction(function() {
 
-            $logger = $this->logger;
+                $logger = $this->logger;
 
-            //obtenemos nombre para log
-            $user = DB::table('users')
+                //obtenemos nombre para log
+                $user = DB::table('users')
+                        ->where('id','=',$GLOBALS['id1'])
+                        ->select('name','surnames')
+                        ->first();
+
+                //primero eliminamos de system_role_user
+                DB::table('system_role_user')
+                    ->where('user_id','=',$GLOBALS['id1'])
+                    ->delete();
+
+                DB::table('users')
                     ->where('id','=',$GLOBALS['id1'])
-                    ->select('name','surnames')
-                    ->first();
+                    ->delete();
 
-            //primero eliminamos de system_role_user
-            DB::table('system_role_user')
-                ->where('user_id','=',$GLOBALS['id1'])
-                ->delete();
+                $GLOBALS['res'] = 0;
 
-            DB::table('users')
-                ->where('id','=',$GLOBALS['id1'])
-                ->delete();
+                $logger->info('The user '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el usuario con Id: '.$GLOBALS['id1'].' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
 
-            $GLOBALS['res'] = 0;
+            });
 
-            $logger->info('The user '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el usuario con Id: '.$GLOBALS['id1'].' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
-
-        });
-
-        return $res;
+            return $res;
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
     }
 
     public function changePass()
     {
-        if (Auth::guest())
+        try
         {
-            return Redirect::route('/');
-        }
-        else
-        {
-            //$id = Auth::user()->id;
-            if (Session::get('languaje') == 'en')
+            if (Auth::guest())
             {
-               return view('en.usuarios.cambiopass',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled]); 
+                return Redirect::route('/');
             }
             else
             {
-                return view('cambiopass');
+                //$id = Auth::user()->id;
+                if (Session::get('languaje') == 'en')
+                {
+                   return view('en.usuarios.cambiopass',['system_roles' => $system_roles,'dv' => $dv,'required' => $required,'disabled' => $disabled]); 
+                }
+                else
+                {
+                    return view('cambiopass');
+                }
             }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
     public function storeNewPass()
     {
-        //print_r($_POST);
-
-        //echo '<br>'.Auth::user()->id;
-        //echo '<br>'.Auth::user()->password;
-
-        //Verificamos que la contraseña antigua ingresada sea la misma
-        if (Hash::check($_POST['pass_old'], Auth::user()->password))
+        try
         {
-            $user = \Ermtool\User::find(Auth::user()->id);
-            $newpass = Hash::make($_POST['password']);
-            //actualizamos pass de Auth por si se vuelve a cambiar
-            Auth::user()->password = $newpass;
-            $user->password = $newpass;
-            $user->save();
+            //print_r($_POST);
 
-            if (Session::get('languaje') == 'en')
+            //echo '<br>'.Auth::user()->id;
+            //echo '<br>'.Auth::user()->password;
+
+            //Verificamos que la contraseña antigua ingresada sea la misma
+            if (Hash::check($_POST['pass_old'], Auth::user()->password))
             {
-                Session::flash('message','Password successfully updated');
+                $user = \Ermtool\User::find(Auth::user()->id);
+                $newpass = Hash::make($_POST['password']);
+                //actualizamos pass de Auth por si se vuelve a cambiar
+                Auth::user()->password = $newpass;
+                $user->password = $newpass;
+                $user->save();
+
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Password successfully updated');
+                }
+                else
+                {
+                    Session::flash('message','Contraseña actualizada con &eacute;xito');
+                }
+
+                return Redirect::route('home');
             }
             else
             {
-                Session::flash('message','Contraseña actualizada con &eacute;xito');
+                Session::flash('message','La contraseña actual ingresada no es correcta. Por favor inténtelo nuevamente');
+                    return Redirect::to('cambiopass')->withInput();
             }
-
-            return Redirect::route('home');
         }
-        else
+        catch (\Exception $e)
         {
-            Session::flash('message','La contraseña actual ingresada no es correcta. Por favor inténtelo nuevamente');
-                return Redirect::to('cambiopass')->withInput();
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 }

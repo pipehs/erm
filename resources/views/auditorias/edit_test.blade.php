@@ -49,13 +49,13 @@
 			Modifique la informaci&oacute;n que desee de la prueba de auditor&iacute;a <b>{{ $audit_test['name'] }}</b>.
 				<div id="cargando"><br></div>
 
-				{!!Form::model($audit_test,['route'=>['programas_auditoria.update_test',$audit_test->id],'method'=>'PUT','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}	
+				{!!Form::model($audit_test,['route'=>['programas_auditoria.update_test',$audit_test->id],'method'=>'PUT','class'=>'form-horizontal','enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}	
 
 					@include('auditorias.form_test')
 
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'guardar'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 						</center>
 					</div>
 				{!!Form::close()!!}

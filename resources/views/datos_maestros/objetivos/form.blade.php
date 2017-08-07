@@ -50,7 +50,7 @@
 					<div class="form-group">
 						<center>
 						{!!Form::hidden('strategic_plan_id',$strategic_plan_id)!!}
-						{!!Form::submit('Guardar', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 						</center>
 					</div>
 

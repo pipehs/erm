@@ -43,7 +43,7 @@
 				</div>
 			@endif
 			Ingrese los datos del nuevo objetivo corporativo para la organizaci&oacute;n {{ $_GET['nombre_organizacion'] }}
-				{!!Form::open(['route'=>'objetivos.store','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'objetivos.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.objetivos.form')
 				{!!Form::close()!!}
 				

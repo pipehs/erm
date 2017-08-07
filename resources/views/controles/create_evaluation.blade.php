@@ -54,7 +54,7 @@
 			<h4>{{ $kind2 }} para control {{ $control }}.</h4>
 				
 			{!!Form::open(['route'=>'control_evaluation.store','method'=>'POST','class'=>'form-horizontal',
-				'enctype'=>'multipart/form-data'])!!}
+				'enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 					{!!Form::hidden('kind',$kind)!!}
 					@include('controles.evaluation_form')
 			{!!Form::close()!!}

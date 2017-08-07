@@ -48,7 +48,7 @@
 
 			Ingrese la informaci&oacute;n asociada al nuevo plan de auditor&iacute;a.
 				<div id="cargando"><br></div>
-				{!!Form::open(['route'=>'agregar_plan','method'=>'POST','class'=>'form-horizontal','name'=>'form'])!!}
+				{!!Form::open(['route'=>'agregar_plan','method'=>'POST','class'=>'form-horizontal','name'=>'form','onsubmit'=>'return checkSubmit();'])!!}
 					@include('auditorias.form')
 				{!!Form::close()!!}
 

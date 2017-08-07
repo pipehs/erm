@@ -47,7 +47,7 @@
 			@endif
 			
 			Ingrese los datos de la nueva causa gen&eacute;rica.
-			{!!Form::open(['route'=>'causas.store','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'causas.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 				@include('datos_maestros.causas.form')
 			{!!Form::close()!!}
 				<center>

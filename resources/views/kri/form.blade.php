@@ -126,7 +126,7 @@
 				</div>
 
 				<div class="form-group" id="div_green_min">
-					<label for="green_min" class="col-sm-4 control-label"><img src="/bgrcdemo/assets/img/1.png" height="21px" width="21px"></label>
+					<label for="green_min" class="col-sm-4 control-label"><img src="/assets/img/1.png" height="21px" width="21px"></label>
 					<div class="col-sm-3">
 						{!!Form::number('green_min',null,['class'=>'form-control','required'=>'true','id'=>'green_min','step'=>'0.1', 'onchange'=>'ordenamiento()'])!!}
 					</div>
@@ -134,7 +134,7 @@
 				</div>
 
 				<div class="form-group" id="div_interval_min">
-					<label for="interval_min" class="col-sm-4 control-label"><img src="/bgrcdemo/assets/img/2.png" height="21px" width="21px"></label>
+					<label for="interval_min" class="col-sm-4 control-label"><img src="/assets/img/2.png" height="21px" width="21px"></label>
 					<div class="col-sm-3">
 						{!!Form::number('interval_min',null,['class'=>'form-control','required'=>'true','id'=>'interval_min','step'=>'0.1', 'onchange'=>'ordenamiento()'])!!}
 					</div>
@@ -142,7 +142,7 @@
 				</div>
 
 				<div class="form-group" id="div_interval_max">
-					<label for="interval_max" class="col-sm-4 control-label"><img src="/bgrcdemo/assets/img/3.png" height="21px" width="21px"></label>
+					<label for="interval_max" class="col-sm-4 control-label"><img src="/assets/img/3.png" height="21px" width="21px"></label>
 					<div class="col-sm-3">
 						{!!Form::number('interval_max',null,['class'=>'form-control','required'=>'true','id'=>'interval_max','step'=>'0.1', 'onchange'=>'ordenamiento()'])!!}
 					</div>
@@ -150,7 +150,7 @@
 				</div>
 
 				<div class="form-group" id="div_red_max">
-					<label for="red_max" class="col-sm-4 control-label"><img src="/bgrcdemo/assets/img/4.png" height="21px" width="21px"></label>
+					<label for="red_max" class="col-sm-4 control-label"><img src="/assets/img/4.png" height="21px" width="21px"></label>
 					<div class="col-sm-3">
 						{!!Form::number('red_max',null,['class'=>'form-control','required'=>'true','id'=>'red_max','step'=>'0.1', 'onchange'=>'ordenamiento()'])!!}
 					</div>
@@ -183,7 +183,7 @@
 			</div>
 				<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-success','id'=>'guardar'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-success','id'=>'btnsubmit'])!!}
 						</center>
 				</div>
 

@@ -88,7 +88,7 @@ $("#audit_plans").change(function() {
 			if ($("#audit_plans").val() != '') //Si es que se ha seleccionado valor válido de plan
 			{
 				//Añadimos la imagen de carga en el contenedor
-				$('#cargando').html('<div><center><img src="/bgrcdemo2/assets/img/loading.gif" width="19" height="19"/></center></div>');
+				$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 
 					//obtenemos auditorias relacionadas al plan seleccionado
 					$.get('auditorias.auditorias.'+$("#audit_plans").val(), function (result) {

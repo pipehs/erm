@@ -39,7 +39,7 @@
 <h4>{{ $name }}</h4>
 <p>Ahora debe ingresar el tipo de respuesta para cada pregunta, y en caso de ser necesario (radio o checkbox) ingresar las alternativas.</p>
 
-{!!Form::open(['url'=>'encuesta.store','method'=>'POST','class'=>'form-horizontal'])!!}
+{!!Form::open(['url'=>'encuesta.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 
 @for($i=1;$i<=$cont;$i++)
 	@if ($_POST['pregunta'.$i] != "")
@@ -70,7 +70,7 @@
 				{!!Form::hidden('nombre_encuesta',$name)!!}
 				<center>
 					<div class="form-group">
-						{!!Form::submit("Crear encuesta", ["class"=>"btn btn-primary","name"=>"agregar"])!!}	
+						{!!Form::submit("Crear encuesta", ["class"=>"btn btn-primary","name"=>"agregar","id"=>"btnsubmit"])!!}	
 					</div>
 					{!!Form::close()!!}
 

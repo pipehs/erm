@@ -54,7 +54,7 @@
 			@endif
 
 			Seleccione el plan, y luego seleccione si desea crear un nuevo programa de auditoría o reutilizar uno existente.
-				{!!Form::open(['route'=>'agregar_prueba','method'=>'POST','class'=>'form-horizontal','id'=>'form','enctype'=>'multipart/form-data'])!!}
+				{!!Form::open(['route'=>'agregar_prueba','method'=>'POST','class'=>'form-horizontal','id'=>'form','enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 
 					<div id="cargando"><br></div>
 
@@ -74,7 +74,7 @@
 					{!!Form::hidden('audit_id',$audit_id)!!}
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id' => 'btnsubmit'])!!}
 						</center>
 					</div>
 
@@ -101,7 +101,7 @@ $("#kind").change(function() {
 			if ($("#kind").val() != '') //Si es que se ha seleccionado un programa previo y no generar uno nuevo
 			{
 				//Añadimos la imagen de carga en el contenedor
-					$('#cargando').html('<div><center><img src="/bgrcdemo2/assets/img/loading.gif" width="19" height="19"/></center></div>');
+					$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 				//se obtienen datos de prueba de auditoría
 					$.get('auditorias.get_audit_program.'+$("#kind").val(), function (result) {
 							//alert(result);

@@ -415,6 +415,13 @@ function contraer3(id, description,short_des)
 	$('#action_plan_'+id).html(short_des+'... <div style="cursor:hand" onclick="expandir3('+id+','+description2+','+short_des2+')"><font color="CornflowerBlue">Ver completo</font></div>')
 }
 
+//AGREGADO 02-08-17
+function checkSubmit() {
+    document.getElementById("btnsubmit").value = "Enviando...";
+    document.getElementById("btnsubmit").disabled = true;
+    return true;
+}
+
 
 $(document).ready(function() {
 	// Load Datatables and run plugin on tables 

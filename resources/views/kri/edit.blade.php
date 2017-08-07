@@ -48,7 +48,7 @@
 
 			Modifique la informaci&oacute;n para el KRI: <b>{{ $kri['name'] }}</b>.
 
-			{!!Form::model($kri,['route'=>['kri.update',$kri->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+			{!!Form::model($kri,['route'=>['kri.update',$kri->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 				@include('kri.form')
 
 			{!!Form::close()!!}

@@ -232,7 +232,7 @@
 				$("#kpi_id").empty();
 				$("#kpi_id").change();
 				//Añadimos la imagen de carga en el contenedor
-				$('#cargando').html('<div><center><img src="/bgrcdemo2/assets/img/loading.gif" width="19" height="19"/></center></div>');
+				$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 
 				//se obtienen stakeholders (menos el auditor jefe)
 				$.get('getkpi.'+$("#organization_id").val(), function (result) {

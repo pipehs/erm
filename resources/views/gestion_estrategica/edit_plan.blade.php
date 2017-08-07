@@ -40,7 +40,7 @@
 				</div>
 			@endif
 			Ingrese los nuevos datos para el plan estrat&eacute;gico.
-				{!!Form::model($strategic_plan,['route'=>['plan_estrategico.update',$strategic_plan->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::model($strategic_plan,['route'=>['plan_estrategico.update',$strategic_plan->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					<div class="form-group">	
 					<label class="col-sm-4 control-label">Nombre plan</label>
 						<div class="col-sm-3">
@@ -69,7 +69,7 @@
 
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 						</center>
 					</div>
 

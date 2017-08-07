@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos del rol.
-				{!!Form::open(['route'=>'roles.store','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'roles.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.roles.form')
 				{!!Form::close()!!}
 

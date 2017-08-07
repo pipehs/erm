@@ -48,7 +48,7 @@
 			@endif
 			
 			Modifique los datos que desee del efecto gen&eacute;rico.
-			{!!Form::model($efecto,['route'=>['efectos.update',$efecto->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+			{!!Form::model($efecto,['route'=>['efectos.update',$efecto->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 				@include('datos_maestros.efectos.form')
 			{!!Form::close()!!}
 				<center>

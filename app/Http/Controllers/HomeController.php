@@ -35,32 +35,40 @@ class HomeController extends Controller
     }
     public function index()
     {
-        if (Auth::guest())
+        try
         {
-            return Redirect::route('/');
+            if (Auth::guest())
+            {
+                return Redirect::route('/');
+            }
+
+            //--- SISTEMA DE ALERTA ---//
+            $planes = new PlanesAccion;
+            //verificamos que hayan planes de acción próximos a cerrar
+            $plans = $planes->verificarFechaPlanes();
+
+            //--- GENERAMOS HEATMAP PARA ÚLTIMA ENCUESTA DE EVALUACIÓN AGREGADA ---//
+
+            $evalclass = new Evaluations;
+            $evals = $evalclass->heatmapLastEvaluation();
+
+            //retornamos la vista HOME con datos
+            //OBS: desde 15-07-2016 verificaremos idioma seleccionado
+            if (Session::get('languaje') == 'es')
+            {
+                return view('home',['nombre'=>$evals['nombre'],'descripcion'=>$evals['descripcion'],
+                                            'riesgos'=>$evals['riesgos'],'prom_proba'=>$evals['prom_proba'],'prom_criticidad'=>$evals['prom_criticidad'],'plans' => $plans,'org' => $evals['org']]);
+            }
+            else if (Session::get('languaje') == 'en')
+            {
+                return view('home',['nombre'=>$evals['nombre'],'descripcion'=>$evals['descripcion'],
+                                            'riesgos'=>$evals['riesgos'],'prom_proba'=>$evals['prom_proba'],'prom_criticidad'=>$evals['prom_criticidad'],'plans' => $plans,'org' => $evals['org']]);
+            }
         }
-
-        //--- SISTEMA DE ALERTA ---//
-        $planes = new PlanesAccion;
-        //verificamos que hayan planes de acción próximos a cerrar
-        $plans = $planes->verificarFechaPlanes();
-
-        //--- GENERAMOS HEATMAP PARA ÚLTIMA ENCUESTA DE EVALUACIÓN AGREGADA ---//
-
-        $evalclass = new Evaluations;
-        $evals = $evalclass->heatmapLastEvaluation();
-
-        //retornamos la vista HOME con datos
-        //OBS: desde 15-07-2016 verificaremos idioma seleccionado
-        if (Session::get('languaje') == 'es')
+        catch (\Exception $e)
         {
-            return view('home',['nombre'=>$evals['nombre'],'descripcion'=>$evals['descripcion'],
-                                        'riesgos'=>$evals['riesgos'],'prom_proba'=>$evals['prom_proba'],'prom_criticidad'=>$evals['prom_criticidad'],'plans' => $plans,'org' => $evals['org']]);
-        }
-        else if (Session::get('languaje') == 'en')
-        {
-            return view('home',['nombre'=>$evals['nombre'],'descripcion'=>$evals['descripcion'],
-                                        'riesgos'=>$evals['riesgos'],'prom_proba'=>$evals['prom_proba'],'prom_criticidad'=>$evals['prom_criticidad'],'plans' => $plans,'org' => $evals['org']]);
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
@@ -90,115 +98,123 @@ class HomeController extends Controller
 
     public function supportStore(Request $request)
     {
-        if (Auth::guest())
+        try
         {
-            return view('login');
-        }
-        else
-        {
-            $evidence = $request->file('evidence_problem');
-
-            $mail = 'fherrera@ixus.cl';
-
-            $name = Auth::user()->name.' '.Auth::user()->surnames;
-            $user_mail = Auth::user()->email;
-            //verificamos que sea una imagen
-            if ($evidence)
+            if (Auth::guest())
             {
-                $test = explode('.',$evidence->getClientOriginalName());
+                return view('login');
             }
             else
             {
-                $test = null;
-            }
+                $evidence = $request->file('evidence_problem');
 
-            if (isset($test[1])) //existe una extensión
-            {
-                //verificamos que tenga extensión de imagen
-                if ($test[1] == 'png' || $test[1] == 'jpg' || $test[1] == 'jpeg' || $test[1] == 'gif' || $test[1] == 'PNG' || $test[1] == 'JPG' || $test[1] == 'JPEG' || $test[1] == 'GIF' || $test[1] == 'jpg')
+                $mail = 'fherrera@ixus.cl';
+
+                $name = Auth::user()->name.' '.Auth::user()->surnames;
+                $user_mail = Auth::user()->email;
+                //verificamos que sea una imagen
+                if ($evidence)
                 {
-                    //PROBAMOS GUARDAR IMAGEN TEMPORALMENTE
-                    $guardado = Storage::put('temporal_mail/'.$evidence->getClientOriginalName(), file_get_contents($evidence->getRealPath())
-                        );
-                    //si es imagen, proseguimos con el envío de mail
-                    Mail::send('mail_support',['user' => $name,'user_mail' => $user_mail,'problem' => $_POST['description'], 'imagen' => $evidence->getClientOriginalName()], function ($message) use ($mail,$name)
-                    {
-                        if (Session::get('languaje') == 'en')
-                        {
-                            $message->to($mail, $name)->subject('Support ticket from B-GRC');
-                        }
-                        else
-                        {
-                            $message->to($mail, $name)->subject('Ticket de consulta B-GRC');
-                        }
-                    });
-
-                    if (Session::get('languaje') == 'en')
-                    {
-                        Session::flash('message','Support ticket successfully sent');
-                    }
-                    else
-                    {
-                        Session::flash('message','Ticket de soporte enviado correctamente');
-                    }
-
-                    return Redirect::to('support');
+                    $test = explode('.',$evidence->getClientOriginalName());
                 }
                 else
                 {
-                    if (Session::get('languaje') == 'en')
-                    {
-                        Session::flash('error','The file uploaded is not an image');
-                    }
-                    else
-                    {
-                        Session::flash('error','El archivo cargado no es una imagen');
-                    }
-
-                    return Redirect::to('support')->withInput();
+                    $test = null;
                 }
-            }
-            
-            else if (isset($test[0])) //significa que es un archivo sin extensión
-            {
-                if (Session::get('languaje') == 'en')
-                    {
-                        Session::flash('error','The file uploaded is not an image');
-                    }
-                    else
-                    {
-                        Session::flash('error','El archivo cargado no es una imagen');
-                    }
 
-                    return Redirect::to('support')->withInput();
-            }
-
-            else //no se agregó imagen
-            {
-                Mail::send('mail_support',['user' => $name,'user_mail' => $user_mail,'problem' => $_POST['description']], function ($message) use ($mail,$name)
+                if (isset($test[1])) //existe una extensión
+                {
+                    //verificamos que tenga extensión de imagen
+                    if ($test[1] == 'png' || $test[1] == 'jpg' || $test[1] == 'jpeg' || $test[1] == 'gif' || $test[1] == 'PNG' || $test[1] == 'JPG' || $test[1] == 'JPEG' || $test[1] == 'GIF' || $test[1] == 'jpg')
                     {
+                        //PROBAMOS GUARDAR IMAGEN TEMPORALMENTE
+                        $guardado = Storage::put('temporal_mail/'.$evidence->getClientOriginalName(), file_get_contents($evidence->getRealPath())
+                            );
+                        //si es imagen, proseguimos con el envío de mail
+                        Mail::send('mail_support',['user' => $name,'user_mail' => $user_mail,'problem' => $_POST['description'], 'imagen' => $evidence->getClientOriginalName()], function ($message) use ($mail,$name)
+                        {
+                            if (Session::get('languaje') == 'en')
+                            {
+                                $message->to($mail, $name)->subject('Support ticket from B-GRC');
+                            }
+                            else
+                            {
+                                $message->to($mail, $name)->subject('Ticket de consulta B-GRC');
+                            }
+                        });
+
                         if (Session::get('languaje') == 'en')
                         {
-                            $message->to($mail, $name)->subject('Support ticket from B-GRC');
+                            Session::flash('message','Support ticket successfully sent');
                         }
                         else
                         {
-                            $message->to($mail, $name)->subject('Ticket de consulta B-GRC');
+                            Session::flash('message','Ticket de soporte enviado correctamente');
                         }
-                    });
 
-                    if (Session::get('languaje') == 'en')
-                    {
-                        Session::flash('message','Support ticket successfully sent');
+                        return Redirect::to('support');
                     }
                     else
                     {
-                        Session::flash('message','Ticket de soporte enviado correctamente');
-                    }
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('error','The file uploaded is not an image');
+                        }
+                        else
+                        {
+                            Session::flash('error','El archivo cargado no es una imagen');
+                        }
 
-                    return Redirect::to('support');
+                        return Redirect::to('support')->withInput();
+                    }
+                }
+                
+                else if (isset($test[0])) //significa que es un archivo sin extensión
+                {
+                    if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('error','The file uploaded is not an image');
+                        }
+                        else
+                        {
+                            Session::flash('error','El archivo cargado no es una imagen');
+                        }
+
+                        return Redirect::to('support')->withInput();
+                }
+
+                else //no se agregó imagen
+                {
+                    Mail::send('mail_support',['user' => $name,'user_mail' => $user_mail,'problem' => $_POST['description']], function ($message) use ($mail,$name)
+                        {
+                            if (Session::get('languaje') == 'en')
+                            {
+                                $message->to($mail, $name)->subject('Support ticket from B-GRC');
+                            }
+                            else
+                            {
+                                $message->to($mail, $name)->subject('Ticket de consulta B-GRC');
+                            }
+                        });
+
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('message','Support ticket successfully sent');
+                        }
+                        else
+                        {
+                            Session::flash('message','Ticket de soporte enviado correctamente');
+                        }
+
+                        return Redirect::to('support');
+                }
+                //print_r($_POST);
             }
-            //print_r($_POST);
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 }

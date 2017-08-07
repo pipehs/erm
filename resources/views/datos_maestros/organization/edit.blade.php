@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Modifique los datos que desee de la organizaci&oacute;n.
-				{!!Form::model($organization,['route'=>['organization.update',$organization->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::model($organization,['route'=>['organization.update',$organization->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.organization.form')
 				{!!Form::close()!!}
 

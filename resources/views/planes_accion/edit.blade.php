@@ -43,7 +43,7 @@
 
 			Ingrese los datos del hallazgo para la organizaci&oacute;n <b>{{ $org }}</b> <br><br>
 
-			{!!Form::model($action_plan,['route'=>['action_plan.update',$action_plan['id']],'method'=>'PUT','class'=>'form-horizontal','id'=>'form','enctype'=>'multipart/form-data'])!!}
+			{!!Form::model($action_plan,['route'=>['action_plan.update',$action_plan['id']],'method'=>'PUT','class'=>'form-horizontal','id'=>'form','enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 					@include('planes_accion.form')
 			{!!Form::close()!!}
 

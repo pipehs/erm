@@ -48,7 +48,7 @@
 			@endif
 			
 			Ingrese los datos del nuevo efecto gen&eacute;rico.
-			{!!Form::open(['route'=>'efectos.store','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'efectos.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 				@include('datos_maestros.efectos.form')
 			{!!Form::close()!!}
 				<center>

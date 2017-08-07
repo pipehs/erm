@@ -44,7 +44,7 @@
 
 		<p>Seleccione los riesgos que desee evaluar agregando impacto y probabilidad del mismo manualmente.</p>
 			
-			{!!Form::open(['url'=>'evaluacion.store','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['url'=>'evaluacion.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					<div class="form-group">
 	                 	<div class="row">
 	                  		{!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
@@ -79,7 +79,7 @@
 					<div class="form-group">
 						<center>
 						{!!Form::hidden('manual','manual')!!}
-						{!!Form::submit('Evaluar', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Evaluar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 						</center>
 					</div>
 

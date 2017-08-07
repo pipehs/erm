@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos del riesgo.
-				{!!Form::model($riesgo,['route'=>['riskstype.update',$riesgo->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::model($riesgo,['route'=>['riskstype.update',$riesgo->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.riesgos_tipo.form')
 				{!!Form::close()!!}
 

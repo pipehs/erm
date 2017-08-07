@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Cambie los datos que desee del proceso.
-				{!!Form::model($proceso,['route'=>['procesos.update',$proceso->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::model($proceso,['route'=>['procesos.update',$proceso->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.procesos.form')
 				{!!Form::close()!!}
 

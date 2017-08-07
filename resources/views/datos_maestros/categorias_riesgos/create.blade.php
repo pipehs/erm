@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos de la nueva categor&iacute;a.
-			{!!Form::open(['route'=>'categorias_risks.store','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'categorias_risks.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 				@include('datos_maestros.categorias_riesgos.form')
 			{!!Form::close()!!}
 				<center>

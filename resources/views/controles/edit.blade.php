@@ -47,7 +47,7 @@
 			@endif
 
 			Ingrese la informaci&oacute;n que desea modificar del control.
-				{!!Form::model($control,['route'=>['controles.update',$control->id],'method'=>'PUT','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
+				{!!Form::model($control,['route'=>['controles.update',$control->id],'method'=>'PUT','class'=>'form-horizontal','enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 					@include('controles.form')
 				{!!Form::close()!!}
 

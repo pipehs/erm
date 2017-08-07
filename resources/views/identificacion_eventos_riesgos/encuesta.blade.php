@@ -44,9 +44,9 @@
 			@endif
 
 			@if (empty($user_answers)) <!-- Si es que no hay respuestas se guardará nueva eval, de lo contrario se editará -->
-				{!!Form::open(['route'=>'identificacion.guardarEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'identificacion.guardarEvaluacion','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 			@else
-				{!!Form::open(['route'=>'identificacion.updateEvaluacion','method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'identificacion.updateEvaluacion','method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 			@endif
 			<?php $i = 1; //contador de preguntas ?>
 			@foreach ($preguntas as $pregunta)
@@ -139,7 +139,7 @@
 					{!!Form::hidden('encuesta_id',$encuesta['id'])!!}
 			<div class="row form-group">
 				<center>
-					{!!Form::submit('Enviar Respuestas', ['class'=>'btn btn-primary','id'=>'responder'])!!}
+					{!!Form::submit('Enviar Respuestas', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 				</center>
 			</div>
 
@@ -164,7 +164,8 @@
 $(document).ready(function() {
 
 	//función para validar checkboxes (no funciona bien aun)
-	$('#responder').click(function() {
+/*
+	$('#btnsubmit').click(function() {
 		if ($('#checkbox-inline :checkbox:checked').length > 0)
 		{
 			alert ("bien");
@@ -176,7 +177,7 @@ $(document).ready(function() {
 			alert ("mal");
 		}
 	})
-
+*/
 });
 </script>
 

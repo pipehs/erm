@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Ingrese los nuevos datos del usuario.
-				{!!Form::model($stakeholder,['route'=>['stakeholders.update',$stakeholder->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::model($stakeholder,['route'=>['stakeholders.update',$stakeholder->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.stakeholders.form')
 				{!!Form::close()!!}
 

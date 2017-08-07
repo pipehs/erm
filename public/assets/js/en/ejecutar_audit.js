@@ -43,7 +43,7 @@ $("#audit").change(function() {
 							if (result.length > 2)
 							{	
 									//alert(result);
-									$("#btn_guardar").prop('disabled',false);
+									$("#btnsubmit").prop('disabled',false);
 									$("#cargando").html('<br>');
 									$("#audit_programs").empty();
 
@@ -119,7 +119,7 @@ $("#audit").change(function() {
 							}
 							else
 							{
-								$("#btn_guardar").prop('disabled',true);
+								$("#btnsubmit").prop('disabled',true);
 								$("#cargando").html("<br>");
 							}
 					

@@ -51,9 +51,9 @@
 			@endif
 
 			@if (empty($user_answers)) <!-- Si es que no hay respuestas se guardará nueva eval, de lo contrario se editará -->
-				{!!Form::open(['route'=>'evaluacion.guardarEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'evaluacion.guardarEvaluacion','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 			@else
-				{!!Form::open(['route'=>'evaluacion.updateEvaluacion','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'evaluacion.updateEvaluacion','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 			@endif
 
 			@if ($tipo == 0)
@@ -146,9 +146,9 @@
 			<div class="row form-group">
 				<center>
 					@if ($tipo == 1)
-						{!!Form::submit('Enviar Respuestas', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Enviar Respuestas', ['class'=>'btn btn-primary','id' => 'btnsubmit'])!!}
 					@else
-						{!!Form::submit('Enviar Evaluación', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Enviar Evaluación', ['class'=>'btn btn-primary','id' => 'btnsubmit'])!!}
 					@endif
 				</center>
 			</div>

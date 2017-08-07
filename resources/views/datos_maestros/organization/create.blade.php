@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos de la organizaci&oacute;n.
-				{!!Form::open(['route'=>'organization.store','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::open(['route'=>'organization.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.organization.form')
 				{!!Form::close()!!}
 

@@ -48,7 +48,7 @@
 
 			Ingrese los datos que desee de la nueva prueba de auditor&iacute;a.
 				<div id="cargando"><br></div>
-				{!!Form::open(['route'=>'programas_auditoria.store_test','method'=>'POST','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
+				{!!Form::open(['route'=>'programas_auditoria.store_test','method'=>'POST','class'=>'form-horizontal','enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 
 					<!-- Formulario compartido entre crear prueba (en programa), crear sin programa y editar prueba) -->
 					@include('auditorias.form_test')
@@ -56,7 +56,7 @@
 					{!!Form::hidden('audit_audit_plan_audit_program_id',$audit_program)!!}
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'guardar'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 						</center>
 					</div>
 				{!!Form::close()!!}

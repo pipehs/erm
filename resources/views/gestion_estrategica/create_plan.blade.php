@@ -43,7 +43,7 @@
 	@endif
 	<hr>
 
-		{!!Form::open(['route'=>'plan_estrategico.store','method'=>'POST','class'=>'form-horizontal'])!!}
+		{!!Form::open(['route'=>'plan_estrategico.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 
 				{!!Form::hidden('organization_id',$org_id)!!}
 				<div class="form-group">	
@@ -86,7 +86,7 @@
 								
 				<div class="form-group">
 					<center>
-					{!!Form::submit('Agregar', ['class'=>'btn btn-primary'])!!}
+					{!!Form::submit('Agregar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
 					</center>
 				</div>
 

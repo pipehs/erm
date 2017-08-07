@@ -47,7 +47,7 @@
 {!!Form::hidden('control_id',$id)!!}
 <div class="form-group">
 	<center>
-		{!!Form::submit('Guardar', ['id'=>'submit','class'=>'btn btn-success'])!!}
+		{!!Form::submit('Guardar', ['id'=>'btnsubmit','class'=>'btn btn-success'])!!}
 	</center>
 </div>
 

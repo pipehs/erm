@@ -42,7 +42,7 @@
 				</div>
 			@endif
 			Ingrese los nuevos datos para el objetivo seleccionado.
-				{!!Form::model($objetivo,['route'=>['objetivos.update',$objetivo->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
+				{!!Form::model($objetivo,['route'=>['objetivos.update',$objetivo->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.objetivos.form')
 				{!!Form::close()!!}
 
