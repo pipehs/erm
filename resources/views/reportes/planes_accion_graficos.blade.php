@@ -150,9 +150,41 @@
 		</div>
 	</div>
 </div>
+<!-- FIN Gráfico de estado de planes de acción -->
 
-
+<!-- Gráfico de porcentaje de avances -->
 <div class="col-xs-12 col-sm-6">
+	<div class="box">
+		<div class="box-header">
+			<div class="box-name">
+				<i class="fa fa-circle"></i>
+				<span>Porcentaje de avances de planes de acción</span>
+			</div>
+			<div class="box-icons">
+				<a class="collapse-link">
+					<i class="fa fa-chevron-up"></i>
+				</a>
+				<a class="expand-link">
+					<i class="fa fa-expand"></i>
+				</a>
+				<a class="close-link">
+					<i class="fa fa-times"></i>
+				</a>
+			</div>
+			<div class="no-move"></div>
+		</div>
+		<div class="box-content">
+			<p align="justify">En este gr&aacute;fico podr&aacute; observar el porcentaje de avance de los distintos planes de acci&oacute;n ingresados en el sistema.</p>
+			<br>
+			<p id="alternativo4"></p>
+			<div id="piechart4" style="width: 100%; height: 300px;"></div>
+		</div>
+	</div>
+</div>
+<!-- FIN Gráfico de porcentaje de avances -->
+</div>
+<div class="row">
+<div class="col-xs-12 col-sm-12">
 	<div class="box">
 		<div class="box-header">
 			<div class="box-name">
@@ -178,6 +210,7 @@
 				{!!Form::hidden('grafico1','',['id' => 'grafico1'])!!}
 				{!!Form::hidden('grafico2','',['id' => 'grafico2'])!!}
 				{!!Form::hidden('grafico3','',['id' => 'grafico3'])!!}
+				{!!Form::hidden('grafico4','',['id' => 'grafico4'])!!}
 				{!!Form::hidden('org',$org,['id' => 'org'])!!}
 				<div class="form-group">
 						<center>
@@ -190,7 +223,7 @@
 		</div>
 	</div>
 </div>
-
+</div>
 <!-- FIN Gráfico de estado de planes de acción -->
 @endif
 @stop
@@ -795,6 +828,92 @@
       }
     @else
     	$('#alternativo3').html('<b>No existen planes de acci&oacute;n</b>');
+    @endif
+
+    @if ($cont_progress_percentage10 > 0 || $cont_progress_percentage20 > 0 || $cont_progress_percentage30 > 0 || $cont_progress_percentage40 > 0 || $cont_progress_percentage50 > 0 || $cont_progress_percentage60 > 0 || $cont_progress_percentage70 > 0 || $cont_progress_percentage80 > 0 || $cont_progress_percentage90 > 0 || $cont_progress_percentage100 > 0)
+
+    	google.charts.setOnLoadCallback(chart4);
+      	function chart4() {
+        var data = google.visualization.arrayToDataTable([
+          ['Porcentaje', 'Cantidad'],
+          ['0 %',     {{ $cont_progress_percentage0 }}],
+          ['10 %',     {{ $cont_progress_percentage10 }}],
+          ['20 %',     {{ $cont_progress_percentage20 }}],
+          ['30 %',     {{ $cont_progress_percentage30 }}],
+          ['40 %',     {{ $cont_progress_percentage40 }}],
+          ['50 %',     {{ $cont_progress_percentage50 }}],
+          ['60 %',     {{ $cont_progress_percentage60 }}],
+          ['70 %',     {{ $cont_progress_percentage70 }}],
+          ['80 %',     {{ $cont_progress_percentage80 }}],
+          ['90 %',     {{ $cont_progress_percentage90 }}],
+          ['100 %',    {{ $cont_progress_percentage100 }}],
+        ]);
+
+        var options = {
+          title: 'Porcentaje de avances de planes de acción',
+          is3D: false,
+          colors: ['#8A0808','#DF0000','#DF4E00','#DF6400', '#DFB600','#CCDF00','#BDDF00','#BDF025','#69F025','#25F062','#25F0AC']
+        };
+
+        var chart4 = new google.visualization.PieChart(document.getElementById('piechart4'));
+        chart4.draw(data, options);
+
+        //guardamos imagen en form hidden para reporte
+        document.getElementById('grafico4').value = chart4.getImageURI();
+
+        //agregamos evento de click
+        google.visualization.events.addListener(chart4, 'select', clickHandler4);
+
+        function clickHandler4(e) {
+      		var sel = chart4.getSelection();
+
+      		if (sel.length > 0)
+			{
+				//hacemos ciclo para no repetir
+				@for($i=0;$i<=10;$i++)
+					if (sel[0].row == {{ $i }}) //0
+					{
+						@if ($i == 0)
+							var title = '<b>Planes de acci&oacute;n porcentaje avance {{$i}}0%</b>';
+						@else
+							var title = '<b>Planes de acci&oacute;n porcentaje avance {{$i}}0%</b>';
+						@endif
+
+							var text ='<table class="table table-striped table-datatable"><thead><th>Plan de acci&oacute;n</th><th>Estado</th><th>Fecha final</th><th>Responsable</th><th>Comentarios de avance</th></thead>';
+
+							@foreach ($action_plans_progress_percentage as $plan)
+								@if ($plan['progress_percentage'] == $i*10)
+									text += '<td>{{$plan["description"]}}</td>';
+									text += '<td>{{$plan["status"]}}</td>';
+									text += '<td>{{$plan["final_date"]}}</td>';
+									text += '<td>{{$plan["stakeholder"]}}</td>';
+									@if ($plan['progress_comments'] != NULL)
+										text += '<td>{{$plan["progress_comments"]}}</td>';
+									@else
+										text += '<td>Sin comentarios</td>';
+									@endif
+
+									text += '</tr>';
+								@endif
+							@endforeach
+							text += '</table>'
+							text += '<a class="btn btn-success" href="genexcelgraficos.13.{{ $org }}">Exportar</a>'
+							swal({   
+								title: title,   
+								text: text,
+								customClass: 'swal-wide',
+
+								html: true 
+							});
+					}
+				@endfor
+				
+			}
+			//console.log(sel);
+      	}
+      }
+    @else
+    	$('#alternativo4').html('<b>No existen planes de acci&oacute;n</b>');
     @endif
 @endif  
       

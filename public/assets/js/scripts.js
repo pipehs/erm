@@ -446,3 +446,48 @@ $(document).ready(function() {
 	$( "first-disabled option:first-child").attr("disabled", "disabled");
 });
 
+//obtiene sub-categorías
+$('#risk_category_id').change(function() {
+
+  if ($('#risk_category_id').val() != '')
+  {
+    $('#risk_subcategory_id').empty();
+    var options = '<option value="" selected disabled>- Seleccione -</option>'
+    //obtenemos todas las causas
+    $.get('get_subcategories.'+$('#risk_category_id').val(), function (result) {
+      //parseamos datos obtenidos
+      var datos = JSON.parse(result);
+
+      $(datos).each( function() {
+        options += '<option value='+this.id+'>'+this.name+'</option>';
+      });
+
+      $('#risk_subcategory_id').html(options)
+
+    });
+    
+  }
+  else
+  {
+    $('#risk_subcategory_id').html('')
+  }
+});
+
+function nac()
+{
+	if($('#chileno').is(':checked'))
+	{
+		$('#id').attr('required','true')
+		$('#dv').attr('required','true')
+		$('#id2').attr('required','false')
+		$('#rut').show(500)
+		$('#dni').hide(500)
+	}
+	else if ($('#extranjero').is(':checked'))
+	{
+		$('#id').attr('required','false')
+		$('#id2').attr('required','true')
+		$('#rut').hide(500)
+		$('#dni').show(500)
+	}
+}

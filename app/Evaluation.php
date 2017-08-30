@@ -35,11 +35,25 @@ class Evaluation extends Model
 
             if ($subcat != NULL)
             {
-                $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org,$cat,$subcat,$ano,$mes,$dia);
+                if ($org == NULL)
+                {
+                    $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval(NULL,$cat,$subcat,$ano,$mes,$dia);
+                }
+                else
+                {
+                    $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org,$cat,$subcat,$ano,$mes,$dia);
+                }
             }
             else
             {
-                $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org,$cat,NULL,$ano,$mes,$dia);
+                if ($org == NULL)
+                {
+                    $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org,$cat,NULL,$ano,$mes,$dia);
+                }
+                else
+                {
+                    $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval(NULL,$cat,NULL,$ano,$mes,$dia);
+                }
             }
 
             if ($subs) //se deben seleccionar tambien los riesgos de las organizaciones dependientes
@@ -54,11 +68,11 @@ class Evaluation extends Model
                 {
                     if ($subcat != NULL)
                     {
-                        $eval_temp = \Ermtool\Evaluation::getSubprocessRiskFromEval($org2,$cat,$subcat,$ano,$mes,$dia);
+                        $eval_temp = \Ermtool\Evaluation::getSubprocessRiskFromEval($org2->id,$cat,$subcat,$ano,$mes,$dia);
                     }
                     else
                     {
-                        $eval_temp = \Ermtool\Evaluation::getSubprocessRiskFromEval($org2,$cat,NULL,$ano,$mes,$dia);
+                        $eval_temp = \Ermtool\Evaluation::getSubprocessRiskFromEval($org2->id,$cat,NULL,$ano,$mes,$dia);
                     }
                     
 
@@ -81,7 +95,15 @@ class Evaluation extends Model
         }
         else
         {
-            $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org,NULL,NULL,$ano,$mes,$dia);
+            //ACTUALIZACIÓN 29-08-17: Para Mostrar Consolidado en semáforo de Riesgos, enviaremos org como null
+            if ($org == NULL)
+            {
+                $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval(NULL,NULL,NULL,$ano,$mes,$dia);
+            }
+            else
+            {
+                $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org,NULL,NULL,$ano,$mes,$dia);
+            }
 
             if ($subs) //se deben seleccionar tambien los riesgos de las organizaciones dependientes
             {
@@ -93,7 +115,7 @@ class Evaluation extends Model
 
                 foreach ($orgs as $org2) //para cada una de ellas guardamos sus evaluaciones en array temporal
                 {
-                    $eval_temp = \Ermtool\Evaluation::getSubprocessRiskFromEval($org2,NULL,NULL,$ano,$mes,$dia);
+                    $eval_temp = \Ermtool\Evaluation::getSubprocessRiskFromEval($org2->id,NULL,NULL,$ano,$mes,$dia);
 
                     foreach ($eval_temp as $e)
                     {
@@ -151,11 +173,11 @@ class Evaluation extends Model
                 {
                     if ($subcat != NULL)
                     {
-                        $eval_temp = \Ermtool\Evaluation::getObjectiveRiskFromEval($org2,$cat,$subcat,$ano,$mes,$dia);
+                        $eval_temp = \Ermtool\Evaluation::getObjectiveRiskFromEval($org2->id,$cat,$subcat,$ano,$mes,$dia);
                     }
                     else
                     {
-                        $eval_temp = \Ermtool\Evaluation::getObjectiveRiskFromEval($org2,$cat,NULL,$ano,$mes,$dia);
+                        $eval_temp = \Ermtool\Evaluation::getObjectiveRiskFromEval($org2->id,$cat,NULL,$ano,$mes,$dia);
                     }
                     
 
@@ -192,7 +214,7 @@ class Evaluation extends Model
 
                 foreach ($orgs as $org2) //para cada una de ellas guardamos sus evaluaciones en array temporal
                 {
-                    $eval_temp = \Ermtool\Evaluation::getObjectiveRiskFromEval($org,NULL,NULL,$ano,$mes,$dia);
+                    $eval_temp = \Ermtool\Evaluation::getObjectiveRiskFromEval($org->id,NULL,NULL,$ano,$mes,$dia);
 
                     foreach ($eval_temp as $e)
                     {
@@ -219,20 +241,40 @@ class Evaluation extends Model
     {
         if ($cat == NULL)
         {
-           return $eval1 = DB::table('evaluation_risk')
-                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
-                ->join('risks','risks.id','=','organization_risk.risk_id')
-                ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
-                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                ->whereNotNull('evaluation_risk.organization_risk_id')
-                ->where('organization_risk.organization_id','=',$org)
-                ->where('organization_subprocess.organization_id','=',$org)
-                ->where('evaluations.updated_at','<=',date($ano.$mes).$dia.' 23:59:59')
-                ->where('evaluations.consolidation','=',1)
-                ->select('evaluation_risk.organization_risk_id as risk_id','risks.id as risk')
-                ->groupBy('evaluation_risk.organization_risk_id','risks.id')
-                ->get(); 
+            //ACTUALIZACIÓN 29-08-17: Para Mostrar Consolidado en semáforo de Riesgos, enviaremos org como null
+            if ($org == NULL)
+            {
+                return $eval1 = DB::table('evaluation_risk')
+                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                    ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
+                    ->join('risks','risks.id','=','organization_risk.risk_id')
+                    ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                    ->whereNotNull('evaluation_risk.organization_risk_id')
+                    ->where('evaluations.updated_at','<=',date($ano.$mes).$dia.' 23:59:59')
+                    ->where('evaluations.consolidation','=',1)
+                    ->select('evaluation_risk.organization_risk_id as risk_id','risks.id as risk')
+                    ->groupBy('evaluation_risk.organization_risk_id','risks.id')
+                    ->get();
+            }
+            else
+            {
+                return $eval1 = DB::table('evaluation_risk')
+                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                    ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
+                    ->join('risks','risks.id','=','organization_risk.risk_id')
+                    ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                    ->whereNotNull('evaluation_risk.organization_risk_id')
+                    ->where('organization_risk.organization_id','=',$org)
+                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->where('evaluations.updated_at','<=',date($ano.$mes).$dia.' 23:59:59')
+                    ->where('evaluations.consolidation','=',1)
+                    ->select('evaluation_risk.organization_risk_id as risk_id','risks.id as risk')
+                    ->groupBy('evaluation_risk.organization_risk_id','risks.id')
+                    ->get();
+            }
+            
         }
         else
         {

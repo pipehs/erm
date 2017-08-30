@@ -14,6 +14,7 @@ use Ermtool\Http\Controllers\EvaluacionRiesgosController as Evaluations;
 use DateTime;
 use Mail;
 use Storage;
+use PDF;
 
 class HomeController extends Controller
 {
@@ -82,6 +83,20 @@ class HomeController extends Controller
         {
             return view('help');
         }
+    }
+
+    public function pdfHelp()
+    {
+        //$dompdf = new DOMPDF();
+        //$dompdf->load_html( file_get_contents( 'http://erm.local/public' ) );
+        //$dompdf->render();
+        //$dompdf->stream("mi_archivo.pdf");
+
+        
+        $pdf = PDF::loadView('help');
+        return $pdf->download('invoice.pdf');
+        //pdf = PDF::loadView('help');
+        //return $pdf->download('pruebapdf.pdf');
     }
 
     public function support()

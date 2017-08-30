@@ -61,13 +61,13 @@
 				<?php break; ?>
 			@endif
 		@endforeach
-		
+		<!--
 			@foreach (Session::get('roles') as $role)
 				@if ($role == 1) {{-- Administración del sistema --}}
 					@include('menu.admin')
 				@endif
 			@endforeach
-		
+		-->
 		<li>
 			<a href="cambiopass" class="{{ activeMenu('cambiopass') }}">
 				<i class="fa fa-lock"></i>

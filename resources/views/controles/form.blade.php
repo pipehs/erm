@@ -6,7 +6,24 @@
 							 	   ['id' => 'subneg','required'=>'true','placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
-				@endif
+
+					<div class="form-group">
+						{!!Form::label('Categor&iacute;a',null,['class'=>'col-sm-6 control-label'])!!}
+						<div class="col-sm-6">
+							{!!Form::select('risk_category_id',$categories,
+							 	   null, 
+							 	   ['id'=>'risk_category_id','placeholder'=>'- Seleccione -'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
+		               <div class="row">
+		                 <label for="risk_subcategory_id" class='col-sm-6 control-label'>Sub-categor&iacute;a</label>
+		                 <div class="col-sm-6">
+		                    <select id="risk_subcategory_id" name="risk_subcategory_id"></select>
+		                 </div>
+		              </div>
+		            </div>
 
 					<div class="form-group" id="riesgos" style="display: none;">
 						<label for="select_riesgos" class="col-sm-6 control-label" id="label_riesgos">Seleccione Riesgo</label>
@@ -17,7 +34,7 @@
 							</select>
 						</div>
 					</div>
-
+				@endif
 					<div class="form-group">
 						{!!Form::label('Nombre',null,['class'=>'col-sm-6 control-label'])!!}
 						<div class="col-sm-6">
@@ -43,9 +60,7 @@
 					<div class="form-group">
 						{!!Form::label('Periodicidad',null,['class'=>'col-sm-6 control-label'])!!}
 						<div class="col-sm-6">
-							{!!Form::select('periodicity',['0'=>'Diario','1'=>'Semanal','2'=>'Mensual',
-													'3'=>'Semestral','4'=>'Anual','5'=>'Cada vez que ocurra'],null,
-													['placeholder'=>'- Seleccione -'])!!}
+							{!!Form::select('periodicity',['0'=>'Diario','1'=>'Semanal','2'=>'Mensual','6' => 'Trimestral','3'=>'Semestral','4'=>'Anual','5'=>'Cada vez que ocurra'],null,['placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
 

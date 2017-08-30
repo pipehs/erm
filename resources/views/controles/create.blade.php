@@ -126,6 +126,7 @@
 
 			if ($("#subneg").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 			{
+				riesgos = new Array()
 					$.get('controles.subneg.'+$("#subneg").val()+'.{{$org}}', function (result) {
 
 							$("#riesgos").removeAttr("style").show(500); //hacemos visible riesgos objetivos
@@ -133,10 +134,11 @@
 							$("#select_riesgos").prop('required',true);
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
-							
+							var i = 0
 							//seteamos datos en select de riesgos / procesos
 							$(datos).each( function() {
-
+								riesgos[i] = {id: this.id, name: this.risk_name,description: this.description,risk_category_id: this.risk_category_id};
+								i++
 								if (this.description == null)
 								{
 									$("#select_riesgos").append('<option value="' + this.id + '">' + this.risk_name + ' - (Sin descripción)</option>');
@@ -162,6 +164,8 @@
 						$("#cause_id").change();
 						$("#effect_id").val("");
 						$("#effect_id").change();
+						$('#select_riesgos').empty();
+						$('#select_riesgos').change();
 			}
 			
 	    });
@@ -175,6 +179,85 @@
 	  uploadErrorStr:"Ocurrio un error al carga. Intentelo de nuevo!"
 	});
 
+
+
+//ACTUALIZACIÓN 21-08-17: Filtramos por categoría
+$("#risk_category_id").change(function()
+{
+	if ($("#subneg").val() != '' && $("#risk_category_id").val() != '')
+	{
+		$("#select_riesgos").empty();
+		$("#select_riesgos").change();
+
+
+		$(riesgos).each(function() {
+			//agregamos sólo los riesgos de la categoría correspondiente
+			if (this.risk_category_id == $("#risk_category_id").val())
+			{
+				$("#select_riesgos").append('<option value="' + this.id + '">' + this.name +'</option>');
+			}
+		})
+	}
+	else if ($("#subneg").val() != '' && $("#risk_category_id").val() == '')
+	{
+		$("#select_riesgos").empty();
+		$("#select_riesgos").change();
+
+		$(riesgos).each(function() {
+
+			$("#select_riesgos").append('<option value="' + this.id + '">' + this.name +'</option>');
+
+		})
+	}
+	else if ($("#subneg").val() == '' && $("#risk_category_id").val() == '')
+	{
+		$("#select_riesgos").empty();
+		$("#select_riesgos").change();
+	}
+});
+
+$("#risk_subcategory_id").change(function()
+{
+	if ($("#subneg").val() != '' && $("#risk_subcategory_id").val() != '')
+	{
+		$("#select_riesgos").empty();
+		$("#select_riesgos").change();
+
+
+		$(riesgos).each(function() {
+			//agregamos sólo los riesgos de la subcategoría correspondiente
+			if (this.risk_category_id == $("#risk_subcategory_id").val())
+			{
+				$("#select_riesgos").append('<option value="' + this.id + '">' + this.name +'</option>');
+			}
+		})
+	}
+	else if ($("#risk_subcategory_id").val() == '' && $("#risk_category_id").val() != '')
+	{
+		$("#select_riesgos").empty();
+		$("#select_riesgos").change();
+
+
+		$(riesgos).each(function() {
+			//agregamos sólo los riesgos de la categoría correspondiente
+			if (this.risk_category_id == $("#risk_category_id").val())
+			{
+				$("#select_riesgos").append('<option value="' + this.id + '">' + this.name +'</option>');
+			}
+		})
+	}
+	else
+	{
+		$("#select_riesgos").empty();
+		$("#select_riesgos").change();
+
+		$(riesgos).each(function() {
+			$("#select_riesgos").append('<option value="' + this.id + '">' + this.name +'</option>');
+		})
+	}
+});
+
 </script>
+
 @stop
 

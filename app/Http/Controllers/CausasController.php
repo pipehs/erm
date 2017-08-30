@@ -161,13 +161,21 @@ class CausasController extends Controller
                 $logger = $this->logger;
 
                 $this->validate($request, [
-                    'name' => 'unique:causes',
-                    'description' => 'required',
+                    'name' => 'unique:causes'
                 ]);
+                
+                if (isset($_POST['description']) && $_POST['description'] != '')
+                {
+                    $description = $_POST['description'];
+                }
+                else
+                {
+                    $description = NULL;
+                }
                 
                 $cause = \Ermtool\Cause::create([
                     'name' => $request['name'],
-                    'description' => $request['description'],
+                    'description' => $description,
                     ]);
 
                 if (Session::get('languaje') == 'en')

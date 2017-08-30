@@ -55,9 +55,9 @@ return [
         'mysql' => [
             'driver'    => 'mysql',
             'host'      => 'localhost',
-            'database'  => 'coca_cola',
+            'database'  => 'erm',
             'username'  => 'root',
-            'password'  => '',
+            'password'  => 'fahs2002',
             'charset'   => 'utf8',
             'collation' => 'utf8_unicode_ci',
             'prefix'    => '',

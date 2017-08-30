@@ -112,7 +112,7 @@
 					<table align="center">
 					<tr><td>
 						@foreach ($objectives as $obj)
-							@if ($obj['perspective'] == 3)
+							@if ($obj['perspective'] == 2)
 								<div class="obj_position">
 									<center>
 									@foreach ($obj['impacted'] as $imp)
@@ -139,7 +139,7 @@
 					<table align="center">
 						<tr><td>
 						@foreach ($objectives as $obj)
-							@if ($obj['perspective'] == 2 && $obj['perspective2'] == 1)
+							@if ($obj['perspective'] == 3 && $obj['perspective2'] == 1)
 								<div class="obj_position">
 									<center>
 									@foreach ($obj['impacted'] as $imp)
@@ -159,7 +159,7 @@
 					<table align="center">
 						<tr><td>
 						@foreach ($objectives as $obj)
-							@if ($obj['perspective'] == 2 && $obj['perspective2'] == 2)
+							@if ($obj['perspective'] == 3 && $obj['perspective2'] == 2)
 								<div class="obj_position">
 									<center>
 									@foreach ($obj['impacted'] as $imp)
@@ -179,7 +179,7 @@
 					<table align="center">
 						<tr><td>
 						@foreach ($objectives as $obj)
-							@if ($obj['perspective'] == 2 && $obj['perspective2'] == 3)
+							@if ($obj['perspective'] == 3 && $obj['perspective2'] == 3)
 								<div class="obj_position">
 									<center>
 									@foreach ($obj['impacted'] as $imp)
@@ -199,7 +199,7 @@
 					<table align="center">
 						<tr><td>
 						@foreach ($objectives as $obj)
-							@if ($obj['perspective'] == 2 && $obj['perspective2'] == 4)
+							@if ($obj['perspective'] == 3 && $obj['perspective2'] == 4)
 								<div class="obj_position">
 									<center>
 									@foreach ($obj['impacted'] as $imp)

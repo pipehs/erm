@@ -14,7 +14,7 @@ $("#perspective").change(function() {
 			$("#objectives_id").html(objetivos);
 		});	
 
-		if ($("#perspective").val() != 3) //perspectiva de clientes no tiene subdivisiones
+		if ($("#perspective").val() != 2) //perspectiva de clientes no tiene subdivisiones
 		{	
 			$("#perspective2").attr('required','true');
 			$("#perspective2").removeAttr('disabled');
@@ -31,7 +31,7 @@ $("#perspective").change(function() {
 					perspectivas += '<option value="1" selected>Productividad</option>';
 					perspectivas += '<option value="2">Aumento</option>';
 				}
-				else if (perspective2_id == 2)
+				else if (perspective2_id == 3)
 				{
 					perspectivas += '<option value="1">Productividad</option>';
 					perspectivas += '<option value="2" selected>Aumento</option>';
@@ -43,7 +43,7 @@ $("#perspective").change(function() {
 				}
 				
 			}
-			else if ($("#perspective").val() == 2) //procesos
+			else if ($("#perspective").val() == 3) //procesos
 			{
 				//en caso de estar editando, vemos si que perspectiva 2 esta siendo seleccionada
 				var perspectivas = '<option value="" disabled selected>- Seleccione -</disabled>';

@@ -53,7 +53,7 @@ class KriController extends Controller
                 //seleccionamos todos los kri
                 $kri_query = DB::table('kri')
                         ->join('risks','risks.id','=','kri.risk_id')
-                        ->select('kri.*','risks.name as risk_name','risks.stakeholder_id as risk_stake')
+                        ->select('kri.*','risks.name as risk_name')
                         ->get();
 
                 $i=0;
@@ -128,19 +128,10 @@ class KriController extends Controller
                     $created_at = date_format($lala,"d-m-Y");
 
                     //obtenemos stakeholder
-                    if ($k->risk_stake == 0 || $k->risk_stake == NULL)
-                    {
-                        $stakeholder = $k->risk_stake;
-                    }
-                     else
-                    {
+                    //ACTUALIZACIÓN 18-08-17: Obtenemos responsables del riesgo por cada org
                         //obtenemos stakeholder
-                        $stake = DB::table('stakeholders')
-                                    ->where('id',$k->risk_stake)
-                                    ->select(DB::raw("CONCAT(name, ' ', surnames) AS full_name"))
-                                    ->first();
-                        $stakeholder = $stake->full_name;
-                    }
+                    $stakeholders = \Ermtool\Stakeholder::getStakeholdersFromRisk($k->risk_id);
+                        
                     $kri[$i] = [
                         'id' => $k->id,
                         'name' => $k->name,
@@ -152,7 +143,7 @@ class KriController extends Controller
                         'type' => $tipo,
                         'periodicity' => $periodicity,
                         'risk' => $k->risk_name,
-                        'risk_stakeholder' => $stakeholder,
+                        'stakeholders' => $stakeholders,
                         'eval' => $eval,
                         'description_eval' => $description_eval,
                         'last_evaluation' => $last_eval,
@@ -955,6 +946,8 @@ class KriController extends Controller
                     ->get();
 
             //obtenemos id de stakeholder
+            //ACTUALIZACIÓN 18-08-17: Existen distintos Stakes por Org, por lo que por ahora lo sacaremos
+            /*
             $s = DB::table('risks')
                         ->where('id','=',$id)
                         ->select('stakeholder_id')
@@ -972,7 +965,9 @@ class KriController extends Controller
                             ->select(DB::raw("CONCAT(name,' ', surnames) AS full_name"))
                             ->first();
                 $stakeholder = $stake->full_name;
-            }
+            } */
+
+            $stakeholders = \Ermtool\Stakeholder::getStakeholdersFromRisk($id);
 
             $i=0;
             foreach ($kri_query as $k)
@@ -1034,7 +1029,7 @@ class KriController extends Controller
                     'type' => $tipo,
                     'eval' => $eval,
                     'description_eval' => $description_eval,
-                    'stakeholder' => $stakeholder
+                    'stakeholders' => $stakeholders
                 ];
 
                 $i += 1;

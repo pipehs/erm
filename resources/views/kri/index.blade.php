@@ -61,7 +61,7 @@
 						<th style="vertical-align:top;">Resultado</th>
 						<th style="vertical-align:top;">Descripci&oacute;n de la evaluaci&oacute;n</th>
 						<th style="vertical-align:top;">Riesgo</th>
-						<th style="vertical-align:top;">Responsable del riesgo</th>
+						<th style="vertical-align:top;">Responsables del riesgo - Org</th>
 						<th style="vertical-align:top;">Intervalo de evaluaci&oacute;n</th>
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
@@ -117,10 +117,12 @@
 							<td>{{ $k['description_eval'] }}</td>
 							<td>{{ $k['risk'] }}</td>
 							<td>
-							@if ($k['risk_stakeholder'] == NULL)
-								No se ha especificado
+							@if (empty($k['stakeholders']))
+								No se han definido
 							@else
-								{{ $k['risk_stakeholder'] }}
+								@foreach ($k['stakeholders'] as $s)
+									<li>{{ $s->name }} {{ $s->surnames }} - {{ $s->organization }}</li>
+								@endforeach
 							@endif
 							</td>
 							<td>

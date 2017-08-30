@@ -1,4 +1,3 @@
-
 function agregar_causa()
 {
 			$("#causa").empty();
@@ -76,3 +75,65 @@ function old_efectos()
 			$("#efecto").append(efecto);
 		});
 }
+
+//ACTUALIZACIÓN 16-08-17: según las organizaciones que agreguemos, se deberán cargar posibles subprocesos y responsables de esta organización
+function change_organization() 
+{
+	$('#other_subprocesses').empty()
+
+	if ($('#organization_id').val() == null)
+	{
+		swal('Error','Debe seleccionar al menos una organización que esté expuesta al riesgo para seleccionar subprocesos','error')
+	}
+	else
+	{
+		$('#cargando1').html('<center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center>').delay(2000).html('')
+		$('#cargando2').html('<center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center>').delay(2000).html('')
+
+		$('#organization_id option:selected').each(function() {
+
+	    	var option = '<div class="form-group">'
+	    	option += '<label for="subprocesses_'+$(this).val()+'" class="col-sm-4 control-label">Seleccione subproceso(s) de '+$(this).text()+'</label>'
+	    	option += '<div class="col-sm-5">'
+	    	option += '<select name="subprocesses_'+$(this).val()+'[]" id="subprocesses_'+$(this).val()+'" class="form-control" required="true" multiple>'
+	    	
+	    	$.get('get_subprocesses.'+$(this).val(), function (result) {		
+				//parseamos datos obtenidos
+				var datos = JSON.parse(result)
+				$(datos).each(function() {
+					option += '<option value="'+this.id+'">'+this.name+'</option>'
+				});
+
+				option += '</select></div></div>'
+
+		    	$('#other_subprocesses').append(option)
+	    	});
+
+	    	var option2 = '<div class="form-group">'
+	    	option2 += '<label for="stakeholder_'+$(this).val()+'" class="col-sm-4 control-label">Seleccione responsable de '+$(this).text()+'</label>'
+	    	option2 += '<div class="col-sm-5">'
+	    	option2 += '<select name="stakeholder_'+$(this).val()+'" id="stakeholder_'+$(this).val()+'" class="form-control">'
+	    	option2 += '<option value="">- Seleccione -</option>'
+	    	$.get('get_stakeholders.'+$(this).val(), function (result) {	
+				//parseamos datos obtenidos
+				var datos = JSON.parse(result)
+				$(datos).each(function() {
+					option2 += '<option value="'+this.rut+'">'+this.fullname+'</option>'
+				});
+
+				option2 += '</select></div></div>'
+		    	//alert(option)
+
+		    	$('#other_stakeholders').append(option2)
+	    	});
+	    });
+
+		$('#other_subprocesses').show(500)
+		$('#other_stakeholders').show(500)
+
+
+	}
+
+}
+
+	

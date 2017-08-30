@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Encuestas de evaluación de Riesgos')
+@section('title', 'Encuestas de eventos de Riesgos')
 
 @section('content')
 

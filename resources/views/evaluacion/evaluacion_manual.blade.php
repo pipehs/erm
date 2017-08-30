@@ -56,6 +56,24 @@
 	                	</div>
 	                </div>
 
+	                <div class="form-group">
+						{!!Form::label('Categor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-6">
+							{!!Form::select('risk_category_id',$categories,
+							 	   null, 
+							 	   ['id'=>'risk_category_id','placeholder'=>'- Seleccione -'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
+		               <div class="row">
+		                 <label for="risk_subcategory_id" class='col-sm-4 control-label'>Sub-categor&iacute;a</label>
+		                 <div class="col-sm-6">
+		                    <select id="risk_subcategory_id" name="risk_subcategory_id"></select>
+		                 </div>
+		              </div>
+		            </div>
+
 					<div class="form-group" id="riesgos_objetivos" style="display: none;">
 						{!!Form::label('Riesgos de negocio',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-6">

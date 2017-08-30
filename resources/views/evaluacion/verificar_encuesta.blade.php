@@ -47,10 +47,10 @@
 
 			<div class="form-group">
 				<small>
-			    {!!Form::label('Ingrese su Rut (sin dígito verificador)',null,['class'=>'col-sm-4 control-label'])!!}
+			    {!!Form::label('Ingrese su Rut o DNI (sin puntos ni guiones, sin digito verificador en caso de Chile)',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-3">
-					{!!Form::text('id',null,
-					['class'=>'form-control','required'=>'true','input maxlength'=>'8'])!!}
+					{!!Form::number('id',null,
+					['class'=>'form-control','required'=>'true'])!!}
 				</div>
 				</small>
 			</div>

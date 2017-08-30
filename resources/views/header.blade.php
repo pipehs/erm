@@ -26,7 +26,7 @@
 	<div class="container-fluid expanded-panel">
 		<div class="row">
 			<div id="logo" class="col-xs-12 col-sm-2">
-				<a href="">B-GRC</a>
+				<a href="">B-GRC &nbsp;&nbsp; <!--<img src="assets/img/CocaCola/coca_andina.png" title="Coca Cola Andina" width="90px" height="20px"></img>--></a>
 			</div>
 			<div id="top-panel" class="col-xs-12 col-sm-10">
 				<div class="row">

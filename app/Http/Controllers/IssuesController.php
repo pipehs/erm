@@ -33,7 +33,7 @@ class IssuesController extends Controller
         $this->logger->pushHandler(new FirePHPHandler());
     }
 
-    public function setIssue1($processes,$subprocesses,$risks,$controls,$name,$classification,$recommendations,$plan,$status,$final_date)
+    public function setIssue1($processes,$subprocesses,$risks,$controls,$name,$classification,$recommendations,$plan,$status,$final_date,$responsable)
     {
         try
         {
@@ -49,7 +49,8 @@ class IssuesController extends Controller
                                 'Recommendations' => $recommendations,
                                 'Action Plan' => $plan,
                                 'Status' => $status,
-                                'Plan Deadline' => $final_date
+                                'Plan Deadline' => $final_date,
+                                'Responsable' => $responsable
                             ];
             }
             else
@@ -64,7 +65,8 @@ class IssuesController extends Controller
                                 'Recomendaciones' => $recommendations,
                                 'Plan de acción' => $plan,
                                 'Estado' => $status,
-                                'Fecha límite plan' => $final_date
+                                'Fecha límite plan' => $final_date,
+                                'Responsable' => $responsable
                             ];
             }
 
@@ -77,7 +79,7 @@ class IssuesController extends Controller
         }
     }
 
-    public function setIssue2($objectives,$risks,$controls,$name,$classification,$recommendations,$plan,$status,$final_date)
+    public function setIssue2($objectives,$risks,$controls,$name,$classification,$recommendations,$plan,$status,$final_date,$responsable)
     {
         try
         {
@@ -92,7 +94,8 @@ class IssuesController extends Controller
                                 'Recommendations' => $recommendations,
                                 'Action Plan' => $plan,
                                 'Status' => $status,
-                                'Plan Deadline' => $final_date
+                                'Plan Deadline' => $final_date,
+                                'Responsable' => $responsable
                             ];
             }
             else
@@ -106,7 +109,8 @@ class IssuesController extends Controller
                                 'Recomendaciones' => $recommendations,
                                 'Plan de acción' => $plan,
                                 'Estado' => $status,
-                                'Fecha límite plan' => $final_date
+                                'Fecha límite plan' => $final_date,
+                                'Responsable' => $responsable
                             ];
             }
 
@@ -120,7 +124,7 @@ class IssuesController extends Controller
     }
 
     //set para reporte de excel de hallazgos de organización
-    public function setIssue3($objectives,$name,$classification,$recommendations,$plan,$status,$final_date)
+    public function setIssue3($objectives,$name,$classification,$recommendations,$plan,$status,$final_date,$responsable)
     {
         try
         {
@@ -133,7 +137,8 @@ class IssuesController extends Controller
                                 'Recommendations' => $recommendations,
                                 'Action Plan' => $plan,
                                 'Status' => $status,
-                                'Plan Deadline' => $final_date
+                                'Plan Deadline' => $final_date,
+                                'Responsable' => $responsable
                             ];
             }
             else
@@ -145,7 +150,8 @@ class IssuesController extends Controller
                                 'Recomendaciones' => $recommendations,
                                 'Plan de acción' => $plan,
                                 'Estado' => $status,
-                                'Fecha límite plan' => $final_date
+                                'Fecha límite plan' => $final_date,
+                                'Responsable' => $responsable
                             ];
             }
 
@@ -159,7 +165,7 @@ class IssuesController extends Controller
     }
 
     //set para reporte de excel de auditoría y programas de auditoría
-    public function setIssue4($audit_plans,$audits,$programs,$test,$name,$classification,$recommendations,$plan,$status,$final_date)
+    public function setIssue4($audit_plans,$audits,$programs,$test,$name,$classification,$recommendations,$plan,$status,$final_date,$responsable)
     {
         try
         {
@@ -174,7 +180,8 @@ class IssuesController extends Controller
                                 'Recommendations' => $recommendations,
                                 'Action Plan' => $plan,
                                 'Status' => $status,
-                                'Plan Deadline' => $final_date
+                                'Plan Deadline' => $final_date,
+                                'Responsable' => $responsable
                             ];
             }
             else
@@ -188,7 +195,8 @@ class IssuesController extends Controller
                                 'Recomendaciones' => $recommendations,
                                 'Plan de acción' => $plan,
                                 'Estado' => $status,
-                                'Fecha límite plan' => $final_date
+                                'Fecha límite plan' => $final_date,
+                                'Responsable' => $responsable
                             ];
             }
 
@@ -494,7 +502,7 @@ class IssuesController extends Controller
                 //para cada issue obtenemos datos de plan de acción (si es que hay)
                 $plan = DB::table('action_plans')
                         ->where('issue_id','=',$issue['id'])
-                        ->select('description','final_date','status')
+                        ->select('description','final_date','status','stakeholder_id')
                         ->get();
 
                 if ($plan != NULL)
@@ -511,41 +519,51 @@ class IssuesController extends Controller
                     $datos = $this->datosReporte($issue['element_id'],$kind,$org_id);
                 }
 
+                //ACTUALIZACIÓN 23-08-17: Agregamos responsable al reporte
+                if ($plan[0]->stakeholder_id != NULL)
+                {
+                    $responsable = \Ermtool\Stakeholder::getName($plan[0]->stakeholder_id);
+                }
+                else
+                {
+                    $responsable = 'No se ha definido';
+                }
+
                 if (strstr($_SERVER["REQUEST_URI"],'genexcelissues'))
                 {
                     //DEBO ARREGLAR ESTO!!!!!
                     
                     if ($kind == 0) //Hallazgos de proceso
                     {
-                        $issues[$i] = $this->setIssue1($datos['process'],$datos['subprocesses'],$datos['risks'],$datos['controls'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                        $issues[$i] = $this->setIssue1($datos['process'],$datos['subprocesses'],$datos['risks'],$datos['controls'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date'],$responsable);
                     }
                     if ($kind == 1) //Hallazgos de subproceso
                     {
-                        $issues[$i] = $this->setIssue1($datos['process'],$datos['subprocess'],$datos['risks'],$datos['controls'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                        $issues[$i] = $this->setIssue1($datos['process'],$datos['subprocess'],$datos['risks'],$datos['controls'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date'],$responsable);
                     }
                     if ($kind == 2) //Hallazgos de organización
                     {
-                         $issues[$i] = $this->setIssue3($datos['objectives'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                         $issues[$i] = $this->setIssue3($datos['objectives'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date'],$responsable);
                     }
                     else if ($kind == 3) //Hallazgos de control de proceso
                     {
-                        $issues[$i] = $this->setIssue1($datos['processes'],$datos['subprocesses'],$datos['risks'],$datos['control'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                        $issues[$i] = $this->setIssue1($datos['processes'],$datos['subprocesses'],$datos['risks'],$datos['control'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date'],$responsable);
                     }
                     else if ($kind == 4) //Hallazgos de control de negocio
                     {
-                        $issues[$i] = $this->setIssue2($datos['objectives'],$datos['risks'],$datos['control'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                        $issues[$i] = $this->setIssue2($datos['objectives'],$datos['risks'],$datos['control'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date'],$responsable);
                     }
                     else if ($kind == 5) //Hallazgos de programa de auditoría
                     {
-                        $issues[$i] = $this->setIssue4($datos['audit_plans'],$datos['audits'],$datos['audit_program'],NULL,$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                        $issues[$i] = $this->setIssue4($datos['audit_plans'],$datos['audits'],$datos['audit_program'],NULL,$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date'],$responsable);
                     }
                     else if ($kind == 6) //Hallazgos de auditoría
                     {
-                        $issues[$i] = $this->setIssue4($datos['audit_plans'],$datos['audit'],$datos['audit_programs'],NULL,$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                        $issues[$i] = $this->setIssue4($datos['audit_plans'],$datos['audit'],$datos['audit_programs'],NULL,$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date'],$responsable);
                     }
                     else if ($kind == 7) //Hallazgos de pruebas de auditoría
                     {
-                        $issues[$i] = $this->setIssue4($datos['audit_plans'],$datos['audit'],$datos['audit_programs'],$datos['audit_test'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date']);
+                        $issues[$i] = $this->setIssue4($datos['audit_plans'],$datos['audit'],$datos['audit_programs'],$datos['audit_test'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date'],$responsable);
                     }
                     
                 }
@@ -574,7 +592,8 @@ class IssuesController extends Controller
                         'description' => $issue['description'],
                         'short_des' => $short_des,
                         'short_rec' => $short_rec,
-                        'short_plan' => $short_plan
+                        'short_plan' => $short_plan,
+                        'responsable' => $responsable,
                     ];
                 }
 
@@ -680,6 +699,8 @@ class IssuesController extends Controller
             }
             else if ($kind == 1) //hallazgos de subproceso
             {
+                $controls = "";
+                $risks = "";
                 $subprocess = \Ermtool\Subprocess::find($element_id);
                 $process = \Ermtool\Subprocess::getProcess($subprocess->id);
 
@@ -1706,11 +1727,30 @@ class IssuesController extends Controller
                             $final_date = NULL;
                         }
 
+                        //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance
+                        if (isset($_POST['percentage']) AND $_POST['percentage'] != "")
+                        {
+                            $percentage = $_POST['percentage'];
+                        }
+                        else
+                        {
+                            $percentage = NULL;
+                        }
+
+                        if (isset($_POST['progress_comments']) AND $_POST['progress_comments'] != "")
+                        {
+                            $progress_comments = $_POST['progress_comments'];
+                        }
+                        else
+                        {
+                            $progress_comments = NULL;
+                        }
+
                         $plan = new PlanesAccion;
 
                         $_POST['description_plan'] = eliminarSaltos($_POST['description_plan']);
 
-                        $newplan = $plan->store($issue,$_POST['description_plan'],$stakeholder,$final_date);
+                        $newplan = $plan->store($issue,$_POST['description_plan'],$stakeholder,$final_date,$percentage,$progress_comments);
 
                         $id_action_plan = $newplan->id;
 
@@ -1822,12 +1862,28 @@ class IssuesController extends Controller
 
                 //vemos si es que tiene plan de accion
                 $action_plan = NULL;
-
+                $per = NULL;
                 $action_plan = DB::table('action_plans')
                                 ->where('issue_id','=',$_GET['id'])
                                 ->select('id','stakeholder_id','description','final_date','status')
                                 ->first();
 
+                //ACTUALIZACIÓN 13-08-17: Obtenemos % de avance si es que hay
+                if (!empty($action_plan) AND $action_plan != NULL)
+                {
+                    //primero, obtenemos la máxima fecha de porcentaje de avance
+                    $max_date = DB::table('progress_percentage')
+                                    ->where('action_plan_id','=',$action_plan->id)
+                                    ->max('updated_at');
+
+                    //obtenemos porcentaje y comentarios
+                    $per = DB::table('progress_percentage')
+                            ->where('action_plan_id','=',$action_plan->id)
+                            ->where('updated_at','=',$max_date)
+                            ->select('percentage','comments','updated_at')
+                            ->first();
+                }
+                
 
                 //vemos si es hallazgo de proceso, organización, u otro
                 if ($issue['process_id'] != NULL)
@@ -1842,22 +1898,22 @@ class IssuesController extends Controller
 
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan,'test_id' => $test_id, 'kind' => $_GET['kind']]);
+                        return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan,'test_id' => $test_id, 'kind' => $_GET['kind'],'per'=>$per]);
                     }
                     else
                     {
-                        return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan,'test_id' => $test_id, 'kind' => $_GET['kind']]);
+                        return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan,'test_id' => $test_id, 'kind' => $_GET['kind'],'per'=>$per]);
                     }
                 }
                 else if ($issue['organization_id'] != NULL)
                 {
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind']]);
+                        return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'per'=>$per]);
                     }
                     else
                     {
-                        return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind']]);
+                        return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'per'=>$per]);
                     }
                 }
                 else
@@ -1866,20 +1922,20 @@ class IssuesController extends Controller
                     {
                         if (Session::get('languaje') == 'en')
                         {
-                            return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => NULL]);
+                            return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => NULL,'per'=>$per]);
                         }
                         else
                         {
-                            return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => NULL]);
+                            return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => NULL,'per'=>$per]);
                         } 
                     }
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind']]);
+                        return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'per'=>$per]);
                     }
                     else
                     {
-                        return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind']]);
+                        return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'per'=>$per]);
                     }
                 }
             }
@@ -1945,6 +2001,17 @@ class IssuesController extends Controller
                         {
                             $final_date = NULL;
                         }
+
+                        //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance
+                        if (isset($_POST['percentage2']) AND $_POST['percentage2'] != "")
+                        {
+                            $percentage = $_POST['percentage2'];
+                        }
+
+                        if (isset($_POST['progress_comments2']) AND $_POST['progress_comments2'] != "")
+                        {
+                            $progress_comments = $_POST['progress_comments2'];
+                        }
                     }
                     else
                     {
@@ -1971,6 +2038,25 @@ class IssuesController extends Controller
                         else
                         {
                             $final_date = NULL;
+                        }
+
+                        //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance
+                        if (isset($_POST['percentage']) AND $_POST['percentage'] != "")
+                        {
+                            $percentage = $_POST['percentage'];
+                        }
+                        else
+                        {
+                            $percentage = NULL;
+                        }
+
+                        if (isset($_POST['progress_comments']) AND $_POST['progress_comments'] != "")
+                        {
+                            $progress_comments = $_POST['progress_comments'];
+                        }
+                        else
+                        {
+                            $progress_comments = NULL;
                         }
                     }
 
@@ -2027,18 +2113,21 @@ class IssuesController extends Controller
                                 'status' => $status,
                                 'updated_at' => date('Y-m-d H:i:s')
                             ]);
+
+                        //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance y comentarios de progreso
+                        DB::table('progress_percentage')
+                            ->insert([
+                                'percentage' => $percentage,
+                                'comments' => $progress_comments,
+                                'action_plan_id' => $id_action_plan,
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'updated_at' => date('Y-m-d H:i:s')
+                                ]);
                     }
                     else
                     {
-                        $id_action_plan = DB::table('action_plans')
-                                            ->insertGetId([
-                                                'issue_id' => $GLOBALS['id2'],
-                                                'description' => $description_plan,
-                                                'stakeholder_id' => $stakeholder_id,
-                                                'final_date' => $final_date,
-                                                'status' => $status,
-                                                'updated_at' => date('Y-m-d H:i:s')
-                                            ]);
+                        $plan = new PlanesAccion;
+                        $newplan = $plan->store($GLOBALS['id2'],$description_plan,$stakeholder_id,$final_date,$percentage,$progress_comments);
                     }
                     
                     

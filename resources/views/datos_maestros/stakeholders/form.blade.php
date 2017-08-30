@@ -1,16 +1,47 @@
-
-					<div class="form-group">
-			            {!!Form::label('Rut',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-2">
-							{!!Form::text('id',null,
-							['class'=>'form-control',$required,'input maxlength'=>'8','input minlength'=>'7', $disabled])!!}
-						</div>
-						<div class="col-sm-1">
-						{!!Form::select('dv',$dv, 
-					 	   null, 
-					 	   ['id' => 'el2','placeholder'=>'-',$required,$disabled])!!}
-						</div>
+@if (strstr($_SERVER["REQUEST_URI"],'create'))
+<!-- Actualización 20-08-17: Rut chileno o DNI Extranjero -->
+			<div class="form-group">
+				<label class="col-sm-4 control-label">Nacionalidad</label>
+				<div class="col-sm-3">
+				<div class="radio-inline">
+					<label> 
+						<input type="radio" name="nacionalidad" id="chileno" value="chileno" onclick="nac()">Chileno
+						<i class="fa fa-circle-o"></i>
+					</label>
+				</div>
+				<div class="radio-inline">
+					<label> 
+						<input type="radio" name="nacionalidad" id="extranjero" value="extranjero" onclick="nac()">Extranjero
+						<i class="fa fa-circle-o"></i>
+					</label>
+				</div>
+				</div>
+			</div>
+			
+			<div id="rut" style="display:none;">
+				<div class="form-group">
+			        {!!Form::label('Rut',null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="col-sm-2">
+						{!!Form::text('id',null,
+						['class'=>'form-control','input maxlength'=>'8','input minlength'=>'7', $disabled])!!}
 					</div>
+					<div class="col-sm-1">
+					{!!Form::select('dv',$dv, 
+				 	   null, 
+				 	   ['id' => 'el2','placeholder'=>'-',$disabled])!!}
+					</div>
+				</div>
+			</div>
+			<div id="dni" style="display:none;">
+				<div class="form-group">
+			        {!!Form::label('DNI',null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="col-sm-3">
+						{!!Form::number('id2',null,
+						['class'=>'form-control','input minlength'=>'7', $disabled])!!}
+					</div>
+				</div>
+			</div>
+@endif
 
 					<div class="form-group">
 						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}

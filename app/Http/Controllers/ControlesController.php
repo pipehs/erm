@@ -541,14 +541,15 @@ class ControlesController extends Controller
             else
             {
                 $stakeholders = \Ermtool\Stakeholder::listStakeholders($org);
+                $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.controles.create',['stakeholders'=>$stakeholders,'org'=>$org]);
+                    return view('en.controles.create',['stakeholders'=>$stakeholders,'org'=>$org,'categories' => $categories]);
                 }
                 else
                 {
-                    return view('controles.create',['stakeholders'=>$stakeholders,'org'=>$org]);
+                    return view('controles.create',['stakeholders'=>$stakeholders,'org'=>$org,'categories' => $categories]);
                 }
             }
         }
@@ -754,6 +755,7 @@ class ControlesController extends Controller
                 $risks_selected = array(); //array de riesgos seleccionados previamente
                 $control = \Ermtool\Control::find($id);
                 $stakeholders = \Ermtool\Stakeholder::listStakeholders((int)$org);
+                $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
                 //seleccionamos riesgos de proceso u objetivo que fueron seleccionados previamente (según corresponda)
                 //ACTUALIZACIÓN 02-04-17: Seleccionamos de control_organization_risk
                 //seleccionamos riesgos de proceso seleccionados previamente
@@ -774,15 +776,11 @@ class ControlesController extends Controller
                 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,
-                            'risks_selected'=>json_encode($risks_selected),'org' => (int)$org
-                            ]);
+                    return view('en.controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,'risks_selected'=>json_encode($risks_selected),'org' => (int)$org,'categories' => $categories]);
                 }
                 else
                 {
-                    return view('controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,
-                            'risks_selected'=>json_encode($risks_selected),'org' => (int)$org
-                            ]);
+                    return view('controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,'risks_selected'=>json_encode($risks_selected),'org' => (int)$org,'categories' => $categories]);
                 }
             }
         }
@@ -1683,6 +1681,9 @@ class ControlesController extends Controller
                                 case 5:
                                     $periodicity = "Each time it occurs";
                                     break;
+                                case 6:
+                                    $periodicity = "Quarterly";
+                                    break;
                             }
                         }
                         if ($control->purpose === NULL)
@@ -1777,6 +1778,9 @@ class ControlesController extends Controller
                                     break;
                                 case 5:
                                     $periodicity = "Cada vez que ocurra";
+                                    break;
+                                case 6:
+                                    $periodicity = "Trimestral";
                                     break;
                             }
                         }

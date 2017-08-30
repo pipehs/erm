@@ -23,4 +23,12 @@ class Risk_category extends Model
     {
     	return $this->hasMany('Ermtool\Risk');
     }
+
+    public static function getSubcategories()
+    {
+        return DB::table('risk_categories')
+                ->whereNotNull('risk_category_id')
+                ->select('id','name')
+                ->get();
+    }
 }

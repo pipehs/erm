@@ -159,15 +159,23 @@ class EfectosController extends Controller
             {
                 //Validación: Si la validación es pasada, el código continua
                 $this->validate($request, [
-                    'name' => 'unique:effects',
-                    'description' => 'required',
+                    'name' => 'unique:effects'
                 ]);
 
                 $logger = $this->logger;
 
+                if (isset($_POST['description']) && $_POST['description'] != '')
+                {
+                    $description = $_POST['description'];
+                }
+                else
+                {
+                    $description = NULL;
+                }
+
                 $effect = \Ermtool\Effect::create([
                     'name' => $request['name'],
-                    'description' => $request['description'],
+                    'description' => $description
                     ]);
 
                 if (Session::get('languaje') == 'en')

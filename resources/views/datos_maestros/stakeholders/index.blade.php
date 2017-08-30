@@ -76,7 +76,12 @@
 
 	@foreach($stakeholders as $stakeholder)
 		<tr>
-			<td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
+			<td>
+			@if ($stakeholder['dv'] == null)
+				{{ $stakeholder['id'] }}
+			@else
+				{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
+			@endif
 			<td>{{ $stakeholder['nombre'] }}</td>
 			<td>{{ $stakeholder['apellidos']}}</td>
 			<td><ul>

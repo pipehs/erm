@@ -41,7 +41,7 @@ class EncuestasController extends Controller
 
                         We send to you the following poll for the identification of risk events. Answer each one of the questions associated to the poll. To answer it you have to access to the following link:
 
-                        http://www.ixus.cl/bgrc/identificacion.encuesta.{$id}
+                        http://ec2-18-231-66-236.sa-east-1.compute.amazonaws.com/identificacion.encuesta.{$id}
 
                         Best Regards,
                         Administration.";
@@ -55,7 +55,7 @@ class EncuestasController extends Controller
                     Responda cada una de las preguntas asociadas a la encuesta. 
                     Para responderla deberá acceder al siguiente link.
 
-                    http://www.ixus.cl/bgrc/identificacion.encuesta.{$id}
+                    http://ec2-18-231-66-236.sa-east-1.compute.amazonaws.com/identificacion.encuesta.{$id}
 
                     Saludos cordiales,
                     Administrador.";
@@ -331,6 +331,13 @@ class EncuestasController extends Controller
         {
             $encuesta = \Ermtool\Poll::find($_GET['encuesta_id']);
 
+            //ACTUALIZACIÓN 24-08-17: Veremos si el id es mayor o igual al máximo permitido por INT
+            if ($_GET['id'] >= 2147483647)
+            {
+                //realizaremos división y utilizamos entero
+                $id = $_GET['id'] / 100;
+                $_GET['id'] = (int)$id;
+            }
             //primero, verificamos que el usuario exista
             $user = DB::table('poll_stakeholder')
                         ->where('poll_id','=',$_GET['encuesta_id'])
@@ -743,6 +750,11 @@ class EncuestasController extends Controller
             {
                 return Redirect::to('encuestaresp');
             }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 

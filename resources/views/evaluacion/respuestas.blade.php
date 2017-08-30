@@ -58,7 +58,14 @@
 				@foreach ($user_answers as $answer)
 					@if ($answer['id'] == $riesgo['evaluation_risk_id'])
 						Probabilidad: {{ $answer['probability']}}<br>
-						Impacto: {{ $answer['impact'] }}
+						Impacto: {{ $answer['impact'] }}<br>
+
+						Comentarios:
+						@if ($answer['comments'] != NULL)
+							{{ $answer['comments']}}
+						@else
+							No se agregaron comentarios.
+						@endif 
 						<?php break; ?>
 					@endif		
 				@endforeach

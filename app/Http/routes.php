@@ -78,6 +78,10 @@ Route::get('help', [
 	'as' => 'help', 'uses' => 'HomeController@help'
 	]);
 
+Route::get('pdf_manual', [
+	'as' => 'pdf_manual', 'uses' => 'HomeController@pdfHelp'
+	]);
+
 Route::get('support', [
 	'as' => 'support', 'uses' => 'HomeController@support'
 	]);
@@ -690,7 +694,7 @@ Route::get('controles.get_objective_controls.{org_id}', [
 Route::get('controles.get_subprocess_controls.{org_id}.{subprocess}', [
 	'as' => 'controles.get_subprocess_controls', 'uses' => 'ControlesController@getSubprocessControls']);
 
-// ----Rutas para reportes básicos---- //
+// ---- Rutas para reportes ---- //
 
 Route::get('heatmap', [
 	'as' =>'heatmap', 'uses' => 'EvaluacionRiesgosController@listHeatmap']);
@@ -743,6 +747,15 @@ Route::get('reporte_audits', [
 
 Route::get('genauditreports.{org}', [
 	'as' => 'genauditreports', 'uses' => 'AuditoriasController@generarReporteAuditorias']);
+
+Route::get('reporte_riesgos', [
+	'as' =>'reporte_riesgos', 'uses' => 'EvaluacionRiesgosController@indexReporteRiesgos']);
+
+Route::get('reporte_riesgos2.{org}.{kind}', [
+	'as' => 'reporte_riesgos2', 'uses' => 'EvaluacionRiesgosController@reporteRiesgosCocaCola'
+]);
+
+//--- Fin Reportes ---//
 
 //obtiene datos de auditoría por JSON (a mostrar en reporte de planes de auditoría)
 Route::get('get_audit.{id}', [
@@ -949,7 +962,7 @@ Route::get('auditorias.objetivos.{org}', [
 Route::get('get_objective_risk.{org}', [
 	'as' => 'get_objective_risk', 'uses' => 'RiesgosController@getRiesgosObjetivos']);
 
-//ruta para obtener riesgos de negocio de una organización (al crear plan o evaluar riesgos)
+//ruta para obtener riesgos de proceso de una organización (al crear plan o evaluar riesgos)
 Route::get('get_risk_subprocess.{org}', [
 	'as' => 'get_risk_subprocess', 'uses' => 'RiesgosController@getRiesgosProcesos']);
 

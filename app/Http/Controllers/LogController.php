@@ -69,8 +69,22 @@ class LogController extends Controller
                     $lala = new DateTime($user->created_at);
                     $created_at = date_format($lala, 'd-m-Y');
 
+                    //ACTUALIZACIÓN 24-08-17: Configuramos ID extranjero
+                    if ($user->rest_id != NULL)
+                    {
+                        //lo pasamos a string
+                        $id1 = (string)$user->id;
+                        $id2 = (string)$user->rest_id;
+                        $id_temp = $id1.$id2;
+                        $id_temp = (int)$id_temp;
+                    }
+                    else
+                    {
+                        $id_temp = $user->id;
+                    }
+
                     $users[$i] = [
-                        'id' => $user->id,
+                        'id' => $id_temp,
                         'dv' => $user->dv,
                         'name' => $user->name,
                         'surnames' => $user->surnames,
@@ -148,9 +162,40 @@ class LogController extends Controller
     {
         try
         {
-            //validamos rut
-            $rut = $_POST['id'].'-'.$_POST['dv'];
-            $res = validaRut($rut);
+            global $id;
+            global $dv;
+            //ACTUALIZACIÓN 20-08-17: Validaremos rut sólo si se ingresa Chileno
+            if ($_POST['nacionalidad'] == 'chileno')
+            {
+                //validamos rut
+                $rut = $_POST['id'].'-'.$_POST['dv'];
+                $res = validaRut($rut);
+                $id = $_POST['id'];
+                $dv = $_POST['dv'];
+            }
+            else
+            {
+                //ACTUALIZACIÓN 24-08-17: Veremos si el id es mayor o igual al máximo permitido por INT
+                if ($_POST['id2'] >= 2147483647)
+                {
+                    //realizaremos división y guardamos entero
+                    $id = $_POST['id2'] / 100;
+                    $id = (int)$id;
+
+                    //ahora guardamos resto (utilizamos función substr por si resto parte con 0)
+                    global $id2;
+                    $id2 = (string)$_POST['id2'];
+                    $id2 = substr($id2, -2);
+                    $res = true;
+                    $dv = null;
+                }
+                else
+                {
+                    $res = true;
+                    $id = $_POST['id2'];
+                    $dv = null;
+                }
+            }
 
             if ($res)
             {
@@ -171,14 +216,35 @@ class LogController extends Controller
 
                     $GLOBALS['req']->merge(['password' => Hash::make($GLOBALS['req']->password)]);
 
-                    $user = \Ermtool\User::create($GLOBALS['req']->all());
-
+                    if (isset($GLOBALS['id2']))
+                    {
+                        $user = \Ermtool\User::create([
+                                'id' => $GLOBALS['id'],
+                                'dv' => $GLOBALS['dv'],
+                                'name' => $_POST['name'],
+                                'surnames' => $_POST['surnames'],
+                                'email' => $_POST['email'],
+                                'password' => $GLOBALS['req']['password'],
+                                'rest_id' => $GLOBALS['id2']
+                            ]);
+                    }
+                    else
+                    {
+                        $user = \Ermtool\User::create([
+                                'id' => $GLOBALS['id'],
+                                'dv' => $GLOBALS['dv'],
+                                'name' => $_POST['name'],
+                                'surnames' => $_POST['surnames'],
+                                'email' => $_POST['email'],
+                                'password' => $GLOBALS['req']['password']
+                            ]);
+                    }
                     //agregamos en system_role_user
                     foreach ($GLOBALS['req']['system_roles_id'] as $role)
                     {
                         DB::table('system_role_user')
                             ->insert([
-                                'user_id' => $GLOBALS['req']['id'],
+                                'user_id' => $GLOBALS['id'],
                                 'system_role_id' => $role,
                             ]);
                     }
@@ -316,6 +382,13 @@ class LogController extends Controller
                 }
             }
 
+            //ACTUALIZACIÓN 24-08-17: Ver si id es mayor a máximo de INT
+            if ($id >= 2147483647)
+            {
+                //realizaremos división y guardamos entero
+                $id1 = $id / 100;
+                $id = (int)$id1;
+            }
             $user = \Ermtool\User::find($id);
             $dv = ['0'=>'0','1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9','k'=>'k'];
             //si es create, campo rut estara desbloqueado
@@ -380,6 +453,14 @@ class LogController extends Controller
 
                 $logger = $this->logger;
 
+                //ACTUALIZACIÓN 24-08-17: Ver si id es mayor a máximo de INT
+                if ($GLOBALS['id1'] >= 2147483647)
+                {
+                    //realizaremos división y guardamos entero
+                    $idtemp = $GLOBALS['id1'] / 100;
+                    $GLOBALS['id1'] = (int)$idtemp;
+                }
+
                 $user = \Ermtool\User::find($GLOBALS['id1']);
 
                 $GLOBALS['req']->merge(['password' => Hash::make($GLOBALS['req']->password)]);
@@ -393,7 +474,7 @@ class LogController extends Controller
 
                 //nuevamente eliminaremos los roles anteriores del stakeholder para evitar repeticiones
                 DB::table('system_role_user')->where('user_id',$GLOBALS['id1'])->delete();
-
+                
                 //ahora agregamos en system_role_user
                 foreach ($GLOBALS['req']['system_roles_id'] as $role)
                 {
@@ -444,6 +525,13 @@ class LogController extends Controller
 
                 $logger = $this->logger;
 
+                //ACTUALIZACIÓN 24-08-17: Ver si id es mayor a máximo de INT
+                if ($GLOBALS['id1'] >= 2147483647)
+                {
+                    //realizaremos división y guardamos entero
+                    $idtemp = $GLOBALS['id1'] / 100;
+                    $GLOBALS['id1'] = (int)$idtemp;
+                }
                 //obtenemos nombre para log
                 $user = DB::table('users')
                         ->where('id','=',$GLOBALS['id1'])

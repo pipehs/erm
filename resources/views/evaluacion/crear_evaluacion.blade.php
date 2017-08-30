@@ -54,21 +54,21 @@ En esta secci&oacute;n podr&aacute; crear encuestas para la evaluación de los r
 
 					<div class="form-group">
 						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
+						<div class="col-sm-4">
 							{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
 						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
+						<div class="col-sm-4">
 							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div id="exp_date" class="form-group">
 						{!!Form::label('Fecha Expiraci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
+						<div class="col-sm-4">
 							{!!Form::date('expiration_date',null,['class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)'])!!}
 						</div>
 					</div>
@@ -76,7 +76,7 @@ En esta secci&oacute;n podr&aacute; crear encuestas para la evaluación de los r
 					<div class="form-group">
 	                 	<div class="row">
 	                  		{!!Form::label('Seleccione organización',null,['class'=>'col-sm-4 control-label'])!!}
-	                  		<div class="col-sm-3">
+	                  		<div class="col-sm-4">
 	                    		{!!Form::select('organization_id',$organizations, 
 	                         		null, 
 	                         	['id' => 'org','placeholder'=>'- Seleccione -','required'=>'true'])!!}
@@ -84,9 +84,27 @@ En esta secci&oacute;n podr&aacute; crear encuestas para la evaluación de los r
 	                	</div>
 	                </div>
 
+	                <div class="form-group">
+						{!!Form::label('Categor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::select('risk_category_id',$categories,
+							 	   null, 
+							 	   ['id'=>'risk_category_id','placeholder'=>'- Seleccione -'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
+		               <div class="row">
+		                 <label for="risk_subcategory_id" class='col-sm-4 control-label'>Sub-categor&iacute;a</label>
+		                 <div class="col-sm-4">
+		                    <select id="risk_subcategory_id" name="risk_subcategory_id"></select>
+		                 </div>
+		              </div>
+		            </div>
+
 					<div class="form-group" id="riesgos_objetivos" style="display: none;">
 						{!!Form::label('Riesgos de negocio',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
+						<div class="col-sm-4">
 							<select name="objective_risk_id[]" id="objective_risk_id" multiple="multiple">
 								<!-- Aquí se agregarán los riesgos de negocio de la org seleccionada a través de Jquery -->
 							</select>
@@ -95,7 +113,7 @@ En esta secci&oacute;n podr&aacute; crear encuestas para la evaluación de los r
 
 					<div class="form-group" id="riesgos_procesos" style="display: none;">
 						{!!Form::label('Riesgos de proceso',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
+						<div class="col-sm-4">
 							<select name="risk_subprocess_id[]" id="risk_subprocess_id" multiple="multiple">
 								<!-- Aquí se agregarán los riesgos de proceso de la org seleccionada a través de Jquery -->
 							</select>

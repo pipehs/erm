@@ -75,6 +75,7 @@
 						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Responsable plan<label><input type="text" placeholder="Filtrar" /></label></th>
 					</thead>
 
 				
@@ -91,6 +92,7 @@
 							<td>{{ $issue['plan'] }}</td>
 							<td>{{ $issue['status'] }}</td>
 							<td>{{ $issue['final_date'] }}</td>
+							<td>{{ $issue['responsable'] }}</td>
 						</tr>
 					@endforeach
 
@@ -108,6 +110,7 @@
 						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Responsable plan<label><input type="text" placeholder="Filtrar" /></label></th>
 					</thead>
 
 				
@@ -124,6 +127,7 @@
 							<td>{{ $issue['plan'] }}</td>
 							<td>{{ $issue['status'] }}</td>
 							<td>{{ $issue['final_date'] }}</td>
+							<td>{{ $issue['responsable'] }}</td>
 						</tr>
 					@endforeach
 
@@ -138,6 +142,7 @@
 						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Responsable plan<label><input type="text" placeholder="Filtrar" /></label></th>
 					</thead>
 
 				
@@ -151,6 +156,7 @@
 							<td>{{ $issue['plan'] }}</td>
 							<td>{{ $issue['status'] }}</td>
 							<td>{{ $issue['final_date'] }}</td>
+							<td>{{ $issue['responsable'] }}</td>
 						</tr>
 					@endforeach
 
@@ -168,6 +174,7 @@
 						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Responsable plan<label><input type="text" placeholder="Filtrar" /></label></th>
 					</thead>
 
 				
@@ -184,6 +191,8 @@
 							<td>{{ $issue['plan'] }}</td>
 							<td>{{ $issue['status'] }}</td>
 							<td>{{ $issue['final_date'] }}</td>
+							<td>{{ $issue['responsable'] }}</td>
+
 						</tr>
 					@endforeach
 
@@ -200,6 +209,7 @@
 						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Responsable plan<label><input type="text" placeholder="Filtrar" /></label></th>
 					</thead>
 
 				
@@ -215,6 +225,7 @@
 							<td>{{ $issue['plan'] }}</td>
 							<td>{{ $issue['status'] }}</td>
 							<td>{{ $issue['final_date'] }}</td>
+							<td>{{ $issue['responsable'] }}</td>
 						</tr>
 					@endforeach
 
@@ -231,6 +242,7 @@
 						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Responsable plan<label><input type="text" placeholder="Filtrar" /></label></th>
 					</thead>
 
 				
@@ -246,6 +258,7 @@
 							<td>{{ $issue['plan'] }}</td>
 							<td>{{ $issue['status'] }}</td>
 							<td>{{ $issue['final_date'] }}</td>
+							<td>{{ $issue['responsable'] }}</td>
 						</tr>
 					@endforeach
 
@@ -262,6 +275,7 @@
 						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
 						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Responsable plan<label><input type="text" placeholder="Filtrar" /></label></th>
 					</thead>
 
 				
@@ -277,6 +291,7 @@
 							<td>{{ $issue['plan'] }}</td>
 							<td>{{ $issue['status'] }}</td>
 							<td>{{ $issue['final_date'] }}</td>
+							<td>{{ $issue['responsable'] }}</td>
 						</tr>
 					@endforeach
 				@endif

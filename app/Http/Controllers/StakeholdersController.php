@@ -10,7 +10,6 @@ use Redirect;
 use DB;
 use Auth;
 use DateTime;
-
 //15-05-2017: MONOLOG
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
@@ -81,9 +80,23 @@ class StakeholdersController extends Controller
                     //obtenemos todos los roles a los que pertenece una persona
                     $roles_temp = \Ermtool\Stakeholder::find($persona['id'])->roles;
                     
+                    if ($persona['rest_id'] != NULL)
+                    {
+                        //lo pasamos a string
+                        $id1 = (string)$persona['id'];
+                        $id2 = (string)$persona['rest_id'];
+                        $id_temp = $id1.$id2;
+                        $id_temp = (int)$id_temp;
+                    }
+                    else
+                    {
+                        $id_temp = $persona['id'];
+                    }
+                    
                     foreach ($roles_temp as $role)
                     {
-                         $roles[$k] = array('stakeholder_id'=>$persona['id'],
+                        
+                         $roles[$k] = array('stakeholder_id'=>$id_temp,
                                                      'id'=>$role['id'],
                                                      'nombre'=>$role['name']);
 
@@ -114,7 +127,20 @@ class StakeholdersController extends Controller
                     else
                         $fecha_act = NULL;
 
-                    $stakeholder[$i] = array('id'=>$persona['id'],
+                    //ACTUALIZACIÓN 24-08-17: Configuramos ID extranjero
+                    if ($persona['rest_id'] != NULL)
+                    {
+                        //lo pasamos a string
+                        $id1 = (string)$persona['id'];
+                        $id2 = (string)$persona['rest_id'];
+                        $id_temp = $id1.$id2;
+                        $id_temp = (int)$id_temp;
+                    }
+                    else
+                    {
+                        $id_temp = $persona['id'];
+                    }
+                    $stakeholder[$i] = array('id'=>$id_temp,
                                         'dv'=>$persona['dv'],
                                         'nombre'=>$persona['name'],
                                         'apellidos'=>$persona['surnames'],
@@ -199,18 +225,49 @@ class StakeholdersController extends Controller
             }
             else
             {
-                //validamos rut
-                $rut = $_POST['id'].'-'.$_POST['dv'];
-                $res = validaRut($rut);
+                global $id;
+                global $dv;
+                //ACTUALIZACIÓN 20-08-17: Validaremos rut sólo si se ingresa Chileno
+                if ($_POST['nacionalidad'] == 'chileno')
+                {
+                    //validamos rut
+                    $rut = $_POST['id'].'-'.$_POST['dv'];
+                    $res = validaRut($rut);
+                    $id = $_POST['id'];
+                    $dv = $_POST['dv'];
+                }
+                else
+                {
+                    //ACTUALIZACIÓN 24-08-17: Veremos si el id es mayor o igual al máximo permitido por INT
+                    if ($_POST['id2'] >= 2147483647)
+                    {
+                        //realizaremos división y guardamos entero
+                        $id = $_POST['id2'] / 100;
+                        $id = (int)$id;
+
+                        //ahora guardamos resto (utilizamos función substr por si resto parte con 0)
+                        global $id2;
+                        $id2 = (string)$_POST['id2'];
+                        $id2 = substr($id2, -2);
+                        $res = true;
+                        $dv = null;
+                    }
+                    else
+                    {
+                        $res = true;
+                        $id = $_POST['id2'];
+                        $dv = null;
+                    }
+                    
+                }
 
                 if ($res)
                 {
                     //Validación: Si la validación es pasada, el código continua
                     $this->validate($request, [
                         'id' => 'unique:stakeholders|min:7',
-                        'name' => 'required|max:45|min:4',
-                        'surnames' => 'required|min:4',
-                        'mail' => 'unique:stakeholders',
+                        'name' => 'required|max:255|min:2',
+                        'surnames' => 'required|min:2'
                     ]);
                     DB::transaction(function()
                     {
@@ -230,22 +287,36 @@ class StakeholdersController extends Controller
                             insert into stakeholders
                             (id, dv, name, surnames, mail, position, updated_at, created_at) 
                             values (".$_POST["id"].",'".$_POST['dv']."','".$_POST['name']."','".$_POST['surnames']."','".$_POST['mail']."','".$pos."','".date("Ymd H:i:s")."','".date("Ymd H:i:s")."')"); */
-
-                        $usuario = \Ermtool\Stakeholder::create([
-                            'id' => $_POST['id'],
-                            'dv' => $_POST['dv'],
-                            'name' => $_POST['name'],
-                            'surnames' => $_POST['surnames'],
-                            'position' => $_POST['position'],
-                            'mail' => $_POST['mail']
+                        if (isset($GLOBALS['id2']))
+                        {
+                            $usuario = \Ermtool\Stakeholder::create([
+                                'id' => $GLOBALS['id'],
+                                'dv' => $GLOBALS['dv'],
+                                'name' => $_POST['name'],
+                                'surnames' => $_POST['surnames'],
+                                'position' => $_POST['position'],
+                                'mail' => $_POST['mail'],
+                                'rest_id' => $GLOBALS['id2']
                             ]);
+                        }
+                        else
+                        {
+                            $usuario = \Ermtool\Stakeholder::create([
+                                'id' => $GLOBALS['id'],
+                                'dv' => $GLOBALS['dv'],
+                                'name' => $_POST['name'],
+                                'surnames' => $_POST['surnames'],
+                                'position' => $_POST['position'],
+                                'mail' => $_POST['mail']
+                            ]);
+                        }
 
                         //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
                         foreach($_POST['organization_id'] as $organization_id)
                         {
                             DB::table('organization_stakeholder')->insert([
                                 'organization_id'=>$organization_id,
-                                'stakeholder_id'=>$_POST['id']
+                                'stakeholder_id'=>$GLOBALS['id']
                                 ]);
                         }
 
@@ -260,7 +331,7 @@ class StakeholdersController extends Controller
 
                                 //insertamos relación
                                 DB::table('role_stakeholder')->insert([
-                                        'stakeholder_id' => $_POST['id'],
+                                        'stakeholder_id' => $GLOBALS['id'],
                                         'role_id' => $role->id
                                         ]);
                             }
@@ -270,7 +341,7 @@ class StakeholdersController extends Controller
                                 foreach ($_POST['role_id'] as $role_id) //insertamos cada rol seleccionado
                                 {
                                     DB::table('role_stakeholder')->insert([
-                                        'stakeholder_id' => $_POST['id'],
+                                        'stakeholder_id' => $GLOBALS['id'],
                                         'role_id' => $role_id
                                         ]);
                                 }
@@ -338,6 +409,13 @@ class StakeholdersController extends Controller
             }
             else
             {
+                //ACTUALIZACIÓN 24-08-17: Ver si id es mayor a máximo de INT
+                if ($id >= 2147483647)
+                {
+                    //realizaremos división y guardamos entero
+                    $id1 = $id / 100;
+                    $id = (int)$id1;
+                }
                 $types_selected = array();
                 $orgs_selected = array();
                 $stakeholder = \Ermtool\Stakeholder::find($id);
@@ -411,6 +489,14 @@ class StakeholdersController extends Controller
                 DB::transaction(function()
                 {
                     $logger = $this->logger;
+
+                    //ACTUALIZACIÓN 24-08-17: Ver si id es mayor a máximo de INT
+                    if ($GLOBALS['id1'] >= 2147483647)
+                    {
+                        //realizaremos división y guardamos entero
+                        $idtemp = $GLOBALS['id1'] / 100;
+                        $GLOBALS['id1'] = (int)$idtemp;
+                    }
 
                     $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
 
@@ -494,12 +580,20 @@ class StakeholdersController extends Controller
             }
             else
             {
-                $logger = $this->logger;
-
                 global $id1;
                 $id1 = $id;
                 DB::transaction(function()
                 {
+                    $logger = $this->logger;
+
+                    //ACTUALIZACIÓN 24-08-17: Ver si id es mayor a máximo de INT
+                    if ($GLOBALS['id1'] >= 2147483647)
+                    {
+                        //realizaremos división y guardamos entero
+                        $idtemp = $GLOBALS['id1'] / 100;
+                        $GLOBALS['id1'] = (int)$idtemp;
+                    }
+
                     $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
                     $stakeholder->status = 1;
                     $stakeholder->save();
@@ -515,7 +609,7 @@ class StakeholdersController extends Controller
 
                     $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado el usuario (stakeholder) con Rut: '.$GLOBALS['id1'].' llamado: '.$stakeholder->name.' '.$stakeholder->surnames.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 });
-                return Redirect::to('/stakeholders');
+                //return Redirect::to('/stakeholders');
             }
         }
         catch (\Exception $e)
@@ -540,6 +634,14 @@ class StakeholdersController extends Controller
                 DB::transaction(function()
                 {
                     $logger = $this->logger;
+
+                    //ACTUALIZACIÓN 24-08-17: Ver si id es mayor a máximo de INT
+                    if ($GLOBALS['id1'] >= 2147483647)
+                    {
+                        //realizaremos división y guardamos entero
+                        $idtemp = $GLOBALS['id1'] / 100;
+                        $GLOBALS['id1'] = (int)$idtemp;
+                    }
 
                     $stakeholder = \Ermtool\Stakeholder::find($GLOBALS['id1']);
                     $stakeholder->status = 0;
@@ -600,6 +702,15 @@ class StakeholdersController extends Controller
             $res = 1;
 
             DB::transaction(function() {
+                $logger = $this->logger;
+
+                //ACTUALIZACIÓN 24-08-17: Ver si id es mayor a máximo de INT
+                if ($GLOBALS['id1'] >= 2147483647)
+                {
+                    //realizaremos división y guardamos entero
+                    $idtemp = $GLOBALS['id1'] / 100;
+                    $GLOBALS['id1'] = (int)$idtemp;
+                }
 
                 //evaluation_risk_stakeholder
                 $rev = DB::table('evaluation_risk_stakeholder')
@@ -669,7 +780,7 @@ class StakeholdersController extends Controller
 
                                                 if (empty($rev))
                                                 {
-                                                    $rev = DB::table('risks')
+                                                    $rev = DB::table('organization_risk')
                                                         ->where('stakeholder_id','=',$GLOBALS['id1'])
                                                         ->select('id')
                                                         ->get();

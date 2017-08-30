@@ -156,4 +156,13 @@ class Organization extends Model
         }
         
     }
+
+    public static function getOrganizationByOrgRisk($org_risk_id)
+    {
+        return DB::table('organizations')
+                ->join('organization_risk','organization_risk.organization_id','=','organizations.id')
+                ->where('organization_risk.id','=',$org_risk_id)
+                ->select('organizations.id','organizations.name','organizations.description')
+                ->first();
+    }
 }

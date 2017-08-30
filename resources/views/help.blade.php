@@ -59,6 +59,13 @@ body {
 					</ul>
 				</div>
 			@endif
+
+			{!!Form::open(['route'=>'pdf_manual','method'=>'POST','class'=>'form-horizontal'])!!}
+				{!!Form::hidden('cuerpo',null,['id' => 'cuerpo'])!!}
+				{!!Form::submit("Exportar a PDF",['class'=>'btn btn-danger'])!!}
+			{!!Form::close()!!}
+			{!! link_to_route('pdf_manual', $title = 'Exportar a PDF', $parameters = NULL, $attributes = ['class'=>'btn btn-danger'])!!}
+
 		<div id="manual">
 			<p>En esta secci&oacute;n podr&aacute; visualizar todas las funciones correspondientes al sistema (haga click sobre las im&aacute;genes para poder verlas en tamaño completo).</p>
 

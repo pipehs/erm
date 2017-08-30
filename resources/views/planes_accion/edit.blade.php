@@ -87,16 +87,22 @@
 				$('#description_plan2').val($('#description_plan').val());
 				$('#stakeholder_id2').val($('#stakeholder_id').val())
 				$('#final_date2').val($('#final_date').val())
+				$('#percentage2').val($('#percentage').val())
+				$('#progress_comments2').val($('#progress_comments').val())
 
 				$('#description_plan').attr('disabled','disabled');
 				$('#stakeholder_id').attr('disabled','disabled');
 				$('#final_date').attr('disabled','disabled');
+				$('#percentage').attr('disabled','disabled');
+				$('#progress_comments').attr('disabled','disabled');
 			}
 			else
 			{
 				$('#description_plan').attr('disabled',false);
 				$('#stakeholder_id').attr('disabled',false);
 				$('#final_date').attr('disabled',false);
+				$('#percentage').attr('disabled',false);
+				$('#progress_comments').attr('disabled',false);
 			}
 		});
 

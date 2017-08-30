@@ -61,7 +61,7 @@ class AuditoriasController extends Controller
             else
             {
                 $planes = array();
-                $plans = \Ermtool\Audit_plan::orderBy('created_ats','DESC')->get();
+                $plans = \Ermtool\Audit_plan::orderBy('created_at','DESC')->get();
                 $i = 0; //contador de planes
                 foreach ($plans as $plan)
                 {

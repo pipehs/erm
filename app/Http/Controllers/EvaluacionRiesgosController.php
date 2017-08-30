@@ -47,10 +47,11 @@ class EvaluacionRiesgosController extends Controller
             foreach ($evaluation_risk as $risk)
             {
                 //obtenemos posibles respuestas (si es que ya se ha ingresado)
+                //ACTUALIZACIÓN 22-08-17: Seleccionamos también los comentarios
                 $respuestas = DB::table('evaluation_risk_stakeholder')
                                     ->where('evaluation_risk_id','=',$risk->id)
                                     ->where('stakeholder_id','=',$rut)
-                                    ->select('evaluation_risk_id as id','probability','impact')
+                                    ->select('evaluation_risk_id as id','probability','impact','comments')
                                     ->get();
 
                 foreach ($respuestas as $respuesta)
@@ -58,6 +59,7 @@ class EvaluacionRiesgosController extends Controller
                     $user_answers[$j] = array(
                                 'impact'=>$respuesta->impact,
                                 'probability' => $respuesta->probability,
+                                'comments' => $respuesta->comments,
                                 'id'=>$respuesta->id,
                             );
                     $j += 1;
@@ -110,7 +112,7 @@ class EvaluacionRiesgosController extends Controller
 
                         We send to you the following poll for risk assessments. You must assign a value on probability and impact for each one of the risks associated to the survey. To answer this poll you have to access to the following link:
 
-                        http://www.ixus.cl/bgrc/evaluacion_encuesta.{$id}
+                        http://ec2-18-231-66-236.sa-east-1.compute.amazonaws.com/evaluacion_encuesta.{$id}
 
                         Best Regards,
                         Administration.";
@@ -121,9 +123,9 @@ class EvaluacionRiesgosController extends Controller
             //Mensaje predeterminado al enviar encuestas
             $mensaje = "Estimado Usuario.
 
-                        Le enviamos la siguiente encuesta para la evaluación de riesgos. Ud deberá asignar un valor de probabilidad y criticidad para cada uno de los riesgos asociados a la encuesta. Para responderla deberá acceder al siguiente link.
+                        Le enviamos la siguiente encuesta para la evaluación de riesgos. Ud deberá asignar un valor de probabilidad e impacto para cada uno de los riesgos asociados a la encuesta. Para responderla deberá acceder al siguiente link.
 
-                        http://www.ixus.cl/bgrc/evaluacion_encuesta.{$id}
+                        http://ec2-18-231-66-236.sa-east-1.compute.amazonaws.com/evaluacion_encuesta.{$id}
 
                         Saludos cordiales,
                         Administrador.";
@@ -151,17 +153,17 @@ class EvaluacionRiesgosController extends Controller
 
                 //ACTUALIZACIÓN 25-07: En vez de obtener y enviar riesgos, enviamos organización para poder seleccionar
                 $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
-
+                $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
                 //juntamos riesgos
                 //$riesgos = $riesgos_sub+$riesgos_obj; no se pueden juntar ya que se puede repetir id
 
                 if (Session::get('languaje') == 'en')
                 { 
-                    return view('en.evaluacion.crear_evaluacion',['organizations'=>$organizations]);
+                    return view('en.evaluacion.crear_evaluacion',['organizations'=>$organizations,'categories' => $categories]);
                 }
                 else
                 {
-                    return view('evaluacion.crear_evaluacion',['organizations'=>$organizations]);
+                    return view('evaluacion.crear_evaluacion',['organizations'=>$organizations,'categories' => $categories]);
                 }
             }
         }
@@ -236,7 +238,7 @@ class EvaluacionRiesgosController extends Controller
                 {
                     DB::transaction(function () {
                         $logger = $this->logger;
-                        if (!isset($_POST['objective_risk_id']) && !isset($_POST['objective_risk_id'])) //no se ingresó ningún riesgo
+                        if (!isset($_POST['objective_risk_id']) && !isset($_POST['risk_subprocess_id'])) //no se ingresó ningún riesgo
                         {
                             Session::flash('error','Debe ingresar a lo menos un riesgo');
                             $GLOBALS['verificador'] = 1;
@@ -561,6 +563,7 @@ class EvaluacionRiesgosController extends Controller
                         //guardamos el riesgo de subproceso junto a su id de evaluation_risk para crear form de encuesta
                         foreach ($risk1 as $r)
                         {
+                            $org_id = $r->org_id;
                             //obtenemos subprocesos relacionados
                             $subobj = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($r->id,$r->org_id);
 
@@ -580,6 +583,7 @@ class EvaluacionRiesgosController extends Controller
 
                         foreach ($risk1 as $r)
                         {
+                            $org_id = $r->org_id;
                             //obtenemos objetivos relacionados
                             $subobj = \Ermtool\Objective::getObjectivesFromOrgRisk($r->id,$r->org_id);
 
@@ -605,9 +609,8 @@ class EvaluacionRiesgosController extends Controller
                 {
                     $tipos_impacto = \Ermtool\Eval_description::getImpactValues(1);
                     $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
-
-                    return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
-                            'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id,'user_answers' => $user_answers]);
+                    $org_name = \Ermtool\Organization::name($org_id);
+                    return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id,'user_answers' => $user_answers,'org_name' => $org_name]);
                 }
             }
         }
@@ -643,6 +646,13 @@ class EvaluacionRiesgosController extends Controller
             {   
                 $res = array();
 
+                //ACTUALIZACIÓN 24-08-17: Veremos si el id es mayor o igual al máximo permitido por INT
+                if ($_POST['id'] >= 2147483647)
+                {
+                    //realizaremos división y utilizamos entero
+                    $id = $_POST['id'] / 100;
+                    $_POST['id'] = (int)$id;
+                }
                 //primero, verificamos que el usuario exista
                 $user = DB::table('evaluation_stakeholder')
                             ->where('evaluation_id','=',$_POST['encuesta_id'])
@@ -667,19 +677,22 @@ class EvaluacionRiesgosController extends Controller
                 {   
                     //cada uno de los riesgos de la evaluación
                     $res = $this->getEvalRisks($_POST['encuesta_id'],$user->stakeholder_id);
+                    
+                    //ACTUALIZACIÓN 23-08-17: Obtenemos nombre org
+                    $org_name = $res['riesgos'][0]['org'];
                     if (Session::get('languaje') == 'en')
                     {
                         $tipos_impacto = \Ermtool\Eval_description::getImpactValues(2); //2 es inglés
                         $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(2);
                         
-                        return view('en.evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id]);
+                        return view('en.evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id,'org_name' => $org_name]);
                     }
                     else
                     {
                         $tipos_impacto = \Ermtool\Eval_description::getImpactValues(1);
                         $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
 
-                        return view('evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id]);
+                        return view('evaluacion.encuesta',['encuesta'=>$encuesta->name,'riesgos'=>$res['riesgos'],'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$_POST['encuesta_id'],'user_answers' => $res['user_answers'],'stakeholder'=>$user->stakeholder_id,'org_name' => $org_name]);
                     }
                 }
             }
@@ -801,7 +814,14 @@ class EvaluacionRiesgosController extends Controller
         try
         {
             //primero verificamos si el rut ingresado corresponde a algún stakeholder
-            //ACTUALIZACIÓN 24-01: Si es que la evaluación es manual, se debe verificar que el usuario exista en la tabla users
+            //ACTUALIZACIÓN 24-01-17: Si es que la evaluación es manual, se debe verificar que el usuario exista en la tabla users
+            //ACTUALIZACIÓN 24-08-17: Veremos si el id es mayor o igual al máximo permitido por INT
+            if ($request['rut'] >= 2147483647)
+            {
+                //realizaremos división y utilizamos entero
+                $id = $request['rut'] / 100;
+                $request['rut'] = (int)$id;
+            }
             if (isset($_POST['tipo']) && $_POST['tipo'] == 0)
             {
                 $stakeholder = \Ermtool\User::find($request['rut']);
@@ -865,12 +885,21 @@ class EvaluacionRiesgosController extends Controller
                                 //ahora calculamos riesgo residual para ese riesgo
                                 $controls->calcResidualRisk($var->organization_id,$var->risk_id);
 
+                                if (isset($_POST['comments_'.$risk_id]) && $_POST['comments_'.$risk_id] != '') //si es que se agregaron comentarios
+                                {
+                                    $comments = $_POST['comments_'.$risk_id];
+                                }
+                                else
+                                {
+                                    $comments = NULL;
+                                }
                                 //insertamos en evaluation_risk_stakeholder
                                 DB::table('evaluation_risk_stakeholder')->insert([
                                     'evaluation_risk_id'=>$evaluation_risk[$i],
                                     'stakeholder_id'=>$_POST['rut'],
                                     'probability'=>$_POST['proba_'.$risk_id.'_subprocess'],
-                                    'impact'=>$_POST['criticidad_'.$risk_id.'_subprocess']
+                                    'impact'=>$_POST['criticidad_'.$risk_id.'_subprocess'],
+                                    'comments' => $comments
                                 ]);
 
                                 $i += 1;  
@@ -898,12 +927,22 @@ class EvaluacionRiesgosController extends Controller
                                 //ahora calculamos riesgo residual para ese riesgo
                                 $controls->calcResidualRisk($var->organization_id,$var->risk_id);
 
+                                if (isset($_POST['comments_'.$risk_id]) && $_POST['comments_'.$risk_id] != '') //si es que se agregaron comentarios
+                                {
+                                    $comments = $_POST['comments_'.$risk_id];
+                                }
+                                else
+                                {
+                                    $comments = NULL;
+                                }
+
                                 //insertamos en evaluation_risk_stakeholder
                                 DB::table('evaluation_risk_stakeholder')->insert([
                                 'evaluation_risk_id'=>$evaluation_risk[$i],
                                 'stakeholder_id'=>$_POST['rut'],
                                 'probability'=>$_POST['proba_'.$risk_id.'_objective'],
-                                'impact'=>$_POST['criticidad_'.$risk_id.'_objective']
+                                'impact'=>$_POST['criticidad_'.$risk_id.'_objective'],
+                                'comments' => $comments,
                                 ]);
 
                                 $i += 1; 
@@ -915,12 +954,22 @@ class EvaluacionRiesgosController extends Controller
                     {
                         foreach ($_POST['evaluation_risk_id'] as $evaluation_risk) //para cada riesgo de la encuesta hacemos un insert
                         {
-                                DB::table('evaluation_risk_stakeholder')->insert([
+                            if (isset($_POST['comments_'.$evaluation_risk]) && $_POST['comments_'.$evaluation_risk] != '') //si es que se agregaron comentarios
+                            {
+                                $comments = $_POST['comments_'.$evaluation_risk];
+                            }
+                            else
+                            {
+                                $comments = NULL;
+                            }
+
+                            DB::table('evaluation_risk_stakeholder')->insert([
                                     'evaluation_risk_id' => $evaluation_risk,
                                     'stakeholder_id' => $_POST['rut'],
                                     'probability'=> $_POST['proba_'.$evaluation_risk],
-                                    'impact' => $_POST['criticidad_'.$evaluation_risk]
-                                    ]);  
+                                    'impact' => $_POST['criticidad_'.$evaluation_risk],
+                                    'comments' => $comments
+                                ]);  
                 
                                 //actualizamos promedio de probabilidad e impacto en tabla evaluation_risk
                                 
@@ -1317,19 +1366,33 @@ class EvaluacionRiesgosController extends Controller
                                 //ACTUALIZACIÓN 25-07: OBTENEMOS DATOS DEL RIESGO Y LOS POSIBLES RIESGOS ASOCIADOS
                                 $riesgo_temp = \Ermtool\Risk::find($evaluation->risk);
                                 //$objectives = $riesgo_temp->objectives ----> NO SIRVE MUESTRA OBJ. DE OTRAS ORGANIZACIONES
-                                $objectives = DB::table('objectives')
+                                if ($_GET['kind'] == 0) //riesgos de proceso
+                                {
+                                    $subobj = DB::table('subprocesses')
+                                            ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                                            ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                                            ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
+                                            ->where('organization_subprocess.organization_id','=',$_GET['organization_id'])
+                                            ->select('subprocesses.name')
+                                            ->get();
+                                }
+                                else if ($_GET['kind'] == 1) //riesgos de negocio
+                                {
+                                    $subobj = DB::table('objectives')
                                             ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
                                             ->where('objective_risk.risk_id','=',$riesgo_temp->id)
                                             ->where('objectives.organization_id','=',$_GET['organization_id'])
                                             ->select('objectives.name')
                                             ->get();
+                                }
+                                
 
                                 //eliminamos posibles espacios que puedan llevar a error en descripción
                                 $description = preg_replace('(\n)',' ',$riesgo_temp->description);
                                 $description = preg_replace('(\r)',' ',$description);
 
                                 $riesgos[$i] = array('name' => $riesgo_temp->name,
-                                                    'subobj' => $objectives,
+                                                    'subobj' => $subobj,
                                                     'description' => $description);
 
                                 $i += 1;
@@ -1410,14 +1473,15 @@ class EvaluacionRiesgosController extends Controller
             {
                 //obtenemos organizaciones
                 $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+                $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.evaluacion.evaluacion_manual',['organizations' => $organizations]);
+                    return view('en.evaluacion.evaluacion_manual',['organizations' => $organizations,'categories' => $categories]);
                 }
                 else
                 {
-                    return view('evaluacion.evaluacion_manual',['organizations' => $organizations]);
+                    return view('evaluacion.evaluacion_manual',['organizations' => $organizations,'categories' => $categories]);
                 }
             }
         }
@@ -1517,8 +1581,8 @@ class EvaluacionRiesgosController extends Controller
                     DB::table('evaluation_risk')
                         ->where('evaluation_risk.id',$evaluation_risk->id)
                         ->update([
-                            'avg_probability' => $request['probability_'.$evaluation_risk->id],
-                            'avg_impact' => $request['impact_'.$evaluation_risk->id]
+                            'avg_probability' => $_POST['probability_'.$evaluation_risk->id],
+                            'avg_impact' => $_POST['impact_'.$evaluation_risk->id]
                             ]);
 
                     //actualizamos atributo consolidation en tabla evaluations
@@ -1749,12 +1813,21 @@ class EvaluacionRiesgosController extends Controller
 
                 foreach ($_POST['evaluation_risk_id'] as $evaluation_risk) //para cada riesgo de la encuesta hacemos un insert
                 {
+                            if (isset($_POST['comments_'.$evaluation_risk]) && $_POST['comments_'.$evaluation_risk] != '') //si es que se agregaron comentarios
+                            {
+                                $comments = $_POST['comments_'.$evaluation_risk];
+                            }
+                            else
+                            {
+                                $comments = NULL;
+                            }
                             DB::table('evaluation_risk_stakeholder')
                                 ->where('evaluation_risk_id','=',$evaluation_risk)
                                 ->where('stakeholder_id','=',$_POST['rut'])
                                 ->update([
                                 'probability'=> $_POST['proba_'.$evaluation_risk],
-                                'impact' => $_POST['criticidad_'.$evaluation_risk]
+                                'impact' => $_POST['criticidad_'.$evaluation_risk],
+                                'comments' => $comments 
                                 ]);  
             
                             //actualizamos promedio de probabilidad e impacto en tabla evaluation_risk
@@ -1884,6 +1957,294 @@ class EvaluacionRiesgosController extends Controller
             enviarMailSoporte($e);
             return view('errors.query',['e' => $e]);
         }
+    }
+
+    //ACTUALIZACIÓN 28-08-17: Reporte Semáforos
+    public function indexReporteRiesgos()
+    {
+        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.reportes.riesgos',['organizations'=>$organizations]);
+        }
+        else
+        {
+            return view('reportes.riesgos',['organizations'=>$organizations]);
+        }
+    }
+    public function reporteRiesgosCocaCola($org,$kind)
+    {
+
+        //try{
+        //obtenemos todos los riesgos específicos de la organización
+
+        //obtenemos subcategories
+        $risk_subcategories = \Ermtool\Risk_category::getSubcategories();
+
+        //$risks = array();
+        $cont_categories = array();
+        $i = 0;
+        foreach ($risk_subcategories as $subcategory)
+        {
+            $categories[$i] = ['id' => $subcategory->id,'name' => $subcategory->name];
+            $cont_categories[$i] = 0;
+            $i += 1;
+        }       
+                //controlado
+
+                $control = array(); //define si un riesgo está siendo controlado o no
+
+                $riesgo_temp = array();
+                $riesgos = array();
+                $i = 0;
+
+                $ano = date('Y');
+                $mes = date('m');
+                $dia = date('d');
+
+                $subs = FALSE;
+
+                if (isset($_GET['kind']) && $_GET['kind'] == 0) //evaluaciones de riesgos de procesos
+                {
+                    //---- consulta multiples join para obtener los subprocesos evaluados relacionados a la organización ----//
+                    //para riesgos inherente 
+                    $evaluations = \Ermtool\Evaluation::getEvaluationRiskSubprocess($_GET['organization_id'],NULL,NULL,$subs,$ano,$mes,$dia);
+
+                    $consolidados = \Ermtool\Evaluation::getEvaluationRiskSubprocess(NULL,NULL,NULL,$subs,$ano,$mes,$dia);  
+                }
+                else if (isset($_GET['kind']) && $_GET['kind'] == 1) //evaluaciones de riesgos de negocio
+                {
+                    $evaluations = \Ermtool\Evaluation::getEvaluationObjectiveRisk($_GET['organization_id'],NULL,NULL,$subs,$ano,$mes,$dia); 
+                }
+
+                if (isset($evaluations) && $evaluations != null && !empty($evaluations))
+                {
+                    //inherente
+                    $prom_proba_in = array();
+                    $prom_criticidad_in = array();
+                    if ($org != 0 && $org != NULL)
+                    {
+                        $riesgos = $this->getEvaluatedRisks($org,$evaluations,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,$categories,$cont_categories,$risk_subcategories);
+                    }
+                    else
+                    {
+                        $riesgos = $this->getEvaluatedRisks($_GET['organization_id'],$evaluations,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,$categories,$cont_categories,$risk_subcategories);
+                    }
+                }        
+
+
+                if (isset($consolidados) && $consolidados != null && !empty($consolidados))
+                {
+                    //inherente
+                    $prom_proba_in = array();
+                    $prom_criticidad_in = array();
+                    $riesgos_consolidados = $this->getEvaluatedRisks(NULL,$consolidados,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,$categories,$cont_categories,$risk_subcategories);
+                }   
+
+                //obtenemos nombre de organización
+                if ($org != 0 && $org != NULL)
+                {
+                   $organization = \Ermtool\Organization::name($org); 
+                }
+                else
+                {
+                    $organization = \Ermtool\Organization::name($_GET['organization_id']);
+                }
+                //Return
+
+                if (Session::get('languaje') == 'en')
+                {
+                    //retornamos la misma vista con datos (inglés)
+                    return view('en.reportes.riesgos',['riesgos'=>$riesgos,'riesgos_consolidados'=>$riesgos_consolidados,'risk_subcategories' => $risk_subcategories,'control' => $control,'kind' => $_GET['kind'],'cont_categories' => $cont_categories,'categories' => $categories,'organization' => $organization]);
+                }
+                else
+                {
+                    //$count1 = count($riesgos);
+                    //$count2 = count($riesgos_consolidados);
+                    return view('reportes.riesgos',['riesgos'=>$riesgos,'riesgos_consolidados'=>$riesgos_consolidados,'risk_subcategories' => $risk_subcategories,'control' => $control,'kind' => $_GET['kind'],'cont_categories' => $cont_categories,'categories' => $categories,'organization' => $organization]);
+                } 
+                
+        //}
+        //catch (\Exception $e)
+        //{
+        //    enviarMailSoporte($e);
+        //    return view('errors.query',['e' => $e]);
+        //}
+    }
+
+    public function getEvaluatedRisks($org,$evaluations,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,$categories,$cont_categories,$risk_subcategories)
+    {
+        $i = 0;
+        foreach ($evaluations as $evaluation)
+        {
+            $updated_at_in = DB::table('evaluation_risk')
+                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                    ->where('evaluation_risk.organization_risk_id','=',$evaluation->risk_id)
+                    ->where('evaluations.consolidation','=',1)
+                    ->where('evaluations.type','=',1)
+                    ->where('evaluations.updated_at','<=',date($ano.$mes.$dia.' 23:59:59'))
+                    ->max('evaluations.updated_at');
+
+                    //$updated_at_in = str_replace('-','',$updated_at_in);
+
+
+            //ACTUALIZACIÓN 22-11-16: Obtendremos los riesgos controlados a través de la tabla controlled_risk sólo para la organización y el tipo seleccionado
+            $updated_at_ctrl = DB::table('controlled_risk')
+                    ->join('organization_risk','organization_risk.id','=','controlled_risk.organization_risk_id')
+                    ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
+                    ->where('controlled_risk.created_at','<=',date($ano.$mes.$dia.' 23:59:59'))
+                    ->max('controlled_risk.created_at');
+
+                    //$updated_at_ctrl = str_replace('-','',$updated_at_ctrl);
+                           
+
+            //obtenemos promedio de probabilidad e impacto
+            $proba_impacto_in = DB::table('evaluation_risk')
+                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                    ->where('evaluations.updated_at','=',$updated_at_in)
+                    ->where('evaluation_risk.organization_risk_id','=',$evaluation->risk_id)
+                    ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                    ->first();
+
+
+            //proba controlado (si es que hay)
+            if (isset($updated_at_ctrl) && $updated_at_ctrl != NULL)
+            {
+                //ACTUALIZACIÓN 01-12: Obtenemos valor de riesgo controlado de controlled_risk_criteria, según la evaluación de controlled_risk
+                $eval = DB::table('controlled_risk')
+                        ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
+                        ->where('controlled_risk.created_at','=',$updated_at_ctrl)
+                        ->select('results')
+                        ->first();
+
+                //calculamos severidad y exposición al riesgo (dejaremos los nombres proba_ctrl para exposición, e impacto_ctrl para severidad para no modificar mucho la vista actual)
+                $impacto_ctrl = $proba_impacto_in->avg_probability * $proba_impacto_in->avg_impact;
+                //obtenemos exposición (1-X%) dividiendo el valor residual por la severidad
+                $proba_ctrl = $eval->results / $impacto_ctrl;
+            }
+
+            //guardamos proba en $prom_proba
+            $prom_proba_in[$i] = $proba_impacto_in->avg_probability;
+            $prom_criticidad_in[$i] = $proba_impacto_in->avg_impact;
+
+            //prom_proba_ctrl para controlado (si es que hay)
+            if (isset($proba_ctrl) && isset($impacto_ctrl))
+            {
+                $prom_proba_ctrl[$i] = $proba_ctrl;
+                $prom_impacto_ctrl[$i] = $impacto_ctrl;
+                $control[$i] = 1;
+            }
+            else
+            {
+                $prom_proba_ctrl[$i] = 0;
+                $prom_impacto_ctrl[$i] = 0;
+            }
+
+            //unseteamos variable de proba_impacto_ctrl para que no se repita
+            unset($proba_ctrl);
+            unset($impacto_ctrl);
+
+            //ACTUALIZACIÓN 25-07: OBTENEMOS DATOS DEL RIESGO Y LOS POSIBLES RIESGOS ASOCIADOS
+            $riesgo_temp = \Ermtool\Risk::find($evaluation->risk);
+            //$objectives = $riesgo_temp->objectives ----> NO SIRVE MUESTRA OBJ. DE OTRAS ORGANIZACIONES
+            if (isset($_GET['kind']) && $_GET['kind'] == 0) //riesgos de proceso
+            {
+                if ($_GET['organization_id'] == NULL)
+                {
+                    $subobj = DB::table('subprocesses')
+                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
+                        ->select('subprocesses.name')
+                        ->get();
+                }
+                else
+                {
+                    $subobj = DB::table('subprocesses')
+                    ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                    ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
+                    ->where('organization_subprocess.organization_id','=',$_GET['organization_id'])
+                    ->select('subprocesses.name')
+                    ->get();
+                }
+                
+            }
+            else if (isset($_GET['kind']) && $_GET['kind'] == 1) //riesgos de negocio
+            {
+                if ($org == NULL)
+                {
+                    $subobj = DB::table('objectives')
+                        ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
+                        ->where('objective_risk.risk_id','=',$riesgo_temp->id)
+                        ->select('objectives.name')
+                        ->get();
+                }
+                else
+                {
+                    $subobj = DB::table('objectives')
+                        ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
+                        ->where('objective_risk.risk_id','=',$riesgo_temp->id)
+                        ->where('objectives.organization_id','=',$_GET['organization_id'])
+                        ->select('objectives.name')
+                        ->get();
+                }
+            }
+                                
+            //obtenemos categoría
+            $risk_category = \Ermtool\Risk_category::name($riesgo_temp->risk_category_id);
+            //eliminamos posibles espacios que puedan llevar a error en descripción
+            $description = preg_replace('(\n)',' ',$riesgo_temp->description);
+            $description = preg_replace('(\r)',' ',$description);
+            $comments = preg_replace('(\n)',' ',$riesgo_temp->comments);
+            $comments = preg_replace('(\r)',' ',$comments);
+
+            $j = 0;
+
+            //contamos y asignamos cateogoría
+            foreach ($risk_subcategories as $category)
+            {
+                if ($category->id == $riesgo_temp->risk_category_id)
+                {
+                    $cont_categories[$j] += 1;
+                    break;
+                }
+                $j += 1;
+            }
+
+            //obtenemos nombre de responsable
+            if ($org == NULL)
+            {
+                $stake = \Ermtool\Stakeholder::getStakeholdersFromRisk($evaluation->risk);
+            }
+            else
+            {
+                $stake = \Ermtool\Stakeholder::getRiskStakeholder($org,$evaluation->risk);
+
+                if (!$stake && $stake != NULL && empty($stake))
+                {
+                    $stake = \Ermtool\Stakeholder::getName($stake->id);
+                }
+                else
+                {
+                    $stake = 'No definido';
+                }
+            }
+            $riesgos[$i] = [
+                'name' => $riesgo_temp->name,
+                'subobj' => $subobj,
+                'description' => $description,
+                'risk_category_id' => $riesgo_temp->risk_category_id,
+                'risk_category' => $risk_category,
+                'comments' => $comments,
+                'exposicion' => $prom_proba_ctrl[$i] * $prom_impacto_ctrl[$i],
+                'responsable' => $stake,
+            ];
+
+            $i += 1;
+        }
+
+        return $riesgos;   
     }
 
 }

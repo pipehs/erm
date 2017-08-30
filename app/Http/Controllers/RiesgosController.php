@@ -49,7 +49,8 @@ class RiesgosController extends Controller
                 $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
                 //ACTUALIZACIÓN 02-03-17: Agregamos filtro de categorías de riesgos (todas las categorías)
-                $categories = \Ermtool\Risk_category::where('status',0)->lists('name','id');
+                //ACT 17-08-17: Mostramos sólo categorías principales
+                $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
 
                 if (Session::get('languaje') == 'en')
                 {
@@ -80,7 +81,7 @@ class RiesgosController extends Controller
             {
                 $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
                 //ACTUALIZACIÓN 02-03-17: Agregamos filtro de categorías de riesgos (todas las categorías)
-                $categories = \Ermtool\Risk_category::where('status',0)->lists('name','id');
+                $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
 
                 $org = \Ermtool\Organization::find($_GET['organization_id']);
 
@@ -88,7 +89,12 @@ class RiesgosController extends Controller
                 $relacionados = array();
                 $i = 0; //contador de riesgos
 
-                if (isset($_GET['risk_category_id']))
+                //ACTUALIZACIÓN 18-08-17: Vemos si se agregó subcategoría
+                if (isset($_GET['risk_subcategory_id']) && $_GET['risk_subcategory_id'] != '')
+                {
+                    $category = $_GET['risk_subcategory_id'];
+                }
+                else if (isset($_GET['risk_category_id']))
                 {
                     $category = $_GET['risk_category_id'];
                 }
@@ -298,7 +304,7 @@ class RiesgosController extends Controller
             else
             {
                 //categorias de riesgo
-                $categorias = \Ermtool\Risk_category::where('status',0)->lists('name','id');
+                $categorias = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
 
                 //causas preingresadas
                 $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
@@ -414,13 +420,21 @@ class RiesgosController extends Controller
                                 $description = $_POST['description'];
                             }
 
-                            if (!isset($_POST['risk_category_id']) || $_POST['risk_category_id'] == "")
+                            //ACTUALIZACIÓN 18-08-17: Vemos si se agregó subcategoría
+                            if (isset($_POST['risk_subcategory_id']) && $_POST['risk_subcategory_id'] != '')
                             {
-                                $risk_category_id = NULL;
+                                $risk_category_id = $_POST['risk_subcategory_id'];
                             }
                             else
                             {
-                                $risk_category_id = $_POST['risk_category_id'];
+                                if (!isset($_POST['risk_category_id']) || $_POST['risk_category_id'] == "")
+                                {
+                                    $risk_category_id = NULL;
+                                }
+                                else
+                                {
+                                    $risk_category_id = $_POST['risk_category_id'];
+                                }
                             }
 
                             if (!isset($_POST['expected_loss']) || $_POST['expected_loss'] == "")
@@ -441,6 +455,17 @@ class RiesgosController extends Controller
                                 $expiration_date = $_POST['expiration_date'];
                             }
 
+                            //ACTUALIZACIÓN 26-08-17: Agregado comentarios o posibles comentarios al crear riesgo
+                            if (!isset($_POST['comments']) || $_POST['comments'] == "")
+                            {
+                                $comments = NULL;
+                            }
+                            else
+                            {
+                                $comments = $_POST['comments'];
+                                $comments = eliminarSaltos($comments);
+                            }
+
                             $description = eliminarSaltos($description);
 
                             $risk = \Ermtool\Risk::create([
@@ -450,8 +475,9 @@ class RiesgosController extends Controller
                                 'type2'=>1,
                                 'expiration_date'=>$expiration_date,
                                 'risk_category_id'=>$risk_category_id,
-                                'stakeholder_id'=>$stake,
+                                //'stakeholder_id'=>$stake,
                                 'expected_loss'=>$expected_loss,
+                                'comments' => $comments
                                 ]);
 
                             //vemos si se agrego alguna causa nueva
@@ -541,17 +567,41 @@ class RiesgosController extends Controller
                         }
 
                         //ACTUALIZACIÓN 29-03-17: Agregamos en tabla organization_risk
-                        $organization = \Ermtool\Organization::find($_POST['org_id']);
-                        $organization->risks()->attach($risk->id);
+                        //ACTUALIZACIÓN 16-08-17: Agregamos aquí también stakeholder_id
+                        //$organization = \Ermtool\Organization::find($_POST['org_id']);
+                        //$organization->risks()->attach($risk->id);
 
+                        \Ermtool\Risk::insertOrganizationRisk($_POST['org_id'],$risk->id,$stake);
 
-                        //ahora para cada posible organización agregada
+                        //ACTUALIZACIÓN 16-08-17: Agregamos riesgo y subproceso para otras organizaciones
                         if (isset($_POST['organization_id']) && $_POST['organization_id'] != "")
                         {
                             foreach ($_POST['organization_id'] as $org)
                             {
-                                $organization = \Ermtool\Organization::find($org);
-                                $organization->risks()->attach($risk->id);
+                                foreach($_POST['subprocesses_'.$org] as $sub)
+                                {
+                                    //primero verificamos que el subproceso no exista previamente
+                                    $risk_subprocess = DB::table('risk_subprocess')
+                                                        ->where('risk_id','=',$risk->id)
+                                                        ->where('subprocess_id','=',$sub)
+                                                        ->get(['id']);
+
+                                    if (empty($risk_subprocess) || $risk_subprocess == null) //agregamos el risk_subprocess
+                                    {
+                                        $subprocess = \Ermtool\Subprocess::find($sub);
+                                        $subprocess->risks()->attach($risk->id); 
+                                    } 
+                                }
+
+                                //ahora agregamos organization_risk con responsable (si es que se agregó)
+                                if (isset($_POST['stakeholder_'.$org]) && $_POST['stakeholder_'.$org] != '' && !empty($_POST['stakeholder_'.$org]))
+                                {
+                                    \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,$_POST['stakeholder_'.$org]);
+                                }
+                                else
+                                {
+                                    \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,null);
+                                }
                             }
                         }
 
@@ -674,7 +724,7 @@ class RiesgosController extends Controller
                     }
                 }
                 //categorias de riesgo
-                $categorias = \Ermtool\Risk_category::where('status',0)->lists('name','id');
+                $categorias = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
                 //causas
                 $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
                 //efectos
@@ -710,26 +760,30 @@ class RiesgosController extends Controller
                 $riesgos_tipo = \Ermtool\Risk::where('status',0)->where('type2',0)->lists('name','id');
 
                 //obtenemos lista de stakeholders
-                $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
+                $stakeholders = \Ermtool\Stakeholder::listStakeholders($_GET['org']);
+
+                //ACT 17-08-17: Obtenemos stakeholder_id de organization_risk
+                $stakeholder = \Ermtool\Stakeholder::getRiskStakeholder($_GET['org'],$risk->id);
 
                 //ACTUALIZACIÓN 29-03-17: SELECCIONAMOS SI SE DESEA AGREGAR A OTRAS ORGANIZACIONES
-                $organizations = \Ermtool\Organization::organizationsWithoutRisk($id);
+                //ACT 17-08-17: No lo haremos al editar 
+                //$organizations = \Ermtool\Organization::organizationsWithoutRisk($id);
 
                 if (Session::get('languaje') == 'en')
                 {
                     if ($risk->type == 0)
                     {
                         return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
-                                            'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders,
+                                            'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,
                                             'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,
-                                            'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org'],'organizations' => $organizations]);
+                                            'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org']]);
                     }
                     else
                     {
                         return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
-                                            'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders,
+                                            'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,
                                             'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,
-                                            'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org'],'organizations' => $organizations]);
+                                            'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org']]);
                     }
                 }
                 else
@@ -737,16 +791,16 @@ class RiesgosController extends Controller
                     if ($risk->type == 0)
                     {
                         return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
-                                            'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders,
+                                            'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,
                                             'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,
-                                            'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org'],'organizations' => $organizations]);
+                                            'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org']]);
                     }
                     else
                     {
                         return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,
-                                            'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders,
+                                            'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,
                                             'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,
-                                            'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org'],'organizations' => $organizations]);
+                                            'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org']]);
                     }
                 }
             }
@@ -893,8 +947,7 @@ class RiesgosController extends Controller
                                         ->delete();
                                 }
                             }
-                        }
-                        
+                        }            
 
                         //lo mismo ahora para efectos
                         $efectos = DB::table('effect_risk')
@@ -988,6 +1041,7 @@ class RiesgosController extends Controller
                         }
 
                         //ahora para cada posible organización agregada
+                        /* ACTUALIZACIÓN 17-08-17: No agregaremos organizaciones al editar
                         if (isset($_POST['organization_id']) && $_POST['organization_id'] != "")
                         {
                             foreach ($_POST['organization_id'] as $org)
@@ -995,7 +1049,7 @@ class RiesgosController extends Controller
                                 $organization = \Ermtool\Organization::find($org);
                                 $organization->risks()->attach($riesgo->id);
                             }
-                        }
+                        } */
 
                         if($GLOBALS['evidence'] != NULL)
                         {
@@ -1017,13 +1071,21 @@ class RiesgosController extends Controller
                             $description = $_POST['description'];
                         }
 
-                        if (!isset($_POST['risk_category_id']) || $_POST['risk_category_id'] == "")
+                        //ACTUALIZACIÓN 18-08-17: Vemos si se agregó subcategoría
+                        if (isset($_POST['risk_subcategory_id']) && $_POST['risk_subcategory_id'] != '')
                         {
-                            $risk_category_id = NULL;
+                            $risk_category_id = $_POST['risk_subcategory_id'];
                         }
                         else
                         {
-                            $risk_category_id = $_POST['risk_category_id'];
+                            if (!isset($_POST['risk_category_id']) || $_POST['risk_category_id'] == "")
+                            {
+                                $risk_category_id = NULL;
+                            }
+                            else
+                            {
+                                $risk_category_id = $_POST['risk_category_id'];
+                            }
                         }
 
                         if (!isset($_POST['expected_loss']) || $_POST['expected_loss'] == "")
@@ -1043,6 +1105,17 @@ class RiesgosController extends Controller
                             $expiration_date = $_POST['expiration_date'];
                         }
 
+                        //ACTUALIZACIÓN 26-08-17: Agregado comentarios o posibles comentarios al crear riesgo
+                        if (!isset($_POST['comments']) || $_POST['comments'] == "")
+                        {
+                            $comments = NULL;
+                        }
+                        else
+                        {
+                            $comments = $_POST['comments'];
+                            $comments = eliminarSaltos($comments);
+                        }
+
                         $description = eliminarSaltos($description);
                         
                         $riesgo->name = $_POST['name'];
@@ -1051,7 +1124,16 @@ class RiesgosController extends Controller
                         $riesgo->type2 = 1;
                         $riesgo->risk_category_id = $risk_category_id;
                         $riesgo->expected_loss = $expected_loss;
-                        $riesgo->stakeholder_id = $stake;
+                        $riesgo->comments = $comments;
+                        //$riesgo->stakeholder_id = $stake;
+
+                        //ACTUALIZACIÓN 17-08-17: Actualizamos stakeholder en organization_risk
+                        DB::table('organization_risk')
+                            ->where('organization_id','=',$_POST['org_id'])
+                            ->where('risk_id','=',$riesgo->id)
+                            ->update([
+                                'stakeholder_id' => $stake
+                                ]);
 
                         $riesgo->save();
 
@@ -1090,7 +1172,7 @@ class RiesgosController extends Controller
             {
                 $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
                 //ACTUALIZACIÓN 02-03-17: Agregamos filtro de categorías de riesgos (todas las categorías)
-                $categories = \Ermtool\Risk_category::where('status',0)->lists('name','id');
+                $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
 
                 if (Session::get('languaje') == 'en')
                 {
@@ -1121,16 +1203,22 @@ class RiesgosController extends Controller
             {
                 $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
                 //ACTUALIZACIÓN 02-03-17: Agregamos filtro de categorías de riesgos (todas las categorías)
-                $categories = \Ermtool\Risk_category::where('status',0)->lists('name','id');
+                $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
 
                 if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //si no se está generando excel
                 {
                     $value = $_GET['kind'];
                     $org = $_GET['organization_id'];
 
-                    if (isset($_GET['risk_category_id']))
+                    //ACTUALIZACIÓN 21-08-17: Vemos si hay subcategoría
+                    if (isset($_GET['risk_subcategory_id']) && $_GET['risk_subcategory_id'] != '')
                     {
-                        $category = $_GET['risk_category_id'];
+                        $category = $_GET['risk_subcategory_id'];
+                    }
+
+                    else if (isset($_GET['risk_category_id']) && $_GET['risk_category_id'] != '')
+                    {
+                        $category = $_GET['risk_category_id'];   
                     }
                     else
                     {
@@ -1644,7 +1732,7 @@ class RiesgosController extends Controller
                                 }
                                 else
                                 {
-                                    $datos[$i] = ['id' => $control->id,
+                                    $datos[$i] = ['id' => $risk->id,
                                                 'Organization' => $org_name,
                                                 'Objective' => $objetivos,
                                                 'Risk' => $risk->name,
@@ -1685,7 +1773,7 @@ class RiesgosController extends Controller
                                 }
                                 else
                                 {
-                                    $datos[$i] = ['id' => $control->id,
+                                    $datos[$i] = ['id' => $risk->id,
                                                 'Organización' => $org_name,
                                                 'Objetivos' => $objetivos,
                                                 'Riesgo' => $risk->name,
@@ -1821,7 +1909,7 @@ class RiesgosController extends Controller
 
                                         if (empty($rev))
                                         {
-                                                //para verificar que sea parar todos los objective_risk
+                                            //para verificar que sea parar todos los objective_risk
 
                                             $rev = DB::table('control_organization_risk')
                                                 ->where('organization_risk_id','=',$risk->id)
@@ -1888,6 +1976,7 @@ class RiesgosController extends Controller
                                         $risk_subprocesses = DB::table('risk_subprocess')
                                                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                                                         ->where('organization_subprocess.organization_id','=',$GLOBALS['org'])
+                                                        ->where('risk_subprocess.risk_id','=',$GLOBALS['id1'])
                                                         ->select('risk_subprocess.id')
                                                         ->get();
 
@@ -2093,8 +2182,8 @@ class RiesgosController extends Controller
     //Función obtiene riesgos de proceso a través de JSON al crear plan de pruebas
     public function getRiesgosProcesos($org)
     {
-        try
-        {
+        //try
+        //{
             if (Auth::guest())
             {
                 return view('login');
@@ -2108,18 +2197,18 @@ class RiesgosController extends Controller
                 usort($results, array($this,"cmp"));
                 return json_encode($results);
             }
-        }
+        /*}
         catch (\Exception $e)
         {
             enviarMailSoporte($e);
             return view('errors.query',['e' => $e]);
-        }   
+        }   */
     }
 
     public function getEvaluationData($risks)
     {
-        try
-        {
+        //try
+       //{
             $results = array();
             $i = 0; //contador de riesgos de negocio
             foreach ($risks as $risk)
@@ -2155,16 +2244,16 @@ class RiesgosController extends Controller
                         {
                             switch ($evaluation->avg_probability)
                             {
-                                case 1:
+                                case ($evaluation->avg_probability >= 1 && $evaluation->avg_probability < 2):
                                     $proba = 'Very improbable';
                                     break;
-                                case 2:
-                                    $proba = 'unlikely';
+                                case ($evaluation->avg_probability >= 2 && $evaluation->avg_probability < 3):
+                                    $proba = 'Unlikely';
                                     break;
-                                case 3:
+                                case ($evaluation->avg_probability >= 3 && $evaluation->avg_probability < 4):
                                     $proba = 'Possible';
                                     break;
-                                case 4:
+                                case ($evaluation->avg_probability >= 4 && $evaluation->avg_probability < 5):
                                     $proba = 'Likely';
                                     break;
                                 case 5:
@@ -2173,16 +2262,16 @@ class RiesgosController extends Controller
                             }
                             switch ($evaluation->avg_impact)
                             {
-                                case 1:
+                                case ($evaluation->avg_impact >= 1 && $evaluation->avg_impact < 2):
                                     $impact = 'Despicable';
                                     break;
-                                case 2:
+                                case ($evaluation->avg_impact >= 2 && $evaluation->avg_impact < 3):
                                     $impact = 'Less';
                                     break;
-                                case 3:
+                                case ($evaluation->avg_impact >= 3 && $evaluation->avg_impact < 4):
                                     $impact = 'Moderate';
                                     break;
-                                case 4:
+                                case ($evaluation->avg_impact >= 4 && $evaluation->avg_impact < 5):
                                     $impact = 'Severe';
                                     break;
                                 case 5:
@@ -2192,36 +2281,38 @@ class RiesgosController extends Controller
                         }
                         else
                         {
+                            //ACTUALIZACIÓN 26-08-17: Puede ser FLOAT, por lo que se debe hacer por rangos
                             switch ($evaluation->avg_probability)
                             {
-                                case 1:
+                                case ($evaluation->avg_probability >= 1 && $evaluation->avg_probability < 2):
                                     $proba = 'Muy poco probable';
                                     break;
-                                case 2:
+                                case ($evaluation->avg_probability >= 2 && $evaluation->avg_probability < 3):
                                     $proba = 'Poco probable';
                                     break;
-                                case 3:
+                                case ($evaluation->avg_probability >= 3 && $evaluation->avg_probability < 4):
                                     $proba = 'Intermedio';
                                     break;
-                                case 4:
+                                case ($evaluation->avg_probability >= 4 && $evaluation->avg_probability < 5):
                                     $proba = 'Probable';
                                     break;
                                 case 5:
                                     $proba = 'Muy probable';
                                     break;
                             }
+
                             switch ($evaluation->avg_impact)
                             {
-                                case 1:
+                                case ($evaluation->avg_impact >= 1 && $evaluation->avg_impact < 2):
                                     $impact = 'Muy poco impacto';
                                     break;
-                                case 2:
+                                case ($evaluation->avg_impact >= 2 && $evaluation->avg_impact < 3):
                                     $impact = 'Poco impacto';
                                     break;
-                                case 3:
+                                case ($evaluation->avg_impact >= 3 && $evaluation->avg_impact < 4):
                                     $impact = 'Intermedio';
                                     break;
-                                case 4:
+                                case ($evaluation->avg_impact >= 4 && $evaluation->avg_impact < 5):
                                     $impact = 'Alto impacto';
                                     break;
                                 case 5:
@@ -2237,6 +2328,8 @@ class RiesgosController extends Controller
                     }
                     $results[$i] = [
                                 'name' => $risk->risk_name,
+                                'description' => $risk->description,
+                                'risk_category_id' => $risk->risk_category_id,
                                  'id' => $risk->id,
                                  'avg_probability' => $avg_probability,
                                  'avg_impact' => $avg_impact,
@@ -2248,12 +2341,12 @@ class RiesgosController extends Controller
             }
 
             return $results;
-        }
-        catch (\Exception $e)
-        {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
-        }
+        //}
+        //catch (\Exception $e)
+        //{
+        //    enviarMailSoporte($e);
+        //    return view('errors.query',['e' => $e]);
+        //}
     }
 
     /*

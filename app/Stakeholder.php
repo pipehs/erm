@@ -10,7 +10,7 @@ use Carbon;
 class Stakeholder extends Model
 {
     
-    protected $fillable = ['id','dv','name','surnames','role','position','mail','organization_id','status'];
+    protected $fillable = ['id','dv','name','surnames','role','position','mail','organization_id','status','rest_id'];
     //eliminamos created_at y updated_at
     //public $timestamps = false;
 
@@ -70,6 +70,25 @@ class Stakeholder extends Model
         }
 
         return $stakeholders;
+    }
+
+    public static function getRiskStakeholder($org,$risk)
+    {
+        return DB::table('organization_risk')
+                        ->where('organization_id','=',$org)
+                        ->where('risk_id','=',$risk)
+                        ->select('stakeholder_id as id')
+                        ->first();
+    }
+
+    public static function getStakeholdersFromRisk($risk)
+    {
+        return DB::table('stakeholders')
+            ->join('organization_risk','organization_risk.stakeholder_id','=','stakeholders.id')
+            ->join('organizations','organizations.id','=','organization_risk.organization_id')
+            ->where('organization_risk.risk_id','=',$risk)
+            ->select('stakeholders.name','stakeholders.surnames','organizations.name as organization')
+            ->get();
     }
 }
  

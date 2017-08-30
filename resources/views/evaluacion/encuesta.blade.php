@@ -38,7 +38,7 @@
 				<div class="move"></div>
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
-
+			<span><b>Organización asociada: {{ $org_name }}</b></span>
 			@if(Session::has('message'))
 				<div class="alert alert-danger alert-dismissible" role="alert">
 					{{ Session::get('message') }}
@@ -59,10 +59,10 @@
 			@if ($tipo == 0)
 				<div class="form-group">
 					<small>
-				    {!!Form::label('Ingrese su Rut (sin dígito verificador)',null,['class'=>'col-sm-4 control-label'])!!}
+				    {!!Form::label('Ingrese su Rut o DNI (sin dígito verificador en caso de Chile)',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
-						{!!Form::text('rut',null,
-						['class'=>'form-control','required'=>'true','input maxlength'=>'8'])!!}
+						{!!Form::number('rut',null,
+					['class'=>'form-control','required'=>'true'])!!}
 					</div>
 					</small>
 				</div>
@@ -90,7 +90,7 @@
 				@endforeach
 				<b><p style="color: blue;">Descripci&oacute;n Riesgo</b>: 
 				{{ $riesgo['description'] }}</p><br>
-				Probabilidad:<br>
+				<b>Probabilidad:</b><br>
 				@for($i=1; $i<=5; $i++)
 				<div class="radio-inline">
 					<label>
@@ -114,7 +114,7 @@
 				</div>
 				@endfor
 				<br><br>
-				Impacto:<br>
+				<b>Impacto:</b><br>
 				@for($i=1; $i<=5; $i++)
 				<div class="radio-inline">
 					<label>
@@ -137,6 +137,23 @@
 					</label>
 				</div>
 				@endfor
+				<br><br>
+				<b>Comentarios (opcional):</b>
+				@if ($tipo == 1)
+					<?php $cont = 0; //lo mismo para comentarios ?>
+					@foreach ($user_answers as $answer)
+						@if ($answer['id'] == $riesgo['evaluation_risk_id'] && $answer['comments'] != NULL)
+							<textarea name="comments_{{$riesgo['evaluation_risk_id']}}" class="form-control" rows="3" cols="3">{{ $answer['comments'] }}</textarea>
+							<?php $cont += 1; ?>
+						@endif
+					@endforeach
+
+					@if ($cont == 0)
+						<textarea name="comments_{{$riesgo['evaluation_risk_id']}}" class="form-control" rows="3" cols="3"></textarea>
+					@endif
+				@else
+					<textarea name="comments_{{$riesgo['org_risk_id']}}" class="form-control" rows="3" cols="3"></textarea>
+				@endif
 				<hr>
 			@endforeach
 			@if ($tipo == 1)

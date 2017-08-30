@@ -66,6 +66,15 @@
 				  </div>
 				</div>
 
+				<div class="form-group">
+	               <div class="row">
+	                 <label for="risk_subcategory_id" class='col-sm-4 control-label'>Seleccione sub-categor&iacute;a de Riesgo o Riesgo General (opcional)</label>
+	                 <div class="col-sm-3">
+	                    <select id="risk_subcategory_id" name="risk_subcategory_id"></select>
+	                 </div>
+	              </div>
+	            </div>
+
                 <div class="form-group" id="tipo">
 	                <div class="row">
 	                  {!!Form::label('Seleccione tipo de matriz',null,['class'=>'col-sm-4 control-label'])!!}

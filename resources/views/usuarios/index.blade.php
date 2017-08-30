@@ -56,7 +56,7 @@
 
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 			<thead>
-			<th>Rut<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Rut / DNI<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Nombre completo<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>E-mail<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Fecha agregado<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -66,7 +66,12 @@
 			</thead>
 			@foreach ($users as $user)
 				<tr>
-				<td>{{ $user['id'] }}-{{ $user['dv'] }}
+				<td>
+				@if ($user['dv'] == null)
+					{{ $user['id'] }}
+				@else
+					{{ $user['id'] }}-{{ $user['dv'] }}
+				@endif
 				<td>{{ $user['name'] }} {{ $user['surnames']}}</td>
 				<td>{{ $user['email'] }}</td>
 				<td>{{ $user['created_at'] }}</td>

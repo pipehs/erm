@@ -58,9 +58,17 @@ class AuthController extends Controller
      */
     protected function create(array $data)
     {
+        if ($data['nacionalidad'] == 'chileno')
+        {
+            $dv = $data['dv'];
+        }
+        else
+        {
+            $dv = null;
+        }
         return User::create([
             'id' => $data['id'],
-            'dv' => $data['dv'],
+            'dv' => $dv,
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),

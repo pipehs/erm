@@ -1,3 +1,4 @@
+		<div id="cargando"><br></div>		
 			@if (isset($objetivos))
 					<div class="form-group">
 						{!!Form::label('Seleccione objetivos involucrados',null,['class'=>'col-sm-4 control-label'])!!}
@@ -84,20 +85,35 @@
 							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
 						</div>
 					</div>
+
 					<div class="form-group">
 						{!!Form::label('Categor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
 							{!!Form::select('risk_category_id',$categorias,
 							 	   null, 
-							 	   ['id'=>'categoria','placeholder'=>'- Seleccione -'])!!}
+							 	   ['id'=>'risk_category_id','placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
+
+					<div class="form-group">
+		               <div class="row">
+		                 <label for="risk_subcategory_id" class='col-sm-4 control-label'>Sub-categor&iacute;a</label>
+		                 <div class="col-sm-5">
+		                    <select id="risk_subcategory_id" name="risk_subcategory_id"></select>
+		                 </div>
+		              </div>
+		            </div>
+
 					<div class="form-group">
 						{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
-							{!!Form::select('stakeholder_id',$stakeholders,
-							 	   null, 
+						@if (isset($stakeholder))
+							{!!Form::select('stakeholder_id',$stakeholders,$stakeholder->id, 
 							 	   ['id'=>'stakeholder','placeholder'=>'- Seleccione -'])!!}
+						@else
+							{!!Form::select('stakeholder_id',$stakeholders,null, 
+							 	   ['id'=>'stakeholder','placeholder'=>'- Seleccione -'])!!}
+						@endif
 						</div>
 					</div>
 					<div id="exp_date" class="form-group">
@@ -112,6 +128,14 @@
 							{!!Form::number('expected_loss',null,['id'=>'expected_loss','class'=>'form-control','min'=>'0'])!!}
 						</div>
 					</div>
+
+					<div class="form-group">
+						{!!Form::label('Comentarios',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-5">
+							{!!Form::textarea('comments',null,['id'=>'comments','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
+						</div>
+					</div>
+
 					<div id="causa">
 						<div class="form-group">
 							{!!Form::label('Causa(s) ',null,['class'=>'col-sm-4 control-label'])!!}
@@ -178,10 +202,11 @@
 							<div style="cursor:hand" onclick="agregar_efecto()"><font color="CornflowerBlue"><u>Agregar Nuevo Efecto</u></font></div> <br>
 						</div>
 					</div>
-
+			@if (strstr($_SERVER["REQUEST_URI"],'create') && isset($subprocesos))		
 					<div class="form-group">
 						<label for="organization_id" class="col-sm-4 control-label">Seleccione otras organizaciones que se encuentren expuestas al riesgo (opcionalmente)</label>
 						<div class="col-sm-5">
+						{{-- Actualización 17-08-17: Ya no se ocupará ya que mejor sólo se editarán los datos del riesgo sin poder agregar o modificar en otras orgs --}}
 						@if (strstr($_SERVER["REQUEST_URI"],'edit'))
 								<select name="organization_id[]" multiple id="organization_id">
 								@foreach ($organizations as $o)
@@ -191,11 +216,16 @@
 								</select>
 						@else
 							{!!Form::select('organization_id[]',$organizations,null, 
-							 	   ['id' => 'el2','multiple'=>'true'])!!}
+							 	   ['id' => 'organization_id','multiple'=>'true'])!!}
 						@endif
 						</div>
+						<div style="cursor:hand" onclick="change_organization()"><font color="CornflowerBlue"><u>Seleccionar subprocesos</u></font></div> <br>
 					</div>
-
+					<div id="cargando1"></div>
+					<div id="cargando2"></div>
+					<div id="other_subprocesses" style="display: none;"></div>
+					<div id="other_stakeholders" style="display: none;"></div>
+			@endif
 					<div class="form-group">
 						<label for="file" class="col-sm-4 control-label">Cargar documentos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>
 						<div class="col-sm-4">
@@ -206,6 +236,6 @@
 					{!!Form::hidden('org_id',$org_id)!!}
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-primary'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-success'])!!}
 						</center>
 					</div>

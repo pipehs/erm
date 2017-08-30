@@ -118,7 +118,6 @@ $("#risk_id").change(function() {
 
 		//obtenemos kri del riesgo seleccionado
 		$.get('get_kri.'+$("#risk_id").val(), function (result) {
-				
 				$("#cargando").html('<br>');
 				$("#info_kri").empty();
 
@@ -201,14 +200,18 @@ $("#risk_id").change(function() {
 							table_row += '<td>'+ $("#risk_id option:selected").text() +'</td>';
 
 							table_row += '<td>';
-							if (this.stakeholder == null)
+
+							if (this.stakeholders.length > 0)
 							{
-								table_row += "Ninguno"
+								$(this.stakeholders).each(function() {
+									table_row += '<li>'+this.name+' '+this.surnames+' - '+this.organization+'</li>'
+								});
 							}
 							else
 							{
-								table_row += this.stakeholder
+								table_row += "Ninguno"
 							}
+							
 							table_row += '</td>'
 							table_row += '<td>'+this.date_last+'</td>';
 					@foreach (Session::get('roles') as $role)

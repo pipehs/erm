@@ -140,9 +140,9 @@
 							<td>No se ha definido perspectiva</td>
 						@elseif ($objetivo['perspective'] == 1)
 							<td>Financiera</td>
-						@elseif ($objetivo['perspective'] == 2)
-							<td>Procesos</td>
 						@elseif ($objetivo['perspective'] == 3)
+							<td>Procesos</td>
+						@elseif ($objetivo['perspective'] == 2)
 							<td>Clientes</td>
 						@elseif ($objetivo['perspective'] == 4)
 							<td>Aprendizaje</td>
