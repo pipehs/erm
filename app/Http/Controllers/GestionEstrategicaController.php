@@ -396,7 +396,7 @@ class GestionEstrategicaController extends Controller
 
                     //$max_updated = str_replace('-','',$max_updated);
                     //ahora si es que hay fecha, obtenemos datos de última eval
-                    if ($max_updated)
+                    if (!empty($max_updated))
                     {
                         $last_eval = DB::table('kpi_measurements')
                                 ->where('kpi_id','=',$k->id)
@@ -582,7 +582,7 @@ class GestionEstrategicaController extends Controller
                             ->max('updated_at');
 
                     //ahora si es que hay fecha, obtenemos datos de última eval
-                    if ($max_updated)
+                    if (!empty($max_updated))
                     {
                         $last_eval = DB::table('kpi_measurements')
                                 ->where('kpi_id','=',$k->id)
@@ -1808,12 +1808,12 @@ class GestionEstrategicaController extends Controller
                                     Session::flash('message','Medición guardada con éxito');
                                 }
                         }
-                        else if (isset($_POST['semester']))
+                        else if (isset($_POST['semestre']))
                         {
                                 //ahora vemos si se está actualizando o creando una nueva evaluación
                                 $eval2 = DB::table('kpi_measurements')
                                 ->where('kpi_id','=',$_POST['kpi_id'])
-                                ->where('semester','=',$_POST['semester'])
+                                ->where('semester','=',$_POST['semestre'])
                                 ->where('year','=',$_POST['ano'])
                                 ->where('status','=',0)
                                 ->select('id')
@@ -1836,7 +1836,7 @@ class GestionEstrategicaController extends Controller
                                             'created_at' => date('Y-m-d H:i:s'),
                                             'updated_at' => date('Y-m-d H:i:s'),
                                             'status' => 0,
-                                            'semester' => $_POST['semester'],
+                                            'semester' => $_POST['semestre'],
                                             'year' => $_POST['ano']
                                             ]);
                                 }

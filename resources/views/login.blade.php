@@ -10,9 +10,9 @@
 				<div class="box-content">
 					<div class="text-center">
 						<!--<img src="assets/img/Latam/latam.png" title="LATAM" width="300px" height="80px"></img><br>-->
-						<!--<img src="assets/img/NorteGrande/logo_norte_grande.PNG" title="Norte Grande" width="300px" height="80px"></img><br>-->
+						<img src="assets/img/logo_parque_arauco.PNG" title="Norte Grande" width="300px" height="80px"></img><br>
 						<img src="assets/img/logoCompleto.PNG" title="Bussiness Governance and Risk Compliance" width="320px" height="120px"></img>
-						<h3 class="page-header">Business, Governance, Risk and Compliance</h3>
+						<h3 class="page-header"><style="font-family: arial; color: #2E2E2E;"> Business, Governance, Risk and Compliance</h3>
 					</div>
 					
 				    {!! Form::open(['route' => 'log.store', 'class' => 'form', 'method' => 'POST']) !!}

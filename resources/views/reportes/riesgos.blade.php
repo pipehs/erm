@@ -67,7 +67,7 @@
 <!-- Datos de los riesgos por categoría -->
 		<!-- Para exportación en Word -->
 			<div id="cuerpo" style="display: none;">
-				<h1>Reporte de Auditorías</h1>
+				<h1>Reporte de Riesgos</h1>
 				<div id="grafico1"></div>
 				<div id="grafico2"></div>
 			</div>
@@ -262,9 +262,12 @@
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
 
-@if (isset($riesgos))
+@if (isset($riesgos) && isset($riesgos_consolidados))
+
+	google.charts.load("visualization", "1", {packages:["corechart"]});
+
 	@if ($verdes_total > 0 || $amarillos_total > 0 || $rojos_total > 0)
-      google.charts.load("visualization", "1", {packages:["corechart"]});
+    
       google.charts.setOnLoadCallback(chart1);
       
       function chart1() {
@@ -422,13 +425,13 @@
 
     @if ($verdes_total_c > 0 || $amarillos_total_c > 0 || $rojos_total_c > 0)
     	google.charts.setOnLoadCallback(chart2);
-      function chart2() {
-        var data = google.visualization.arrayToDataTable([
-          ['Riesgos', 'Cantidad'],
-          ['Mitigados',     {{ $verdes_total_c }}],
-          ['Mitigados con reparo',     {{ $amarillos_total_c }}],
-          ['No mitigados',     {{ $rojos_total_c }}]
-        ]);
+		function chart2() {
+			var data = google.visualization.arrayToDataTable([
+	          ['Riesgos', 'Cantidad'],
+	          ['Mitigados',     {{ $verdes_total_c }}],
+	          ['Mitigados con reparo',     {{ $amarillos_total_c }}],
+	          ['No mitigados',     {{ $rojos_total_c }}]
+		]);
 
         var options = {
           title: 'Riesgos mitigados de organización',

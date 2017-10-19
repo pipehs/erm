@@ -84,12 +84,16 @@ function change_organization()
 	if ($('#organization_id').val() == null)
 	{
 		swal('Error','Debe seleccionar al menos una organización que esté expuesta al riesgo para seleccionar subprocesos','error')
+		$('#other_subprocesses').html('');
+		$('#other_stakeholders').html('');
 	}
 	else
 	{
 		$('#cargando1').html('<center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center>').delay(2000).html('')
 		$('#cargando2').html('<center><img src="../public/assets/img/loading.gif" width="19" height="19"/></center>').delay(2000).html('')
 
+		$('#other_subprocesses').html('');
+		$('#other_stakeholders').html('');
 		$('#organization_id option:selected').each(function() {
 
 	    	var option = '<div class="form-group">'

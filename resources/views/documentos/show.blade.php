@@ -94,37 +94,40 @@
 									<td>
 									<?php //pequeño módulo php para ver el tipo de archivo y nombre
 										$archivo = explode('.',$file);
-										$file_name = explode('/',$archivo[0]);
-										$file_name = $file_name[2];
+										$ext = $archivo[1]; //tipo archivo
+										$filename = explode('/',$archivo[0]);
+										$id = $filename[1]; //id del elemento
+										$kind = $filename[0]; //por ej. evidencias_hallazgos
+										$filename = $filename[2];
 										$cont += 1;
 									?>
 									
 									@if ($archivo[1] == 'pdf')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/word.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'png')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/png.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@else
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@endif
 
 									@foreach (Session::get('roles') as $role)
 										@if ($role == 1)
-											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $issue['id'] }},2,'{{ $file_name }}')"><br/>
+											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $issue['id'] }},2,'{{ $filename }}')"><br/>
 											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 										@endif
 									@endforeach
@@ -162,37 +165,40 @@
 										@foreach ($issue['action_plan']['files'] as $file2)
 											<td>
 											<?php //pequeño módulo php para ver el tipo de archivo y nombre
-												$archivo = explode('.',$file2);
-												$file_name = explode('/',$archivo[0]);
-												$file_name = $file_name[2];
+												$archivo = explode('.',$file);
+												$ext = $archivo[1]; //tipo archivo
+												$filename = explode('/',$archivo[0]);
+												$id = $filename[1]; //id del elemento
+												$kind = $filename[0]; //por ej. evidencias_hallazgos
+												$filename = $filename[2];
 												$cont += 1;
 											?>
 											
 											@if ($archivo[1] == 'pdf')
-												<a href="../storage/app/{{$file}}" download><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
-												{{ $file_name }}<br/>
+												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+												{{ $filename }}<br/>
 											@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-												<a href="../storage/app/{{$file}}" download><img src="assets/img/word.png" width="30" height="30" /></a><br/>
-												{{ $file_name }}<br/>
+												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+												{{ $filename }}<br/>
 											@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-												<a href="../storage/app/{{$file}}" download><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
-												{{ $file_name }}<br/>
+												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+												{{ $filename }}<br/>
 											@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-												<a href="../storage/app/{{$file}}" download><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
-												{{ $file_name }}<br/>
+												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+												{{ $filename }}<br/>
 											@elseif ($archivo[1] == 'png')
-												<a href="../storage/app/{{$file}}" download><img src="assets/img/png.png" width="30" height="30" /></a><br/>
-												{{ $file_name }}<br/>
+												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+												{{ $filename }}<br/>
 											@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-												<a href="../storage/app/{{$file}}" download><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
-												{{ $file_name }}<br/>
+												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+												{{ $filename }}<br/>
 											@else
-												<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
-												{{ $file_name }}<br/>
+												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+												{{ $filename }}<br/>
 											@endif
 											@foreach (Session::get('roles') as $role)
 												@if ($role == 1)
-													<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $file_name }}')"><br/>
+													<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $filename }}')"><br/>
 												<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 												@endif
 											@endforeach
@@ -243,36 +249,39 @@
 								<td>
 								<?php //pequeño módulo php para ver el tipo de archivo y nombre
 									$archivo = explode('.',$file);
-									$file_name = explode('/',$archivo[0]);
-									$file_name = $file_name[2];
+									$ext = $archivo[1]; //tipo archivo
+									$filename = explode('/',$archivo[0]);
+									$id = $filename[1]; //id del elemento
+									$kind = $filename[0]; //por ej. evidencias_hallazgos
+									$filename = $filename[2];
 									$cont += 1;
 								?>
 								
 								@if ($archivo[1] == 'pdf')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/word.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@elseif ($archivo[1] == 'png')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/png.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@else
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@endif
 								@foreach (Session::get('roles') as $role)
 									@if ($role == 1)
-										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $issue['id'] }},2,'{{ $file_name }}')"><br/>
+										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $issue['id'] }},2,'{{ $filename }}')"><br/>
 										<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 									@endif
 								@endforeach
@@ -321,36 +330,39 @@
 									<td>
 									<?php //pequeño módulo php para ver el tipo de archivo y nombre
 										$archivo = explode('.',$file);
-										$file_name = explode('/',$archivo[0]);
-										$file_name = $file_name[2];
+										$ext = $archivo[1]; //tipo archivo
+										$filename = explode('/',$archivo[0]);
+										$id = $filename[1]; //id del elemento
+										$kind = $filename[0]; //por ej. evidencias_hallazgos
+										$filename = $filename[2];
 										$cont += 1;
 									?>
 									
 									@if ($archivo[1] == 'pdf')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/word.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'png')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/png.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@else
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@endif
 									@foreach (Session::get('roles') as $role)
 										@if ($role == 1)
-											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $control->id }},3,'{{ $file_name }}')"><br/>
+											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $control->id }},3,'{{ $filename }}')"><br/>
 											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 										@endif
 									@endforeach
@@ -387,36 +399,39 @@
 								<td>
 								<?php //pequeño módulo php para ver el tipo de archivo y nombre
 									$archivo = explode('.',$file);
-									$file_name = explode('/',$archivo[0]);
-									$file_name = $file_name[2];
+									$ext = $archivo[1]; //tipo archivo
+									$filename = explode('/',$archivo[0]);
+									$id = $filename[1]; //id del elemento
+									$kind = $filename[0]; //por ej. evidencias_hallazgos
+									$filename = $filename[2];
 									$cont += 1;
 								?>
 								
 								@if ($archivo[1] == 'pdf')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}<br/>
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+									{{ $filename }}<br/>
 								@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/word.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}<br/>
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+									{{ $filename }}<br/>
 								@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}<br/>
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+									{{ $filename }}<br/>
 								@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}<br/>
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+									{{ $filename }}<br/>
 								@elseif ($archivo[1] == 'png')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/png.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}<br/>
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+									{{ $filename }}<br/>
 								@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}<br/>
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+									{{ $filename }}<br/>
 								@else
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}<br/>
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+									{{ $filename }}<br/>
 								@endif
 								@foreach (Session::get('roles') as $role)
 									@if ($role == 1)
-										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},4,'{{ $file_name }}')"><br/>
+										<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},4,'{{ $filename }}')"><br/>
 										<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 									@endif
 								@endforeach
@@ -451,36 +466,36 @@
 										<td>
 										<?php //pequeño módulo php para ver el tipo de archivo y nombre
 											$archivo = explode('.',$file2);
-											$file_name = explode('/',$archivo[0]);
-											$file_name = $file_name[2];
+											$filename = explode('/',$archivo[0]);
+											$filename = $filename[2];
 											$cont += 1;
 										?>
 										
 										@if ($archivo[1] == 'pdf')
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
+											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+											{{ $filename }}<br/>
 										@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/word.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
+											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+											{{ $filename }}<br/>
 										@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
+											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+											{{ $filename }}<br/>
 										@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
+											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+											{{ $filename }}<br/>
 										@elseif ($archivo[1] == 'png')
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/png.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
+											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+											{{ $filename }}<br/>
 										@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
+											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+											{{ $filename }}<br/>
 										@else
-											<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
-											{{ $file_name }}<br/>
+											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+											{{ $filename }}<br/>
 										@endif
 										@foreach (Session::get('roles') as $role)
 											@if ($role == 1)
-												<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $file_name }}')"><br/>
+												<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $ans['id'] }},7,'{{ $filename }}')"><br/>
 												<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 											@endif
 										@endforeach
@@ -530,45 +545,48 @@
 								<td>
 								<?php //pequeño módulo php para ver el tipo de archivo y nombre
 									$archivo = explode('.',$file);
-									$file_name = explode('/',$archivo[0]);
-									$file_name = $file_name[2];
+									$ext = $archivo[1]; //tipo archivo
+									$filename = explode('/',$archivo[0]);
+									$id = $filename[1]; //id del elemento
+									$kind = $filename[0]; //por ej. evidencias_hallazgos
+									$filename = $filename[2];
 									$cont += 1;
 								?>
 								
 								@if ($archivo[1] == 'pdf')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/word.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@elseif ($archivo[1] == 'png')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/png.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@else
-									<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
-									{{ $file_name }}
+									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+									{{ $filename }}
 								@endif
 
 								@if ($kind == 4)
 									@foreach (Session::get('roles') as $role)
 										@if ($role == 1)
-											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},1,'{{ $file_name }}')"><br/>
+											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},1,'{{ $filename }}')"><br/>
 											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 										@endif
 									@endforeach
 								@elseif ($kind == 5)
 									@foreach (Session::get('roles') as $role)
 										@if ($role == 1)
-											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},0,'{{ $file_name }}')"><br/>
+											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},0,'{{ $filename }}')"><br/>
 											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 										@endif
 									@endforeach
@@ -615,36 +633,39 @@
 									<td>
 									<?php //pequeño módulo php para ver el tipo de archivo y nombre
 										$archivo = explode('.',$file);
-										$file_name = explode('/',$archivo[0]);
-										$file_name = $file_name[2];
+										$ext = $archivo[1]; //tipo archivo
+										$filename = explode('/',$archivo[0]);
+										$id = $filename[1]; //id del elemento
+										$kind = $filename[0]; //por ej. evidencias_hallazgos
+										$filename = $filename[2];
 										$cont += 1;
 									?>
 									
 									@if ($archivo[1] == 'pdf')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/word.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'png')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/png.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@else
-										<a href="../storage/app/{{$file}}" download><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
-										{{ $file_name }}
+										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 									@endif
 									@foreach (Session::get('roles') as $role)
 										@if ($role == 1)
-											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $risk['id'] }},6,'{{ $file_name }}')"><br/>
+											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $risk['id'] }},6,'{{ $filename }}')"><br/>
 											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 										@endif
 									@endforeach

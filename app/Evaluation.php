@@ -48,11 +48,11 @@ class Evaluation extends Model
             {
                 if ($org == NULL)
                 {
-                    $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org,$cat,NULL,$ano,$mes,$dia);
+                    $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval(NULL,$cat,NULL,$ano,$mes,$dia);
                 }
                 else
                 {
-                    $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval(NULL,$cat,NULL,$ano,$mes,$dia);
+                    $eval1 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org,$cat,NULL,$ano,$mes,$dia);
                 }
             }
 
@@ -342,7 +342,23 @@ class Evaluation extends Model
         //ahora validamos mes
             if ($cat == NULL)
             {
-                return DB::table('evaluation_risk')
+                if ($org == NULL)
+                {
+                    return DB::table('evaluation_risk')
+                        ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                        ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
+                        ->join('risks','risks.id','=','organization_risk.risk_id')
+                        ->join('objective_risk','objective_risk.risk_id','=','organization_risk.risk_id')
+                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                        ->where('evaluations.consolidation','=',1)
+                        ->where('evaluations.updated_at','<=',date($ano.$mes).$dia.' 23:59:59')
+                        ->select('evaluation_risk.organization_risk_id as risk_id','risks.id as risk')
+                        ->groupBy('evaluation_risk.organization_risk_id','risks.id')
+                        ->get();
+                }
+                else
+                {
+                    return DB::table('evaluation_risk')
                         ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                         ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
                         ->join('risks','risks.id','=','organization_risk.risk_id')
@@ -354,6 +370,7 @@ class Evaluation extends Model
                         ->select('evaluation_risk.organization_risk_id as risk_id','risks.id as risk')
                         ->groupBy('evaluation_risk.organization_risk_id','risks.id')
                         ->get();
+                }
             }
             else
             {

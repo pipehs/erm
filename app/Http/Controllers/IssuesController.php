@@ -505,7 +505,7 @@ class IssuesController extends Controller
                         ->select('description','final_date','status','stakeholder_id')
                         ->get();
 
-                if ($plan != NULL)
+                if ($plan != NULL || !empty($plan))
                 {
                     $temp = $this->formatearIssue($issue['id'],$issue['name'],$issue['classification'],$issue['recommendations'],$plan[0]->description,$plan[0]->status,$plan[0]->final_date);  
                 }
@@ -520,7 +520,7 @@ class IssuesController extends Controller
                 }
 
                 //ACTUALIZACIÓN 23-08-17: Agregamos responsable al reporte
-                if ($plan[0]->stakeholder_id != NULL)
+                if (isset($plan[0]) && $plan[0]->stakeholder_id != NULL)
                 {
                     $responsable = \Ermtool\Stakeholder::getName($plan[0]->stakeholder_id);
                 }

@@ -136,6 +136,7 @@
 	</div>
 </div>
 <!-- FIN Gráfico de pruebas de auditoría -->
+<!--
 <div class="row">
 	<div class="col-xs-12 col-sm-12">
 		<div class="box">
@@ -181,6 +182,8 @@
 		</div>
 	</div>
 </div>
+
+-->
 @endif				
 
 @stop
@@ -247,14 +250,14 @@
         //agregamos imagen para reporte
         var my_div = document.getElementById('grafico1');
 		google.visualization.events.addListener(chart, 'ready', function () {
-			my_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
+			//my_div.innerHTML = '<img src="' + chart.getImageURI() + '">';
 			//console.log(my_div.innerHTML);
 		});
 
         chart.draw(data, options);
 
         //guardamos imagen en form hidden para reporte
-        document.getElementById('grafico12').value = chart.getImageURI();
+        //document.getElementById('grafico12').value = chart.getImageURI();
 
         //agregamos evento de click
         google.visualization.events.addListener(chart, 'select', clickHandler);
@@ -402,7 +405,7 @@ $("#audit_plan_id").change(function() {
 	if ($("#audit_plan_id").val() != "") //Si es que el se ha cambiado el valor a un valor válido (y no al campo "- Seleccione -")
 	{
 		//asignamos valor de audit plan id
-		document.getElementById('audit_plan').value = $("#audit_plan_id").val();
+		//document.getElementById('audit_plan').value = $("#audit_plan_id").val();
 		//Añadimos la imagen de carga en el contenedor
 		$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>');
 		
@@ -436,13 +439,13 @@ $("#audit_plan_id").change(function() {
 				        //agregamos imagen para reporte
 				        var my_div = document.getElementById('grafico2');
 						google.visualization.events.addListener(chart2, 'ready', function () {
-							my_div.innerHTML = '<img src="' + chart2.getImageURI() + '">';
+							//my_div.innerHTML = '<img src="' + chart2.getImageURI() + '">';
 							//console.log(my_div.innerHTML);
 						});
 				        chart2.draw(data, options);
 
 				        //asignamos valores a variable hidden
-				        document.getElementById('grafico22').value = chart2.getImageURI();
+				        //document.getElementById('grafico22').value = chart2.getImageURI();
 				        //hacemos visible botón exportar
 				        $('#boton_exportar').show(500);
 

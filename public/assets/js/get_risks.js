@@ -2,11 +2,28 @@ $("#org").change(function() {
 	if ($("#org").val() != '')
 	{
 
+		$.get('get_objective_risk.'+$("#org").val(), function (result) {
 
+				riesgos_negocio = new Array()
+				$("#cargando").html('<br>');
+				$("#objective_risk_id").empty();
+				$("#objective_risk_id").change();
+				$("#cargando2").empty(); //cargando de riesgos							
+				//parseamos datos obtenidos
+				var datos = JSON.parse(result);
+				var i = 0;
+				//seteamos datos en select de riesgos / objetivos
+				$(datos).each( function() {
+					riesgos_negocio[i] = {id: this.id, name: this.name,description: this.description,risk_category_id: this.risk_category_id};
+					i++
+					$("#objective_risk_id").append('<option value="' + this.id + '">' + this.name +' - '+ this.description +'</option>');
+					$("#riesgos").append('<tr><td>' + this.name + '</td><td>' +this.proba_def + ' (' + this.avg_probability + ')</td><td>' + this.impact_def + ' (' + this.avg_impact + ')</td></tr>');
+				});
+		});
 		
 		//se obtienen riesgos de proceso para la organización seleccionada
 		$.get('get_risk_subprocess.'+$("#org").val(), function (result) {
-				alert(result)				
+				//alert(result)				
 				riesgos_proceso = new Array()
 				$("#cargando").html('<br>');
 				$("#risk_subprocess_id").empty();
@@ -19,7 +36,7 @@ $("#org").change(function() {
 					riesgos_proceso[i] = {id: this.id, name: this.name,description: this.description,risk_category_id: this.risk_category_id};
 					i++
 					//alert(riesgos_procesos[i]);
-					$("#risk_subprocess_id").append('<option value="' + this.id + '">' + this.name +'</option>');
+					$("#risk_subprocess_id").append('<option value="' + this.id + '">' + this.name +' - '+ this.description +'</option>');
 					$("#riesgos").append('<tr><td>' + this.name + '</td><td>' + this.proba_def + ' (' + this.avg_probability + ')</td><td>' + this.impact_def + ' (' + this.avg_impact + ')</td></tr>');
 				});
 

@@ -93,17 +93,23 @@
 			{!!Form::close()!!}
 		</div>
 
-@if (isset($riesgos)) {{-- AGREGADO 26-07 obliga a seleccionar primero organización --}}
+@if (isset($riesgos)) {{-- AGREGADO 26-07-16 obliga a seleccionar primero organización --}}
+{{-- MOD 13-10-17 Siempre se mostrarán los riesgos --}}
 
-<h4><b>Riesgos de: {{ $org_selected }} </b></h4>
+<h4><b>
+@if (isset($org))
+	Riesgos de: {{ $org_selected }} 
+@endif
+</b></h4>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
-				
-				<center>
-				{!! link_to_route('riesgos.create', $title = 'Agregar Riesgo de Proceso', $parameters = ['P' => 1, 'org' => $org_id], $attributes = ['class'=>'btn btn-warning']) !!}
-				&nbsp;&nbsp;
-				{!! link_to_route('riesgos.create', $title = 'Agregar Riesgo de Negocio', $parameters = ['N' => 1, 'org' => $org_id], $attributes = ['class'=>'btn btn-primary']) !!}
-				</center>
+				@if (isset($org_id))
+					<center>
+					{!! link_to_route('riesgos.create', $title = 'Agregar Riesgo de Proceso', $parameters = ['P' => 1, 'org' => $org_id], $attributes = ['class'=>'btn btn-warning']) !!}
+					&nbsp;&nbsp;
+					{!! link_to_route('riesgos.create', $title = 'Agregar Riesgo de Negocio', $parameters = ['N' => 1, 'org' => $org_id], $attributes = ['class'=>'btn btn-primary']) !!}
+					</center>
+				@endif
 			<?php break; ?>
 
 			@else
@@ -113,13 +119,20 @@
 			
 			<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
 			<thead>
+			@if (!isset($org_id))
+				<th>Organizaci&oacute;n(es)<label><input type="text" placeholder="Filtrar" /></label></th>
+			@endif
 			<th>Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Tipo<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Categor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Fecha Creaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-			<th>Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
+			@if (!isset($org_id))
+				<th>Responsable(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+			@else
+				<th>Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
+			@endif
 			<th>Subprocesos u Objetivos Relacionados<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Causa(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Efecto(s)<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -133,6 +146,13 @@
 			</thead>
 			@foreach ($riesgos as $riesgo)
 				<tr>
+				@if (!isset($org_id))
+					<td><ul>
+					@foreach ($riesgo['orgs'] as $o)
+						<li>{{ $o }}</li>
+					@endforeach
+					</ul></td>
+				@endif
 				<td>{{ $riesgo['nombre'] }}</td>
 				<td>
 				@if ($riesgo['descripcion'] == NULL || $riesgo['descripcion'] == "")
@@ -171,14 +191,30 @@
 				@else
 					<td>{{$riesgo['fecha_exp']}}</td>
 				@endif
-				<td>{{ $riesgo['stakeholder'] }}</td>
+				@if (!isset($org_id))
+					<td><ul>
+					@foreach ($riesgo['responsables'] as $r)
+						<li>{{ $r }}</li>
+					@endforeach
+					</ul></td>
+				@else
+					<td>{{ $riesgo['stakeholder'] }}</td>
+				@endif
 				<td>
 				<ul>
-				@foreach($relacionados as $subonegocio)
-					@if ($subonegocio['risk_id'] == $riesgo['id'])
-								<li>{{ $subonegocio['nombre'] }}</li>
-					@endif
-				@endforeach
+				@if (!isset($org_id))	
+					@foreach($relacionados as $subonegocio)
+						@if ($subonegocio['risk_id'] == $riesgo['id'])
+							<li>{{ $subonegocio['nombre'] }}</li>
+						@endif
+					@endforeach
+				@else
+					@foreach($relacionados as $subonegocio)
+						@if ($subonegocio['risk_id'] == $riesgo['id'])
+							<li>{{ $subonegocio['nombre'] }}</li>
+						@endif
+					@endforeach
+				@endif
 				</ul>	
 				</td>
 				<td>
@@ -209,8 +245,13 @@
 				</td>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
-				<td>{!! link_to_route('riesgos.edit', $title = 'Editar', $parameters = ['id' => $riesgo['id'], 'org' => $org_id], $attributes = ['class'=>'btn btn-success']) !!}</td>
-				<td><button class="btn btn-danger" onclick="eliminar2({{ $riesgo['id'] }}.{{ $org_id }},'{{ $riesgo['nombre'] }}','riesgos','El riesgo')">Eliminar</button></td>
+				@if (!isset($org_id))
+					<td>{!! link_to_route('riesgos.edit', $title = 'Editar', $parameters = ['id' => $riesgo['id'], 'org' => NULL], $attributes = ['class'=>'btn btn-success']) !!}</td>
+					<td><button class="btn btn-danger" onclick="eliminar2({{ $riesgo['id'] }}.0,'{{ $riesgo['nombre'] }}','riesgos','El riesgo')">Eliminar</button></td>
+				@else
+					<td>{!! link_to_route('riesgos.edit', $title = 'Editar', $parameters = ['id' => $riesgo['id'], 'org' => $org_id], $attributes = ['class'=>'btn btn-success']) !!}</td>
+					<td><button class="btn btn-danger" onclick="eliminar2({{ $riesgo['id'] }}.{{ $org_id }},'{{ $riesgo['nombre'] }}','riesgos','El riesgo')">Eliminar</button></td>
+				@endif
 			<?php break; ?>
 			@endif
 		@endforeach

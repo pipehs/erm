@@ -71,14 +71,16 @@
 <script>
 $("#orgs").ready(function() {
 			$("#orgs").change();
+			//alert('{{ $stakeholder->stakeholder_id }}')
 			//seteamos datos
 			//auditor responsable
-			$("#stakeholder_id").val('{{ $stakeholder->stakeholder_id }}');
+			//$("#stakeholder_id").val('{{ $stakeholder->stakeholder_id }}');
+			$("#stakeholder_id option[value='{{ $stakeholder->stakeholder_id }}']").prop("selected",true);
 			$("#stakeholder_id").change();
 			
 			audit_plan_id = '{{ $audit_plan->id }}'
 			//seleccionamos datos cuando ya existan (esperaremos 1 segundo)
-			window.setTimeout(risks, 1000);
+			//window.setTimeout(risks, 1000);
 			window.setTimeout(stakes, 1500);
 	});
 

@@ -57,7 +57,7 @@ class kpi extends Model
 	        				->first();
 
 	        	$sem = ['1er Semestre','2do Semestre'];
-	        	echo $date;
+	        	//echo $date;
 	        	$res = $sem[($date->semester)-1].' del '.$date->year;
 	        }
 	        else if ($p->periodicity == 3) //trimestral

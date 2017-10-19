@@ -381,6 +381,22 @@ function contraer(id, description,short_des)
 	$('#description_'+id).html(short_des+'... <div style="cursor:hand" onclick="expandir('+id+','+description2+','+short_des2+')"><font color="CornflowerBlue">Ver completo</font></div>')
 }
 
+function expandirrisk(id,description,short_des)
+{
+	description2 = "'"+description+"'";
+	short_des2 = "'"+short_des+"'";
+
+	$('#descriptionrisk_'+id).html(description+'<div style="cursor:hand" onclick="contraerrisk('+id+','+description2+','+short_des2+')"><font color="CornflowerBlue">Ocultar</font></div>')
+}
+
+function contraerrisk(id, description,short_des)
+{
+	description2 = "'"+description+"'";
+	short_des2 = "'"+short_des+"'";
+
+	$('#descriptionrisk_'+id).html(short_des+'... <div style="cursor:hand" onclick="expandir('+id+','+description2+','+short_des2+')"><font color="CornflowerBlue">Ver completo</font></div>')
+}
+
 //funciones expandir y contraer para recomendaciones de hallazgos
 function expandir2(id,description,short_des)
 {

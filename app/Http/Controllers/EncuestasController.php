@@ -591,7 +591,7 @@ class EncuestasController extends Controller
                         }
                         else
                         {
-                            $msj->subject('Encuesta identificación de eventos de Riesgos');
+                            $msj->subject('ENCUESTA DE SATISFACCIÓN MESA DE RIESGOS 2017');
                         }
                         //Seleccionamos correos de stakeholders
                         $i = 0; //verifica si se debe ingresar to o cc
@@ -685,7 +685,8 @@ class EncuestasController extends Controller
                         else
                         {
                             //obtenemos valor de la respuesta -> de la tabla posible_answers
-                                $resp = DB::table('posible_answers')->where('id',$_POST['respuesta'.$pregunta_id])->value('answer');
+                            //ACTUALIZACIÓN 01-09-2017: forzamos int
+                            $resp = DB::table('posible_answers')->where('id',(int)$_POST['respuesta'.$pregunta_id])->value('answer');
                                 
                             //vemos si es radio button (debería existir $resp)
                             if ($resp)
@@ -791,7 +792,8 @@ class EncuestasController extends Controller
                         else
                         {
                             //obtenemos valor de la respuesta -> de la tabla posible_answers
-                                $resp = DB::table('posible_answers')->where('id',$_POST['respuesta'.$pregunta_id])->value('answer');
+                            //ACTUALIZACIÓN 01-09-2017: forzamos int
+                            $resp = DB::table('posible_answers')->where('id',(int)$_POST['respuesta'.$pregunta_id])->value('answer');
                                 
                             //vemos si es radio button (debería existir $resp)
                             if ($resp)

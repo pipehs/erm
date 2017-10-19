@@ -361,9 +361,14 @@ class ControlesController extends Controller
 
                             $k += 1;
                         }
+                        $short_des = substr($risk->description,0,100);
+                        //ACT 27-04-17: eliminamos saltos de línea
+                        $desc = eliminarSaltos($risk->description);
                         $risks[$j] = [
+                            'id' => $risk->id,
                             'name' => $risk->name,
-                            'description' => $risk->description,
+                            'description' => $desc,
+                            'short_des' => $short_des
                         ]; 
                         $j += 1;
                     }
@@ -446,10 +451,15 @@ class ControlesController extends Controller
                             $k += 1;
                         }
 
+                        $short_des = substr($risk->description,0,100);
+                        //ACT 27-04-17: eliminamos saltos de línea
+                        $desc = eliminarSaltos($risk->description);
                         $risks[$j] = [
+                            'id' => $risk->id,
                             'name' => $risk->name,
-                            'description' => $risk->description
-                        ];
+                            'description' => $desc,
+                            'short_des' => $short_des
+                        ]; 
                         $j += 1;
                     }  
 
@@ -925,22 +935,26 @@ class ControlesController extends Controller
                     //ACTUALIZACIÓN 03-04-17: primero eliminamos los riesgos antiguos para no repetir
                     $control_organization_risk_id = \Ermtool\Control::getControlOrganizationRisk($control->id,$_POST['org_id']);
 
-                    foreach ($control_organization_risk_id as $c)
+                    if (isset($_POST['select_riesgos'])) //sólo realizar si es que se están agregando riesgos asociados al control
                     {
-                        DB::table('control_organization_risk')
-                            ->where('id','=',$c->id)
-                            ->delete();
-                    }
+                        foreach ($control_organization_risk_id as $c)
+                        {
+                            DB::table('control_organization_risk')
+                                ->where('id','=',$c->id)
+                                ->delete();
+                        }
 
-                    //guardamos riesgos de proceso o de negocio
-                    foreach ($_POST['select_riesgos'] as $org_risk_id)
-                    {   
-                        DB::table('control_organization_risk')
-                            ->insert([
-                                'organization_risk_id' => $org_risk_id,
-                                'control_id' => $control->id
-                                ]);
+                        //guardamos riesgos de proceso o de negocio
+                        foreach ($_POST['select_riesgos'] as $org_risk_id)
+                        {   
+                            DB::table('control_organization_risk')
+                                ->insert([
+                                    'organization_risk_id' => $org_risk_id,
+                                    'control_id' => $control->id
+                                    ]);
+                        }
                     }
+                    
                     if (Session::get('languaje') == 'en')
                     {
                         Session::flash('message','Control successfully updated');

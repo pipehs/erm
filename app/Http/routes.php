@@ -547,6 +547,8 @@ Route::get('riesgos.setriesgotipo.{id}', [
 Route::get('riesgos.destroy.{id}.{org}', [
 	'as' => 'riesgos.destroy', 'uses' => 'RiesgosController@destroy']);
 
+Route::get('riesgos.destroy.{id}', [
+	'as' => 'riesgos.destroy', 'uses' => 'RiesgosController@destroy2']);
 // ---- FIN RUTAS PARA IDENTIFICACIÓN DE RIESGO ---- //
 
 // ---- RUTAS PARA EVALUACIÓN DE RIESGOS ---- //
@@ -1341,3 +1343,8 @@ Route::post('gentotalreport', [
 Route::get('get_subcategories.{cat_id}', [
 	'as' => 'get_subcategories', 'uses' => 'CategoriasRiesgosController@getSubCategories'
 ]);
+
+//ruta para descargar evidencias (llama a funcion helper)
+Route::get('downloadfile.{kind}.{id}.{filename}.{ext}', function($kind,$id,$filename,$ext) {
+	return downloadFile($kind,$id,$filename,$ext);
+});

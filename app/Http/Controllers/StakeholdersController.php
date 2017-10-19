@@ -66,11 +66,26 @@ class StakeholdersController extends Controller
                 {
                     //ahora obtenemos todas las organizaciones a las que pertenece cada persona
                     $orgs = \Ermtool\Stakeholder::find($persona['id'])->organizations;
-                   
+                    
+                    //ACTUALIZACIÓN 24-08-17: Configuramos ID extranjero
+                    if ($persona['rest_id'] != NULL)
+                    {
+                        //lo pasamos a string
+                        $id1 = (string)$persona['id'];
+                        $id2 = (string)$persona['rest_id'];
+                        $id_temp = $id1.$id2;
+                        //$id_temp = (int)$id_temp;
+                        //ACTUALIZACIÓN 01-09-17: FLOAT POR INT PARA NÚMEROS LARGOS
+                        $id_temp = (float)$id_temp;
+                    }
+                    else
+                    {
+                        $id_temp = $persona['id'];
+                    }
 
                     foreach ($orgs as $organization)
                     {
-                         $organizaciones[$j] = array('stakeholder_id'=>$persona['id'],
+                         $organizaciones[$j] = array('stakeholder_id'=>$id_temp,
                                                      'id'=>$organization['id'],
                                                      'nombre'=>$organization['name']);
 
@@ -79,19 +94,6 @@ class StakeholdersController extends Controller
 
                     //obtenemos todos los roles a los que pertenece una persona
                     $roles_temp = \Ermtool\Stakeholder::find($persona['id'])->roles;
-                    
-                    if ($persona['rest_id'] != NULL)
-                    {
-                        //lo pasamos a string
-                        $id1 = (string)$persona['id'];
-                        $id2 = (string)$persona['rest_id'];
-                        $id_temp = $id1.$id2;
-                        $id_temp = (int)$id_temp;
-                    }
-                    else
-                    {
-                        $id_temp = $persona['id'];
-                    }
                     
                     foreach ($roles_temp as $role)
                     {
@@ -127,19 +129,6 @@ class StakeholdersController extends Controller
                     else
                         $fecha_act = NULL;
 
-                    //ACTUALIZACIÓN 24-08-17: Configuramos ID extranjero
-                    if ($persona['rest_id'] != NULL)
-                    {
-                        //lo pasamos a string
-                        $id1 = (string)$persona['id'];
-                        $id2 = (string)$persona['rest_id'];
-                        $id_temp = $id1.$id2;
-                        $id_temp = (int)$id_temp;
-                    }
-                    else
-                    {
-                        $id_temp = $persona['id'];
-                    }
                     $stakeholder[$i] = array('id'=>$id_temp,
                                         'dv'=>$persona['dv'],
                                         'nombre'=>$persona['name'],
@@ -225,151 +214,167 @@ class StakeholdersController extends Controller
             }
             else
             {
-                global $id;
-                global $dv;
-                //ACTUALIZACIÓN 20-08-17: Validaremos rut sólo si se ingresa Chileno
-                if ($_POST['nacionalidad'] == 'chileno')
+                if (isset($_POST['nacionalidad']))
                 {
-                    //validamos rut
-                    $rut = $_POST['id'].'-'.$_POST['dv'];
-                    $res = validaRut($rut);
-                    $id = $_POST['id'];
-                    $dv = $_POST['dv'];
-                }
-                else
-                {
-                    //ACTUALIZACIÓN 24-08-17: Veremos si el id es mayor o igual al máximo permitido por INT
-                    if ($_POST['id2'] >= 2147483647)
+                    global $id;
+                    global $dv;
+                    //ACTUALIZACIÓN 20-08-17: Validaremos rut sólo si se ingresa Chileno
+                    if ($_POST['nacionalidad'] == 'chileno')
                     {
-                        //realizaremos división y guardamos entero
-                        $id = $_POST['id2'] / 100;
-                        $id = (int)$id;
-
-                        //ahora guardamos resto (utilizamos función substr por si resto parte con 0)
-                        global $id2;
-                        $id2 = (string)$_POST['id2'];
-                        $id2 = substr($id2, -2);
-                        $res = true;
-                        $dv = null;
+                        //validamos rut
+                        $rut = $_POST['id'].'-'.$_POST['dv'];
+                        $res = validaRut($rut);
+                        $id = $_POST['id'];
+                        $dv = $_POST['dv'];
                     }
                     else
                     {
-                        $res = true;
-                        $id = $_POST['id2'];
-                        $dv = null;
+                        //ACTUALIZACIÓN 24-08-17: Veremos si el id es mayor o igual al máximo permitido por INT
+                        if ($_POST['id2'] >= 2147483647)
+                        {
+                            //realizaremos división y guardamos entero
+                            $id = $_POST['id2'] / 100;
+                            $id = (int)$id;
+
+                            //ahora guardamos resto (utilizamos función substr por si resto parte con 0)
+                            global $id2;
+                            $id2 = (string)$_POST['id2'];
+                            $id2 = substr($id2, -2);
+                            $res = true;
+                            $dv = null;
+                        }
+                        else
+                        {
+                            $res = true;
+                            $id = $_POST['id2'];
+                            $dv = null;
+                        }
+                        
                     }
-                    
-                }
 
-                if ($res)
-                {
-                    //Validación: Si la validación es pasada, el código continua
-                    $this->validate($request, [
-                        'id' => 'unique:stakeholders|min:7',
-                        'name' => 'required|max:255|min:2',
-                        'surnames' => 'required|min:2'
-                    ]);
-                    DB::transaction(function()
+                    if ($res)
                     {
-                        $logger = $this->logger;
+                        //Validación: Si la validación es pasada, el código continua
+                        $this->validate($request, [
+                            'id' => 'unique:stakeholders|min:7',
+                            'name' => 'required|max:255|min:2',
+                            'surnames' => 'required|min:2'
+                        ]);
+                        
+                        DB::transaction(function()
+                        {
+                            $logger = $this->logger;
 
-                        if ($_POST['position'] == NULL || $_POST['position'] == "")
-                        {
-                            $pos = NULL;
-                        }
-                        else
-                        {
-                            $pos = $_POST['position'];
-                        }
-                        /*
-                        DB::statement("
-                            SET IDENTITY_INSERT stakeholders ON;
-                            insert into stakeholders
-                            (id, dv, name, surnames, mail, position, updated_at, created_at) 
-                            values (".$_POST["id"].",'".$_POST['dv']."','".$_POST['name']."','".$_POST['surnames']."','".$_POST['mail']."','".$pos."','".date("Ymd H:i:s")."','".date("Ymd H:i:s")."')"); */
-                        if (isset($GLOBALS['id2']))
-                        {
-                            $usuario = \Ermtool\Stakeholder::create([
-                                'id' => $GLOBALS['id'],
-                                'dv' => $GLOBALS['dv'],
-                                'name' => $_POST['name'],
-                                'surnames' => $_POST['surnames'],
-                                'position' => $_POST['position'],
-                                'mail' => $_POST['mail'],
-                                'rest_id' => $GLOBALS['id2']
-                            ]);
-                        }
-                        else
-                        {
-                            $usuario = \Ermtool\Stakeholder::create([
-                                'id' => $GLOBALS['id'],
-                                'dv' => $GLOBALS['dv'],
-                                'name' => $_POST['name'],
-                                'surnames' => $_POST['surnames'],
-                                'position' => $_POST['position'],
-                                'mail' => $_POST['mail']
-                            ]);
-                        }
-
-                        //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
-                        foreach($_POST['organization_id'] as $organization_id)
-                        {
-                            DB::table('organization_stakeholder')->insert([
-                                'organization_id'=>$organization_id,
-                                'stakeholder_id'=>$GLOBALS['id']
-                                ]);
-                        }
-
-                        //INSERTAMOS ROLES
-                            //primero verificamos si es que se está agregando un nuevo rol
-                            if (isset($_POST['rol_nuevo']))
+                            if ($_POST['position'] == NULL || $_POST['position'] == "")
                             {
-                                $role = \Ermtool\Role::create([
-                                    'name' => $_POST['rol_nuevo'],
-                                    'status' => 0
-                                ]);
-
-                                //insertamos relación
-                                DB::table('role_stakeholder')->insert([
-                                        'stakeholder_id' => $GLOBALS['id'],
-                                        'role_id' => $role->id
-                                        ]);
-                            }
-
-                            else //se están seleccionando roles existentes
-                            {
-                                foreach ($_POST['role_id'] as $role_id) //insertamos cada rol seleccionado
-                                {
-                                    DB::table('role_stakeholder')->insert([
-                                        'stakeholder_id' => $GLOBALS['id'],
-                                        'role_id' => $role_id
-                                        ]);
-                                }
-                            }
-
-                            if (Session::get('languaje') == 'en')
-                            {
-                                Session::flash('message','Stakeholder successfully created');
+                                $pos = NULL;
                             }
                             else
                             {
-                                Session::flash('message','Usuario agregado correctamente');
+                                $pos = $_POST['position'];
+                            }
+                            /*
+                            DB::statement("
+                                SET IDENTITY_INSERT stakeholders ON;
+                                insert into stakeholders
+                                (id, dv, name, surnames, mail, position, updated_at, created_at) 
+                                values (".$_POST["id"].",'".$_POST['dv']."','".$_POST['name']."','".$_POST['surnames']."','".$_POST['mail']."','".$pos."','".date("Ymd H:i:s")."','".date("Ymd H:i:s")."')"); */
+                            if (isset($GLOBALS['id2']))
+                            {
+                                $usuario = \Ermtool\Stakeholder::create([
+                                    'id' => $GLOBALS['id'],
+                                    'dv' => $GLOBALS['dv'],
+                                    'name' => $_POST['name'],
+                                    'surnames' => $_POST['surnames'],
+                                    'position' => $_POST['position'],
+                                    'mail' => $_POST['mail'],
+                                    'rest_id' => $GLOBALS['id2']
+                                ]);
+                            }
+                            else
+                            {
+                                $usuario = \Ermtool\Stakeholder::create([
+                                    'id' => $GLOBALS['id'],
+                                    'dv' => $GLOBALS['dv'],
+                                    'name' => $_POST['name'],
+                                    'surnames' => $_POST['surnames'],
+                                    'position' => $_POST['position'],
+                                    'mail' => $_POST['mail']
+                                ]);
                             }
 
-                            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el usuario (stakeholder) con Rut: '.$usuario->id.' llamado: '.$usuario->name.' '.$usuario->surnames.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
-                    });
+                            //otra forma para agregar relaciones -> en comparación a attach utilizado en por ej. SubprocesosController
+                            foreach($_POST['organization_id'] as $organization_id)
+                            {
+                                DB::table('organization_stakeholder')->insert([
+                                    'organization_id'=>$organization_id,
+                                    'stakeholder_id'=>$GLOBALS['id']
+                                    ]);
+                            }
 
-                    return Redirect::to('/stakeholders');
+                            //INSERTAMOS ROLES
+                                //primero verificamos si es que se está agregando un nuevo rol
+                                if (isset($_POST['rol_nuevo']))
+                                {
+                                    $role = \Ermtool\Role::create([
+                                        'name' => $_POST['rol_nuevo'],
+                                        'status' => 0
+                                    ]);
+
+                                    //insertamos relación
+                                    DB::table('role_stakeholder')->insert([
+                                            'stakeholder_id' => $GLOBALS['id'],
+                                            'role_id' => $role->id
+                                            ]);
+                                }
+
+                                else //se están seleccionando roles existentes
+                                {
+                                    foreach ($_POST['role_id'] as $role_id) //insertamos cada rol seleccionado
+                                    {
+                                        DB::table('role_stakeholder')->insert([
+                                            'stakeholder_id' => $GLOBALS['id'],
+                                            'role_id' => $role_id
+                                            ]);
+                                    }
+                                }
+
+                                if (Session::get('languaje') == 'en')
+                                {
+                                    Session::flash('message','Stakeholder successfully created');
+                                }
+                                else
+                                {
+                                    Session::flash('message','Usuario agregado correctamente');
+                                }
+
+                                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el usuario (stakeholder) con Rut: '.$usuario->id.' llamado: '.$usuario->name.' '.$usuario->surnames.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                        });
+
+                        return Redirect::to('/stakeholders');
+                    }
+                    else
+                    {
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('message','The Id that you entered was incorrect. Please try again.');
+                        }
+                        else
+                        {
+                           Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente'); 
+                        }
+                        return Redirect::to('/stakeholders.create')->withInput();
+                    }
                 }
                 else
                 {
                     if (Session::get('languaje') == 'en')
                     {
-                        Session::flash('message','The Id that you entered was incorrect. Please try again.');
+                        Session::flash('message','You must select nationality and then the Id of the user.');
                     }
                     else
                     {
-                       Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente'); 
+                       Session::flash('message','Debe seleccionar nacionalidad y luego ingresar Rut o ID del usuario'); 
                     }
                     return Redirect::to('/stakeholders.create')->withInput();
                 }

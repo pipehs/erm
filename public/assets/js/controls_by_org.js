@@ -23,7 +23,7 @@ function selectControls()
 				controles += '<select name="control_id" id="control_id" onChange="selectControls2()" class="form-control" required>'
 				controles += '<option value="" disabled selected>- Seleccione -</option>'
 				$(datos).each( function() {
-					controles += '<option value="'+this.id+'">'+this.name+'</option>'
+					controles += '<option value="'+this.id+'">'+this.name+' - '+this.description+'</option>'
 				});
 
 				controles += '</select>'
@@ -48,7 +48,7 @@ function selectControls()
 				procesos += '<select name="process_id" id="process_id" onChange="subprocesos()" class="form-control" required>'
 				procesos += '<option value="" disabled selected>- Seleccione -</option>'
 				$(datos).each( function() {
-					procesos += '<option value="'+this.id+'">'+this.name+'</option>'
+					procesos += '<option value="'+this.id+'">'+this.name+' - '+this.description+'</option>'
 				});
 
 				procesos += '</select>'

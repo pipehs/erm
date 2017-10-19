@@ -58,7 +58,7 @@
 	@endif
 @endforeach
 
-	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px">
+	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:10px;">
 	<thead>
 	<th style="vertical-align:top;">Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th style="vertical-align:top;" width="20%">Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>

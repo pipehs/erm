@@ -55,7 +55,7 @@
 							{!!Form::number('HH_plan',null,['class'=>'form-control','id'=>'HH_plan','min'=>'0'])!!}
 						</div>
 					</div>
--->
+-->				
 					<div class="form-group">
 						{!!Form::label('Auditor responsable',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">

@@ -77,7 +77,7 @@ class Risk extends Model
                 ->join('organization_risk','organization_risk.risk_id','=','objective_risk.risk_id')
                 ->join('risks','risks.id','=','organization_risk.risk_id')
                 ->where('risks.type2','=',1)
-                ->groupBy('risks.id','risks.name','risks.description')
+                ->groupBy('risks.id','risks.name','risks.description','risks.risk_category_id')
                 ->select('risks.id as risk_id','risks.name as risk_name','risks.description','risks.risk_category_id')
                 ->get();
         }
@@ -88,7 +88,7 @@ class Risk extends Model
                 ->join('risks','risks.id','=','organization_risk.risk_id')
                 ->where('organization_risk.organization_id','=',$org)
                 ->where('risks.type2','=',1)
-                ->groupBy('organization_risk.id','risks.id','risks.name','risks.description')
+                ->groupBy('organization_risk.id','risks.id','risks.name','risks.description','risks.risk_category_id')
                 ->select('organization_risk.id as id','risks.id as risk_id','risks.name as risk_name','risks.description','risks.risk_category_id')
                 ->get();
         }
@@ -98,30 +98,43 @@ class Risk extends Model
     //Función para identificación y matrices de riesgos (igual a la de arriba sólo que para no causar posibles fallos se hizo una nueva agregando la categoría)
     public static function getRisks($org,$category)
     {
-        if ($category == NULL)
+        //ACTUALIZACIÓN 13-10-17: Se muestran primero todos los riesgos independiente de la organización
+        if ($org != NULL)
         {
-            //primero obtenemos sólo el id de los riesgos y luego su información
-            //ACTUALIZACIÓN 29-03-17: Probablemente group by da lo mismo
-            //ACTUALIZACIÓN 16-08-17
-            return DB::table('risks')
-                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
-                    ->where('organization_risk.organization_id','=',$org)
-                    ->where('risks.type2','=',1)
-                    ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
-                    ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
-                    ->get();
+            if ($category == NULL)
+            {
+                //primero obtenemos sólo el id de los riesgos y luego su información
+                //ACTUALIZACIÓN 29-03-17: Probablemente group by da lo mismo
+                //ACTUALIZACIÓN 16-08-17
+                return DB::table('risks')
+                        ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                        ->where('organization_risk.organization_id','=',$org)
+                        ->where('risks.type2','=',1)
+                        ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
+                        ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
+                        ->get();
+            }
+            else
+            {
+                return DB::table('risks')
+                        ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                        ->where('organization_risk.organization_id','=',$org)
+                        ->where('risks.risk_category_id','=',$category)
+                        ->where('risks.type2','=',1)
+                        ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
+                        ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
+                        ->get();
+            }
         }
         else
         {
             return DB::table('risks')
-                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
-                    ->where('organization_risk.organization_id','=',$org)
-                    ->where('risks.risk_category_id','=',$category)
-                    ->where('risks.type2','=',1)
-                    ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
-                    ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
-                    ->get();
+                ->where('risks.type2','=',1)
+                ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id')
+                ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id')
+                ->get();
         }
+        
     }
 
     //ACT 04-04-17: Igual a las de arriba solo que con where de type para proceso o negocio
@@ -182,6 +195,46 @@ class Risk extends Model
             $risks = array_unique($risks,SORT_REGULAR);
             return $risks;
         }
+    }
+
+    //ACTUALIZACIÓN 05-10-17: Obtenemos riesgos por categoría (indepeniente de la organización)
+    public static function getRisksFromCategory($category)
+    {
+            //Obtenemos también los riesgos de las subcategorías
+            $subcategories_temp = DB::table('risk_categories')
+                            ->where('risk_category_id','=',$category)
+                            ->select('id')
+                            ->get();
+
+            //convertimos a array
+            $subcategories = array();
+            $i = 0;
+            foreach ($subcategories_temp as $s)
+            {
+                $subcategories[$i] = $s->id;
+                $i += 1;
+            }
+            //riesgos de categoría directamente
+            $risks1 = DB::table('risks')
+                    ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
+                    ->where('risks.risk_category_id','=',$category)
+                    ->where('risks.type2','=',1)
+                    ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','risk_categories.name')
+                    ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','risk_categories.name as risk_category')
+                    ->get();
+
+            //riesgos de subcategoría
+            $risks2 = DB::table('risks')
+                    ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
+                    ->whereIn('risks.risk_category_id',$subcategories)
+                    ->where('risks.type2','=',1)
+                    ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','risk_categories.name')
+                    ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','risk_categories.name as risk_category')
+                    ->get();
+
+            $risks = array_merge($risks1,$risks2);
+            $risks = array_unique($risks,SORT_REGULAR);
+            return $risks;
     }
 
     public static function getRiskSubprocess($org)

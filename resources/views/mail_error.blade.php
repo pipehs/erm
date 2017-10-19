@@ -6,7 +6,7 @@
 <p>Se informa que se generó a través del sistema el siguiente error con sus datos correspondientes.</p>
 
 <p>Enviado por: {!! $user !!}<br>
-Empresa: Coca Cola Andina<br>
+Empresa: Servidor de Prueba (localhost)<br>
 Correo: {!! $user_mail !!}</p>
 
 <p>Favor brindar una solución a la brevedad.</p>

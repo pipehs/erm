@@ -93,6 +93,7 @@
 <!-- FIN Gráfico de planes accion de controles, auditorias u otros -->
 
 <!-- Gráfico de hallazgos -->
+<!--
 <div class="col-xs-12 col-sm-6">
 	<div class="box">
 		<div class="box-header">
@@ -120,6 +121,7 @@
 		</div>
 	</div>
 </div>
+-->
 <!-- FIN Gráfico de hallazgos -->
 
 <!-- Gráfico de estado de planes de acción -->
@@ -913,7 +915,7 @@
       	}
       }
     @else
-    	$('#alternativo4').html('<b>No existen planes de acci&oacute;n</b>');
+    	$('#alternativo4').html('<b>No existen planes de acci&oacute;n, o no se han definido porcentajes de avance para los planes de acci&oacute;n creados.</b>');
     @endif
 @endif  
       

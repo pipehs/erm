@@ -107,7 +107,7 @@ function getSubprocesses()
 		var select = '<div class="form-group">';
 		select += '<label for="control_id" class="col-sm-4 control-label">Seleccione Control(es) de forma opcional</label>';
 		select += '<div class="col-sm-6">'
-		select += '<select name="control_id[]" class="form-control" multiple>';
+		select += '<select name="control_id[]" multiple>';
 		select += '<option value="" selected disabled>- Seleccione -</option>';
 
 		var datos = JSON.parse(result);
@@ -115,11 +115,11 @@ function getSubprocesses()
 			//en caso que se esté editando
 			if (type_id == this.id)
 			{
-				select += '<option value="'+this.id+'" selected>'+this.name+' - '+this.description+'</option>';
+				select += '<option value="'+this.id+'" selected title="'+this.name+' - '+this.description+'">'+this.name+' - '+this.description+'</option>';
 			}
 			else
 			{
-				select += '<option value="'+this.id+'">'+this.name+' - '+this.description+'</option>';
+				select += '<option value="'+this.id+'" title="'+this.name+' - '+this.description+'">'+this.name+' - '+this.description+'</option>';
 			}
 							
 		});

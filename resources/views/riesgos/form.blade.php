@@ -1,3 +1,4 @@
+@if (isset($objetivos) || isset($subprocesos))	
 		<div id="cargando"><br></div>		
 			@if (isset($objetivos))
 					<div class="form-group">
@@ -62,7 +63,7 @@
 						</div>
 					</div>
 			@endif
-
+@endif
 					<div class="form-group">
 						{!!Form::label('Puede seleccionar un riesgo tipo creado previamente (opcional)',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
@@ -103,7 +104,7 @@
 		                 </div>
 		              </div>
 		            </div>
-
+			@if (isset($stakeholders) && isset($stakeholder))	
 					<div class="form-group">
 						{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
@@ -116,6 +117,7 @@
 						@endif
 						</div>
 					</div>
+			@endif
 					<div id="exp_date" class="form-group">
 						{!!Form::label('Fecha Expiraci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
@@ -202,16 +204,17 @@
 							<div style="cursor:hand" onclick="agregar_efecto()"><font color="CornflowerBlue"><u>Agregar Nuevo Efecto</u></font></div> <br>
 						</div>
 					</div>
-			@if (strstr($_SERVER["REQUEST_URI"],'create') && isset($subprocesos))		
+@if (isset($objetivos) || isset($subprocesos))	
+			@if (isset($subprocesos))		
 					<div class="form-group">
 						<label for="organization_id" class="col-sm-4 control-label">Seleccione otras organizaciones que se encuentren expuestas al riesgo (opcionalmente)</label>
 						<div class="col-sm-5">
 						{{-- Actualización 17-08-17: Ya no se ocupará ya que mejor sólo se editarán los datos del riesgo sin poder agregar o modificar en otras orgs --}}
+						{{-- Act 16-10-17: Si se ocupará para poder agregar más organizaciones en caso de que no se hayan agregado todas al comienzo--}}
 						@if (strstr($_SERVER["REQUEST_URI"],'edit'))
 								<select name="organization_id[]" multiple id="organization_id">
 								@foreach ($organizations as $o)
-								<?php $org = explode(',',$o); ?>
-										<option value="{{ $org[0] }}">{{ $org[1] }}</option>
+										<option value="{{ $o['id'] }}">{{ $o['name'] }}</option>
 								@endforeach
 								</select>
 						@else
@@ -226,14 +229,16 @@
 					<div id="other_subprocesses" style="display: none;"></div>
 					<div id="other_stakeholders" style="display: none;"></div>
 			@endif
+@endif
 					<div class="form-group">
 						<label for="file" class="col-sm-4 control-label">Cargar documentos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>
 						<div class="col-sm-4">
 							<input id="file-1" type="file" class="file" name="evidence_doc[]" multiple=true data-preview-file-type="any">
 						</div>
 					</div>
-					
+			@if (isset($org_id))			
 					{!!Form::hidden('org_id',$org_id)!!}
+			@endif
 					<div class="form-group">
 						<center>
 						{!!Form::submit('Guardar', ['class'=>'btn btn-success'])!!}

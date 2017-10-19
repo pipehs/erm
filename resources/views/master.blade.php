@@ -86,9 +86,9 @@
     @yield('content')
 </div>
 
-	{!!Html::script('http://cdn.jsdelivr.net/webshim/1.12.4/extras/modernizr-custom.js')!!}
+	{!!Html::script('https://cdn.jsdelivr.net/webshim/1.12.4/extras/modernizr-custom.js')!!}
 	<!-- polyfiller file to detect and load polyfills -->
-	{!!Html::script('http://cdn.jsdelivr.net/webshim/1.12.4/polyfiller.js')!!}
+	{!!Html::script('https://cdn.jsdelivr.net/webshim/1.12.4/polyfiller.js')!!}
 	<script>
 	  webshims.setOptions('forms-ext', {types: 'date'});
 		webshims.polyfill('forms forms-ext');
@@ -103,7 +103,7 @@
 		};
 
 	</script>
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" type="text/javascript"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" type="text/javascript"></script>
 	{!!Html::script('assets/js/fileinput.min.js')!!}
 	{!!Html::script('assets/plugins/bootstrap/bootstrap.min.js')!!}
 	{!!Html::script('assets/plugins/justified-gallery/jquery.justifiedgallery.min.js')!!}

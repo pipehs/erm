@@ -181,7 +181,10 @@ function result(id,result,hh_real,comments,files)
 			$(filestemp).each( function(i,file) {
 
 				filetemp = file.split('.')
+				ext = filetemp[1] //tipo de archivo
 				filename = filetemp[0].split('/')
+				id = filename[1] //carpeta
+				kind = filename[0] //ejecucion_auditorias
 				filename = filename[2]
 
 				resultado += '<div class="col-sm-6 control-label"></br>';
@@ -190,32 +193,32 @@ function result(id,result,hh_real,comments,files)
 
 				if (filetemp[1] == 'jpg' || filetemp[1] == 'jpeg' || filetemp[1] == 'JPG')
 				{
-					resultado += '<div class="col-sm-6"><a href="../storage/app/'+file+'" download><img src="assets/img/jpg.png" width="30" height="30" />'+filename+'</a></div>'
+					resultado += '<div class="col-sm-6"><a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/jpg.png" width="30" height="30" />'+filename+'</a></div>'
 				}
 				else if (filetemp[1] == 'pdf')
 				{
 
-					resultado += '<div class="col-sm-6"><a href="/bgrcdemo/storage/app/'+file+'" download><img src="assets/img/pdf.png" width="30" height="30" />'+filename+'</a></div>'
+					resultado += '<div class="col-sm-6"><a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/pdf.png" width="30" height="30" />'+filename+'</a></div>'
 				}
 				else if (filetemp[1] == 'doc' || filetemp[1] == 'docx')
 				{
-					resultado += '<div class="col-sm-6"><a href="../storage/app/'+file+'" download><img src="assets/img/word.png" width="30" height="30" />'+filename+'</a></div>'
+					resultado += '<div class="col-sm-6"><a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/word.png" width="30" height="30" />'+filename+'</a></div>'
 				}
 				else if (filetemp[1] == 'xls' || filetemp[1] == 'xlsx')
 				{
-					resultado += '<div class="col-sm-6"><a href="../storage/app/'+file+'" download><img src="assets/img/excel.png" width="30" height="30" />'+filename+'</a></div>'
+					resultado += '<div class="col-sm-6"><a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/excel.png" width="30" height="30" />'+filename+'</a></div>'
 				}
 				else if (filetemp[1] == 'ppt' || filetemp[1] == 'pptx')
 				{
-					resultado += '<div class="col-sm-6"><a href="../storage/app/'+file+'" download><img src="assets/img/powerpoint.png" width="30" height="30" />'+filename+'</a></div>'
+					resultado += '<div class="col-sm-6"><a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/powerpoint.png" width="30" height="30" />'+filename+'</a></div>'
 				}
 				else if (filetemp[1] == 'png' || filetemp[1] == 'PNG')
 				{
-					resultado += '<div class="col-sm-6"><a href="../storage/app/'+file+'" download><img src="assets/img/png.png" width="30" height="30" />'+filename+'</a></div>'
+					resultado += '<div class="col-sm-6"><a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/png.png" width="30" height="30" />'+filename+'</a></div>'
 				}
 				else
 				{
-					resultado += '<div class="col-sm-6"><a href="../storage/app/'+file+'" download><img src="assets/img/desconocido.png" width="30" height="30" />'+filename+'</a></div>'
+					resultado += '<div class="col-sm-6"><a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/desconocido.png" width="30" height="30" />'+filename+'</a></div>'
 				}
 
 				if (rol == 1)

@@ -581,6 +581,7 @@ class AuditoriasController extends Controller
                             {
                                 foreach ($controls as $control)
                                 {
+                                    /*Por ahora no se usa en Coca Cola
                                     if ($control->control_id != NULL)
                                     {
                                         $result = $c->calcControlValue($control->control_id);
@@ -592,7 +593,8 @@ class AuditoriasController extends Controller
                                     else
                                     {
                                         $result = 2;
-                                    }
+                                    }*/
+                                    $result = 1;
                                 }
                             }
                             else 
@@ -717,6 +719,15 @@ class AuditoriasController extends Controller
                 //primero vemos si se está agregando una nota o una evidencia
                 DB::transaction(function() {
                     $logger = $this->logger4;
+
+                    if (isset($_POST['stakeholder_id']))
+                    {
+                        $stake = $_POST['stakeholder_id'];
+                    }
+                    else
+                    {
+                        $stake = NULL;
+                    }
                     $res = DB::table('notes')
                             ->insertGetId([
                                 'name' => $_POST['name_'.$_POST['test_id']],
@@ -726,7 +737,7 @@ class AuditoriasController extends Controller
                                 'audit_test_id' => $_POST['test_id'],
                                 'status' => 0,
                                 'user_id' => Auth::user()->id,
-                                'stakeholder_id' => $_POST['stakeholder_id']
+                                'stakeholder_id' => $stake
                             ]);
                 
                     //guardamos archivo de evidencia (si es que hay)
@@ -2524,13 +2535,6 @@ class AuditoriasController extends Controller
                             ->get();
                         if (empty($rev))
                         {
-                            //nombre
-                            $name = DB::table('audit_tests')->where('id',$GLOBALS['id1'])->value('name');
-                            //ahora se puede eliminar
-                            DB::table('audit_tests')
-                                ->where('id','=',$GLOBALS['id1'])
-                                ->delete();
-
                             //nombre de audit y audit_plan para log
                             $a = DB::table('audits')
                                     ->join('audit_audit_plan','audit_audit_plan.audit_id','=','audits.id')
@@ -2538,9 +2542,21 @@ class AuditoriasController extends Controller
                                     ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_audit_plan_id','=','audit_audit_plan.id')
                                     ->join('audit_tests','audit_tests.audit_audit_plan_audit_program_id','=','audit_audit_plan_audit_program.id')
                                     ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
-                                    ->where('audit_tests.audit_audit_plan_audit_program_id','=',$GLOBALS['id1'])
+                                    ->where('audit_tests.id','=',$GLOBALS['id1'])
                                     ->select('audit_plans.name as audit_plan','audits.name as audit','audit_programs.name as program')
                                     ->first();
+                            //nombre
+                            $name = DB::table('audit_tests')->where('id',$GLOBALS['id1'])->value('name');
+                            //ahora se puede eliminar
+
+                            //primero eliminamos de audit_test_control (si es que hay)
+                            DB::table('audit_test_control')
+                                ->where('audit_test_id','=',$GLOBALS['id1'])
+                                ->delete();
+                                
+                            DB::table('audit_tests')
+                                ->where('id','=',$GLOBALS['id1'])
+                                ->delete();
 
                             $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la prueba de auditoría con Id: '.$GLOBALS['id1'].' llamado: '.$name.', asociado al programa '.$a->program.' de la auditoría: '.$a->audit.' perteneciente al plan: '.$a->audit_plan.',  con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
@@ -4689,26 +4705,36 @@ class AuditoriasController extends Controller
             return view('errors.query',['e' => $e]);
         }
     }
-    public static function destroyNoteAnswer($id)
+    public function destroyNoteAnswer($id)
     {
         try
         {
-            $logger = $this->logger4;
-            $answer = DB::table('notes_answers')->where('id',$id)->value('answer');
+            global $id1;
+            $id1 = $id;
+            global $res;
+            $res = 1;
+            DB::transaction(function() {
 
-            $note = DB::table('notes')
-                    ->join('notes_answers','notes_answers.note_id','=','notes.id')
-                    ->where('notes_answers.id','=',$id)
-                    ->select('notes.id','notes.name');
+                $logger = $this->logger4;
+                $answer = DB::table('notes_answers')->where('id',$GLOBALS['id1'])->value('answer');
 
-            //ACT 17-04-17: Simplemente eliminamos respuesta
-            DB::table('notes_answers')
-                ->where('id','=',$id)
-                ->delete();
+                $note = DB::table('notes')
+                        ->join('notes_answers','notes_answers.note_id','=','notes.id')
+                        ->where('notes_answers.id','=',$GLOBALS['id1'])
+                        ->select('notes.id','notes.name')
+                        ->first();
 
-            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la respuesta definida como '.$answer.' asociada a la nota con Id: '.$note->id.' llamada: '.$note->name.',  con fecha '.date('d-m-Y').' a las '.date('H:i:s')); 
+                //ACT 17-04-17: Simplemente eliminamos respuesta
+                DB::table('notes_answers')
+                    ->where('id','=',$GLOBALS['id1'])
+                    ->delete();
 
-            return 0;
+                $GLOBALS['res'] = 0;
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado la respuesta definida como '.$answer.' asociada a la nota con Id: '.$note->id.' llamada: '.$note->name.',  con fecha '.date('d-m-Y').' a las '.date('H:i:s')); 
+            });
+
+            return $res;
         }
         catch (\Exception $e)
         {

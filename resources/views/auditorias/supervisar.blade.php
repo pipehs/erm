@@ -147,37 +147,41 @@ $("#audit").change(function() {
 									$(filestemp).each( function(i,file) {
 
 										filetemp = file.split('.')
+										ext = filetemp[1] //tipo de archivo
+
 										filename = filetemp[0].split('/')
+										id = filename[1] //carpeta
+										kind = filename[0] //ejecucion_auditorias
 										filename = filename[2]
 
 
 										if (filetemp[1] == 'jpg' || filetemp[1] == 'jpeg' || filetemp[1] == 'JPG')
 										{
-											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/jpg.png" width="30" height="30" />'+filename+'</a>'
+											audit_test += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/jpg.png" width="30" height="30" />'+filename+'</a>'
 										}
 										else if (filetemp[1] == 'pdf')
 										{
-											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/pdf.png" width="30" height="30" />'+filename+'</a>'
+											audit_test += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/pdf.png" width="30" height="30" />'+filename+'</a>'
 										}
 										else if (filetemp[1] == 'doc' || filetemp[1] == 'docx')
 										{
-											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/word.png" width="30" height="30" />'+filename+'</a>'
+											audit_test += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/word.png" width="30" height="30" />'+filename+'</a>'
 										}
 										else if (filetemp[1] == 'xls' || filetemp[1] == 'xlsx')
 										{
-											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/excel.png" width="30" height="30" />'+filename+'</a>'
+											audit_test += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/excel.png" width="30" height="30" />'+filename+'</a>'
 										}
 										else if (filetemp[1] == 'ppt' || filetemp[1] == 'pptx')
 										{
-											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/powerpoint.png" width="30" height="30" />'+filename+'</a>'
+											audit_test += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/powerpoint.png" width="30" height="30" />'+filename+'</a>'
 										}
 										else if (filetemp[1] == 'png' || filetemp[1] == 'PNG')
 										{
-											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/png.png" width="30" height="30" />'+filename+'</a>'
+											audit_test += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/png.png" width="30" height="30" />'+filename+'</a>'
 										}
 										else
 										{
-											audit_test += '<a href="../storage/app/'+file+'" download><img src="assets/img/desconocido.png" width="30" height="30" />'+filename+'</a>'
+											audit_test += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+ext+'"><img src="assets/img/desconocido.png" width="30" height="30" />'+filename+'</a>'
 										}
 
 									});
@@ -269,7 +273,7 @@ function crear_nota(id)
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<textarea name="description_'+id+'" rows="3" cols="4" class="form-control" placeholder="Nota" required></textarea></div>';
 	nota += '<div class="form-group col-sm-12">';
-	nota += '<select name="stakeholder_id" class="form-control">'
+	nota += '<select name="stakeholder_id" class="form-control" required>'
 	nota += '<option value="" disabled selected>- Seleccione a quien irá dirigida la nota -</option>';
 	//seteamos datos en select de auditorías
 	$(stakeholders).each( function() {

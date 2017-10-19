@@ -313,6 +313,25 @@ function upload_file($archivo,$dir,$id)
     }
 }
 
+//helper para descargar archivo
+function downloadFile($kind,$id,$filename,$ext)
+{
+
+	//$realPath = $dir.'/'.$id.'/'.$filename;
+	$kind = str_replace("'","",$kind);
+	$ext = str_replace("'","",$ext);
+	//echo $kind.'<br>'.$id.'<br>'.$filename.'<br>'.$ext;
+
+	$path = 'app\\'.$kind.'\\'.$id.'\\'.$filename.'.'.$ext; //windows
+
+	if (!file_exists($path))
+	{
+		$path = 'app/'.$kind.'/'.$id.'/'.$filename.'.'.$ext; //ubuntu
+	}
+	return response()->download(storage_path($path));
+
+}
+
 //Funcion php que valida rut en Chile
 function validaRut($rut)
 {

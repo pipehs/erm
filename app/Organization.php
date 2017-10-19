@@ -128,8 +128,8 @@ class Organization extends Model
 
             if (empty($org_risk)) //significa que esta organización no tiene 
             {
-                $res[$i] = $o->id.',';
-                $res[$i] .= $o->name;
+                $res[$i] = ['id' => $o->id,
+                            'name' => $o->name];
                 $i+=1;
             }
         }
@@ -164,5 +164,13 @@ class Organization extends Model
                 ->where('organization_risk.id','=',$org_risk_id)
                 ->select('organizations.id','organizations.name','organizations.description')
                 ->first();
+    }
+
+    public static function getOrganizationsFromRisk($risk_id)
+    {
+        return DB::table('organization_risk')
+                ->where('organization_risk.risk_id','=',$risk_id)
+                ->select('organization_risk.organization_id','organization_risk.stakeholder_id')
+                ->get();
     }
 }

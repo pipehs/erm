@@ -1577,49 +1577,60 @@ class PlanesAccionController extends Controller
                                         ->limit(1)
                                         ->first();
 
-                        if ($progress->percentage == 10)
+                        if (!empty($progress))
                         {
-                            $cont_progress_percentage10 += 1;
+                            if ($progress->percentage == 10)
+                            {
+                                $cont_progress_percentage10 += 1;
+                            }
+                            else if ($progress->percentage == 20)
+                            {
+                                $cont_progress_percentage20 += 1;
+                            }
+                            else if ($progress->percentage == 30)
+                            {
+                                $cont_progress_percentage30 += 1;
+                            }
+                            else if ($progress->percentage == 40)
+                            {
+                                $cont_progress_percentage40 += 1;
+                            }
+                            else if ($progress->percentage == 50)
+                            {
+                                $cont_progress_percentage50 += 1;
+                            }
+                            else if ($progress->percentage == 60)
+                            {
+                                $cont_progress_percentage60 += 1;
+                            }
+                            else if ($progress->percentage == 70)
+                            {
+                                $cont_progress_percentage70 += 1;
+                            }
+                            else if ($progress->percentage == 80)
+                            {
+                                $cont_progress_percentage80 += 1;
+                            }
+                            else if ($progress->percentage == 90)
+                            {
+                                $cont_progress_percentage90 += 1;
+                            }
+                            else if ($progress->percentage == 100)
+                            {
+                                $cont_progress_percentage100 += 1;
+                            }
+                            else if ($progress->percentage == 0)
+                            {
+                                $cont_progress_percentage0 += 1;
+                            }
+
+                            $progress_percentage = $progress->percentage;
+                            $progress_comments = $progress->comments;
                         }
-                        else if ($progress->percentage == 20)
+                        else
                         {
-                            $cont_progress_percentage20 += 1;
-                        }
-                        else if ($progress->percentage == 30)
-                        {
-                            $cont_progress_percentage30 += 1;
-                        }
-                        else if ($progress->percentage == 40)
-                        {
-                            $cont_progress_percentage40 += 1;
-                        }
-                        else if ($progress->percentage == 50)
-                        {
-                            $cont_progress_percentage50 += 1;
-                        }
-                        else if ($progress->percentage == 60)
-                        {
-                            $cont_progress_percentage60 += 1;
-                        }
-                        else if ($progress->percentage == 70)
-                        {
-                            $cont_progress_percentage70 += 1;
-                        }
-                        else if ($progress->percentage == 80)
-                        {
-                            $cont_progress_percentage80 += 1;
-                        }
-                        else if ($progress->percentage == 90)
-                        {
-                            $cont_progress_percentage90 += 1;
-                        }
-                        else if ($progress->percentage == 100)
-                        {
-                            $cont_progress_percentage100 += 1;
-                        }
-                        else if ($progress->percentage == 0)
-                        {
-                            $cont_progress_percentage0 += 1;
+                            $progress_percentage = NULL;
+                            $progress_comments = NULL;
                         }
 
 
@@ -1629,8 +1640,8 @@ class PlanesAccionController extends Controller
                                 'final_date' => $final_date,
                                 'stakeholder' => $user->name.' '.$user->surnames,
                                 'status' => $status,
-                                'progress_percentage' => $progress->percentage,
-                                'progress_comments' => $progress->comments
+                                'progress_percentage' => $progress_percentage,
+                                'progress_comments' => $progress_comments
                             ];
 
                     }

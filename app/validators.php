@@ -1,4 +1,10 @@
 <?php
-// Este archivo es protegido por la ley de derechos de propiedad intelectual. La ingeniería inversa de este codigo se prohibe estrictamente.
-eval(base64_decode('DQp1c2UgREI7DQoNClZhbGlkYXRvcjo6ZXh0ZW5kKCd2YWxpZGF0ZVVzZXInLCBmdW5jdGlvbigkYXR0cmlidXRlLCAkdmFsdWUsICRwYXJhbWV0ZXJzKQ0Kew0KCSR1c2VyID0gREI6OnRhYmxlKCdldmFsdWF0aW9uX3N0YWtlaG9sZGVyJykNCiAgICAgICAgCQkJLT53aGVyZSgnc3Rha2Vob2xkZXJfaWQnLCc9JywkdmFsdWUpDQogICAgICAgIAkJCS0+c2VsZWN0KCdpZCcpOw0KDQogICAgcmV0dXJuICR1c2VyOw0KfSk7IA=='));
+use DB; 
+
+Validator::extend('validateUser', 
+	function($attribute, $value, $parameters) { 
+		$user = DB::table('evaluation_stakeholder') 
+				->where('stakeholder_id','=',$value) 
+				->select('id'); return $user; 
+			});
 ?>

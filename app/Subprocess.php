@@ -193,7 +193,7 @@ class Subprocess extends Model
                 ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
                 ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
                 ->where('control_organization_risk.control_id','=',$control)
-                ->where('organization_subprocess.organization_id','=',$org)
+                ->where('organization_subprocess.organization_id','=',(int)$org)
                 ->select('subprocesses.id','subprocesses.name','subprocesses.description')
                 ->groupBy('subprocesses.id','subprocesses.name','subprocesses.description')
                 ->get();

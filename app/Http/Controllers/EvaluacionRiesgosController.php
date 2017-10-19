@@ -764,9 +764,13 @@ class EvaluacionRiesgosController extends Controller
                         $i += 1;
                 }
 
-                Mail::send('envio_mail',$request->all(), 
+
+                try
+                {
+                    Mail::send('envio_mail',$request->all(), 
                     function ($msj) use ($correos)
                     {
+                        echo "Hola??<br>";
                         if (Session::get('languaje') == 'en')
                         {
                             $msj->subject('Risks assessments poll');
@@ -789,6 +793,13 @@ class EvaluacionRiesgosController extends Controller
                         }
                     }
                 );
+                }
+                catch (\Exception $e)
+                {
+                    //enviarMailSoporte($e);
+                    return view('errors.query',['e' => $e]);
+                }
+                
 
                 if (Session::get('languaje') == 'en')
                 {
@@ -799,7 +810,7 @@ class EvaluacionRiesgosController extends Controller
                     Session::flash('message','Encuesta enviada correctamente');
                 }
 
-                return Redirect::to('/evaluacion_agregadas');
+                //return Redirect::to('/evaluacion_agregadas');
             }
         }
         catch (\Exception $e)
@@ -2187,6 +2198,23 @@ class EvaluacionRiesgosController extends Controller
                         ->where('objective_risk.risk_id','=',$riesgo_temp->id)
                         ->where('objectives.organization_id','=',$_GET['organization_id'])
                         ->select('objectives.name')
+                        ->get();
+                }
+            }
+            else //para gráfico de inicio, tanto subprocesos como objetivos
+            {
+                $subobj = DB::table('objectives')
+                        ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
+                        ->where('objective_risk.risk_id','=',$riesgo_temp->id)
+                        ->select('objectives.name')
+                        ->get();
+
+                if (!isset($subobj) || empty($subobj))
+                {
+                    $subobj = DB::table('subprocesses')
+                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
+                        ->select('subprocesses.name')
                         ->get();
                 }
             }

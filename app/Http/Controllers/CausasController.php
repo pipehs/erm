@@ -254,7 +254,6 @@ class CausasController extends Controller
                 //Validación: Si la validación es pasada, el código continua
                 $this->validate($request, [
                     'name' => 'unique:causes',
-                    'description' => 'required',
                 ]);
 
                 $logger = $this->logger;

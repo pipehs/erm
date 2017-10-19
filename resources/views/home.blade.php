@@ -22,7 +22,7 @@
 
      <!-- Heatmap de última encuesta agregada -->
 <div class="row">
-	<div class="col-sm-12 col-m-6">
+	<div class="col-sm-4 col-m-6">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -54,7 +54,7 @@
               <div  style="width: 11px; background-color:#000000; word-wrap: break-word; text-align: center; color:white;">Impacto
                     </div></td>
                 <td  bgcolor="#CCCCCC">
-                  <table height="395px" width="100%" border="1">
+                  <table height="275px" width="80%" border="1" style="font-size:10px;">
                     <tr><td>5<br>Cr&iacute;tico</td></tr>
                     <tr><td>4<br>Alto</td></tr>
                     <tr><td>3<br>Moderado</td></tr>
@@ -63,14 +63,14 @@
                   </table>
                 </td>
                 <td >
-                  <table class="heatmap1" border="1">
+                  <table class="heatmap-inicio" border="1">
 
                   <!-- damos por ahora los 5 niveles fijos de criticidad y probabilidad -->
                   @for ($i=0; $i<5; $i++)
 
                     <tr style="height: 20%; ">
                     @for ($j=1; $j<=5; $j++)
-                        <td id="{{(5-$i)}}_{{($j)}}" style="width: 20%; text-align: center;"></td>
+                        <td id="{{(5-$i)}}_{{($j)}}" style="width: 16%; text-align: center;"></td>
                     @endfor
                     </tr>
                     
@@ -82,7 +82,7 @@
                     <td ></td>
                     <td ></td>
                     <td  bgcolor="#CCCCCC">
-                        <table height="50px" width="100%" border="1">
+                        <table height="50px" width="50%" border="1" style="font-size:10px;">
                             <td width="20%" style="vertical-align:top;">1<br>Remoto</td>
                             <td width="20%" style="vertical-align:top;">2<br>No probable</td>
                             <td width="20%" style="vertical-align:top;">3<br>Probable</td>
@@ -109,7 +109,68 @@
 	</div>
 </div>
 
-</div>
+
+<!-- Riesgos por categoría -->
+  <div class="col-sm-4 col-m-6">
+    <div class="box">
+      <div class="box-header">
+        <div class="box-name">
+          <i class="fa fa-table"></i>
+          <span>Riesgos clasificados por categor&iacute;a</span>
+        </div>
+        <div class="box-icons">
+          <a class="collapse-link">
+            <i class="fa fa-chevron-up"></i>
+          </a>
+          <a class="expand-link">
+            <i class="fa fa-expand"></i>
+          </a>
+          <a class="close-link">
+            <i class="fa fa-times"></i>
+          </a>
+        </div>
+        <div class="move"></div>
+      </div>
+      <div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
+        <p id="alternativo"></p>
+         <div id="chart1" style="width: 100%; height: 250px;"></div>
+      </div>
+    </div>
+  </div> 
+<!-- FIN Riesgos por categoría -->
+
+<!-- Riesgos críticos con o sin control -->
+  <div class="col-sm-4 col-m-6">
+    <div class="box">
+      <div class="box-header">
+        <div class="box-name">
+          <i class="fa fa-table"></i>
+          <span>Estado de Riesgos críticos</span>
+        </div>
+        <div class="box-icons">
+          <a class="collapse-link">
+            <i class="fa fa-chevron-up"></i>
+          </a>
+          <a class="expand-link">
+            <i class="fa fa-expand"></i>
+          </a>
+          <a class="close-link">
+            <i class="fa fa-times"></i>
+          </a>
+        </div>
+        <div class="move"></div>
+      </div>
+      <div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
+
+        <!--Hola-->
+      </div>
+    </div>
+  </div> 
+<!-- FIN Riesgos por categoría -->
+
+
+
+</div> <!-- FIN row -->
 
 
 @stop
@@ -124,6 +185,7 @@
     @endforeach
   @endif
   
+
   //---- HEATMAP ----//
       <?php $cont = 1; //contador de riesgos ?>
       //ciclo para rellenar tabla con riesgos
@@ -133,8 +195,8 @@
                   @if (intval($prom_criticidad[$k]) == (5-$i))
                       @if (intval($prom_proba[$k]) == (5-$j))
                          $('#{{(5-$i)}}_{{(5-$j)}}').append("<span class='circulo' title='{{ $riesgos[$k]['name'] }} - {{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad[$k],1) }}'>{{ $cont }}</span>");
-
-                         $('#leyendas').append("<p><small><span class='circulo-small'>{{ $cont }}</span> : {{ $riesgos[$k]['name'] }} - {{ $riesgos[$k]['description'] }}")
+                        /*
+                         $('#leyendas').append("<p><small><span class='circulo-small'>{{ $cont }}</span> : {{ $riesgos[$k]['name'] }} - {{ $riesgos[$k]['description'] }}") */
                        /*
                         $('#{{(5-$i)}}_{{(5-$j)}}').append("<img src='assets/img/circulo.png' height='20px' width='20px' title='{{ $riesgos[$k]['name'] }}. Probabilidad: {{ number_format($prom_proba[$k],1) }} &nbsp; Criticidad: {{ number_format($prom_criticidad[$k],1) }}'>");
                      
@@ -151,6 +213,41 @@
       @endfor
 
   $( document ).tooltip(); 
+  </script>
+
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script>
+  @if (isset($risks))
+      google.charts.load("visualization", "1", {packages:["corechart"]});
+      google.charts.setOnLoadCallback(chart1);
+      function chart1() {
+        var data = google.visualization.arrayToDataTable([
+          ['Riesgos', 'Cantidad',{ role: 'style' }],
+
+          <?php $last = end($categories); ?>
+          @foreach ($categories as $cat)
+
+            @if ($cat == $last)
+              ["{{ $cat['name']}}", {{ $cat['cont'] }},"{{ $cat['color'] }}"]
+            @else
+              ["{{$cat['name']}}", {{ $cat['cont'] }},"{{ $cat['color'] }}"],
+            @endif
+          @endforeach
+        ]);
+
+        var options = {
+          title: 'Riesgos por categoría',
+        };
+
+        var chart = new google.visualization.ColumnChart(document.getElementById('chart1'));
+        chart.draw(data, options);
+
+        //guardamos imagen en form hidden para reporte
+        //document.getElementById('grafico1').value = chart.getImageURI();
+      }
+  @else
+    $('#alternativo').html('<b>Aun no se han ejecutado controles</b>');
+  @endif
   </script>
 @stop
 

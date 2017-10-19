@@ -138,7 +138,11 @@
 				@endforeach
 				</table>
 				<div id="boton_exportar">
+				@if ($value == 0)
+					{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "0,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
+				@else
 					{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "1,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
+				@endif
 				</div>
 
 				<center>
