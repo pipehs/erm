@@ -30,4 +30,22 @@ class Cause extends Model
     {
         return DB::table('causes')->where('id',$id)->value('name');
     }
+
+    public static function getCauseByName($name)
+    {   
+        return DB::table('causes')
+                ->where('name','=',$name)
+                ->select('id')
+                ->first();
+    }
+
+    public static function getCauseByNameAndDescription($name,$desc)
+    {   
+        return DB::table('causes')
+                ->where('name','=',$name)
+                ->where('description','=',$desc)
+                ->select('id')
+                ->first();
+    }
+     
 }

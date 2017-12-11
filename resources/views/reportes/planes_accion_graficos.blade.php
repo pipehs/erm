@@ -84,7 +84,7 @@
 			<div class="no-move"></div>
 		</div>
 		<div class="box-content">
-			<p align="justify">En este gr&aacute;fico podr&aacute; observar del universo de planes de acci&oacute;n, de que tipo son estos, ya sean planes de acci&oacute;n para evaluaci&oacute;n de controles, auditor&iacute;s u otros.</p>
+			<p align="justify">En este gr&aacute;fico podr&aacute; observar del universo de planes de acci&oacute;n por tipo, ya sean planes de acci&oacute;n para evaluaci&oacute;n de controles, auditor&iacute;a u otros.</p>
 			<p id="alternativo"></p>
 			<div id="piechart_3d" style="width: 100%; height: 300px;"></div>
 		</div>
@@ -93,7 +93,7 @@
 <!-- FIN Gráfico de planes accion de controles, auditorias u otros -->
 
 <!-- Gráfico de hallazgos -->
-<!--
+
 <div class="col-xs-12 col-sm-6">
 	<div class="box">
 		<div class="box-header">
@@ -115,13 +115,13 @@
 			<div class="no-move"></div>
 		</div>
 		<div class="box-content">
-			<p align="justify">En este gr&aacute;fico podr&aacute; observar los distintos hallazgos registrados en el sistema, además de la informaci&oacute;n correspondiente a los planes de acci&oacute;n enlazados a los mismos (siempre que estos tengan un plan de acci&oacute;n registrado).</p>
+			<p align="justify">En este gr&aacute;fico podr&aacute; observar los distintos hallazgos registrados en el sistema, además de la informaci&oacute;n correspondiente a los planes de acci&oacute;n enlazados a los mismos (siempre que &eacute;stos tengan un plan de acci&oacute;n registrado).</p>
 			<p id="alternativo2"></p>
 			<div id="piechart2" style="width: 100%; height: 300px;"></div>
 		</div>
 	</div>
 </div>
--->
+
 <!-- FIN Gráfico de hallazgos -->
 
 <!-- Gráfico de estado de planes de acción -->
@@ -146,7 +146,7 @@
 			<div class="no-move"></div>
 		</div>
 		<div class="box-content">
-			<p align="justify">En este gr&aacute;fico podr&aacute; observar el estado de los distintos planes de acci&oacute;n, si es que est&aacute;n cerrados, pr&oacute;ximos a cerrar, o aquellos que est&aacute;n pasados en su fecha final y aun no se han cerrado.</p>
+			<p align="justify">En este gr&aacute;fico podr&aacute; observar el estado de los distintos planes de acci&oacute;n, si es que est&aacute;n cerrados, pr&oacute;ximos a cerrar, o aquellos que est&aacute;n pasados en su fecha final y a&uacute;n no se han cerrado.</p>
 			<p id="alternativo3"></p>
 			<div id="piechart3" style="width: 100%; height: 300px;"></div>
 		</div>
@@ -206,6 +206,7 @@
 			</div>
 			<div class="no-move"></div>
 		</div>
+		
 			<div class="box-content">
 			<div id="boton_exportar">
 			{!!Form::open(['route'=>'export_action_plan_graphics','method'=>'POST','class'=>'form-horizontal'])!!}
@@ -214,14 +215,17 @@
 				{!!Form::hidden('grafico3','',['id' => 'grafico3'])!!}
 				{!!Form::hidden('grafico4','',['id' => 'grafico4'])!!}
 				{!!Form::hidden('org',$org,['id' => 'org'])!!}
+				<!--
 				<div class="form-group">
 						<center>
 						{!!Form::submit('Exportar a Word', ['class'=>'btn btn-info'])!!}
 						</center>
 				</div>
+				-->
 			{!!Form::close()!!}
 			</div>
 			</div>
+		
 		</div>
 	</div>
 </div>

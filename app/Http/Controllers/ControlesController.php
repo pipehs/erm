@@ -333,8 +333,24 @@ class ControlesController extends Controller
 
                 $i = 0; //contador de controles
                 
-                $controles1 = \Ermtool\Control::getBussinessControls($_GET['organization_id']);
-                $controles2 = \Ermtool\Control::getProcessesControls($_GET['organization_id']);
+                //ACTUALIZACIÓN 21-11-17: Vemos si se está filtrando por Riesgo
+                if (isset($_GET['objective_risk_id']))
+                {
+                    $controles1 = \Ermtool\Control::getBussinessControls($_GET['organization_id'],$_GET['objective_risk_id']); 
+                }
+                else
+                {
+                    $controles1 = \Ermtool\Control::getBussinessControls($_GET['organization_id'],NULL);
+                }
+
+                if (isset($_GET['risk_subprocess_id']))
+                {
+                    $controles2 = \Ermtool\Control::getProcessesControls($_GET['organization_id'],$_GET['risk_subprocess_id']);
+                }
+                else
+                {
+                    $controles2 = \Ermtool\Control::getProcessesControls($_GET['organization_id'],NULL);
+                }
 
                 //controles de negocio
                 foreach ($controles1 as $control) //se recorre cada uno de los controles de negocio
@@ -422,7 +438,14 @@ class ControlesController extends Controller
                                         'risks' => $risks,
                                         'objectives' => $objectives,
                                         'short_des' => $short_des,
-                                        'porcentaje_cont' => $control->porcentaje_cont);
+                                        'porcentaje_cont' => $control->porcentaje_cont,
+                                        'key_control' => $control->key_control,
+                                        'objective' => $control->objective,
+                                        'establishment' => $control->establishment,
+                                        'application' => $control->application,
+                                        'supervision' => $control->supervision,
+                                        'test_plan' => $control->test_plan,
+                                    );
                     $i += 1;
                 }
 
@@ -553,13 +576,16 @@ class ControlesController extends Controller
                 $stakeholders = \Ermtool\Stakeholder::listStakeholders($org);
                 $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
 
+                //ACTUALIZACIÓN 16-11-17: Estados financieros
+                $financial_statements = \Ermtool\Financial_statement::where('status',0)->lists('name','id');
+
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.controles.create',['stakeholders'=>$stakeholders,'org'=>$org,'categories' => $categories]);
+                    return view('en.controles.create',['stakeholders'=>$stakeholders,'org'=>$org,'categories' => $categories,'financial_statements' => $financial_statements]);
                 }
                 else
                 {
-                    return view('controles.create',['stakeholders'=>$stakeholders,'org'=>$org,'categories' => $categories]);
+                    return view('controles.create',['stakeholders'=>$stakeholders,'org'=>$org,'categories' => $categories,'financial_statements' => $financial_statements]);
                 }
             }
         }
@@ -588,7 +614,6 @@ class ControlesController extends Controller
                 //Validación: Si la validación es pasada, el código continua
                 $this->validate($request, [
                     'name' => 'required|max:255',
-                    'description' => 'required',
                 ]);
                 //print_r($_POST);
                 //guardamos variable global de evidencia
@@ -598,6 +623,23 @@ class ControlesController extends Controller
                 DB::transaction(function()
                 {
                     $logger = $this->logger;
+
+                        if (isset($_POST['description']))
+                        {
+                            if ($_POST['description'] == NULL || $_POST['description'] == "")
+                            {
+                                $description = NULL;
+                            }
+                            else
+                            {
+                                $description = $_POST['description'];
+                            }
+                        }
+                        else
+                        {
+                            $description = NULL;
+                        }
+
                         if ($_POST['stakeholder_id'] == NULL)
                             $stakeholder = NULL;
                         else
@@ -661,30 +703,187 @@ class ControlesController extends Controller
                             $porcentaje_cont = NULL;
                         }
 
+                        //ACTUALIZACIÓN 16-11-17: Nuevos atributos de control
+                        if (isset($_POST['key_control']))
+                        {
+                            if ($_POST['key_control'] == NULL || $_POST['key_control'] == "")
+                            {
+                                $key_control = NULL;
+                            }
+                            else
+                            {
+                                $key_control = $_POST['key_control'];
+                            }
+                        }
+                        else
+                        {
+                            $key_control = NULL;
+                        }
+
+                        if (isset($_POST['objective']))
+                        {
+                            if ($_POST['objective'] == NULL || $_POST['objective'] == "")
+                            {
+                                $objective = NULL;
+                            }
+                            else
+                            {
+                                $objective = $_POST['objective'];
+                            }
+                        }
+                        else
+                        {
+                            $objective = NULL;
+                        }
+
+                        if (isset($_POST['establishment']))
+                        {
+                            if ($_POST['establishment'] == NULL || $_POST['establishment'] == "")
+                            {
+                                $establishment = NULL;
+                            }
+                            else
+                            {
+                                $establishment = $_POST['establishment'];
+                            }
+                        }
+                        else
+                        {
+                            $establishment = NULL;
+                        }
+
+                        if (isset($_POST['application']))
+                        {
+                            if ($_POST['application'] == NULL || $_POST['application'] == "")
+                            {
+                                $application = NULL;
+                            }
+                            else
+                            {
+                                $application = $_POST['application'];
+                            }
+                        }
+                        else
+                        {
+                            $application = NULL;
+                        }
+
+                        if (isset($_POST['supervision']))
+                        {
+                            if ($_POST['supervision'] == NULL || $_POST['supervision'] == "")
+                            {
+                                $supervision = NULL;
+                            }
+                            else
+                            {
+                                $supervision = $_POST['supervision'];
+                            }
+                        }
+                        else
+                        {
+                            $supervision = NULL;
+                        }
+
+                        if (isset($_POST['objective']))
+                        {
+                            if ($_POST['objective'] == NULL || $_POST['objective'] == "")
+                            {
+                                $objective = NULL;
+                            }
+                            else
+                            {
+                                $objective = $_POST['objective'];
+                            }
+                        }
+                        else
+                        {
+                            $objective = NULL;
+                        }
+
+                        if (isset($_POST['test_plan']))
+                        {
+                            if ($_POST['test_plan'] == NULL || $_POST['test_plan'] == "")
+                            {
+                                $test_plan = NULL;
+                            }
+                            else
+                            {
+                                $test_plan = $_POST['test_plan'];
+                            }
+                        }
+                        else
+                        {
+                            $test_plan = NULL;
+                        }
+
                         //insertamos control y obtenemos ID
                         $control_id = DB::table('controls')->insertGetId([
                                 'name'=>$_POST['name'],
-                                'description'=>$_POST['description'],
+                                'description'=>$description,
                                 'type'=>$type,
                                 'type2'=>$_POST['subneg'],
                                 'evidence'=>$evidence,
                                 'periodicity'=>$periodicity,
                                 'purpose'=>$purpose,
-                                'stakeholder_id'=>$stakeholder,
+                                //'stakeholder_id'=>$stakeholder,
                                 'created_at'=>date('Ymd H:i:s'),
                                 'updated_at'=>date('Ymd H:i:s'),
                                 'expected_cost'=>$expected_cost,
-                                'porcentaje_cont'=>$porcentaje_cont
+                                'porcentaje_cont'=>$porcentaje_cont,
+                                'key_control' => $key_control,
+                                'objective' => $objective,
+                                'establishment' => $establishment,
+                                'application' => $application,
+                                'supervision' => $supervision,
+                                'test_plan' => $test_plan
                                 ]);
                         
                         //ACTUALIZACIÓN 31-03-17: Agregamos en control_organization_risk
+                        //ACTUALIZACIÓN 04-12-17: control_organization_risk con stakeholder
                         foreach ($_POST['select_riesgos'] as $riesgo)
                         {
                             DB::table('control_organization_risk')
                                 ->insert([
                                     'organization_risk_id' => $riesgo,
-                                    'control_id' => $control_id
+                                    'control_id' => $control_id,
+                                    'stakeholder_id' => $stakeholder
                                 ]);
+                        }
+
+                        //ACTUALIZACIÓN 16-11-17: Agregamos estados financieros
+                        if (isset($_POST['financial_statement_id']))
+                        {
+                            foreach ($_POST['financial_statement_id'] as $fs)
+                            {
+                                DB::table('control_financial_statement')
+                                ->insert([
+                                    'control_id' => $control_id,
+                                    'financial_statement_id' => $fs
+                                ]);
+                            }
+                        }
+
+                        //Vemos si se están creando nuevos estados financieros
+                        $i = 1;
+
+                        while (isset($_POST['new_fs_'.$i]))
+                        {
+                            if ($_POST['new_fs_'.$i] != '' && $_POST['new_fs_'.$i] != NULL)
+                            {
+                                $fs = \Ermtool\Financial_statement::create([
+                                        'name' => $_POST['new_fs_'.$i],
+                                        'status' => 0
+                                    ]);
+
+                                //agregamos enlace
+                                DB::table('control_financial_statement')
+                                ->insert([
+                                    'control_id' => $control_id,
+                                    'financial_statement_id' => $fs->id
+                                ]);
+                            }
+
+                            $i += 1;
                         }
 
                         //ACTUALIZACION 05-07-2017: Para Coca Cola Andina, calcularemos aquí el valor del control y almacenaremos porcentaje de resultado (según evaluaciones y autoevaluaciones) en tabla control_eval_risk_temp
@@ -702,7 +901,7 @@ class ControlesController extends Controller
                                 ]);
 
                         //ahora calcularemos el valor de el o los riesgos a los que apunte este control
-                        $eval_risk = $this->calcControlledRisk($control_id,$_POST['org_id']);
+                        $eval_risk = $this->calcControlledRisk($control_id,$_POST['org_id'],date('Y'),date('m'),date('d'));
 
 
                         //guardamos archivos de evidencias (si es que hay)
@@ -783,14 +982,20 @@ class ControlesController extends Controller
                     $risks_selected[$i] = (int)$risk->id;
                     $i += 1;
                 }
+
+                //ACTUALIZACIÓN 16-11-17: Estados financieros
+                $financial_statements = \Ermtool\Financial_statement::where('status',0)->lists('name','id');
+
+                //Vemos estados financieros seleccionados previamente
+                $fs_selected = \Ermtool\Financial_statement::getFSByControl($control->id);
                 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,'risks_selected'=>json_encode($risks_selected),'org' => (int)$org,'categories' => $categories]);
+                    return view('en.controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,'risks_selected'=>json_encode($risks_selected),'org' => (int)$org,'categories' => $categories,'fs_selected' => $fs_selected,'financial_statements' => $financial_statements]);
                 }
                 else
                 {
-                    return view('controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,'risks_selected'=>json_encode($risks_selected),'org' => (int)$org,'categories' => $categories]);
+                    return view('controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,'risks_selected'=>json_encode($risks_selected),'org' => (int)$org,'categories' => $categories,'fs_selected' => $fs_selected,'financial_statements' => $financial_statements]);
                 }
             }
         }
@@ -825,6 +1030,22 @@ class ControlesController extends Controller
                 {
                     $logger = $this->logger;
                     $control = \Ermtool\Control::find($GLOBALS['id1']);
+
+                    if (isset($_POST['description']))
+                    {
+                        if ($_POST['description'] == NULL || $_POST['description'] == "")
+                        {
+                            $description = NULL;
+                        }
+                        else
+                        {
+                            $description = $_POST['description'];
+                        }
+                    }
+                    else
+                    {
+                        $description = NULL;
+                    }
                     if ($_POST['stakeholder_id'] == NULL)
                         $stakeholder = NULL;
                     else
@@ -888,6 +1109,119 @@ class ControlesController extends Controller
                         $porcentaje_cont = NULL;
                     }
 
+                    //ACTUALIZACIÓN 16-11-17: Nuevos atributos de control
+                    if (isset($_POST['key_control']))
+                    {
+                        if ($_POST['key_control'] == NULL || $_POST['key_control'] == "")
+                        {
+                            $key_control = NULL;
+                        }
+                        else
+                        {
+                            $key_control = $_POST['key_control'];
+                        }
+                    }
+                    else
+                    {
+                        $key_control = NULL;
+                    }
+
+                    if (isset($_POST['objective']))
+                    {
+                        if ($_POST['objective'] == NULL || $_POST['objective'] == "")
+                        {
+                            $objective = NULL;
+                        }
+                        else
+                        {
+                            $objective = $_POST['objective'];
+                        }
+                    }
+                    else
+                    {
+                        $objective = NULL;
+                    }
+
+                    if (isset($_POST['establishment']))
+                    {
+                        if ($_POST['establishment'] == NULL || $_POST['establishment'] == "")
+                        {
+                            $establishment = NULL;
+                        }
+                        else
+                        {
+                            $establishment = $_POST['establishment'];
+                        }
+                    }
+                    else
+                    {
+                        $establishment = NULL;
+                    }
+
+                    if (isset($_POST['application']))
+                    {
+                        if ($_POST['application'] == NULL || $_POST['application'] == "")
+                        {
+                            $application = NULL;
+                        }
+                        else
+                        {
+                            $application = $_POST['application'];
+                        }
+                    }
+                    else
+                    {
+                        $application = NULL;
+                    }
+
+                    if (isset($_POST['supervision']))
+                    {
+                        if ($_POST['supervision'] == NULL || $_POST['supervision'] == "")
+                        {
+                            $supervision = NULL;
+                        }
+                        else
+                        {
+                            $supervision = $_POST['supervision'];
+                        }
+                    }
+                    else
+                    {
+                        $supervision = NULL;
+                    }
+
+                    if (isset($_POST['objective']))
+                    {
+                        if ($_POST['objective'] == NULL || $_POST['objective'] == "")
+                        {
+                            $objective = NULL;
+                        }
+                        else
+                        {
+                            $objective = $_POST['objective'];
+                        }
+                    }
+                    else
+                    {
+                        $objective = NULL;
+                    }
+
+                    if (isset($_POST['test_plan']))
+                    {
+                        if ($_POST['test_plan'] == NULL || $_POST['test_plan'] == "")
+                        {
+                            $test_plan = NULL;
+                        }
+                        else
+                        {
+                            $test_plan = $_POST['test_plan'];
+                        }
+                    }
+                    else
+                    {
+                        $test_plan = NULL;
+                    }
+
                     //guardamos archivos de evidencia (si es que hay)
                     if($GLOBALS['evidencedoc'] != NULL)
                     {
@@ -900,14 +1234,19 @@ class ControlesController extends Controller
                         }                    
                     }
                     $control->name = $_POST['name'];
-                    $control->description = $_POST['description'];
+                    $control->description = $description;
                     $control->type = $type;
                     $control->evidence = $evidence;
                     $control->periodicity = $periodicity;
                     $control->purpose = $purpose;
-                    $control->stakeholder_id = $stakeholder;
+                    //$control->stakeholder_id = $stakeholder;
                     $control->expected_cost = $expected_cost;
                     $control->porcentaje_cont = $porcentaje_cont;
+                    $control->establishment = $establishment;
+                    $control->application = $application;
+                    $control->supervision = $supervision;
+                    $control->key_control = $key_control;
+                    $control->test_plan = $test_plan;
                     $control->save();
 
                     //ACTUALIZACION 05-07-2017: Para Coca Cola Andina, calcularemos aquí el valor del control y almacenaremos porcentaje de resultado (según evaluaciones y autoevaluaciones) en tabla control_eval_risk_temp
@@ -930,10 +1269,17 @@ class ControlesController extends Controller
                             ]);
 
                     //ahora calcularemos el valor de el o los riesgos a los que apunte este control
-                    $eval_risk = $this->calcControlledRisk($GLOBALS['id1'],$_POST['org_id']);
+                    $eval_risk = $this->calcControlledRisk($GLOBALS['id1'],$_POST['org_id'],date('Y'),date('m'),date('d'));
 
                     //ACTUALIZACIÓN 03-04-17: primero eliminamos los riesgos antiguos para no repetir
                     $control_organization_risk_id = \Ermtool\Control::getControlOrganizationRisk($control->id,$_POST['org_id']);
+
+                    //ACTUALIZACIÓN 04-12-17: Insertamos stakeholder en control_organization_risk
+                    DB::table('control_organization_risk')
+                                ->where('id','=',$control_organization_risk_id[0]->id)
+                                ->update([
+                                    'stakeholder_id' => $stakeholder
+                                ]);
 
                     if (isset($_POST['select_riesgos'])) //sólo realizar si es que se están agregando riesgos asociados al control
                     {
@@ -953,6 +1299,53 @@ class ControlesController extends Controller
                                     'control_id' => $control->id
                                     ]);
                         }
+                    }
+                    //ACTUALIZACIÓN 16-11-17: Agregamos estados financieros
+                    //vemos si el estado financiero ya existe
+                    $fstemp =\Ermtool\Financial_statement::getFSByControl($control->id);
+                    
+                    foreach ($fstemp as $fs)
+                    {
+                        //borramos estados financieros anteriores
+                        DB::table('control_financial_statement')
+                                ->where('id','=',$fs->control_financial_statement_id)
+                                ->delete();
+                    }
+
+                    //ahora agregamos los posibles agregados
+                    if (isset($_POST['financial_statement_id']))
+                    {
+                        foreach ($_POST['financial_statement_id'] as $fs)
+                        {
+                            DB::table('control_financial_statement')
+                            ->insert([
+                                'control_id' => $control->id,
+                                'financial_statement_id' => $fs
+                            ]);
+                        }
+                    }
+
+                    //Vemos si se están creando nuevos estados financieros
+                    $i = 1;
+
+                    while (isset($_POST['new_fs_'.$i]))
+                    {
+                        if ($_POST['new_fs_'.$i] != '' && $_POST['new_fs_'.$i] != NULL)
+                        {
+                            $fs = \Ermtool\Financial_statement::create([
+                                    'name' => $_POST['new_fs_'.$i],
+                                    'status' => 0
+                                ]);
+
+                            //agregamos enlace
+                            DB::table('control_financial_statement')
+                            ->insert([
+                                'control_id' => $control->id,
+                                'financial_statement_id' => $fs->id
+                            ]);
+                        }
+
+                        $i += 1;
                     }
                     
                     if (Session::get('languaje') == 'en')
@@ -1065,6 +1458,11 @@ class ControlesController extends Controller
 
                             if (empty($ctrl_risk)) //se puede borrar control
                             {
+                                //ACTUALIZACIÓN 16-11-17: Eliminamos también asociación con estados financieros
+                                DB::table('control_financial_statement')
+                                    ->where('control_id','=',$GLOBALS['id1'])
+                                    ->delete();
+
                                 DB::table('controls')
                                     ->where('id','=',$GLOBALS['id1'])
                                     ->delete();
@@ -1080,7 +1478,7 @@ class ControlesController extends Controller
                             {
                                 foreach ($risks as $risk)
                                 {
-                                    $this->calcResidualRisk($GLOBALS['org1'],$risk->id);
+                                    $this->calcResidualRisk($GLOBALS['org1'],$risk->id,date('Y'),date('m'),date('d'));
                                 }
                             }
 
@@ -1939,6 +2337,7 @@ class ControlesController extends Controller
                                             'Purpose' => $purpose,
                                             'Expected_cost' => $expected_cost,
                                             'Evidence' => $evidence,
+                                            'Cont_percentage' => $control->porcentaje_cont,
                                             'Subprocesses' => $sub,
                                             'Risks' => $risks2];
                                 }
@@ -1953,6 +2352,7 @@ class ControlesController extends Controller
                                             'Purpose' => $purpose,
                                             'Expected_cost' => $expected_cost,
                                             'Evidence' => $evidence,
+                                            'porcentaje_cont' => $control->porcentaje_cont,
                                             'Subprocesses' => $sub,
                                             'Risks' => $risks2,
                                             'short_des' => $short_des];
@@ -1972,6 +2372,7 @@ class ControlesController extends Controller
                                             'Propósito' => $purpose,
                                             'Costo_control' => $expected_cost,
                                             'Evidencia' => $evidence,
+                                            'Porcentaje_contribución' => $control->porcentaje_cont,
                                             'Riesgos' => $risks2,
                                             'Subprocesos' => $sub];
                                 }
@@ -1986,6 +2387,7 @@ class ControlesController extends Controller
                                             'Propósito' => $purpose,
                                             'Costo_control' => $expected_cost,
                                             'Evidencia' => $evidence,
+                                            'porcentaje_cont' => $control->porcentaje_cont,
                                             'Riesgos' => $risks2,
                                             'Subprocesos' => $sub,
                                             'short_des' => $short_des];
@@ -2134,7 +2536,7 @@ class ControlesController extends Controller
         {
             $controls = array();
             //controles de negocio
-            $controles = \Ermtool\Control::getBussinessControls($org);
+            $controles = \Ermtool\Control::getBussinessControls($org,NULL);
             
             $i = 0;
             foreach ($controles as $control)
@@ -2146,7 +2548,7 @@ class ControlesController extends Controller
                 $i += 1;
             }
             //controles de proceso
-            $controles = \Ermtool\Control::getProcessesControls($org);
+            $controles = \Ermtool\Control::getProcessesControls($org,NULL);
 
             foreach ($controles as $control)
             {
@@ -2174,7 +2576,7 @@ class ControlesController extends Controller
             if ($type == 1)
             {
                 //controles de negocio
-                $controles = \Ermtool\Control::getBussinessControls($org);
+                $controles = \Ermtool\Control::getBussinessControls($org,NULL);
 
                 $i = 0;
 
@@ -2191,7 +2593,7 @@ class ControlesController extends Controller
             else if ($type == 0)
             {
                 //controles de proceso
-                $controles = \Ermtool\Control::getProcessesControls($org);
+                $controles = \Ermtool\Control::getProcessesControls($org,NULL);
 
                 $i = 0;
                 
@@ -2743,7 +3145,7 @@ class ControlesController extends Controller
     {
         try
         {
-            $controls = \Ermtool\Control::getBussinessControls($org);
+            $controls = \Ermtool\Control::getBussinessControls($org,NULL);
             return json_encode($controls);
         }
         catch (\Exception $e)
@@ -2950,7 +3352,7 @@ class ControlesController extends Controller
     } */
 
     //función que calcula el valor del o los riesgos controlados (a través de una nueva agregación o modificación en el valor de un control)
-    public function calcControlledRisk($control_id,$org)
+    public function calcControlledRisk($control_id,$org,$ano,$mes,$dia)
     {
         try
         {
@@ -2961,7 +3363,7 @@ class ControlesController extends Controller
             //ahora recorremos cada uno de esos riesgos, y obtenemos los controles que tiene asociado y cuáles de estos controles posee una evaluación en la tabla control_eval_risk_temp
             foreach ($risks as $risk)
             {
-                $this->calcResidualRisk($org,$risk->id);
+                $this->calcResidualRisk($org,$risk->id,$ano,$mes,$dia);
             }
 
             return 0;
@@ -2973,7 +3375,7 @@ class ControlesController extends Controller
         }
     }
 
-    public function calcResidualRisk($org,$risk_id)
+    public function calcResidualRisk($org,$risk_id,$ano,$mes,$dia)
     {
         try
         {
@@ -3045,7 +3447,7 @@ class ControlesController extends Controller
                     //ahora calculamos nivel de exposición al riesgo (riesgo residual) según fórmula de KOAndina
                     $riesgo_residual = ($s->avg_probability * $s->avg_impact)*(1-($prom_controls/100));
                     $riesgo_residual = round($riesgo_residual, 2);
-                    \Ermtool\Control_evaluation::insertControlledRisk($risk2->id,$riesgo_residual,2);
+                    \Ermtool\Control_evaluation::insertControlledRisk($risk2->id,$riesgo_residual,2,$ano,$mes,$dia);
                 }
             }
             else

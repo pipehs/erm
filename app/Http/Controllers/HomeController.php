@@ -44,11 +44,12 @@ class HomeController extends Controller
                 return Redirect::route('/');
             }
 
+            /* ----------  DESACTIVADO EN IMPLEMENTACIÓN ---------- */
             //--- SISTEMA DE ALERTA ---//
-            $planes = new PlanesAccion;
+            //$planes = new PlanesAccion;
             //verificamos que hayan planes de acción próximos a cerrar
-            $plans = $planes->verificarFechaPlanes();
-
+            //$plans = $planes->verificarFechaPlanes();
+            $plans = NULL;
             //--- GENERAMOS HEATMAP PARA ÚLTIMA ENCUESTA DE EVALUACIÓN AGREGADA ---//
 
             $evalclass = new Evaluations;
@@ -61,6 +62,12 @@ class HomeController extends Controller
             //seteamos contador para cada categoría
             $p_categories = \Ermtool\Risk_category::getPrimaryCategories();
             $cont_categories = array();
+
+            //seteamos variables en caso de que no hayan datos
+            $categories = array();
+            $categories2 = array();
+            $riesgos_objective = array();
+            $riesgos_subprocess = array();
             $i = 0;
             foreach ($p_categories as $category)
             {

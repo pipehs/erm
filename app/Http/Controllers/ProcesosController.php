@@ -68,12 +68,27 @@ class ProcesosController extends Controller
                 {
 
                     //obtenemos todas las organizaciones a las que pertenece cada subproceso relacionado
+                    /*
                     $orgs = DB::select('SELECT organizations.id, organizations.name
                                         FROM organizations
                                         WHERE organizations.id IN (SELECT DISTINCT organization_subprocess.organization_id
                                             FROM organization_subprocess
                                         WHERE organization_subprocess.subprocess_id IN (SELECT subprocesses.id
-                                            FROM subprocesses WHERE process_id = '.$process["id"].'))');
+                                            FROM subprocesses WHERE process_id = '.$process["id"].'))'); */
+                    global $id;
+                    $id = $process['id'];
+
+                    $orgs = DB::table('organizations')
+                            ->join('organization_subprocess','organization_subprocess.organization_id','=','organizations.id')
+                            ->join('subprocesses','subprocesses.id','=','organization_subprocess.subprocess_id')
+                            ->join('processes','processes.id','=','subprocesses.process_id')
+                            ->where((function ($query) {
+                                $query->where('subprocesses.process_id','=',$GLOBALS['id'])
+                                      ->orWhere('processes.process_id','=',$GLOBALS['id']);
+                            }))
+                            ->select('organizations.id','organizations.name')
+                            ->groupBy('organizations.id','organizations.name')
+                            ->get();
 
                     foreach ($orgs as $organization)
                     {

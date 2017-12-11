@@ -41,7 +41,7 @@
 				</div>
 			@endif
 
-			En esta secci&oacute;n podr&aacute; crear, modificar y cerrar hallazgos para los distintos datos maestros relevantes a una organizaci&oacute;n. Estos hallazgos puedes estar relacionados a un proceso, subproceso, o a la organizaci&oacute;n misma<br><br>
+			En esta secci&oacute;n podr&aacute; crear, modificar y cerrar hallazgos para los distintos datos maestros relevantes a una organizaci&oacute;n. Estos hallazgos pueden estar relacionados a un proceso, subproceso, o a la organizaci&oacute;n misma<br><br>
 			<div id="cargando"><br></div>
 
 			{!!Form::open(['route'=>'hallazgos_lista','method'=>'GET','class'=>'form-horizontal'])!!}
@@ -56,7 +56,7 @@
 			<div class="form-group">
 				{!!Form::label('Seleccione un tipo',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-3">
-					{!!Form::select('kind',['0'=>'Procesos','1'=>'Subprocesos','2'=>'Organización','3'=>'Controles de proceso','4'=>'Controles de entidad','5'=>'Programas de auditoría','6'=>'Auditorías','7'=>'Pruebas de auditoría'],null, 
+					{!!Form::select('kind',['0'=>'Procesos','1'=>'Subprocesos','2'=>'Organización','3'=>'Controles de proceso','4'=>'Controles de entidad','5'=>'Programas de auditoría','6'=>'Auditorías','7'=>'Pruebas de auditoría','8'=>'Riesgos','9'=>'Compliance','10'=>'Canal de denuncia'],null, 
 							 	   ['id' => 'kind','required'=>'true','placeholder'=>'- Seleccione -','onChange'=>'lala()'])!!}
 				</div>
 			</div>
@@ -99,6 +99,12 @@
 					<h4><b>{{ $org }}: Hallazgos de auditor&iacute;as</b></h4>
 				@elseif ($kind == 7)
 					<h4><b>{{ $org }}: Hallazgos de pruebas de auditoría</b></h4>
+				@elseif ($kind == 8)
+					<h4><b>{{ $org }}: Hallazgos de Riesgos</b></h4>
+				@elseif ($kind == 9)
+					<h4><b>{{ $org }}: Hallazgos de Compliance</b></h4>
+				@elseif ($kind == 10)
+					<h4><b>{{ $org }}: Hallazgos de Canal de denuncia</b></h4>
 				@endif
 
 		@foreach (Session::get('roles') as $role)

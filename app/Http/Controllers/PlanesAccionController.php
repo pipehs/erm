@@ -91,14 +91,13 @@ class PlanesAccionController extends Controller
                 //planes de control de entidad asociados a la organización
                 $planes5 = DB::table('issues')
                             ->join('action_plans','action_plans.issue_id','=','issues.id')
-                            ->join('control_organization_risk','control_organization_risk.control_id','=','issues.control_id')
-                            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
-                            ->join('controls','controls.id','=','control_organization_risk.control_id')
-                            ->where('organization_risk.organization_id','=',$id)
-                            ->groupBy('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
-                                    'action_plans.status','action_plans.stakeholder_id','issues.name','control_organization_risk.control_id','controls.type2')
-                            ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
-                                    'action_plans.status','action_plans.stakeholder_id','issues.name as issue','control_organization_risk.control_id as control_organization_risk_id','controls.type2')
+                            //->join('control_organization_risk','control_organization_risk.control_id','=','issues.control_id')
+                           // ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                            ->join('controls','controls.id','=','issues.control_id')
+                            ->where('issues.organization_id','=',$id)
+                            //->where('organization_risk.organization_id','=',$id)
+                            ->groupBy('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date','action_plans.status','action_plans.stakeholder_id','issues.name','controls.type2')
+                            ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date','action_plans.status','action_plans.stakeholder_id','issues.name as issue','controls.type2')
                             ->get();
 
                 $planes6 = array(); //ACT 05-04 ya no se necesita diferenciar entre controles de entidad o de proceso ya que están todos dentro de planes5
@@ -272,6 +271,35 @@ class PlanesAccionController extends Controller
                     }
                     if (strstr($_SERVER["REQUEST_URI"],'genexcelplan')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
                     {
+                        //ACT 15-11-17: Obtenemos info de porcentaje de avance
+                        //primero, obtenemos la máxima fecha de porcentaje de avance
+                        $max_date = DB::table('progress_percentage')
+                                        ->where('action_plan_id','=',$plan->id)
+                                        ->max('updated_at');
+
+                        //obtenemos porcentaje y comentarios
+                        $per = DB::table('progress_percentage')
+                                ->where('action_plan_id','=',$plan->id)
+                                ->where('updated_at','=',$max_date)
+                                ->select('percentage','comments','updated_at')
+                                ->first();
+
+                        if (!empty($per))
+                        {
+                            $percentage = $per->percentage;
+                            $percentage_comments = $per->comments;
+                            $percentage_date = $per->updated_at;
+                        }
+
+                        else
+                        {
+                            $percentage = NULL;
+                            $percentage_comments = NULL;
+                            $percentage_date = NULL;
+                        }
+
+                        $short_des = substr($plan->description,0,100);
+                                
                         $action_plans[$i] = [
                             'Origen del hallazgo' => $origin,
                             'Hallazgo' => $plan->issue,
@@ -280,10 +308,40 @@ class PlanesAccionController extends Controller
                             'Correo responsable' => $resp_mail,
                             'Estado' => $status,
                             'Fecha final' => $final_date,
+                            'Porcentaje' => $percentage,
+                            'Comentarios Avance' => $percentage_comments,
+                            'Fecha Avance' => $percentage_date,
                         ];
                     }
                     else
                     {
+                        //ACT 15-11-17: Obtenemos info de porcentaje de avance
+                        //primero, obtenemos la máxima fecha de porcentaje de avance
+                        $max_date = DB::table('progress_percentage')
+                                        ->where('action_plan_id','=',$plan->id)
+                                        ->max('updated_at');
+
+                        //obtenemos porcentaje y comentarios
+                        $per = DB::table('progress_percentage')
+                                ->where('action_plan_id','=',$plan->id)
+                                ->where('updated_at','=',$max_date)
+                                ->select('percentage','comments','updated_at')
+                                ->first();
+
+                        if (!empty($per))
+                        {
+                            $percentage = $per->percentage;
+                            $percentage_comments = $per->comments;
+                            $percentage_date = $per->updated_at;
+                        }
+
+                        else
+                        {
+                            $percentage = NULL;
+                            $percentage_comments = NULL;
+                            $percentage_date = NULL;
+                        }
+
                         $short_des = substr($plan->description,0,100);
 
                         $action_plans[$i] = [
@@ -297,6 +355,9 @@ class PlanesAccionController extends Controller
                             'status' => $status,
                             'status_number' => $plan->status,
                             'short_des' => $short_des,
+                            'percentage' => $percentage,
+                            'percentage_comments' => $percentage_comments,
+                            'percentage_date' => $percentage_date,
                         ];
                     }
 
@@ -1181,6 +1242,7 @@ class PlanesAccionController extends Controller
                                         ->where('issue_id','=',$issue->id)
                                         ->first(['id','description','final_date','status','stakeholder_id','updated_at']);
 
+
                     if ($action_plan != NULL)
                     {
                         if ($action_plan->stakeholder_id == NULL)
@@ -1672,6 +1734,9 @@ class PlanesAccionController extends Controller
                             $issue->recommendations = "Sin recomendaciones";
                         }
                     }
+
+                    $updated_at_tmp = new DateTime($issue->updated_at);
+                    $updated_at = date_format($updated_at_tmp, 'd-m-Y');
 
                     //determinamos clasificación
                     if ($issue->classification == 0)

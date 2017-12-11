@@ -11,28 +11,43 @@ use stdClass;
 class Control extends Model
 {
     
-     protected $fillable = ['name','description','expiration_date','type','type2','evidence','periodicity','purpose','stakeholder_id','expected_cost','porcentaje_cont'];
+     protected $fillable = ['name','description','expiration_date','type','type2','evidence','periodicity','purpose','expected_cost','porcentaje_cont','key_control','objective','establishment','application','supervision','test_plan'];
 
+/*
     public function stakeholders()
     {
     	return $this->belongsTo('Ermtool\Stakeholder');
     }
-
+*/
     public static function name($id)
     {
         $res = DB::table('controls')->where('id', $id)->value('name');
         return $res;
     }
 
-    public static function getBussinessControls($org)
+    public static function getBussinessControls($org,$risk_id)
     {
+        //ACTUALIZACIÓN 21-11-17: Agregamos posible filtro de Riesgo
         //ACTUALIZACIÓN 31-03-17: Obtenemos primero riesgos de negocio
-        $risks = DB::table('objective_risk')
+        if ($risk_id != NULL)
+        {
+            $risks = DB::table('objective_risk')
+                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
+                    ->where('objectives.organization_id','=',$org)
+                    ->where('objective_risk.risk_id','=',$risk_id)
+                    ->groupBy('objective_risk.risk_id')
+                    ->select('objective_risk.risk_id')
+                    ->get();
+        }
+        else
+        {
+            $risks = DB::table('objective_risk')
                     ->join('objectives','objectives.id','=','objective_risk.objective_id')
                     ->where('objectives.organization_id','=',$org)
                     ->groupBy('objective_risk.risk_id')
                     ->select('objective_risk.risk_id')
                     ->get();
+        }
 
         $controls = array();
         $i = 0;
@@ -44,7 +59,7 @@ class Control extends Model
                     ->where('organization_risk.organization_id','=',$org)
                     ->where('organization_risk.risk_id','=',$risk->risk_id)
                     ->select('controls.*')
-                    ->distinct('controls.id')
+                    ->distinct('controls.id','control_organization_risk.stakeholder_id')
                     ->get();
 
             foreach ($ctrls as $ctrl)
@@ -63,7 +78,13 @@ class Control extends Model
                     'purpose' => $ctrl->purpose,
                     'expected_cost' => $ctrl->expected_cost,
                     'stakeholder_id' => $ctrl->stakeholder_id,
-                    'porcentaje_cont' => $ctrl->porcentaje_cont
+                    'porcentaje_cont' => $ctrl->porcentaje_cont,
+                    'key_control' => $ctrlctrl->key_control,
+                    'objective' => $ctrl->objective,
+                    'establishment' => $ctrl->establishment,
+                    'application' => $ctrl->application,
+                    'supervision' => $ctrl->supervision,
+                    'test_plan' => $ctrl->test_plan
                 ];
 
                 $i+=1;
@@ -74,15 +95,29 @@ class Control extends Model
         return $controls;
     }
 
-    public static function getProcessesControls($org)
+    public static function getProcessesControls($org,$risk_id)
     {
+        //ACTUALIZACIÓN 21-11-17: Agregamos posible filtro de Riesgo
         //ACTUALIZACIÓN 31-03-17: Obtenemos primero riesgos de proceso
-        $risks = DB::table('risk_subprocess')
-                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                    ->where('organization_subprocess.organization_id','=',$org)
-                    ->groupBy('risk_subprocess.risk_id')
-                    ->select('risk_subprocess.risk_id')
-                    ->get();
+        if ($risk_id != NULL)
+        {
+            $risks = DB::table('risk_subprocess')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                        ->where('organization_subprocess.organization_id','=',$org)
+                        ->where('risk_subprocess.risk_id','=',$risk_id)
+                        ->groupBy('risk_subprocess.risk_id')
+                        ->select('risk_subprocess.risk_id')
+                        ->get();
+        }
+        else
+        {
+            $risks = DB::table('risk_subprocess')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
+                        ->where('organization_subprocess.organization_id','=',$org)
+                        ->groupBy('risk_subprocess.risk_id')
+                        ->select('risk_subprocess.risk_id')
+                        ->get();
+        }
 
         $controls = array();
         $i = 0;
@@ -93,9 +128,11 @@ class Control extends Model
                     ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
                     ->where('organization_risk.organization_id','=',$org)
                     ->where('organization_risk.risk_id','=',$risk->risk_id)
-                    ->select('controls.*')
+                    ->select('controls.*','control_organization_risk.stakeholder_id')
                     ->distinct('controls.id')
                     ->get();
+
+            //ACTUALIZACIÓN 30-11-17: Los responsables dependen de la organización
 
             foreach ($ctrls as $ctrl)
             {
@@ -113,7 +150,13 @@ class Control extends Model
                     'purpose' => $ctrl->purpose,
                     'expected_cost' => $ctrl->expected_cost,
                     'stakeholder_id' => $ctrl->stakeholder_id,
-                    'porcentaje_cont' => $ctrl->porcentaje_cont
+                    'porcentaje_cont' => $ctrl->porcentaje_cont,
+                    'key_control' => $ctrl->key_control,
+                    'objective' => $ctrl->objective,
+                    'establishment' => $ctrl->establishment,
+                    'application' => $ctrl->application,
+                    'supervision' => $ctrl->supervision,
+                    'test_plan' => $ctrl->test_plan
                 ];
 
                 $i+=1;
@@ -361,7 +404,7 @@ class Control extends Model
     //obtenemos controles de riesgo.
     public static function getControlsFromRisk($org,$risk)
     {
-        $risks = DB::table('controls')
+        return DB::table('controls')
                     ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
                     ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
                     ->where('organization_risk.risk_id','=',$risk)
@@ -369,8 +412,6 @@ class Control extends Model
                     ->select('controls.id','controls.name','controls.description')
                     ->groupBy('controls.id','controls.name','controls.description')
                     ->get();
-
-        return $risks;
     }
 
     public static function getControlOrganizationRisk($control_id,$org_id)
@@ -399,8 +440,24 @@ class Control extends Model
                 ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
                 ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
                 ->where('organization_risk.organization_id','=',(int)$org)
-                ->select('controls.*')
+                ->select('controls.*','control_organization_risk.stakeholder_id')
                 ->distinct()
                 ->get();
+    }
+
+    public static function getControlByName($name)
+    {
+        return DB::table('controls')
+                ->where('name','=',$name)
+                ->select('*')
+                ->first();
+    }
+
+    public static function getControlByDescription($description)
+    {
+        return DB::table('controls')
+                ->where('description','=',$description)
+                ->select('*')
+                ->first();
     }
 }

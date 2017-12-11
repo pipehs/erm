@@ -51,22 +51,19 @@
 	@endforeach
 @if (isset($controls1))
 	<h4><b>Controles a nivel de entidad</b></h4>
-	<div id="table-wrapper">
-  	<div id="table-scroll">
-		<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+
+		<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 		<thead>
-		<th>Nombre</th>
-		<th>Descripci&oacute;n</th>
-		<th>Riesgo(s)</th>
-		<th width="12%">Objetivo(s)</th>
-		<th>Tipo Control</th>
-		<th>Responsable del Control</th>
-		<th>Evidencia</th>
-		<th>Prop&oacute;sito</th>
-		<th>Costo esperado</th>
-		@if (isset($cocacola))
-			<th>% de contribuci&oacute;n</th>
-		@endif
+		<th>Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Tipo Control<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Responsable del Control<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Evidencia<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Costo esperado<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>% de contribuci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 		<th>Acci&oacute;n</th>
@@ -174,28 +171,25 @@
 			</tr>
 		@endforeach
 		</table>
-	</div>
-	</div>
+
 @endif
 
 @if (isset($controls2))
 	<h4><b>Controles a nivel de proceso</b></h4>
-	<div id="table-wrapper">
-  	<div id="table-scroll">
-		<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+<!--	<div id="table-wrapper">
+  	<div id="table-scroll">-->
+		<table id="datatable-3" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 		<thead>
-		<th>Nombre</th>
-		<th>Descripci&oacute;n</th>
-		<th>Riesgo(s)</th>
-		<th>Subproceso(s)</th>
-		<th>Tipo Control</th>
-		<th>Responsable del Control</th>
-		<th>Evidencia</th>
-		<th>Prop&oacute;sito</th>
-		<th>Costo esperado</th>
-		@if (isset($cocacola))
-			<th>% de contribuci&oacute;n</th>
-		@endif
+		<th>Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Tipo Control<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Responsable del Control<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Evidencia<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Costo esperado<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>% de contribuci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 		<th>Acci&oacute;n</th>
@@ -304,12 +298,12 @@
 			</tr>
 		@endforeach
 		</table>
-		</div>
-		</div>
+	<!--	</div>
+		</div>-->
 @endif
 		<br/>
 		<center>
-			{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
+			<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
 		<center>
 @else
 	{!!Form::open(['url'=>'controles.index2','method'=>'GET','class'=>'form-horizontal'])!!}
@@ -319,9 +313,29 @@
 		    <div class="col-sm-4">
 		      {!!Form::select('organization_id',$organizations, 
 		           null, 
-		          ['id' => 'org','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+		          ['id' => 'organization','placeholder'=>'- Seleccione -','required'=>'true'])!!}
 		    </div>
 		 </div>
+	</div>
+<!-- 21-11-17: Quizás no sea necesario filtrar por categoría, además que el que aparezcan puede hacer que los usuarios quieran ver los controles según categoría de Riesgos (más complejo)
+	
+-->
+	<div class="form-group" id="riesgos_objetivos" style="display: none;">
+		{!!Form::label('Riesgo de negocio (opcional)',null,['class'=>'col-sm-4 control-label'])!!}
+		<div class="col-sm-4">
+			<select name="objective_risk_id" id="objective_risk_id">
+				<!-- Aquí se agregarán los riesgos de negocio de la org seleccionada a través de Jquery -->
+			</select>
+		</div>
+	</div>
+
+	<div class="form-group" id="riesgos_procesos" style="display: none;">
+		{!!Form::label('Riesgo de proceso (opcional)',null,['class'=>'col-sm-4 control-label'])!!}
+		<div class="col-sm-4">
+			<select name="risk_subprocess_id" id="risk_subprocess_id">
+				<!-- Aquí se agregarán los riesgos de proceso de la org seleccionada a través de Jquery -->
+			</select>
+		</div>
 	</div>
 	<br>
 	<div class="form-group">
@@ -336,5 +350,9 @@
 		</div>
 	</div>
 </div>
+@stop
+
+@section('scripts2')
+{!!Html::script('assets/js/get_risks.js')!!}
 @stop
 

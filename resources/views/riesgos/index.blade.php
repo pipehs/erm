@@ -77,9 +77,18 @@
 
             <div class="form-group">
                <div class="row">
-                 <label for="risk_subcategory_id" class='col-sm-4 control-label'>Seleccione sub-categor&iacute;a de Riesgo o Riesgo General (opcional)</label>
+                 <label for="risk_subcategory_id" class='col-sm-4 control-label'>Seleccione categor&iacute;a nivel 2 (opcional)</label>
                  <div class="col-sm-3">
                     <select id="risk_subcategory_id" name="risk_subcategory_id"></select>
+                 </div>
+              </div>
+            </div>
+        
+            <div class="form-group">
+               <div class="row">
+                 <label for="risk_subcategory_id2" class='col-sm-4 control-label'>Seleccione categor&iacute;a nivel 3 (opcional)</label>
+                 <div class="col-sm-3">
+                    <select id="risk_subcategory_id2" name="risk_subcategory_id2"></select>
                  </div>
               </div>
             </div>
@@ -126,8 +135,6 @@
 			<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Tipo<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Categor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
-			<th>Fecha Creaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-			<th>Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 			@if (!isset($org_id))
 				<th>Responsable(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 			@else
@@ -136,6 +143,9 @@
 			<th>Subprocesos u Objetivos Relacionados<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Causa(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Efecto(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Probabilidad<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Impacto<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Score<label><input type="text" placeholder="Filtrar" /></label></th>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
 				<th>Editar</th>
@@ -180,17 +190,7 @@
 					{{ $riesgo['categoria'] }}
 				@endif
 				</td>
-				@if ($riesgo['fecha_creacion'] == NULL)
-					<td>Error al grabar fecha de creaci&oacute;n</td>
-				@else
-					<td>{{$riesgo['fecha_creacion']}}</td>
-				@endif
-
-				@if ($riesgo['fecha_exp'] == NULL)
-					<td>Ninguna</td>
-				@else
-					<td>{{$riesgo['fecha_exp']}}</td>
-				@endif
+				
 				@if (!isset($org_id))
 					<td><ul>
 					@foreach ($riesgo['responsables'] as $r)
@@ -203,10 +203,8 @@
 				<td>
 				<ul>
 				@if (!isset($org_id))	
-					@foreach($relacionados as $subonegocio)
-						@if ($subonegocio['risk_id'] == $riesgo['id'])
-							<li>{{ $subonegocio['nombre'] }}</li>
-						@endif
+					@foreach($riesgo['subobj'] as $subobj)
+							<li>{{ $subobj['name'] }}</li>
 					@endforeach
 				@else
 					@foreach($relacionados as $subonegocio)
@@ -243,6 +241,9 @@
 					@endif
 				@endif
 				</td>
+				<td>{{$riesgo['probabilidad']}}</td>
+				<td>{{$riesgo['impacto']}}</td>
+				<td>{{$riesgo['score']}}</td>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
 				@if (!isset($org_id))

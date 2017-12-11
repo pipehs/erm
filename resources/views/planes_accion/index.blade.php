@@ -83,6 +83,9 @@
 					<th>Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Estado<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Porcentaje avance<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Comentarios avances<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Fecha avance<label><input type="text" placeholder="Filtrar" /></label></th>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
 					<th>Editar</th>
@@ -114,6 +117,27 @@
 						<td>{{ $action_plan['stakeholder'] }}.<br>{{ $action_plan['stakeholder_mail'] }}</td>
 						<td>{{ $action_plan['status'] }}</td>
 						<td>{{ $action_plan['final_date'] }}</td>
+						<td>
+						@if ($action_plan['percentage'] == NULL)
+							No se ha agregado
+						@else
+							{{ $action_plan['percentage'] }}%
+						@endif
+						</td>
+						<td>
+						@if ($action_plan['percentage_comments'] == '' || $action_plan['percentage_comments'] == NULL)
+							No se han agregado
+						@else
+							{{ $action_plan['percentage_comments'] }}
+						@endif
+						</td>
+						<td>
+						@if ($action_plan['percentage_date'] == NULL)
+							No se ha agregado
+						@else
+							{{ date('d-m-Y',strtotime($action_plan['percentage_date'])) }}
+						@endif
+						</td>
 				@foreach (Session::get('roles') as $role)
 					@if ($role != 6)
 						<td>{!! link_to_route('action_plan.edit', $title = 'Editar', $parameters = ['org'=>$org_id,'id'=>$action_plan['id']],$attributes = ['class'=>'btn btn-success'])!!}</td>

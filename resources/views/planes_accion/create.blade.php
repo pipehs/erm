@@ -41,7 +41,7 @@
 				</div>
 			@endif
 
-			Ingrese los del nuevo plan de acci&oacute;n para la organizaci&oacute;n <b>{{ $org }}</b> <br><br>
+			Ingrese los datos del nuevo plan de acci&oacute;n para la organizaci&oacute;n <b>{{ $org }}</b> <br><br>
 
 			{!!Form::open(['route'=>'action_plan.store','method'=>'POST','class'=>'form-horizontal','enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 					@include('planes_accion.form')

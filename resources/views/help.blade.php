@@ -60,10 +60,7 @@ body {
 				</div>
 			@endif
 
-			{!!Form::open(['route'=>'pdf_manual','method'=>'POST','class'=>'form-horizontal'])!!}
-				{!!Form::hidden('cuerpo',null,['id' => 'cuerpo'])!!}
-				{!!Form::submit("Exportar a PDF",['class'=>'btn btn-danger'])!!}
-			{!!Form::close()!!}
+			
 			{!! link_to_route('pdf_manual', $title = 'Exportar a PDF', $parameters = NULL, $attributes = ['class'=>'btn btn-danger'])!!}
 
 		<div id="manual">

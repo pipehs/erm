@@ -131,4 +131,12 @@ class Action_plan extends Model
         }
 
     }
+
+    public static function getActionPlanByDescription($description)
+    {
+        return DB::table('action_plans')
+                ->where('description','=',$description)
+                ->select('*')
+                ->first();
+    }
 }

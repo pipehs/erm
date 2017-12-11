@@ -53,32 +53,34 @@
 	@endif
 @endforeach
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size: 11px;">
-					<thead>
-						<tr>
-							<th>Organizaciones</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Proceso involucrado</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Subproceso</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Descripci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Fecha Creaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Fecha Actualizaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Fecha Expiraci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Subprocesos Dependientes</small><label><input type="text" placeholder="Filtrar" /></label></th>
-						@foreach (Session::get('roles') as $role)
-							@if ($role != 6)
-							<th style="vertical-align:top;">Acci&oacute;n</th>
-							<th style="vertical-align:top;">Acci&oacute;n</th>
-							<?php break; ?>
-							@endif
-						@endforeach
-						</tr>
-					</thead>
+	<thead>
+		<tr>
+			<th>Organizaciones</small><label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Proceso involucrado</small><label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Subproceso</small><label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Descripci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Fecha Creaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>&Uacute;ltima actualizaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Sistemas/Plataformas</small><label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Habeas Data</small><label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Marco Regulatorio</small><label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Subprocesos Dependientes</small><label><input type="text" placeholder="Filtrar" /></label></th>
+		@foreach (Session::get('roles') as $role)
+			@if ($role != 6)
+			<th style="vertical-align:top;">Acci&oacute;n</th>
+			<th style="vertical-align:top;">Acci&oacute;n</th>
+			<?php break; ?>
+			@endif
+		@endforeach
+		</tr>
+	</thead>
 	<tr style="display:none;">
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
-		<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+		<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 		<?php break; ?>
 	@else
-		<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+		<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 	@endif
 @endforeach
 	@foreach ($subprocesos as $subproceso)
@@ -114,11 +116,24 @@
 			<td>{{ $subproceso['fecha_act'] }}</td>
 		@endif
 
-		@if ($subproceso['fecha_exp'] == NULL)
-			<td>Ninguna</td>
+		@if ($subproceso['systems'] == NULL)
+			<td>No definido</td>
 		@else
-			<td>{{ $subproceso['fecha_exp'] }}</td>
+			<td>{{ $subproceso['systems'] }}</td>
 		@endif
+
+		@if ($subproceso['habeas_data'] == NULL)
+			<td>No definido</td>
+		@else
+			<td>{{ $subproceso['habeas_data'] }}</td>
+		@endif
+
+		@if ($subproceso['regulatory_framework'] == NULL)
+			<td>No definido</td>
+		@else
+			<td>{{ $subproceso['regulatory_framework'] }}</td>
+		@endif
+
 		<td><ul style="none">
 		@if ($sub_dependientes == NULL)
 			Ninguno

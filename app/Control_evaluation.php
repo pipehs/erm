@@ -82,7 +82,7 @@ class Control_evaluation extends Model
 
     }
 
-    public static function insertControlledRisk($risk,$result,$kind)
+    public static function insertControlledRisk($risk,$result,$kind,$ano,$mes,$dia)
     {
         //ACT 05-07-17: Kind ya no se usa
 
@@ -90,7 +90,7 @@ class Control_evaluation extends Model
                 ->insert([
                     'organization_risk_id' => $risk,
                     'results' => $result,
-                    'created_at' => date('Y-m-d H:i:s')
+                    'created_at' => date($ano.'-'.$mes.'-'.$dia.' H:i:s')
                     ]);
     }
 

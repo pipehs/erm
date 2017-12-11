@@ -10,7 +10,7 @@ use Carbon;
 class Subprocess extends Model
 {
 
-	protected $fillable = ['name','description','expiration_date','process_id','subprocess_id','status'];
+	protected $fillable = ['name','description','expiration_date','process_id','subprocess_id','status','systems','habeas_data','regulatory_framework'];
 
 	//eliminamos created_at y updated_at
     //public $timestamps = false;
@@ -197,5 +197,13 @@ class Subprocess extends Model
                 ->select('subprocesses.id','subprocesses.name','subprocesses.description')
                 ->groupBy('subprocesses.id','subprocesses.name','subprocesses.description')
                 ->get();
+    }
+
+    public static function getSubprocessByName($name)
+    {
+        return DB::table('subprocesses')
+                ->where('name','=',$name)
+                ->select('id')
+                ->first();
     }
 }

@@ -493,6 +493,82 @@ class IssuesController extends Controller
                 }
             }
 
+            else if ($kind == 8) //Hallazgos de Riesgos
+            {
+
+                $risks = \Ermtool\Risk::getRisksFromIssues($org_id);
+
+                $issues = array(); //se guardaran los programas que tienen issues que además tienen documentos
+                $i = 0;
+                foreach ($risks as $risk)
+                {
+                    //obtenemos issues de riesgos
+                    $issues2 = \Ermtool\Issue::getRiskIssues($risk->id);
+
+                    foreach ($issues2 as $issue)
+                    {
+                        $issues[$i] = [
+                            'element_id' => $risk->id,
+                            'risk' => $risk->name,
+                            'risk_description' => $risk->description,
+                            'id' => $issue->id,
+                            'name' => $issue->name,
+                            'description' => $issue->description,
+                            'classification' => $issue->classification,
+                            'recommendations' => $issue->recommendations
+                        ];
+
+                        $i += 1; 
+                    }
+                }
+            }
+
+            else if ($kind == 9) //Hallazgos de Compliance
+            {
+                $issues = array(); //se guardaran los programas que tienen issues que además tienen documentos
+                $i = 0;
+
+                //obtenemos issues de compliance
+                $issues2 = \Ermtool\Issue::getComplianceIssues($org_id);
+
+                foreach ($issues2 as $issue)
+                {
+                    $issues[$i] = [
+                        'element_id' => $issue->organization,
+                        'id' => $issue->id,
+                        'name' => $issue->name,
+                        'description' => $issue->description,
+                        'classification' => $issue->classification,
+                        'recommendations' => $issue->recommendations
+                    ];
+
+                    $i += 1; 
+                }
+            }
+
+            else if ($kind == 10) //Hallazgos de Canal de denuncias
+            {
+                $issues = array(); //se guardaran los programas que tienen issues que además tienen documentos
+                $i = 0;
+
+                //obtenemos issues de canal de denuncia
+                $issues2 = \Ermtool\Issue::getCompliantChanellIssues($org_id);
+
+                foreach ($issues2 as $issue)
+                {
+                    $issues[$i] = [
+                        'element_id' => $issue->organization,
+                        'id' => $issue->id,
+                        'name' => $issue->name,
+                        'description' => $issue->description,
+                        'classification' => $issue->classification,
+                        'recommendations' => $issue->recommendations
+                    ];
+
+                    $i += 1; 
+                }
+            }
+
             $i = 0;
             //  dd($issues1);
             
@@ -565,7 +641,18 @@ class IssuesController extends Controller
                     {
                         $issues[$i] = $this->setIssue4($datos['audit_plans'],$datos['audit'],$datos['audit_programs'],$datos['audit_test'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date'],$responsable);
                     }
-                    
+                    else if ($kind == 8) //Hallazgos de Riesgos
+                    {
+
+                    }
+                    else if ($kind == 9) //Hallazgos de Compliance
+                    {
+
+                    }
+                    else if ($kind == 10) //Hallazgos de Canal de denuncia
+                    {
+                        
+                    }
                 }
                 else
                 {
@@ -578,23 +665,47 @@ class IssuesController extends Controller
                     $short_des = substr($issue['description'],0,100);
                     $short_rec = substr($temp['recommendations'],0,100);
 
-                    $issues[$i] = [
-                        'id' => $temp['id'],
-                        'origin' => $origin,
-                        'name' => $temp['name'],
-                        'classification' => $temp['classification'],
-                        'recommendations' => $temp['recommendations'],
-                        'plan' => $temp['plan'],
-                        'status' => $temp['status'],
-                        'status_origin' => $temp['status_origin'],
-                        'final_date' => $temp['final_date'],
-                        'datos' => $datos,
-                        'description' => $issue['description'],
-                        'short_des' => $short_des,
-                        'short_rec' => $short_rec,
-                        'short_plan' => $short_plan,
-                        'responsable' => $responsable,
-                    ];
+                    if ($kind2 = 2)
+                    {
+                        $issues[$i] = [
+                            'datos' => $datos,
+                            'id' => $temp['id'],
+                            'origin' => $origin,
+                            'name' => $temp['name'],
+                            'classification' => $temp['classification'],
+                            'recommendations' => $temp['recommendations'],
+                            'plan' => $temp['plan'],
+                            'status' => $temp['status'],
+                            'status_origin' => $temp['status_origin'],
+                            'final_date' => $temp['final_date'],
+                            'datos' => $datos,
+                            'description' => $issue['description'],
+                            'short_des' => $short_des,
+                            'short_rec' => $short_rec,
+                            'short_plan' => $short_plan,
+                            'responsable' => $responsable,
+                        ];
+                    }
+                    else
+                    {
+                        $issues[$i] = [
+                            'id' => $temp['id'],
+                            'origin' => $origin,
+                            'name' => $temp['name'],
+                            'classification' => $temp['classification'],
+                            'recommendations' => $temp['recommendations'],
+                            'plan' => $temp['plan'],
+                            'status' => $temp['status'],
+                            'status_origin' => $temp['status_origin'],
+                            'final_date' => $temp['final_date'],
+                            'datos' => $datos,
+                            'description' => $issue['description'],
+                            'short_des' => $short_des,
+                            'short_rec' => $short_rec,
+                            'short_plan' => $short_plan,
+                            'responsable' => $responsable,
+                        ];
+                    }
                 }
 
                 $i += 1;
@@ -1002,10 +1113,11 @@ class IssuesController extends Controller
             else if ($kind == 7) //ACTUALIZACIÓN 31-01-2017: Pruebas de auditorías
             {
                 $audit_plans1 = \Ermtool\Audit_plan::getAuditPlansFromAuditTest($org,$element_id);
+                //$audit_plans1 = array();
                 $audit_plans = "";
                 $audit_programs = "";
                 $audits = "";
-                if ($audit_plans1)
+                if (!empty($audit_plans1))
                 {
                     $last = end($audit_plans1); //guardamos final para no agregarle coma
                     foreach ($audit_plans1 as $audit_plan)
@@ -1022,7 +1134,8 @@ class IssuesController extends Controller
                 }
 
                 $audit1 = \Ermtool\Audit::getAuditFromAuditTest($org,$element_id);
-                if ($audit1)
+                //$audit1 = array();
+                if (!empty($audit1))
                 {
                     $last = end($audit1); //guardamos final para no agregarle coma
                     foreach ($audit1 as $audit)
@@ -1039,7 +1152,8 @@ class IssuesController extends Controller
                 }
 
                 $audit_programs1 = \Ermtool\Audit_program::getAuditProgramFromAuditTest($org,$element_id);
-                if ($audit_programs1)
+                //$audit_programs1 = array();
+                if (!empty($audit_programs1))
                 {
                     $last = end($audit_programs1); //guardamos final para no agregarle coma
                     foreach ($audit_programs1 as $program)
@@ -1059,10 +1173,49 @@ class IssuesController extends Controller
 
                 $datos = [
                     'audit_plans' => $audit_plans,
-                    'audit' => $audit,
+                    'audit' => $audits,
                     'audit_programs' => $audit_programs,
                     'audit_test' => $audit_test,
                 ];
+            }
+            //ACTUALIZACIÓN 22-11-17: Hallazgos de Riesgos, Compliance, Canal de Denuncia
+            else if ($kind == 8) //riesgos
+            {
+                //Obtenemos controles del riesgo
+                $controls1 = \Ermtool\Control::getControlsFromRisk($org,$element_id);
+                $controls = "";
+                if (!empty($controls1))
+                {
+                    $last = end($controls1); //guardamos final para no agregarle coma
+                    foreach ($controls1 as $control)
+                    {
+                        if ($control != $last)
+                        {
+                            $controls .= $control->name.', ';
+                        }
+                        else
+                        {
+                            $controls .= $control->name;
+                        }
+                    }
+                }
+
+                $risk = \Ermtool\Risk::find($element_id);
+                $risk_category = \Ermtool\Risk_category::name($risk->risk_category_id);
+
+                $datos = [
+                    'risk_category' => $risk_category,
+                    'risk' => $risk->name,
+                    'controls' => $controls
+                ];
+            }
+            else if ($kind == 9) //Compliance
+            {
+
+            }
+            else if ($kind == 10) //Canal de denuncia
+            {
+
             }
 
             return $datos;

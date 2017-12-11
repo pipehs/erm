@@ -29,7 +29,7 @@ class Audit extends Model
                     ->join('audits','audits.id','=','audit_audit_plan.audit_id')
                     ->where('audit_plans.organization_id','=',$org)
                     ->where('audits.id','=',$kind)
-                    ->select('audits.id','audit_plans.name as audit_plan','audits.name','audits.description')
+                    ->select('audits.ids','audit_plans.name as audit_plan','audits.name','audits.description')
                     ->groupBy('audits.id','audit_plans.name','audits.name','audits.description')
                     ->get();
         }
@@ -51,15 +51,15 @@ class Audit extends Model
     //obtenemos auditoría de una prueba
     public static function getAuditFromAuditTest($org,$test)
     {
-        $audits = DB::table('issues')
-                    ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
-                    ->join('audit_audit_plan','audit_audit_plan.id','=','issues.audit_audit_plan_id')
+        $audits = DB::table('audit_tests')
+                    ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                    ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
                     ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
                     ->join('audits','audits.id','=','audit_audit_plan.audit_id')
                     ->where('audit_plans.organization_id','=',$org)
-                    ->whereNotNull('issues.audit_test_id')
+                    ->where('audit_tests.id','=',$test)
                     ->select('audits.id','audits.name','audits.description')
-                    ->select('audits.id','audits.name','audits.description')
+                    ->groupBy('audits.id','audits.name','audits.description')
                     ->get();
 
         return $audits;
@@ -109,5 +109,22 @@ class Audit extends Model
             ->where('audit_plans.status','=',0)
             ->select('audits.id','audits.name')
             ->get();
+    }
+
+    public static function getAuditByName($name)
+    {
+        return DB::table('audits')
+                ->where('name','=',$name)
+                ->select('id')
+                ->first();
+    }
+
+    public static function getAuditAuditPlan($audit_plan_id,$audit_id)
+    {
+        return DB::table('audit_audit_plan')
+                ->where('audit_plan_id','=',$audit_plan_id)
+                ->where('audit_id','=',$audit_id)
+                ->select('id')
+                ->first();
     }
 }

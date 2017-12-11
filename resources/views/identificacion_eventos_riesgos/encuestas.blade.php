@@ -90,7 +90,7 @@
 			<tr>
 				<td>{{ $stakeholder['id'] }}-{{ $stakeholder['dv'] }}</td>
 				<td>{{ $stakeholder['name'] }} {{ $stakeholder['surnames'] }}</td>
-				<td>Este usuario aun no ha respondido</td>
+				<td>Este usuario a&uacute;n no ha respondido</td>
 			</tr>
 		@endforeach
 	@else
@@ -106,7 +106,7 @@
 				<td>{{ $stakeholder['name'] }} {{ $stakeholder['surnames'] }}</td>
 
 				@if ($cont == 0)
-					<td>Este usuario aun no ha respondido</td>
+					<td>Este usuario a&uacute;n no ha respondido</td>
 				@else
 					<td>
 						{!! link_to_route('encuestas.show', $title = 'Ver',

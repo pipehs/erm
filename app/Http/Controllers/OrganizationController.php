@@ -162,12 +162,18 @@ class OrganizationController extends Controller
             {
                 if (Session::get('languaje') == 'en')
                 {
-                    $organizations = \Ermtool\Organization::where('status',0)->where('organization_id',NULL)->lists('name','id');
+                    //ACTUALIZACIÓN 31-10-17: Existirán distintos niveles de organizaciones, por lo que no sólo se mostrarán las de primer nivel, sino que todas
+                    //$organizations = \Ermtool\Organization::where('status',0)->where('organization_id',NULL)->lists('name','id');
+                    $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
                     return view('en.datos_maestros.organization.create',['organizations'=>$organizations]);
                 }
                 else
                 {
-                    $organizations = \Ermtool\Organization::where('status',0)->where('organization_id',NULL)->lists('name','id');
+                    //ACTUALIZACIÓN 31-10-17: Existirán distintos niveles de organizaciones, por lo que no sólo se mostrarán las de primer nivel, sino que todas
+                    //$organizations = \Ermtool\Organization::where('status',0)->where('organization_id',NULL)->lists('name','id');
+                    $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
                     return view('datos_maestros.organization.create',['organizations'=>$organizations]);
                 }
             }
@@ -288,7 +294,17 @@ class OrganizationController extends Controller
             }
             else
             {
-                $organizations = \Ermtool\Organization::where('id','<>',$id)->where('status',0)->where('organization_id',NULL)->lists('name','id');
+                //ACTUALIZACIÓN 31-10-17: Existirán distintos niveles de organizaciones, por lo que no sólo se mostrarán las de primer nivel, sino que todas
+                //$organizations = \Ermtool\Organization::where('id','<>',$id)->where('status',0)->where('organization_id',NULL)->lists('name','id');
+                global $id2;
+                $id2 = $id; 
+                $organizations = \Ermtool\Organization::where('id','<>',$id)
+                        ->where('status',0)
+                        ->where((function ($query) {
+                        $query->where('organization_id','<>',$GLOBALS['id2'])
+                            ->orWhere('organization_id','=',NULL);
+                        }))
+                        ->lists('name','id');
                 $org = \Ermtool\Organization::find($id);
 
                 if (Session::get('languaje') == 'en')

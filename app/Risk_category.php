@@ -46,4 +46,12 @@ class Risk_category extends Model
                 ->select('id','name')
                 ->get();
     }
+
+    public static function getRiskCategoryByName($name)
+    {
+        return DB::table('risk_categories')
+                ->where('name','=',$name)
+                ->select('id')
+                ->first();
+    }
 }

@@ -142,7 +142,10 @@ class CategoriasRiesgosController extends Controller
             else
             {
                 //Seleccionamos categorías que pueden ser padres
-                $categorias = \Ermtool\Risk_category::where('risk_category_id',NULL)->where('status',0)->lists('name','id');
+                //ACTUALIZACIÓN 31-10-17: Existirán distintos niveles de categorías, por lo que no sólo se mostrarán las de primer nivel, sino que todas
+                //$categorias = \Ermtool\Risk_category::where('risk_category_id',NULL)->where('status',0)->lists('name','id');
+                $categorias = \Ermtool\Risk_category::where('status',0)->lists('name','id');
+
                 if (Session::get('languaje') == 'en')
                 {
                     return view('en.datos_maestros.categorias_riesgos.create',['categorias'=>$categorias]);
@@ -246,12 +249,22 @@ class CategoriasRiesgosController extends Controller
             {
                 $risk_category = \Ermtool\Risk_category::find($id);
 
+                //ACTUALIZACIÓN 31-10-17: Existirán distintos niveles de categorías, por lo que no sólo se mostrarán las de primer nivel, sino que todas
                 //Seleccionamos categorias que pueden ser padres
-                $categorias = \Ermtool\Risk_category::where('risk_category_id',NULL)
-                                                    ->where('status',0)
-                                                    ->where('id','<>',$id)
-                                                    ->lists('name','id');
-
+                //$categorias = \Ermtool\Risk_category::where('risk_category_id',NULL)
+                //                                    ->where('status',0)
+                //                                    ->where('id','<>',$id)
+                //                                    ->lists('name','id');
+                global $id2;
+                $id2 = $id;
+                $categorias = \Ermtool\Risk_category::where('id','<>',$id)
+                                                ->where('status',0)
+                                                ->where((function ($query) {
+                                                $query->where('risk_category_id','<>',$GLOBALS['id2'])
+                                                    ->orWhere('risk_category_id','=',NULL);
+                                                }))
+                                                ->lists('name','id');
+                                                
                 if (Session::get('languaje') == 'en')
                 {
                     return view('en.datos_maestros.categorias_riesgos.edit',['risk_category'=>$risk_category,

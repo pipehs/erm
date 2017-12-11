@@ -65,13 +65,27 @@ class SubprocesosController extends Controller
                 {
 
                     //ahora obtenemos todas las organizaciones a las que pertenece cada subproceso
-                    $orgs = \Ermtool\Subprocess::find($subprocess['id'])->organizations;
+                    //$orgs = \Ermtool\Subprocess::find($subprocess['id'])->organizations;
+
+                    global $id;
+                    $id = $subprocess['id'];
+
+                    $orgs = DB::table('organizations')
+                            ->join('organization_subprocess','organization_subprocess.organization_id','=','organizations.id')
+                            ->join('subprocesses','subprocesses.id','=','organization_subprocess.subprocess_id')
+                            ->where((function ($query) {
+                                $query->where('subprocesses.subprocess_id','=',$GLOBALS['id'])
+                                      ->orWhere('organization_subprocess.subprocess_id','=',$GLOBALS['id']);
+                            }))
+                            ->select('organizations.id','organizations.name')
+                            ->groupBy('organizations.id','organizations.name')
+                            ->get();
 
                     foreach ($orgs as $organization)
                     {
                          $organizaciones[$j] = array('subprocess_id'=>$subprocess['id'],
-                                                     'id'=>$organization['id'],
-                                                     'nombre'=>$organization['name']);
+                                                     'id'=>$organization->id,
+                                                     'nombre'=>$organization->name);
 
                          $j += 1;
                     }
@@ -130,7 +144,10 @@ class SubprocesosController extends Controller
                                         'fecha_exp'=>$fecha_exp,
                                         'proceso_relacionado'=>$proceso['name'],
                                         'estado'=>$subprocess['status'],
-                                        'short_des'=>$short_des);
+                                        'short_des'=>$short_des,
+                                        'systems' => $subprocess['systems'],
+                                        'habeas_data' => $subprocess['habeas_data'],
+                                        'regulatory_framework' => $subprocess['regulatory_framework']);
                     $i += 1;
                 }
 
@@ -231,13 +248,44 @@ class SubprocesosController extends Controller
                             $expiration_date = NULL;
                         }
 
+                        //ACTUALIZACIÓN 21-11-17: Vemos si se agregaron atributos: Sistemas, Habeas data, o Marco regulatorio
+                        if (isset($_POST['systems']) && $_POST['systems'] != '')
+                        {
+                            $systems = $_POST['systems'];
+                        }
+                        else
+                        {
+                            $systems = NULL;
+                        }
+
+                        if (isset($_POST['habeas_data']) && $_POST['habeas_data'] != '')
+                        {
+                            $habeas_data = $_POST['habeas_data'];
+                        }
+                        else
+                        {
+                            $habeas_data = NULL;
+                        }
+
+                        if (isset($_POST['regulatory_framework']) && $_POST['regulatory_framework'] != '')
+                        {
+                            $regulatory_framework = $_POST['regulatory_framework'];
+                        }
+                        else
+                        {
+                            $regulatory_framework = NULL;
+                        }
+
                         $new_subprocess = \Ermtool\Subprocess::create([
                             'name' => $_POST['name'],
                             'description' => $_POST['description'],
                             'expiration_date' => $expiration_date,
                             'process_id' => $_POST['process_id'],
                             'subprocess_id' => $subprocess_id,
-                            ]);
+                            'systems' => $systems,
+                            'habeas_data' => $habeas_data,
+                            'regulatory_framework' => $regulatory_framework
+                        ]);
 
                         //agregamos la relación a cada organización
                             // primero obtenemos subproceso que acabamos de agregar   
@@ -385,9 +433,41 @@ class SubprocesosController extends Controller
                     {
                         $expiration_date = NULL;
                     }
+
+                    //ACTUALIZACIÓN 21-11-17: Vemos si se agregaron atributos: Sistemas, Habeas data, o Marco regulatorio
+                    if (isset($_POST['systems']) && $_POST['systems'] != '')
+                    {
+                        $systems = $_POST['systems'];
+                    }
+                    else
+                    {
+                        $systems = NULL;
+                    }
+
+                    if (isset($_POST['habeas_data']) && $_POST['habeas_data'] != '')
+                    {
+                        $habeas_data = $_POST['habeas_data'];
+                    }
+                    else
+                    {
+                        $habeas_data = NULL;
+                    }
+
+                    if (isset($_POST['regulatory_framework']) && $_POST['regulatory_framework'] != '')
+                    {
+                        $regulatory_framework = $_POST['regulatory_framework'];
+                    }
+                    else
+                    {
+                        $regulatory_framework = NULL;
+                    }
+
                     $subproceso->expiration_date = $expiration_date;
                     $subproceso->process_id = $_POST['process_id'];
                     $subproceso->subprocess_id = $subprocess_id;
+                    $subproceso->systems = $systems;
+                    $subproceso->habeas_data = $habeas_data;
+                    $subproceso->regulatory_framework = $regulatory_framework;
 
                     //deberemos quitar las relaciones, y luego agregar las nuevas para este subproceso
                     //primero eliminaremos todas las relaciones de organizaciones con subprocesos donde el subproceso sea el que se está editando
@@ -407,6 +487,7 @@ class SubprocesosController extends Controller
                     }
 
                     $subproceso->save();
+
                     if (Session::get('languaje') == 'en')
                     {
                         Session::flash('message','Subprocess successfully updated');

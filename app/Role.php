@@ -23,4 +23,12 @@ class Role extends Model
     {
     	return DB::table('roles')->where('id',$id)->value('name');
     }
+
+    public static function getRoleByName($name)
+    {
+        return DB::table('roles')
+                ->where('name','=',$name)
+                ->select('id')
+                ->first();
+    }
 }

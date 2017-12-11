@@ -2425,3 +2425,26 @@ td.beauty-hover {
   width:35%;
   border:1px solid red;
 }
+
+.btn_ultra_small {
+  padding: 2px 6px;
+  font-size: 10px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-bottom: 0;
+  font-weight: bold;
+  line-height: 1.4;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+      touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 5px;
+}

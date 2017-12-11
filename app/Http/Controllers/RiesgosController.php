@@ -51,11 +51,9 @@ class RiesgosController extends Controller
                 $i = 0; //contador de riesgos
                 $riesgos2 = \Ermtool\Risk::getRisks(NULL,NULL);
 
-                $j = 0; //contador de subprocesos u objetivos relacionados
-
                 foreach ($riesgos2 as $riesgo)
                 {
-                    $relacionados = array();
+                    $j = 0; //contador de subprocesos u objetivos relacionados
                     $responsables = array();
                     $orgs = array();
                     //obtenemos organizaciones y responsables por organización
@@ -99,9 +97,10 @@ class RiesgosController extends Controller
                         foreach($subprocesses as $subprocess)
                         {
                             //agregamos org_name ya que este estará identificado si el riesgo es de negocio
-                            $relacionados[$j] = array('risk_id'=>$riesgo->id,
-                                                'id'=>$subprocess->id,
-                                                'nombre'=>$subprocess->name);
+                            //$relacionados[$j] = array('risk_id'=>$riesgo->id,
+                                                //'id'=>$subprocess->id,
+                                                //'nombre'=>$subprocess->name);
+                            $subobj[$j] = ['id' => $subprocess->id, 'name' => $subprocess->name];
                             $j += 1;
                         }
                     }
@@ -120,11 +119,13 @@ class RiesgosController extends Controller
                         {
                             //obtenemos organización
                             //$org = \Ermtool\Organization::where('id',$objective['organization_id'])->value('name');
-                            $relacionados[$j] = array('risk_id'=>$riesgo->id,
-                                                    'id'=>$objective->id,
-                                                    'nombre'=>$objective->name);
+                            //$relacionados[$j] = array('risk_id'=>$riesgo->id,
+                                                    //'id'=>$objective->id,
+                                                    //'nombre'=>$objective->name);
 
+                            $subobj[$j] = ['id' => $subprocess->id, 'name' => $subprocess->name];
                             $j += 1;
+
                         }
                     }
 
@@ -205,6 +206,54 @@ class RiesgosController extends Controller
                         $efectos = NULL;
                     }
 
+                    //ACTUALIZACIÓN 01-12-17: Agregamos probabilidad e impacto en mantenedor
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $proba_string = ['Very low','Low','Medium','High','Very high'];
+                        $impact_string = ['Very low','Low','Medium','High','Very high'];
+                    }
+                    else
+                    {
+                        $proba_string = ['Muy poco probable','Poco probable','Intermedio','Probable','Muy probable'];
+                        $impact_string = ['Muy poco impacto','Poco impacto','Intermedio','Alto impacto','Muy alto impacto'];
+                    }
+
+                    //primero obtenemos maxima fecha de evaluacion para el riesgo
+                    $fecha = DB::table('evaluation_risk')
+                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->where('evaluation_risk.organization_risk_id','=',$riesgo->id)
+                                    ->max('evaluations.updated_at');
+
+                    //ACT 04-04-17: Sacamos guiones para SQL Server
+                    //$fecha = str_replace('-','',$fecha);
+
+                    //obtenemos proba, impacto y score
+                    $eval_risk = DB::table('evaluation_risk')
+                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->where('evaluation_risk.organization_risk_id','=',$riesgo->id)
+                                    ->where('evaluations.updated_at','=',$fecha)
+                                    ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                                    ->get();
+
+                    if (!empty($eval_risk))
+                    {
+                        foreach ($eval_risk as $eval)
+                        {
+                            if ($eval->avg_probability != NULL AND $eval->avg_impact != NULL)
+                            {
+                                $impacto = $eval->avg_impact.' ('.$impact_string[$eval->avg_impact-1].')';
+                                $probabilidad = $eval->avg_probability.' ('.$proba_string[$eval->avg_probability-1].')';
+                                $score = $impacto * $probabilidad;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        $impacto = 'Sin eval.';
+                        $probabilidad = 'Sin eval.';
+                        $score = 'Sin eval.';
+                    }
+
                     //ACT 25-04-17: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
                     $short_des = substr($riesgo->description,0,100);
 
@@ -219,7 +268,11 @@ class RiesgosController extends Controller
                                         'causas'=>$causas,
                                         'efectos'=>$efectos,
                                         'short_des'=>$short_des,
-                                        'orgs' => $orgs);
+                                        'orgs' => $orgs,
+                                        'subobj' => $subobj,
+                                        'impacto' => $impacto,
+                                        'probabilidad' => $probabilidad,
+                                        'score' => $score);
 
                     $i += 1;
 
@@ -233,11 +286,11 @@ class RiesgosController extends Controller
 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.riesgos.index',['organizations' => $organizations,'categories' => $categories,'riesgos' => $riesgos,'relacionados'=>$relacionados]);
+                    return view('en.riesgos.index',['organizations' => $organizations,'categories' => $categories,'riesgos' => $riesgos]);
                 }
                 else
                 {
-                    return view('riesgos.index',['organizations' => $organizations, 'categories' => $categories,'riesgos' => $riesgos,'relacionados'=>$relacionados]);
+                    return view('riesgos.index',['organizations' => $organizations, 'categories' => $categories,'riesgos' => $riesgos]);
                 }
             }
         }
@@ -268,8 +321,13 @@ class RiesgosController extends Controller
                 $relacionados = array();
                 $i = 0; //contador de riesgos
 
+                //ACTUALIZACIÓN 01-11-17: Vemos si se agregó sub-subcategoría
+                if (isset($_GET['risk_subcategory_id2']) && $_GET['risk_subcategory_id2'] != '')
+                {
+                    $category = $_GET['risk_subcategory_id2'];
+                }
                 //ACTUALIZACIÓN 18-08-17: Vemos si se agregó subcategoría
-                if (isset($_GET['risk_subcategory_id']) && $_GET['risk_subcategory_id'] != '')
+                else if (isset($_GET['risk_subcategory_id']) && $_GET['risk_subcategory_id'] != '')
                 {
                     $category = $_GET['risk_subcategory_id'];
                 }
@@ -429,6 +487,58 @@ class RiesgosController extends Controller
                         $efectos = NULL;
                     }
 
+                    //ACTUALIZACIÓN 01-12-17: Agregamos probabilidad e impacto en mantenedor
+                    if (Session::get('languaje') == 'en')
+                    {
+                        $proba_string = ['Very low','Low','Medium','High','Very high'];
+                        $impact_string = ['Very low','Low','Medium','High','Very high'];
+                    }
+                    else
+                    {
+                        $proba_string = ['Muy poco probable','Poco probable','Intermedio','Probable','Muy probable'];
+                        $impact_string = ['Muy poco impacto','Poco impacto','Intermedio','Alto impacto','Muy alto impacto'];
+                    }
+                    //primero obtenemos maxima fecha de evaluacion para el riesgo
+                    $fecha = DB::table('evaluation_risk')
+                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->where('evaluation_risk.organization_risk_id','=',$riesgo->id)
+                                    ->where('evaluations.consolidation','=',1)
+                                    ->max('evaluations.updated_at');
+
+                    //ACT 04-04-17: Sacamos guiones para SQL Server
+                    //$fecha = str_replace('-','',$fecha);
+
+                    //obtenemos proba, impacto y score
+                    $eval_risk = DB::table('evaluation_risk')
+                                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->where('evaluation_risk.organization_risk_id','=',$riesgo->id)
+                                    ->where('evaluations.updated_at','=',$fecha)
+                                    ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                                    ->get();
+
+                    if (!empty($eval_risk))
+                    {
+                        $impacto = '';
+                        $probabilidad = '';
+                        $score = '';
+                        foreach ($eval_risk as $eval)
+                        {
+                            if ($eval->avg_probability != NULL AND $eval->avg_impact != NULL)
+                            {
+                                $impacto = $eval->avg_impact.' ('.$impact_string[$eval->avg_impact-1].')';
+                                $probabilidad = $eval->avg_probability.' ('.$proba_string[$eval->avg_probability-1].')';
+                                $score = $impacto * $probabilidad;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        $impacto = 'Sin eval.';
+                        $probabilidad = 'Sin eval.';
+                        $score = 'Sin eval.';
+                    }
+                    
+
                     //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
                     $short_des = substr($riesgo->description,0,100);
 
@@ -442,7 +552,10 @@ class RiesgosController extends Controller
                                         'categoria'=>$categoria,
                                         'causas'=>$causas,
                                         'efectos'=>$efectos,
-                                        'short_des'=>$short_des);
+                                        'short_des'=>$short_des,
+                                        'impacto' => $impacto,
+                                        'probabilidad' => $probabilidad,
+                                        'score' => $score);
 
                     $i += 1;
 
@@ -600,7 +713,13 @@ class RiesgosController extends Controller
                             }
 
                             //ACTUALIZACIÓN 18-08-17: Vemos si se agregó subcategoría
-                            if (isset($_POST['risk_subcategory_id']) && $_POST['risk_subcategory_id'] != '')
+                            //ACTUALIZACIÓN 01-11-17: Vemos si se agregó sub-subcategoría
+                            if (isset($_GET['risk_subcategory_id2']) && $_GET['risk_subcategory_id2'] != '')
+                            {
+                                $risk_category_id = $_POST['risk_subcategory_id2'];
+                            }
+                
+                            else if (isset($_POST['risk_subcategory_id']) && $_POST['risk_subcategory_id'] != '')
                             {
                                 $risk_category_id = $_POST['risk_subcategory_id'];
                             }

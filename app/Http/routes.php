@@ -1348,3 +1348,11 @@ Route::get('get_subcategories.{cat_id}', [
 Route::get('downloadfile.{kind}.{id}.{filename}.{ext}', function($kind,$id,$filename,$ext) {
 	return downloadFile($kind,$id,$filename,$ext);
 });
+
+Route::get('importador',[
+	'as' => 'importador', 'uses' => 'ExcelController@importarIndex'
+]);
+
+Route::post('importar_excel', [
+	'as' => 'importar_excel', 'uses' => 'ExcelController@importarExcel'
+]);

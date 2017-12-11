@@ -173,4 +173,12 @@ class Organization extends Model
                 ->select('organization_risk.organization_id','organization_risk.stakeholder_id')
                 ->get();
     }
+
+    public static function getOrgByName($org_name)
+    {
+        return DB::table('organizations')
+                ->where('name','=',$org_name)
+                ->select('id')
+                ->first();
+    }
 }

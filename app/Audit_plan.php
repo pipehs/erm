@@ -56,6 +56,19 @@ class Audit_plan extends Model
                 ->get();
     }
 
+    public static function getAuditPlansFromAuditTest($org,$audit_test_id)
+    {
+        return DB::table('audit_tests')
+                ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                ->where('audit_tests.id','=',$audit_test_id)
+                ->where('audit_plans.organization_id','=',$org)
+                ->select('audit_plans.id','audit_plans.name','audit_plans.description')
+                ->groupBy('audit_plans.id','audit_plans.name','audit_plans.description')
+                ->get();
+    }
+
     public static function getPlanes($org)
     {
         return DB::table('audit_plans')
@@ -63,5 +76,22 @@ class Audit_plan extends Model
                 ->where('status','=',0)
                 ->select('*')
                 ->get();
+    }
+
+    public static function getAuditPlanByName($name)
+    {
+        return DB::table('audit_plans')
+                ->where('name','=',$name)
+                ->select('id')
+                ->first();
+    }
+
+    public static function getAuditPlanByNameAndOrg($name,$org_id)
+    {
+        return DB::table('audit_plans')
+                ->where('name','=',$name)
+                ->where('organization_id','=',$org_id)
+                ->select('id')
+                ->first();
     }
 }

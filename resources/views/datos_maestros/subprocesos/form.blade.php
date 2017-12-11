@@ -65,6 +65,27 @@
 							 	   ['id' => 'el2','placeholder'=>'No'])!!}
 						</div>
 					</div>
+
+					<div class="form-group">
+						{!!Form::label('Sistemas / Plataformas',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::text('systems',null,['class'=>'form-control'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
+						{!!Form::label('Habeas data',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::text('habeas_data',null,['class'=>'form-control'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
+						{!!Form::label('Marco Regulatorio',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::text('regulatory_framework',null,['class'=>'form-control'])!!}
+						</div>
+					</div>
 					
 					<div class="form-group">
 						<center>

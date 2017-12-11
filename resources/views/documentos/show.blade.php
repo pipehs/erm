@@ -97,31 +97,31 @@
 										$ext = $archivo[1]; //tipo archivo
 										$filename = explode('/',$archivo[0]);
 										$id = $filename[1]; //id del elemento
-										$kind = $filename[0]; //por ej. evidencias_hallazgos
+										$kind3 = $filename[0]; //por ej. evidencias_hallazgos
 										$filename = $filename[2];
 										$cont += 1;
 									?>
 									
 									@if ($archivo[1] == 'pdf')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'png')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@else
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@endif
 
@@ -169,31 +169,31 @@
 												$ext = $archivo[1]; //tipo archivo
 												$filename = explode('/',$archivo[0]);
 												$id = $filename[1]; //id del elemento
-												$kind = $filename[0]; //por ej. evidencias_hallazgos
+												$kind3 = $filename[0]; //por ej. evidencias_hallazgos
 												$filename = $filename[2];
 												$cont += 1;
 											?>
 											
 											@if ($archivo[1] == 'pdf')
-												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+												<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
 												{{ $filename }}<br/>
 											@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+												<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
 												{{ $filename }}<br/>
 											@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+												<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
 												{{ $filename }}<br/>
 											@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+												<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
 												{{ $filename }}<br/>
 											@elseif ($archivo[1] == 'png')
-												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+												<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
 												{{ $filename }}<br/>
 											@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+												<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
 												{{ $filename }}<br/>
 											@else
-												<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+												<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 												{{ $filename }}<br/>
 											@endif
 											@foreach (Session::get('roles') as $role)
@@ -252,31 +252,31 @@
 									$ext = $archivo[1]; //tipo archivo
 									$filename = explode('/',$archivo[0]);
 									$id = $filename[1]; //id del elemento
-									$kind = $filename[0]; //por ej. evidencias_hallazgos
+									$kind3 = $filename[0]; //por ej. evidencias_hallazgos
 									$filename = $filename[2];
 									$cont += 1;
 								?>
 								
 								@if ($archivo[1] == 'pdf')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
 									{{ $filename }}
 								@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
 									{{ $filename }}
 								@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
 									{{ $filename }}
 								@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
 									{{ $filename }}
 								@elseif ($archivo[1] == 'png')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
 									{{ $filename }}
 								@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
 									{{ $filename }}
 								@else
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 									{{ $filename }}
 								@endif
 								@foreach (Session::get('roles') as $role)
@@ -333,31 +333,31 @@
 										$ext = $archivo[1]; //tipo archivo
 										$filename = explode('/',$archivo[0]);
 										$id = $filename[1]; //id del elemento
-										$kind = $filename[0]; //por ej. evidencias_hallazgos
+										$kind3 = $filename[0]; //por ej. evidencias_hallazgos
 										$filename = $filename[2];
 										$cont += 1;
 									?>
 									
 									@if ($archivo[1] == 'pdf')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'png')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@else
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@endif
 									@foreach (Session::get('roles') as $role)
@@ -402,31 +402,31 @@
 									$ext = $archivo[1]; //tipo archivo
 									$filename = explode('/',$archivo[0]);
 									$id = $filename[1]; //id del elemento
-									$kind = $filename[0]; //por ej. evidencias_hallazgos
+									$kind3 = $filename[0]; //por ej. evidencias_hallazgos
 									$filename = $filename[2];
 									$cont += 1;
 								?>
 								
 								@if ($archivo[1] == 'pdf')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
 									{{ $filename }}<br/>
 								@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
 									{{ $filename }}<br/>
 								@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
 									{{ $filename }}<br/>
 								@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
 									{{ $filename }}<br/>
 								@elseif ($archivo[1] == 'png')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
 									{{ $filename }}<br/>
 								@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
 									{{ $filename }}<br/>
 								@else
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+									<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 									{{ $filename }}<br/>
 								@endif
 								@foreach (Session::get('roles') as $role)
@@ -472,25 +472,25 @@
 										?>
 										
 										@if ($archivo[1] == 'pdf')
-											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+											<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
 											{{ $filename }}<br/>
 										@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+											<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
 											{{ $filename }}<br/>
 										@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+											<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
 											{{ $filename }}<br/>
 										@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+											<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
 											{{ $filename }}<br/>
 										@elseif ($archivo[1] == 'png')
-											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+											<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
 											{{ $filename }}<br/>
 										@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+											<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
 											{{ $filename }}<br/>
 										@else
-											<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+											<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 											{{ $filename }}<br/>
 										@endif
 										@foreach (Session::get('roles') as $role)
@@ -515,7 +515,11 @@
 							@endif
 						@endforeach
 				@elseif ($kind == 4 || $kind == 5) {{-- Documentos de programas o pruebas --}}
-					<p>Documentos de programas de auditor&iacute;a asociados al plan {{ $audit_plan }}</p>
+					@if ($kind == 4)
+						<p>Documentos de programas de auditor&iacute;a asociados al plan {{ $audit_plan }}</p>
+					@elseif ($kind == 5)
+						<p>Documentos de pruebas de auditor&iacute;a asociados al plan {{ $audit_plan }}</p>
+					@endif
 					<h3 style="color:#0B0B61;">Plan de auditor&iacute;a: {{ $audit_plan }}</h3><br/>
 
 						<table class="table">
@@ -545,47 +549,66 @@
 								<td>
 								<?php //pequeño módulo php para ver el tipo de archivo y nombre
 									$archivo = explode('.',$file);
-									$ext = $archivo[1]; //tipo archivo
-									$filename = explode('/',$archivo[0]);
-									$id = $filename[1]; //id del elemento
-									$kind = $filename[0]; //por ej. evidencias_hallazgos
-									$filename = $filename[2];
+
+									if (isset($archivo[1])) //si es que tiene extensión
+									{
+										$ext = $archivo[1]; //tipo archivo
+										$filename = explode('/',$archivo[0]);
+										$id = $filename[1]; //id del elemento
+										$kind3 = $filename[0]; //por ej. evidencias_hallazgos
+										$filename = $filename[2];
+									}
+									else
+									{
+										$filename = explode('/',$archivo[0]);
+										$id = $filename[1]; //id del elemento
+										$kind3 = $filename[0]; //por ej. evidencias_hallazgos
+										$filename = $filename[2];
+									}
+									
 									$cont += 1;
 								?>
 								
-								@if ($archivo[1] == 'pdf')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
-									{{ $filename }}
-								@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
-									{{ $filename }}
-								@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
-									{{ $filename }}
-								@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
-									{{ $filename }}
-								@elseif ($archivo[1] == 'png')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
-									{{ $filename }}
-								@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
-									{{ $filename }}
-								@else
-									<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
-									{{ $filename }}
+								@if (isset($archivo[1]))
+									@if ($archivo[1] == 'pdf')
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
+									@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
+									@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
+									@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
+									@elseif ($archivo[1] == 'png')
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
+									@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
+									@else
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/rar.jpg" width="30" height="30" /></a><br/>
+										{{ $filename }}
+									@endif
+								@else {{-- No hay extensión --}}
+									<a href="downloadfile2.{{$kind3}}.{{$id}}.{{$filename}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+										{{ $filename }}
 								@endif
 
 								@if ($kind == 4)
 									@foreach (Session::get('roles') as $role)
-										@if ($role == 1)
+										{{ $role }}
+										@if ($role == 1 || $role == 4)
 											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},1,'{{ $filename }}')"><br/>
 											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 										@endif
 									@endforeach
 								@elseif ($kind == 5)
 									@foreach (Session::get('roles') as $role)
-										@if ($role == 1)
+									{{ $role }}
+										@if ($role == 1 || $role == 4)
 											<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $element['id'] }},0,'{{ $filename }}')"><br/>
 											<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 										@endif
@@ -636,31 +659,31 @@
 										$ext = $archivo[1]; //tipo archivo
 										$filename = explode('/',$archivo[0]);
 										$id = $filename[1]; //id del elemento
-										$kind = $filename[0]; //por ej. evidencias_hallazgos
+										$kind3 = $filename[0]; //por ej. evidencias_hallazgos
 										$filename = $filename[2];
 										$cont += 1;
 									?>
 									
 									@if ($archivo[1] == 'pdf')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'png')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@else
-										<a href="downloadfile.{{$kind}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@endif
 									@foreach (Session::get('roles') as $role)

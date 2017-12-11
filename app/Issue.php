@@ -10,8 +10,7 @@ use Carbon;
 class Issue extends Model
 {
     
-    protected $fillable = ['name','description','recommendations','evidence','classification',
-    						'audit_test_id','audit_audit_plan_id','control_evaluation_id'];
+    protected $fillable = ['name','description','recommendations','evidence','classification','audit_test_id','audit_audit_plan_id','control_evaluation_id','organization_id'];
 
 
    	//obtiene datos del origen de un control
@@ -438,5 +437,41 @@ class Issue extends Model
                 ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
                 ->where('audit_tests.id','=',$audit_test_id)
                 ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification']);
+    }
+
+    public static function getRiskIssues($risk_id)
+    {
+        $issues = DB::table('issues')
+                    ->join('organization_risk','organization_risk.id','=','issues.organization_risk_id')
+                    ->where('issues.kind','=',3)
+                    ->where('organization_risk.risk_id','=',$risk_id)
+                    ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
+                    ->get();
+
+        return $issues;
+    }
+
+    public static function getComplianceIssues($org_id)
+    {
+        $issues = DB::table('issues')
+                    ->join('organizations','organizations.id','=','issues.organization_id')
+                    ->where('issues.kind','=',1)
+                    ->where('organizations.organization_id','=',$org_id)
+                    ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations','organizations.name as organization')
+                    ->get();
+
+        return $issues;
+    }
+
+    public static function getCompliantChanellIssues($org_id)
+    {
+        $issues = DB::table('issues')
+                    ->join('organizations','organizations.id','=','issues.organization_id')
+                    ->where('issues.kind','=',2)
+                    ->where('organizations.organization_id','=',$org_id)
+                    ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations','organizations.name as organization')
+                    ->get();
+
+        return $issues;
     }
 }

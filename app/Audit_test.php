@@ -108,4 +108,12 @@ class Audit_test extends Model
             ->select('audit_tests.id','audit_tests.name')
             ->get();
     }
+
+    public static function getAuditTestByName($name)
+    {
+        return DB::table('audit_tests')
+                ->where('name','=',$name)
+                ->select('id')
+                ->first();
+    }
 }

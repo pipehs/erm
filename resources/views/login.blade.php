@@ -9,8 +9,8 @@
 			<div class="box">
 				<div class="box-content">
 					<div class="text-center">
-						<!--<img src="assets/img/Latam/latam.png" title="LATAM" width="300px" height="80px"></img><br>-->
-						<img src="assets/img/logo_parque_arauco.PNG" title="Norte Grande" width="300px" height="80px"></img><br>
+						<!--<img src="assets/img/logo_testing.PNG" title="Testing" width="200px" height="120px"></img><br>-->
+						<!--<img src="assets/img/logo_parque_arauco2.jpg" title="Parque Arauco" width="230px" height="60px"></img><br>-->
 						<img src="assets/img/logoCompleto.PNG" title="Bussiness Governance and Risk Compliance" width="320px" height="120px"></img>
 						<h3 class="page-header"><style="font-family: arial; color: #2E2E2E;"> Business, Governance, Risk and Compliance</h3>
 					</div>

@@ -326,4 +326,48 @@ class Risk extends Model
                     'stakeholder_id' => $stakeholder_id
                 ]);
     }
+
+    public static function getRiskByName($risk,$org_id)
+    {
+        return DB::table('risks')
+            ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+            ->where('risks.name','=',$risk)
+            ->where('organization_risk.organization_id','=',$org_id)
+            ->select('risks.id','organization_risk.id as org_risk_id')
+            ->first();
+    }
+
+    public static function getRiskByNameAndDescription($name,$description,$org_id)
+    {
+        return DB::table('risks')
+            ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+            ->where('risks.name','=',$name)
+            ->where('risks.description','=',$description)
+            ->where('organization_risk.organization_id','=',$org_id)
+            ->select('risks.id','organization_risk.id as org_risk_id')
+            ->first();
+    }
+
+    public static function getRiskByName2($risk)
+    {
+        return DB::table('risks')
+            ->where('risks.name','=',$risk)
+            ->select('risks.id')
+            ->first();
+    }
+
+    //obtenemos riesgos a través de Control
+    public static function getRisksFromIssue($org)
+    {
+        $risks = DB::table('risks')
+                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                    ->join('issues','issues.organization_risk_id','=','organization_risk.id')
+                    ->where('issues.kind','=',3)
+                    ->where('organization_risk.organization_id','=',(int)$org)
+                    ->select('risks.id','risks.name','risks.description')
+                    ->groupBy('risks.id','risks.name','risks.description')
+                    ->get();
+
+        return $risks;
+    }
 }

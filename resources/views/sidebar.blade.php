@@ -101,6 +101,13 @@
 			@endif
 		@endforeach
 
+		<li>
+			<a href="importador" class="{{ activeMenu('importador') }}">
+				<i class="fa fa-wrench"></i>
+				<span class="hidden-xs">Importador Excel</span>
+			</a>
+		</li>
+
 	@endif
 @else
 					<li>&nbsp;</li>

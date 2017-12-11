@@ -17,7 +17,7 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-xs-12 col-sm-7">
+	<div class="col-xs-12 col-sm-8">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -175,7 +175,7 @@
 		</div>
 	</div>
 
-	<div class="col-xs-12 col-sm-5">
+	<div class="col-xs-12 col-sm-4">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">

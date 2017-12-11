@@ -94,4 +94,12 @@ class Process extends Model
                 ->get();
     }
 
+    public static function getProcessByName($name)
+    {
+        return DB::table('processes')
+                ->where('name','=',$name)
+                ->select('id')
+                ->first();
+    }
+
 }

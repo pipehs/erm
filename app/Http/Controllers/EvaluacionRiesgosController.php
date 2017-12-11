@@ -112,7 +112,7 @@ class EvaluacionRiesgosController extends Controller
 
                         We send to you the following poll for risk assessments. You must assign a value on probability and impact for each one of the risks associated to the survey. To answer this poll you have to access to the following link:
 
-                        http://ec2-18-231-66-236.sa-east-1.compute.amazonaws.com/evaluacion_encuesta.{$id}
+                        http://www.grc-koandina.com/evaluacion_encuesta.{$id}
 
                         Best Regards,
                         Administration.";
@@ -125,7 +125,7 @@ class EvaluacionRiesgosController extends Controller
 
                         Le enviamos la siguiente encuesta para la evaluación de riesgos. Ud deberá asignar un valor de probabilidad e impacto para cada uno de los riesgos asociados a la encuesta. Para responderla deberá acceder al siguiente link.
 
-                        http://ec2-18-231-66-236.sa-east-1.compute.amazonaws.com/evaluacion_encuesta.{$id}
+                        http://www.grc-koandina.com/evaluacion_encuesta.{$id}
 
                         Saludos cordiales,
                         Administrador.";
@@ -770,7 +770,6 @@ class EvaluacionRiesgosController extends Controller
                     Mail::send('envio_mail',$request->all(), 
                     function ($msj) use ($correos)
                     {
-                        echo "Hola??<br>";
                         if (Session::get('languaje') == 'en')
                         {
                             $msj->subject('Risks assessments poll');
@@ -796,7 +795,7 @@ class EvaluacionRiesgosController extends Controller
                 }
                 catch (\Exception $e)
                 {
-                    //enviarMailSoporte($e);
+                    enviarMailSoporte($e);
                     return view('errors.query',['e' => $e]);
                 }
                 
@@ -810,7 +809,7 @@ class EvaluacionRiesgosController extends Controller
                     Session::flash('message','Encuesta enviada correctamente');
                 }
 
-                //return Redirect::to('/evaluacion_agregadas');
+                return Redirect::to('/evaluacion_agregadas');
             }
         }
         catch (\Exception $e)
@@ -846,7 +845,7 @@ class EvaluacionRiesgosController extends Controller
             //$this->validate($request, [
             //    'rut' => 'exists:stakeholders,id'
             //]);
-
+            $org = \Ermtool\Organization::getOrganizationByOrgRisk($_POST['evaluation_risk_id'][0]);
             if ($stakeholder) //si es que el rut ingresado es correcto, procedemos a guardar evaluación
             {
                 global $rut;
@@ -894,7 +893,7 @@ class EvaluacionRiesgosController extends Controller
                                         ->first();
 
                                 //ahora calculamos riesgo residual para ese riesgo
-                                $controls->calcResidualRisk($var->organization_id,$var->risk_id);
+                                $controls->calcResidualRisk($var->organization_id,$var->risk_id,date('Y'),date('m'),date('d'));
 
                                 if (isset($_POST['comments_'.$risk_id]) && $_POST['comments_'.$risk_id] != '') //si es que se agregaron comentarios
                                 {
@@ -904,10 +903,22 @@ class EvaluacionRiesgosController extends Controller
                                 {
                                     $comments = NULL;
                                 }
+
+                                //ACTUALIZACIÓN 04-12-17: Debemos verificar largo del rut (porque puede tener Rest)
+                                if ($_POST['rut'] >= 2147483647)
+                                {
+                                    //realizaremos división y guardamos entero
+                                    $rut = $_POST['rut'] / 100;
+                                    $rut = (int)$id;
+                                }
+                                else
+                                {
+                                    $rut = $_POST['rut'];
+                                }
                                 //insertamos en evaluation_risk_stakeholder
                                 DB::table('evaluation_risk_stakeholder')->insert([
                                     'evaluation_risk_id'=>$evaluation_risk[$i],
-                                    'stakeholder_id'=>$_POST['rut'],
+                                    'user_id'=>$rut,
                                     'probability'=>$_POST['proba_'.$risk_id.'_subprocess'],
                                     'impact'=>$_POST['criticidad_'.$risk_id.'_subprocess'],
                                     'comments' => $comments
@@ -936,7 +947,7 @@ class EvaluacionRiesgosController extends Controller
                                         ->first();
 
                                 //ahora calculamos riesgo residual para ese riesgo
-                                $controls->calcResidualRisk($var->organization_id,$var->risk_id);
+                                $controls->calcResidualRisk($var->organization_id,$var->risk_id,date('Y'),date('m'),date('d'));
 
                                 if (isset($_POST['comments_'.$risk_id]) && $_POST['comments_'.$risk_id] != '') //si es que se agregaron comentarios
                                 {
@@ -947,10 +958,22 @@ class EvaluacionRiesgosController extends Controller
                                     $comments = NULL;
                                 }
 
+                                //ACTUALIZACIÓN 04-12-17: Debemos verificar largo del rut (porque puede tener Rest)
+                                if ($_POST['rut'] >= 2147483647)
+                                {
+                                    //realizaremos división y guardamos entero
+                                    $rut = $_POST['rut'] / 100;
+                                    $rut = (int)$id;
+                                }
+                                else
+                                {
+                                    $rut = $_POST['rut'];
+                                }
+
                                 //insertamos en evaluation_risk_stakeholder
                                 DB::table('evaluation_risk_stakeholder')->insert([
                                 'evaluation_risk_id'=>$evaluation_risk[$i],
-                                'stakeholder_id'=>$_POST['rut'],
+                                'user_id'=>$rut,
                                 'probability'=>$_POST['proba_'.$risk_id.'_objective'],
                                 'impact'=>$_POST['criticidad_'.$risk_id.'_objective'],
                                 'comments' => $comments,
@@ -974,9 +997,21 @@ class EvaluacionRiesgosController extends Controller
                                 $comments = NULL;
                             }
 
+                            //ACTUALIZACIÓN 04-12-17: Debemos verificar largo del rut (porque puede tener Rest)
+                            if ($_POST['rut'] >= 2147483647)
+                            {
+                                //realizaremos división y guardamos entero
+                                $rut = $_POST['rut'] / 100;
+                                $rut = (int)$id;
+                            }
+                            else
+                            {
+                                $rut = $_POST['rut'];
+                            }
+
                             DB::table('evaluation_risk_stakeholder')->insert([
                                     'evaluation_risk_id' => $evaluation_risk,
-                                    'stakeholder_id' => $_POST['rut'],
+                                    'stakeholder_id' => $rut,
                                     'probability'=> $_POST['proba_'.$evaluation_risk],
                                     'impact' => $_POST['criticidad_'.$evaluation_risk],
                                     'comments' => $comments
@@ -1044,12 +1079,12 @@ class EvaluacionRiesgosController extends Controller
                                 $subs = DB::table('subprocesses')
                                         ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
                                         ->where('risk_subprocess.risk_id','=',$r->id)
-                                        ->select('subprocesses.name')
+                                        ->select('subprocesses.name','subprocesses.description')
                                         ->get();
                                 $j = 0;
                                 foreach ($subs as $sub)
                                 {
-                                    $subprocesses[$j] = $sub->name;
+                                    $subprocesses[$j] = $sub;
                                     $j+=1;
                                 }
                                 $riesgos[$i] = array('type' => 'subprocess',
@@ -1074,12 +1109,12 @@ class EvaluacionRiesgosController extends Controller
                                 $objs = DB::table('objectives')
                                         ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
                                         ->where('objective_risk.risk_id','=',$r->id)
-                                        ->select('objectives.name')
+                                        ->select('objectives.name','objectives.description')
                                         ->get();
                                 $j = 0;
                                 foreach ($objs as $obj)
                                 {
-                                    $objectives[$j] = $obj->name;
+                                    $objectives[$j] = $obj;
                                     $j+=1;
                                 }
                                 $riesgos[$i] = array('type' => 'objective',
@@ -1098,16 +1133,18 @@ class EvaluacionRiesgosController extends Controller
 
                         $tipos_impacto = \Ermtool\Eval_description::getImpactValues(2); //2 es inglés
                         $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(2);
+                        $org_name = $org->name;
 
-                        return view('en.evaluacion.encuesta',['encuesta'=>'Manual Evaluation','riesgos'=>$riesgos,'tipo'=>0,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>0]);
+                        return view('en.evaluacion.encuesta',['encuesta'=>'Manual Evaluation','riesgos'=>$riesgos,'tipo'=>0,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>0,'org_name'=>$org_name])->withInput(Input::all());
                     }
                     else
                     {
                         Session::flash('message','El rut ingresado no se encuentra en nuestra base de datos');
                         $tipos_impacto = \Ermtool\Eval_description::getImpactValues(1); //2 es inglés
                         $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
+                        $org_name = $org->name;
 
-                        return view('evaluacion.encuesta',['encuesta'=>'Evaluación Manual','riesgos'=>$riesgos,'tipo'=>0,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>0])->withInput(Input::all()); //no funcion withInput
+                        return view('evaluacion.encuesta',['encuesta'=>'Evaluación Manual','riesgos'=>$riesgos,'tipo'=>0,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>0,'org_name'=>$org_name])->withInput(Input::all()); //no funcion withInput
                     }
                 }
                 else
@@ -1610,7 +1647,7 @@ class EvaluacionRiesgosController extends Controller
                             ->first();
 
                     //ahora calculamos riesgo residual para ese riesgo
-                    $controls->calcResidualRisk($var->organization_id,$var->risk_id);
+                    $controls->calcResidualRisk($var->organization_id,$var->risk_id,date('Y'),date('m'),date('d'));
                 }
 
                 if (Session::get('languaje') == 'en')
@@ -2051,6 +2088,10 @@ class EvaluacionRiesgosController extends Controller
                     $prom_proba_in = array();
                     $prom_criticidad_in = array();
                     $riesgos_consolidados = $this->getEvaluatedRisks(NULL,$consolidados,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,$categories,$cont_categories,$risk_subcategories);
+                }
+                else
+                {
+                    $riesgos_consolidados = array();
                 }   
 
                 //obtenemos nombre de organización

@@ -13,7 +13,7 @@
 function LoadCalendarScript(callback){
 	function LoadFullCalendarScript(){
 		if(!$.fn.fullCalendar){
-			$.getScript('../public/assets/plugins/fullcalendar/fullcalendar.js', callback);
+			$.getScript('/assets/plugins/fullcalendar/fullcalendar.js', callback);
 		}
 		else {
 			if (callback && typeof(callback) === "function") {
@@ -22,7 +22,7 @@ function LoadCalendarScript(callback){
 		}
 	}
 	if (!$.fn.moment){
-		$.getScript('../public/assets/plugins/moment/moment.min.js', LoadFullCalendarScript);
+		$.getScript('/assets/plugins/moment/moment.min.js', LoadFullCalendarScript);
 	}
 	else {
 		LoadFullCalendarScript();
@@ -48,7 +48,7 @@ function LoadOpenLayersScript(callback){
 //
 function LoadTimePickerScript(callback){
 	if (!$.fn.timepicker){
-		$.getScript('../public/assets/plugins/jquery-ui-timepicker-addon/jquery-ui-timepicker-addon.min.js', callback);
+		$.getScript('/assets/plugins/jquery-ui-timepicker-addon/jquery-ui-timepicker-addon.min.js', callback);
 	}
 	else {
 		if (callback && typeof(callback) === "function") {
@@ -62,7 +62,7 @@ function LoadTimePickerScript(callback){
 //
 function LoadBootstrapValidatorScript(callback){
 	if (!$.fn.bootstrapValidator){
-		$.getScript('../public/assets/plugins/bootstrapvalidator/bootstrapValidator.min.js', callback);
+		$.getScript('/assets/plugins/bootstrapvalidator/bootstrapValidator.min.js', callback);
 	}
 	else {
 		if (callback && typeof(callback) === "function") {
@@ -76,7 +76,7 @@ function LoadBootstrapValidatorScript(callback){
 //
 function LoadSelect2Script(callback){
 	if (!$.fn.select2){
-		$.getScript('../public/assets/plugins/select2/select2.min.js', callback);
+		$.getScript('/assets/plugins/select2/select2.min.js', callback);
 	}
 	else {
 		if (callback && typeof(callback) === "function") {
@@ -90,10 +90,10 @@ function LoadSelect2Script(callback){
 //
 function LoadDataTablesScripts(callback){
 	function LoadDatatables(){
-		$.getScript('../public/assets/plugins/datatables/jquery.dataTables.js', function(){
-			$.getScript('../public/assets/plugins/datatables/ZeroClipboard.js', function(){
-				$.getScript('../public/assets/plugins/datatables/TableTools.js', function(){
-					$.getScript('../public/assets/plugins/datatables/dataTables.bootstrap.js', callback);
+		$.getScript('/assets/plugins/datatables/jquery.dataTables.js', function(){
+			$.getScript('/assets/plugins/datatables/ZeroClipboard.js', function(){
+				$.getScript('/assets/plugins/datatables/TableTools.js', function(){
+					$.getScript('/assets/plugins/datatables/dataTables.bootstrap.js', callback);
 				});
 			});
 		});
@@ -113,7 +113,7 @@ function LoadDataTablesScripts(callback){
 //
 function LoadFineUploader(callback){
 	if (!$.fn.fineuploader){
-		$.getScript('../public/assets/plugins/fineuploader/jquery.fineuploader-5.0.1.min.js', callback);
+		$.getScript('/assets/plugins/fineuploader/jquery.fineuploader-5.0.1.min.js', callback);
 	}
 	else {
 		if (callback && typeof(callback) === "function") {
@@ -128,11 +128,11 @@ function LoadFineUploader(callback){
 //
 function LoadXChartScript(callback){
 	function LoadXChart(){
-		$.getScript('../public/assets/plugins/xcharts/xcharts.min.js', callback);
+		$.getScript('/assets/plugins/xcharts/xcharts.min.js', callback);
 	}
 	function LoadD3Script(){
 		if (!$.fn.d3){
-			$.getScript('../public/assets/plugins/d3/d3.v3.min.js', LoadXChart)
+			$.getScript('/assets/plugins/d3/d3.v3.min.js', LoadXChart)
 		}
 		else {
 			LoadXChart();
@@ -153,13 +153,13 @@ function LoadXChartScript(callback){
 //
 function LoadFlotScripts(callback){
 	function LoadFlotScript(){
-		$.getScript('../public/assets/plugins/flot/jquery.flot.js', LoadFlotResizeScript);
+		$.getScript('/assets/plugins/flot/jquery.flot.js', LoadFlotResizeScript);
 	}
 	function LoadFlotResizeScript(){
-		$.getScript('../public/assets/plugins/flot/jquery.flot.resize.js', LoadFlotTimeScript);
+		$.getScript('/assets/plugins/flot/jquery.flot.resize.js', LoadFlotTimeScript);
 	}
 	function LoadFlotTimeScript(){
-		$.getScript('../public/assets/plugins/flot/jquery.flot.time.js', callback);
+		$.getScript('/assets/plugins/flot/jquery.flot.time.js', callback);
 	}
 	if (!$.fn.flot){
 		LoadFlotScript();
@@ -178,7 +178,7 @@ function LoadFlotScripts(callback){
 function LoadMorrisScripts(callback){
 	function LoadMorrisScript(){
 		if(!$.fn.Morris){
-			$.getScript('../public/assets/plugins/morris/morris.min.js', callback);
+			$.getScript('/assets/plugins/morris/morris.min.js', callback);
 		}
 		else {
 			if (callback && typeof(callback) === "function") {
@@ -187,7 +187,7 @@ function LoadMorrisScripts(callback){
 		}
 	}
 	if (!$.fn.raphael){
-		$.getScript('../public/assets/plugins/raphael/raphael-min.js', LoadMorrisScript);
+		$.getScript('/assets/plugins/raphael/raphael-min.js', LoadMorrisScript);
 	}
 	else {
 		LoadMorrisScript();
@@ -199,7 +199,7 @@ function LoadMorrisScripts(callback){
 //
 function LoadFancyboxScript(callback){
 	if (!$.fn.fancybox){
-		$.getScript('../public/assets/plugins/fancybox/jquery.fancybox.js', callback);
+		$.getScript('/assets/plugins/fancybox/jquery.fancybox.js', callback);
 	}
 	else {
 		if (callback && typeof(callback) === "function") {
@@ -213,7 +213,7 @@ function LoadFancyboxScript(callback){
 //
 function LoadKnobScripts(callback){
 	if(!$.fn.knob){
-		$.getScript('../public/assets/plugins/jQuery-Knob/jquery.knob.js', callback);
+		$.getScript('/assets/plugins/jQuery-Knob/jquery.knob.js', callback);
 	}
 	else {
 		if (callback && typeof(callback) === "function") {
@@ -227,7 +227,7 @@ function LoadKnobScripts(callback){
 //
 function LoadSparkLineScript(callback){
 	if(!$.fn.sparkline){
-		$.getScript('../public/assets/plugins/sparkline/jquery.sparkline.min.js', callback);
+		$.getScript('/assets/plugins/sparkline/jquery.sparkline.min.js', callback);
 	}
 	else {
 		if (callback && typeof(callback) === "function") {

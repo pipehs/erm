@@ -462,6 +462,7 @@ $(document).ready(function() {
 	$( "first-disabled option:first-child").attr("disabled", "disabled");
 });
 
+
 //obtiene sub-categorías
 $('#risk_category_id').change(function() {
 
@@ -473,7 +474,6 @@ $('#risk_category_id').change(function() {
     $.get('get_subcategories.'+$('#risk_category_id').val(), function (result) {
       //parseamos datos obtenidos
       var datos = JSON.parse(result);
-
       $(datos).each( function() {
         options += '<option value='+this.id+'>'+this.name+'</option>';
       });
@@ -486,6 +486,61 @@ $('#risk_category_id').change(function() {
   else
   {
     $('#risk_subcategory_id').html('')
+  }
+});
+
+//obtiene 3er nivel de categorías
+i = 1; //no sirve ya que cada vez que se cambia, se sumaría
+$('#risk_subcategory_id').change(function() {
+	//i = i+1; //no sirve ya que cada vez que se cambia, se sumaría
+  if ($('#risk_subcategory_id').val() != '')
+  {
+    $('#risk_subcategory_id2').empty();
+    var options = '<option value="" selected disabled>- Seleccione -</option>'
+    //obtenemos todas las causas
+    $.get('get_subcategories.'+$('#risk_subcategory_id').val(), function (result) {
+      //parseamos datos obtenidos
+      var datos = JSON.parse(result);
+
+      $(datos).each( function() {
+        options += '<option value='+this.id+'>'+this.name+'</option>';
+      });
+
+      $('#risk_subcategory_id2').html(options)
+
+    });
+    
+  }
+  else
+  {
+    $('#risk_subcategory_id2').html('')
+  }
+});
+
+//obtiene 4to nivel de categorías
+$('#risk_subcategory_id2').change(function() {
+	//i = i+1; //no sirve ya que cada vez que se cambia, se sumaría
+  if ($('#risk_subcategory_id2').val() != '')
+  {
+    $('#risk_subcategory_id3').empty();
+    var options = '<option value="" selected disabled>- Seleccione -</option>'
+    //obtenemos todas las causas
+    $.get('get_subcategories.'+$('#risk_subcategory_id2').val(), function (result) {
+      //parseamos datos obtenidos
+      var datos = JSON.parse(result);
+
+      $(datos).each( function() {
+        options += '<option value='+this.id+'>'+this.name+'</option>';
+      });
+
+      $('#risk_subcategory_id3').html(options)
+
+    });
+    
+  }
+  else
+  {
+    $('#risk_subcategory_id3').html('')
   }
 });
 
@@ -507,3 +562,74 @@ function nac()
 		$('#dni').show(500)
 	}
 }
+
+//Agrega nuevos estados financieros para un control
+cont_fs = 1;
+function add_fs()
+{
+			var new_fs = '<div class="form-group">'
+			new_fs += '<label for="new_fs_'+cont_fs+'" class="col-sm-4 control-label">Nuevo estado financiero '+cont_fs+'</label>'
+			new_fs += '<div class="col-sm-6">'
+			new_fs += '<input type="text" name="new_fs_'+cont_fs+'" class="form-control"></input>'
+			new_fs += '</div></div>'
+
+			$("#new_fs").append(new_fs)
+			cont_fs = cont_fs + 1
+}
+
+//-- Static header --//
+function MakeStaticHeader(gridId, height, width, headerHeight, isFooter) 
+{
+	var tbl = document.getElementById(gridId);
+	if (tbl) 
+	{
+        var DivHR = document.getElementById('DivHeaderRow');
+        var DivMC = document.getElementById('DivMainContent');
+        var DivFR = document.getElementById('DivFooterRow');
+
+        //*** Set divheaderRow Properties ****
+        DivHR.style.height = headerHeight + 'px';
+        DivHR.style.width = (parseInt(width) - 16) + 'px';
+        DivHR.style.position = 'relative';
+        DivHR.style.top = '0px';
+        DivHR.style.zIndex = '10';
+        DivHR.style.verticalAlign = 'top';
+
+        //*** Set divMainContent Properties ****
+        DivMC.style.width = width + 'px';
+        DivMC.style.height = height + 'px';
+        DivMC.style.position = 'relative';
+        DivMC.style.top = -headerHeight + 'px';
+        DivMC.style.zIndex = '1';
+
+        //*** Set divFooterRow Properties ****
+        DivFR.style.width = (parseInt(width) - 16) + 'px';
+        DivFR.style.position = 'relative';
+        DivFR.style.top = -headerHeight + 'px';
+        DivFR.style.verticalAlign = 'top';
+        DivFR.style.paddingtop = '2px';
+
+        if (isFooter) 
+        {
+	        var tblfr = tbl.cloneNode(true);
+	      	tblfr.removeChild(tblfr.getElementsByTagName('tbody')[0]);
+	        var tblBody = document.createElement('tbody');
+	        tblfr.style.width = '100%';
+	        tblfr.cellSpacing = "0";
+	        //*****In the case of Footer Row *******
+	        tblBody.appendChild(tbl.rows[tbl.rows.length - 1]);
+	        tblfr.appendChild(tblBody);
+	        DivFR.appendChild(tblfr);
+	    }
+	        
+	    //****Copy Header in divHeaderRow****
+	    DivHR.appendChild(tbl.cloneNode(true));
+    }
+}
+
+function OnScrollDiv(Scrollablediv) 
+{
+    document.getElementById('DivHeaderRow').scrollLeft = Scrollablediv.scrollLeft;
+    document.getElementById('DivFooterRow').scrollLeft = Scrollablediv.scrollLeft;
+}
+//-- FIN static header --//

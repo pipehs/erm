@@ -85,6 +85,7 @@
 				<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Costo control<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Evidencia<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Porcentaje Contribuci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 
 			@if ($value == 0)
@@ -118,6 +119,7 @@
 						<td>{{$dato['Propósito']}}</td>
 						<td>{{$dato['Costo_control']}}</td>
 						<td>{{$dato['Evidencia']}}</td>
+						<td>{{$dato['porcentaje_cont']}}%</td>
 						<td>
 						@foreach ($dato['Riesgos'] as $risk)
 							<li>{{ $risk }}</li>

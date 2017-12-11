@@ -66,6 +66,9 @@
 			<th>Correo responsable<label><input type='text' placeholder='Filtrar'/></label></th>
 			<th>Estado<label><input type='text' placeholder='Filtrar'/></label></th>
 			<th>Fecha final<label><input type='text' placeholder='Filtrar'/></label></th>
+			<th>Porcentaje avance<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Comentarios avances<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Fecha avance<label><input type="text" placeholder="Filtrar" /></label></th>
 		</thead>
 
 		@foreach ($action_plans as $plan)
@@ -77,6 +80,15 @@
 				<td>{{$plan['stakeholder_mail']}}</td>
 				<td>{{$plan['status']}}</td>
 				<td>{{$plan['final_date']}}</td>
+				<td>{{ $plan['percentage'] }}%</td>
+				<td>
+				@if ($plan['percentage_comments'] == '' || $plan['percentage_comments'] == NULL)
+					No se han agregado
+				@else
+					{{ $plan['percentage_comments'] }}
+				@endif
+				</td>
+				<td>{{ date('d-m-Y',strtotime($plan['percentage_date'])) }}</td>
 			</tr>
 		@endforeach	
 	</table>

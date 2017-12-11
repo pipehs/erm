@@ -10,7 +10,7 @@
 						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::textarea('description',null,['id'=>'description','class'=>'form-control',
-							'rows'=>'3','cols'=>'4'])!!}
+							'rows'=>'5','cols'=>'4'])!!}
 						</div>
 					</div>
 
@@ -25,7 +25,7 @@
 					<div id="exp_date" class="form-group">
 						{!!Form::label('Fecha fin',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::date('expiration_date',null,['id'=>'expiration_date','class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)'])!!}
+							{!!Form::date('expiration_date',null,['id'=>'expiration_date','class'=>'form-control'])!!}
 						</div>
 					</div>
 			@endif

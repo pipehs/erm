@@ -217,16 +217,16 @@
 
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script>
-  @if (isset($risks))
+  @if (isset($categories) && !empty($categories))
       google.charts.load("visualization", "1", {packages:["corechart"]});
       google.charts.setOnLoadCallback(chart1);
       function chart1() {
         var data = google.visualization.arrayToDataTable([
           ['Riesgos', 'Cantidad',{ role: 'style' }],
 
-          <?php $last = end($categories); ?>
+          <?php $last = end($categories); $cont = 0; ?>
           @foreach ($categories as $cat)
-
+            <?php $cont+=1; ?>
             @if ($cat == $last)
               ["{{ $cat['name']}}", {{ $cat['cont'] }},"{{ $cat['color'] }}"]
             @else
@@ -242,11 +242,71 @@
         var chart = new google.visualization.ColumnChart(document.getElementById('chart1'));
         chart.draw(data, options);
 
+        //agregamos evento de click
+        google.visualization.events.addListener(chart, 'select', clickHandler);
+
+        function clickHandler(e) {
+          var sel = chart.getSelection();
+          <?php $i = 0; ?>
+          
+          if (sel.length > 0)
+          {
+            @while ($i < $cont)
+                //alert(sel[0].row);
+                if (sel[0].row == {{ $i }})
+                {
+                  var title = '<b>Categoría {{ $categories[$i]["name"]}}</b>';
+
+                  var text ='<table class="table table-striped table-datatable"><thead><th>Subcategor&iacute;a</th><th>Riesgo</th><th>Descripci&oacute;n</th><th>Tipo</th><th>P&eacute;rdida esperada</th><th>Fecha expiraci&oacute;n</th></thead>';
+
+                  @foreach ($categories[$i]['risks'] as $risk)
+                    text += '<tr><td>{{$risk->risk_category}}</td>';
+                    text += '<td>{{$risk->name}}</td>';
+                    text += '<td>{{$risk->description}}</td>';
+
+                    @if ($risk->type == 0)
+                      text += '<td>Proceso</td>';
+                    @else
+                      text += '<td>Negocio</td>';
+                    @endif
+
+                    @if ($risk->expected_loss > 0 && $risk->expected_loss != NULL)
+                        text += '<td>{{$risk->expected_loss}}</td>';
+                    @else
+                        text += '<td>No se ha definido</td>';
+                    @endif
+                    @if ($risk->expiration_date != NULL)
+                      exp_date = '{{$risk->expiration_date}}'
+                      exp_date = exp_date.split('-')
+                      text += '<td>'+exp_date[2]+'-'+exp_date[1]+'-'+exp_date[0]+'</td></tr>';
+                    @else
+                      text += '<td>No se ha definido</td></tr>'
+                    @endif
+                  @endforeach
+                  
+
+                  text += '</table>'
+                  text += '<a class="btn btn-success" href="genexcelgraficos.1.{{$org}}">Exportar</a>'
+
+                  swal({   
+                    title: title,   
+                    text: text,
+                    customClass: 'swal-wide2',   
+                    html: true 
+                  });
+                }
+                <?php $i += 1; ?>
+            @endwhile
+          
+              console.log(sel);
+          }
+        }
+
         //guardamos imagen en form hidden para reporte
         //document.getElementById('grafico1').value = chart.getImageURI();
       }
   @else
-    $('#alternativo').html('<b>Aun no se han ejecutado controles</b>');
+    $('#alternativo').html('<b>Aun no se han creado riesgos</b>');
   @endif
   </script>
 @stop

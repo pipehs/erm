@@ -98,13 +98,22 @@
 
 					<div class="form-group">
 		               <div class="row">
-		                 <label for="risk_subcategory_id" class='col-sm-4 control-label'>Sub-categor&iacute;a</label>
+		                 <label for="risk_subcategory_id" class='col-sm-4 control-label'>Sub-categor&iacute;a 1</label>
 		                 <div class="col-sm-5">
 		                    <select id="risk_subcategory_id" name="risk_subcategory_id"></select>
 		                 </div>
 		              </div>
 		            </div>
-			@if (isset($stakeholders) && isset($stakeholder))	
+
+		            <div class="form-group">
+		               <div class="row">
+		                 <label for="risk_subcategory_id2" class='col-sm-4 control-label'>Sub-categor&iacute;a 2</label>
+		                 <div class="col-sm-5">
+		                    <select id="risk_subcategory_id2" name="risk_subcategory_id2"></select>
+		                 </div>
+		              </div>
+		            </div>
+			@if (isset($stakeholders) || isset($stakeholder))	
 					<div class="form-group">
 						{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">

@@ -90,5 +90,36 @@ class Stakeholder extends Model
             ->select('stakeholders.name','stakeholders.surnames','organizations.name as organization')
             ->get();
     }
+
+    public static function getUserByMail($mail)
+    {
+        return DB::table('stakeholders')
+            ->where('mail','=',$mail)
+            ->select('id')
+            ->first();
+    }
+
+    public static function getUserByName($name)
+    {
+        //separamos nombre
+        $name = explode(' ',$name);
+
+        if (isset($name[2])) //puede que tenga 2do apellido
+        {
+            return DB::table('stakeholders')
+                ->where('name','=',$name[0])
+                ->where('surnames','=',$name[1].' '.$name[2])
+                ->select('id')
+                ->first();
+        }
+        else
+        {
+            return DB::table('stakeholders')
+                ->where('name','=',$name[0])
+                ->where('surnames','=',$name[1])
+                ->select('id')
+                ->first();
+        }
+    }
 }
  
