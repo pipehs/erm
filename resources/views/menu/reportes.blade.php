@@ -14,6 +14,7 @@
 						<li>{!!HTML::link('graficos_auditorias','Gr&aacute;ficos Auditor&iacute;as',['class'=>activeMenu('graficos_auditorias')])!!}</li>
 						<li>{!!HTML::link('graficos_planes_accion','Gr&aacute;ficos Planes de Acci&oacute;n',['class'=>activeMenu('graficos_planes_accion')])!!}</li>
 						<li>{!!HTML::link('reporte_riesgos','Reporte de Riesgos',['class'=>activeMenu('reporte_riesgos')])!!}</li>
+						<li>{!!HTML::link('reporte_consolidado','Reporte Consolidado',['class'=>activeMenu('reporte_riesgos')])!!}</li>
 						<!--<li>{!!HTML::link('reporte_personalizado','Reporte Personalizado',['class'=>activeMenu('reporte_personalizado')])!!}</li>-->
 					</ul>
 				</li>

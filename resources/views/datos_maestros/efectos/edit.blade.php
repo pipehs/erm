@@ -51,11 +51,9 @@
 			{!!Form::model($efecto,['route'=>['efectos.update',$efecto->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 				@include('datos_maestros.efectos.form')
 			{!!Form::close()!!}
-				<center>
-				{!!Form::open(['url'=>'efectos','method'=>'GET'])!!}
-					{!!Form::submit('Volver', ['class'=>'btn btn-danger'])!!}
-				{!!Form::close()!!}
-				<center>
+			<center>
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+			<center>
 			</div>
 		</div>
 	</div>

@@ -74,11 +74,56 @@ class Evaluation extends Model
                     {
                         $eval_temp = \Ermtool\Evaluation::getSubprocessRiskFromEval($org2->id,$cat,NULL,$ano,$mes,$dia);
                     }
-                    
 
                     foreach ($eval_temp as $e)
                     {
                         array_push($evals2,$e);
+                    }
+
+                    //hacemos 3er nivel
+                    $orgs2 = DB::table('organizations')
+                        ->where('organization_id','=',$org2->id)
+                        ->select('id')
+                        ->get();
+
+                    foreach ($orgs2 as $org3) //para cada una de ellas guardamos sus evaluaciones en array temporal
+                    {
+                        if ($subcat != NULL)
+                        {
+                            $eval_temp2 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org3->id,$cat,$subcat,$ano,$mes,$dia);
+                        }
+                        else
+                        {
+                            $eval_temp2 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org3->id,$cat,NULL,$ano,$mes,$dia);
+                        }
+
+                        foreach ($eval_temp2 as $e)
+                        {
+                            array_push($evals2,$e);
+                        }
+
+                        //hacemos 4er nivel
+                        $orgs3 = DB::table('organizations')
+                            ->where('organization_id','=',$org3->id)
+                            ->select('id')
+                            ->get();
+
+                        foreach ($orgs3 as $org4) //para cada una de ellas guardamos sus evaluaciones en array temporal
+                        {
+                            if ($subcat != NULL)
+                            {
+                                $eval_temp3 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org4->id,$cat,$subcat,$ano,$mes,$dia);
+                            }
+                            else
+                            {
+                                $eval_temp3 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org4->id,$cat,NULL,$ano,$mes,$dia);
+                            }
+
+                            foreach ($eval_temp3 as $e)
+                            {
+                                array_push($evals2,$e);
+                            }
+                        }
                     }
                 }
 
@@ -124,6 +169,39 @@ class Evaluation extends Model
                     
                     //$evals2->append($eval_temp);
                     //$evals2->{$i} = $eval_temp;
+
+                    //hacemos 3er nivel
+                    $orgs2 = DB::table('organizations')
+                        ->where('organization_id','=',$org2->id)
+                        ->select('id')
+                        ->get();
+
+                    foreach ($orgs2 as $org3) //para cada una de ellas guardamos sus evaluaciones en array temporal
+                    {
+
+                        $eval_temp2 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org3->id,NULL,NULL,$ano,$mes,$dia);
+
+                        foreach ($eval_temp2 as $e)
+                        {
+                            array_push($evals2,$e);
+                        }
+
+                        //hacemos 4er nivel
+                        $orgs3 = DB::table('organizations')
+                            ->where('organization_id','=',$org3->id)
+                            ->select('id')
+                            ->get();
+
+                        foreach ($orgs3 as $org4) //para cada una de ellas guardamos sus evaluaciones en array temporal
+                        {
+                            $eval_temp3 = \Ermtool\Evaluation::getSubprocessRiskFromEval($org4->id,NULL,NULL,$ano,$mes,$dia);
+
+                            foreach ($eval_temp3 as $e)
+                            {
+                                array_push($evals2,$e);
+                            }
+                        }
+                    }
                 }
 
                 //print_r($eval1);
@@ -424,5 +502,40 @@ class Evaluation extends Model
                             ->get();
                 }
             }
+    }
+
+    public static function getLastEvaluation($risk)
+    {
+        $max_date = DB::table('evaluations')
+                ->join('evaluation_risk','evaluation_risk.evaluation_id','=','evaluations.id')
+                ->where('evaluation_risk.organization_risk_id','=',$risk)
+                ->max('evaluations.updated_at');
+
+        if (!empty($max_date) && $max_date != NULL)
+        {
+            $evaluation = DB::table('evaluations')
+                    ->where('evaluations.updated_at','=',$max_date)
+                    ->select('id')
+                    ->first();
+
+            if (!empty($evaluation) && $evaluation != NULL)
+            {
+                $evaluation_risk = DB::table('evaluation_risk')
+                        ->where('evaluation_id','=',$evaluation->id)
+                        ->where('organization_risk_id','=',$risk)
+                        ->select('avg_probability','avg_impact')
+                        ->first();
+
+                return $evaluation_risk;
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        else
+        {
+            return NULL;
+        }
     }
 }

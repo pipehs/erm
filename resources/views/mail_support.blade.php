@@ -8,7 +8,7 @@
 <hr>
 
 @if (isset($imagen))
- 	<img src="{!! $message->embed('../../bgrcdemo.ixus.cl/storage/app/temporal_mail/'.$imagen) !!}">
+ 	<img src="{!! $message->embed('../storage/app/temporal_mail/'.$imagen) !!}">
 @endif
 </body>
 </html>

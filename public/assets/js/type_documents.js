@@ -163,7 +163,7 @@ function getRisks()
 
 					var datos = JSON.parse(result);
 					$(datos).each( function() {
-							select += '<option value="'+this.risk_id+'">'+this.risk_name+'</option>';
+							select += '<option value="'+this.org_risk_id+'">'+this.risk_name+'</option>';
 					});
 
 					select += '</select>';

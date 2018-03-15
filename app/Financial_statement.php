@@ -7,7 +7,7 @@ use DB;
 
 class Financial_statement extends Model
 {
-    protected $fillable = ['name','status'];
+    protected $fillable = ['name','status','kind','description'];
 
     public static function getFSByControl($control_id)
     {

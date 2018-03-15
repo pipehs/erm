@@ -131,7 +131,7 @@ $(document).ready(function() {
 							
 							//seteamos datos en select de riesgos / procesos
 							$(datos).each( function() {
-								$("#select_riesgos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.description + '<option>');
+								$("#select_riesgos").append('<option value="' + this.org_risk_id + '">' + this.risk_name + ' - ' + this.description + '<option>');
 							});
 
 				//riesgos seleccionados
@@ -158,7 +158,7 @@ $(document).ready(function() {
 							
 							//seteamos datos en select de riesgos / procesos
 							$(datos).each( function() {
-								$("#select_riesgos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.description + '<option>');
+								$("#select_riesgos").append('<option value="' + this.org_risk_id + '">' + this.risk_name + ' - ' + this.description + '<option>');
 							});
 			
 

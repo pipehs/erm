@@ -16,6 +16,7 @@ use DateTime;
 use Mail;
 use Storage;
 use PDF;
+use stdClass;
 
 class HomeController extends Controller
 {
@@ -78,6 +79,13 @@ class HomeController extends Controller
                 //obtenemos riesgos de cada categoria
                 $risks_temp = \Ermtool\Risk::getRisksFromCategory($category->id);
 
+                //ACT 27-12-17: Eliminamos saltos de línea de riesgos
+                foreach ($risks_temp as $r)
+                {
+                    $r->name = eliminarSaltos($r->name);
+                    $r->description = eliminarSaltos($r->description);
+                }
+                
                 $cont_categories[$i] = count($risks_temp);
 
                 //$randcolor = '#' . str_pad(dechex(mt_rand(0, 0xFFFFFF)), 6, '0', STR_PAD_LEFT);
@@ -317,8 +325,882 @@ class HomeController extends Controller
         }
         catch (\Exception $e)
         {
-            enviarMailSoporte($e);
+            //enviarMailSoporte($e);
             return view('errors.query',['e' => $e]);
+        }
+    }
+
+    public function reporteConsolidado()
+    {   
+        if (Auth::guest())
+        {
+            return view('login');
+        }
+        else
+        {
+        //try
+        //{
+            //seteamos variables
+            $i = 0;
+            $results = [];
+            $risk = new stdClass();
+
+            //primero obtenemos organizaciones
+            $orgs = DB::table('organizations')
+                    ->where('status','=',0)
+                    ->get(['id','name','description']);
+
+            foreach ($orgs as $org)
+            {
+                //obtenemos subprocesos
+                $subs = DB::table('subprocesses')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('organization_subprocess.organization_id','=',$org->id)
+                        ->where('subprocesses.status','=',0)
+                        ->get(['subprocesses.id','subprocesses.name','subprocesses.description']);
+
+                foreach ($subs as $sub)
+                {
+                    //obtenemos proceso
+                    $process = DB::table('processes')
+                            ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                            ->where('subprocesses.id','=',$sub->id)
+                            ->where('processes.status','=',0)
+                            ->select('processes.id','processes.name','processes.description')
+                            ->first();
+
+                    //obtenemos riesgos asociados al subproceso y la organización
+                    $risks = \Ermtool\Risk::getRisksFromSubprocess($org->id,$sub->id);
+
+                    //por algun motivo, no se están obteniendo todos los riesgos (en bgrc de parauco)
+                    //print_r($risks);
+
+                    if (!empty($risks))
+                    {
+                        foreach ($risks as $risk)
+                        {
+                            //seteamos variables que dependen de cada riesgo
+                            $causes = new stdClass();
+                            $effects = new stdClass();
+                            $last_evaluation = new stdClass();
+                            $sev = 'No evaluado';
+                            $ctrl = new stdClass();
+                            $issue = new stdClass();
+                            $plan = new stdClass();
+                            //obtenemos categoría del riesgo
+                            $risk_category = \Ermtool\Risk_category::name($risk->risk_category_id);
+
+                            //obtenemos categoría principal (asociada a subcategoría)
+                            $ppal_category = \Ermtool\Risk_category::getPrimaryCategory($risk->risk_category_id);
+
+                            $ppal_category = \Ermtool\Risk_category::name($ppal_category->id);
+                            //obtenemos responsable
+                            $risk_resp = \Ermtool\Stakeholder::getRiskStakeholder($org->id,$risk->risk_id);
+                            if ($risk_resp->id != NULL)
+                            {
+                                //cargo responsable
+                                $risk_resp_position = \Ermtool\Stakeholder::getPosition($risk_resp->id);
+                                $risk_resp_position = $risk_resp_position->position;
+                                if ($risk_resp_position == NULL)
+                                {
+                                    $risk_resp_position = 'No se ha definido cargo';
+                                }
+
+                                //mail responsable
+                                $risk_resp_mail = \Ermtool\Stakeholder::getMail($risk_resp->id);
+                                $risk_resp_mail = $risk_resp_mail->mail;
+                                if ($risk_resp_mail == NULL)
+                                {
+                                    $risk_resp_mail = 'No definido';
+                                }
+
+                                //nombre responsable
+                                $risk_resp = \Ermtool\Stakeholder::getName($risk_resp->id);
+                            }
+                            else
+                            {
+                                $risk_resp = 'No definido';
+                                $risk_resp_position = 'No definido';
+                            }
+
+                            //pérdida esperada
+                            if ($risk->expected_loss == NULL)
+                            {
+                                $risk->expected_loss = 'No se ha definido pérdida';
+                            }
+
+
+                            //causas y efectos
+                            $causes = \Ermtool\Cause::getCausesFromRisk($risk->risk_id);
+                            $effects = \Ermtool\Effect::getEffectsFromRisk($risk->risk_id);
+
+                            //seteamos causas en caso de excel
+                            if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
+                            {
+                                $c = '';
+                                $e = '';
+                                if (empty($causes))
+                                {
+                                    $causes = 'No se han agregado causas';
+                                }
+                                else
+                                {
+                                    $last = end($causes);
+                                    foreach ($causes as $cause)
+                                    {
+                                        if ($cause == $last)
+                                        {
+                                            $c = $cause->name.' - '.$cause->description;
+                                        }
+                                        else
+                                        {
+                                            $c = $cause->name.' - '.$cause->description.', ';
+                                        }
+                                    }
+
+                                    $causes = $c;
+                                }
+
+                                if (empty($effects))
+                                {
+                                    $effects = 'No se han agregado efectos';
+                                }
+                                else
+                                {
+                                    $last = end($effects);
+                                    foreach ($effects as $effect)
+                                    {
+                                        if ($effect == $last)
+                                        {
+                                            $e = $effect->name.' - '.$effect->description;
+                                        }
+                                        else
+                                        {
+                                            $e = $effect->name.' - '.$effect->description.', ';
+                                        }
+                                    }
+
+                                    $effects = $e;
+                                }
+                            }
+
+                            //obtenemos última evaluación
+                            $last_evaluation = \Ermtool\Evaluation::getLastEvaluation($risk->id);
+                            if ($last_evaluation == NULL )
+                            {
+                                $proba = 'No evaluado';
+                                $impact = 'No evaluado';
+                            }
+                            else
+                            {
+                                $proba = $last_evaluation->avg_probability;
+                                $impact = $last_evaluation->avg_impact;
+                            }
+
+                            //obtenemos controles asociados al riesgo
+                            $controls = \Ermtool\Control::getControlsFromRisk($org->id,$risk->risk_id);
+
+                            if (!empty($controls))
+                            {
+                                foreach ($controls as $ctrl)
+                                {
+                                    //seteamos datos
+                                    if (Session::get('languaje') == 'es')
+                                    {
+                                        //tipo de control
+                                        if ($ctrl->type === 0)
+                                        {
+                                            $ctrl->type = 'Manual';
+                                        }
+                                        else if ($ctrl->type == 1)
+                                        {
+                                            $ctrl->type = 'Semi-automático';
+                                        }
+                                        else if ($ctrl->type == 2)
+                                        {
+                                            $ctrl->type = 'Automático';
+                                        }
+                                        else
+                                        {
+                                            $ctrl->type = 'No definido';
+                                        }
+
+                                        //periodicidad
+                                        if ($ctrl->periodicity === 0)
+                                        {
+                                            $ctrl->periodicity = 'Diario';
+                                        }
+                                        else if ($ctrl->periodicity == 1)
+                                        {
+                                            $ctrl->periodicity = 'Semanal';
+                                        }
+                                        else if ($ctrl->periodicity == 2)
+                                        {
+                                            $ctrl->periodicity = 'Mensual';
+                                        }
+                                        else if ($ctrl->periodicity == 3)
+                                        {
+                                            $ctrl->periodicity = 'Semestral';
+                                        }
+                                        else if ($ctrl->periodicity == 4)
+                                        {
+                                            $ctrl->periodicity = 'Anual';
+                                        }
+                                        else if ($ctrl->periodicity == 5)
+                                        {
+                                            $ctrl->periodicity = 'Cada vez que ocurra';
+                                        }
+                                        else if ($ctrl->periodicity == 6)
+                                        {
+                                            $ctrl->periodicity = 'Trimestral';
+                                        }
+                                        else
+                                        {
+                                            $ctrl->periodicity = 'No definida';
+                                        }
+
+                                        //propósito
+                                        if ($ctrl->purpose === 0)
+                                        {
+                                            $ctrl->purpose = 'Preventivo';
+                                        }
+                                        else if ($ctrl->purpose == 1)
+                                        {
+                                            $ctrl->purpose = 'Detectivo';
+                                        }
+                                        else if ($ctrl->purpose == 2)
+                                        {
+                                            $ctrl->purpose = 'Correctivo';
+                                        }
+                                        else
+                                        {
+                                            $ctrl->purpose = 'No se ha definido';
+                                        }
+
+                                        //comentarios
+                                        if ($ctrl->comments == NULL)
+                                        {
+                                            $ctrl->comments = 'No se han agregado comentarios';
+                                        }
+
+                                        //evidencia
+                                        if ($ctrl->evidence == NULL)
+                                        {
+                                            $ctrl->evidence = 'No se ha agregado evidencia';
+                                        }
+
+                                        //costo esperado
+                                        if ($ctrl->expected_cost == NULL)
+                                        {
+                                            $ctrl->expected_cost = 'No se ha agregado costo esperado';
+                                        }
+                                    }
+                                    else //se setean variables en inglés
+                                    {
+
+                                    }
+                                    //obtenemos responsable de control
+                                    $control_resp = \Ermtool\Control::getResponsable($ctrl->id,$risk->id);
+                                    if ($control_resp->id != NULL)
+                                    {
+                                        //obtenemos correo
+                                        $control_resp_mail = \Ermtool\Stakeholder::getMail($control_resp->id);
+                                        $control_resp_mail = $control_resp_mail->mail;
+
+                                        if ($control_resp_mail == NULL)
+                                        {
+                                            $control_resp_mail = 'No se ha agregado responsable';
+                                        }
+
+                                        //cargo responsable
+                                        $control_resp_position = \Ermtool\Stakeholder::getPosition($control_resp->id);
+                                        $control_resp_position = $control_resp_position->position;
+                                        if ($control_resp_position == NULL)
+                                        {
+                                            $control_resp_position = 'No se ha definido cargo';
+                                        }
+
+                                        $control_resp = \Ermtool\Stakeholder::getName($control_resp->id);
+                                    }
+                                    else
+                                    {
+                                        $control_resp = 'No se ha agregado responsable';
+                                        $control_resp_mail = 'No se ha agregado responsable';
+                                    }
+
+                                    //seteamos riesgo residual
+                                    if ($last_evaluation != NULL)
+                                    {
+                                        //guardamos proba e impact, para poder enviar los datos en caso que no haya evaluación
+                                        $proba = $last_evaluation->avg_probability;
+                                        $impact = $last_evaluation->avg_impact;
+                                        $sev = $proba * $impact;
+                                        $residual_risk = $sev * (1-($ctrl->porcentaje_cont/100));
+                                    }
+                                    else
+                                    {
+                                        $sev = 'No se ha evaluado';
+                                        $residual_risk = 'No se ha evaluado';
+                                    }
+                                    //obtenemos hallazgos de control
+                                    $issues = \Ermtool\Issue::getIssuesFromControl($org->id,$ctrl->id);
+
+                                    if (!empty($issues))
+                                    {
+                                        foreach ($issues as $issue)
+                                        {
+                                            if (Session::get('languaje') == 'es')
+                                            {
+                                                //clasificación de hallazgo
+                                                if ($issue->classification === 0)
+                                                {
+                                                    $issue->classification = 'Oportunidad de mejora';
+                                                }
+                                                else if ($issue->classification == 1)
+                                                {
+                                                    $issue->classification = 'Deficiencia'; 
+                                                }
+                                                else if ($issue->classification == 2)
+                                                {
+                                                    $issue->classification = 'Debilidad significativa';
+                                                }
+                                                else
+                                                {
+                                                    $issue->classification = 'No se ha definido';
+                                                }
+                                            }
+                                            else //variables en inglés
+                                            {
+
+                                            }
+                                            //obtenemos plan(es) de acción asociado(s) al hallazgo
+                                            $action_plans = \Ermtool\Action_plan::getActionPlanFromIssue2($issue->id);
+
+                                            if (!empty($action_plans))
+                                            {
+                                                foreach ($action_plans as $plan)
+                                                {
+                                                    if (Session::get('languaje') == 'es')
+                                                    {
+                                                        //estado de plan de acción
+                                                        if ($plan->status === 0)
+                                                        {
+                                                            $plan->status = 'En progreso';
+                                                        }
+                                                        else if ($plan->status == 1)
+                                                        {
+                                                            $plan->status = 'Cerrado';
+                                                        }
+                                                        else
+                                                        {
+                                                            $plan->status = 'No se ha definido';
+                                                        }
+                                                    }
+                                                    else //variables en inglés
+                                                    {
+
+                                                    }
+
+                                                    //responsable plan de acción
+                                                    if ($plan->stakeholder_id != NULL)
+                                                    {
+                                                        $plan_resp = \Ermtool\Stakeholder::getName($plan->stakeholder_id);
+                                                        $plan_resp_mail = \Ermtool\Stakeholder::getMail($plan->stakeholder_id);
+                                                        $plan_resp_mail = $plan_resp_mail->mail;
+
+                                                        //cargo
+                                                        $plan_resp_position = \Ermtool\Stakeholder::getPosition($plan->stakeholder_id);
+                                                        $plan_resp_position = $plan_resp_position->position;
+
+                                                        if ($plan_resp_position == NULL)
+                                                        {
+                                                            $plan_resp_position = 'No se ha definido cargo';
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        $plan_resp = 'No se ha definido responsable';
+                                                        $plan_resp_mail = 'No se ha definido responsable';
+                                                        $plan_resp_position = 'No se ha definido responsable';
+                                                    }
+                                                    //obtenemos porcentaje de avance del plan
+                                                    //primero, obtenemos la máxima fecha de porcentaje de avance
+                                                    $max_date = DB::table('progress_percentage')
+                                                                    ->where('action_plan_id','=',$plan->id)
+                                                                    ->max('updated_at');
+
+                                                    //obtenemos porcentaje y comentarios
+                                                    $per = DB::table('progress_percentage')
+                                                            ->where('action_plan_id','=',$plan->id)
+                                                            ->where('updated_at','=',$max_date)
+                                                            ->select('percentage','comments','updated_at')
+                                                            ->first();
+
+                                                    if (!empty($per))
+                                                    {
+                                                        $percentage = $per->percentage.'%';
+                                                        $percentage_comments = $per->comments;
+                                                        $percentage_date = $per->updated_at;
+                                                    }
+
+                                                    else
+                                                    {
+                                                        $percentage = 'No hay porcentaje de avance';
+                                                        $percentage_comments = 'No hay porcentaje de avance';
+                                                        $percentage_date = 'No hay porcentaje de avance';
+                                                    }
+
+                                                    if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
+                                                    {
+                                                        $results[$i] = [
+                                                            'Organización' => $org->name,
+                                                            'Proceso' => $process->name,
+                                                            'Subproceso' => $sub->name,
+                                                            'Riesgo' => $risk->name,
+                                                            'Descripción Riesgo' => $risk->description,
+                                                            'Categoría de Riesgo' => $ppal_category,
+                                                            'Subcategoría de Riesgo' => $risk_category,
+                                                            'Responsable Riesgo' => $risk_resp,
+                                                            'Cargo Responsable' => $risk_resp_position,
+                                                            'Correo Responsable' => $risk_resp_mail,
+                                                            'Causas' => $causes,
+                                                            'Efectos' => $effects,
+                                                            'Pérdida Esperada' => $risk->expected_loss,
+                                                            'Probabilidad' => $proba,
+                                                            'Impacto' => $impact,
+                                                            'Severidad' => $sev,
+                                                            'Control' => $ctrl->name,
+                                                            'Descripción Control' => $ctrl->description,
+                                                            'Responsable Control' => $control_resp,
+                                                            'Correo Responsable Control' => $control_resp_mail,
+                                                            'Cargo Responsable Control' => $control_resp_position,
+                                                            'Tipo Control' => $ctrl->type,
+                                                            'Periodicidad' => $ctrl->periodicity,
+                                                            'Propósito' => $ctrl->purpose,
+                                                            'Costo Control' => $ctrl->expected_cost,
+                                                            'Evidencia Control' => $ctrl->evidence,
+                                                            'Comentarios Control' => $ctrl->comments,
+                                                            '% de Contribución' => $ctrl->porcentaje_cont.'%',            
+                                                            'Riesgo Residual' => $residual_risk,
+                                                            'Hallazgo' => $issue->name,
+                                                            'Descripción Hallazgo' => $issue->description,
+                                                            'Clasificación Hallazgo' => $issue->classification,
+                                                            'Recomendaciones' => $issue->recommendations,
+                                                            'Plan de Acción' => $plan->description,
+                                                            'Estado Plan' => $plan->status,
+                                                            'Responsable Plan Acción' => $plan_resp,
+                                                            'Correo Responsable Plan' => $plan_resp_mail,
+                                                            'Cargo Responsable Plan' => $plan_resp_position,
+                                                            '% de Avance' => $percentage,
+                                                            'Fecha de avance' => $percentage_date,
+                                                            'Comentarios de avance' => $percentage_comments,
+                                                            'Fecha Final Plan' => $plan->final_date
+                                                        ];
+                                                    }
+                                                    else
+                                                    {
+                                                        //echo $risk->name.'<br>';
+                                                        $results[$i] = [
+                                                            'org' => $org->name,
+                                                            'process' => $process,
+                                                            'subprocess' => $sub,
+                                                            'risk' => $risk,
+                                                            'ppal_category' => $ppal_category,
+                                                            'risk_category' => $risk_category,
+                                                            'risk_resp' => $risk_resp,
+                                                            'risk_resp_position' => $risk_resp_position,
+                                                            'risk_resp_mail' => $risk_resp_mail,
+                                                            'causes' => $causes,
+                                                            'effects' => $effects,
+                                                            'probability' => $proba,
+                                                            'impact' => $impact,
+                                                            'score' => $sev,
+                                                            'residual_risk' => $residual_risk,
+                                                            'control' => $ctrl,
+                                                            'control_resp' => $control_resp,
+                                                            'control_resp_mail' => $control_resp_mail,
+                                                            'control_resp_position' => $control_resp_position,
+                                                            'issue' => $issue,
+                                                            'action_plan' => $plan,
+                                                            'action_plan_resp' => $plan_resp,
+                                                            'action_plan_resp_mail' => $plan_resp_mail,
+                                                            'action_plan_resp_position' => $plan_resp_position,
+                                                            'percentage' => $percentage,
+                                                            'percentage_date' => $percentage_date,
+                                                            'percentage_comments' => $percentage_comments
+                                                        ];
+                                                    }
+
+                                                    $i += 1;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                //echo "NO HAY PLAN DE ACCIÓN<br>";
+                                                $plan->description = 'No hay plan de acción';
+                                                $plan->status = 'No hay plan de acción';
+                                                $plan->final_date = 'No hay plan de acción';
+                                                $percentage = 'No hay plan de acción';
+                                                $percentage_date = 'No hay plan de acción';
+                                                $percentage_comments = 'No hay plan de acción';
+                                                $plan_resp = 'No hay plan de acción';
+                                                $plan_resp_mail = 'No hay plan de acción';
+                                                $plan_resp_position = 'No hay plan de acción';
+
+                                                if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
+                                                {
+                                                    $results[$i] = [
+                                                        'Organización' => $org->name,
+                                                        'Proceso' => $process->name,
+                                                        'Subproceso' => $sub->name,
+                                                        'Riesgo' => $risk->name,
+                                                        'Descripción Riesgo' => $risk->description,
+                                                        'Categoría de Riesgo' => $ppal_category,
+                                                        'Subcategoría de Riesgo' => $risk_category,
+                                                        'Responsable Riesgo' => $risk_resp,
+                                                        'Cargo Responsable' => $risk_resp_position,
+                                                        'Correo Responsable' => $risk_resp_mail,
+                                                        'Causas' => $causes,
+                                                        'Efectos' => $effects,
+                                                        'Pérdida Esperada' => $risk->expected_loss,
+                                                        'Probabilidad' => $proba,
+                                                        'Impacto' => $impact,
+                                                        'Severidad' => $sev,
+                                                        'Control' => $ctrl->name,
+                                                        'Descripción Control' => $ctrl->description,
+                                                        'Responsable Control' => $control_resp,
+                                                        'Correo Responsable Control' => $control_resp_mail,
+                                                        'Cargo Responsable Control' => $control_resp_position,
+                                                        'Tipo Control' => $ctrl->type,
+                                                        'Periodicidad' => $ctrl->periodicity,
+                                                        'Propósito' => $ctrl->purpose,
+                                                        'Costo Control' => $ctrl->expected_cost,
+                                                        'Evidencia Control' => $ctrl->evidence,
+                                                        'Comentarios Control' => $ctrl->comments,
+                                                        '% de Contribución' => $ctrl->porcentaje_cont.'%',
+                                                        'Riesgo Residual' => $residual_risk,
+                                                        'Hallazgo' => $issue->name,
+                                                        'Descripción Hallazgo' => $issue->description,
+                                                        'Clasificación Hallazgo' => $issue->classification,
+                                                        'Recomendaciones' => $issue->recommendations,
+                                                        'Plan de Acción' => $plan->description,
+                                                        'Estado Plan' => $plan->status,
+                                                        'Responsable Plan Acción' => $plan_resp,
+                                                        'Correo Responsable Plan' => $plan_resp_mail,
+                                                        'Cargo Responsable Plan' => $plan_resp_position,
+                                                        '% de Avance' => $percentage,
+                                                        'Fecha de avance' => $percentage_date,
+                                                        'Comentarios de avance' => $percentage_comments,
+                                                        'Fecha Final Plan' => $plan->final_date
+                                                    ];
+                                                }
+                                                else
+                                                {
+                                                    //echo $risk->name.'<br>';
+                                                    $results[$i] = [
+                                                        'org' => $org->name,
+                                                        'process' => $process,
+                                                        'subprocess' => $sub,
+                                                        'risk' => $risk,
+                                                        'ppal_category' => $ppal_category,
+                                                        'risk_category' => $risk_category,
+                                                        'risk_resp' => $risk_resp,
+                                                        'risk_resp_position' => $risk_resp_position,
+                                                        'risk_resp_mail' => $risk_resp_mail,
+                                                        'causes' => $causes,
+                                                        'effects' => $effects,
+                                                        'probability' => $proba,
+                                                        'impact' => $impact,
+                                                        'score' => $sev,
+                                                        'residual_risk' => $residual_risk,
+                                                        'control' => $ctrl,
+                                                        'control_resp' => $control_resp,
+                                                        'control_resp_mail' => $control_resp_mail,
+                                                        'control_resp_position' => $control_resp_position,
+                                                        'issue' => $issue,
+                                                        'action_plan' => $plan,
+                                                        'action_plan_resp' => $plan_resp,
+                                                        'action_plan_resp_mail' => $plan_resp_mail,
+                                                        'action_plan_resp_position' => $plan_resp_position,
+                                                        'percentage' => $percentage,
+                                                        'percentage_date' => $percentage_date,
+                                                        'percentage_comments' => $percentage_comments
+                                                    ];
+                                                }
+
+                                                $i += 1;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //echo "NO HAY HALLAZGOS<br>";
+                                        $issue->name = 'No hay hallazgo';
+                                        $issue->description = 'No hay hallazgo';
+                                        $issue->classification = 'No hay hallazgo';
+                                        $issue->recommendations = 'No hay hallazgo';
+                                        $plan->description = 'No hay plan de acción';
+                                        $plan->status = 'No hay plan de acción';
+                                        $plan->final_date = 'No hay plan de acción';
+                                        $percentage = 'No hay plan de acción';
+                                        $percentage_date = 'No hay plan de acción';
+                                        $percentage_comments = 'No hay plan de acción';
+                                        $plan_resp = 'No hay plan de acción';
+                                        $plan_resp_mail = 'No hay plan de acción';
+                                        $plan_resp_position = 'No hay plan de acción';
+
+                                        if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
+                                        {
+                                            $results[$i] = [
+                                                'Organización' => $org->name,
+                                                'Proceso' => $process->name,
+                                                'Subproceso' => $sub->name,
+                                                'Riesgo' => $risk->name,
+                                                'Descripción Riesgo' => $risk->description,
+                                                'Categoría de Riesgo' => $ppal_category,
+                                                'Subcategoría de Riesgo' => $risk_category,
+                                                'Responsable Riesgo' => $risk_resp,
+                                                'Cargo Responsable' => $risk_resp_position,
+                                                'Correo Responsable' => $risk_resp_mail,
+                                                'Causas' => $causes,
+                                                'Efectos' => $effects,
+                                                'Pérdida Esperada' => $risk->expected_loss,
+                                                'Probabilidad' => $proba,
+                                                'Impacto' => $impact,
+                                                'Severidad' => $sev,
+                                                'Control' => $ctrl->name,
+                                                'Descripción Control' => $ctrl->description,
+                                                'Responsable Control' => $control_resp,
+                                                'Correo Responsable Control' => $control_resp_mail,
+                                                'Cargo Responsable Control' => $control_resp_position,
+                                                'Tipo Control' => $ctrl->type,
+                                                'Periodicidad' => $ctrl->periodicity,
+                                                'Propósito' => $ctrl->purpose,
+                                                'Costo Control' => $ctrl->expected_cost,
+                                                'Descripción Evidencia Control' => $ctrl->evidence,
+                                                'Comentarios Control' => $ctrl->comments,
+                                                '% de Contribución' => $ctrl->porcentaje_cont.'%',
+                                                'Riesgo Residual' => $residual_risk,
+                                                'Hallazgo' => $issue->name,
+                                                'Descripción Hallazgo' => $issue->description,
+                                                'Clasificación Hallazgo' => $issue->classification,
+                                                'Recomendaciones' => $issue->recommendations,
+                                                'Plan de Acción' => $plan->description,
+                                                'Estado Plan' => $plan->status,
+                                                'Responsable Plan Acción' => $plan_resp,
+                                                'Correo Responsable Plan' => $plan_resp_mail,
+                                                'Cargo Responsable Plan' => $plan_resp_position,
+                                                '% de Avance' => $percentage,
+                                                'Fecha de avance' => $percentage_date,
+                                                'Comentarios de avance' => $percentage_comments,
+                                                'Fecha Final Plan' => $plan->final_date
+                                            ];
+                                        }
+                                        else
+                                        {
+                                            //echo $risk->name.'<br>';
+                                            $results[$i] = [
+                                                'org' => $org->name,
+                                                'process' => $process,
+                                                'subprocess' => $sub,
+                                                'risk' => $risk,
+                                                'ppal_category' => $ppal_category,
+                                                'risk_category' => $risk_category,
+                                                'risk_resp' => $risk_resp,
+                                                'risk_resp_position' => $risk_resp_position,
+                                                'risk_resp_mail' => $risk_resp_mail,
+                                                'causes' => $causes,
+                                                'effects' => $effects,
+                                                'probability' => $proba,
+                                                'impact' => $impact,
+                                                'score' => $sev,
+                                                'residual_risk' => $residual_risk,
+                                                'control' => $ctrl,
+                                                'control_resp' => $control_resp,
+                                                'control_resp_mail' => $control_resp_mail,
+                                                'control_resp_position' => $control_resp_position,
+                                                'issue' => $issue,
+                                                'action_plan' => $plan,
+                                                'action_plan_resp' => $plan_resp,
+                                                'action_plan_resp_mail' => $plan_resp_mail,
+                                                'action_plan_resp_position' => $plan_resp_position,
+                                                'percentage' => $percentage,
+                                                'percentage_date' => $percentage_date,
+                                                'percentage_comments' => $percentage_comments
+                                            ];
+                                        }
+
+                                        $i += 1;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                //echo "NO HAY CONTROLES<br>";
+                                $ctrl->name = 'No hay control';
+                                $ctrl->description = 'No hay control';
+                                $ctrl->type = 'No hay control';
+                                $ctrl->purpose = 'No hay control';
+                                $ctrl->periodicity = 'No hay control';
+                                $ctrl->evidence = 'No hay control';
+                                $ctrl->comments = 'No hay control';
+                                $ctrl->porcentaje_cont = 'No hay control';
+                                $ctrl->expected_cost = 'No hay control';
+                                $control_resp = 'No hay control';
+                                $control_resp_mail = 'No hay control';
+                                $control_resp_position = 'No hay control';
+                                $residual_risk = 'No hay control';
+                                $issue->name = 'No hay hallazgo';
+                                $issue->description = 'No hay hallazgo';
+                                $issue->classification = 'No hay hallazgo';
+                                $issue->recommendations = 'No hay hallazgo';
+                                $plan->description = 'No hay plan de acción';
+                                $plan->status = 'No hay plan de acción';
+                                $plan->final_date = 'No hay plan de acción';
+                                $percentage = 'No hay plan de acción';
+                                $percentage_date = 'No hay plan de acción';
+                                $percentage_comments = 'No hay plan de acción';
+                                $plan_resp = 'No hay plan de acción';
+                                $plan_resp_mail = 'No hay plan de acción';
+                                $plan_resp_position = 'No hay plan de acción';
+
+                                if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
+                                {
+                                    $results[$i] = [
+                                        'Organización' => $org->name,
+                                        'Proceso' => $process->name,
+                                        'Subproceso' => $sub->name,
+                                        'Riesgo' => $risk->name,
+                                        'Descripción Riesgo' => $risk->description,
+                                        'Categoría de Riesgo' => $ppal_category,
+                                        'Subcategoría de Riesgo' => $risk_category,
+                                        'Responsable Riesgo' => $risk_resp,
+                                        'Cargo Responsable' => $risk_resp_position,
+                                        'Correo Responsable' => $risk_resp_mail,
+                                        'Causas' => $causes,
+                                        'Efectos' => $effects,
+                                        'Pérdida Esperada' => $risk->expected_loss,
+                                        'Probabilidad' => $proba,
+                                        'Impacto' => $impact,
+                                        'Severidad' => $sev,
+                                        'Control' => $ctrl->name,
+                                        'Descripción Control' => $ctrl->description,
+                                        'Responsable Control' => $control_resp,
+                                        'Correo Responsable Control' => $control_resp_mail,
+                                        'Cargo Responsable Control' => $control_resp_position,
+                                        'Tipo Control' => $ctrl->type,
+                                        'Periodicidad' => $ctrl->periodicity,
+                                        'Propósito' => $ctrl->purpose,
+                                        'Costo Control' => $ctrl->expected_cost,
+                                        'Evidencia Control' => $ctrl->evidence,
+                                        'Comentarios Control' => $ctrl->comments,
+                                        '% de Contribución' => $ctrl->porcentaje_cont.'%',
+                                        'Riesgo Residual' => $residual_risk,
+                                        'Hallazgo' => $issue->name,
+                                        'Descripción Hallazgo' => $issue->description,
+                                        'Clasificación Hallazgo' => $issue->classification,
+                                        'Recomendaciones' => $issue->recommendations,
+                                        'Plan de Acción' => $plan->description,
+                                        'Estado Plan' => $plan->status,
+                                        'Responsable Plan Acción' => $plan_resp,
+                                        'Correo Responsable Plan' => $plan_resp_mail,
+                                        'Cargo Responsable Plan' => $plan_resp_position,
+                                        '% de Avance' => $percentage,
+                                        'Fecha de avance' => $percentage_date,
+                                        'Comentarios de avance' => $percentage_comments,
+                                        'Fecha Final Plan' => $plan->final_date
+                                    ];
+                                }
+                                else
+                                {
+                                    //echo $risk->name.'<br>';
+                                    $results[$i] = [
+                                        'org' => $org->name,
+                                        'process' => $process,
+                                        'subprocess' => $sub,
+                                        'risk' => $risk,
+                                        'ppal_category' => $ppal_category,
+                                        'risk_category' => $risk_category,
+                                        'risk_resp' => $risk_resp,
+                                        'risk_resp_position' => $risk_resp_position,
+                                        'risk_resp_mail' => $risk_resp_mail,
+                                        'causes' => $causes,
+                                        'effects' => $effects,
+                                        'probability' => $proba,
+                                        'impact' => $impact,
+                                        'score' => $sev,
+                                        'residual_risk' => $residual_risk,
+                                        'control' => $ctrl,
+                                        'control_resp' => $control_resp,
+                                        'control_resp_mail' => $control_resp_mail,
+                                        'control_resp_position' => $control_resp_position,
+                                        'issue' => $issue,
+                                        'action_plan' => $plan,
+                                        'action_plan_resp' => $plan_resp,
+                                        'action_plan_resp_mail' => $plan_resp_mail,
+                                        'action_plan_resp_position' => $plan_resp_position,
+                                        'percentage' => $percentage,
+                                        'percentage_date' => $percentage_date,
+                                        'percentage_comments' => $percentage_comments
+                                    ];
+                                }
+
+                                $i += 1;
+                            }
+                        }
+                    }
+                    /*else
+                    {
+                        //echo "NO HAY RIESGOS<br>";
+                        $risk->name = 'No hay riesgo';
+                        $risk->description = 'No hay riesgo';
+                        $proba = 'No hay riesgo';
+                        $impact = 'No hay riesgo';
+                        $risk_category = 'No hay riesgo';
+                        $risk_resp = 'No hay riesgo';
+                        $ctrl->name = 'No hay control';
+                        $ctrl->description = 'No hay control';
+                        $ctrl->type = 'No hay control';
+                        $ctrl->purpose = 'No hay control';
+                        $ctrl->periodicity = 'No hay control';
+                        $ctrl->porcentaje_cont = 'No hay control';
+                        $ctrl->evidence = 'No hay control';
+                        $ctrl->comments = 'No hay control';
+                        $control_resp = 'No hay control';
+                        $residual_risk = 'No hay control';
+                        $issue->name = 'No hay hallazgo';
+                        $issue->description = 'No hay hallazgo';
+                        $issue->classification = 'No hay hallazgo';
+                        $issue->recommendations = 'No hay hallazgo';
+                        $plan->description = 'No hay plan de acción';
+                        $plan->status = 'No hay plan de acción';
+                        $plan->final_date = 'No hay plan de acción';
+                        $percentage = 'No hay plan de acción';
+                        $percentage_date = 'No hay plan de acción';
+                        $percentage_comments = 'No hay plan de acción';
+                        $plan_resp = 'No hay plan de acción';
+                        $plan_resp_mail = 'No hay plan de acción';
+
+                    }*/
+                }
+            }
+
+            //print_r($results);
+            if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
+            {
+                return $results;
+            }
+            else
+            {
+                return view('reportes.consolidado',['results' => $results]);
+            }
+        
+        //}
+        //catch (\Exception $e)
+        //{
+            //enviarMailSoporte($e);
+        //    return view('errors.query',['e' => $e]);
+        //}
         }
     }
 }

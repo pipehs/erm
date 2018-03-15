@@ -166,7 +166,7 @@ class RiesgosController extends Controller
                     $causes = DB::table('cause_risk')
                                 ->join('causes','causes.id','=','cause_risk.cause_id')
                                 ->where('cause_risk.risk_id','=',$riesgo->id)
-                                ->select('causes.name')
+                                ->select('causes.name','causes.description')
                                 ->get();
 
                     if ($causes)
@@ -175,7 +175,7 @@ class RiesgosController extends Controller
                         $k = 0;
                         foreach ($causes as $cause)
                         {
-                            $causas[$k] = $cause->name;
+                            $causas[$k] = $cause->name.' - '.$cause->description;
                             $k += 1;
                         }
                     }
@@ -188,7 +188,7 @@ class RiesgosController extends Controller
                     $effects = DB::table('effect_risk')
                                 ->join('effects','effects.id','=','effect_risk.effect_id')
                                 ->where('effect_risk.risk_id','=',$riesgo->id)
-                                ->select('effects.name')
+                                ->select('effects.name','effects.description')
                                 ->get();
 
                     if ($effects)
@@ -197,7 +197,7 @@ class RiesgosController extends Controller
                         $k = 0;
                         foreach ($effects as $effect)
                         {
-                            $efectos[$k] = $effect->name;
+                            $efectos[$k] = $effect->name.' - '.$effect->description;
                             $k += 1;
                         }
                     }
@@ -430,7 +430,7 @@ class RiesgosController extends Controller
                     $causes = DB::table('cause_risk')
                                 ->join('causes','causes.id','=','cause_risk.cause_id')
                                 ->where('cause_risk.risk_id','=',$riesgo->id)
-                                ->select('causes.name')
+                                ->select('causes.name','causes.description')
                                 ->get();
 
                     if ($causes)
@@ -439,7 +439,7 @@ class RiesgosController extends Controller
                         $k = 0;
                         foreach ($causes as $cause)
                         {
-                            $causas[$k] = $cause->name;
+                            $causas[$k] = $cause->name.' - '.$cause->description;
                             $k += 1;
                         }
                     }
@@ -469,7 +469,7 @@ class RiesgosController extends Controller
                     $effects = DB::table('effect_risk')
                                 ->join('effects','effects.id','=','effect_risk.effect_id')
                                 ->where('effect_risk.risk_id','=',$riesgo->id)
-                                ->select('effects.name')
+                                ->select('effects.name','effects.description')
                                 ->get();
 
                     if ($effects)
@@ -478,7 +478,7 @@ class RiesgosController extends Controller
                         $k = 0;
                         foreach ($effects as $effect)
                         {
-                            $efectos[$k] = $effect->name;
+                            $efectos[$k] = $effect->name.' - '.$effect->description;
                             $k += 1;
                         }
                     }
@@ -498,10 +498,14 @@ class RiesgosController extends Controller
                         $proba_string = ['Muy poco probable','Poco probable','Intermedio','Probable','Muy probable'];
                         $impact_string = ['Muy poco impacto','Poco impacto','Intermedio','Alto impacto','Muy alto impacto'];
                     }
+
+                    //ACT 18-12-17: Obtenemos org_risk_id
+                    $org_risk = \Ermtool\Risk::getOrgRisk($riesgo->id,$_GET['organization_id']);
+
                     //primero obtenemos maxima fecha de evaluacion para el riesgo
                     $fecha = DB::table('evaluation_risk')
                                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                    ->where('evaluation_risk.organization_risk_id','=',$riesgo->id)
+                                    ->where('evaluation_risk.organization_risk_id','=',$org_risk->id)
                                     ->where('evaluations.consolidation','=',1)
                                     ->max('evaluations.updated_at');
 
@@ -511,7 +515,7 @@ class RiesgosController extends Controller
                     //obtenemos proba, impacto y score
                     $eval_risk = DB::table('evaluation_risk')
                                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                    ->where('evaluation_risk.organization_risk_id','=',$riesgo->id)
+                                    ->where('evaluation_risk.organization_risk_id','=',$org_risk->id)
                                     ->where('evaluations.updated_at','=',$fecha)
                                     ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
                                     ->get();
@@ -587,8 +591,8 @@ class RiesgosController extends Controller
      */
     public function create()
     {
-        try
-        {
+        //try
+        //{
             if (Auth::guest())
             {
                 return view('login');
@@ -599,38 +603,58 @@ class RiesgosController extends Controller
                 $categorias = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
 
                 //causas preingresadas
-                $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
+                $causas = \Ermtool\Cause::where('status',0)->select('name','id','description')->get();
 
                 //efectos preingresados
-                $efectos = \Ermtool\Effect::where('status',0)->lists('name','id');
+                $efectos = \Ermtool\Effect::where('status',0)->select('name','id','description')->get();
 
                 //riesgos tipo
                 $riesgos_tipo = \Ermtool\Risk::where('status',0)->where('type2',0)->lists('name','id');
 
                 //obtenemos lista de stakeholders
-                $stakeholders = \Ermtool\Stakeholder::listStakeholders($_GET['org']);
+                $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
 
                 //ACTUALIZACIÓN 29-03-17: SELECCIONAMOS SI SE DESEA AGREGAR A OTRAS ORGANIZACIONES
                 $organizations = \Ermtool\Organization::where('status',0)->where('id','<>',$_GET['org'])->lists('name','id');
 
+                //ACTUALIZACIÓN 04-01-18: Agregamos tipos de moneda para materialidad
+                $kinds = ['1'=>'Peso','2'=>'Dólar','3'=>'Euro','4'=>'UF']; 
+
+                //Obtenemos EBT. Para esto, primero vemos si esta organización tiene EBT, sino buscamos EBT de org principal
+                $ebt = \Ermtool\Organization::getEBT($_GET['org'],1);
+
+                if ($ebt->ebt == NULL)
+                {
+                    $ebt = \Ermtool\Organization::getEBT($_GET['org'],2);
+
+                    //si org principal no tiene EBT
+                    if ($ebt->ebt == NULL)
+                    {
+                        $ebt = array();
+                    }
+                }
+
                 if(isset($_GET['P']))
                 {
                     //ACTUALIZACIÓN 26-07-16: SOLO MOSTRAMOS PROCESOS PERTENECIENTES A LA EMPRESA QUE SE ESTÁ CONSULTANDO
+                    //ACT 07-03-18: También seleccionamos proceso (para casos como Emaresa donde existen subprocesos con el mismo nombre para distinto proceso)
                     $subprocesos = DB::table('subprocesses')
+                                    ->join('processes','processes.id','=','subprocesses.process_id')
                                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                                     ->where('organization_subprocess.organization_id','=',$_GET['org'])
                                     ->where('subprocesses.status','=',0)
-                                    ->lists('subprocesses.name','subprocesses.id');
+                                    ->select('processes.name as process','subprocesses.name','subprocesses.id')
+                                    ->get();
 
                     if (Session::get('languaje') == 'en')
                     {
                         return view('en.riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                            'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations]);
+                            'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations,'kinds'=>$kinds,'ebt' => $ebt]);
                     }
                     else
                     {
                         return view('riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                            'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations]);
+                            'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations,'kinds'=>$kinds,'ebt' => $ebt]);
                     }
                 }
 
@@ -645,21 +669,21 @@ class RiesgosController extends Controller
                     if (Session::get('languaje') == 'en')
                     {
                         return view('en.riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                                'efectos'=>$efectos,'objetivos'=>$objectives,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations]);
+                                'efectos'=>$efectos,'objetivos'=>$objectives,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations,'kinds'=>$kinds,'ebt' => $ebt]);
                     }
                     else
                     {
                         return view('riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                                'efectos'=>$efectos,'objetivos'=>$objectives,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations]);
+                                'efectos'=>$efectos,'objetivos'=>$objectives,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations,'kinds'=>$kinds,'ebt' => $ebt]);
                     }
                 }
             }
-        }
-        catch (\Exception $e)
-        {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
-        }
+        //}
+        //catch (\Exception $e)
+        //{
+        //    enviarMailSoporte($e);
+        //    return view('errors.query',['e' => $e]);
+        //}
     }
 
     /**
@@ -670,8 +694,8 @@ class RiesgosController extends Controller
      */
     public function store(Request $request)
     {
-        try
-        {
+        //try
+        //{
             if (Auth::guest())
             {
                 return view('login');
@@ -763,6 +787,35 @@ class RiesgosController extends Controller
                                 $comments = $_POST['comments'];
                                 $comments = eliminarSaltos($comments);
                             }
+
+                            if (!isset($_POST['comments2']) || $_POST['comments2'] == "")
+                            {
+                                $comments2 = NULL;
+                            }
+                            else
+                            {
+                                $comments2 = $_POST['comments2'];
+                                $comments2 = eliminarSaltos($comments2);
+                            }
+
+                            //ACTUALIZACIÓN 08-01-17: Agregamos impacto y probabilidades brutas 
+                            if (!isset($_POST['impact']) || $_POST['impact'] == "")
+                            {
+                                $impact = NULL;
+                            }
+                            else
+                            {
+                                $impact = $_POST['impact'];
+                            }
+
+                            if (!isset($_POST['probability']) || $_POST['expiration_date'] == "")
+                            {
+                                $expiration_date = NULL;
+                            }
+                            else
+                            {
+                                $expiration_date = $_POST['expiration_date'];
+                            } 
 
                             $description = eliminarSaltos($description);
 
@@ -866,10 +919,11 @@ class RiesgosController extends Controller
 
                         //ACTUALIZACIÓN 29-03-17: Agregamos en tabla organization_risk
                         //ACTUALIZACIÓN 16-08-17: Agregamos aquí también stakeholder_id
+                        //ACTUALIZACIÓN 08-01-17: Agregamos aquí también comentarios
                         //$organization = \Ermtool\Organization::find($_POST['org_id']);
                         //$organization->risks()->attach($risk->id);
 
-                        \Ermtool\Risk::insertOrganizationRisk($_POST['org_id'],$risk->id,$stake);
+                        \Ermtool\Risk::insertOrganizationRisk($_POST['org_id'],$risk->id,$stake,$comments2);
 
                         //ACTUALIZACIÓN 16-08-17: Agregamos riesgo y subproceso para otras organizaciones
                         if (isset($_POST['organization_id']) && $_POST['organization_id'] != "")
@@ -894,11 +948,11 @@ class RiesgosController extends Controller
                                 //ahora agregamos organization_risk con responsable (si es que se agregó)
                                 if (isset($_POST['stakeholder_'.$org]) && $_POST['stakeholder_'.$org] != '' && !empty($_POST['stakeholder_'.$org]))
                                 {
-                                    \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,$_POST['stakeholder_'.$org]);
+                                    \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,$_POST['stakeholder_'.$org],null);
                                 }
                                 else
                                 {
-                                    \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,null);
+                                    \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,null,null);
                                 }
                             }
                         }
@@ -915,6 +969,29 @@ class RiesgosController extends Controller
                             }                    
                         }
 
+                        //ACT 08-01-18: Agregamos materialidad
+                        if (isset($_POST['impact']) && $_POST['impact'] != "")
+                        {
+                            if (isset($_POST['probability']) && $_POST['probability'] != "")
+                            {
+                                //obtenemos org_risk_id
+                                $org_risk = \Ermtool\Risk::getOrganizationRisk($_POST['org_id'],$risk->id);
+
+                                DB::table('materiality')
+                                    ->insert([
+                                        'impact' => $_POST['impact'],
+                                        'probability' => $_POST['probability'],
+                                        'kind' => $_POST['kind2'],
+                                        'calification' => $_POST['calification2'],
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s'),
+                                        'organization_risk_id' => $org_risk->id
+                                    ]);
+                            }
+                        }
+
+
+
                         if (Session::get('languaje') == 'en')
                         {
                             Session::flash('message','Risk successfully created');
@@ -929,12 +1006,12 @@ class RiesgosController extends Controller
 
                 return Redirect::to('riesgos.index2?organization_id='.$_POST['org_id']);
             }
-        }
-        catch (\Exception $e)
-        {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
-        }
+        //}
+        //catch (\Exception $e)
+        //{
+        //    enviarMailSoporte($e);
+        //    return view('errors.query',['e' => $e]);
+        //}
     }
 
     //setea datos de un riesgo tipo cuando se está identificando un riesgo
@@ -970,8 +1047,8 @@ class RiesgosController extends Controller
      */
     public function edit($id)
     {
-        try
-        {
+        //try
+        //{
             if (Auth::guest())
             {
                 return view('login');
@@ -985,11 +1062,14 @@ class RiesgosController extends Controller
                     //ACTUALIZACIÓN 16-19-17: Vemos si se seleccionó organización o se editará el riesgo en general
                     if (isset($_GET['org']) && $_GET['org'] != NULL)
                     {
+                        //ACT 07-03-18: También seleccionamos proceso (para casos como Emaresa donde existen subprocesos con el mismo nombre para distinto proceso)
                         $subprocesos = DB::table('subprocesses')
+                                    ->join('processes','processes.id','=','subprocesses.process_id')
                                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                                     ->where('organization_subprocess.organization_id','=',$_GET['org'])
                                     ->where('subprocesses.status','=',0)
-                                    ->lists('subprocesses.name','subprocesses.id');
+                                    ->select('processes.name as process','subprocesses.name','subprocesses.id')
+                                    ->get();
 
                         $sub_selected = array();
                         $subs = DB::table('risk_subprocess')
@@ -1033,9 +1113,9 @@ class RiesgosController extends Controller
                 //categorias de riesgo
                 $categorias = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
                 //causas
-                $causas = \Ermtool\Cause::where('status',0)->lists('name','id');
+                $causas = \Ermtool\Cause::where('status',0)->select('name','id','description')->get();
                 //efectos
-                $efectos = \Ermtool\Effect::where('status',0)->lists('name','id');
+                $efectos = \Ermtool\Effect::where('status',0)->select('name','id','description')->get();
                 $causes_selected = array();
                 $effects_selected = array();
                 //obtenemos causas seleccionadas
@@ -1063,21 +1143,102 @@ class RiesgosController extends Controller
                     $effects_selected[$i] = $effect->effect_id;
                     $i += 1;
                 }
+
+                //ACT 28-12-17: obtenemos categoría principal (2 en caso que hayan 3 niveles) y seteamos distintos niveles
+                if ($risk->risk_category_id != NULL)
+                {
+                    $risk_category1 = DB::table('risk_categories')
+                                    ->where('id','=',$risk->risk_category_id)
+                                    ->select('risk_category_id as id')
+                                    ->first();
+
+                    if ($risk_category1->id != NULL)
+                    {
+                       //Ahora obtenemos próxima categoría principal (si es que hay)
+                        $risk_category0 = DB::table('risk_categories')
+                                        ->where('id','=',$risk_category1->id)
+                                        ->select('risk_category_id as id')
+                                        ->first();
+
+                        if ($risk_category0->id == NULL) //seteamos 3 niveles (con último vacío)
+                        {
+                            $risk_category0 = $risk_category1->id;
+                            $risk_category1 = $risk->risk_category_id;
+                            $risk_category2 = NULL;
+                        }
+                        else
+                        {
+                            $risk_category0 = $risk_category0->id;
+                            $risk_category1 = $risk_category1->id;
+                            $risk_category2 = $risk->risk_category_id;
+                        } 
+                    }
+                    else //sólo hay una categoría
+                    {
+                        $risk_category0 = $risk->risk_category_id;
+                        $risk_category1 = NULL;
+                        $risk_category2 = NULL;
+                    }
+                    
+                }
+                else
+                {
+                    $risk_category0 = NULL;
+                    $risk_category1 = NULL;
+                    $risk_category2 = NULL;
+                }
+                
                 //riesgos tipo
                 $riesgos_tipo = \Ermtool\Risk::where('status',0)->where('type2',0)->lists('name','id');
 
                 if (isset($_GET['org']) && $_GET['org'] != NULL)
                 {
                     //obtenemos lista de stakeholders
-                    $stakeholders = \Ermtool\Stakeholder::listStakeholders($_GET['org']);
+                    $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
 
                     //ACT 17-08-17: Obtenemos stakeholder_id de organization_risk
                     $stakeholder = \Ermtool\Stakeholder::getRiskStakeholder($_GET['org'],$risk->id);
+
+                    //ACT 08-01-17: Agregamos comentarios específicos de la organización, ebt
+                    $comments2 = DB::table('organization_risk')
+                                    ->where('organization_id','=',$_GET['org'])
+                                    ->where('risk_id','=',$risk->id)
+                                    ->select('comments')
+                                    ->first();
+
+                    $comments2 = $comments2->comments;
+
+                    $ebt = \Ermtool\Organization::getEBT($_GET['org'],1);
+
+                    if ($ebt->ebt == NULL)
+                    {
+                        $ebt = \Ermtool\Organization::getEBT($_GET['org'],2);
+
+                        //si org principal no tiene EBT
+                        if ($ebt->ebt == NULL)
+                        {
+                            $ebt = array();
+                        }
+                    }
+
+                    //obtenemos último impacto y probabilidad (materialidad)
+                    $last_m = \Ermtool\Risk::getLastMateriality($_GET['org'],$risk->id);
+                }
+                else
+                {
+                    $last_m = NULL;
+                    $ebt = NULL;
+                    $comments2 = NULL;
                 }
                 //ACTUALIZACIÓN 29-03-17: SELECCIONAMOS SI SE DESEA AGREGAR A OTRAS ORGANIZACIONES
                 //ACT 17-08-17: No lo haremos al editar 
                 //ACT 16-10-17: Si lo haremos al editar
                 $organizations = \Ermtool\Organization::organizationsWithoutRisk($id);
+
+                
+
+                //ACTUALIZACIÓN 04-01-18: Agregamos tipos de moneda para materialidad
+                $kinds = ['1'=>'Peso','2'=>'Dólar','3'=>'Euro','4'=>'UF']; 
 
                 if (Session::get('languaje') == 'en')
                 {
@@ -1085,22 +1246,22 @@ class RiesgosController extends Controller
                     {
                         if ($risk->type == 0)
                         {
-                            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org'],'organizations' => $organizations]);
+                            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org'],'organizations' => $organizations,'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds]);
                         }
                         else
                         {
-                            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org']]);
+                            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org'],'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds]);
                         }
                     }
                     else
                     {
                         if ($risk->type == 0)
                         {
-                            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected]);
+                            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds]);
                         }
                         else
                         {
-                            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected]);
+                            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds]);
                         }
                     }
                 }
@@ -1110,32 +1271,32 @@ class RiesgosController extends Controller
                     {
                         if ($risk->type == 0)
                         {
-                            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org'],'organizations' => $organizations]);
+                            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org'],'organizations' => $organizations,'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds]);
                         }
                         else
                         {
-                            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org']]);
+                            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org'],'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds]);
                         }
                     }
                     else
                     {
                         if ($risk->type == 0)
                         {
-                            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected]);
+                            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds]);
                         }
                         else
                         {
-                            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected]);
+                            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds]);
                         }
                     }
                 }
             }
-        }
-        catch (\Exception $e)
-        {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
-        }
+        //}
+        //catch (\Exception $e)
+        //{
+        //    enviarMailSoporte($e);
+        //    return view('errors.query',['e' => $e]);
+        //}
     }
 
     /**
@@ -1401,11 +1562,11 @@ class RiesgosController extends Controller
                                     //ahora agregamos organization_risk con responsable (si es que se agregó)
                                     if (isset($_POST['stakeholder_'.$org]) && $_POST['stakeholder_'.$org] != '' && !empty($_POST['stakeholder_'.$org]))
                                     {
-                                        \Ermtool\Risk::insertOrganizationRisk($org,$riesgo->id,$_POST['stakeholder_'.$org]);
+                                        \Ermtool\Risk::insertOrganizationRisk($org,$riesgo->id,$_POST['stakeholder_'.$org],null);
                                     }
                                     else
                                     {
-                                        \Ermtool\Risk::insertOrganizationRisk($org,$riesgo->id,null);
+                                        \Ermtool\Risk::insertOrganizationRisk($org,$riesgo->id,null,null);
                                     }
                                 }
                             }
@@ -1498,6 +1659,27 @@ class RiesgosController extends Controller
                                     'stakeholder_id' => $stake
                                     ]);
                         }
+
+                        //ACT 08-01-18: Agregamos materialidad
+                        if (isset($_POST['impact']) && $_POST['impact'] != "")
+                        {
+                            if (isset($_POST['probability']) && $_POST['probability'] != "")
+                            {
+                                //obtenemos org_risk_id
+                                $org_risk = \Ermtool\Risk::getOrganizationRisk($_POST['org_id'],$riesgo->id);
+
+                                DB::table('materiality')
+                                    ->insert([
+                                        'impact' => $_POST['impact'],
+                                        'probability' => $_POST['probability'],
+                                        'kind' => $_POST['kind2'],
+                                        'calification' => $_POST['calification2'],
+                                        'created_at' => date('Y-m-d H:i:s'),
+                                        'updated_at' => date('Y-m-d H:i:s'),
+                                        'organization_risk_id' => $org_risk->id
+                                    ]);
+                            }
+                        }
                         
                         $riesgo->save();
 
@@ -1533,8 +1715,8 @@ class RiesgosController extends Controller
     //matriz de riesgos
     public function matrices()
     {
-        try
-        {
+        //try
+        //{
             if (Auth::guest())
             {
                 return view('login');
@@ -1545,24 +1727,68 @@ class RiesgosController extends Controller
                 //ACTUALIZACIÓN 02-03-17: Agregamos filtro de categorías de riesgos (todas las categorías)
                 $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
 
+                //ACT 02-01-18: Realizamos vista consolidada (para todas las organizaciones)
+                if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //si no se está generando excel
+                {
+                    $value = NULL;
+                    $org_temp = NULL;
+
+                    //ACTUALIZACIÓN 21-08-17: Vemos si hay subcategoría
+                    if (isset($_GET['risk_subcategory_id']) && $_GET['risk_subcategory_id'] != '')
+                    {
+                        $category = $_GET['risk_subcategory_id'];
+                    }
+
+                    else if (isset($_GET['risk_category_id']) && $_GET['risk_category_id'] != '')
+                    {
+                        $category = $_GET['risk_category_id'];   
+                    }
+                    else
+                    {
+                        $category = NULL;
+                    }
+                }
+                //por ahora si es excel se deja como NULL la categoría (02-03-17)
+                //ACT 27-12-17: Ahora estamos agregando categoría 
+                else 
+                {
+                    if ($cat == NULL)
+                    {
+                        $category = NULL;
+                    }
+                    else
+                    {
+                        $category = (int)$cat;
+                    }
+                    
+                    $org_temp = NULL;
+                }
+    
+                $i = 0;
+                $datos = array();
+
+                $datos = $this->generateRiskMatrix($org_temp,$category,$value);
+
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.reportes.matriz_riesgos',['organizations'=>$organizations,'categories' => $categories]);
+                    //return view('en.reportes.matriz_riesgos',['organizations'=>$organizations,'categories' => $categories]);
+                    return view('en.reportes.matriz_riesgos',['datos'=>$datos,'organizations'=>$organizations,'categories' => $categories]);
                 }
                 else
                 {
-                    return view('reportes.matriz_riesgos',['organizations'=>$organizations,'categories' => $categories]);  
+                    //return view('reportes.matriz_riesgos',['organizations'=>$organizations,'categories' => $categories]);
+                    return view('reportes.matriz_riesgos',['datos'=>$datos,'organizations'=>$organizations,'categories' => $categories]);
                 }
             }
-        }
-        catch (\Exception $e)
-        {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
-        }
+        //}
+        //catch (\Exception $e)
+        //{
+        //    enviarMailSoporte($e);
+        //    return view('errors.query',['e' => $e]);
+        //}
     }
 
-    public function generarMatriz($value,$org)
+    public function generarMatriz($value,$org,$cat)
     {
         try
         {
@@ -1595,16 +1821,65 @@ class RiesgosController extends Controller
                     {
                         $category = NULL;
                     }
-                } 
-                else //por ahora si es excel se deja como NULL la categoría (02-03-17)
+                }
+                //por ahora si es excel se deja como NULL la categoría (02-03-17)
+                //ACT 27-12-17: Ahora estamos agregando categoría 
+                else 
                 {
-                    $category = NULL;
-                    $org = (int)$org;
+                    if ($cat == NULL)
+                    {
+                        $category = NULL;
+                    }
+                    else
+                    {
+                        $category = (int)$cat;
+                    }
+                    
+                    if ($org == NULL)
+                    {
+                        $org = NULL;
+                    }
+                    else
+                    {
+                        $org = (int)$org;
+                    }
                 }
                 
                 $i = 0;
                 $datos = array();
 
+                $datos = $this->generateRiskMatrix($org,$category,$value);
+
+                if (strstr($_SERVER["REQUEST_URI"],'genexcel')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
+                {
+                    return $datos;
+                }
+                else
+                {
+                    if (Session::get('languaje') == 'en')
+                    {
+                        return view('en.reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org,'categories' => $categories]);
+                    }
+                    else
+                    {
+                        return view('reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org,'categories' => $categories]);
+                    }
+                    //return json_encode($datos);
+                }
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    //ACT 02-01-18: Función para generar matriz de riesgos
+    public function generateRiskMatrix($org,$category,$value)
+    {
+        $i = 0;
+        $datos = array();
                 if (Session::get('languaje') == 'en')
                 {
                     $proba_string = ['Very low','Low','Medium','High','Very high'];
@@ -1637,7 +1912,7 @@ class RiesgosController extends Controller
                         // -- seteamos datos --//
                         //seteamos causa y efecto
 
-                        if ($value == 0) //obtenemos procesos y subprocesos
+                        if ($risk->type == 0) //obtenemos procesos y subprocesos
                         {
                             $processes = \Ermtool\Process::getProcessesFromRisk($org,$risk->id);
 
@@ -1718,7 +1993,7 @@ class RiesgosController extends Controller
                                 $subprocesos = array();
                             }
                         }
-                        else if ($value == 1) //obtenemos objetivos
+                        else if ($risk->type == 1) //obtenemos objetivos
                         {
                             $objectives = \Ermtool\Objective::getObjectivesFromOrgRisk($risk->id,$org);
 
@@ -1992,206 +2267,283 @@ class RiesgosController extends Controller
                         }
                         //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
                         $short_des = substr($description,0,100);
-                        //Seteamos datos
-                        if ($value == 0) //guardamos datos de riesgos de procesos
+
+                        if (isset($org) && $org != NULL)
                         {
-                            if (Session::get('languaje') == 'en')
+                                $orgs_name = \Ermtool\Organization::name($org);
+                        }
+                        else
+                        {
+                            $orgs = \Ermtool\Organization::getOrganizationsFromRisk($risk->id);
+
+                            $last = end($orgs);
+                            $orgs_name = '';
+                            foreach ($orgs as $org1)
                             {
-                                if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                                if ($last == $org1)
                                 {
-                                    $datos[$i] = [//'id' => $control->id,
-                                            'Process' => $procesos,
-                                            'Subprocess' => $subprocesos,
-                                            'Risk' => $risk->name,
-                                            'Description' => $description,
-                                            'Category' => $risk_category,
-                                            'Causes' => $causas,
-                                            'Effects' => $efectos,
-                                            'Expected_loss' => $expected_loss,
-                                            'Probability' => $probabilidad,
-                                            'Impact' => $impacto,
-                                            'Score' => $score,
-                                            'Identification_date' => $fecha_creacion,
-                                            'Expiration_date' => $expiration_date,
-                                            'Controls' => $controles,];
+                                    $orgs_name .= $org1->name;
                                 }
                                 else
                                 {
-                                    $datos[$i] = ['id' => $risk->id,
-                                            'Process' => $procesos,
-                                            'Subprocess' => $subprocesos,
-                                            'Risk' => $risk->name,
-                                            'Description' => $description,
-                                            'Category' => $risk_category,
-                                            'Causes' => $causas,
-                                            'Effects' => $efectos,
-                                            'Expected_loss' => $expected_loss,
-                                            'Probability' => $probabilidad,
-                                            'Impact' => $impacto,
-                                            'Score' => $score,
-                                            'Identification_date' => $fecha_creacion,
-                                            'Expiration_date' => $expiration_date,
-                                            'Controls' => $controles,
-                                            'short_des' => $short_des];
+                                    $orgs_name .= $org1->name.', ';
                                 }
+                            }
+                        }
+
+                        if ($org == NULL && strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                        {
+                            if (Session::get('languaje') == 'en')
+                            {
+                                if ($risk->type == 0)
+                                {
+                                    $type = 'Process';
+                                    $temp = $procesos;
+                                }
+                                else
+                                {
+                                    $type = 'Bussiness';
+                                    $temp = $objetivos;
+                                }
+                                $datos[$i] = [//'id' => $control->id,
+                                        'Organizations' => $orgs_name,
+                                        'Kind' => $type,
+                                        'Process/Objective' => $temp,
+                                        'Risk' => $risk->name,
+                                        'Description' => $description,
+                                        'Category' => $risk_category,
+                                        'Causes' => $causas,
+                                        'Effects' => $efectos,
+                                        'Expected_loss' => $expected_loss,
+                                        'Probability' => $probabilidad,
+                                        'Impact' => $impacto,
+                                        'Score' => $score,
+                                        'Identification_date' => $fecha_creacion,
+                                        'Expiration_date' => $expiration_date,
+                                        'Controls' => $controles,];
                             }
                             else
                             {
-                                if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                                if ($risk->type == 0)
                                 {
-                                    $datos[$i] = [//'id' => $control->id,
-                                                'Procesos' => $procesos,
-                                                'Subprocesos' => $subprocesos,
-                                                'Riesgo' => $risk->name,
-                                                'Descripción' => $description,
-                                                'Categoría' => $risk_category,
-                                                'Causas' => $causas,
-                                                'Efectos' => $efectos,
-                                                'Pérdida_esperada' => $expected_loss,
-                                                'Probabilidad' => $probabilidad,
-                                                'Impacto' => $impacto,
-                                                'Score' => $score,
-                                                'Fecha_identificación' => $fecha_creacion,
-                                                'Fecha_expiración' => $expiration_date,
-                                                'Controles' => $controles,];
+                                    $type = 'De Proceso';
+                                    $temp = $procesos;
                                 }
                                 else
                                 {
-                                    $datos[$i] = ['id' => $risk->id,
-                                                'Procesos' => $procesos,
-                                                'Subprocesos' => $subprocesos,
-                                                'Riesgo' => $risk->name,
-                                                'Descripción' => $description,
-                                                'Categoría' => $risk_category,
-                                                'Causas' => $causas,
-                                                'Efectos' => $efectos,
-                                                'Pérdida_esperada' => $expected_loss,
-                                                'Probabilidad' => $probabilidad,
-                                                'Impacto' => $impacto,
-                                                'Score' => $score,
-                                                'Fecha_identificación' => $fecha_creacion,
-                                                'Fecha_expiración' => $expiration_date,
-                                                'Controles' => $controles,
-                                                'short_des' => $short_des];
+                                    $type = 'De Negocio';
+                                    $temp = $objetivos;
                                 }
+
+                                $datos[$i] = [//'id' => $control->id,
+                                        'Organizaciones' => $orgs_name,
+                                        'Tipo' => $type,
+                                        'Procesos/Objetivo' => $temp,
+                                        'Riesgo' => $risk->name,
+                                        'Descripción' => $description,
+                                        'Categoría' => $risk_category,
+                                        'Causas' => $causas,
+                                        'Efectos' => $efectos,
+                                        'Pérdida_esperada' => $expected_loss,
+                                        'Probabilidad' => $probabilidad,
+                                        'Impacto' => $impacto,
+                                        'Score' => $score,
+                                        'Fecha_identificación' => $fecha_creacion,
+                                        'Fecha_expiración' => $expiration_date,
+                                        'Controles' => $controles,];
                             }
                             $i += 1;
                         }
-
-                        else if ($value == 1) //guardamos datos de riesgos de negocio
+                        else
                         {
-                            $org_name = \Ermtool\Organization::name($org);
-                            if (Session::get('languaje') == 'en')
+                            //Seteamos datos
+                            if ($risk->type == 0) //guardamos datos de riesgos de procesos
                             {
-                                if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                                
+                                if (Session::get('languaje') == 'en')
                                 {
-                                    $datos[$i] = [//'id' => $control->id,
-                                                'Organization' => $org_name,
-                                                'Objective' => $objetivos,
+                                    if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                                    {
+                                        $datos[$i] = [//'id' => $control->id,
+                                                'Organizations' => $orgs_name,
+                                                'Process' => $procesos,
+                                                'Subprocess' => $subprocesos,
                                                 'Risk' => $risk->name,
                                                 'Description' => $description,
                                                 'Category' => $risk_category,
                                                 'Causes' => $causas,
-                                                'Effects' => $efectos,              
-                                                'Expected_loss' => $risk->expected_loss,
+                                                'Effects' => $efectos,
+                                                'Expected_loss' => $expected_loss,
                                                 'Probability' => $probabilidad,
                                                 'Impact' => $impacto,
                                                 'Score' => $score,
                                                 'Identification_date' => $fecha_creacion,
                                                 'Expiration_date' => $expiration_date,
-                                                'Controls' => $controles];
-                                }
-                                else
-                                {
-                                    $datos[$i] = ['id' => $risk->id,
-                                                'Organization' => $org_name,
-                                                'Objective' => $objetivos,
+                                                'Controls' => $controles,];
+                                    }
+                                    else
+                                    {
+                                        $datos[$i] = ['id' => $risk->id,
+                                                'Organizations' => $orgs_name,
+                                                'Process' => $procesos,
+                                                'Subprocess' => $subprocesos,
                                                 'Risk' => $risk->name,
                                                 'Description' => $description,
                                                 'Category' => $risk_category,
                                                 'Causes' => $causas,
-                                                'Effects' => $efectos,              
-                                                'Expected_loss' => $risk->expected_loss,
+                                                'Effects' => $efectos,
+                                                'Expected_loss' => $expected_loss,
                                                 'Probability' => $probabilidad,
                                                 'Impact' => $impacto,
                                                 'Score' => $score,
                                                 'Identification_date' => $fecha_creacion,
                                                 'Expiration_date' => $expiration_date,
                                                 'Controls' => $controles,
-                                                'short_des' => $short_des];
-                                }
-
-                            }
-                            else
-                            {
-                                if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
-                                {
-                                    $datos[$i] = [//'id' => $control->id,
-                                                'Organización' => $org_name,
-                                                'Objetivos' => $objetivos,
-                                                'Riesgo' => $risk->name,
-                                                'Descripción' => $description,
-                                                'Categoría' => $risk_category,
-                                                'Causas' => $causas,
-                                                'Efectos' => $efectos,              
-                                                'Pérdida_esperada' => $risk->expected_loss,
-                                                'Probabilidad' => $probabilidad,
-                                                'Impacto' => $impacto,
-                                                'Score' => $score,
-                                                'Fecha_identificación' => $fecha_creacion,
-                                                'Fecha_expiración' => $expiration_date,
-                                                'Controles' => $controles];
+                                                'short_des' => $short_des,
+                                                'type' => $risk->type];
+                                    }
                                 }
                                 else
                                 {
-                                    $datos[$i] = ['id' => $risk->id,
-                                                'Organización' => $org_name,
-                                                'Objetivos' => $objetivos,
-                                                'Riesgo' => $risk->name,
-                                                'Descripción' => $description,
-                                                'Categoría' => $risk_category,
-                                                'Causas' => $causas,
-                                                'Efectos' => $efectos,              
-                                                'Pérdida_esperada' => $risk->expected_loss,
-                                                'Probabilidad' => $probabilidad,
-                                                'Impacto' => $impacto,
-                                                'Score' => $score,
-                                                'Fecha_identificación' => $fecha_creacion,
-                                                'Fecha_expiración' => $expiration_date,
-                                                'Controles' => $controles,
-                                                'short_des' => $short_des];
+                                    if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                                    {
+                                        $datos[$i] = [//'id' => $control->id,
+                                                    'Organizaciones' => $orgs_name,
+                                                    'Procesos' => $procesos,
+                                                    'Subprocesos' => $subprocesos,
+                                                    'Riesgo' => $risk->name,
+                                                    'Descripción' => $description,
+                                                    'Categoría' => $risk_category,
+                                                    'Causas' => $causas,
+                                                    'Efectos' => $efectos,
+                                                    'Pérdida_esperada' => $expected_loss,
+                                                    'Probabilidad' => $probabilidad,
+                                                    'Impacto' => $impacto,
+                                                    'Score' => $score,
+                                                    'Fecha_identificación' => $fecha_creacion,
+                                                    'Fecha_expiración' => $expiration_date,
+                                                    'Controles' => $controles,];
+                                    }
+                                    else
+                                    {
+                                        $datos[$i] = ['id' => $risk->id,
+                                                    'Organizaciones' => $orgs_name,
+                                                    'Procesos' => $procesos,
+                                                    'Subprocesos' => $subprocesos,
+                                                    'Riesgo' => $risk->name,
+                                                    'Descripción' => $description,
+                                                    'Categoría' => $risk_category,
+                                                    'Causas' => $causas,
+                                                    'Efectos' => $efectos,
+                                                    'Pérdida_esperada' => $expected_loss,
+                                                    'Probabilidad' => $probabilidad,
+                                                    'Impacto' => $impacto,
+                                                    'Score' => $score,
+                                                    'Fecha_identificación' => $fecha_creacion,
+                                                    'Fecha_expiración' => $expiration_date,
+                                                    'Controles' => $controles,
+                                                    'short_des' => $short_des,
+                                                    'type' => $risk->type];
+                                    }
                                 }
-
+                                $i += 1;
                             }
-                            $i += 1;
+
+                            else if ($risk->type == 1) //guardamos datos de riesgos de negocio
+                            {
+                                
+                                if (Session::get('languaje') == 'en')
+                                {
+                                    if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                                    {
+                                        $datos[$i] = [//'id' => $control->id,
+                                                    'Organizations' => $orgs_name,
+                                                    'Objective' => $objetivos,
+                                                    'Risk' => $risk->name,
+                                                    'Description' => $description,
+                                                    'Category' => $risk_category,
+                                                    'Causes' => $causas,
+                                                    'Effects' => $efectos,              
+                                                    'Expected_loss' => $risk->expected_loss,
+                                                    'Probability' => $probabilidad,
+                                                    'Impact' => $impacto,
+                                                    'Score' => $score,
+                                                    'Identification_date' => $fecha_creacion,
+                                                    'Expiration_date' => $expiration_date,
+                                                    'Controls' => $controles];
+                                    }
+                                    else
+                                    {
+                                        $datos[$i] = ['id' => $risk->id,
+                                                    'Organizations' => $orgs_name,
+                                                    'Objective' => $objetivos,
+                                                    'Risk' => $risk->name,
+                                                    'Description' => $description,
+                                                    'Category' => $risk_category,
+                                                    'Causes' => $causas,
+                                                    'Effects' => $efectos,              
+                                                    'Expected_loss' => $risk->expected_loss,
+                                                    'Probability' => $probabilidad,
+                                                    'Impact' => $impacto,
+                                                    'Score' => $score,
+                                                    'Identification_date' => $fecha_creacion,
+                                                    'Expiration_date' => $expiration_date,
+                                                    'Controls' => $controles,
+                                                    'short_des' => $short_des,
+                                                    'type' => $risk->type];
+                                    }
+
+                                }
+                                else
+                                {
+                                    if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                                    {
+                                        $datos[$i] = [//'id' => $control->id,
+                                                    'Organizaciones' => $orgs_name,
+                                                    'Objetivos' => $objetivos,
+                                                    'Riesgo' => $risk->name,
+                                                    'Descripción' => $description,
+                                                    'Categoría' => $risk_category,
+                                                    'Causas' => $causas,
+                                                    'Efectos' => $efectos,              
+                                                    'Pérdida_esperada' => $risk->expected_loss,
+                                                    'Probabilidad' => $probabilidad,
+                                                    'Impacto' => $impacto,
+                                                    'Score' => $score,
+                                                    'Fecha_identificación' => $fecha_creacion,
+                                                    'Fecha_expiración' => $expiration_date,
+                                                    'Controles' => $controles];
+                                    }
+                                    else
+                                    {
+                                        $datos[$i] = ['id' => $risk->id,
+                                                    'Organizaciones' => $orgs_name,
+                                                    'Objetivos' => $objetivos,
+                                                    'Riesgo' => $risk->name,
+                                                    'Descripción' => $description,
+                                                    'Categoría' => $risk_category,
+                                                    'Causas' => $causas,
+                                                    'Efectos' => $efectos,              
+                                                    'Pérdida_esperada' => $risk->expected_loss,
+                                                    'Probabilidad' => $probabilidad,
+                                                    'Impacto' => $impacto,
+                                                    'Score' => $score,
+                                                    'Fecha_identificación' => $fecha_creacion,
+                                                    'Fecha_expiración' => $expiration_date,
+                                                    'Controles' => $controles,
+                                                    'short_des' => $short_des,
+                                                    'type' => $risk->type];
+                                    }
+
+                                }
+                                $i += 1;
+                            }
                         }
+                        
                 }
 
-                if (strstr($_SERVER["REQUEST_URI"],'genexcel')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
-                {
-                    return $datos;
-                }
-                else
-                {
-                    if (Session::get('languaje') == 'en')
-                    {
-                        return view('en.reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org,'categories' => $categories]);
-                    }
-                    else
-                    {
-                        return view('reportes.matriz_riesgos',['datos'=>$datos,'value'=>$value,'organizations'=>$organizations,'org_selected' => $org,'categories' => $categories]);
-                    }
-                    //return json_encode($datos);
-                }
-            }
-        }
-        catch (\Exception $e)
-        {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
-        }
+        return $datos;
     }
-
     /**
      * Remove the specified resource from storage.
      *
@@ -2883,7 +3235,7 @@ class RiesgosController extends Controller
             //obtengo maxima fecha para obtener última evaluación
                     $fecha = DB::table('evaluation_risk')
                                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                    ->where('evaluation_risk.organization_risk_id','=',$risk->id)
+                                    ->where('evaluation_risk.organization_risk_id','=',$risk->org_risk_id)
                                     ->max('updated_at');
 
                     $fecha_up = new DateTime($fecha);
@@ -2891,7 +3243,7 @@ class RiesgosController extends Controller
                     //obtenemos evaluación de riesgo de negocio (si es que hay)---> Ultima (mayor fecha updated_at)
                     $evaluations = DB::table('evaluation_risk')
                                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                    ->where('evaluation_risk.organization_risk_id','=',$risk->id)
+                                    ->where('evaluation_risk.organization_risk_id','=',$risk->org_risk_id)
                                     ->where('evaluations.consolidation','=',1)
                                     ->whereNotNull('evaluation_risk.avg_probability')
                                     ->whereNotNull('evaluation_risk.avg_impact')
@@ -2997,7 +3349,7 @@ class RiesgosController extends Controller
                                 'name' => $risk->risk_name,
                                 'description' => $risk->description,
                                 'risk_category_id' => $risk->risk_category_id,
-                                 'id' => $risk->id,
+                                 'id' => $risk->org_risk_id,
                                  'avg_probability' => $avg_probability,
                                  'avg_impact' => $avg_impact,
                                  'proba_def' => $proba_def,

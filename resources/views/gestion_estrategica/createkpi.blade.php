@@ -54,8 +54,7 @@
 			{!!Form::close()!!}
 
 			<center>
-				{!! link_to_route('kpi2', $title = 'Volver', $parameters = ['organization_id'=>$org_id],
-                 	$attributes = ['class'=>'btn btn-danger'])!!}
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
 			<center>
 
 

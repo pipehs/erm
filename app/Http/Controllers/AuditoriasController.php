@@ -2930,6 +2930,7 @@ class AuditoriasController extends Controller
                             ->where('audit_plans.organization_id','=',$org_id)
                             ->select('id','name','description','objectives','scopes','status','resources','methodology','initial_date','final_date','rules')
                             ->get();
+
                 foreach ($audit_plans as $plan)
                 {
                     if ($plan->objectives == "" || $plan->objectives == NULL)
@@ -3094,6 +3095,14 @@ class AuditoriasController extends Controller
                     {
                         $j = 0;
                         $auditorias = array();
+
+                        //ACT 23-01-18: Hacemos verificador para caso de muchas auditorías (aun no se implementa este verificador)
+                        $ver = 0;
+                        if (count($audits) > 4)
+                        {
+                            $ver = 1;
+                        }
+
                         foreach ($audits as $audit)
                         {
                             $auditorias[$j] = ['id' => $audit->id, 'name' => $audit->name];
@@ -3102,7 +3111,28 @@ class AuditoriasController extends Controller
                     }
                     if (Session::get('languaje') == 'en')
                     {
-                        $results[$i] = [
+                        if (strstr($_SERVER["REQUEST_URI"],'genexcelaudit')) //ACT 23-01-18: guardamos sólo los datos necesarios para el excel (no se envía nuevo dato verificador de cantidad de auditorias)
+                        {
+                            $results[$i] = [
+                                    'Audit_plan' => $plan->name,
+                                    'Description' => $plan->description,
+                                    'Audits' => $auditorias,
+                                    'Objectives' => $objectives,
+                                    'Scopes' => $scopes,
+                                    'Resources' => $resources,
+                                    'Methodology' => $methodology,
+                                    'Rules' => $rules,
+                                    'Hours_man_plan' => $hh_plan,
+                                    'Hours_man_real' => $hh_real,
+                                    'Initial_date' => $initial_date,
+                                    'Final_date' => $final_date
+                                    
+                            ];
+                        }
+                        else
+                        {
+                            $results[$i] = [
+                                    'id' => $plan->id,
                                     'Audit_plan' => $plan->name,
                                     'Description' => $plan->description,
                                     'Audits' => $auditorias,
@@ -3115,12 +3145,33 @@ class AuditoriasController extends Controller
                                     'Hours_man_real' => $hh_real,
                                     'Initial_date' => $initial_date,
                                     'Final_date' => $final_date,
-                                
-                        ];
+                                    'verificador' => $ver                        
+                            ];
+                        }
                     }
                     else
                     {
-                        $results[$i] = [
+                        if (strstr($_SERVER["REQUEST_URI"],'genexcelaudit')) //ACT 23-01-18: guardamos sólo los datos necesarios para el excel (no se envía nuevo dato verificador de cantidad de auditorias)
+                        {
+                            $results[$i] = [
+                                    'Plan_de_auditoría' => $plan->name,
+                                    'Descripción_plan' => $plan->description,
+                                    'Auditorías' => $auditorias,
+                                    'Objetivos' => $objectives,
+                                    'Alcances' => $scopes,
+                                    'Recursos' => $resources,
+                                    'Metodología' => $methodology,
+                                    'Normas' => $rules,
+                                    'Horas_hombre_plan' => $hh_plan,
+                                    'Horas_hombre_real' => $hh_real,
+                                    'Fecha_inicio' => $initial_date,
+                                    'Fecha_fin' => $final_date        
+                            ];
+                        }
+                        else
+                        {
+                            $results[$i] = [
+                                    'id' => $plan->id,
                                     'Plan_de_auditoría' => $plan->name,
                                     'Descripción_plan' => $plan->description,
                                     'Auditorías' => $auditorias,
@@ -3133,8 +3184,9 @@ class AuditoriasController extends Controller
                                     'Horas_hombre_real' => $hh_real,
                                     'Fecha_inicio' => $initial_date,
                                     'Fecha_fin' => $final_date,
-                                
-                        ];
+                                    'verificador' => $ver         
+                            ];
+                        }
                     }
                     $i += 1;
                 }
@@ -3381,6 +3433,21 @@ class AuditoriasController extends Controller
         try
         {
             $audits = \Ermtool\Audit::getAudits2($org);
+            return json_encode($audits);
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    //obtiene auditorías de un plan
+    public function getAudits3($audit_plan_id)
+    {
+        try
+        {
+            $audits = \Ermtool\Audit::getAudits($audit_plan_id);
             return json_encode($audits);
         }
         catch (\Exception $e)

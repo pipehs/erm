@@ -95,8 +95,9 @@ class Audit extends Model
     public static function getAudits($audit_plan)
     {
         return DB::table('audit_audit_plan')
-                ->where('audit_plan_id','=',$audit_plan)
-                ->select('audit_id as id')
+                ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                ->where('audit_audit_plan.audit_plan_id','=',$audit_plan)
+                ->select('audits.id as id','audits.name','audits.description')
                 ->get();
     }
 

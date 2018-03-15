@@ -1,5 +1,5 @@
 <?php
-
+//ARCHIVO OBSOLETO
 namespace Ermtool\Http\Controllers;
 
 use Illuminate\Http\Request;

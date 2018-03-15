@@ -41,7 +41,7 @@
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
       <p>En esta secci&oacute;n podr&aacute; ver la matriz para los riesgos de negocio y/o de procesos de las distintas organizaciones ingresadas en el sistema. </p>
 
-      @if (!isset($datos))
+      @if (!isset($value))
       	{!!Form::open(['route'=>'genriskmatrix','method'=>'GET','class'=>'form-horizontal'])!!}
 
       			<div class="form-group">
@@ -96,17 +96,17 @@
 			{!! link_to_route('genriskmatrix', $title = 'Matriz Riesgos de Negocio', $parameters = 1, $attributes = ['class'=>'btn btn-success']) !!}
 			-->
 
-	{!!Form::close()!!}
+		{!!Form::close()!!}
 
-	@else
+	@endif
 			<hr>
 			<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
-
+		@if (isset($value))
 			@if ($value == 0)
 				<thead>
 				<th>Proceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>ID Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Descripci&oacute;n Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Categoría<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Causas<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -191,15 +191,24 @@
 				@endforeach
 
 				</table>
-		
+			
 				<div id="boton_exportar">
-					{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "3,$org_selected", $attributes = ['class'=>'btn btn-success']) !!}
+				@if (isset($_GET['risk_subcategory_id']))
+					<?php $cat = $_GET['risk_subcategory_id']; ?>
+				@elseif (isset($_GET['risk_category_id']) && !isset($_GET['risk_subcategory_id']))
+					<?php $cat = $_GET['risk_category_id']; ?>
+				@else
+					<?php $cat = NULL; ?>
+				@endif
+
+				{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "3,$org_selected,$cat", $attributes = ['class'=>'btn btn-success']) !!}
+
 				</div>
 			@elseif ($value == 1)
 				<thead>
 				<th>Organizaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Objetivo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>ID Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Descripci&oacute;n Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Categoría<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Causas<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -282,6 +291,105 @@
 					{!! link_to_route('risk_matrix', $title = 'Volver', $parameters = NULL,
 		                 $attributes = ['class'=>'btn btn-danger'])!!}
 			<center>
+		@else
+			<thead>
+				<th>Organizacion(es)<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Tipo Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Proceso(s) / Objetivo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Descripci&oacute;n Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Categoría<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Causas<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Efectos<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Pérdida esperada<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Probabilidad<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Impacto<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Score<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Fecha expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Control<label><input type="text" placeholder="Filtrar" /></label></th>
+				</thead>
+
+				@foreach ($datos as $dato)
+					<tr>
+					<td>{{$dato['Organizaciones']}}</td>
+					<td>
+					@if ($dato['type'] == 0)
+						Riesgo de proceso
+					@elseif ($dato['type'] == 1)
+						Riesgo de negocio
+					@endif
+					</td>
+					<td>
+					@if ($dato['type'] == 1)
+						@foreach($dato['Objetivos'] as $obj)
+							<li>{{$obj}}</li>
+						@endforeach
+					@else
+						@if (!empty($dato['Procesos']))
+							@foreach($dato['Procesos'] as $process)
+								<li>{{$process}}</li>
+							@endforeach
+						@else
+							No se han definido procesos
+						@endif	
+					@endif
+					</td>
+					<td>{{$dato['Riesgo']}}</td>
+					<td>
+					@if ($dato['Descripción'] == NULL || $dato['Descripción'] == "")
+						No se ha definido descripci&oacute;n
+					@else
+						@if (strlen($dato['Descripción']) > 100)
+							<div id="description_{{$dato['id']}}" title="{{ $dato['Descripción'] }}">{{ $dato['short_des'] }}...
+							<div style="cursor:hand" onclick="expandir({{ $dato['id'] }},'{{ $dato['Descripción'] }}','{{ $dato['short_des'] }}')">
+							<font color="CornflowerBlue">Ver completo</font>
+							</div></div>
+						@else
+							{{ $dato['Descripción'] }}
+						@endif
+					@endif
+					</td>
+					<td>{{$dato['Categoría']}}</td>
+					<td>
+					@if (!empty($dato['Causas']))
+						@foreach($dato['Causas'] as $c)
+							<li>{{$c}}</li>
+						@endforeach
+					@else
+						No se han definido causas
+					@endif
+					</td>
+					<td>
+					@if (!empty($dato['Efectos']))
+						@foreach($dato['Efectos'] as $e)
+							<li>{{$e}}</li>
+						@endforeach
+					@else
+						No se han definido efectos
+					@endif
+					</td>
+					<td>{{$dato['Pérdida_esperada']}}</td>
+					<td>{{$dato['Probabilidad']}}</td>
+					<td>{{$dato['Impacto']}}</td>
+					<td>{{$dato['Score']}}</td>
+					<td>{{$dato['Fecha_expiración']}}</td>
+					<td>
+					@if (!empty($dato['Controles']))
+						@foreach($dato['Controles'] as $c)
+							<li>{{$c}}</li>
+						@endforeach
+					@else
+						No se han definido controles
+					@endif
+					</td>
+					</tr>
+				@endforeach
+
+				</table>
+		
+				<div id="boton_exportar">
+					{!! link_to_route('genexcel', $title = 'Exportar', $parameters = "2,0", $attributes = ['class'=>'btn btn-success']) !!}
+				</div>
 		@endif
 
       </div>

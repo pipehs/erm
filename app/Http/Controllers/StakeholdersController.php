@@ -840,20 +840,21 @@ class StakeholdersController extends Controller
     }
 
     //obtiene stakeholders pertenecientes a una organización
+    //ACT 24-01-18: Puede ser de cualquier organización
     public function getStakeholders($org)
     {
         try
         {
             $results = array();
 
-            $stakeholders = \Ermtool\Organization::find($org)->stakeholders;
+            $stakeholders = \Ermtool\Stakeholder::where('status',0)->get();
 
             $i = 0;
             foreach ($stakeholders as $stake)
             {
                 $results[$i] = [
-                        'rut' => $stake['id'],
-                        'fullname' => $stake['name'].' '.$stake['surnames']
+                        'rut' => $stake->id,
+                        'fullname' => $stake->name.' '.$stake->surnames
                 ];
                 $i += 1;
             }

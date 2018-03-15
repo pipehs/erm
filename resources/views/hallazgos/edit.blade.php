@@ -74,6 +74,11 @@
 
 			@endif
 
+			@if ($issue->classification_id != NULL)
+				 $("#classification").val({{$issue->classification_id}})
+				 $("#classification").change()
+			@endif
+
 		});
 
 		$('#status').change(function() {

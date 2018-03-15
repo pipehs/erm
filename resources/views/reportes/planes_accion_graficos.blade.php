@@ -253,7 +253,10 @@
           ['Subprocesos',     {{ $cont_subprocess }}],
           ['Procesos',     {{ $cont_process }}],
           ['Controles de proceso',     {{ $cont_process_ctrl }}],
-          ['Controles de entidad',     {{ $cont_bussiness_ctrl }}]
+          ['Controles de entidad',     {{ $cont_bussiness_ctrl }}],
+          ['Riesgos',     {{ $cont_risk }}],
+          ['Compliance',     {{ $cont_compliance }}],
+          ['Canal de denuncia',     {{ $cont_compliant_channel }}]
         ]);
 
         var options = {
@@ -528,8 +531,97 @@
 					});
 				}
 
+				if (sel[0].row == 9) //riesgos
+				{
+					var title = '<b>Planes de acción asociados a Riesgos</b>';
+
+					var text ='<table class="table table-striped table-datatable"><thead><th>Riesgos</th><th>Hallazgo</th><th>Recomendaciones</th><th>Plan</th><th>Estado</th><th>Fecha final</th><th>Responsable</th></thead>';
+
+					@foreach ($action_plans_bussiness_ctrl as $plan)
+							text += '<tr><td>'
+							@foreach ($plan['risks'] as $r)
+								text += '<li>{{ $r->name }} - {{ $r->description }}</li>'
+							@endforeach
+
+							text += '</td>';
+							text += '<td>{{ $plan["issue"] }}';
+							text += '<td>{{ $plan["recommendations"]}}</td>';
+							text += '<td>{{ $plan["description"] }}</td>';
+							text += '<td>{{ $plan["status"] }}</td>';
+							text += '<td>{{ $plan["final_date"] }}</td>';
+							text += '<td>{{ $plan["stakeholder"] }}</td>';
+							text += '</tr>';
+					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.24.{{ $org }}">Exportar</a>'
+
+					swal({   
+						title: title,   
+						text: text,
+						customClass: 'swal-wide3',   
+						html: true 
+					});
+				}
+
+				if (sel[0].row == 10) //compliance
+				{
+					var title = '<b>Planes de acción asociados a Compliance</b>';
+
+					var text ='<table class="table table-striped table-datatable"><thead><th>Hallazgo</th><th>Recomendaciones</th><th>Plan</th><th>Estado</th><th>Fecha final</th><th>Responsable</th></thead>';
+
+					@foreach ($action_plans_compliance as $plan)
+							text += '<tr>'
+							text += '<td>{{ $plan["issue"] }}';
+							text += '<td>{{ $plan["recommendations"]}}</td>';
+							text += '<td>{{ $plan["description"] }}</td>';
+							text += '<td>{{ $plan["status"] }}</td>';
+							text += '<td>{{ $plan["final_date"] }}</td>';
+							text += '<td>{{ $plan["stakeholder"] }}</td>';
+							text += '</tr>';
+					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.25.{{ $org }}">Exportar</a>'
+
+					swal({   
+						title: title,   
+						text: text,
+						customClass: 'swal-wide3',   
+						html: true 
+					});
+				}
+
+				if (sel[0].row == 11) //canal de denuncia
+				{
+					var title = '<b>Planes de acción asociados a Canal de denuncia</b>';
+
+					var text ='<table class="table table-striped table-datatable"><thead><th>Hallazgo</th><th>Recomendaciones</th><th>Plan</th><th>Estado</th><th>Fecha final</th><th>Responsable</th></thead>';
+
+					@foreach ($action_plans_compliant_channel as $plan)
+							text += '<tr>'
+							text += '<td>{{ $plan["issue"] }}';
+							text += '<td>{{ $plan["recommendations"]}}</td>';
+							text += '<td>{{ $plan["description"] }}</td>';
+							text += '<td>{{ $plan["status"] }}</td>';
+							text += '<td>{{ $plan["final_date"] }}</td>';
+							text += '<td>{{ $plan["stakeholder"] }}</td>';
+							text += '</tr>';
+					@endforeach
+
+					text += '</table>'
+					text += '<a class="btn btn-success" href="genexcelgraficos.26.{{ $org }}">Exportar</a>'
+
+					swal({   
+						title: title,   
+						text: text,
+						customClass: 'swal-wide3',   
+						html: true 
+					});
+				}
+
 			}
-      		console.log(sel);
+      		//console.log(sel);
 		}
       }
     @else
@@ -843,16 +935,16 @@
         var data = google.visualization.arrayToDataTable([
           ['Porcentaje', 'Cantidad'],
           ['0 %',     {{ $cont_progress_percentage0 }}],
-          ['10 %',     {{ $cont_progress_percentage10 }}],
-          ['20 %',     {{ $cont_progress_percentage20 }}],
-          ['30 %',     {{ $cont_progress_percentage30 }}],
-          ['40 %',     {{ $cont_progress_percentage40 }}],
-          ['50 %',     {{ $cont_progress_percentage50 }}],
-          ['60 %',     {{ $cont_progress_percentage60 }}],
-          ['70 %',     {{ $cont_progress_percentage70 }}],
-          ['80 %',     {{ $cont_progress_percentage80 }}],
-          ['90 %',     {{ $cont_progress_percentage90 }}],
-          ['100 %',    {{ $cont_progress_percentage100 }}],
+          ['<= 10 %',     {{ $cont_progress_percentage10 }}],
+          ['<= 20 %',     {{ $cont_progress_percentage20 }}],
+          ['<= 30 %',     {{ $cont_progress_percentage30 }}],
+          ['<= 40 %',     {{ $cont_progress_percentage40 }}],
+          ['<= 50 %',     {{ $cont_progress_percentage50 }}],
+          ['<= 60 %',     {{ $cont_progress_percentage60 }}],
+          ['<= 70 %',     {{ $cont_progress_percentage70 }}],
+          ['<= 80 %',     {{ $cont_progress_percentage80 }}],
+          ['<= 90 %',     {{ $cont_progress_percentage90 }}],
+          ['<= 100 %',    {{ $cont_progress_percentage100 }}],
         ]);
 
         var options = {
@@ -885,21 +977,39 @@
 							var title = '<b>Planes de acci&oacute;n porcentaje avance {{$i}}0%</b>';
 						@endif
 
-							var text ='<table class="table table-striped table-datatable"><thead><th>Plan de acci&oacute;n</th><th>Estado</th><th>Fecha final</th><th>Responsable</th><th>Comentarios de avance</th></thead>';
+							var text ='<table class="table table-striped table-datatable"><thead><th>Plan de acci&oacute;n</th><th>Estado</th><th>Fecha final</th><th>Responsable</th><th>% de avance</th><th>Comentarios de avance</th></thead>';
 
 							@foreach ($action_plans_progress_percentage as $plan)
-								@if ($plan['progress_percentage'] == $i*10)
-									text += '<td>{{$plan["description"]}}</td>';
-									text += '<td>{{$plan["status"]}}</td>';
-									text += '<td>{{$plan["final_date"]}}</td>';
-									text += '<td>{{$plan["stakeholder"]}}</td>';
-									@if ($plan['progress_comments'] != NULL)
-										text += '<td>{{$plan["progress_comments"]}}</td>';
-									@else
-										text += '<td>Sin comentarios</td>';
-									@endif
+								@if ($i == 0)
+									@if ($plan['progress_percentage'] == $i*10)
+										text += '<tr><td>{{$plan["description"]}}</td>';
+										text += '<td>{{$plan["status"]}}</td>';
+										text += '<td>{{$plan["final_date"]}}</td>';
+										text += '<td>{{$plan["stakeholder"]}}</td>';
+										text += '<td>{{ $plan["progress_percentage"] }}</td>';
+										@if ($plan['progress_comments'] != NULL)
+											text += '<td>{{$plan["progress_comments"]}}</td>';
+										@else
+											text += '<td>Sin comentarios</td>';
+										@endif
 
-									text += '</tr>';
+										text += '</tr>';
+									@endif
+								@else
+									@if ($plan['progress_percentage'] > ($i-1)*10 && $plan['progress_percentage'] <= $i*10)
+										text += '<tr><td>{{$plan["description"]}}</td>';
+										text += '<td>{{$plan["status"]}}</td>';
+										text += '<td>{{$plan["final_date"]}}</td>';
+										text += '<td>{{$plan["stakeholder"]}}</td>';
+										text += '<td>{{ $plan["progress_percentage"] }}</td>';
+										@if ($plan['progress_comments'] != NULL)
+											text += '<td>{{$plan["progress_comments"]}}</td>';
+										@else
+											text += '<td>Sin comentarios</td>';
+										@endif
+
+										text += '</tr>';
+									@endif
 								@endif
 							@endforeach
 							text += '</table>'

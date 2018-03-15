@@ -87,22 +87,22 @@
 							No tiene documentos
 						@else
 							<div style="cursor:hand" id="descargar_{{ $issue['id'] }}" onclick="descargar(2,'{{$issue['evidence'][0]['url'] }}')"><font color="CornflowerBlue"><u>Descargar</u></font></div>
-				@foreach (Session::get('roles') as $role)
-					@if ($role != 6)
-							<img src="assets/img/btn_eliminar.png" height="40px" width="40px" onclick="eliminar_ev({{ $issue['id'] }},2)">
-							</br>
-					<?php break; ?>
-					@endif
-				@endforeach
+					@foreach (Session::get('roles') as $role)
+						@if ($role != 6)
+								<img src="assets/img/btn_eliminar.png" height="40px" width="40px" onclick="eliminar_ev({{ $issue['id'] }},2)">
+								</br>
+						<?php break; ?>
 						@endif
-				@foreach (Session::get('roles') as $role)
-					@if ($role != 6)
-						<td>{!! link_to_route('edit_hallazgo', $title = 'Editar', $parameters = ['org'=>$org_id,'id'=>$issue['id'],'test_id'=>$audit_test_id],$attributes = ['class'=>'btn btn-success'])!!}</td>
-						<td>
-						<button class="btn btn-danger" onclick="eliminar2({{ $issue['id'] }},'{{ $issue['name'] }}','hallazgo','El hallazgo')">Eliminar</button></td>
-					<?php break; ?>
-					@endif
-				@endforeach
+					@endforeach
+							@endif
+					@foreach (Session::get('roles') as $role)
+						@if ($role != 6)
+							<td>{!! link_to_route('edit_hallazgo', $title = 'Editar', $parameters = ['org'=>$org_id,'id'=>$issue['id'],'test_id'=>$audit_test_id],$attributes = ['class'=>'btn btn-success'])!!}</td>
+							<td>
+							<button class="btn btn-danger" onclick="eliminar2({{ $issue['id'] }},'{{ $issue['name'] }}','hallazgo','El hallazgo')">Eliminar</button></td>
+						<?php break; ?>
+						@endif
+					@endforeach
 					</tr>
 				@endforeach
 				</td></tr></table>

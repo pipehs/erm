@@ -2,7 +2,7 @@
 					<div class="form-group">
 						{!!Form::label('Seleccione tipo de hallazgo',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::select('kind',['0'=>'Procesos','1'=>'Subprocesos','2'=>'Organización','3'=>'Controles de proceso','4'=>'Controles de entidad','5'=>'Programas de auditoría','6'=>'Auditorías','7'=>'Pruebas de auditoría'],null,['placeholder'=>'- Seleccione -','id' => 'kind','required'=>'true'])!!}
+							{!!Form::select('kind',['0'=>'Procesos','1'=>'Subprocesos','2'=>'Organización','3'=>'Controles de proceso','4'=>'Controles de entidad','5'=>'Programas de auditoría','6'=>'Auditorías','7'=>'Pruebas de auditoría','8'=>'Riesgo','9'=>'Compliance','10'=>'Canal de Denuncia'],null,['placeholder'=>'- Seleccione -','id' => 'kind','required'=>'true'])!!}
 						</div>
 					</div>
 
@@ -98,9 +98,27 @@
 						</div>
 					</div>
 
+					<div class="form-group">
+						<label for="status" class="control-label col-sm-4">Estado del plan</label>
+						<div class="col-sm-4">
+							@if (isset($action_plan) && $action_plan->status == 1))
+								<input type="checkbox" name="status" id="status" data-toggle="toggle" data-on="Cerrado" data-off="Abierto" data-width="100" data-offstyle="primary" data-onstyle="danger" checked>
+							@else
+								<input type="checkbox" name="status" id="status" data-toggle="toggle" data-on="Cerrado" data-off="Abierto" data-width="100" data-offstyle="primary" data-onstyle="danger">
+							@endif
+						</div>
+					</div>
+
 					@if (isset($org_id))
 						{!!Form::hidden('org_id',$org_id)!!}
 					@endif
+
+					{!!Form::hidden('description_plan2',null,['id'=>'description_plan2'])!!}
+					{!!Form::hidden('stakeholder_id2',null,['id'=>'stakeholder_id2'])!!}
+					{!!Form::hidden('final_date2',null,['id'=>'final_date2'])!!}
+					{!!Form::hidden('percentage2',null,['id'=>'percentage2'])!!}
+					{!!Form::hidden('progress_comments2',null,['id'=>'progress_comments2'])!!}
+
 
 					<div class="form-group">
 						<center>

@@ -92,9 +92,9 @@ class ProcesosController extends Controller
 
                     foreach ($orgs as $organization)
                     {
-                        $organizaciones[$k] = array('proceso_id'=>$process['id'],
-                                                    'id'=>$organization->id,
-                                                    'nombre'=>$organization->name);
+                        $organizaciones[$k] = [
+                            'id'=>$organization->id,
+                            'nombre'=>$organization->name];
 
                         $k += 1;
                     }
@@ -170,7 +170,9 @@ class ProcesosController extends Controller
                                         'proceso_dependiente'=>$proceso_dependiente['name'],
                                         'proceso_dependiente_id'=>$proceso_dependiente['id'],
                                         'estado'=>$process['status'],
-                                        'short_des' => $short_des);
+                                        'short_des' => $short_des,
+                                        'organizaciones' => $organizaciones
+                                    );
                     $i += 1;
                 }
 

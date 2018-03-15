@@ -40,11 +40,9 @@
 			{!!Form::model($risk_category,['route'=>['categorias_risks.update',$risk_category->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.categorias_riesgos.form')
 			{!!Form::close()!!}
-				<center>
-				{!!Form::open(['url'=>'categorias_risks','method'=>'GET'])!!}
-					{!!Form::submit('Volver', ['class'=>'btn btn-danger'])!!}
-				{!!Form::close()!!}
-				<center>
+			<center>
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+			<center>
 			</div>
 		</div>
 	</div>

@@ -78,6 +78,15 @@
 				<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 				<thead>
 					<th>Origen del hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
+			@foreach ($action_plans as $action_plan)
+				@if ($action_plan['origin'] == 'Hallazgo de control de proceso')
+					<!--<th>Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Control<label><input type="text" placeholder="Filtrar" /></label></th>-->
+					<?php break; ?>
+				@else
+					<?php break; ?>
+				@endif
+			@endforeach
 					<th>Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -99,6 +108,8 @@
 				@foreach ($action_plans as $action_plan)
 					<tr>
 						<td>{{ $action_plan['origin'] }}</td>
+
+
 						<td>{{ $action_plan['issue'] }}</td>
 						<td>
 						@if ($action_plan['description'] == '')

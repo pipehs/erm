@@ -42,15 +42,15 @@
 						</div>
 					</div>
 
-					<!--
+					
 					<div class="form-group">
 						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
-					-->
-
+					
+					<!--
 					<div class="form-group">
 						{!!Form::label('Establecimiento',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
@@ -71,6 +71,8 @@
 							{!!Form::textarea('supervision',null,['id'=>'supervision','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
+					-->
+					
 					<div class="form-group">
 						{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
@@ -138,7 +140,7 @@
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Estado(s) Financiero(s)',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Cuenta(s) Contable(s)',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-6">
 						@if (strstr($_SERVER["REQUEST_URI"],'edit'))
 							<select name="financial_statement_id[]" multiple id="financial_statement_id">

@@ -84,12 +84,24 @@ class Objective extends Model
 
     public static function getObjectivesFromOrgRisk($risk,$org)
     {
-        return DB::table('objectives')
+        //ACT 03-01-18: Obtenemos objetivos del riesgo para todas las organizaciones (para matriz de riesgos)
+        if ($org == NULL)
+        {
+            return DB::table('objectives')
+                ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
+                ->where('objective_risk.risk_id','=',$risk)
+                ->select('objectives.name','objectives.description')
+                ->get();
+        }
+        else
+        {
+            return DB::table('objectives')
                 ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
                 ->where('objective_risk.risk_id','=',$risk)
                 ->where('objectives.organization_id','=',$org)
                 ->select('objectives.name','objectives.description')
                 ->get();
+        }
     }
 
     public static function getFatherObjectives($org)

@@ -92,8 +92,7 @@
 				</tr>
 				</table>
 				<center>
-					{!! link_to_route('kri', $title = 'Volver', $parameters = NULL,
-                 		$attributes = ['class'=>'btn btn-danger'])!!}
+					<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
 				<center>
 				</div>
 

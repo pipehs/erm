@@ -38,6 +38,30 @@
 							null,['placeholder'=>'- Seleccione -','required'=>'true'])!!}
 						</div>
 					</div>
+				@elseif(isset($audit_tests))
+					<div class="form-group">
+						<label for="audit_test_id" class="col-sm-4 control-label">Seleccione prueba involucrada</label>
+						<div class="col-sm-4">
+							<select name="audit_test_id">
+								<option value="" selected disabled>- Seleccione -</option>
+
+								@foreach ($audit_tests as $test2)
+									<option value="{{ $test2->id }}">{{ $test2->audit_plan }} - {{ $test2->audit }} - {{ $test2->audit_program }} - {{ $test2->name }}</option>
+								@endforeach
+							</select>
+						</div>
+					</div>
+				@elseif(isset($risks))
+					<div class="form-group">
+						<label for="audit_test_id" class="col-sm-4 control-label">Seleccione Riesgo(s) involucrado(s)</label>
+						<div class="col-sm-4">
+							<select name="organization_risk_id[]" multiple="true">
+								@foreach ($risks as $risk)
+									<option value="{{ $risk->id }}">{{ $risk->name }} - {{ $risk->description }}</option>
+								@endforeach
+							</select>
+						</div>
+					</div>
 				@endif
 					<div class="form-group">
 						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
@@ -64,8 +88,12 @@
 					<div class="form-group">
 						{!!Form::label('Clasificaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::select('classification',['0'=>'Oportunidad de mejora','1'=>'Deficiencia','2'=>'Debilidad significativa'],null,
-													['placeholder'=>'- Seleccione -'])!!}
+							<select name="classification" id="classification">
+							<option value="" selected>- Seleccione -</option>
+							@foreach ($classifications as $c)
+								<option value="{{ $c->id }}">{{ $c->name }}</option>
+							@endforeach
+							</select>
 						</div>
 					</div>
 

@@ -137,8 +137,8 @@
 			@endforeach
 			<br>
 			<center>
-			<a href="ver_encuestas" class="btn btn-danger">Volver</a>
-			</center>
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+			<center>
 @endif
 
 		

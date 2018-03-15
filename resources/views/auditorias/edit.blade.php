@@ -55,8 +55,7 @@
 				{!!Form::close()!!}
 
 				<center>
-					{!! link_to_route('plan_auditoria.show', $title = 'Volver', $parameters = $audit_plan->id,
-                 		$attributes = ['class'=>'btn btn-danger'])!!}
+					<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
 				<center>
 			</div>
 		</div>

@@ -137,15 +137,15 @@
 							var i = 0
 							//seteamos datos en select de riesgos / procesos
 							$(datos).each( function() {
-								riesgos[i] = {id: this.id, name: this.risk_name,description: this.description,risk_category_id: this.risk_category_id};
+								riesgos[i] = {id: this.org_risk_id, name: this.risk_name,description: this.description,risk_category_id: this.risk_category_id};
 								i++
 								if (this.description == null)
 								{
-									$("#select_riesgos").append('<option value="' + this.id + '">' + this.risk_name + ' - (Sin descripción)</option>');
+									$("#select_riesgos").append('<option value="' + this.org_risk_id + '">' + this.risk_name + ' - (Sin descripción)</option>');
 								}
 								else
 								{
-									$("#select_riesgos").append('<option value="' + this.id + '">' + this.risk_name + ' - ' + this.description +'</option>');
+									$("#select_riesgos").append('<option value="' + this.org_risk_id + '">' + this.risk_name + ' - ' + this.description +'</option>');
 								}
 								
 							});

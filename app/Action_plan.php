@@ -21,6 +21,15 @@ class Action_plan extends Model
     			->first();
     }
 
+    //ACT 29-01-18: Por ahora haremos 2 funciones, pero luego se debe actualizar y dejar sólo una (con el nombre de la de arriba), ya que posteriormente se debe actualizar y un hallazgo puede tener más de un plan de acción
+    public static function getActionPlanFromIssue2($issue)
+    {
+        return DB::table('action_plans')
+                ->where('issue_id','=',$issue)
+                ->select('id','description','status','stakeholder_id','final_date')
+                ->get();
+    }
+
     public static function getOpenedActionPlans()
     {
     	return DB::table('action_plans')
@@ -128,6 +137,18 @@ class Action_plan extends Model
                     ->where('action_plans.id','=',$id)
                     ->select('controls.name as control')
                     ->first();
+        }
+        else if ($kind == 10) //info de riesgos
+        {
+            return DB::table('risks')
+                ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                ->join('issue_organization_risk','issue_organization_risk.organization_risk_id','=','organization_risk.id')
+                ->join('issues','issues.id','=','issue_organization_risk.issue_id')
+                ->join('action_plans','action_plans.issue_id','=','issues.id')
+                ->where('action_plans.id','=',$id)
+                ->select('organization_risk.id','risks.name','risks.description')
+                ->groupBy('organization_risk.id','risks.name','risks.description')
+                ->get();
         }
 
     }

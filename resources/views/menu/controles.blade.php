@@ -9,6 +9,7 @@
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 			<li><a href="evaluar_controles" class="{{ activeMenu('evaluar_controles') }}">Evaluaci&oacute;n de Controles</a></li>
+			<li><a href="residual_manual" class="{{ activeMenu('residual_manual') }}">Evaluaci&oacute;n Residual de Riesgos</a></li>
 		<?php break; ?>
 		@endif
 	@endforeach

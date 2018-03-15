@@ -306,7 +306,7 @@
         //document.getElementById('grafico1').value = chart.getImageURI();
       }
   @else
-    $('#alternativo').html('<b>Aun no se han creado riesgos</b>');
+    $('#alternativo').html('<b>Aun no se han creado riesgos, o éstos no se han categorizado</b>');
   @endif
   </script>
 @stop

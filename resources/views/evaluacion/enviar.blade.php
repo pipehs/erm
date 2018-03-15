@@ -71,8 +71,7 @@
 
 			<div>
 			<center>
-				{!! link_to_route('evaluacion_agregadas', $title = 'Volver', $parameters = NULL,
-				 $attributes = ['class'=>'btn btn-success'])!!}
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
 			<center>
 			</div>
 		</div>

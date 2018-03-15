@@ -45,13 +45,13 @@
 </div>
 
 {!!Form::hidden('control_id',$id)!!}
+{!!Form::hidden('org_id',$org_id)!!}
 <div class="form-group">
 	<center>
 		{!!Form::submit('Guardar', ['id'=>'btnsubmit','class'=>'btn btn-success'])!!}
 	</center>
 </div>
 
-<center>
-	{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
-	<!--{!! link_to_route('volver_evaluacion', $title = 'Volver', $parameters = ['control_id' => $id],$attributes = ['class'=>'btn btn-danger'])!!}-->
-<center>
+	<center>
+		<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+	<center>

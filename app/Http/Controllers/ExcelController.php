@@ -11,6 +11,7 @@ use Ermtool\Http\Controllers\RiesgosController as Riesgos; //Para poder generar 
 use Ermtool\Http\Controllers\AuditoriasController as Audits;
 use Ermtool\Http\Controllers\PlanesAccionController as PlanesAccion;
 use Ermtool\Http\Controllers\IssuesController as Issues;
+use Ermtool\Http\Controllers\HomeController as Home;
 use Auth;
 use DB;
 use Session;
@@ -18,12 +19,21 @@ use Redirect;
 
 class ExcelController extends Controller
 {
-    public function generarExcel($value,$org)
+    public function generarExcel($value,$org,$cat)
     {
         try
         {
             global $id_org;
-            $id_org = $org;
+            if ($org == 0)
+            {
+                $id_org = NULL;
+            }
+            else
+            {
+                $id_org = $org;
+            }
+            global $id_cat;
+            $id_cat = $cat;
             if ($value == 0) //se genera excel para controles de proceso
             {
                 Excel::create('Matriz controles de procesos '.date("d-m-Y"), function($excel) {
@@ -97,6 +107,44 @@ class ExcelController extends Controller
 
                 })->export('xls');
             }
+            //ACT 03-01-18: Matriz de Riesgos genéricos
+            else if ($value == 2) 
+            {
+                Excel::create('Matriz de riesgos '.date("d-m-Y"), function($excel) {
+
+                    // título excel
+                    $excel->setTitle('Matriz de riesgos');
+
+                    //creador y compañia
+                    $excel->setCreator('Administrador B-GRC')
+                          ->setCompany('IT Apps');
+
+                    //descripción
+                    $excel->setDescription('Matriz de riesgos');
+
+                    $excel->sheet('Riesgos', function($sheet) {
+                        $riesgo = new Riesgos;
+                        $datos = $riesgo->generarMatriz(0,$GLOBALS['id_org'],$GLOBALS['id_cat']);
+
+                        //$datos2 = json_decode($datos);
+                        $sheet->fromArray($datos);
+
+                        //editamos formato de salida de celdas
+                        $sheet->cells('A1:O1', function($cells) {
+                                $cells->setBackground('#013ADF');
+                                $cells->setFontColor('#ffffff');
+                                $cells->setFontFamily('Calibri');
+                                $cells->setFontWeight('bold');
+                                $cells->setFontSize(16);
+                        });
+
+                        $sheet->freezeFirstRow();
+
+                    });
+
+                })->export('xls');
+            }
+
             else if ($value == 3) //se genera excel para riesgos de proceso
             {
                 Excel::create('Matriz de riesgos de proceso '.date("d-m-Y"), function($excel) {
@@ -113,7 +161,7 @@ class ExcelController extends Controller
 
                     $excel->sheet('Riesgos', function($sheet) {
                         $riesgo = new Riesgos;
-                        $datos = $riesgo->generarMatriz(0,$GLOBALS['id_org']);
+                        $datos = $riesgo->generarMatriz(0,$GLOBALS['id_org'],$GLOBALS['id_cat']);
 
                         //$datos2 = json_decode($datos);
                         $sheet->fromArray($datos);
@@ -133,7 +181,7 @@ class ExcelController extends Controller
 
                 })->export('xls');
             }
-            else if ($value == 4) //se genera excel para riesgos de proceso
+            else if ($value == 4) //se genera excel para riesgos de negocio
             {
                 Excel::create('Matriz de riesgos de negocio '.date("d-m-Y"), function($excel) {
 
@@ -149,7 +197,7 @@ class ExcelController extends Controller
 
                     $excel->sheet('Riesgos', function($sheet) {
                         $riesgo = new Riesgos;
-                        $datos = $riesgo->generarMatriz(1,$GLOBALS['id_org']);
+                        $datos = $riesgo->generarMatriz(1,$GLOBALS['id_org'],$GLOBALS['id_cat']);
 
                         //$datos2 = json_decode($datos);
                         $sheet->fromArray($datos);
@@ -925,6 +973,85 @@ class ExcelController extends Controller
                     $excel->setCreator('Administrador B-GRC')
                           ->setCompany('B-GRC - IXUS Consulting');
                     $excel->setDescription('Reporte de planes de acción controles de negocio');
+                    $excel->sheet('Planes de acción', function($sheet) {
+                        $plan = new PlanesAccion;
+                        $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
+                        $sheet->fromArray($datos);
+                        $sheet->cells('A1:G1', function($cells) {
+                                $cells->setBackground('#013ADF');
+                                $cells->setFontColor('#ffffff');
+                                $cells->setFontFamily('Calibri');
+                                $cells->setFontWeight('bold');
+                                $cells->setFontSize(16);
+                        });
+
+                        $sheet->freezeFirstRow();
+                    });
+
+                })->export('xls');
+            }
+
+            //ACT 12-03-18: Gráficos para planes asociados a riesgo, compliance o canal de denuncia
+            else if ($GLOBALS['id2'] == 24)
+            {
+                Excel::create('Planes de acción riesgos '.date("d-m-Y"), function($excel) {
+
+                    $excel->setTitle('Planes de acción Riesgos');
+                    $excel->setCreator('Administrador B-GRC')
+                          ->setCompany('B-GRC - IXUS Consulting');
+                    $excel->setDescription('Reporte de planes de acción asociados a Riesgos');
+                    $excel->sheet('Planes de acción', function($sheet) {
+                        $plan = new PlanesAccion;
+                        $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
+                        $sheet->fromArray($datos);
+                        $sheet->cells('A1:G1', function($cells) {
+                                $cells->setBackground('#013ADF');
+                                $cells->setFontColor('#ffffff');
+                                $cells->setFontFamily('Calibri');
+                                $cells->setFontWeight('bold');
+                                $cells->setFontSize(16);
+                        });
+
+                        $sheet->freezeFirstRow();
+                    });
+
+                })->export('xls');
+            }
+
+            else if ($GLOBALS['id2'] == 25)
+            {
+                Excel::create('Planes de acción compliance '.date("d-m-Y"), function($excel) {
+
+                    $excel->setTitle('Planes de acción Compliance');
+                    $excel->setCreator('Administrador B-GRC')
+                          ->setCompany('B-GRC - IXUS Consulting');
+                    $excel->setDescription('Reporte de planes de acción asociados a Compliance');
+                    $excel->sheet('Planes de acción', function($sheet) {
+                        $plan = new PlanesAccion;
+                        $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
+                        $sheet->fromArray($datos);
+                        $sheet->cells('A1:G1', function($cells) {
+                                $cells->setBackground('#013ADF');
+                                $cells->setFontColor('#ffffff');
+                                $cells->setFontFamily('Calibri');
+                                $cells->setFontWeight('bold');
+                                $cells->setFontSize(16);
+                        });
+
+                        $sheet->freezeFirstRow();
+                    });
+
+                })->export('xls');
+            }
+
+            else if ($GLOBALS['id2'] == 26)
+            {
+                Excel::create('Planes de acción Canal de denuncia '.date("d-m-Y"), function($excel) {
+
+                    $excel->setTitle('Planes de acción Riesgos');
+                    $excel->setCreator('Administrador B-GRC')
+                          ->setCompany('B-GRC - IXUS Consulting');
+                    $excel->setDescription('Reporte de planes de acción asociados a Riesgos');
                     $excel->sheet('Planes de acción', function($sheet) {
                         $plan = new PlanesAccion;
                         $datos = $plan->indexGraficos2($GLOBALS['id2'],$GLOBALS['org2']);
@@ -1730,7 +1857,6 @@ class ExcelController extends Controller
                                         'role_id' => $role->id
                                     ]);
                                 }
-
                             }
                             else if ($_POST['kind'] == 5) //Plantillas Riesgos (KOAndina)
                             {
@@ -2030,6 +2156,35 @@ class ExcelController extends Controller
                                                 else
                                                 {
                                                     $control = \Ermtool\Control::find($control->id);
+
+                                                    //ACT 12-12-17: Vemos si es que existe en control_organization_risk, sino agregamos
+                                                    $c_o_r = DB::table('control_organization_risk')
+                                                            ->where('organization_risk_id','=',$org_risk->id)
+                                                            ->where('control_id','=',$control->id)
+                                                            ->get(['id']);
+
+                                                    if (empty($c_o_r))
+                                                    {
+                                                        $row['e_mail_control'] = strtolower($row['e_mail_control']);
+                                                        $user_control = \Ermtool\Stakeholder::getUserByMail($row['e_mail_control']);
+
+                                                        if (empty($user_control))
+                                                        {
+                                                            $user_control = NULL;
+                                                        }
+                                                        else
+                                                        {   
+                                                            $user_control = $user_control->id;
+                                                        }
+                                                            
+                                                        //insertamos control_organization_risk
+                                                        DB::table('control_organization_risk')
+                                                        ->insert([
+                                                            'organization_risk_id' => $org_risk->id,
+                                                            'control_id' => $control->id,
+                                                            'stakeholder_id'=>$user_control
+                                                        ]);
+                                                    }
 
                                                     if ($j > 1)
                                                     {
@@ -2465,8 +2620,8 @@ class ExcelController extends Controller
                                                         }
 
                                                         //ACT 07-12-17: Agregado para agregar controles que posiblemente no se hayan agregado antes, obtenemos id del último control para ponerle el id más grande
-                                                        //$newid = DB::table('controls')->max('id');
-                                                        //$newid = ($newid+1);
+                                                        $newid = DB::table('controls')->max('id');
+                                                        $newid = ($newid+1);
 
                                                         $nombre = 'Acción mitigante '.$newid.' - '.$row['organizacion'];
                                                         //$nombre = 'Acción mitigante '.($i+1).' - '.$row['organizacion'];
@@ -2547,6 +2702,35 @@ class ExcelController extends Controller
                                                     {
                                                         $control = \Ermtool\Control::find($control->id);
 
+                                                        //ACT 12-12-17: Vemos si es que existe en control_organization_risk, sino agregamos
+                                                        $c_o_r = DB::table('control_organization_risk')
+                                                                ->where('organization_risk_id','=',$org_risk->id)
+                                                                ->where('control_id','=',$control->id)
+                                                                ->get(['id']);
+
+                                                        if (empty($c_o_r))
+                                                        {
+                                                            $row['e_mail_control'] = strtolower($row['e_mail_control']);
+                                                            $user_control = \Ermtool\Stakeholder::getUserByMail($row['e_mail_control']);
+
+                                                            if (empty($user_control))
+                                                            {
+                                                                $user_control = NULL;
+                                                            }
+                                                            else
+                                                            {   
+                                                                $user_control = $user_control->id;
+                                                            }
+
+                                                            //insertamos control_organization_risk
+                                                            DB::table('control_organization_risk')
+                                                            ->insert([
+                                                                'organization_risk_id' => $org_risk->id,
+                                                                'control_id' => $control->id,
+                                                                'stakeholder_id'=>$user_control
+                                                            ]);
+                                                        }
+
                                                         if ($j > 1 && $j != 3)
                                                         {
                                                             if ($row['contribucion_acciones_mitigantes_'.$j] != '' && $row['contribucion_acciones_mitigantes_'.$j] != NULL)
@@ -2601,7 +2785,7 @@ class ExcelController extends Controller
                                         
 
                                         //ahora vemos si es que se debe cargar plan de acción
-                                        if ($row['plan_accion'] == 'si')
+                                        if ($row['plan_accion'] == 'si' || $row['plan_accion'] == 'SI')
                                         {
                                             //vemos si es que ya existe plan de acción
                                             $action_plan = \Ermtool\Action_plan::getActionPlanByDescription($control->description);
@@ -2630,6 +2814,7 @@ class ExcelController extends Controller
                                                             'control_id' => $control->id,
                                                             'created_at' => date('Y-m-d H:i:s'),
                                                             'updated_at' => date('Y-m-d H:i:s'),
+                                                            'organization_id' => $org->id
                                                         ]);
 
                                                 //agregamos plan de acción
@@ -2668,7 +2853,7 @@ class ExcelController extends Controller
                                             {
                                                 DB::table('progress_percentage')
                                                 ->insert([
-                                                    'percentage' => $row['estado_de_avance_0al_31_de_noviembre_2016']*100,
+                                                    'percentage' => $row['estado_de_avance_0al_30_de_noviembre_2016']*100,
                                                     'action_plan_id' => $action_plan->id,
                                                     'created_at' => date('2016-11-30 00:00:00'),
                                                     'updated_at' => date('2016-11-30 00:00:00')
@@ -2817,7 +3002,7 @@ class ExcelController extends Controller
                                                     $audit = $audit->id;
                                                 }
 
-                                                $audit_audit_plan = \Ermtool\Audit::getAuditAuditPlan($audit,$audit_plan);
+                                                $audit_audit_plan = \Ermtool\Audit::getAuditAuditPlan($audit_plan,$audit);
 
                                                 if (empty($audit_audit_plan))
                                                 {
@@ -3005,20 +3190,18 @@ class ExcelController extends Controller
                                               
                                         }
                                     }
-                                }
-                                
+                                }                            
                             }
 
                             else if ($_POST['kind'] == 8) //Plantilla Riesgos (genérica)
                             {
-                                
                                 foreach ($row as $row)
                                 {
 
                                 if (isset($row['nombre_riesgo']))
                                 {
 
-
+                                echo $row['subproceso'].'<br>';
                                 //creamos riesgo si es que no existe
                                 $risk = \Ermtool\Risk::getRiskByName2($row['nombre_riesgo']);
 
@@ -3026,27 +3209,45 @@ class ExcelController extends Controller
                                 {                             
                                     //identificamos categorías de Riesgo
                                     //nivel 1
-                                    $risk_category1 = \Ermtool\Risk_category::getRiskCategoryByName($row['categoria_1']);
-
-                                    if (empty($risk_category1))
+                                    if($row['categoria_1'] != '')
                                     {
-                                            $risk_category1 = \Ermtool\Risk_category::create([
-                                                'name' => $row['categoria_1'],
-                                                'description' => $row['categoria_1']
-                                            ]);
+                                        $risk_category1 = \Ermtool\Risk_category::getRiskCategoryByName($row['categoria_1']);
+
+                                        if (empty($risk_category1))
+                                        {
+                                                $risk_category1 = \Ermtool\Risk_category::create([
+                                                    'name' => $row['categoria_1'],
+                                                    'description' => $row['categoria_1']
+                                                ]);
+                                        }
                                     }
-
-                                    $risk_category2 = \Ermtool\Risk_category::getRiskCategoryByName($row['categoria_2_riesgo_general']);
-
-                                    if (empty($risk_category2))
+                                    
+                                    if ($row['categoria_2'] != '')
                                     {
-                                            $risk_category2 = \Ermtool\Risk_category::create([
-                                                'name' => $row['categoria_2_riesgo_general'],
-                                                'description' => $row['categoria_2_riesgo_general'],
-                                                'risk_category_id' => $risk_category1->id
-                                            ]);
-                                    }
+                                        $risk_category2 = \Ermtool\Risk_category::getRiskCategoryByName($row['categoria_2']);
 
+                                        if (empty($risk_category2))
+                                        {
+                                                $risk_category2 = \Ermtool\Risk_category::create([
+                                                    'name' => $row['categoria_2'],
+                                                    'description' => $row['categoria_2'],
+                                                    'risk_category_id' => $risk_category1->id
+                                                ]);
+                                        }
+                                    }
+                                    
+                                    if (isset ($risk_category2))
+                                    {
+                                        $rk = $risk_category2->id;
+                                    }
+                                    else if (isset($risk_category1))
+                                    {
+                                        $rk = $risk_category1->id;
+                                    }
+                                    else
+                                    {
+                                        $rk = NULL;
+                                    }
                                     if ($row['descripcion'] == '' || $row['descripcion'] == NULL)
                                     {
                                         $description = $row['descripcion'];
@@ -3056,14 +3257,30 @@ class ExcelController extends Controller
                                         $description = $row['descripcion'].' - '.$row['descripcion'];
                                     }
 
+                                    //solo para DB de prueba (NorteGrande), agregamos id
+                                    //$maxid = DB::table('risks')->max('id');
+                                    //$id = $maxid+1;
                                     $description = eliminarSaltos($description);
+                                    $name = eliminarSaltos($row['nombre_riesgo']);
+
+                                    if ($row['fecha_expiracion'] != '')
+                                    {
+                                        $fecha_exp = $row['fecha_expiracion'];
+                                    }
+                                    else
+                                    {
+                                        $fecha_exp = NULL;
+                                    }
                                     //creamos riesgo
                                     $risk = \Ermtool\Risk::create([
-                                            'name'=>$row['nombre_riesgo'],
+                                            //'id' => $id,
+                                            'name'=>$name,
                                             'description'=>$description,
                                             'type'=> 0,
                                             'type2'=> 1,
-                                            'risk_category_id'=>$risk_category2->id
+                                            'risk_category_id'=>$rk,
+                                            'status' => 0,
+                                            'expiration_date' => $fecha_exp
                                     ]);
                                 }
                                 //separamos organizaciones por espacio        
@@ -3096,19 +3313,32 @@ class ExcelController extends Controller
                                 //cargamos enlace entre subproceso y riesgo
                                 $subprocess = \Ermtool\Subprocess::find($subprocess->id);
                                 $subprocess->risks()->attach($risk->id);
+                                /*
+                                //Para prueba NG
+                                $maxid = DB::table('risk_subprocess')->max('id');
+                                $id = $maxid+1;
 
-
+                                DB::table('risk_subprocess')
+                                    ->insert([
+                                        'id' => $id,
+                                        'risk_id' => $risk->id,
+                                        'subprocess_id' => $subprocess->id
+                                    ]);*/
                                 }
+                                
 
                                 }
                             }
 
                             else if ($_POST['kind'] == 9) //Plantilla Controles (genérica)
                             {
+                                //print_r($row);
                                 foreach ($row as $row)
                                 {
+                                //echo $row['riesgo_de_proceso'].'<br>';
                                     if (isset($row['organizacion']) && $row['organizacion'] != '')
                                     {
+                                        //echo $row['riesgo_de_proceso'].'<br>';
                                         $org = \Ermtool\Organization::getOrgByName($row['organizacion']);
                                         //obtenemos riesgo
                                         $risk = \Ermtool\Risk::getRiskByName($row['riesgo_de_proceso'],$org->id);
@@ -3149,7 +3379,7 @@ class ExcelController extends Controller
                                             }
 
                                             $nombre = $row['nombre_control'];
-
+                                            $nombre = eliminarSaltos($nombre);
                                             $porcentaje_cont = $row['de_contribucion']*100;
 
                                             $description = eliminarSaltos($row['descripcion']);
@@ -3163,18 +3393,26 @@ class ExcelController extends Controller
                                             {
                                                 $comments = NULL;
                                             }
+                                            //Para prueba NG
+                                            //$maxid = DB::table('controls')->max('id');
+                                            //$id = $maxid+1;
+
+                                            //echo strlen($nombre).'<br>';
                                             //insertamos control y obtenemos ID
                                             $control = \Ermtool\Control::create([
+                                                //'id' => $id,
                                                 'name'=>$nombre,
                                                 'description'=>$description,
                                                 'type2'=>0,
                                                 'evidence'=>$evidence,
                                                 'purpose'=>$purpose,
-                                                'porcentaje_cont'=> $porcentaje_cont,
-                                                'comments' => $comments
+                                                'stakeholder_id'=>$user_control,
+                                                //'porcentaje_cont'=> $porcentaje_cont,
+                                                //'comments' => $comments
                                             ]);
 
                                             //Guardamos en control_eval_risk_temp valor del control (autoevaluación)
+                                            /* No para NG
                                             DB::table('control_eval_risk_temp')
                                             ->insert([
                                                 'result' => $porcentaje_cont,
@@ -3183,14 +3421,14 @@ class ExcelController extends Controller
                                                 'auto_evaluation' => 1,
                                                 'status' => 1,
                                                 'created_at' => date('Y-m-d H:i:s')
-                                            ]);
+                                            ]); */
 
                                             //agregamos valor residual de riesgo
-                                            $controlclass = new Controles;
+                                            //$controlclass = new Controles;
                                             //ahora calculamos riesgo residual para ese riesgo
                                             //$controlclass->calcResidualRisk($org->id,$org_risk->id);
                                             //ahora calcularemos el valor de el o los riesgos a los que apunte este control
-                                            $controlclass->calcControlledRisk($control->id,$org->id,date('Y'),date('m'),date('d'));
+                                            //$controlclass->calcControlledRisk($control->id,$org->id,date('Y'),date('m'),date('d'));
                                         }
                                         else
                                         {
@@ -3198,6 +3436,7 @@ class ExcelController extends Controller
 
                                             $porcentaje_cont = $row['de_contribucion']*100;
                                             //Cambiamos estado de anteriores
+                                            /* No para NG
                                             DB::table('control_eval_risk_temp')
                                                 ->where('control_id','=',$control->id)
                                                 ->where('organization_id','=',$org->id)
@@ -3211,26 +3450,54 @@ class ExcelController extends Controller
                                                 'auto_evaluation' => 1,
                                                 'status' => 1,
                                                 'created_at' => date('Y-m-d H:i:s')
-                                            ]);
+                                            ]); */
 
                                             //actualizamos porcentaje de cont de control
-                                            $control->porcentaje_cont = $porcentaje_cont;
-                                            $control->save();
+                                            //$control->porcentaje_cont = $porcentaje_cont;
+                                            //$control->save();
 
                                             //calculamos nuevo riesgo residual para ese riesgo
                                             //$controlclass->calcResidualRisk($org->id,$org_risk->id);
                                             //calculamos nuevo valor de el o los riesgos a los que apunte este control
-                                            $controlclass = new Controles;
-                                            $controlclass->calcControlledRisk($control->id,$org->id,date('Y'),date('m'),date('d'));
+                                            //$controlclass = new Controles;
+                                            //$controlclass->calcControlledRisk($control->id,$org->id,date('Y'),date('m'),date('d'));
                                         }
 
+                                        //echo $row['riesgo_de_proceso'].'<br>';
                                         //insertamos control_organization_risk
-                                        DB::table('control_organization_risk')
-                                        ->insert([
-                                            'organization_risk_id' => $risk->org_risk_id,
-                                            'control_id' => $control->id,
-                                            'stakeholder_id'=>$user_control,
-                                        ]);
+                                        //ACT 15-12-17: Insertamos porcentaje_cont aquí
+                                        //vemos si existe el control para la org_risk
+                                        $cor = DB::table('control_organization_risk')
+                                                ->where('organization_risk_id','=',$risk->org_risk_id)
+                                                ->where('control_id','=',$control->id)
+                                                ->select('id')
+                                                ->first();
+
+                                        if (empty($cor))
+                                        {
+                                            if (isset($row['comentarios']) && $row['comentarios'] != '')
+                                            {
+                                                $comments = eliminarSaltos($row['comentarios']);
+                                            }
+                                            else
+                                            {
+                                                $comments = NULL;
+                                            }
+
+                                            //Para prueba NG
+                                            //$maxid = DB::table('control_organization_risk')->max('id');
+                                            //$id = $maxid+1;
+                                            DB::table('control_organization_risk')
+                                            ->insert([
+                                                //'id' => $id,
+                                                'organization_risk_id' => $risk->org_risk_id,
+                                                'control_id' => $control->id,
+                                                //'stakeholder_id'=>$user_control,
+                                                //'cont_percentage' => $porcentaje_cont,
+                                                //'comments' => $comments
+                                            ]);
+                                        }
+                                        
                                     }
                                 }
                             }
@@ -3460,6 +3727,7 @@ class ExcelController extends Controller
                                         $medidas = eliminarSaltos($medidas);
                                         $medidas = 'Medidas de mitigación: '.$medidas;
                                         //creamos riesgo
+                                        /*
                                         $risk = \Ermtool\Risk::create([
                                             'name'=>$row['titulo_del_riesgo'],
                                             'description'=>$description,
@@ -3467,13 +3735,24 @@ class ExcelController extends Controller
                                             'type2'=> 1,
                                             'risk_category_id'=>$risk_category,
                                             'comments' => $medidas,
-                                        ]);
+                                        ]); */
 
-                                        \Ermtool\Risk::insertOrganizationRisk($org->id,$risk->id,$user);
+                                        $risk_id = DB::table('risks')
+                                                ->insertGetId([
+                                                    'name'=>$row['titulo_del_riesgo'],
+                                                    'description'=>$description,
+                                                    'type'=> 0,
+                                                    'type2'=> 1,
+                                                    'risk_category_id'=>$risk_category,
+                                                    'created_at' => $row['fecha_identificacion'],
+                                                    'updated_at' => $row['fecha_identificacion']
+                                                ]);
+
+                                        \Ermtool\Risk::insertOrganizationRisk($org->id,$risk_id,$user,$medidas);
 
                                         //cargamos enlace entre subproceso y riesgo
                                         $subprocess = \Ermtool\Subprocess::find($subprocess->id);
-                                        $subprocess->risks()->attach($risk->id);
+                                        $subprocess->risks()->attach($risk_id);
 
                                         //agregamos causa
                                         $name = $row['factor_de_riesgo_causa'];
@@ -3493,7 +3772,7 @@ class ExcelController extends Controller
                                         //insertamos cause_risk
                                         DB::table('cause_risk')
                                             ->insert([
-                                                'risk_id' => $risk->id,
+                                                'risk_id' => $risk_id,
                                                 'cause_id' => $cause->id,
                                             ]);
                                         
@@ -3503,7 +3782,7 @@ class ExcelController extends Controller
                                     //obtenemos org_risk_id
                                     $org_risk = DB::table('organization_risk')
                                                 ->where('organization_id','=',$org->id)
-                                                ->where('risk_id','=',$risk->id)
+                                                ->where('risk_id','=',$risk_id)
                                                 ->select('id')
                                                 ->first();
 
@@ -3574,14 +3853,14 @@ class ExcelController extends Controller
                                         }
                                     }
 
-                                    $fecha = date('Y-m-d H:i:s');
+                                    //$fecha = date('Y-m-d H:i:s');
 
                                     if ($row['p_riesgo'] != '' && $row['p_riesgo'] != NULL && $row['i_riesgo'] != '' && $row['i_riesgo'] != NULL)
                                     {
                                         //primero creamos evaluación manual
                                         //seleccionamos evaluación (si es que existe)
                                         $eval_id1 = DB::table('evaluations')
-                                                ->where('created_at','=',$fecha)
+                                                ->where('created_at','=',$row['fecha_encuesta_2'])
                                                 ->select('id')
                                                 ->first();
 
@@ -3591,8 +3870,8 @@ class ExcelController extends Controller
                                                     'name' => 'Evaluación Manual',
                                                     'consolidation' => 1,
                                                     'description' => 'Evaluación Manual',
-                                                    'created_at' => $fecha,
-                                                    'updated_at' => $fecha,
+                                                    'created_at' => $row['fecha_encuesta_2'],
+                                                    'updated_at' => $row['fecha_encuesta_2'],
                                                 ]);
                                         }
                                         else
@@ -3642,8 +3921,215 @@ class ExcelController extends Controller
                                             ]);
                                         }
                                     }
+                                }                              
+                            }
+
+                            else if ($_POST['kind'] == 12) //Riesgos tipo
+                            {
+                                foreach ($row as $row)
+                                {
+
+                                //print_r($row);
+                                if (isset($row['nombre_riesgo']) && $row['nombre_riesgo'] != '')
+                                {
+                                    if ($row['perdida_esperada_num'] == '')
+                                        $expected_loss = NULL;
+                                    else
+                                        $expected_loss = $row['perdida_esperada_num'];
+
+                                    //eliminamos saltos de nombre y descripción
+                                    $name = eliminarSaltos($row['nombre_riesgo']);
+                                    $description = eliminarSaltos($row['descripcion']);
+
+                                    if ($row['fecha_expiracion'] == '')
+                                        $exp_date = NULL;
+                                    else
+                                        $exp_date = $row['fecha_expiracion'];
+
+                                    $risk = \Ermtool\Risk::create([
+                                        'name'=>$name,
+                                        'description'=>$description,
+                                        'type2'=>0,
+                                        'expiration_date'=>$exp_date,
+                                        'risk_category_id'=>NULL,
+                                        'expected_loss' => $expected_loss
+                                    ]);
+
+                                    //causas y efectos (al menos en parauco no hay)
                                 }
-                                  
+
+                                }
+                            }
+                            else if ($_POST['kind'] == 13) //Cuentas contables
+                            {
+                                //foreach ($row as $row)
+                                //{
+                                //print_r($row);
+
+                                if (isset($row['sub_grupo_cuenta']) && $row['sub_grupo_cuenta'] != '')
+                                {
+                                    //vemos si ya existe
+                                    $desc_cuenta_mayor = DB::table('financial_statements')
+                                                    ->where('name','=',$row['desc_cuenta_mayor'])
+                                                    ->select('id')
+                                                    ->first();
+
+                                    if (!empty($desc_cuenta_mayor) && $desc_cuenta_mayor != NULL)
+                                    {
+                                        //sólo actualizamos cta contable
+                                        if ($row['denominacion_rubro'] != '')
+                                        {
+                                            $description = $row['denominacion_rubro'];
+                                        }
+                                        else
+                                        {
+                                            $description = NULL;
+                                        }
+
+                                        $fs = \Ermtool\Financial_statement::find($desc_cuenta_mayor->id);
+
+                                        $fs->description = $description;
+                                        $fs->save();
+                                    }
+                                    else
+                                    {
+                                        if ($row['desc_cuenta_mayor'] != '')
+                                        {
+                                            $name = $row['desc_cuenta_mayor'];
+                                        }
+                                        else
+                                        {
+                                            $name = NULL;
+                                        }
+
+                                        if ($row['denominacion_rubro'] != '')
+                                        {
+                                            $description = $row['denominacion_rubro'];
+                                        }
+                                        else
+                                        {
+                                            $description = NULL;
+                                        }
+
+                                        $fs = \Ermtool\Financial_statement::create([
+                                            'name'=>$name,
+                                            'description'=>$description,
+                                            'status'=>0,
+                                            'kind'=>$row['sub_grupo_cuenta']
+                                        ]);
+                                    }
+                                    
+                                }
+                                //}
+                            }
+
+                            else if ($_POST['kind'] == 14) //Actualizar comentarios de control
+                            {
+                                //foreach ($row as $row)
+                                //{
+
+                                //obtenemos org
+                                $org = \Ermtool\Organization::getOrgByName($row['organizacion']);
+                                //obtenemos risk y org_risk_id
+                                $risk = \Ermtool\Risk::getRiskByName($row['riesgo_de_proceso'],$org->id);
+                                //obtenemos control
+                                $control = \Ermtool\Control::getControlByName($row['nombre_control']);
+
+                                //obtenemos control_organization_risk
+                                $cor = DB::table('control_organization_risk')
+                                        ->where('control_id','=',$control->id)
+                                        ->where('organization_risk_id','=',$risk->org_risk_id)
+                                        ->select('id')
+                                        ->first();
+
+                                //actualizamos comentarios
+                                if ($row['comentarios'] != '')
+                                {
+                                    $comments = $row['comentarios'];
+                                }
+                                else
+                                {
+                                    $comments = NULL;
+                                }
+
+                                DB::table('control_organization_risk')
+                                    ->where('id','=',$cor->id)
+                                    ->update([
+                                        'comments' => $comments
+                                    ]);
+
+                                //}
+                            }
+
+                            else if ($_POST['kind'] == 15) //Actualizar categorías de Riesgo (PArauco)
+                            {
+                                //foreach ($row as $row)
+                                //{
+                                /* ESTO ES EN CASO QUE YA SE ENCUENTREN CARGADAS LAS CATEGORÍAS */
+                                if ($row['nivel_3'] != '' && $row['nivel_3'] != ' ')
+                                {
+                                    $ref_risk = str_replace('_','',$row['ref_risk']);
+                                    $nivel3 = str_replace('.',' ',$row['nivel_3']);
+                                    $risk_category_name = $ref_risk.'_'.$nivel3;
+
+                                    //echo $risk_category.'<br>';
+                                }
+                                else
+                                {
+                                    $ref_risk = str_replace('_','',$row['ref_risk']);
+                                    $nivel2 = str_replace('.',' ',$row['nivel_2']);
+                                    $risk_category_name = $ref_risk.'_'.$nivel2;
+
+                                    //echo $risk_category.'<br>';
+                                }
+
+                                $risk_category = \Ermtool\Risk_category::getRiskCategoryByName($risk_category_name);
+
+                                if (!empty($risk_category))
+                                {
+                                    $risk_category = $risk_category->id;
+                                }
+                                else
+                                {
+                                    echo "NO ESTÁ LA CATEGORÍA: ".$risk_category_name.'<br>';
+                                }
+
+                                //echo $risk_category;
+                                
+                                //obtenemos org
+                                //$org = \Ermtool\Organization::getOrgByName($row['sociedad']);
+                                //obtenemos risk y org_risk_id
+                                /*
+                                if (!empty($org))
+                                {
+                                    $risk = \Ermtool\Risk::getRiskByName($row['titulo_del_riesgo'],$org->id);
+                                }
+                                else
+                                {
+                                    echo $row['sociedad'].'<br>';
+                                }
+                                */
+                                $risk = \Ermtool\Risk::getRiskByName($row['titulo_del_riesgo'],NULL);
+
+                                if (empty($risk))
+                                {
+                                    echo $row['titulo_del_riesgo'].'<br>';
+                                }
+                                else
+                                {
+                                    //obtenemos riesgo
+                                    $risk = \Ermtool\Risk::find($risk->id);
+                                    //echo $risk->id.'<br>';
+
+                                    //actualizamos categoría del riesgo
+                                    $risk->risk_category_id = $risk_category;
+                                    $risk->save();
+                                }
+                                
+                                
+                                
+
+                                //}
                             }
                         });
 
@@ -3662,5 +4148,50 @@ class ExcelController extends Controller
 
             return Redirect::to('importador');
         }
+    }
+
+    public function generarExcelConsolidado()
+    {
+        //try
+        //{
+            Excel::create('Reporte Consolidado '.date("d-m-Y"), function($excel) {
+
+                // título excel
+                $excel->setTitle('Reporte Consolidado');
+
+                //creador y compañia
+                $excel->setCreator('Sistema B-GRC')
+                      ->setCompany('It Apps Bussiness Solutions');
+
+                //descripción
+                $excel->setDescription('Reporte consolidado de Riesgos, Controles, Hallazgos y Planes de acción');
+
+                $excel->sheet('B-GRC', function($sheet) {
+                    $home = new Home;
+                    $datos = $home->reporteConsolidado();
+
+                    //$datos2 = json_decode($datos);
+                    $sheet->fromArray($datos);
+
+                    //editamos formato de salida de celdas
+                    $sheet->cells('A1:AP1', function($cells) {
+                            $cells->setBackground('#013ADF');
+                            $cells->setFontColor('#ffffff');
+                            $cells->setFontFamily('Calibri');
+                            $cells->setFontWeight('bold');
+                            $cells->setFontSize(16);
+                    });
+
+                    $sheet->freezeFirstRow();
+
+                });
+
+            })->export('xls');
+        //}
+        //catch (\Exception $e)
+        //{
+            //enviarMailSoporte($e);
+            //return view('errors.query',['e' => $e]);
+        //}
     }
 }

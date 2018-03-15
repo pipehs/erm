@@ -40,11 +40,9 @@
 			{!!Form::model($objective_category,['route'=>['categorias_objetivos.update',$objective_category->id],'method'=>'PUT','class'=>'form-horizontal'])!!}
 					@include('datos_maestros.categorias_objetivos.form')
 			{!!Form::close()!!}
-				<center>
-				{!!Form::open(['url'=>'categorias_objetivos','method'=>'GET'])!!}
-					{!!Form::submit('Volver', ['class'=>'btn btn-danger'])!!}
-				{!!Form::close()!!}
-				<center>
+			<center>
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+			<center>
 			</div>
 		</div>
 	</div>

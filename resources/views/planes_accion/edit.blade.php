@@ -70,11 +70,17 @@
 
 			@if ($action_plan->status == 1)
 
+				$('#description_plan2').val($('#description').val());
+				$('#stakeholder_id2').val($('#stakeholder_id').val())
+				$('#final_date2').val($('#final_date').val())
+				$('#percentage2').val($('#percentage').val())
+				$('#progress_comments2').val($('#progress_comments').val())
+
 				$('#description').attr('disabled','disabled');
 				$('#stakeholder_id').attr('disabled','disabled');
-				$('#issue_id').attr('disabled','disabled');
 				$('#final_date').attr('disabled','disabled');
-				$('#submit').attr('disabled','disabled');
+				$('#percentage').attr('disabled','disabled');
+				$('#progress_comments').attr('disabled','disabled');
 
 			@endif
 
@@ -84,13 +90,13 @@
 
 			if($('#status').is(':checked'))
 			{
-				$('#description_plan2').val($('#description_plan').val());
+				$('#description_plan2').val($('#description').val());
 				$('#stakeholder_id2').val($('#stakeholder_id').val())
 				$('#final_date2').val($('#final_date').val())
 				$('#percentage2').val($('#percentage').val())
 				$('#progress_comments2').val($('#progress_comments').val())
 
-				$('#description_plan').attr('disabled','disabled');
+				$('#description').attr('disabled','disabled');
 				$('#stakeholder_id').attr('disabled','disabled');
 				$('#final_date').attr('disabled','disabled');
 				$('#percentage').attr('disabled','disabled');
@@ -98,7 +104,7 @@
 			}
 			else
 			{
-				$('#description_plan').attr('disabled',false);
+				$('#description').attr('disabled',false);
 				$('#stakeholder_id').attr('disabled',false);
 				$('#final_date').attr('disabled',false);
 				$('#percentage').attr('disabled',false);

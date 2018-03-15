@@ -162,13 +162,9 @@
 	</div>
 </div> <!-- end div class="row"> -->
 
-{!!Form::open(['url'=>'enviar_encuesta','method'=>'GET','class'=>'form-horizontal'])!!}
-<center>
-	<div class="row form-group">
-	  {!!Form::submit('Volver', ['class'=>'btn btn-danger','name'=>'volver'])!!}
-	</div>
-</center>
-{!!Form::close()!!}
+			<center>
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+			<center>
 
 @stop
 

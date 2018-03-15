@@ -107,12 +107,12 @@
 					<h4><b>{{ $org }}: Hallazgos de Canal de denuncia</b></h4>
 				@endif
 
-		@foreach (Session::get('roles') as $role)
-			@if ($role != 6)
-				{!! link_to_route('create_hallazgo', $title = 'Agregar Hallazgo', $parameters = ['org'=>$org_id,'kind'=>$kind],$attributes = ['class'=>'btn btn-primary'])!!}
-			<?php break; ?>
-			@endif
-		@endforeach
+				@foreach (Session::get('roles') as $role)
+					@if ($role != 6)
+						{!! link_to_route('create_hallazgo', $title = 'Agregar Hallazgo', $parameters = ['org'=>$org_id,'kind'=>$kind],$attributes = ['class'=>'btn btn-primary'])!!}
+					<?php break; ?>
+					@endif
+				@endforeach
 				<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 				<thead>
 					@if ($kind == 0)
@@ -129,6 +129,10 @@
 						<th>Plan de auditor&iacute;a - Auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
 					@elseif ($kind == 7)
 						<th>Prueba de auditor&iacute;a<label><input type="text" placeholder="Filtrar" /></label></th>
+					@elseif ($kind == 8)
+						<th>Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+					@else
+						<th>Origen<label><input type="text" placeholder="Filtrar" /></label></th>
 					@endif
 					<th>Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -137,18 +141,26 @@
 					<th>Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Estado<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
-		@foreach (Session::get('roles') as $role)
-			@if ($role != 6)
-					<th>Editar</th>
-					<th>Eliminar</th>
-				<?php break; ?>
-			@endif
-		@endforeach
+					@foreach (Session::get('roles') as $role)
+						@if ($role != 6)
+								<th>Editar</th>
+								<th>Eliminar</th>
+							<?php break; ?>
+						@endif
+					@endforeach
 				</thead>
 
 				@foreach ($issues as $issue)
 					<tr>
-						<td>{{ $issue['origin'] }}</td>
+						<td>
+						@if ($kind == 8)
+							@foreach ($issue['origin'] as $risk)
+								<li>{{ $risk->name }}: {{ $risk->description }}</li>
+							@endforeach
+						@else
+							{{ $issue['origin'] }}
+						@endif
+						</td>
 						<td>{{ $issue['name'] }}</td>
 						<td>
 						@if (strlen($issue['description']) > 100)
@@ -183,14 +195,14 @@
 						</td>
 						<td>{{ $issue['status'] }}</td>
 						<td>{{ $issue['final_date'] }}</td>
-				@foreach (Session::get('roles') as $role)
-					@if ($role != 6)
-						<td>{!! link_to_route('edit_hallazgo', $title = 'Editar', $parameters = ['org'=>$org_id,'id'=>$issue['id'],'kind'=>$kind],$attributes = ['class'=>'btn btn-success'])!!}</td>
-						<td>
-						<button class="btn btn-danger" onclick="eliminar2({{ $issue['id'] }},'{{ $issue['name'] }}','hallazgo','El hallazgo')">Eliminar</button></td>
-					<?php break; ?>
-					@endif
-				@endforeach
+					@foreach (Session::get('roles') as $role)
+						@if ($role != 6)
+							<td>{!! link_to_route('edit_hallazgo', $title = 'Editar', $parameters = ['org'=>$org_id,'id'=>$issue['id'],'kind'=>$kind],$attributes = ['class'=>'btn btn-success'])!!}</td>
+							<td>
+							<button class="btn btn-danger" onclick="eliminar2({{ $issue['id'] }},'{{ $issue['name'] }}','hallazgo','El hallazgo')">Eliminar</button></td>
+						<?php break; ?>
+						@endif
+					@endforeach
 					</tr>
 				@endforeach
 

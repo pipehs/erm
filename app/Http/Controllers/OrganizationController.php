@@ -160,13 +160,16 @@ class OrganizationController extends Controller
             }
             else
             {
+                //ACTUALIZACIÓN 04-01-18: Agregamos tipos de moneda para materialidad
+                $kinds = ['1'=>'Peso','2'=>'Dólar','3'=>'Euro','4'=>'UF']; 
+
                 if (Session::get('languaje') == 'en')
                 {
                     //ACTUALIZACIÓN 31-10-17: Existirán distintos niveles de organizaciones, por lo que no sólo se mostrarán las de primer nivel, sino que todas
                     //$organizations = \Ermtool\Organization::where('status',0)->where('organization_id',NULL)->lists('name','id');
                     $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
-                    return view('en.datos_maestros.organization.create',['organizations'=>$organizations]);
+                    return view('en.datos_maestros.organization.create',['organizations'=>$organizations, 'kinds'=>$kinds]);
                 }
                 else
                 {
@@ -174,7 +177,7 @@ class OrganizationController extends Controller
                     //$organizations = \Ermtool\Organization::where('status',0)->where('organization_id',NULL)->lists('name','id');
                     $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
-                    return view('datos_maestros.organization.create',['organizations'=>$organizations]);
+                    return view('datos_maestros.organization.create',['organizations'=>$organizations, 'kinds'=>$kinds]);
                 }
             }
         }
@@ -234,6 +237,26 @@ class OrganizationController extends Controller
                     else
                         $exp_date = $_POST['expiration_date'];
 
+                    //ACT 08-01-17: Se agrega EBT al crear organización
+                    if (isset($_POST['ebt']))
+                    {
+                        if ($_POST['ebt'] != '')
+                        {
+                            $ebt = $_POST['ebt'];
+                            $kind = $_POST['kind_ebt'];
+                        }
+                        else
+                        {
+                            $ebt = NULL;
+                            $kind = NULL;
+                        }
+                    }
+                    else
+                    {
+                        $ebt = NULL;
+                        $kind = NULL;
+                    }
+
                     $org = \Ermtool\Organization::create([
                         'name' => $_POST['name'],
                         'description' => $_POST['description'],
@@ -242,7 +265,9 @@ class OrganizationController extends Controller
                         'organization_id' => $organizacion_padre,
                         'mision' => $mision,
                         'vision' => $vision,
-                        'target_client' => $target_client
+                        'target_client' => $target_client,
+                        'ebt' => $ebt,
+                        'kind_ebt' => $kind
                         ]);
 
                     if (Session::get('languaje') == 'en')
@@ -294,6 +319,8 @@ class OrganizationController extends Controller
             }
             else
             {
+                //ACTUALIZACIÓN 04-01-18: Agregamos tipos de moneda para materialidad
+                $kinds = ['1'=>'Peso','2'=>'Dólar','3'=>'Euro','4'=>'UF']; 
                 //ACTUALIZACIÓN 31-10-17: Existirán distintos niveles de organizaciones, por lo que no sólo se mostrarán las de primer nivel, sino que todas
                 //$organizations = \Ermtool\Organization::where('id','<>',$id)->where('status',0)->where('organization_id',NULL)->lists('name','id');
                 global $id2;
@@ -309,11 +336,11 @@ class OrganizationController extends Controller
 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.datos_maestros.organization.edit',['organizations'=>$organizations,'organization'=>$org]);
+                    return view('en.datos_maestros.organization.edit',['organizations'=>$organizations,'organization'=>$org, 'kinds'=>$kinds]);
                 }
                 else
                 {
-                    return view('datos_maestros.organization.edit',['organizations'=>$organizations,'organization'=>$org]);
+                    return view('datos_maestros.organization.edit',['organizations'=>$organizations,'organization'=>$org, 'kinds'=>$kinds]);
                 }
             }
         }
@@ -461,6 +488,26 @@ class OrganizationController extends Controller
                     else
                         $exp_date = $_POST['expiration_date'];
 
+                    //ACT 08-01-17: Se agrega EBT al crear organización
+                    if (isset($_POST['ebt']))
+                    {
+                        if ($_POST['ebt'] != '')
+                        {
+                            $ebt = $_POST['ebt'];
+                            $kind = $_POST['kind_ebt'];
+                        }
+                        else
+                        {
+                            $ebt = NULL;
+                            $kind = NULL;
+                        }
+                    }
+                    else
+                    {
+                        $ebt = NULL;
+                        $kind = NULL;
+                    }
+
                     $organization->name = $_POST['name'];
                     $organization->description = $_POST['description'];
                     $organization->expiration_date = $exp_date;
@@ -469,6 +516,8 @@ class OrganizationController extends Controller
                     $organization->mision = $mision;
                     $organization->vision = $vision;
                     $organization->target_client = $target_client;
+                    $organization->ebt = $ebt;
+                    $organization->kind_ebt = $kind;
 
                     $organization->save();
                     if (Session::get('languaje') == 'en')

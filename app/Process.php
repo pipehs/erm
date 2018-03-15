@@ -83,7 +83,19 @@ class Process extends Model
 
     public static function getProcessesFromRisk($org,$risk_id)
     {
-        return DB::table('processes')
+        if ($org == NULL)
+        {
+            return DB::table('processes')
+                ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                ->where('risk_subprocess.risk_id','=',$risk_id)
+                ->select('processes.id','processes.name','processes.description')
+                ->groupBy('processes.id','processes.name','processes.description')
+                ->get();
+        }
+        else
+        {
+            return DB::table('processes')
                 ->join('subprocesses','subprocesses.process_id','=','processes.id')
                 ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                 ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
@@ -92,6 +104,7 @@ class Process extends Model
                 ->select('processes.id','processes.name','processes.description')
                 ->groupBy('processes.id','processes.name','processes.description')
                 ->get();
+        }
     }
 
     public static function getProcessByName($name)

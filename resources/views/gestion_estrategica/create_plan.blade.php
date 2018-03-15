@@ -91,8 +91,8 @@
 				</div>
 
 				<center>
-					{!! link_to_route('objetivos.index', $title = 'Volver', $parameters = NULL, $attributes = ['class'=>'btn btn-danger']) !!}
-				</center>
+					<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+				<center>
 
 		{!!Form::close()!!}
 			</div>

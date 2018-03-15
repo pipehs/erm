@@ -84,11 +84,9 @@
 		<tr>
 		<td><ul>
 		<?php $cont = 0; //contador para verificar si hay organizaciones ?>
-		@foreach ($organizaciones as $organizacion)
-			@if ($organizacion['proceso_id'] == $proceso['id'] || $organizacion['proceso_id'] == $proceso['proceso_dependiente_id'])
-				<li>{{ $organizacion['nombre'] }}</li>
-				<?php $cont += 1;  //contador para verificar si hay organizaciones ?>
-			@endif
+		@foreach ($proceso['organizaciones'] as $organizacion)
+			<li>{{ $organizacion['nombre'] }}</li>
+			<?php $cont += 1;  //contador para verificar si hay organizaciones ?>
 		@endforeach
 		@if ($cont == 0)
 				No hay organización relacionada

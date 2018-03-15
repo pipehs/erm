@@ -40,9 +40,23 @@ class PlanesAccionController extends Controller
             $i = 0;
             $action_plans = array();
                 //primero obtenemos los planes de acción para los hallazgos que son directamente de la organización
+                //ACT 15-12-17: Verificamos que todos los demás campos (aparte de org_id) sean NULL
+                //ACT 08-03-18: Verificamos que no se encuentre en nueva tabla issue_organization_risk
                 $planes = DB::table('issues')
                             ->join('action_plans','action_plans.issue_id','=','issues.id')
+                            ->whereNotIn('issues.id',function($query) {
+                               $query->select('issue_id')->from('issue_organization_risk');
+                            })
                             ->where('issues.organization_id','=',$id)
+                            ->whereNull('issues.audit_audit_plan_id')
+                            ->whereNull('issues.audit_audit_plan_audit_program_id')
+                            ->whereNull('issues.audit_test_id')
+                            ->whereNull('issues.subprocess_id')
+                            ->whereNull('issues.process_id')
+                            ->whereNull('issues.control_id')
+                            ->whereNull('issues.control_evaluation_id')
+                            ->whereNull('issues.objective_id')
+                            ->whereNull('issues.subprocess_id')
                             ->groupBy('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
                                     'action_plans.status','action_plans.stakeholder_id','issues.name','issues.organization_id')
                             ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
@@ -124,9 +138,33 @@ class PlanesAccionController extends Controller
                                     'action_plans.status','action_plans.stakeholder_id','issues.name','issues.process_id')
                             ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
                                     'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.process_id as process_id')
+                            ->get();
+
+                //ACT 08-03-18: Planes de acción asociados a un riesgo
+                $planes9 = DB::table('issues')
+                            ->join('action_plans','action_plans.issue_id','=','issues.id')
+                            ->whereIn('issues.id',function($query) {
+                               $query->select('issue_id')->from('issue_organization_risk');
+                            })
+                            ->where('issues.organization_id','=',$id)
+                            /*
+                            ->whereNull('issues.audit_audit_plan_id')
+                            ->whereNull('issues.audit_audit_plan_audit_program_id')
+                            ->whereNull('issues.audit_test_id')
+                            ->whereNull('issues.subprocess_id')
+                            ->whereNull('issues.process_id')
+                            ->whereNull('issues.control_id')
+                            ->whereNull('issues.control_evaluation_id')
+                            ->whereNull('issues.objective_id')
+                            ->whereNull('issues.subprocess_id')*/
+                            ->where('issues.kind','=',3)
+                            ->groupBy('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                    'action_plans.status','action_plans.stakeholder_id','issues.name','issues.organization_id')
+                            ->select('action_plans.id','action_plans.description','action_plans.stakeholder_id','action_plans.final_date',
+                                    'action_plans.status','action_plans.stakeholder_id','issues.name as issue','issues.kind')
                             ->get(); 
 
-                $plans = array_merge($planes,$planes2,$planes3,$planes4,$planes5,$planes6,$planes7,$planes8);
+                $plans = array_merge($planes,$planes2,$planes3,$planes4,$planes5,$planes6,$planes7,$planes8,$planes9);
 
                 foreach ($plans as $plan)
                 {
@@ -208,6 +246,18 @@ class PlanesAccionController extends Controller
                         {
                             $origin = 'Process issue';
                         }
+                        else if (isset($plan->kind) && $plan->kind == 3)
+                        {
+                            $origin = "Risk issue";
+                        }
+                        else if (isset($plan->kind) && $plan->kind == 2)
+                        {
+                            $origin = "Compliance issue";
+                        }
+                        else if (isset($plan->kind) && $plan->kind == 1)
+                        {
+                            $origin = "Compliant Channel issue";
+                        }
                     }
                     else
                     {
@@ -259,6 +309,39 @@ class PlanesAccionController extends Controller
                         else if (isset($plan->type2) && $plan->type2 == 0)
                         {
                             $origin = 'Hallazgo de control de proceso';
+
+                            //ACT 26-12-17: Agregamos control y riesgo asociado (esto se deberá hacer para cada tipo)
+                            /*
+                            $control = \Ermtool\Control::getControlByActionPlan($plan->id,$id);
+                            $risks = \Ermtool\Risk::getRisksFromControl($id,$control->id);
+
+                            $origin2 = '';
+
+                            $last = end($risks);
+                            $j = 0;
+                            foreach ($risks as $risk)
+                            {
+                                if (!strstr($_SERVER["REQUEST_URI"],'genexcel'))
+                                {
+                                    
+                                    $origin2[$j] = $risk->name;
+                                    $j += 1;    
+                                }
+                                else
+                                {
+                                    if ($risk == $last)
+                                    {
+                                        $origin2 .= $risk->name;
+                                    }
+                                    else
+                                    {
+                                        $origin2 .= $risk->name.', ';
+                                    }
+                                }
+                            }
+
+                            $origin3 = $control->name;
+                            */
                         }
                         else if (isset($plan->subprocess_id))
                         {
@@ -267,6 +350,18 @@ class PlanesAccionController extends Controller
                         else if (isset($plan->process_id))
                         {
                             $origin = 'Hallazgo asociado a proceso';
+                        }
+                        else if (isset($plan->kind) && $plan->kind == 3)
+                        {
+                            $origin = "Hallazgo asociado a riesgo";
+                        }
+                        else if (isset($plan->kind) && $plan->kind == 2)
+                        {
+                            $origin = "Hallazgo de cumplimiento";
+                        }
+                        else if (isset($plan->kind) && $plan->kind == 1)
+                        {
+                            $origin = "Hallazgo de canal de denuncia";
                         }
                     }
                     if (strstr($_SERVER["REQUEST_URI"],'genexcelplan')) //se esta generado el archivo excel, por lo que los datos no son codificados en JSON
@@ -288,6 +383,7 @@ class PlanesAccionController extends Controller
                         {
                             $percentage = $per->percentage;
                             $percentage_comments = $per->comments;
+                            $percentage_comments = eliminarSaltos($percentage_comments);
                             $percentage_date = $per->updated_at;
                         }
 
@@ -331,7 +427,7 @@ class PlanesAccionController extends Controller
                         if (!empty($per))
                         {
                             $percentage = $per->percentage;
-                            $percentage_comments = $per->comments;
+                            $percentage_comments = eliminarSaltos($per->comments);
                             $percentage_date = $per->updated_at;
                         }
 
@@ -344,8 +440,19 @@ class PlanesAccionController extends Controller
 
                         $short_des = substr($plan->description,0,100);
 
+                        if (!isset($origin2))
+                        {
+                            $origin2 = NULL;
+                        }
+                        if (!isset($origin3))
+                        {
+                            $origin3 = NULL;
+                        }
+
                         $action_plans[$i] = [
                             'origin' => $origin,
+                            'origin2' => $origin2,
+                            'origin3' => $origin3,
                             'id' => $plan->id,
                             'issue' => $plan->issue,
                             'description' => $plan->description,
@@ -529,7 +636,7 @@ class PlanesAccionController extends Controller
             $org_name = \Ermtool\Organization::where('id',$org)->value('name');
 
             //obtenemos stakeholders de la misma organización
-            $stakes = \Ermtool\Stakeholder::listStakeholders($org);
+            $stakes = \Ermtool\Stakeholder::listStakeholders(NULL);
 
             if (Session::get('languaje') == 'en')
             {
@@ -559,21 +666,22 @@ class PlanesAccionController extends Controller
             $issues_temp = $i->getIssues($kind,NULL,$org,NULL);
 
             //dentro de estas issues, vemos cuales ya tienen planes de acción y las omitimos
+            //ACT 03-03-18: Desde ahora, un issue puede tener más de un plan de acción (por ahora comentaremos todo lo relacionado a la validación anterior)
             $i = 0;
             foreach ($issues_temp as $is)
             {
                 //obtenemos posible plan de acción de issue
-                $plan = \Ermtool\Action_plan::getActionPlanFromIssue($is['id']);
+                //$plan = \Ermtool\Action_plan::getActionPlanFromIssue($is['id']);
 
-                if (empty($plan)) //significa que no tiene plan, por lo que se puede crear
-                {
+                //if (empty($plan)) //significa que no tiene plan, por lo que se puede crear
+                //{
                     $issues[$i] = [
                         'id' => $is['id'],
                         'name' => $is['name'],
                     ];
 
                     $i += 1;
-                }
+                //}
             }
 
             return json_encode($issues);
@@ -611,7 +719,7 @@ class PlanesAccionController extends Controller
                             'description' => $description,
                             'stakeholder_id' => $stakeholder,
                             'final_date' => $final_date,
-                            'status' => 0,
+                            'status' => $status,
                         ]);
 
             //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance y comentarios de progreso
@@ -651,53 +759,107 @@ class PlanesAccionController extends Controller
                 $evidence = $request->file('evidence_doc');
                 DB::transaction(function() {
                     $logger = $this->logger;
-                    $status = 0;
 
-                    //verificamos ingreso de datos
-                    if (isset($_POST['description']) AND $_POST['description'] != "")
+                    if (isset($_POST['status']))
                     {
-                        $description = $_POST['description'];
-                        $description = eliminarSaltos($description);
+                        $status = 1;
+                        if ($_POST['description_plan2'] != "")
+                        {
+                            $description = eliminarSaltos($_POST['description_plan2']);
+                        }
+                        else
+                            $description = NULL;
+
+                        if ($_POST['stakeholder_id2'] != "")
+                        {
+                            $stakeholder_id = $_POST['stakeholder_id2'];
+                        }
+                        else
+                            $stakeholder_id = NULL;
+
+                        if ($_POST['final_date2'] != "")
+                        {
+                            $final_date = $_POST['final_date2'];
+                        }
+                        else
+                        {
+                            $final_date = NULL;
+                        }
+
+                        //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance
+                        if (isset($_POST['percentage2']) AND $_POST['percentage2'] != "")
+                        {
+                            $percentage = $_POST['percentage2'];
+                        }
+                        else
+                        {
+                            $percentage = NULL;
+                        }
+
+                        if (isset($_POST['progress_comments2']) AND $_POST['progress_comments2'] != "")
+                        {
+                            $progress_comments = $_POST['progress_comments2'];
+                        }
+                        else
+                        {
+                            $progress_comments = NULL;
+                        }
                     }
                     else
                     {
-                        $description = NULL;
-                    }
+                        $status = 0;
+                        //verificamos ingreso de datos
+                        if (isset($_POST['description']) AND $_POST['description'] != "")
+                        {
+                            $description = $_POST['description'];
+                            $description = eliminarSaltos($description);
+                            //ACTUALIZACIÓN 24-08-17: Eliminamos posibles comillas
+                            $description = str_replace('"','',$description);
+                            $description = str_replace("'","",$description);
+                        }
+                        else
+                        {
+                            $description = NULL;
+                        }
 
-                    if ($_POST['stakeholder_id'] != "")
-                    {
-                        $stakeholder_id = $_POST['stakeholder_id'];
-                    }
-                    else
-                        $stakeholder_id = NULL;
+                        if ($_POST['stakeholder_id'] != "")
+                        {
+                            $stakeholder_id = $_POST['stakeholder_id'];
+                        }
+                        else
+                            $stakeholder_id = NULL;
 
-                    if ($_POST['final_date'] != "")
-                    {
-                        $final_date = $_POST['final_date'];
-                    }
-                    else
-                    {
-                        $final_date = NULL;
-                    }
+                        if ($_POST['final_date'] != "")
+                        {
+                            $final_date = $_POST['final_date'];
+                        }
+                        else
+                        {
+                            $final_date = NULL;
+                        }
 
-                    //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance
-                    if (isset($_POST['percentage']) AND $_POST['percentage'] != "")
-                    {
-                        $percentage = $_POST['percentage'];
-                    }
-                    else
-                    {
-                        $percentage = NULL;
-                    }
+                        //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance
+                        if (isset($_POST['percentage']) AND $_POST['percentage'] != "")
+                        {
+                            $percentage = $_POST['percentage'];
+                        }
+                        else
+                        {
+                            $percentage = NULL;
+                        }
 
-                    if (isset($_POST['progress_comments']) AND $_POST['progress_comments'] != "")
-                    {
-                        $progress_comments = $_POST['progress_comments'];
-                        $progress_comments = eliminarSaltos($progress_comments);
-                    }
-                    else
-                    {
-                        $progress_comments = NULL;
+                        if (isset($_POST['progress_comments']) AND $_POST['progress_comments'] != "")
+                        {
+                            $progress_comments = $_POST['progress_comments'];
+                            $progress_comments = eliminarSaltos($progress_comments);
+
+                            $progress_comments = str_replace('"','',$progress_comments);
+                            $progress_comments = str_replace("'","",$progress_comments);
+                        }
+                        else
+                        {
+                            $progress_comments = NULL;
+                        }
                     }
 
                     $action_plan = \Ermtool\Action_plan::create([
@@ -783,7 +945,7 @@ class PlanesAccionController extends Controller
                 $org_id = \Ermtool\Organization::where('id',$_GET['org'])->value('id');
 
                 //obtenemos stakeholders de la misma organización
-                $stakes = \Ermtool\Stakeholder::listStakeholders($_GET['org']);
+                $stakes = \Ermtool\Stakeholder::listStakeholders(NULL);
 
                 $action_plan = \Ermtool\Action_plan::find($id);
 
@@ -849,61 +1011,109 @@ class PlanesAccionController extends Controller
                 $evidence = $request->file('evidence_doc');
                 DB::transaction(function() {
                     $logger = $this->logger;
-                    $status = 0;
 
-                    //verificamos ingreso de datos
-                    if (isset($_POST['description']) AND $_POST['description'] != "")
+                    //ACT 09-03-18: Agregamos estado del plan de acción
+                    if (isset($_POST['status']))
                     {
-                        $description = $_POST['description'];
-                        $description = eliminarSaltos($description);
-                        //ACTUALIZACIÓN 24-08-17: Eliminamos posibles comillas
-                        $description = str_replace('"','',$description);
-                        $description = str_replace("'","",$description);
+                        $status = 1;
+                        if ($_POST['description_plan2'] != "")
+                        {
+                            $description = eliminarSaltos($_POST['description_plan2']);
+                        }
+                        else
+                            $description = NULL;
+
+                        if ($_POST['stakeholder_id2'] != "")
+                        {
+                            $stakeholder_id = $_POST['stakeholder_id2'];
+                        }
+                        else
+                            $stakeholder_id = NULL;
+
+                        if ($_POST['final_date2'] != "")
+                        {
+                            $final_date = $_POST['final_date2'];
+                        }
+                        else
+                        {
+                            $final_date = NULL;
+                        }
+
+                        //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance
+                        if (isset($_POST['percentage2']) AND $_POST['percentage2'] != "")
+                        {
+                            $percentage = $_POST['percentage2'];
+                        }
+                        else
+                        {
+                            $percentage = NULL;
+                        }
+
+                        if (isset($_POST['progress_comments2']) AND $_POST['progress_comments2'] != "")
+                        {
+                            $progress_comments = $_POST['progress_comments2'];
+                        }
+                        else
+                        {
+                            $progress_comments = NULL;
+                        }
                     }
                     else
                     {
-                        $description = NULL;
-                    }
+                        $status = 0;
+                        //verificamos ingreso de datos
+                        if (isset($_POST['description']) AND $_POST['description'] != "")
+                        {
+                            $description = $_POST['description'];
+                            $description = eliminarSaltos($description);
+                            //ACTUALIZACIÓN 24-08-17: Eliminamos posibles comillas
+                            $description = str_replace('"','',$description);
+                            $description = str_replace("'","",$description);
+                        }
+                        else
+                        {
+                            $description = NULL;
+                        }
 
-                    if ($_POST['stakeholder_id'] != "")
-                    {
-                        $stakeholder_id = $_POST['stakeholder_id'];
-                    }
-                    else
-                        $stakeholder_id = NULL;
+                        if ($_POST['stakeholder_id'] != "")
+                        {
+                            $stakeholder_id = $_POST['stakeholder_id'];
+                        }
+                        else
+                            $stakeholder_id = NULL;
 
-                    if ($_POST['final_date'] != "")
-                    {
-                        $final_date = $_POST['final_date'];
-                    }
-                    else
-                    {
-                        $final_date = NULL;
-                    }
+                        if ($_POST['final_date'] != "")
+                        {
+                            $final_date = $_POST['final_date'];
+                        }
+                        else
+                        {
+                            $final_date = NULL;
+                        }
 
-                    //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance
-                    if (isset($_POST['percentage']) AND $_POST['percentage'] != "")
-                    {
-                        $percentage = $_POST['percentage'];
-                    }
-                    else
-                    {
-                        $percentage = NULL;
-                    }
+                        //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance
+                        if (isset($_POST['percentage']) AND $_POST['percentage'] != "")
+                        {
+                            $percentage = $_POST['percentage'];
+                        }
+                        else
+                        {
+                            $percentage = NULL;
+                        }
 
-                    if (isset($_POST['progress_comments']) AND $_POST['progress_comments'] != "")
-                    {
-                        $progress_comments = $_POST['progress_comments'];
-                        $progress_comments = eliminarSaltos($progress_comments);
+                        if (isset($_POST['progress_comments']) AND $_POST['progress_comments'] != "")
+                        {
+                            $progress_comments = $_POST['progress_comments'];
+                            $progress_comments = eliminarSaltos($progress_comments);
 
-                        $progress_comments = str_replace('"','',$progress_comments);
-                        $progress_comments = str_replace("'","",$progress_comments);
+                            $progress_comments = str_replace('"','',$progress_comments);
+                            $progress_comments = str_replace("'","",$progress_comments);
+                        }
+                        else
+                        {
+                            $progress_comments = NULL;
+                        }
                     }
-                    else
-                    {
-                        $progress_comments = NULL;
-                    }
-
                     //actualizamos action_plan de issue_id = $id
                     $action_plan = \Ermtool\Action_plan::find($GLOBALS['id2']);
                     $action_plan->description = $description;
@@ -1198,6 +1408,7 @@ class PlanesAccionController extends Controller
                 $cont_closed = 0;
 
                 //ACTUALIZACIÓN 03-02-2017: En gráfico mostraremos todos los tipos distintos
+                //ACT 12-03-2018: Agregamos gráficos de riesgo, compliance y canal de denuncia
                 $action_plans_ctrl = array();
                 $action_plans_audit_plan = array();
                 $action_plans_program = array();
@@ -1207,6 +1418,9 @@ class PlanesAccionController extends Controller
                 $action_plans_process = array();
                 $action_plans_process_ctrl = array();
                 $action_plans_bussiness_ctrl = array();
+                $action_plans_risk = array();
+                $action_plans_compliance = array();
+                $action_plans_compliant_channel = array();
 
                 $cont_ctrl = 0;
                 $cont_audit_plan = 0;
@@ -1217,6 +1431,9 @@ class PlanesAccionController extends Controller
                 $cont_process = 0;
                 $cont_process_ctrl = 0;
                 $cont_bussiness_ctrl = 0;
+                $cont_risk = 0;
+                $cont_compliance = 0;
+                $cont_compliant_channel = 0;
 
                 //ACTUALIZACIÓN 22-08-17: Variables para gráficos de porcentajes de avance
                 $action_plans_progress_percentage = array();
@@ -1631,6 +1848,53 @@ class PlanesAccionController extends Controller
                             ];
                         }
 
+                        //ACT 12-03-18: Agregamos hallazgos de Riesgo, compliance y canal de denuncia
+                        else if ($issue->kind == 10) //hallazgo de riesgo
+                        {
+                            $cont_risk += 1;
+                            $action_plans_risk[$i] = [
+                                'id' => $action_plan->id,
+                                'description' => $action_plan->description,
+                                'status' => $status,
+                                'final_date' => $final_date,
+                                'updated_at' => $updated_at,
+                                'stakeholder' => $user->name.' '.$user->surnames,
+                                'issue' => $issue->description,
+                                'recommendations' => $issue->recommendations,
+                                'risks' => $info
+                            ];
+                        }
+                        else if ($issue->kind == 11) //hallazgo de compliance
+                        {
+                            $cont_compliance += 1;
+                            $action_plans_compliance[$i] = [
+                                'id' => $action_plan->id,
+                                'description' => $action_plan->description,
+                                'status' => $status,
+                                'final_date' => $final_date,
+                                'updated_at' => $updated_at,
+                                'stakeholder' => $user->name.' '.$user->surnames,
+                                'issue' => $issue->description,
+                                'recommendations' => $issue->recommendations,
+                                'info' => NULL
+                            ];
+                        }
+                        else if ($issue->kind == 12) //hallazgo de canal de denuncia
+                        {
+                            $cont_compliant_channel += 1;
+                            $action_plans_compliant_channel[$i] = [
+                                'id' => $action_plan->id,
+                                'description' => $action_plan->description,
+                                'status' => $status,
+                                'final_date' => $final_date,
+                                'updated_at' => $updated_at,
+                                'stakeholder' => $user->name.' '.$user->surnames,
+                                'issue' => $issue->description,
+                                'recommendations' => $issue->recommendations,
+                                'info' => NULL
+                            ];
+                        }
+
                         //ACTUALIZACIÓN 22-08-17: Hacemos porcentajes de avance
                         $progress = DB::table('progress_percentage')
                                         ->where('action_plan_id','=',$action_plan->id)
@@ -1641,43 +1905,44 @@ class PlanesAccionController extends Controller
 
                         if (!empty($progress))
                         {
-                            if ($progress->percentage == 10)
+                            //ACT 15-01-18: Se hará con rangos por el caso de que haya otro valor
+                            if ($progress->percentage > 0 && $progress->percentage <= 10)
                             {
                                 $cont_progress_percentage10 += 1;
                             }
-                            else if ($progress->percentage == 20)
+                            else if ($progress->percentage > 10 && $progress->percentage <= 20)
                             {
                                 $cont_progress_percentage20 += 1;
                             }
-                            else if ($progress->percentage == 30)
+                            else if ($progress->percentage > 20 && $progress->percentage <= 30)
                             {
                                 $cont_progress_percentage30 += 1;
                             }
-                            else if ($progress->percentage == 40)
+                            else if ($progress->percentage > 30 && $progress->percentage <= 40)
                             {
                                 $cont_progress_percentage40 += 1;
                             }
-                            else if ($progress->percentage == 50)
+                            else if ($progress->percentage > 40 && $progress->percentage <= 50)
                             {
                                 $cont_progress_percentage50 += 1;
                             }
-                            else if ($progress->percentage == 60)
+                            else if ($progress->percentage > 50 && $progress->percentage <= 60)
                             {
                                 $cont_progress_percentage60 += 1;
                             }
-                            else if ($progress->percentage == 70)
+                            else if ($progress->percentage > 60 && $progress->percentage <= 70)
                             {
                                 $cont_progress_percentage70 += 1;
                             }
-                            else if ($progress->percentage == 80)
+                            else if ($progress->percentage > 70 && $progress->percentage <= 80)
                             {
                                 $cont_progress_percentage80 += 1;
                             }
-                            else if ($progress->percentage == 90)
+                            else if ($progress->percentage > 80 && $progress->percentage <= 90)
                             {
                                 $cont_progress_percentage90 += 1;
                             }
-                            else if ($progress->percentage == 100)
+                            else if ($progress->percentage > 90 && $progress->percentage <= 100)
                             {
                                 $cont_progress_percentage100 += 1;
                             }
@@ -2119,11 +2384,78 @@ class PlanesAccionController extends Controller
 
                             return $plans;
                         }
+
+                        //ACT 12-03-18: Agregamos para hallazgos de riesgo, compliance y canal de denuncia
+                        else if ($value == 24) //planes de acción para riesgos
+                        {
+                            $i = 0;
+                            $plans = array();
+                            foreach ($action_plans_risk as $plan)
+                            {
+                                $risks = '';
+                                foreach ($plan['risks'] as $r)
+                                {
+                                    $risks += $r->name.', ';
+                                }
+                                $plans[$i] = [
+                                    'Risks' => $risks,
+                                    'Issue' => $plan['issue'],
+                                    'Recommendations' => $plan['recommendations'],
+                                    'Action plan' => $plan['description'],
+                                    'Status' => $plan['status'],
+                                    'Final date' => $plan['final_date'],
+                                    'Responsable' => $plan['stakeholder']
+                                ];
+                                $i += 1;
+                            }
+
+                            return $plans;
+                        }
+
+                        else if ($value == 25) //planes de acción para compliance
+                        {
+                            $i = 0;
+                            $plans = array();
+                            foreach ($action_plans_bussiness_ctrl as $plan)
+                            {
+                                $plans[$i] = [
+                                    'Issue' => $plan['issue'],
+                                    'Recommendations' => $plan['recommendations'],
+                                    'Action plan' => $plan['description'],
+                                    'Status' => $plan['status'],
+                                    'Final date' => $plan['final_date'],
+                                    'Responsable' => $plan['stakeholder']
+                                ];
+                                $i += 1;
+                            }
+
+                            return $plans;
+                        }
+
+                        else if ($value == 26) //planes de acción para canal de denuncia
+                        {
+                            $i = 0;
+                            $plans = array();
+                            foreach ($action_plans_bussiness_ctrl as $plan)
+                            {
+                                $plans[$i] = [
+                                    'Issue' => $plan['issue'],
+                                    'Recommendations' => $plan['recommendations'],
+                                    'Action plan' => $plan['description'],
+                                    'Status' => $plan['status'],
+                                    'Final date' => $plan['final_date'],
+                                    'Responsable' => $plan['stakeholder']
+                                ];
+                                $i += 1;
+                            }
+
+                            return $plans;
+                        }
                         
                     }
                     else
                     {
-                        return view('en.reportes.planes_accion_graficos',['issues_om'=>$issues_om,'issues_def'=>$issues_def,'issues_deb'=>$issues_deb,'op_mejora'=>$op_mejora,'deficiencia'=>$deficiencia,'deb_significativa'=>$deb_significativa,'cont_ctrl' => $cont_ctrl,'cont_audit' => $cont_audit,'action_plans_ctrl' => $action_plans_ctrl,'action_plans_audit' => $action_plans_audit,'action_plans_open' => $action_plans_open,'action_plans_warning' => $action_plans_warning,'action_plans_danger' => $action_plans_danger,'action_plans_closed' => $action_plans_closed,'cont_open' => $cont_open,'cont_warning' => $cont_warning,'cont_danger' => $cont_danger,'cont_closed' => $cont_closed,'cont_process' => $cont_process,'cont_subprocess' => $cont_subprocess,'cont_program' => $cont_program,'cont_audit_plan' => $cont_audit_plan,'cont_process_ctrl' => $cont_process_ctrl,'cont_bussiness_ctrl' => $cont_bussiness_ctrl,'cont_progress_percentage0' => $cont_progress_percentage0,'cont_progress_percentage10' => $cont_progress_percentage10,'cont_progress_percentage20' => $cont_progress_percentage20,'cont_progress_percentage30' => $cont_progress_percentage30,'cont_progress_percentage40' => $cont_progress_percentage40,'cont_progress_percentage50' => $cont_progress_percentage50,'cont_progress_percentage60' => $cont_progress_percentage60,'cont_progress_percentage70' => $cont_progress_percentage70,'cont_progress_percentage80' => $cont_progress_percentage80,'cont_progress_percentage90' => $cont_progress_percentage90,'cont_progress_percentage100' => $cont_progress_percentage100,'cont_org' => $cont_org,'action_plans_process' => $action_plans_process,'action_plans_subprocess' => $action_plans_subprocess,'action_plans_audit_plan' => $action_plans_audit_plan,'action_plans_process_ctrl' => $action_plans_process_ctrl,'action_plans_bussiness_ctrl' => $action_plans_bussiness_ctrl,'action_plans_org' => $action_plans_org,'action_plans_program' => $action_plans_program,'action_plans_progress_percentage' => $action_plans_progress_percentage,'org' => $_GET['organization_id']]);
+                        return view('en.reportes.planes_accion_graficos',['issues_om'=>$issues_om,'issues_def'=>$issues_def,'issues_deb'=>$issues_deb,'op_mejora'=>$op_mejora,'deficiencia'=>$deficiencia,'deb_significativa'=>$deb_significativa,'cont_ctrl' => $cont_ctrl,'cont_audit' => $cont_audit,'action_plans_ctrl' => $action_plans_ctrl,'action_plans_audit' => $action_plans_audit,'action_plans_open' => $action_plans_open,'action_plans_warning' => $action_plans_warning,'action_plans_danger' => $action_plans_danger,'action_plans_closed' => $action_plans_closed,'cont_open' => $cont_open,'cont_warning' => $cont_warning,'cont_danger' => $cont_danger,'cont_closed' => $cont_closed,'cont_process' => $cont_process,'cont_subprocess' => $cont_subprocess,'cont_program' => $cont_program,'cont_audit_plan' => $cont_audit_plan,'cont_process_ctrl' => $cont_process_ctrl,'cont_bussiness_ctrl' => $cont_bussiness_ctrl,'cont_progress_percentage0' => $cont_progress_percentage0,'cont_progress_percentage10' => $cont_progress_percentage10,'cont_progress_percentage20' => $cont_progress_percentage20,'cont_progress_percentage30' => $cont_progress_percentage30,'cont_progress_percentage40' => $cont_progress_percentage40,'cont_progress_percentage50' => $cont_progress_percentage50,'cont_progress_percentage60' => $cont_progress_percentage60,'cont_progress_percentage70' => $cont_progress_percentage70,'cont_progress_percentage80' => $cont_progress_percentage80,'cont_progress_percentage90' => $cont_progress_percentage90,'cont_progress_percentage100' => $cont_progress_percentage100,'cont_org' => $cont_org,'action_plans_process' => $action_plans_process,'action_plans_subprocess' => $action_plans_subprocess,'action_plans_audit_plan' => $action_plans_audit_plan,'action_plans_process_ctrl' => $action_plans_process_ctrl,'action_plans_bussiness_ctrl' => $action_plans_bussiness_ctrl,'action_plans_org' => $action_plans_org,'action_plans_program' => $action_plans_program, 'action_plans_risk' => $action_plans_risk, 'action_plans_compliance' => $action_plans_compliance, 'action_plans_compliant_channel' => $action_plans_compliant_channel, 'action_plans_progress_percentage' => $action_plans_progress_percentage,'org' => $_GET['organization_id']]);
                     }
                 }
                 else
@@ -2462,8 +2794,75 @@ class PlanesAccionController extends Controller
 
                             return $plans;
                         }
+
+                        //ACT 12-03-18: Agregamos para hallazgos de riesgo, compliance y canal de denuncia
+                        else if ($value == 24) //planes de acción para riesgos
+                        {
+                            $i = 0;
+                            $plans = array();
+                            foreach ($action_plans_risk as $plan)
+                            {
+                                $risks = '';
+                                foreach ($plan['risks'] as $r)
+                                {
+                                    $risks += $r->name.', ';
+                                }
+                                $plans[$i] = [
+                                    'Riesgos' => $risks,
+                                    'Hallazgo' => $plan['issue'],
+                                    'Recomendaciones' => $plan['recommendations'],
+                                    'Plan de acción' => $plan['description'],
+                                    'Estado' => $plan['status'],
+                                    'Fecha final' => $plan['final_date'],
+                                    'Responsable' => $plan['stakeholder']
+                                ];
+                                $i += 1;
+                            }
+
+                            return $plans;
+                        }
+
+                        else if ($value == 25) //planes de acción para compliance
+                        {
+                            $i = 0;
+                            $plans = array();
+                            foreach ($action_plans_bussiness_ctrl as $plan)
+                            {
+                                $plans[$i] = [
+                                    'Hallazgo' => $plan['issue'],
+                                    'Recomendaciones' => $plan['recommendations'],
+                                    'Plan de acción' => $plan['description'],
+                                    'Estado' => $plan['status'],
+                                    'Fecha final' => $plan['final_date'],
+                                    'Responsable' => $plan['stakeholder']
+                                ];
+                                $i += 1;
+                            }
+
+                            return $plans;
+                        }
+
+                        else if ($value == 26) //planes de acción para canal de denuncia
+                        {
+                            $i = 0;
+                            $plans = array();
+                            foreach ($action_plans_bussiness_ctrl as $plan)
+                            {
+                                $plans[$i] = [
+                                    'Hallazgo' => $plan['issue'],
+                                    'Recomendaciones' => $plan['recommendations'],
+                                    'Plan de acción' => $plan['description'],
+                                    'Estado' => $plan['status'],
+                                    'Fecha final' => $plan['final_date'],
+                                    'Responsable' => $plan['stakeholder']
+                                ];
+                                $i += 1;
+                            }
+
+                            return $plans;
+                        }
                     }
-                    return view('reportes.planes_accion_graficos',['issues_om'=>$issues_om,'issues_def'=>$issues_def,'issues_deb'=>$issues_deb,'op_mejora'=>$op_mejora,'deficiencia'=>$deficiencia,'deb_significativa'=>$deb_significativa,'cont_ctrl' => $cont_ctrl,'cont_audit' => $cont_audit,'action_plans_ctrl' => $action_plans_ctrl,'action_plans_audit' => $action_plans_audit,'action_plans_open' => $action_plans_open,'action_plans_warning' => $action_plans_warning,'action_plans_danger' => $action_plans_danger,'action_plans_closed' => $action_plans_closed,'cont_open' => $cont_open,'cont_warning' => $cont_warning,'cont_danger' => $cont_danger,'cont_closed' => $cont_closed,'cont_process' => $cont_process,'cont_subprocess' => $cont_subprocess,'cont_program' => $cont_program,'cont_audit_plan' => $cont_audit_plan,'cont_process_ctrl' => $cont_process_ctrl,'cont_bussiness_ctrl' => $cont_bussiness_ctrl,'cont_progress_percentage0' => $cont_progress_percentage0,'cont_progress_percentage10' => $cont_progress_percentage10,'cont_progress_percentage20' => $cont_progress_percentage20,'cont_progress_percentage30' => $cont_progress_percentage30,'cont_progress_percentage40' => $cont_progress_percentage40,'cont_progress_percentage50' => $cont_progress_percentage50,'cont_progress_percentage60' => $cont_progress_percentage60,'cont_progress_percentage70' => $cont_progress_percentage70,'cont_progress_percentage80' => $cont_progress_percentage80,'cont_progress_percentage90' => $cont_progress_percentage90,'cont_progress_percentage100' => $cont_progress_percentage100,'cont_org' => $cont_org,'action_plans_process' => $action_plans_process,'action_plans_subprocess' => $action_plans_subprocess,'action_plans_audit_plan' => $action_plans_audit_plan,'action_plans_process_ctrl' => $action_plans_process_ctrl,'action_plans_bussiness_ctrl' => $action_plans_bussiness_ctrl,'action_plans_org' => $action_plans_org,'action_plans_program' => $action_plans_program,'action_plans_progress_percentage' => $action_plans_progress_percentage,'org' => $_GET['organization_id']]);
+                    return view('reportes.planes_accion_graficos',['issues_om'=>$issues_om,'issues_def'=>$issues_def,'issues_deb'=>$issues_deb,'op_mejora'=>$op_mejora,'deficiencia'=>$deficiencia,'deb_significativa'=>$deb_significativa,'cont_ctrl' => $cont_ctrl,'cont_audit' => $cont_audit,'action_plans_ctrl' => $action_plans_ctrl,'action_plans_audit' => $action_plans_audit,'action_plans_open' => $action_plans_open,'action_plans_warning' => $action_plans_warning,'action_plans_danger' => $action_plans_danger,'action_plans_closed' => $action_plans_closed,'cont_open' => $cont_open,'cont_warning' => $cont_warning,'cont_danger' => $cont_danger,'cont_closed' => $cont_closed,'cont_process' => $cont_process,'cont_subprocess' => $cont_subprocess,'cont_program' => $cont_program,'cont_audit_plan' => $cont_audit_plan,'cont_process_ctrl' => $cont_process_ctrl,'cont_bussiness_ctrl' => $cont_bussiness_ctrl, 'cont_risk' => $cont_risk, 'cont_compliance' => $cont_compliance, 'cont_compliant_channel' => $cont_compliant_channel,'cont_progress_percentage0' => $cont_progress_percentage0,'cont_progress_percentage10' => $cont_progress_percentage10,'cont_progress_percentage20' => $cont_progress_percentage20,'cont_progress_percentage30' => $cont_progress_percentage30,'cont_progress_percentage40' => $cont_progress_percentage40,'cont_progress_percentage50' => $cont_progress_percentage50,'cont_progress_percentage60' => $cont_progress_percentage60,'cont_progress_percentage70' => $cont_progress_percentage70,'cont_progress_percentage80' => $cont_progress_percentage80,'cont_progress_percentage90' => $cont_progress_percentage90,'cont_progress_percentage100' => $cont_progress_percentage100,'cont_org' => $cont_org,'action_plans_process' => $action_plans_process,'action_plans_subprocess' => $action_plans_subprocess,'action_plans_audit_plan' => $action_plans_audit_plan,'action_plans_process_ctrl' => $action_plans_process_ctrl,'action_plans_bussiness_ctrl' => $action_plans_bussiness_ctrl,'action_plans_org' => $action_plans_org,'action_plans_program' => $action_plans_program, 'action_plans_risk' => $action_plans_risk, 'action_plans_compliance' => $action_plans_compliance, 'action_plans_compliant_channel' => $action_plans_compliant_channel, 'action_plans_progress_percentage' => $action_plans_progress_percentage,'org' => $_GET['organization_id']]);
                 }
             }
         }

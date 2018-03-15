@@ -143,9 +143,9 @@
 			</tr>
 			</table>
 
-			<center>
-   				{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
-   			<center>
+				<center>
+					<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+				<center>
 			</div>
 		</div>
 	</div>

@@ -140,4 +140,74 @@ function change_organization()
 
 }
 
+//ACT 08-01-18: Genera en formulario automáticamente exposición, y calcular calificación bruta
+function generate_exposition(ebt)
+{
+	if ($('#probability').val() != null && $('#impact').val() != null)
+	{
+		var exposition = 0
+		exposition = $('#probability').val() * $('#impact').val() / 100
+
+		$('#exposition').val(exposition)
+		$('#exposition').change()
+
+		//calculamos calificación de riesgo según EBT
+
+		if (exposition > (ebt * 0.02))
+		{
+			$('#calification').val(1)
+			$('#calification2').val(1)
+			$('#calification').change()
+		}
+		else if (exposition <= (ebt * 0.02) || exposition > (ebt * 0.01))
+		{
+			$('#calification').val(2)
+			$('#calification2').val(2)
+			$('#calification').change()
+		}
+		else
+		{
+			$('#calification').val(3)
+			$('#calification2').val(3)
+			$('#calification').change()
+		}
+
+	}
+}
+
+//ACT 05-03-18: Genera en formulario automáticamente exposición, y calcular calificación bruta, incluyendo id del riesgo
+function generate_exposition2(ebt,id)
+{
+	if ($('#probability_'+id).val() != null && $('#impact_'+id).val() != null)
+	{
+		var exposition = 0
+		exposition = $('#probability_'+id).val() * $('#impact_'+id).val() / 100
+
+		$('#exposition_'+id).val(exposition)
+		$('#exposition_'+id).change()
+
+		//calculamos calificación de riesgo según EBT
+
+		if (exposition > (ebt * 0.02))
+		{
+			$('#calification_'+id).val(1)
+			$('#calification2_'+id).val(1)
+			$('#calification_'+id).change()
+		}
+		else if (exposition <= (ebt * 0.02) || exposition > (ebt * 0.01))
+		{
+			$('#calification_'+id).val(2)
+			$('#calification2_'+id).val(2)
+			$('#calification_'+id).change()
+		}
+		else
+		{
+			$('#calification_'+id).val(3)
+			$('#calification2_'+id).val(3)
+			$('#calification_'+id).change()
+		}
+
+	}
+}
+
 	

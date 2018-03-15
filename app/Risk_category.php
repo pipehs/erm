@@ -30,6 +30,28 @@ class Risk_category extends Model
                 ->whereNotNull('risk_category_id')
                 ->select('id','name')
                 ->get();
+
+        //Esto servía para cuando eran sólo 2 niveles (en parque arauco son 3 o 4)
+        //return DB::table('risk_categories')
+        //        ->whereNotNull('risk_category_id')
+        //        ->select('id','name')
+        //        ->get();
+
+        //ACT 22-01-18: Hacemos ciclo para determinar (y retornar) último nivel de subcategorías
+        //Primer nivel
+        /*
+        $categories = DB::table('risk_categories')
+                ->whereNull('risk_category_id')
+                ->select('id')
+                ->get();
+
+        foreach ($categories as $cat)
+        {
+            $subs = DB::table('risk_categories')
+                ->where('risk_category_id','=',$cat->id)
+                ->select('id','name')
+                ->get();
+        }*/
     }
 
     public static function getAllCategories()
@@ -52,6 +74,14 @@ class Risk_category extends Model
         return DB::table('risk_categories')
                 ->where('name','=',$name)
                 ->select('id')
+                ->first();
+    }
+
+    public static function getPrimaryCategory($cat_id)
+    {
+        return DB::table('risk_categories')
+                ->where('id','=',$cat_id)
+                ->select('risk_category_id as id')
                 ->first();
     }
 }

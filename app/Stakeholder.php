@@ -91,6 +91,16 @@ class Stakeholder extends Model
             ->get();
     }
 
+    public static function getStakeholderFromOrgRisk($org_risk_id)
+    {
+        return DB::table('stakeholders')
+            ->join('organization_risk','organization_risk.stakeholder_id','=','stakeholders.id')
+            ->join('organizations','organizations.id','=','organization_risk.organization_id')
+            ->where('organization_risk.id','=',$org_risk_id)
+            ->select('stakeholders.name','stakeholders.surnames','organizations.name as organization')
+            ->get();
+    }
+
     public static function getUserByMail($mail)
     {
         return DB::table('stakeholders')
@@ -120,6 +130,22 @@ class Stakeholder extends Model
                 ->select('id')
                 ->first();
         }
+    }
+
+    public static function getMail($id)
+    {
+        return DB::table('stakeholders')
+            ->where('id','=',$id)
+            ->select('mail')
+            ->first();
+    }
+
+    public static function getPosition($id)
+    {
+        return DB::table('stakeholders')
+            ->where('id','=',$id)
+            ->select('position')
+            ->first();
     }
 }
  

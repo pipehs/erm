@@ -115,9 +115,9 @@
 	@endforeach
 	</table>
 
-	<center>
-		{!! link_to_route('programas_auditoria', $title = 'Volver', $parameters=null, $attributes = ['class'=>'btn btn-danger']) !!}
-	</center>
+				<center>
+					<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+				<center>
 @endif
 			</div>
 		</div>

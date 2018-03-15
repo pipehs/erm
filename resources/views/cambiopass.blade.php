@@ -82,7 +82,7 @@
 				</div>
 			{!!Form::close()!!}
 				<center>
-					{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
+					<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
 				<center>
 
 			</div>

@@ -568,7 +568,7 @@ cont_fs = 1;
 function add_fs()
 {
 			var new_fs = '<div class="form-group">'
-			new_fs += '<label for="new_fs_'+cont_fs+'" class="col-sm-4 control-label">Nuevo estado financiero '+cont_fs+'</label>'
+			new_fs += '<label for="new_fs_'+cont_fs+'" class="col-sm-4 control-label">Nueva cuenta contable '+cont_fs+'</label>'
 			new_fs += '<div class="col-sm-6">'
 			new_fs += '<input type="text" name="new_fs_'+cont_fs+'" class="form-control"></input>'
 			new_fs += '</div></div>'

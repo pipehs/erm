@@ -72,8 +72,7 @@ td {
 				{!!Form::close()!!}
 
 					<center>
-						{!! link_to_route('plan_auditoria', $title = 'Volver', $parameters = NULL,
-						 $attributes = ['class'=>'btn btn-danger'])!!}
+						<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
 					<center>
 
 			</div>

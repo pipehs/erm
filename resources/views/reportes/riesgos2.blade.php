@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Reporte de Riesgos')
+@section('title', 'Reporte de Riesgos por Procesos')
 
 @section('content')
 
@@ -9,7 +9,7 @@
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
 			<li><a href="#">Reportes</a></li>
-			<li><a href="semaforo">Reporte de Riesgos</a></li>
+			<li><a href="semaforo">Reporte de Riesgos por Procesos</a></li>
 		</ol>
 	</div>
 </div>
@@ -19,7 +19,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-table"></i>
-					<span>Reporte de Riesgos</span>
+					<span>Reporte de Riesgos por Procesos</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -36,39 +36,6 @@
 			</div>
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
       		<p>En esta secci&oacute;n podr&aacute; ver el reporte de Riesgos en formato de sem&aacute;foro, donde se puede observar el nivel de exposici&oacute;n ponderado por Riesgo general y tambi&eacute;n visualizar los riesgos espec&iacute;ficos.</p>
-
-		@if(!isset($riesgos))
-			{!!Form::open(['url'=>'reporte_riesgos2','method'=>'GET','class'=>'form-horizontal'])!!}
-			<div class="form-group">
-				<div class="row">
-				    {!!Form::label('Organizaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
-				    <div class="col-sm-4">
-				      {!!Form::select('organization_id',$organizations, 
-				           null, 
-				          ['id' => 'org','placeholder'=>'- Seleccione -','required'=>'true'])!!}
-				    </div> 
-				</div>
-			</div>
-			<div class="form-group">
-				<div class="row">
-					<label for="kind2" class="col-sm-4 control-label">Tipo de reporte</label>
-				 	<div class="col-sm-4">
-				      {!!Form::select('kind2',['1'=>'Por categoría','2'=>'Por Procesos'], 
-				           null, 
-				          ['id' => 'kind2','placeholder'=>'- Seleccione -','required'=>'true'])!!}
-				    </div>
-				</div>
-			</div>
-			<br>
-			<!-- Por ahora sólo será de procesos -->
-			{!!Form::hidden('kind',0)!!}
-			<div class="form-group">
-				<center>
-					{!!Form::submit('Seleccionar', ['class'=>'btn btn-success'])!!}
-				</center>
-			</div>
-			{!!Form::close()!!}
-		@endif
 		</div>
 	</div>
 </div>
@@ -105,31 +72,33 @@
 			
 			<table class="table">
 			<thead>
-				<th>Categoría</th>
+				<th>Proceso</th>
 				<th bgcolor="#FF0000"></th>
 				<th bgcolor="#FFFF00"></th>
 				<th bgcolor="#00FF00"></th>
 				<th>Total</th>
 			</thead>
 			<?php $verdes_total = 0; $amarillos_total = 0; $rojos_total = 0; ?>
-			@foreach ($categories as $category)
+			@foreach ($processes as $process)
 			<?php $verdes = 0; $amarillos = 0; $rojos = 0; ?>
 			<tr>
 				@foreach ($riesgos as $riesgo)
 					@if ($riesgo['exposicion'] != 0)
-						@if ($riesgo['risk_category_id'] == $category['id'])
-							@if (($riesgo['exposicion'] <= 3.75 && $riesgo['exposicion2'] <= 0.5) || ($riesgo['exposicion'] <= 6 && $riesgo['exposicion2'] == 1))
-								<?php $verdes += 1; $verdes_total += 1; ?>
-							@elseif (($riesgo['exposicion'] > 3.75 && $riesgo['exposicion'] < 8 && $riesgo['exposicion2'] <= 0.5))
-								<?php $amarillos += 1; $amarillos_total += 1; ?>
-							@elseif ($riesgo['exposicion'] >= 8)
-								<?php $rojos += 1; $rojos_total += 1; ?>
+						@foreach ($riesgo['processes'] as $risk_process)
+							@if ($risk_process->id == $process['id'])
+								@if (($riesgo['exposicion'] <= 3.75 && $riesgo['exposicion2'] <= 0.5) || ($riesgo['exposicion'] <= 6 && $riesgo['exposicion2'] == 1))
+									<?php $verdes += 1; $verdes_total += 1; ?>
+								@elseif (($riesgo['exposicion'] > 3.75 && $riesgo['exposicion'] < 8 && $riesgo['exposicion2'] <= 0.5))
+									<?php $amarillos += 1; $amarillos_total += 1; ?>
+								@elseif ($riesgo['exposicion'] >= 8)
+									<?php $rojos += 1; $rojos_total += 1; ?>
+								@endif
 							@endif
-						@endif
+						@endforeach
 					@endif
 				@endforeach
 								
-				<td>{{ $category['name'] }}</td>
+				<td>{{ $process['name'] }}</td>
 				<td>{{ $rojos }}</td>
 				<td>{{ $amarillos }}</td>
 				<td>{{ $verdes }}</td>
@@ -205,33 +174,36 @@
 			
 			<table class="table">
 			<thead>
-				<th>Categoría</th>
+				<th>Proceso</th>
 				<th bgcolor="#FF0000"></th>
 				<th bgcolor="#FFFF00"></th>
 				<th bgcolor="#00FF00"></th>
 				<th>Total</th>
 			</thead>
-			
+
+	
+
 			<?php $verdes_total_c = 0; $amarillos_total_c = 0; $rojos_total_c = 0; ?>
-			@foreach ($categories as $category)
+			@foreach ($processes as $process)
 			<?php $verdes_c = 0; $amarillos_c = 0; $rojos_c = 0; ?>
 			<tr>
-	
 				@foreach ($riesgos_consolidados as $riesgo)
 					@if ($riesgo['exposicion'] != 0)
-						@if ($riesgo['risk_category_id'] == $category['id'])
-							@if (($riesgo['exposicion'] <= 3.75 && $riesgo['exposicion2'] <= 0.5) || ($riesgo['exposicion'] <= 6 && $riesgo['exposicion2'] == 1))
-								<?php $verdes_c += 1; $verdes_total_c += 1; ?>
-							@elseif (($riesgo['exposicion'] > 3.75 && $riesgo['exposicion'] < 8 && $riesgo['exposicion2'] <= 0.5))
-								<?php $amarillos_c += 1; $amarillos_total_c += 1; ?>
-							@elseif ($riesgo['exposicion'] >= 8)
-								<?php $rojos_c += 1; $rojos_total_c += 1; ?>
-							@endif							
-						@endif
+						@foreach ($riesgo['processes'] as $risk_process)
+							@if ($risk_process->id == $process['id'])
+								@if (($riesgo['exposicion'] <= 3.75 && $riesgo['exposicion2'] <= 0.5) || ($riesgo['exposicion'] <= 6 && $riesgo['exposicion2'] == 1))
+									<?php $verdes_c += 1; $verdes_total_c += 1; ?>
+								@elseif (($riesgo['exposicion'] > 3.75 && $riesgo['exposicion'] < 8 && $riesgo['exposicion2'] <= 0.5))
+									<?php $amarillos_c += 1; $amarillos_total_c += 1; ?>
+								@elseif ($riesgo['exposicion'] >= 8)
+									<?php $rojos_c += 1; $rojos_total_c += 1;?>
+								@endif
+							@endif
+						@endforeach
 					@endif
 				@endforeach
-
-				<td>{{ $category['name'] }}</td>
+								
+				<td>{{ $process['name'] }}</td>
 				<td>{{ $rojos_c }}</td>
 				<td>{{ $amarillos_c }}</td>
 				<td>{{ $verdes_c }}</td>
@@ -328,12 +300,12 @@
 				{
 					var title = '<b>Riesgos Mitigados</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Subprocesos</th><th>Riesgo</th><th>Descripción</th><th>Categoría</th><th>Comentarios</th><th>Exposición</th><th>Responsable</th></thead>';
-
+					var text ='<table class="table table-striped table-datatable"><thead><th>Cont</th><th>Subprocesos</th><th>Riesgo</th><th>Descripción</th><th>Categoría</th><th>Comentarios</th><th>Exposición</th><th>Responsable</th></thead>';
+					<?php $cont = 1; ?>
 					@foreach ($riesgos as $riesgo)
 						@if ($riesgo['exposicion'] != 0)
 							@if (($riesgo['exposicion'] <= 3.75 && $riesgo['exposicion2'] <= 0.5) || ($riesgo['exposicion'] <= 6 && $riesgo['exposicion2'] == 1))
-								text += '<tr><td>'
+								text += '<tr><td>{{ $cont }}</td><td>'
 								@foreach ($riesgo['subobj'] as $subobj)
 									text += '<li>{{$subobj->name}}</li>'
 								@endforeach
@@ -349,7 +321,9 @@
 								text += '<td>{{ $riesgo["exposicion"] }}';
 								text += '<td>{{ $riesgo["responsable"]}}</td>';
 								text += '</tr>';
+								<?php $cont += 1; ?>
 							@endif
+							
 						@endif
 					@endforeach
 
@@ -367,12 +341,12 @@
 				{
 					var title = '<b>Riesgos Mitigados con reparo</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Subprocesos</th><th>Riesgo</th><th>Descripción</th><th>Categoría</th><th>Comentarios</th><th>Exposición</th><th>Responsable</th></thead>';
-
+					var text ='<table class="table table-striped table-datatable"><thead><th>Cont</th><th>Subprocesos</th><th>Riesgo</th><th>Descripción</th><th>Categoría</th><th>Comentarios</th><th>Exposición</th><th>Responsable</th></thead>';
+					<?php $cont = 1; ?>
 					@foreach ($riesgos as $riesgo)
 						@if ($riesgo['exposicion'] != 0)
 							@if(($riesgo['exposicion'] > 3.75 && $riesgo['exposicion'] < 8 && $riesgo['exposicion2'] <= 0.5))
-								text += '<tr><td>'
+								text += '<tr><td>{{ $cont }}</td><td>'
 								@foreach ($riesgo['subobj'] as $subobj)
 									text += '<li>{{$subobj->name}}</li>'
 								@endforeach
@@ -388,6 +362,7 @@
 								text += '<td>{{ $riesgo["exposicion"] }}';
 								text += '<td>{{ $riesgo["responsable"]}}</td>';
 								text += '</tr>';
+								<?php $cont += 1; ?>
 							@endif
 						@endif
 					@endforeach
@@ -406,12 +381,12 @@
 				{
 					var title = '<b>Riesgos No mitigados</b>';
 
-					var text ='<table class="table table-striped table-datatable"><thead><th>Subprocesos</th><th>Riesgo</th><th>Descripción</th><th>Categoría</th><th>Comentarios</th><th>Exposición</th><th>Responsable</th></thead>';
-
+					var text ='<table class="table table-striped table-datatable"><thead><th>Cont</th><th>Subprocesos</th><th>Riesgo</th><th>Descripción</th><th>Categoría</th><th>Comentarios</th><th>Exposición</th><th>Responsable</th></thead>';
+					<?php $cont = 1; ?>
 					@foreach ($riesgos as $riesgo)
 						@if ($riesgo['exposicion'] != 0)
 							@if($riesgo['exposicion'] >= 8)
-								text += '<tr><td>'
+								text += '<tr><td>{{ $cont }}</td><td>'
 								@foreach ($riesgo['subobj'] as $subobj)
 									text += '<li>{{$subobj->name}}</li>'
 								@endforeach
@@ -427,6 +402,7 @@
 								text += '<td>{{ $riesgo["exposicion"] }}';
 								text += '<td>{{ $riesgo["responsable"]}}</td>';
 								text += '</tr>';
+								<?php $cont += 1; ?>
 							@endif
 						@endif
 					@endforeach
@@ -514,6 +490,7 @@
 								text += '</tr>';
 								<?php $cont += 1; ?>
 							@endif
+							
 						@endif
 					@endforeach
 
@@ -536,7 +513,7 @@
 					@foreach ($riesgos_consolidados as $riesgo)
 						@if ($riesgo['exposicion'] != 0)
 							@if(($riesgo['exposicion'] > 3.75 && $riesgo['exposicion'] < 8 && $riesgo['exposicion2'] <= 0.5))
-								text += '<tr><td>{{ $cont }}</td><td>'
+								text += '<tr><td>{{ $cont}}</td><td>'
 								@foreach ($riesgo['subobj'] as $subobj)
 									text += '<li>{{$subobj->name}}</li>'
 								@endforeach
@@ -580,7 +557,7 @@
 					var title = '<b>Riesgos No mitigados</b>';
 
 					var text ='<table class="table table-striped table-datatable"><thead><th>Cont</th><th>Subprocesos</th><th>Riesgo</th><th>Descripción</th><th>Categoría</th><th>Comentarios</th><th>Exposición</th><th>Responsable(s)</th></thead>';
-					<?php $cont = 1; ?>	
+					<?php $cont = 1; ?>
 					@foreach ($riesgos_consolidados as $riesgo)
 						@if ($riesgo['exposicion'] != 0)
 							@if($riesgo['exposicion'] >= 8)

@@ -2448,3 +2448,9 @@ td.beauty-hover {
   border: 1px solid transparent;
   border-radius: 5px;
 }
+
+.table-scroll {
+  width:auto;
+  display: block;
+  overflow:auto;
+}

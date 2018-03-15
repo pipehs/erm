@@ -53,7 +53,7 @@ function dropDown1()
 //dropdown GENERAL de gestión de riesgos
 function dropDown2()
 {
-	$uri = array('crear_encuesta','enviar_encuesta','encuestas','evaluacion','evaluacion_agregadas','evaluacion_manual','riesgos','enlazar_riesgos','kri','riesgo_kri');
+	$uri = array('crear_encuesta','enviar_encuesta','encuestas','evaluacion','evaluacion_agregadas','evaluacion_manual','enlazar_riesgos','kri','riesgo_kri');
 
 	foreach ($uri as $uri)
 	{
@@ -153,7 +153,7 @@ function dropDown23()
 //dropdown de reportes básicos
 function dropDown4()
 {
-	$uri = array('heatmap','matrices','risk_matrix','reporte_planes','reporte_hallazgos','graficos_controles','graficos_auditorias','graficos_planes_accion','genriskmatrix','reporte_audits');
+	$uri = array('heatmap','matrices','risk_matrix','reporte_planes','reporte_hallazgos','graficos_controles','graficos_auditorias','graficos_planes_accion','genriskmatrix','reporte_audits','reporte_riesgos','reporte_riesgos2');
 
 	foreach ($uri as $uri)
 	{
@@ -179,7 +179,7 @@ function dropDown4()
 //active de controles
 function dropDown5()
 {
-	$uri = array('controles','evaluar_controles');
+	$uri = array('controles','evaluar_controles','residual_manual');
 
 	foreach ($uri as $uri)
 	{

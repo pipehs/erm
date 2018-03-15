@@ -329,7 +329,7 @@ class DocumentosController extends Controller
                             foreach ($controls as $control)
                             {
                                 //obtenemos issues del control
-                                $issues = \Ermtool\Issue::getControlIssues($control->id);
+                                $issues = \Ermtool\Issue::getControlIssues($control->id,$_GET['organization_id']);
 
                                 $issues2 = array(); //array donde se guardaran los issues que tienen documentos
                                 //recorremos los issues para ver por cada uno si posee archivos
@@ -403,7 +403,7 @@ class DocumentosController extends Controller
                             foreach ($controls as $control)
                             {
                                 //obtenemos issues del control
-                                $issues = \Ermtool\Issue::getControlIssues($control->id);
+                                $issues = \Ermtool\Issue::getControlIssues($control->id,$_GET['organization_id']);
 
                                 $issues2 = array(); //array donde se guardaran los issues que tienen documentos
                                 //recorremos los issues para ver por cada uno si posee archivos

@@ -31,9 +31,18 @@ class LogController extends Controller
     //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
     public function __construct()
     {
+        $dir = str_replace('public','',$_SERVER['DOCUMENT_ROOT']);
         $this->logger = new Logger('usuarios_sistema');
-        $this->logger->pushHandler(new StreamHandler($_SERVER['DOCUMENT_ROOT'].'/storage/logs/usuarios_sistema.log', Logger::INFO));
+        $this->logger->pushHandler(new StreamHandler($dir.'/storage/logs/usuarios_sistema.log', Logger::INFO));
         $this->logger->pushHandler(new FirePHPHandler());
+
+        $this->logger2 = new Logger('pass');
+        $this->logger2->pushHandler(new StreamHandler($dir.'/storage/logs/cambio_pass.log', Logger::INFO));
+        $this->logger2->pushHandler(new FirePHPHandler());
+
+        $this->logger3 = new Logger('sessions');
+        $this->logger3->pushHandler(new StreamHandler($dir.'/storage/logs/sessions.log', Logger::INFO));
+        $this->logger3->pushHandler(new FirePHPHandler());
     }
 
     public function index()
@@ -297,6 +306,7 @@ class LogController extends Controller
             //return $request->email;
             if (Auth::attempt(['email'=>$request['email'], 'password' => $request['password']]))
             {
+                $logger = $this->logger3;
                 //echo Auth::user()->id.'<br>'.Auth::user()->name;
                 
                 //obtenemos roles del usuario
@@ -315,6 +325,8 @@ class LogController extends Controller
                     Session::push('roles_name',$role->role);
                     $i += 1;
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha ingresado al sistema con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
             }
             if (Session::get('languaje') == 'en')
             {
@@ -438,10 +450,10 @@ class LogController extends Controller
         try
         {
             //OBS: Hacer validación manual de e-mail
-            $this->validate($request, [
-                'name' => 'required|max:45|min:4',
-                'password' => 'required|min:4'
-            ]);
+            //$this->validate($request, [
+            //    'name' => 'required|max:45|min:4',
+            //    'password' => 'required|min:4'
+            //]);
 
             global $req;
             $req = $request;
@@ -549,7 +561,7 @@ class LogController extends Controller
 
                 $GLOBALS['res'] = 0;
 
-                $logger->info('The user '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el usuario con Id: '.$GLOBALS['id1'].' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el usuario con Id: '.$GLOBALS['id1'].' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
 
             });
 
@@ -598,6 +610,7 @@ class LogController extends Controller
 
             //echo '<br>'.Auth::user()->id;
             //echo '<br>'.Auth::user()->password;
+            $logger = $this->logger2;
 
             //Verificamos que la contraseña antigua ingresada sea la misma
             if (Hash::check($_POST['pass_old'], Auth::user()->password))
@@ -617,6 +630,8 @@ class LogController extends Controller
                 {
                     Session::flash('message','Contraseña actualizada con &eacute;xito');
                 }
+
+                $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha modificado su contraseña, con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
 
                 return Redirect::route('home');
             }

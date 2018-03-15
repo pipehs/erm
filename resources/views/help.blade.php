@@ -643,10 +643,9 @@ body {
 					<p style="font-size: 11px;">Figura 43. Gestor de documentos.</p>
 				</center><br>
 		</div>
-				<center>
-					{!! link_to_route('home', $title = 'Volver', $parameters = NULL,
-                 		$attributes = ['class'=>'btn btn-danger'])!!}
-				<center>
+			<center>
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+			<center>
 
 			</div>
 		</div>

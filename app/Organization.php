@@ -10,7 +10,7 @@ use Carbon;
 class Organization extends Model
 {
     
-    protected $fillable = ['name','description','expiration_date','shared_services','organization_id','status','mision','vision','target_client'];
+    protected $fillable = ['name','description','expiration_date','shared_services','organization_id','status','mision','vision','target_client','ebt','kind_ebt'];
 
     public static function name($organization_id)
     {
@@ -169,8 +169,9 @@ class Organization extends Model
     public static function getOrganizationsFromRisk($risk_id)
     {
         return DB::table('organization_risk')
+                ->join('organizations','organizations.id','=','organization_risk.organization_id')
                 ->where('organization_risk.risk_id','=',$risk_id)
-                ->select('organization_risk.organization_id','organization_risk.stakeholder_id')
+                ->select('organization_risk.organization_id','organization_risk.stakeholder_id','organizations.name')
                 ->get();
     }
 
@@ -180,5 +181,72 @@ class Organization extends Model
                 ->where('name','=',$org_name)
                 ->select('id')
                 ->first();
+    }
+
+    public static function getEBT($id,$kind)
+    {
+        //si no se envía ID, se busca EBT de org. principal
+        if ($kind == 2) 
+        {
+            $org = DB::table('organizations')
+                ->where('id','=',$id)
+                ->select('organization_id','ebt','kind_ebt')
+                ->first();
+
+            //vemos si es organización principal
+            if ($org->organization_id == NULL)
+            {
+                return $org;
+            }
+            //si no lo es, buscamos recursivamente cuál es la organización principal
+            else
+            {
+                $org_father = DB::table('organizations')
+                            ->where('id','=',$org->organization_id)
+                            ->select('organization_id','ebt','kind_ebt')
+                            ->first();
+
+                while ($org_father->organization_id != NULL)
+                {
+                    $org_father = DB::table('organizations')
+                            ->where('id','=',$org_father->organization_id)
+                            ->select('organization_id','ebt','kind_ebt')
+                            ->first();
+                }
+
+                return $org_father;
+            }
+        }
+        else
+        {
+            return DB::table('organizations')
+                ->where('id','=',$id)
+                ->select('ebt','kind_ebt')
+                ->first();
+        }
+    }
+
+    public static function getOrgByControlEvaluation($id)
+    {
+        $org = DB::table('organizations')
+            ->join('control_evaluation','control_evaluation.organization_id','=','organizations.id')
+            ->where('control_evaluation.id','=',$id)
+            ->select('organizations.id')
+            ->first();
+
+        //OBS 20-01-18: El agregado de atributo organization_id en control_evaluation es nuevo, por lo que si no existiera para evitar errores se buscará organización a través del control
+        if (empty($org) || (isset($org->id) && $org->id == NULL))
+        {
+            $org = DB::table('organizations')
+                ->join('organization_risk','organization_risk.organization_id','=','organizations.id')
+                ->join('control_organization_risk','control_organization_risk.organization_risk_id','=','organization_risk.id')
+                ->join('controls','controls.id','=','control_organization_risk.control_id')
+                ->join('control_evaluation','control_evaluation.control_id','=','controls.id')
+                ->where('control_evaluation.id','=',$id)
+                ->select('organizations.id')
+                ->first(); 
+        }
+        
+        return $org;
     }
 }

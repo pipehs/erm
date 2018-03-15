@@ -41,9 +41,9 @@
 					@include('datos_maestros.organization.form')
 				{!!Form::close()!!}
 
-				<center>
-				{!! link_to_route('organization.index', $title = 'Volver', $parameters = NULL, $attributes = ['class'=>'btn btn-danger']) !!}
-				<center>
+			<center>
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+			<center>
 			</div>
 		</div>
 	</div>

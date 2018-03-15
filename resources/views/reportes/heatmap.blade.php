@@ -112,11 +112,21 @@
 
             <div class="form-group" id="tipo2" style="display: none;">
                 <div class="row">
-                  {!!Form::label('Riesgo inherente o residual',null,['class'=>'col-sm-4 control-label'])!!}
+                  <label for="kind2" class="col-sm-4 control-label">Seleccione si desea ver otro mapa además de residual</label>
                   <div class="col-sm-3">
-                    {!!Form::select('kind2',(['0'=>'Riesgos inherentes','1'=>'Riesgo inherente v/s Riesgo residual']), 
-                         null, 
-                         ['id' => 'kind2','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+                    <div class="checkbox">
+                      <label>
+                        <input type="checkbox" name="kind2_1">
+                        <i class="fa fa-square-o"></i>% Contribución acciones mitigantes
+                      </label>
+                    </div>
+
+                    <div class="checkbox">
+                      <label>
+                        <input type="checkbox" name="kind2_2">
+                        <i class="fa fa-square-o"></i>Evaluación Residual Manual
+                      </label>
+                    </div>
                   </div>
                 </div>
             </div>
@@ -303,14 +313,20 @@
 <script>
 
   @if (isset($riesgos))
-      <?php $cont = 1; //contador de riesgos ?>
+      <?php 
+        $cont = 1; //contador de riesgos
+        $verificador = array(); //Verificador para ver si ya existe una agrupación de Riesgos en el cuadrante
+        $verificador2 = array(); //Verificador para agrupación de Riesgos residuales
+      ?>
       //ciclo para rellenar tabla con riesgos INHERENTES
-      @for($k=0; $k < count($riesgos); $k++)
-          @for($i=0; $i < 5; $i++)
-              @for ($j=0; $j < 5; $j++)
-                  @if (intval($prom_criticidad_in[$k]) == (5-$i))
-                      @if (intval($prom_proba_in[$k]) == (5-$j))
-                         $('#{{(5-$i)}}_{{(5-$j)}}').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_in[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_in[$k],1) }}'>{{ $cont }}</span>");
+    @for($k=0; $k < count($riesgos); $k++)
+        @if ($cont2[intval($prom_criticidad_in[$k])][intval($prom_proba_in[$k])] > 5)
+          @if (!isset($verificador[intval($prom_criticidad_in[$k])][intval($prom_proba_in[$k])]))
+            $('#{{$prom_criticidad_in[$k]}}_{{$prom_proba_in[$k]}}').append("<span class='circulo' title='Haga click para ver detalles' onclick='getRiesgos({{intval($prom_criticidad_in[$k])}},{{intval($prom_proba_in[$k])}})'>N{{$cont2[intval($prom_criticidad_in[$k])][intval($prom_proba_in[$k])]}}</span>");
+            <?php $verificador[intval($prom_criticidad_in[$k])][intval($prom_proba_in[$k])] = 1; ?>
+          @endif
+        @else
+            $('#{{$prom_criticidad_in[$k]}}_{{$prom_proba_in[$k]}}').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_in[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_in[$k],1) }}'>{{ $cont }}</span>");
 
                          var leyendas = "<p><ul><li><small><span class='circulo-small'>{{ $cont }}</span> : <b>Riesgo:</b>";
                          leyendas += "{{ $riesgos[$k]['name'] }}</li>";
@@ -338,10 +354,8 @@
 
                          leyendas += "</ul>";
                          $('#leyendas').append(leyendas);
-                  @endif
-                @endif
-              @endfor
-          @endfor
+        @endif
+          
         <?php $cont += 1; ?>
     @endfor
 
@@ -353,13 +367,41 @@
                       @if (intval($prom_criticidad_ctrl[$k]) == $s)
 
                           @if ($prom_proba_ctrl[$k] <= 0.05 && $prom_proba_ctrl[$k] >= 0)
+                            @if ($cont_ctrl[$s][1] > 4)
+                              @if (!isset($verificador2[$s][1]))
+                                $('#{{($s)}}_1_ctrl').append("<span class='circulo' title='Haga click para ver detalles' onclick='getRiesgos2({{$s}},1)'>N{{$cont_ctrl[$s][1]}}</span>");
+                                <?php $verificador2[$s][1] = 1; ?>
+                              @endif
+                            @else
                               $('#{{($s)}}_1_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. &nbsp; &nbsp; Exposición efectiva al riesgo: {{ round($prom_proba_ctrl[$k],2) * $s }} &nbsp; &nbsp; Contribución acciones mitigantes: {{ intval((1-$prom_proba_ctrl[$k])*100) }}% &nbsp; &nbsp; Severidad: {{ $prom_criticidad_ctrl[$k] }}'>{{ $cont }}</span>");
+                            @endif
                           @elseif ($prom_proba_ctrl[$k] <= 0.15 && $prom_proba_ctrl[$k] > 0.05)
+                            @if ($cont_ctrl[$s][2] > 4)
+                              @if (!isset($verificador2[$s][2]))
+                                $('#{{($s)}}_2_ctrl').append("<span class='circulo' title='Haga click para ver detalles' onclick='getRiesgos2({{$s}},2)'>N{{$cont_ctrl[$s][2]}}</span>");
+                                <?php $verificador2[$s][2] = 1; ?>
+                              @endif
+                            @else
                               $('#{{($s)}}_2_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. &nbsp; &nbsp; Exposición efectiva al riesgo: {{ round($prom_proba_ctrl[$k],2) * $s }} &nbsp; &nbsp; Contribución acciones mitigantes: {{ intval((1-$prom_proba_ctrl[$k])*100) }}% &nbsp; &nbsp; Severidad: {{ $prom_criticidad_ctrl[$k] }}'>{{ $cont }}</span>");
+                            @endif
                           @elseif ($prom_proba_ctrl[$k] <= 0.5 && $prom_proba_ctrl[$k] > 0.15)
+                            @if ($cont_ctrl[$s][3] > 4)
+                              @if (!isset($verificador2[$s][3]))
+                                $('#{{($s)}}_3_ctrl').append("<span class='circulo' title='Haga click para ver detalles' onclick='getRiesgos2({{$s}},3)'>N{{$cont_ctrl[$s][3]}}</span>");
+                                <?php $verificador2[$s][3] = 1; ?>
+                              @endif
+                            @else
                               $('#{{($s)}}_3_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. &nbsp; &nbsp; Exposición efectiva al riesgo: {{ round($prom_proba_ctrl[$k],2) * $s }} &nbsp; &nbsp; Contribución acciones mitigantes: {{ intval((1-$prom_proba_ctrl[$k])*100) }}% &nbsp; &nbsp; Severidad: {{ $prom_criticidad_ctrl[$k] }}'>{{ $cont }}</span>");
+                            @endif
                           @elseif ($prom_proba_ctrl[$k] <= 1 && $prom_proba_ctrl[$k] > 0.5)
+                            @if ($cont_ctrl[$s][4] > 4)
+                              @if (!isset($verificador2[$s][4]))
+                                $('#{{($s)}}_4_ctrl').append("<span class='circulo' title='Haga click para ver detalles' onclick='getRiesgos2({{$s}},4)'>N{{$cont_ctrl[$s][4]}}</span>");
+                                <?php $verificador2[$s][4] = 1; ?>
+                              @endif
+                            @else
                               $('#{{($s)}}_4_ctrl').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. &nbsp; &nbsp; Exposición efectiva al riesgo: {{ round($prom_proba_ctrl[$k],2) * $s }} &nbsp; &nbsp; Contribución acciones mitigantes: {{ intval((1-$prom_proba_ctrl[$k])*100) }}% &nbsp; &nbsp; Severidad: {{ $prom_criticidad_ctrl[$k] }}'>{{ $cont }}</span>");
+                            @endif
                           @endif
         
                       @endif
@@ -412,6 +454,135 @@
     }
     
  });
+
+//ACT 10-01-18: Obtiene riesgos agrupados
+function getRiesgos(imp,proba)
+{
+    var title = '<b>Riesgos en cuadrante '+proba+','+imp+'</b>';
+    @if (isset($riesgos))
+      if ({{ $kind }} == 0)
+      {
+        var text ='<table class="table table-striped table-datatable"><thead><th>Subproceso(s)</th><th>Riesgo</th><th>Descripci&oacute;n</th><th>Probabilidad</th><th>Impacto</th></thead>';
+      }
+      else
+      {
+        var text ='<table class="table table-striped table-datatable"><thead><th>Objetivo(s)</th><th>Riesgo</th><th>Descripci&oacute;n</th><th>Probabilidad</th><th>Impacto</th></thead>';
+      }
+
+      @for($k=0; $k < count($riesgos); $k++)
+          if ({{intval($prom_proba_in[$k])}} == proba && {{intval($prom_criticidad_in[$k])}} == imp)
+          {
+            text += '<tr><td>'
+            @foreach ($riesgos[$k]['subobj'] as $subobj)
+              text += '<li> {{ $subobj->name }}</li>';
+            @endforeach
+            text += '</td>'
+            text += '<td>{{$riesgos[$k]["name"]}}</td>';
+            text += '<td>{{$riesgos[$k]["description"]}}</td>';
+            text += '<td>{{$prom_proba_in[$k]}}</td>';
+            text += '<td>{{$prom_criticidad_in[$k]}}</td></tr>';
+          }
+      @endfor
+            text += '</table>'
+
+            swal({   
+              title: title,   
+              text: text,
+              customClass: 'swal-wide3',   
+              html: true 
+            });
+    @endif
+}
+
+function getRiesgos2(s,cuadrante)
+{
+    var title = '<b>Riesgos en cuadrante '+s+','+cuadrante+'</b>';
+    @if (isset($riesgos))
+      if ({{ $kind }} == 0)
+      {
+        var text ='<table class="table table-striped table-datatable"><thead><th>Subproceso(s)</th><th>Riesgo</th><th>Descripci&oacute;n</th><th>Exposición efectiva al riesgo</th><th>Severidad</th></thead>';
+      }
+      else
+      {
+        var text ='<table class="table table-striped table-datatable"><thead><th>Objetivo(s)</th><th>Riesgo</th><th>Descripci&oacute;n</th><th>Exposición efectiva al riesgo</th><th>Severidad</th></thead>';
+      }
+
+      @if ($kind2 == 1)
+        @for($k=0; $k < count($riesgos); $k++)
+            if ({{intval($prom_criticidad_ctrl[$k])}} == s)
+            {
+              if (cuadrante == 1)
+              {
+                @if ($prom_proba_ctrl[$k] <= 0.05 && $prom_proba_ctrl[$k] >= 0)
+                  text += '<tr><td>'
+                  @foreach ($riesgos[$k]['subobj'] as $subobj)
+                    text += '<li> {{ $subobj->name }}</li>';
+                  @endforeach
+                  text += '</td>'
+                  text += '<td>{{$riesgos[$k]["name"]}}</td>';
+                  text += '<td>{{$riesgos[$k]["description"]}}</td>';
+                  text += '<td>{{round($prom_proba_ctrl[$k],2) * intval($prom_criticidad_ctrl[$k])}}</td>';
+                  text += '<td>{{$prom_criticidad_ctrl[$k]}}</td></tr>';
+                @endif  
+              }
+
+              else if (cuadrante == 2)
+              {
+                @if ($prom_proba_ctrl[$k] <= 0.15 && $prom_proba_ctrl[$k] > 0.05)
+                  text += '<tr><td>'
+                  @foreach ($riesgos[$k]['subobj'] as $subobj)
+                    text += '<li> {{ $subobj->name }}</li>';
+                  @endforeach
+                  text += '</td>'
+                  text += '<td>{{$riesgos[$k]["name"]}}</td>';
+                  text += '<td>{{$riesgos[$k]["description"]}}</td>';
+                  text += '<td>{{round($prom_proba_ctrl[$k],2) * intval($prom_criticidad_ctrl[$k])}}</td>';
+                  text += '<td>{{$prom_criticidad_ctrl[$k]}}</td></tr>';
+                @endif  
+              }
+
+              else if (cuadrante == 3)
+              {
+                @if ($prom_proba_ctrl[$k] <= 0.5 && $prom_proba_ctrl[$k] > 0.15)
+                  text += '<tr><td>'
+                  @foreach ($riesgos[$k]['subobj'] as $subobj)
+                    text += '<li> {{ $subobj->name }}</li>';
+                  @endforeach
+                  text += '</td>'
+                  text += '<td>{{$riesgos[$k]["name"]}}</td>';
+                  text += '<td>{{$riesgos[$k]["description"]}}</td>';
+                  text += '<td>{{round($prom_proba_ctrl[$k],2) * intval($prom_criticidad_ctrl[$k])}}</td>';
+                  text += '<td>{{$prom_criticidad_ctrl[$k]}}</td></tr>';
+                @endif  
+              }
+
+              else if (cuadrante == 4)
+              {
+                @if ($prom_proba_ctrl[$k] <= 1 && $prom_proba_ctrl[$k] > 0.5)
+                  text += '<tr><td>'
+                  @foreach ($riesgos[$k]['subobj'] as $subobj)
+                    text += '<li> {{ $subobj->name }}</li>';
+                  @endforeach
+                  text += '</td>'
+                  text += '<td>{{$riesgos[$k]["name"]}}</td>';
+                  text += '<td>{{$riesgos[$k]["description"]}}</td>';
+                  text += '<td>{{round($prom_proba_ctrl[$k],2) * intval($prom_criticidad_ctrl[$k])}}</td>';
+                  text += '<td>{{$prom_criticidad_ctrl[$k]}}</td></tr>';
+                @endif  
+              }
+            }
+        @endfor
+      @endif
+            text += '</table>'
+
+            swal({   
+              title: title,   
+              text: text,
+              customClass: 'swal-wide3',   
+              html: true 
+            });
+    @endif
+}
 
 </script>
 

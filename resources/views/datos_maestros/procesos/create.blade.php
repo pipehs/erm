@@ -40,11 +40,9 @@
 					@include('datos_maestros.procesos.form')
 				{!!Form::close()!!}
 
-				<center>
-				{!!Form::open(['url'=>'procesos','method'=>'GET'])!!}
-					{!!Form::submit('Volver', ['class'=>'btn btn-danger'])!!}
-				{!!Form::close()!!}
-				<center>
+			<center>
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+			<center>
 			</div>
 		</div>
 	</div>

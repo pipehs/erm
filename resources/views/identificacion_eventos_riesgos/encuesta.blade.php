@@ -145,8 +145,7 @@
 
 			<div class="row form-group">
 				<center>
-					{!! link_to_route('identificacion.encuesta', $title = 'Volver', $parameters = $encuesta['id'],
-                 		$attributes = ['class'=>'btn btn-danger'])!!}
+					<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
 				<center>
 			</div>
 

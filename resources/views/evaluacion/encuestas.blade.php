@@ -14,7 +14,7 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-sm-12 col-sm-8">
+	<div class="col-sm-12 col-sm-10">
 		<div class="box">
 			<div class="box-header">
 				<div class="box-name">
@@ -58,16 +58,17 @@
 			<p>Seleccione la encuesta que desea ver.<p>
 		@endif
 	@endforeach
-		<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="margin: 0 auto;">
+		<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="margin: 0 auto;">
 			<thead>
-			<th>Nombre</th>
-			<th>Fecha de t&eacute;rmino</th>
-			<th>Ver</th>
+			<th style="vertical-align:top;">Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th style="vertical-align:top;">Fecha de creaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th style="vertical-align:top;">Fecha de t&eacute;rmino<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th style="vertical-align:top;">Ver</th>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
-			<th>Enviar</th>
-			<th>Consolidar</th>
-			<th>Eliminar</th>
+			<th style="vertical-align:top;">Enviar</th>
+			<th style="vertical-align:top;">Consolidar</th>
+			<th style="vertical-align:top;">Eliminar</th>
 		<?php break; ?>
 		@endif
 	@endforeach
@@ -76,24 +77,33 @@
 				@foreach ($encuestas as $encuesta)
 					<tr>
 					<td>{{ $encuesta['name'] }}</td>
-					@foreach ($fecha as $f)
-						@if ($f['evaluation_id'] == $encuesta['id'])
-							<td>{{ $f['expiration_date'] }}</td>
-						@endif
-					@endforeach
+					<td>{{ $encuesta['created_at']}}</td>
+					<td>{{ $encuesta['expiration_date']}}</td>
 					<td>
 					 {!! link_to_route('evaluacion.show', $title = 'Ver', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-success']) !!}
 					 </td>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 					<td>
-					{!! link_to_route('evaluacion.enviar', $title = 'Enviar', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-primary']) !!}
+					@if ($encuesta['consolidation'] == 0)
+						{!! link_to_route('evaluacion.enviar', $title = 'Enviar', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-primary']) !!}
+					@else
+						Encuesta consolidada
+					@endif
 					</td>
 					<td>
-					{!! link_to_route('evaluacion.consolidar', $title = 'Consolidar', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-default']) !!}
+					@if ($encuesta['consolidation'] == 0)
+						{!! link_to_route('evaluacion.consolidar', $title = 'Consolidar', $parameters = $encuesta['id'], $attributes = ['class'=>'btn btn-default']) !!}
+					@else
+						Encuesta consolidada
+					@endif
 					</td>
 					<td>
-					<button class="btn btn-danger" onclick="eliminar({{ $encuesta['id'] }})">Eliminar</button>
+					@if ($encuesta['consolidation'] == 0)
+						<button class="btn btn-danger" onclick="eliminar({{ $encuesta['id'] }})">Eliminar</button>
+					@else
+						Encuesta consolidada
+					@endif
 					</td>
 		<?php break; ?>
 		@endif

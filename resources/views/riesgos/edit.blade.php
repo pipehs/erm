@@ -50,7 +50,50 @@
 @stop
 
 @section('scripts2')
+{!!Html::script('assets/js/audits.js')!!}
+{!!Html::script('assets/js/ejecutar_audit.js')!!}
+{!!Html::script('assets/js/descargar.js')!!}
+
 <script>
+//ACT 28-12-17: Seteamos Categorías si es que hay
+$(document).ready(function () {
+
+	//seteamos datos si es que se está editando
+	setTimeout(risk_category0, 0)
+	setTimeout(risk_category1,1000)
+	setTimeout(risk_category2,2000)	
+
+	//alert('{{$risk_category0}}');
+
+});
+
+function risk_category0()
+{
+	@if ($risk_category0 != NULL)
+
+		$("#risk_category_id").val({{$risk_category0}});
+		$("#risk_category_id").change();
+	@endif
+}
+
+function risk_category1()
+{
+	@if ($risk_category1 != NULL)
+
+		$("#risk_subcategory_id").val({{$risk_category1}});
+		$("#risk_subcategory_id").change();
+	@endif
+}
+
+function risk_category2()
+{
+	@if ($risk_category2 != NULL)
+
+		$("#risk_subcategory_id2").val({{$risk_category2}});
+		$("#risk_subcategory_id2").change();
+	@endif
+}
+
 //bloqueamos opciones de llenado si es que se esta ingresando un riesgo tipo
 	$("#risk_id").change(function() {
 

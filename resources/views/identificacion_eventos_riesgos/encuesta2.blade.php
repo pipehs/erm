@@ -86,10 +86,9 @@
 			<hr>
 		@endforeach
 
-		<center>
-			{!! link_to_route('encuestas', $title = 'Volver', 
-				$parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
-		</center>
+			<center>
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+			<center>
 
 			</div>
 		</div>

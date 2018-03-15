@@ -289,7 +289,7 @@
 	@endif
 	</br></br></br>
 	<center>
-		{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
+		<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
 	<center>
 @else
 	{!!Form::open(['route'=>'mapas2','method'=>'GET','class'=>'form-horizontal'])!!}

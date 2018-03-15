@@ -29,6 +29,7 @@ class ControlesController extends Controller
 
     public $logger;
     public $logger2;
+    public $logger3;
     //Hacemos función de construcción de logger (generico será igual para todas las clases, cambiando el nombre del elemento)
     public function __construct()
     {
@@ -40,6 +41,10 @@ class ControlesController extends Controller
         $this->logger2 = new Logger('evaluacion_controles');
         $this->logger2->pushHandler(new StreamHandler($dir.'/storage/logs/evaluacion_controles.log', Logger::INFO));
         $this->logger2->pushHandler(new FirePHPHandler());
+
+        $this->logger3 = new Logger('evaluacion_riesgos');
+        $this->logger3->pushHandler(new StreamHandler($dir.'/storage/logs/evaluacion_riesgos.log', Logger::INFO));
+        $this->logger3->pushHandler(new FirePHPHandler());
     }
 
     public function getControlReport($controles,$value)
@@ -298,6 +303,10 @@ class ControlesController extends Controller
             }
             else
             {
+
+                //llamamos a función para actualizar porcentajes de contribución
+                //$this->updateContPercentage();
+
                 $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
                 if (Session::get('languaje') == 'en')
@@ -334,6 +343,7 @@ class ControlesController extends Controller
                 $i = 0; //contador de controles
                 
                 //ACTUALIZACIÓN 21-11-17: Vemos si se está filtrando por Riesgo
+                //OBS 26-12-17: objective_risk_id y risk_subprocess_id en realidad están tomando organization_risk_id (por lo que nisiquiera sería necesario enviar la columna organization_id)
                 if (isset($_GET['objective_risk_id']))
                 {
                     $controles1 = \Ermtool\Control::getBussinessControls($_GET['organization_id'],$_GET['objective_risk_id']); 
@@ -603,8 +613,8 @@ class ControlesController extends Controller
      */
     public function store(Request $request)
     {
-        try
-        {
+        //try
+        //{
             if (Auth::guest())
             {
                 return view('login');
@@ -826,8 +836,8 @@ class ControlesController extends Controller
                                 'periodicity'=>$periodicity,
                                 'purpose'=>$purpose,
                                 //'stakeholder_id'=>$stakeholder,
-                                'created_at'=>date('Ymd H:i:s'),
-                                'updated_at'=>date('Ymd H:i:s'),
+                                'created_at'=>date('Y-m-d H:i:s'),
+                                'updated_at'=>date('Y-m-d H:i:s'),
                                 'expected_cost'=>$expected_cost,
                                 'porcentaje_cont'=>$porcentaje_cont,
                                 'key_control' => $key_control,
@@ -928,12 +938,12 @@ class ControlesController extends Controller
                 });
                 return Redirect::to('controles.index2?organization_id='.$_POST['org_id']);
             }
-        }
-        catch (\Exception $e)
-        {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
-        }
+        //}
+        //catch (\Exception $e)
+        //{
+        //    enviarMailSoporte($e);
+        //    return view('errors.query',['e' => $e]);
+        //}
     }
     /**
      * Display the specified resource.
@@ -1617,7 +1627,7 @@ class ControlesController extends Controller
         }
     }
 
-    public function createEvaluacion($id,$kind)
+    public function createEvaluacion($id,$kind,$org)
     {
         try
         {
@@ -1670,7 +1680,7 @@ class ControlesController extends Controller
                             # code...
                             break;
                     }
-                    return view('controles.create_evaluation',['kind' => $kind, 'kind2' => $kind2, 'id' => $id,'control' => $control,'stakeholders' => $stakeholders,'control_evaluation'=>NULL]);
+                    return view('controles.create_evaluation',['kind' => $kind, 'kind2' => $kind2, 'id' => $id,'control' => $control,'stakeholders' => $stakeholders,'control_evaluation'=>NULL,'org_id' => $org]);
                 }
             }
         }
@@ -1775,7 +1785,8 @@ class ControlesController extends Controller
                                 'results' => $_POST['results'],
                                 'comments' => $comments,
                                 'kind' => $_POST['kind'],
-                                'status' => 1
+                                'status' => 1,
+                                'organization_id' => $_POST['org_id']
                             ]);
 
                     global $eval2;
@@ -1900,7 +1911,7 @@ class ControlesController extends Controller
     control_eval_risk_temp, para luego re calcular el valor del riesgo controlado (a través de todos los controles que se encuentren en la tabla control_eval_risk_temp y que apunten a los riesgos creados en el sistema) */
 
     /* ACTUALIZACIÓN 04-07-2017: Esta función no se utilizará en Coca Cola, y serán modificadas las funciones calcControlValue y calcControlledRisk, de modo que cada vez que se cree o actualice un control, se calculará el promedio de los controles, y luego este valor será aplicado a todos los riesgos asociados
-
+*/
     public function closeEvaluation($id,$org)
     {
         global $id1;
@@ -1916,10 +1927,10 @@ class ControlesController extends Controller
             $eval->save();
 
             //ahora calcularemos el resultado del control
-            $control = $this->calcControlValue($eval->control_id);
+            //$control = $this->calcControlValue($eval->control_id);
 
             //ahora calcularemos el valor de el o los riesgos a los que apunte este control
-            $eval_risk = $this->calcControlledRisk($eval->control_id,$GLOBALS['org1']);
+            //$eval_risk = $this->calcControlledRisk($eval->control_id,$GLOBALS['org1']);
 
             if (Session::get('languaje') == 'en')
             {
@@ -1954,7 +1965,7 @@ class ControlesController extends Controller
         });
 
         return 0;
-    } */
+    }
     
     //función que retornará documento de evidencia subidos, junto al control que corresponden
     public function docs($id)
@@ -3170,7 +3181,7 @@ class ControlesController extends Controller
     }
 
     //calculamos el valor del control según las pruebas que posea
-    /*public function calcControlValue($id)
+    public function calcControlValue($id)
     {
         //obtenemos la última evaluación de cada una de las pruebas (independientes de si están abiertas o cerradas)
         //primero obtenemos la fecha
@@ -3327,6 +3338,7 @@ class ControlesController extends Controller
         }
 
         //ahora vemos si el total de pruebas realizadas y cerradas es igual a la cantidad de pruebas efectivas
+        /*
         if ($total == $efectivas)
         {
             //guardamos en control_eval_risk_temp como control efectivo
@@ -3347,9 +3359,10 @@ class ControlesController extends Controller
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
         }
+        */
 
         return 0;
-    } */
+    }
 
     //función que calcula el valor del o los riesgos controlados (a través de una nueva agregación o modificación en el valor de un control)
     public function calcControlledRisk($control_id,$org,$ano,$mes,$dia)
@@ -3775,5 +3788,265 @@ class ControlesController extends Controller
             enviarMailSoporte($e);
             return view('errors.query',['e' => $e]);
         }
+    }
+
+    public function updateContPercentage()
+    {
+        $controls = \Ermtool\Control::all();
+
+        foreach ($controls as $control)
+        {
+            //obtenemos control_organization_risk donde corresponde
+            $cors = DB::table('control_organization_risk')
+                ->where('control_id','=',$control->id)
+                ->select('id')
+                ->get();
+
+            foreach ($cors as $cor)
+            {
+                DB::table('control_organization_risk')
+                    ->where('id','=',$cor->id)
+                    ->update([
+                        'cont_percentage' => $control->porcentaje_cont
+                    ]);
+            }
+
+            //$control->porcentaje_cont = NULL;
+            //$control->save();
+        }
+    }
+
+    //ACT 24-01-18: Index de Evaluación de Riesgos residual manual
+    public function residualManual()
+    {
+        try
+        {
+            if (Auth::guest())
+            {
+                return view('login');
+            }
+            else
+            {
+                //ACTUALIZACIÓN 25-07: En vez de obtener y enviar riesgos, enviamos organización para poder seleccionar
+                $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+                $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
+
+                if (Session::get('languaje') == 'en')
+                { 
+                    return view('en.controles.residual_manual',['organizations'=>$organizations,'categories' => $categories]);
+                }
+                else
+                {
+                    return view('controles.residual_manual',['organizations'=>$organizations,'categories' => $categories]);
+                }
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    //Página para agregar evaluación residual del riesgo
+    public function residualManual2()
+    {
+        try
+        {
+            if (Auth::guest())
+            {
+                return view('login');
+            }
+            else
+            {
+                $objective_risk = [];
+                $risk_subprocess = [];
+                $i = 0;
+                if (isset($_GET['objective_risk_id'])) //insertamos primero riesgos de negocio -> si es que se agregaron
+                {
+                    foreach ($_GET['objective_risk_id'] as $objective_risk_id)
+                    {
+                            $objective_risk[$i] = $objective_risk_id;
+                            $i += 1;
+                    }
+                }
+
+                $i = 0;
+                if (isset($_GET['risk_subprocess_id'])) //ahora insertamos riesgos de subproceso (si es que se agregaron)
+                {
+                    foreach ($_GET['risk_subprocess_id'] as $subprocess_risk_id)
+                    {
+                            $risk_subprocess[$i] = $subprocess_risk_id;
+                            $i += 1;
+                    }
+                }
+
+                $riesgos = array();
+                $i = 0;
+                $id = 0;
+                //Obtenemos EBT. Para esto, primero vemos si esta organización tiene EBT, sino buscamos EBT de org principal
+                $ebt = \Ermtool\Organization::getEBT($_GET['organization_id'],1);
+
+                if ($ebt->ebt == NULL)
+                {
+                    $ebt = \Ermtool\Organization::getEBT($_GET['organization_id'],2);
+
+                    //si org principal no tiene EBT
+                    if ($ebt->ebt == NULL)
+                    {
+                        $ebt = array();
+                    }
+                }
+
+                //ACTUALIZACIÓN 04-01-18: Agregamos tipos de moneda para materialidad
+                $kinds = ['1'=>'Peso','2'=>'Dólar','3'=>'Euro','4'=>'UF']; 
+
+                //cada uno de los riesgos de subproceso
+                foreach ($risk_subprocess as $risk)
+                {
+
+                        $risk1 = \Ermtool\Risk::getRisksFromOrgRisk($risk);
+
+                        //guardamos el riesgo de subproceso junto a su id de evaluation_risk para crear form de encuesta
+                        foreach ($risk1 as $r)
+                        {
+                            //obtenemos último impacto y probabilidad (materialidad)
+                            $last_m = \Ermtool\Risk::getLastMateriality($_GET['organization_id'],$r->id);
+
+                            //$org_id = $r->org_id;
+                            //obtenemos subprocesos relacionados
+                            $subobj = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($r->id,$_GET['organization_id']);
+
+                            //obtenemos controles asociados al riesgo
+                            $controls = \Ermtool\Control::getControlsFromRisk($_GET['organization_id'],$r->id);
+
+                            //obtenemos evaluación del riesgo si es que hay
+                            $evaluation_risk = \Ermtool\Evaluation::getLastEvaluation($risk);
+
+                            $riesgos[$i] = array('type' => 0,
+                                                'org_risk_id' => $risk,
+                                                'risk_name' => $r->risk_name,
+                                                'description' => $r->description,
+                                                'subobj' => $subobj,
+                                                'last_m' => $last_m,
+                                                'controls' => $controls,
+                                                'evaluation_risk' => $evaluation_risk);
+                            $i += 1;
+                        }
+                }
+
+                foreach ($objective_risk as $risk)
+                {
+                        //obtenemos nombre de riesgo y organizacion
+                        $risk1 = \Ermtool\Risk::getRisksFromOrgRisk($risk);
+
+                        foreach ($risk1 as $r)
+                        {
+                            //obtenemos último impacto y probabilidad (materialidad)
+                            $last_m = \Ermtool\Risk::getLastMateriality($_GET['organization_id'],$r->id);
+
+                            //obtenemos objetivos relacionados
+                            $subobj = \Ermtool\Objective::getObjectivesFromOrgRisk($r->id,$_GET['organization_id']);
+
+                            //obtenemos controles asociados al riesgo
+                            $controls = \Ermtool\Control::getControlsFromRisk($_GET['organization_id'],$r->id);
+
+                            //obtenemos evaluación del riesgo si es que hay
+                            $evaluation_risk = \Ermtool\Evaluation::getLastEvaluation($risk);
+
+                            $riesgos[$i] = array('type' => 1,
+                                                'org_risk_id' => $risk,
+                                                'risk_name' => $r->risk_name,
+                                                'description' => $r->description,
+                                                'subobj' => $subobj,
+                                                'last_m' => $last_m,
+                                                'controls' => $controls,
+                                                'evaluation_risk' => $evaluation_risk);
+                            $i += 1;
+                        }
+                }
+
+                if (Session::get('languaje') == 'en')
+                {
+                    $tipos_impacto = \Ermtool\Eval_description::getImpactValues(2); //2 es inglés
+                    $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(2);
+                    $org_name = \Ermtool\Organization::name($_GET['organization_id']); 
+                    return view('en.controles.residual_manual2',['riesgos'=>$riesgos,'org_name' => $org_name,'org_id'=>$_GET['organization_id'], 'ebt' => $ebt,'tipos_impacto' => $tipos_impacto, 'tipos_proba' => $tipos_proba, 'kinds' => $kinds]);
+                }
+                else
+                {
+                    $tipos_impacto = \Ermtool\Eval_description::getImpactValues(1);
+                    $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
+                    $org_name = \Ermtool\Organization::name($_GET['organization_id']); 
+                    return view('controles.residual_manual2',['riesgos' => $riesgos, 'org_name' => $org_name, 'org_id' => $_GET['organization_id'], 'ebt' => $ebt,'tipos_impacto' => $tipos_impacto, 'tipos_proba' => $tipos_proba, 'kinds' => $kinds]);
+                }
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    public function storeResidualManual()
+    {
+        //print_r($_POST);
+        DB::transaction(function(){
+            $logger = $this->logger3;
+
+            foreach ($_POST['evaluation_risk_id'] as $org_risk_id)
+            {
+                if (isset($_POST['comments_'.$org_risk_id]) && $_POST['comments_'.$org_risk_id] != '') //si es que se agregaron comentarios
+                {
+                    $comments = $_POST['comments_'.$org_risk_id];
+                }
+                else
+                {
+                    $comments = NULL;
+                }
+
+                //ACT 05-03-18: Sacamos rut de Auth
+                $rut = Auth::user()->id;
+                /*
+                if ($_POST['rut'] >= 2147483647)
+                {
+                    //realizaremos división y guardamos entero
+                    $rut = $_POST['rut'] / 100;
+                    $rut = (int)$id;
+                }
+                else
+                {
+                    $rut = $_POST['rut'];
+                }*/
+
+                //insertamos en controlled_risk_manual
+                $eval_risk_id = DB::table('controlled_risk_manual')
+                        ->insertGetId([
+                            'organization_risk_id' => $org_risk_id,
+                            'probability' => $_POST['proba_'.$org_risk_id],
+                            'impact' => $_POST['criticidad_'.$org_risk_id],
+                            'probability2' => $_POST['probability_'.$org_risk_id],
+                            'impact2' => $_POST['impact_'.$org_risk_id],
+                            'comments' => $comments,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                            'user_id' => $rut,
+                        ]);
+            }
+
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Answers successfully sent');
+            }
+            else
+            {
+                Session::flash('message','Respuestas enviadas correctamente');
+            }
+
+            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames.', Rut: '.Auth::user()->id.', ha realizado una evaluación de riesgos residual con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+        });
+
+        return Redirect::to('residual_manual'); 
     }
 }

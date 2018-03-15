@@ -80,9 +80,13 @@
 				<td>{{ $plan['Plan_de_auditoría'] }}</td>
 				<td>{{ $plan['Descripción_plan'] }}</td>
 				<td>
-				@foreach ($plan['Auditorías'] as $audit)
-					<a href="#" onclick="veraudit({{$audit['id']}})">{{ $audit['name'] }}</a><br>
-				@endforeach
+				@if ($plan['verificador'] == 1)
+					<a href="#" onclick="veraudits({{$plan['id']}})">Ver</a><br>
+				@else
+					@foreach ($plan['Auditorías'] as $audit)
+						<a href="#" onclick="veraudit({{$audit['id']}})">{{ $audit['name'] }}</a><br>
+					@endforeach
+				@endif
 				</td>
 				<td>{{ $plan['Objetivos'] }}</td>
 				<td>{{ $plan['Alcances'] }}</td>
@@ -174,6 +178,36 @@ function veraudit(id)
 		text += '<tr><td><b>Fecha final</b></td>'
 		text += '<td>'+ datos.audit.final_date +'</td>'
 		text += '</tr></table>'
+
+		//text += '<a class="btn btn-success" href="genexcelaudit.'+datos.audit.id+'">Exportar</a>'
+
+		swal({   
+			title: title,   
+			text: text,
+			customClass: 'swal-wide',   
+			html: true 
+		});
+	});
+}
+
+function veraudits(id)
+{
+
+	$.get('get_audits2.'+ id, function (result) {
+
+		//parseamos datos obtenidos
+		var datos = JSON.parse(result);
+	
+		var title = '<b>Auditorías</b>';
+
+		var text ='<table class="table table-striped table-datatable">';
+		text += '<thead><th>Auditoría</th><th>Descripción</th></thead>';
+		$(datos).each( function() {
+			text += '<tr><td><a href="#" onclick="veraudit('+this.id+')">'+ this.name +'</td>'
+			text += '<td>'+ this.description +'</td></tr>'
+		});
+
+		text += '</table>'
 
 		//text += '<a class="btn btn-success" href="genexcelaudit.'+datos.audit.id+'">Exportar</a>'
 

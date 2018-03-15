@@ -67,7 +67,7 @@
 			<center><b>Aun no se ha creado ning&uacute;n KPI para {{$obj_selected}}.</b></center><br><br>
 
 			<center>
-				{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
 			<center>
 		@else
 			<h4><b>{{ $obj_selected }}</b></h4>

@@ -326,15 +326,17 @@ class EvaluacionRiesgosController extends Controller
     //Función que mostrará lista de encuestas agregadas
     public function encuestas()
     {
-        try
-        {
+        //try
+        //{
             if (Auth::guest())
             {
                 return view('login');
             }
             else
             {
-                $encuestas = \Ermtool\Evaluation::where('consolidation',0)->get(); //se muestran las encuestas NO consolidadas
+                //ACT 30-12-17: Sacamos la consolidación para ver todas
+                //$encuestas = \Ermtool\Evaluation::where('consolidation',0)->get(); //se muestran las encuestas NO consolidadas
+                $encuestas = \Ermtool\Evaluation::all();
                 $i = 0;
                 $fecha = array();
                 foreach($encuestas as $encuesta)
@@ -342,15 +344,22 @@ class EvaluacionRiesgosController extends Controller
                     if ($encuesta->expiration_date != NULL)
                     {
                         $expiration_date = new DateTime($encuesta->expiration_date);
-                        $fecha_exp = date_format($expiration_date, 'd-m-Y');         
+                        $encuesta->expiration_date = date_format($expiration_date, 'd-m-Y');         
                     }
                     else
                     {
-                        $fecha_exp = "Ninguna";
+                        $encuesta->expiration_date = "Ninguna";
                     }
 
-                    $fecha[$i] = ['evaluation_id' => $encuesta->id,
-                                  'expiration_date' => $fecha_exp];
+                    if ($encuesta->created_at != NULL)
+                    {
+                        $created_at = new DateTime($encuesta->created_at);
+                        $encuesta->created_at = date_format($created_at, 'Y-m-d');
+                    }
+                    
+
+                    //$fecha[$i] = ['evaluation_id' => $encuesta->id,
+                    //              'expiration_date' => $fecha_exp];
 
                     $i += 1;
                 }
@@ -364,12 +373,12 @@ class EvaluacionRiesgosController extends Controller
                     return view('evaluacion.encuestas',['encuestas'=>$encuestas,'fecha'=>$fecha]);
                 }
             }
-        }
-        catch (\Exception $e)
-        {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
-        }
+        //}
+        //catch (\Exception $e)
+        //{
+        //    enviarMailSoporte($e);
+        //    return view('errors.query',['e' => $e]);
+        //}
     }
 
     public function show($id)
@@ -1330,14 +1339,26 @@ class EvaluacionRiesgosController extends Controller
 
                                 //$updated_at_in = str_replace('-','',$updated_at_in);
 
-                                if ($_GET['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
+                                //ACT 05-03-18: Ahora existirá kind2_1. kind2_2, kind2_3 (según los mapas que existan)
+                                if (isset($_GET['kind2_1'])) //Mapa % de contribución
                                 {
                                     //ACTUALIZACIÓN 22-11-16: Obtendremos los riesgos controlados a través de la tabla controlled_risk sólo para la organización y el tipo seleccionado
                                     $updated_at_ctrl = DB::table('controlled_risk')
-                                                        ->join('organization_risk','organization_risk.id','=','controlled_risk.organization_risk_id')
-                                                        ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
-                                                        ->where('controlled_risk.created_at','<=',date($ano.$mes.$dia.' 23:59:59'))
-                                                        ->max('controlled_risk.created_at');
+                                            ->join('organization_risk','organization_risk.id','=','controlled_risk.organization_risk_id')
+                                            ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
+                                            ->where('controlled_risk.created_at','<=',date($ano.$mes.$dia.' 23:59:59'))
+                                            ->max('controlled_risk.created_at');
+
+                                    //$updated_at_ctrl = str_replace('-','',$updated_at_ctrl);
+                                }
+
+                                if (isset($_GET['kind2_2'])) //Mapa Residual Manual
+                                {
+                                    $updated_at_ctrl = DB::table('controlled_risk_manual')
+                                            ->join('organization_risk','organization_risk.id','=','controlled_risk.organization_risk_id')
+                                            ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
+                                            ->where('controlled_risk.created_at','<=',date($ano.$mes.$dia.' 23:59:59'))
+                                            ->max('controlled_risk.created_at');
 
                                     //$updated_at_ctrl = str_replace('-','',$updated_at_ctrl);
                                 }
@@ -1352,6 +1373,7 @@ class EvaluacionRiesgosController extends Controller
 
 
                                 //proba controlado (si es que hay)
+                                //ACT 05-03-18: Esto será para mapa de % de contribución
                                 if (isset($updated_at_ctrl) && $updated_at_ctrl != NULL)
                                 {
                                     //ACTUALIZACIÓN 01-12: Obtenemos valor de riesgo controlado de controlled_risk_criteria, según la evaluación de controlled_risk
@@ -1416,6 +1438,7 @@ class EvaluacionRiesgosController extends Controller
                                 //$objectives = $riesgo_temp->objectives ----> NO SIRVE MUESTRA OBJ. DE OTRAS ORGANIZACIONES
                                 if ($_GET['kind'] == 0) //riesgos de proceso
                                 {
+
                                     $subobj = DB::table('subprocesses')
                                             ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
                                             ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
@@ -1423,6 +1446,80 @@ class EvaluacionRiesgosController extends Controller
                                             ->where('organization_subprocess.organization_id','=',$_GET['organization_id'])
                                             ->select('subprocesses.name')
                                             ->get();
+
+                                    //ACT 11-01-18: obtenemos subprocesos de filiales (para cualquier tipo de nivel)
+                                    $subobj2 = array(); //array temporal para guardar subprocesos
+
+                                    if (isset($_GET['sub_organizations'])) //verificamos que se haya seleccionado ver filiales
+                                    {
+                                        //organizaciones dependientes de primer nivel (después de la seleccionada)
+                                        $orgs = DB::table('organizations')
+                                                ->where('organization_id','=',$_GET['organization_id'])
+                                                ->select('id')
+                                                ->get();
+
+                                        foreach ($orgs as $org) //organizaciones de 2 nivel (después de la seleccionada)
+                                        {
+                                            $subobj_temp = DB::table('subprocesses')
+                                                ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                                                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                                                ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
+                                                ->where('organization_subprocess.organization_id','=',$org->id)
+                                                ->select('subprocesses.name')
+                                                ->get();
+
+                                            foreach ($subobj_temp as $t)
+                                            {
+                                                array_push($subobj2,$t);
+                                            }
+
+                                            $orgs2 = DB::table('organizations')
+                                                    ->where('organization_id','=',$org->id)
+                                                    ->select('id')
+                                                    ->get();
+
+                                            foreach ($orgs2 as $org2) //organizaciones de 3 nivel (después de la seleccionada)
+                                            {
+                                                $subobj_temp = DB::table('subprocesses')
+                                                    ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                                                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                                                    ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
+                                                    ->where('organization_subprocess.organization_id','=',$org2->id)
+                                                    ->select('subprocesses.name')
+                                                    ->get();
+
+                                                foreach ($subobj_temp as $t)
+                                                {
+                                                    array_push($subobj2,$t);
+                                                }
+
+                                                $orgs3 = DB::table('organizations')
+                                                        ->where('organization_id','=',$org->id)
+                                                        ->select('id')
+                                                        ->get();
+
+                                                foreach ($orgs3 as $org2) //organizaciones de 3 nivel (después de la seleccionada)
+                                                {
+                                                    $subobj_temp = DB::table('subprocesses')
+                                                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                                                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                                                        ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
+                                                        ->where('organization_subprocess.organization_id','=',$org2->id)
+                                                        ->select('subprocesses.name')
+                                                        ->get();
+
+                                                    foreach ($subobj_temp as $t)
+                                                    {
+                                                        array_push($subobj2,$t);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                        $subobj2 = array_unique($subobj2,SORT_REGULAR);  
+                                        $subobj = array_merge($subobj,$subobj2);
+                                        $subobj = array_unique($subobj,SORT_REGULAR);
+                                    }
                                 }
                                 else if ($_GET['kind'] == 1) //riesgos de negocio
                                 {
@@ -1436,10 +1533,13 @@ class EvaluacionRiesgosController extends Controller
                                 
 
                                 //eliminamos posibles espacios que puedan llevar a error en descripción
-                                $description = preg_replace('(\n)',' ',$riesgo_temp->description);
-                                $description = preg_replace('(\r)',' ',$description);
+                                //$description = preg_replace('(\n)',' ',$riesgo_temp->description);
+                                //$description = preg_replace('(\r)',' ',$description);
+                                //ACT 12-12-17: Eliminamos saltos
+                                $description = eliminarSaltos($riesgo_temp->description);
+                                $name = eliminarSaltos($riesgo_temp->name);
 
-                                $riesgos[$i] = array('name' => $riesgo_temp->name,
+                                $riesgos[$i] = array('name' => $name,
                                                     'subobj' => $subobj,
                                                     'description' => $description);
 
@@ -1452,8 +1552,80 @@ class EvaluacionRiesgosController extends Controller
                     $prom_proba_ctrl = null;
                     $prom_criticidad_ctrl = null;
                 }
+
+                //ACT 10-01-18: Si es que son muchos los riesgos, los juntamos. Para esto, realizamos contador de los riesgos para cada uno de los cuadrantes (primero en mapa inherente)
+                $cont = array();
+                for($i=1; $i <= 5; $i++)
+                {
+                    for ($j=1; $j <= 5; $j++)
+                    {
+                        $cont[$i][$j] = 0;
+                    }
+                }
                 
-                if ($_GET['kind2'] == 1) //Si es 0 veremos solo mapa para riesgos inherentes
+                for($k=0; $k < count($riesgos); $k++)
+                {
+                    $cont[intval($prom_criticidad_in[$k])][intval($prom_proba_in[$k])] += 1;
+                }
+
+                //ACT 11-01-18: Ahora realizamos la actualización para mapa de riesgos residuales
+                if (isset($_GET['kind2_1'])) //Mapa de % de Contribución de acciones mitigante
+                {
+
+                    $cont_ctrl = array();
+                    for ($i=1; $i <= 25; $i++)
+                    {
+                        $cont_ctrl[$i][1] = 0;
+                        $cont_ctrl[$i][2] = 0;
+                        $cont_ctrl[$i][3] = 0;
+                        $cont_ctrl[$i][4] = 0;
+                    }
+                    for ($i=1; $i <= 25; $i++) //ciclo de severidad
+                    {
+                        for($k=0; $k < count($riesgos); $k++)
+                        {
+                            if (intval($prom_criticidad_ctrl[$k]) == $i) //si es que la severidad del riesgo es igual a la del ciclo
+                            {
+                                if ($prom_proba_ctrl[$k] <= 0.05 && $prom_proba_ctrl[$k] >= 0)
+                                {
+                                    $cont_ctrl[$i][1] += 1;
+                                }
+                                else if ($prom_proba_ctrl[$k] <= 0.15 && $prom_proba_ctrl[$k] > 0.05)
+                                {
+                                    $cont_ctrl[$i][2] += 1;
+                                }
+                                else if ($prom_proba_ctrl[$k] <= 0.5 && $prom_proba_ctrl[$k] > 0.15)
+                                {
+                                    $cont_ctrl[$i][3] += 1;
+                                }
+                                else if ($prom_proba_ctrl[$k] <= 1 && $prom_proba_ctrl[$k] > 0.5)
+                                {
+                                    $cont_ctrl[$i][4] += 1;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (isset($_GET['kind2_2'])) //Mapa de Riesgo Residual Manual
+                {
+                    $cont_manual = array();
+                    for($i=1; $i <= 5; $i++)
+                    {
+                        for ($j=1; $j <= 5; $j++)
+                        {
+                            $cont_manual[$i][$j] = 0;
+                        }
+                    }
+                    
+                    for($k=0; $k < count($riesgos); $k++)
+                    {
+                        $cont_manual[intval($prom_criticidad_manual[$k])][intval($prom_proba_manual[$k])] += 1;
+                    }
+                }
+
+                //ACT 05-03-18: Vemos si es que hay algún otro tipo de mapa de calor (aparte de inherente)
+                if (isset($_GET['kind2_1']) || (isset($_GET['kind2_2'])) || (isset($_GET['kind2_3']))) 
                 {
                     if (Session::get('languaje') == 'en')
                     {
@@ -1465,7 +1637,10 @@ class EvaluacionRiesgosController extends Controller
                                                 'prom_criticidad_ctrl'=>$prom_criticidad_ctrl,
                                                 'control' => $control,
                                                 'kind' => $_GET['kind'],
-                                                'kind2' => $_GET['kind2']]);
+                                                'kind2' => $_GET['kind2'],
+                                                'exposicion' => $exposicion,
+                                                'cont2' => $cont,
+                                                'cont_ctrl' => $cont_ctrl]);
                     }
                     else
                     {
@@ -1477,7 +1652,9 @@ class EvaluacionRiesgosController extends Controller
                                                 'control' => $control,
                                                 'kind' => $_GET['kind'],
                                                 'kind2' => $_GET['kind2'],
-                                                'exposicion' => $exposicion]);
+                                                'exposicion' => $exposicion,
+                                                'cont2' => $cont,
+                                                'cont_ctrl' => $cont_ctrl]);
                     } 
                 }
                 else
@@ -1489,7 +1666,9 @@ class EvaluacionRiesgosController extends Controller
                                                 'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
                                                 'prom_criticidad_in'=>$prom_criticidad_in,
                                                 'kind' => $_GET['kind'],
-                                                'kind2' => $_GET['kind2']]);
+                                                'kind2' => $_GET['kind2'],
+                                                'exposicion' => $exposicion,
+                                                'cont2' => $cont]);
                     }
                     else
                     {
@@ -1497,7 +1676,9 @@ class EvaluacionRiesgosController extends Controller
                                                 'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
                                                 'prom_criticidad_in'=>$prom_criticidad_in,
                                                 'kind' => $_GET['kind'],
-                                                'kind2' => $_GET['kind2']]);
+                                                'kind2' => $_GET['kind2'],
+                                                'exposicion' => $exposicion,
+                                                'cont2' => $cont]);
                     } 
                 }
             }
@@ -2021,26 +2202,44 @@ class EvaluacionRiesgosController extends Controller
             return view('reportes.riesgos',['organizations'=>$organizations]);
         }
     }
-    public function reporteRiesgosCocaCola($org,$kind)
+    //OBS 27-12-17: Se creo pensando en CocaCola (por eso el nombre), pero es para todas las organizaciones
+    //ACT 12-01-18: Se agrega kind2, para definir que tipo de reporte es (por categoría, por proceso, etc)
+    public function reporteRiesgos2()
     {
 
         //try{
-        //obtenemos todos los riesgos específicos de la organización
+        $risk_subcategories = array();        
+        $categories = array();
 
-        //obtenemos subcategories
-        $risk_subcategories = \Ermtool\Risk_category::getSubcategories();
+        $processes = array();
+        $processes2 = array();
 
-        //$risks = array();
-        $cont_categories = array();
-        $i = 0;
-        foreach ($risk_subcategories as $subcategory)
+        if (isset($_GET['kind2']) && $_GET['kind2'] == 1)
         {
-            $categories[$i] = ['id' => $subcategory->id,'name' => $subcategory->name];
-            $cont_categories[$i] = 0;
-            $i += 1;
-        }       
-                //controlado
+            //obtenemos subcategories
+            $risk_subcategories = \Ermtool\Risk_category::getSubcategories();
+            $i = 0;
+            foreach ($risk_subcategories as $subcategory)
+            {
+                $categories[$i] = ['id' => $subcategory->id,'name' => $subcategory->name];
+                $i += 1;
+            } 
+        }
+        else if (isset($_GET['kind2']) && $_GET['kind2'] == 2) //por procesos
+        {
+            if (isset($_GET['kind']) && $_GET['kind'] == 0)
+            {
+                $processes2 = \Ermtool\Process::where('status',0)->get(['id','name']);
 
+                $i = 0;
+                foreach ($processes2 as $process)
+                {
+                    $processes[$i] = ['id' => $process->id, 'name' => $process->name];
+                    $i += 1;
+                }
+            }
+        }     
+                //controlado
                 $control = array(); //define si un riesgo está siendo controlado o no
 
                 $riesgo_temp = array();
@@ -2071,14 +2270,15 @@ class EvaluacionRiesgosController extends Controller
                     //inherente
                     $prom_proba_in = array();
                     $prom_criticidad_in = array();
-                    if ($org != 0 && $org != NULL)
-                    {
-                        $riesgos = $this->getEvaluatedRisks($org,$evaluations,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,$categories,$cont_categories,$risk_subcategories);
-                    }
-                    else
-                    {
-                        $riesgos = $this->getEvaluatedRisks($_GET['organization_id'],$evaluations,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,$categories,$cont_categories,$risk_subcategories);
-                    }
+                    //ACT 15-01-18: Se comenta esto ya que no se utiliza variable org (ni se declara en la función desde ahora)
+                    //if ($org != 0 && $org != NULL)
+                    //{
+                    //    $riesgos = $this->getEvaluatedRisks($org,$evaluations,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,null,null,null);
+                    //}
+                    //else
+                    //{
+                        $riesgos = $this->getEvaluatedRisks($_GET['organization_id'],$evaluations,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,null,null,null);
+                    //}
                 }        
 
 
@@ -2087,7 +2287,7 @@ class EvaluacionRiesgosController extends Controller
                     //inherente
                     $prom_proba_in = array();
                     $prom_criticidad_in = array();
-                    $riesgos_consolidados = $this->getEvaluatedRisks(NULL,$consolidados,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,$categories,$cont_categories,$risk_subcategories);
+                    $riesgos_consolidados = $this->getEvaluatedRisks(NULL,$consolidados,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,null,null,null);
                 }
                 else
                 {
@@ -2095,26 +2295,41 @@ class EvaluacionRiesgosController extends Controller
                 }   
 
                 //obtenemos nombre de organización
-                if ($org != 0 && $org != NULL)
-                {
-                   $organization = \Ermtool\Organization::name($org); 
-                }
-                else
-                {
+                //ACT 15-01-18: Se comenta esto ya que no se utiliza variable org (ni se declara en la función desde ahora)
+                //if ($org != 0 && $org != NULL)
+                //{
+                //   $organization = \Ermtool\Organization::name($org); 
+                //}
+                //else
+                //{
                     $organization = \Ermtool\Organization::name($_GET['organization_id']);
-                }
+                //}
                 //Return
 
                 if (Session::get('languaje') == 'en')
                 {
                     //retornamos la misma vista con datos (inglés)
-                    return view('en.reportes.riesgos',['riesgos'=>$riesgos,'riesgos_consolidados'=>$riesgos_consolidados,'risk_subcategories' => $risk_subcategories,'control' => $control,'kind' => $_GET['kind'],'cont_categories' => $cont_categories,'categories' => $categories,'organization' => $organization]);
+                    if (isset($_GET['kind2']) && $_GET['kind2'] == 1)
+                    {
+                        return view('en.reportes.riesgos',['riesgos'=>$riesgos,'riesgos_consolidados'=>$riesgos_consolidados,'control' => $control,'kind' => $_GET['kind'],'categories' => $categories,'organization' => $organization]);
+                    }
+                    else if (isset($_GET['kind2']) && $_GET['kind2'] == 2)
+                    {
+                        return view('en.reportes.riesgos2',['riesgos'=>$riesgos,'riesgos_consolidados'=>$riesgos_consolidados,'control' => $control,'kind' => $_GET['kind'],'processes' => $processes,'organization' => $organization]);
+                    }
                 }
                 else
                 {
                     //$count1 = count($riesgos);
                     //$count2 = count($riesgos_consolidados);
-                    return view('reportes.riesgos',['riesgos'=>$riesgos,'riesgos_consolidados'=>$riesgos_consolidados,'risk_subcategories' => $risk_subcategories,'control' => $control,'kind' => $_GET['kind'],'cont_categories' => $cont_categories,'categories' => $categories,'organization' => $organization]);
+                    if (isset($_GET['kind2']) && $_GET['kind2'] == 1)
+                    {
+                        return view('reportes.riesgos',['riesgos'=>$riesgos,'riesgos_consolidados'=>$riesgos_consolidados,'control' => $control,'kind' => $_GET['kind'],'categories' => $categories,'organization' => $organization]);
+                    }
+                    else if (isset($_GET['kind2']) && $_GET['kind2'] == 2)
+                    {
+                        return view('reportes.riesgos2',['riesgos'=>$riesgos,'riesgos_consolidados'=>$riesgos_consolidados,'control' => $control,'kind' => $_GET['kind'],'processes' => $processes,'organization' => $organization]);
+                    }
                 } 
                 
         //}
@@ -2202,10 +2417,13 @@ class EvaluacionRiesgosController extends Controller
             //$objectives = $riesgo_temp->objectives ----> NO SIRVE MUESTRA OBJ. DE OTRAS ORGANIZACIONES
             if (isset($_GET['kind']) && $_GET['kind'] == 0) //riesgos de proceso
             {
-                if ($_GET['organization_id'] == NULL)
+                if ($org == NULL)
                 {
+                    //ACT 12-01-18: Vemos por organización igual ya que para cada organización habrá distinta evaluación
                     $subobj = DB::table('subprocesses')
                         ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                        ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+                        ->where('organization_risk.id','=',$evaluation->risk_id)
                         ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
                         ->select('subprocesses.name')
                         ->get();
@@ -2216,7 +2434,7 @@ class EvaluacionRiesgosController extends Controller
                     ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                     ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
-                    ->where('organization_subprocess.organization_id','=',$_GET['organization_id'])
+                    ->where('organization_subprocess.organization_id','=',$org)
                     ->select('subprocesses.name')
                     ->get();
                 }
@@ -2226,8 +2444,11 @@ class EvaluacionRiesgosController extends Controller
             {
                 if ($org == NULL)
                 {
+                    //ACT 12-01-18: Vemos por organización igual ya que para cada organización habrá distinta evaluación
                     $subobj = DB::table('objectives')
                         ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
+                        ->join('organization_risk','organization_risk.risk_id','=','objective_risk.risk_id')
+                        ->where('organization_risk.id','=',$evaluation->risk_id)
                         ->where('objective_risk.risk_id','=',$riesgo_temp->id)
                         ->select('objectives.name')
                         ->get();
@@ -2246,6 +2467,8 @@ class EvaluacionRiesgosController extends Controller
             {
                 $subobj = DB::table('objectives')
                         ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
+                        ->join('organization_risk','organization_risk.risk_id','=','objective_risk.risk_id')
+                        ->where('organization_risk.id','=',$evaluation->risk_id)
                         ->where('objective_risk.risk_id','=',$riesgo_temp->id)
                         ->select('objectives.name')
                         ->get();
@@ -2254,6 +2477,8 @@ class EvaluacionRiesgosController extends Controller
                 {
                     $subobj = DB::table('subprocesses')
                         ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                        ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+                        ->where('organization_risk.id','=',$evaluation->risk_id)
                         ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
                         ->select('subprocesses.name')
                         ->get();
@@ -2262,35 +2487,47 @@ class EvaluacionRiesgosController extends Controller
                                 
             //obtenemos categoría
             $risk_category = \Ermtool\Risk_category::name($riesgo_temp->risk_category_id);
-            //eliminamos posibles espacios que puedan llevar a error en descripción
-            $description = preg_replace('(\n)',' ',$riesgo_temp->description);
-            $description = preg_replace('(\r)',' ',$description);
-            $comments = preg_replace('(\n)',' ',$riesgo_temp->comments);
-            $comments = preg_replace('(\r)',' ',$comments);
 
             $j = 0;
 
             //contamos y asignamos cateogoría
-            foreach ($risk_subcategories as $category)
+            if ($risk_subcategories != null && !empty($risk_subcategories))
             {
-                if ($category->id == $riesgo_temp->risk_category_id)
+                foreach ($risk_subcategories as $category)
                 {
-                    $cont_categories[$j] += 1;
-                    break;
+                    if ($category->id == $riesgo_temp->risk_category_id)
+                    {
+                        $cont_categories[$j] += 1;
+                        break;
+                    }
+                    $j += 1;
                 }
-                $j += 1;
+            }
+            
+            //ACT 15-01-18: Para reporte de Riesgos por Procesos
+            $processes = array();
+            if (isset($_GET['kind2']) &&  $_GET['kind2'] == 2) //reporte por procesos
+            {
+                //obtenemos todos los procesos asociado al Riesgo (puede ser uno o muchos)
+                $processes = DB::table('processes')
+                            ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                            ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                            ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+                            ->where('organization_risk.id','=',$evaluation->risk_id)
+                            ->select('processes.id','processes.name')
+                            ->get();
             }
 
             //obtenemos nombre de responsable
             if ($org == NULL)
             {
-                $stake = \Ermtool\Stakeholder::getStakeholdersFromRisk($evaluation->risk);
+                $stake = \Ermtool\Stakeholder::getStakeholderFromOrgRisk($evaluation->risk_id);
             }
             else
             {
                 $stake = \Ermtool\Stakeholder::getRiskStakeholder($org,$evaluation->risk);
 
-                if (!$stake && $stake != NULL && empty($stake))
+                if ($stake->id != null && !empty($stake))
                 {
                     $stake = \Ermtool\Stakeholder::getName($stake->id);
                 }
@@ -2299,15 +2536,24 @@ class EvaluacionRiesgosController extends Controller
                     $stake = 'No definido';
                 }
             }
+
+            //eliminamos posibles espacios que puedan llevar a error en descripción
+            //ACT 12-12-17: Eliminamos saltos en todo (también en nombre), con función eliminarSaltos de Helpers
+            $description = eliminarSaltos($riesgo_temp->description);
+            $comments = eliminarSaltos($riesgo_temp->comments);
+            $name = eliminarSaltos($riesgo_temp->name);
+            
             $riesgos[$i] = [
-                'name' => $riesgo_temp->name,
+                'name' => $name,
                 'subobj' => $subobj,
                 'description' => $description,
                 'risk_category_id' => $riesgo_temp->risk_category_id,
                 'risk_category' => $risk_category,
                 'comments' => $comments,
-                'exposicion' => $prom_proba_ctrl[$i] * $prom_impacto_ctrl[$i],
+                'exposicion' => $prom_proba_ctrl[$i] * $prom_impacto_ctrl[$i], //exposición = exposición efectiva
+                'exposicion2' => $prom_proba_ctrl[$i], //exposición2 = 1 - %Contribución
                 'responsable' => $stake,
+                'processes' => $processes,
             ];
 
             $i += 1;

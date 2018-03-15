@@ -175,13 +175,24 @@ class Subprocess extends Model
 
     public static function getSubprocessesFromOrgRisk($risk,$org)
     {
-        return DB::table('subprocesses')
-            ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-            ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-            ->where('organization_subprocess.organization_id','=',$org)
-            ->where('risk_subprocess.risk_id','=',$risk)
-            ->select('subprocesses.name','subprocesses.description')
-            ->get();
+        if ($org == NULL)
+        {
+            return DB::table('subprocesses')
+                ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                ->where('risk_subprocess.risk_id','=',$risk)
+                ->select('subprocesses.name','subprocesses.description')
+                ->get();
+        }
+        else
+        {
+            return DB::table('subprocesses')
+                ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                ->where('organization_subprocess.organization_id','=',$org)
+                ->where('risk_subprocess.risk_id','=',$risk)
+                ->select('subprocesses.name','subprocesses.description')
+                ->get();
+        }
     }
 
     public static function getSubprocessesFromControl($org,$control)

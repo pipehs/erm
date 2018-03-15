@@ -655,7 +655,7 @@ Route::get('editar_evaluacion.{id}', [
 	'as' => 'editar_evaluacion', 'uses' => 'ControlesController@editEvaluacion'
 ]);
 
-Route::get('agregar_evaluacion.{id}.{kind}', [
+Route::get('agregar_evaluacion.{id}.{kind}.{org}', [
 	'as' => 'agregar_evaluacion', 'uses' => 'ControlesController@createEvaluacion'
 ]);
 
@@ -696,6 +696,18 @@ Route::get('controles.get_objective_controls.{org_id}', [
 Route::get('controles.get_subprocess_controls.{org_id}.{subprocess}', [
 	'as' => 'controles.get_subprocess_controls', 'uses' => 'ControlesController@getSubprocessControls']);
 
+Route::get('residual_manual', [
+	'as' => 'residual_manual', 'uses' => 'ControlesController@residualManual'
+]);
+
+Route::get('residual_manual2', [
+	'as' => 'residual_manual2', 'uses' => 'ControlesController@residualManual2'
+]);
+
+Route::post('residual_manual.store', [
+	'as' => 'residual_manual.store', 'uses' => 'ControlesController@storeResidualManual'
+]);
+
 // ---- Rutas para reportes ---- //
 
 Route::get('heatmap', [
@@ -713,7 +725,7 @@ Route::get('risk_matrix', [
 
 // Nuevos enlaces para matrices de riesgos divididas: matriz de riesgos de proceso y corporativos
 
-Route::get('genriskmatrix.{value},{org}', [
+Route::get('genriskmatrix.{value},{org},{cat}', [
 	'as' => 'genriskmatrix', 'uses' => 'RiesgosController@generarMatriz']);
 
 //ruta para generar matriz de control a través de JSON
@@ -753,8 +765,13 @@ Route::get('genauditreports.{org}', [
 Route::get('reporte_riesgos', [
 	'as' =>'reporte_riesgos', 'uses' => 'EvaluacionRiesgosController@indexReporteRiesgos']);
 
-Route::get('reporte_riesgos2.{org}.{kind}', [
-	'as' => 'reporte_riesgos2', 'uses' => 'EvaluacionRiesgosController@reporteRiesgosCocaCola'
+Route::get('reporte_riesgos2', [
+	'as' => 'reporte_riesgos2', 'uses' => 'EvaluacionRiesgosController@reporteRiesgos2'
+]);
+
+//ACT 29-01-18: Lo dejamos en el home ya que utilizará todas las tablas
+Route::get('reporte_consolidado', [
+	'as' => 'reporte_consolidado', 'uses' => 'HomeController@reporteConsolidado'
 ]);
 
 //--- Fin Reportes ---//
@@ -766,6 +783,10 @@ Route::get('get_audit.{id}', [
 //obtiene auditorías de una organización
 Route::get('get_audits.{id}', [
 	'as' => 'get_audits', 'uses' => 'AuditoriasController@getAudits2']);
+
+//obtiene auditorías de un plan
+Route::get('get_audits2.{id}', [
+	'as' => 'get_audits2', 'uses' => 'AuditoriasController@getAudits3']);
 
 //obtiene pruebas de auditoría relacionadas a una organización
 Route::get('get_audit_tests.{id}', [
@@ -906,7 +927,7 @@ Route::get('audit_tests.destroy.{id}', [
 
 //------ Rutas para trabajar con Excel ------//
 
-Route::get('genexcel.{value},{org}', [
+Route::get('genexcel.{value},{org},{cat}', [
 	'as' => 'genexcel', 'uses' => 'ExcelController@generarExcel']);
 
 Route::get('genexcelplan.{org}', [
@@ -924,6 +945,8 @@ Route::get('genexcelgraficos.{id}.{org}', [
 Route::get('genexcelgraficosdinamicos.{kind},{id}.{org}', [
 	'as' => 'genexcelgraficosdinamicos', 'uses' => 'ExcelController@generarExcelGraficosDinamicos']);
 
+Route::get('genexcelconsolidado', [
+	'as' => 'genexcelconsolidado', 'uses' => 'ExcelController@generarExcelConsolidado']);
 
 //------ RUTAS PARA ENLACES A TRAVÉS DE JSON --------//
 
@@ -1348,6 +1371,12 @@ Route::get('get_subcategories.{cat_id}', [
 Route::get('downloadfile.{kind}.{id}.{filename}.{ext}', function($kind,$id,$filename,$ext) {
 	return downloadFile($kind,$id,$filename,$ext);
 });
+
+//ACT 05-12-17
+//ruta para descargar evidencias sin extensión(llama a funcion helper)
+//Route::get('downloadfile2.{kind}.{id}.{filename}', function($kind,$id,$filename) {
+//	return downloadFile2($kind,$id,$filename);
+//});
 
 Route::get('importador',[
 	'as' => 'importador', 'uses' => 'ExcelController@importarIndex'
