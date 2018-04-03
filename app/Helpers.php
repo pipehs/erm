@@ -679,7 +679,7 @@ function eliminarSaltos($cadenaDeTexto)
 //función para enviar correo de soporte para cuando se produce algún error en el sistema
 function enviarMailSoporte($e)
 {
-    $mail = 'soporte@ixus.cl';
+    $mail = 'soporte@itappsolutions.com';
 
     if (isset(Auth::user()->name))
     {
