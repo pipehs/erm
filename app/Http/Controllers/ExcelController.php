@@ -2151,7 +2151,7 @@ class ExcelController extends Controller
                                                     //ahora calculamos riesgo residual para ese riesgo
                                                     //$controlclass->calcResidualRisk($org->id,$org_risk->id);
                                                     //ahora calcularemos el valor de el o los riesgos a los que apunte este control
-                                                    $controlclass->calcControlledRisk($control->id,$org->id,$ano,$mes,$dia);
+                                                    $controlclass->calcControlledRiskAutoEval($control->id,$org->id,$ano,$mes,$dia);
                                                 }
                                                 else
                                                 {
@@ -2226,7 +2226,7 @@ class ExcelController extends Controller
                                                                 //$controlclass->calcResidualRisk($org->id,$org_risk->id);
                                                                 //calculamos nuevo valor de el o los riesgos a los que apunte este control
                                                                 $controlclass = new Controles;
-                                                                $controlclass->calcControlledRisk($control->id,$org->id,$ano,$mes,$dia);
+                                                                $controlclass->calcControlledRiskAutoEval($control->id,$org->id,$ano,$mes,$dia);
                                                             }
                                                             
                                                         }
@@ -2696,7 +2696,7 @@ class ExcelController extends Controller
                                                         //ahora calculamos riesgo residual para ese riesgo
                                                         //$controlclass->calcResidualRisk($org->id,$org_risk->id);
                                                         //ahora calcularemos el valor de el o los riesgos a los que apunte este control
-                                                        $controlclass->calcControlledRisk($control->id,$org->id,$ano,$mes,$dia);
+                                                        $controlclass->calcControlledRiskAutoEval($control->id,$org->id,$ano,$mes,$dia);
                                                     }
                                                     else
                                                     {
@@ -2771,7 +2771,7 @@ class ExcelController extends Controller
                                                                     //$controlclass->calcResidualRisk($org->id,$org_risk->id);
                                                                     //calculamos nuevo valor de el o los riesgos a los que apunte este control
                                                                     $controlclass = new Controles;
-                                                                    $controlclass->calcControlledRisk($control->id,$org->id,$ano,$mes,$dia);
+                                                                    $controlclass->calcControlledRiskAutoEval($control->id,$org->id,$ano,$mes,$dia);
                                                                 }
                                                             }
                                                         }
@@ -4130,6 +4130,262 @@ class ExcelController extends Controller
                                 
 
                                 //}
+                            }
+                            else if ($_POST['kind'] == 16) //Actualizar organization_subprocess (PArauco)
+                            {
+                                //print_r($row);
+                                //Proceso = MacroSubproceso
+                                $subprocess = \Ermtool\Subprocess::getSubprocessByName($row['referencia_hasta_proceso'].' - '.$row['pr']);
+
+                                if (empty($subprocess)) //creamos macrosubproceso
+                                {
+                                    echo 'No se encontró: '.$row['referencia_hasta_proceso'].' - '.$row['pr'];
+                                }
+
+                                //Subproceso = Subproceso
+                                $subprocess2 = \Ermtool\Subprocess::getSubprocessByName($row['codigo'].' - '.$row['sp']);
+
+                                if (empty($subprocess2)) //creamos subproceso
+                                {
+                                     echo 'No se encontróóó: '.$row['codigo'].' - '.$row['sp'];
+                                }
+
+                                //Separamos organizaciones por coma, y enlazamos subproceso a organización
+                                $orgs = explode(', ',$row['organizacion']);
+
+                                foreach ($orgs as $org)
+                                {
+                                    //obtenemos org por nombre
+                                    $o = \Ermtool\Organization::getOrgByName($org);
+
+                                    //primero vemos que no exista previamente
+                                    $org_sub = DB::table('organization_subprocess')
+                                            ->where('organization_id','=',$o->id)
+                                            ->where('subprocess_id','=',$subprocess->id)
+                                            ->select('id')
+                                            ->get();
+
+                                    if (empty($org_sub))
+                                    {
+                                        DB::table('organization_subprocess')
+                                        ->insert([
+                                            'organization_id' => $o->id,
+                                            'subprocess_id' => $subprocess->id
+                                        ]);
+                                    }
+
+                                    //lo mismo para subprocess2
+                                    //primero vemos que no exista previamente
+                                    $org_sub = DB::table('organization_subprocess')
+                                            ->where('organization_id','=',$o->id)
+                                            ->where('subprocess_id','=',$subprocess2->id)
+                                            ->select('id')
+                                            ->get();
+
+                                    if (empty($org_sub))
+                                    {
+                                        DB::table('organization_subprocess')
+                                        ->insert([
+                                            'organization_id' => $o->id,
+                                            'subprocess_id' => $subprocess2->id
+                                        ]);
+                                    } 
+                                    
+                                }
+                            }
+                            /*
+                            else if ($_POST['kind'] == 17) //Actualización subproceso enlazado a Riesgo (PArauco)
+                            {
+                                //print_r($row);
+
+                                $risk = \Ermtool\Risk::getRiskByName($row['titulo_del_riesgo'],NULL);
+
+                                if (empty($risk))
+                                {
+                                    echo $row['titulo_del_riesgo'].'<br>';
+                                }
+                                else
+                                {
+                                    //echo $risk->id.'<br>';
+                                    //actualizamos risk subprocess
+                                    //obtenemos subproceso
+                                    $sub = \Ermtool\Subprocess::getSubprocessByName($row['id_subproceso'].' - '.$row['nombre_subproceso']);
+
+                                    if (empty($sub))
+                                    {
+                                        echo $row['id_subproceso'].' - '.$row['nombre_subproceso'];
+                                    }
+                                    else
+                                    {
+                                        //actualizamos
+                                        DB::table('risk_subprocess')
+                                            ->where('risk_id','=',$risk->id)
+                                            ->update([
+                                                'subprocess_id' => $sub->id
+                                            ]);
+
+                                    }
+                                } 
+                            }*/
+                            else if ($_POST['kind'] == 17) //Actualizar evaluaciones (PArauco)
+                            {
+                                $org = \Ermtool\Organization::getOrgByName($row['sociedad']);
+                                
+                                if (!empty($org))
+                                {
+                                    $risk = \Ermtool\Risk::getRiskByName($row['titulo_del_riesgo'],$org->id);
+
+                                    if (empty($risk))
+                                    {
+                                        echo $row['titulo_del_riesgo'].'<br>';
+                                    }
+                                    else
+                                    {
+                                        //echo $row['dueno_del_proceso_afectado'].'<br>';
+
+                                        if ($row['p_encuesta'] != '' && $row['p_encuesta'] != NULL && $row['i_encuesta'] != '' && $row['i_encuesta'] != NULL)
+                                        {
+                                            //primero creamos evaluación manual
+                                            //OBS 23-03-18: Esta no es evaluación manual, sino que es encuesta
+                                            //seleccionamos evaluación (si es que existe)
+                                            $eval_id1 = DB::table('evaluations')
+                                                    ->where('created_at','=',$row['fecha_identificacion'])
+                                                    ->select('id')
+                                                    ->first();
+
+                                            if (empty($eval_id1))
+                                            {
+                                                $fecha = date_create($row['fecha_identificacion']);
+                                                $fecha = date_format($fecha, 'd-m-Y');
+                                                $eval_id1 = DB::table('evaluations')->insertGetId([
+                                                    'name' => 'Encuesta de evaluación del '.$fecha,
+                                                    'consolidation' => 1,
+                                                    'description' => 'Encuesta de evaluación del '.$fecha,
+                                                    'created_at' => $row['fecha_identificacion'],
+                                                    'updated_at' => $row['fecha_identificacion'],
+                                                ]);
+                                            }
+                                            else
+                                            {
+                                                    $eval_id1 = $eval_id1->id;
+                                            }
+
+                                            //vemos si ya existe evaluación para este riesgo y en esta evaluación (para el caso que los riesgos se repiten)
+                                            $evaluation_risk = DB::table('evaluation_risk')
+                                                                ->where('evaluation_id','=',$eval_id1)
+                                                                ->where('organization_risk_id','=',$risk->org_risk_id)
+                                                                ->select('id')
+                                                                ->first();
+
+                                            if (empty($evaluation_risk))
+                                            {
+                                                //insertamos riesgo evaluation_risk
+                                                $evaluation_risk = DB::table('evaluation_risk')->insertGetId([
+                                                            'evaluation_id' => $eval_id1,
+                                                            'organization_risk_id' => $risk->org_risk_id,
+                                                            'avg_probability' => $row['p_encuesta'],
+                                                            'avg_impact' => $row['i_encuesta']
+                                                    ]);
+                                            }
+                                            else
+                                            {
+                                                $evaluation_risk = $evaluation_risk->id;
+                                            }
+                                                        
+                                            //vemos si existe en evaluation_risk_stakeholder
+                                            $evaluation_risk_stake = DB::table('evaluation_risk_stakeholder')
+                                                    ->join('evaluation_risk','evaluation_risk.id','=','evaluation_risk_stakeholder.evaluation_risk_id')
+                                                    ->where('evaluation_risk_stakeholder.evaluation_risk_id','=',$evaluation_risk)
+                                                    ->where('evaluation_risk_stakeholder.user_id','=',Auth::user()->id)
+                                                    ->where('evaluation_risk.evaluation_id','=',$eval_id1)
+                                                    ->select('evaluation_risk_stakeholder.id')
+                                                    ->first();
+
+                                            if (empty($evaluation_risk_stakehoder))
+                                            {
+                                                //insertamos en evaluation_risk_stakeholder
+                                                DB::table('evaluation_risk_stakeholder')->insert([
+                                                    'evaluation_risk_id'=>$evaluation_risk,
+                                                    'user_id'=>Auth::user()->id,
+                                                    'probability'=>$row['p_encuesta'],
+                                                    'impact'=>$row['i_encuesta'],
+                                                ]);
+                                            }
+                                        }
+
+                                        //$fecha = date('Y-m-d H:i:s');
+
+                                        if ($row['p_riesgo'] != '' && $row['p_riesgo'] != NULL && $row['i_riesgo'] != '' && $row['i_riesgo'] != NULL)
+                                        {
+                                            //primero creamos evaluación manual
+                                            //seleccionamos evaluación (si es que existe)
+                                            $eval_id1 = DB::table('evaluations')
+                                                    ->where('created_at','=',$row['fecha_encuesta_2'])
+                                                    ->select('id')
+                                                    ->first();
+
+                                            if (empty($eval_id1))
+                                            {
+                                                    $eval_id1 = DB::table('evaluations')->insertGetId([
+                                                        'name' => 'Evaluación Manual',
+                                                        'consolidation' => 1,
+                                                        'description' => 'Evaluación Manual',
+                                                        'created_at' => $row['fecha_encuesta_2'],
+                                                        'updated_at' => $row['fecha_encuesta_2'],
+                                                    ]);
+                                            }
+                                            else
+                                            {
+                                                    $eval_id1 = $eval_id1->id;
+                                            }
+
+                                            //vemos si ya existe evaluación para este riesgo y en esta evaluación (para el caso que los riesgos se repiten)
+                                            $evaluation_risk = DB::table('evaluation_risk')
+                                                        ->where('evaluation_id','=',$eval_id1)
+                                                        ->where('organization_risk_id','=',$risk->org_risk_id)
+                                                        ->select('id')
+                                                        ->first();
+
+                                            if (empty($evaluation_risk))
+                                            {
+                                                //insertamos riesgo evaluation_risk
+                                                $evaluation_risk = DB::table('evaluation_risk')->insertGetId([
+                                                            'evaluation_id' => $eval_id1,
+                                                            'organization_risk_id' => $risk->org_risk_id,
+                                                            'avg_probability' => $row['p_riesgo'],
+                                                            'avg_impact' => $row['i_riesgo']
+                                                    ]);
+                                            }
+                                            else
+                                            {
+                                                $evaluation_risk = $evaluation_risk->id;
+                                            }
+                                                        
+                                            //vemos si existe en evaluation_risk_stakeholder
+                                            $evaluation_risk_stake = DB::table('evaluation_risk_stakeholder')
+                                                    ->join('evaluation_risk','evaluation_risk.id','=','evaluation_risk_stakeholder.evaluation_risk_id')
+                                                    ->where('evaluation_risk_stakeholder.evaluation_risk_id','=',$evaluation_risk)
+                                                    ->where('evaluation_risk_stakeholder.user_id','=',Auth::user()->id)
+                                                    ->where('evaluation_risk.evaluation_id','=',$eval_id1)
+                                                    ->select('evaluation_risk_stakeholder.id')
+                                                    ->first();
+
+                                            if (empty($evaluation_risk_stakehoder))
+                                            {
+                                                //insertamos en evaluation_risk_stakeholder
+                                                DB::table('evaluation_risk_stakeholder')->insert([
+                                                    'evaluation_risk_id'=>$evaluation_risk,
+                                                    'user_id'=>Auth::user()->id,
+                                                    'probability'=>$row['p_riesgo'],
+                                                    'impact'=>$row['i_riesgo'],
+                                                ]);
+                                            }
+                                        }
+                                    }
+
+                                    
+                                }
+                                
                             }
                         });
 

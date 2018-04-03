@@ -138,6 +138,7 @@
 					<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Comentarios<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Estado<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -182,6 +183,9 @@
 						@else
 							{{ $issue['recommendations'] }}
 						@endif
+						</td>
+						<td>
+							{{ $issue['comments'] }}
 						</td>
 						<td>
 						@if (strlen($issue['plan']) > 100)

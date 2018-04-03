@@ -714,6 +714,16 @@ class PlanesAccionController extends Controller
             $progress_comments = str_replace("'","",$progress_comments);
             $progress_comments = eliminarSaltos($progress_comments);
 
+            //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance y comentarios de progreso
+            if (isset($_POST['status']))
+            {
+                $status = 1;
+            }
+            else
+            {
+                $status = 0;
+            }
+            
             $new_plan = \Ermtool\Action_plan::create([
                             'issue_id' => $issue_id,
                             'description' => $description,

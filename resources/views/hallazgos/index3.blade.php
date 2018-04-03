@@ -61,6 +61,7 @@
 					<th>Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th>Comentarios<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Estado<label><input type="text" placeholder="Filtrar" /></label></th>
 					<th>Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -79,6 +80,7 @@
 						<td>{{ $issue['name'] }}</td>
 						<td>{{ $issue['classification'] }}</td>
 						<td>{{ $issue['recommendations'] }}</td>
+						<td>{{ $issue['comments'] }}</td>
 						<td>{{ $issue['plan'] }}</td>
 						<td>{{ $issue['status'] }}</td>
 						<td>{{ $issue['final_date'] }}</td>

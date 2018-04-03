@@ -37,7 +37,7 @@
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
 
 <h4>{{ $name }}</h4>
-<p>Ahora debe ingresar el tipo de respuesta para cada pregunta, y en caso de ser necesario (radio o checkbox) ingresar las alternativas.</p>
+<p>Ahora debe ingresar el tipo de respuesta para cada pregunta, y en caso de ser necesario (respuestas múltiples) ingresar las alternativas.</p>
 
 {!!Form::open(['url'=>'encuesta.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 
@@ -50,8 +50,8 @@
 								<select id="select{{$i}}" required="true" name="tipo_respuesta{{ $i }}">
 									<option selected="selected" value="">- Seleccione tipo de respuesta -</option>
 									<option value="0">Texto</option>
-									<option value="1">Radio</option>
-									<option value="2">Checkbox</option>
+									<option value="1">Alternativa única</option>
+									<option value="2">Alternativas múltiples</option>
 								</select>
 							</div>
 						</div>
@@ -82,7 +82,7 @@
 
 
 <label>* Recuerde que:</label>
-	<p>Radio: Permite elegir una respuesta. 
+	<p>Alternativa única: Permite elegir una respuesta. 
 		<div class="radio-inline">
 			<label>
 				<input type="radio" name="radio-inline" checked>
@@ -102,7 +102,7 @@
 			</label>
 		</div>
 	</p>
-	<p>Checkbox: Permite elegir varias respuestas. 
+	<p>Alternativas múltiples: Permite elegir varias respuestas a la vez. 
 		<div class="checkbox-inline">
 			<label>
 				<input type="checkbox" checked>

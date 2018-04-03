@@ -176,277 +176,76 @@
 				<p>Seleccione el tipo de prueba que desea agregar o editar para el control {{ $control->name }}.</p>
 				<hr>
 				<table class="table table-bordered table-striped table-heading table-datatable" style="font-size:12px; width: 100%;">
-				<thead>
-				<th colspan="3">Prueba de diseño</th>
-				</thead>
-				<tr>
-				<td style="width:60%;">
-				@if (!isset($last_diseno) || $last_diseno == NULL) 
-					Sin informaci&oacute;n previa
-					</td>
-					<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.0" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
-				@else
-					<center><b><u>&Uacute;ltima evaluaci&oacute;n</u></b></center>
-					<ul>
-						<li>Descripci&oacute;n: {{ $last_diseno['description'] }}</li>
-						<li>Resultado: 
-							@if ($last_diseno['results'] == 1)
-								Efectiva
-							@else
-								Inefectiva
-							@endif
-						</li>
-						<li>&Uacute;ltima actualizaci&oacute;n: 
-							{{ $last_diseno['updated_at'] }}
-						</li>
-						<li>
-						@if ($last_diseno['comments'] != NULL) {{-- Es efectiva--}}
-							Comentarios: {{ $last_diseno['comments'] }}
-						@elseif ($last_diseno['issues'] != NULL)
-							Hallazgo(s) encontrado(s):
-							<ul>
-							@foreach ($last_diseno['issues'] as $i)
-								<li>Nombre: {{ $i->name }}</li>
-								<li>Descripci&oacute;n: {{ $i->description }}</li>
-								<li>Clasificaci&oacute;n:
-									@if ($i->classification == 0)
-										Oportunidad de mejora
-									@elseif ($i->classification == 1)
-										Deficiencia
-									@elseif ($i->classification == 2)
-										Debilidad significativa
-									@else
-										No se pudo obtener la clasificaci&oacute;n
-									@endif
-								</li>
-								<li>Recomendaciones: {{ $i->recommendations }}</li>
-							@endforeach
-							</li>
-						@else
-							No hay hallazgos ni comentarios.
-						@endif
-						</li>
-						<li>Estado:
-							@if ($last_diseno['status'] == 1)
-								Abierta
-							@else
-								Cerrada
-							@endif
-						</li>
-					</ul>
-					</td>
-					@if ($last_diseno['status'] == 2)
-						<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.0.{{ $org_id }}" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
+				@foreach ($last_evaluations as $e)
+					<thead>
+						<th colspan="3">{{ $e['name'] }}</th>
+					</thead>
+					<tr>
+					<td style="width:60%;">
+					@if (!isset($e['id']) || $e['id'] == NULL) 
+						Sin informaci&oacute;n previa
+						</td>
+						<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.{{ $e['eid'] }}.{{ $org_id }}" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
 					@else
-						<td>{!! link_to_route('editar_evaluacion', $title = 'Editar evaluaci&oacute;n', $parameters = $last_diseno['id'],
-				                 		$attributes = ['class'=>'btn btn-primary'])!!}</td>
-						<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $last_diseno['id'] }}.{{ $org_id }},'{{ $control['name'] }}','La prueba de diseño')">Cerrar prueba</button></td>
-				    @endif
-				@endif
-				
-				</tr>
-				<thead>
-				<th colspan="3">Prueba de efectividad operativa</th>
-				</thead>
-				<tr>
-				<td>
-				@if (!isset($last_efectividad) || $last_efectividad == NULL)
-					Sin informaci&oacute;n previa
-					</td>
-					<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.1.{{ $org_id }}" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
-				@else
-					<center><b><u>&Uacute;ltima evaluaci&oacute;n</u></b></center>
-					<ul>
-						<li>Descripci&oacute;n: {{ $last_efectividad['description'] }}</li>
-						<li>Resultado: 
-							@if ($last_efectividad['results'] == 1)
-								Efectiva
-							@else
-								Inefectiva
-							@endif
-						</li>
-						<li>&Uacute;ltima actualizaci&oacute;n: 
-							{{ $last_efectividad['updated_at'] }}
-						</li>
-						<li>
-						@if ($last_efectividad['comments'] != NULL) {{-- Es efectiva--}}
-							Comentarios: {{ $last_efectividad['comments'] }}
-						@elseif ($last_efectividad['issues'] != NULL)
-							Hallazgo(s) encontrado(s):
-							<ul>
-							@foreach ($last_efectividad['issues'] as $i)
-								<li>Nombre: {{ $i->name }}</li>
-								<li>Descripci&oacute;n: {{ $i->description }}</li>
-								<li>Clasificaci&oacute;n:
-									@if ($i->classification == 0)
-										Oportunidad de mejora
-									@elseif ($i->classification == 1)
-										Deficiencia
-									@elseif ($i->classification == 2)
-										Debilidad significativa
-									@else
-										No se pudo obtener la clasificaci&oacute;n
-									@endif
-								</li>
-								<li>Recomendaciones: {{ $i->recommendations }}</li>
-							@endforeach
+						<center><b><u>&Uacute;ltima evaluaci&oacute;n</u></b></center>
+						<ul>
+							<li>Descripci&oacute;n: {{ $e['description'] }}</li>
+							<li>Resultado: 
+								@if ($e['results'] == 1)
+									Efectiva
+								@else
+									Inefectiva
+								@endif
 							</li>
-						@else
-							No hay hallazgos ni comentarios.
-						@endif
-						</li>
-						<li>Estado:
-							@if ($last_efectividad['status'] == 1)
-								Abierta
-							@else
-								Cerrada
-							@endif
-						</li>
-					</ul>
-					</td>
-					@if ($last_efectividad['status'] == 2)
-						<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.1.{{ $org_id }}" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
-					@else
-						<td>{!! link_to_route('editar_evaluacion', $title = 'Editar evaluaci&oacute;n', $parameters = $last_efectividad['id'],$attributes = ['class'=>'btn btn-primary'])!!}</td>
-						<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $last_efectividad['id'] }}.{{ $org_id }},'{{ $control['name'] }}','La prueba de efectividad operativa')">Cerrar prueba</button></td>
-				    @endif
-				@endif
-				
-				</tr>
-				<thead>
-				<th colspan="3">Prueba sustantiva</th>
-				</thead>
-				<tr>
-				<td>
-				@if (!isset($last_sustantiva) || $last_sustantiva == NULL)
-					Sin informaci&oacute;n previa
-					</td>
-					<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.2.{{ $org_id }}" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
-				@else
-					<center><b><u>&Uacute;ltima evaluaci&oacute;n</u></b></center>
-					<ul>
-						<li>Descripci&oacute;n: {{ $last_sustantiva['description'] }}</li>
-						<li>Resultado: 
-							@if ($last_sustantiva['results'] == 1)
-								Efectiva
-							@else
-								Inefectiva
-							@endif
-						</li>
-						<li>&Uacute;ltima actualizaci&oacute;n: 
-							{{ $last_sustantiva['updated_at'] }}
-						</li>
-						<li>
-						@if ($last_sustantiva['comments'] != NULL) {{-- Es efectiva--}}
-							Comentarios: {{ $last_sustantiva['comments'] }}
-						@elseif ($last_sustantiva['issues'] != NULL)
-							Hallazgo(s) encontrado(s):
-							<ul>
-							@foreach ($last_sustantiva['issues'] as $i)
-								<li>Nombre: {{ $i->name }}</li>
-								<li>Descripci&oacute;n: {{ $i->description }}</li>
-								<li>Clasificaci&oacute;n:
-									@if ($i->classification == 0)
-										Oportunidad de mejora
-									@elseif ($i->classification == 1)
-										Deficiencia
-									@elseif ($i->classification == 2)
-										Debilidad significativa
-									@else
-										No se pudo obtener la clasificaci&oacute;n
-									@endif
-								</li>
-								<li>Recomendaciones: {{ $i->recommendations }}</li>
-							@endforeach
+							<li>&Uacute;ltima actualizaci&oacute;n: 
+								{{ $e['updated_at'] }}
 							</li>
-						@else
-							No hay hallazgos ni comentarios.
-						@endif
-						</li>
-						<li>Estado:
-							@if ($last_sustantiva['status'] == 1)
-								Abierta
-							@else
-								Cerrada
-							@endif
-						</li>
-					</ul>
-					</td>
-					@if ($last_sustantiva['status'] == 2)
-						<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.2.{{ $org_id }}" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
-					@else
-						<td>{!! link_to_route('editar_evaluacion', $title = 'Editar evaluaci&oacute;n', $parameters = $last_sustantiva['id'],$attributes = ['class'=>'btn btn-primary'])!!}</td>
-						<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $last_sustantiva['id'] }}.{{ $org_id }},'{{ $control['name'] }}','La prueba sustantiva')">Cerrar prueba</button></td>
-				    @endif
-				@endif
-				</tr>
-				<thead>
-				<th colspan="3">Prueba de cumplimiento</th>
-				</thead>
-				<tr>
-				<td>
-				@if (!isset($last_cumplimiento) || $last_cumplimiento == NULL)
-					Sin informaci&oacute;n previa
-					</td>
-					<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.3.{{ $org_id }}" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
-				@else
-					<center><b><u>&Uacute;ltima evaluaci&oacute;n</u></b></center>
-					<ul>
-						<li>Descripci&oacute;n: {{ $last_cumplimiento['description'] }}</li>
-						<li>Resultado: 
-							@if ($last_cumplimiento['results'] == 1)
-								Efectiva
-							@else
-								Inefectiva
-							@endif
-						</li>
-						<li>&Uacute;ltima actualizaci&oacute;n: 
-							{{ $last_cumplimiento['updated_at'] }}
-						</li>
-						<li>
-						@if ($last_cumplimiento['comments'] != NULL) {{-- Es efectiva--}}
-							Comentarios: {{ $last_diseno['comments'] }}
-						@elseif ($last_cumplimiento['issues'] != NULL)
-							Hallazgo(s) encontrado(s):
-							<ul>
-							@foreach ($last_cumplimiento['issues'] as $i)
-								<li>Nombre: {{ $i->name }}</li>
-								<li>Descripci&oacute;n: {{ $i->description }}</li>
-								<li>Clasificaci&oacute;n:
-									@if ($i->classification == 0)
-										Oportunidad de mejora
-									@elseif ($i->classification == 1)
-										Deficiencia
-									@elseif ($i->classification == 2)
-										Debilidad significativa
-									@else
-										No se pudo obtener la clasificaci&oacute;n
-									@endif
+							<li>
+							@if ($e['comments'] != NULL) {{-- Es efectiva--}}
+								Comentarios: {{ $e['comments'] }}
+							@elseif ($e['issues'] != NULL)
+								Hallazgo(s) encontrado(s):
+								<ul>
+								@foreach ($e['issues'] as $i)
+									<li>Nombre: {{ $i->name }}</li>
+									<li>Descripci&oacute;n: {{ $i->description }}</li>
+									<li>Clasificaci&oacute;n:
+										@if ($i->classification == 0)
+											Oportunidad de mejora
+										@elseif ($i->classification == 1)
+											Deficiencia
+										@elseif ($i->classification == 2)
+											Debilidad significativa
+										@else
+											No se pudo obtener la clasificaci&oacute;n
+										@endif
+									</li>
+									<li>Recomendaciones: {{ $i->recommendations }}</li>
+								@endforeach
 								</li>
-								<li>Recomendaciones: {{ $i->recommendations }}</li>
-							@endforeach
-							</li>
-						@else
-							No hay hallazgos ni comentarios.
-						@endif
-						</li>
-						<li>Estado:
-							@if ($last_cumplimiento['status'] == 1)
-								Abierta
 							@else
-								Cerrada
+								No hay hallazgos ni comentarios.
 							@endif
-						</li>
-					</ul>
-					</td>
-					@if ($last_cumplimiento['status'] == 2)
-						<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.3.{{ $org_id }}" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
-					@else
-						<td>{!! link_to_route('editar_evaluacion', $title = 'Editar evaluaci&oacute;n', $parameters = $last_cumplimiento['id'],$attributes = ['class'=>'btn btn-primary'])!!}</td>
-						<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $last_cumplimiento['id'] }}.{{ $org_id }},'{{ $control['name'] }}','La prueba de cumplimiento')">Cerrar prueba</button></td>
-				    @endif
-				@endif
-				</tr>
+							</li>
+							<li>Estado:
+								@if ($e['status'] == 1)
+									Abierta
+								@else
+									Cerrada
+								@endif
+							</li>
+						</ul>
+						</td>
+						@if ($e['status'] == 2)
+							<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.{{$e['eid']}}.{{ $org_id }}" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
+						@else
+							<td>{!! link_to_route('editar_evaluacion', $title = 'Editar evaluaci&oacute;n', $parameters = $e['id'],$attributes = ['class'=>'btn btn-primary'])!!}</td>
+							<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $e['id'] }}.{{ $org_id }},'{{ $control['name'] }}','{{ $e['name'] }}')">Cerrar prueba</button></td>
+					    @endif
+					@endif
+					
+					</tr>
+				@endforeach
 				</table>
 				
 			</div>

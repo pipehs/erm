@@ -50,10 +50,41 @@ $('#type1').change(function() {
 					select += '<div class="col-sm-6">'
 					select += '<select name="perspective" id="perspective" onchange="getObjectiveControls()" class="form-control" required="true">'
 					select += '<option value="" selected disabled>- Seleccione -</option>'
-					select += '<option value="1">Financiera</option>'
-					select += '<option value="2">Procesos</option>'
-					select += '<option value="3">Clientes</option>'
-					select += '<option value="4">Aprendizaje</option>'
+					if (type_id == 1)
+					{
+						select += '<option value="1" selected>Financiera</option>'
+						select += '<option value="2">Procesos</option>'
+						select += '<option value="3">Clientes</option>'
+						select += '<option value="4">Aprendizaje</option>'
+					}
+					else if (type_id == 2)
+					{
+						select += '<option value="1">Financiera</option>'
+						select += '<option value="2" selected>Procesos</option>'
+						select += '<option value="3">Clientes</option>'
+						select += '<option value="4">Aprendizaje</option>'
+					}
+					else if (type_id == 3)
+					{
+						select += '<option value="1">Financiera</option>'
+						select += '<option value="2">Procesos</option>'
+						select += '<option value="3" selected>Clientes</option>'
+						select += '<option value="4">Aprendizaje</option>'
+					}
+					else if (type_id == 4)
+					{
+						select += '<option value="1">Financiera</option>'
+						select += '<option value="2" selected>Procesos</option>'
+						select += '<option value="3">Clientes</option>'
+						select += '<option value="4" selected>Aprendizaje</option>'
+					}
+					else
+					{
+						select += '<option value="1">Financiera</option>'
+						select += '<option value="2" selected>Procesos</option>'
+						select += '<option value="3">Clientes</option>'
+						select += '<option value="4">Aprendizaje</option>'
+					}
 					select += '</select>'
 					select += '</div></div>';
 					select += '<div id="control_cat" style="display:none;"></div>';
@@ -84,14 +115,7 @@ function getSubprocesses()
 		var datos = JSON.parse(result);
 		$(datos).each( function() {
 			//en caso que se esté editando
-			if (type_id == this.id)
-			{
-				select += '<option value="'+this.id+'" selected>'+this.name+'</option>';
-			}
-			else
-			{
-				select += '<option value="'+this.id+'">'+this.name+'</option>';
-			}
+			select += '<option value="'+this.id+'">'+this.name+'</option>';
 							
 		});
 
@@ -113,7 +137,7 @@ function getSubprocesses()
 		var datos = JSON.parse(result);
 		$(datos).each( function() {
 			//en caso que se esté editando
-			if (type_id == this.id)
+			if (jQuery.inArray(this.id, controls) != -1)
 			{
 				select += '<option value="'+this.id+'" selected title="'+this.name+' - '+this.description+'">'+this.name+' - '+this.description+'</option>';
 			}

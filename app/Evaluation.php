@@ -504,12 +504,35 @@ class Evaluation extends Model
             }
     }
 
-    public static function getLastEvaluation($risk)
+    //ACT 26-03-18: Agregamos tipo (kind), que identifica si es: 1: Para cualquier tipo de evaluación. 2: Para evaluaciones de encuesta. 3: Para evaluaciones manuales
+    public static function getLastEvaluation($risk,$kind)
     {
-        $max_date = DB::table('evaluations')
+        if ($kind == 1)
+        {
+            $max_date = DB::table('evaluations')
                 ->join('evaluation_risk','evaluation_risk.evaluation_id','=','evaluations.id')
                 ->where('evaluation_risk.organization_risk_id','=',$risk)
+                ->where('consolidation','=',1)
                 ->max('evaluations.updated_at');
+        }
+        else if ($kind == 2)
+        {
+            $max_date = DB::table('evaluations')
+                ->join('evaluation_risk','evaluation_risk.evaluation_id','=','evaluations.id')
+                ->where('evaluations.name','<>','Evaluación Manual')
+                ->where('consolidation','=',1)
+                ->where('evaluation_risk.organization_risk_id','=',$risk)
+                ->max('evaluations.updated_at');
+        }
+        else if ($kind == 3)
+        {
+            $max_date = DB::table('evaluations')
+                ->join('evaluation_risk','evaluation_risk.evaluation_id','=','evaluations.id')
+                ->where('evaluations.name','=','Evaluación Manual')
+                ->where('consolidation','=',1)
+                ->where('evaluation_risk.organization_risk_id','=',$risk)
+                ->max('evaluations.updated_at');
+        }
 
         if (!empty($max_date) && $max_date != NULL)
         {

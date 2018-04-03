@@ -253,7 +253,8 @@ class IssuesController extends Controller
                             'name' => $issue->name,
                             'description' => $issue->description,
                             'classification' => $issue->classification,
-                            'recommendations' => $issue->recommendations
+                            'recommendations' => $issue->recommendations,
+                            'comments' => $issue->comments
                         ];
 
                         $i += 1; 
@@ -297,7 +298,8 @@ class IssuesController extends Controller
                                 'name' => $issue->name,
                                 'description' => $issue->description,
                                 'classification' => $issue->classification,
-                                'recommendations' => $issue->recommendations
+                                'recommendations' => $issue->recommendations,
+                                'comments' => $issue->comments
                             ];
 
                             $i += 1; 
@@ -343,7 +345,8 @@ class IssuesController extends Controller
                             'name' => $issue->name,
                             'description' => $issue->description,
                             'classification' => $issue->classification,
-                            'recommendations' => $issue->recommendations
+                            'recommendations' => $issue->recommendations,
+                            'comments' => $issue->comments
                         ];
 
                         $i += 1; 
@@ -378,7 +381,8 @@ class IssuesController extends Controller
                             'name' => $issue->name,
                             'description' => $issue->description,
                             'classification' => $issue->classification,
-                            'recommendations' => $issue->recommendations
+                            'recommendations' => $issue->recommendations,
+                            'comments' => $issue->comments
                         ];
 
                         $i += 1; 
@@ -413,7 +417,8 @@ class IssuesController extends Controller
                             'name' => $issue->name,
                             'description' => $issue->description,
                             'classification' => $issue->classification,
-                            'recommendations' => $issue->recommendations
+                            'recommendations' => $issue->recommendations,
+                            'comments' => $issue->comments
                         ];
 
                         $i += 1; 
@@ -449,7 +454,8 @@ class IssuesController extends Controller
                             'name' => $issue->name,
                             'description' => $issue->description,
                             'classification' => $issue->classification,
-                            'recommendations' => $issue->recommendations
+                            'recommendations' => $issue->recommendations,
+                            'comments' => $issue->comments
                         ];
 
                         $i += 1; 
@@ -485,7 +491,8 @@ class IssuesController extends Controller
                             'name' => $issue->name,
                             'description' => $issue->description,
                             'classification' => $issue->classification,
-                            'recommendations' => $issue->recommendations
+                            'recommendations' => $issue->recommendations,
+                            'comments' => $issue->comments
                         ];
 
                         $i += 1; 
@@ -516,7 +523,8 @@ class IssuesController extends Controller
                             'name' => $issue->name,
                             'description' => $issue->description,
                             'classification' => $issue->classification,
-                            'recommendations' => $issue->recommendations
+                            'recommendations' => $issue->recommendations,
+                            'comments' => $issue->comments
                         ];
 
                         $i += 1; 
@@ -540,7 +548,8 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations
+                        'recommendations' => $issue->recommendations,
+                        'comments' => $issue->comments
                     ];
 
                     $i += 1; 
@@ -563,7 +572,8 @@ class IssuesController extends Controller
                         'name' => $issue->name,
                         'description' => $issue->description,
                         'classification' => $issue->classification,
-                        'recommendations' => $issue->recommendations
+                        'recommendations' => $issue->recommendations,
+                        'comments' => $issue->comments
                     ];
 
                     $i += 1; 
@@ -584,11 +594,11 @@ class IssuesController extends Controller
 
                 if ($plan != NULL || !empty($plan))
                 {
-                    $temp = $this->formatearIssue($issue['id'],$issue['name'],$issue['classification'],$issue['recommendations'],$plan[0]->description,$plan[0]->status,$plan[0]->final_date);  
+                    $temp = $this->formatearIssue($issue['id'],$issue['name'],$issue['classification'],$issue['recommendations'],$issue['comments'],$plan[0]->description,$plan[0]->status,$plan[0]->final_date);  
                 }
                 else
                 {
-                    $temp = $this->formatearIssue($issue['id'],$issue['name'],$issue['classification'],$issue['recommendations'],NULL,NULL,NULL);
+                    $temp = $this->formatearIssue($issue['id'],$issue['name'],$issue['classification'],$issue['recommendations'],$issue['comments'],NULL,NULL,NULL);
                 }      
 
                 if ($kind2 == 2) //estamos formateando para reporte de hallazgos, por lo que se agregarán datos extras
@@ -696,6 +706,7 @@ class IssuesController extends Controller
                             'name' => $temp['name'],
                             'classification' => $temp['classification'],
                             'recommendations' => $temp['recommendations'],
+                            'comments' => $temp['comments'],
                             'plan' => $temp['plan'],
                             'status' => $temp['status'],
                             'status_origin' => $temp['status_origin'],
@@ -716,6 +727,7 @@ class IssuesController extends Controller
                             'name' => $temp['name'],
                             'classification' => $temp['classification'],
                             'recommendations' => $temp['recommendations'],
+                            'comments' => $temp['comments'],
                             'plan' => $temp['plan'],
                             'status' => $temp['status'],
                             'status_origin' => $temp['status_origin'],
@@ -1256,7 +1268,7 @@ class IssuesController extends Controller
         }
     }
 
-    public function formatearIssue($id,$name,$classification,$recommendations,$plan,$status,$date)
+    public function formatearIssue($id,$name,$classification,$recommendations,$comments,$plan,$status,$date)
     {
         try
         {
@@ -1366,6 +1378,15 @@ class IssuesController extends Controller
                     $rec = $recommendations;
                 }
 
+                if ($comments == "" || $comments == NULL)
+                {
+                    $com = 'No se han agregado comentarios';
+                }
+                else
+                {
+                    $com = $comments;
+                }
+
                 if ($plan == "" || $plan == NULL)
                 {
                     $desc = 'No se ha agregado descripción para el plan de acción (o aun no se agrega plan)';
@@ -1406,6 +1427,7 @@ class IssuesController extends Controller
                 'name' => $name,
                 'classification' => $class,
                 'recommendations' => $rec,
+                'comments' => $com,
                 'plan' => $desc,
                 'status' => $status2,
                 'status_origin' => $status,
@@ -1851,6 +1873,16 @@ class IssuesController extends Controller
                     {
                         $classification = NULL;
                     }
+
+                    if (isset($_POST['comments']))
+                    {
+                        $comments = $_POST['comments'];
+                        $comments = eliminarSaltos($comments);
+                    }
+                    else
+                    {
+                        $comments = NULL;
+                    }
                     
                     if (isset($_POST['kind']))
                     {
@@ -1862,6 +1894,7 @@ class IssuesController extends Controller
                                         'description' => $description,
                                         'recommendations' => $recommendations,
                                         'classification_id' => $classification,
+                                        'comments' => $comments,
                                         'process_id' => $_POST['process_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
@@ -1877,6 +1910,7 @@ class IssuesController extends Controller
                                         'description' => $description,
                                         'recommendations' => $recommendations,
                                         'classification' => $classification,
+                                        'comments' => $comments,
                                         'subprocess_id' => $_POST['subprocess_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
@@ -1892,6 +1926,7 @@ class IssuesController extends Controller
                                         'description' => $description,
                                         'recommendations' => $recommendations,
                                         'classification' => $classification,
+                                        'comments' => $comments,
                                         'organization_id' => $_POST['org_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
@@ -1906,6 +1941,7 @@ class IssuesController extends Controller
                                         'description' => $description,
                                         'recommendations' => $recommendations,
                                         'classification' => $classification,
+                                        'comments' => $comments,
                                         'control_id' => $_POST['control_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
@@ -1921,6 +1957,7 @@ class IssuesController extends Controller
                                         'description' => $description,
                                         'recommendations' => $recommendations,
                                         'classification' => $classification,
+                                        'comments' => $comments,
                                         'audit_audit_plan_audit_program_id' => $_POST['audit_audit_plan_audit_program_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
@@ -1936,6 +1973,7 @@ class IssuesController extends Controller
                                         'description' => $description,
                                         'recommendations' => $recommendations,
                                         'classification' => $classification,
+                                        'comments' => $comments,
                                         'audit_audit_plan_id' => $_POST['audit_audit_plan_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
@@ -1951,6 +1989,7 @@ class IssuesController extends Controller
                                         'description' => $description,
                                         'recommendations' => $recommendations,
                                         'classification' => $classification,
+                                        'comments' => $comments,
                                         'audit_test_id' => $_POST['audit_test_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
@@ -1967,6 +2006,7 @@ class IssuesController extends Controller
                                         'description' => $description,
                                         'recommendations' => $recommendations,
                                         'classification' => $classification,
+                                        'comments' => $comments,
                                         //'organization_risk_id' => $_POST['organization_risk_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
@@ -1983,6 +2023,7 @@ class IssuesController extends Controller
                                         'description' => $description,
                                         'recommendations' => $recommendations,
                                         'classification' => $classification,
+                                        'comments' => $comments,
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
                                         'organization_id' => $_POST['organization_id'],
@@ -1999,6 +2040,7 @@ class IssuesController extends Controller
                                         'description' => $description,
                                         'recommendations' => $recommendations,
                                         'classification' => $classification,
+                                        'comments' => $comments,
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
                                         'organization_id' => $_POST['organization_id'],
@@ -2018,6 +2060,7 @@ class IssuesController extends Controller
                                     'description' => $description,
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
+                                    'comments' => $comments,
                                     'audit_test_id' => $_POST['test_id'],
                                     'created_at' => date('Y-m-d H:i:s'),
                                     'updated_at' => date('Y-m-d H:i:s'),
@@ -2036,6 +2079,7 @@ class IssuesController extends Controller
                                     'description' => $description,
                                     'recommendations' => $recommendations,
                                     'classification' => $classification,
+                                    'comments' => $comments,
                                     'control_evaluation_id' => $_POST['evaluation_id'],
                                     'created_at' => date('Y-m-d H:i:s'),
                                     'updated_at' => date('Y-m-d H:i:s'),

@@ -60,8 +60,8 @@ class Process extends Model
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                     ->where('organization_subprocess.organization_id','=',$org)
                     ->where('processes.status','=',0)
-                    ->groupBy('processes.id','processes.name')
-                    ->select('processes.id','processes.name')
+                    ->groupBy('processes.id','processes.name','processes.description')
+                    ->select('processes.id','processes.name','processes.description')
                     ->get();
                     
         return $processes;

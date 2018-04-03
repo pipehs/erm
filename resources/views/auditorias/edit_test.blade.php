@@ -74,11 +74,48 @@
 
 <script>
 $(document).ready(function () {
+	setTimeout(type, 0)
+	setTimeout(change,2000)
 
-	type_id = {{ $type_id }}
-	setTimeout(function() {
-         getType(1);
-    }, 500);
+	function type()
+	{
+		@if ($audit_test->process_id != NULL)
+			type_id = {{ $audit_test->process_id }}
+			$("#type1").val(1);
+			$("#type1").change();
+
+		@else
+			type_id = {{ $audit_test->perspective_id }}
+			$("#type1").val(2);
+			$("#type1").change();
+		@endif
+	}
+
+	function change()
+	{
+		//guardamos controles en un array
+		controls = []
+		i = 0
+		subprocesses = []
+		j = 0
+		@foreach ($audit_test_control as $c)
+			controls[i] = {{$c->control_id}}
+			i = i+1
+		@endforeach
+
+		@if (isset($audit_test_subprocess))
+			@foreach($audit_test_subprocess as $s)
+				subprocesses[i] = {{$s->subprocess_id}}
+				j = j+1
+			@endforeach
+		@endif
+
+		@if ($audit_test->process_id != NULL)
+			$("#process_id").change()
+		@else
+			$("#perspective").change()
+		@endif
+	}
 });
 </script>
 {!!Html::script('assets/js/type_audit_test.js')!!}

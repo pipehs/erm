@@ -1385,3 +1385,29 @@ Route::get('importador',[
 Route::post('importar_excel', [
 	'as' => 'importar_excel', 'uses' => 'ExcelController@importarExcel'
 ]);
+
+
+//19-03-18: Sistema (Canal) de Denuncias
+Route::get('registro_denuncia', function(){
+   return View::make('denuncias.registro');
+});
+
+Route::get('registro_denuncia2', function(){
+   return View::make('denuncias.registro2');
+});
+
+Route::get('seguimiento_admin', function(){
+   return View::make('denuncias.seguimiento_admin');
+});
+
+Route::get('clasificacion', function(){
+   return View::make('denuncias.clasificacion');
+});
+
+Route::get('cerrar_caso', function(){
+   return View::make('denuncias.cerrar_caso');
+});
+
+Route::get('reportes_denuncias', function(){
+   return View::make('denuncias.reportes');
+});

@@ -74,7 +74,9 @@
 @section('scripts2')
 <script>
 $(document).ready(function () {
-	type_id = "NULL"
+	controls = []
+	subprocesses = []
+	type_id = 'NULL'
 });
 </script>
 {!!Html::script('assets/js/type_audit_test.js')!!}

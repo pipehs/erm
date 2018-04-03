@@ -38,8 +38,8 @@ class HomeController extends Controller
     }
     public function index()
     {
-        try
-        {
+        //try
+        //{
             if (Auth::guest())
             {
                 return Redirect::route('/');
@@ -54,13 +54,17 @@ class HomeController extends Controller
             //--- GENERAMOS HEATMAP PARA ÚLTIMA ENCUESTA DE EVALUACIÓN AGREGADA ---//
 
             $evalclass = new Evaluations;
-            $evals = $evalclass->heatmapLastEvaluation();
+            //ACT 26-03-18: Obtenemos heatmap por categorías de Riesgo
+            $cats = $evalclass->heatmapForCategories();
+
+            //$evals = $evalclass->heatmapLastEvaluation();
 
             //--- Gráfico de Riesgos clasificados por categoría ---//
             //$riskclass = new Risks;
             //$risks = $risks->getRisks(NULL);
 
             //seteamos contador para cada categoría
+            /*
             $p_categories = \Ermtool\Risk_category::getPrimaryCategories();
             $cont_categories = array();
 
@@ -161,13 +165,21 @@ class HomeController extends Controller
             {
                 return json_en('en.home',['nombre'=>$evals['nombre'],'descripcion'=>$evals['descripcion'],
                                             'riesgos'=>$evals['riesgos'],'prom_proba'=>$evals['prom_proba'],'prom_criticidad'=>$evals['prom_criticidad'],'plans' => $plans,'org' => $evals['org'],'categories'=>$categories,'riesgos_subprocess' => $riesgos_subprocess,'riesgos_objective' => $riesgos_objective]);
+            }*/
+            if (Session::get('languaje') == 'es')
+            {
+                return view('home',['cats' => $cats]);
             }
-        }
-        catch (\Exception $e)
-        {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
-        }
+            else if (Session::get('languaje') == 'en')
+            {
+                return json_en('en.home',['cats' => $cats]);
+            }
+        //}
+        //catch (\Exception $e)
+        //{
+            //enviarMailSoporte($e);
+            //return view('errors.query',['e' => $e]);
+        //}
     }
 
     public function help()
@@ -377,6 +389,7 @@ class HomeController extends Controller
 
                     if (!empty($risks))
                     {
+                        $risk_resp_mail = 'No definido';
                         foreach ($risks as $risk)
                         {
                             //seteamos variables que dependen de cada riesgo
@@ -485,7 +498,8 @@ class HomeController extends Controller
                             }
 
                             //obtenemos última evaluación
-                            $last_evaluation = \Ermtool\Evaluation::getLastEvaluation($risk->id);
+                            //ACT 26-03-18: Agregamos kind (1 es para cualquier tipo de evaluación)
+                            $last_evaluation = \Ermtool\Evaluation::getLastEvaluation($risk->id,1);
                             if ($last_evaluation == NULL )
                             {
                                 $proba = 'No evaluado';

@@ -13,7 +13,7 @@ function selectControls()
 			$('#create_edit').hide(500)
 			$('#button').hide(500)
 
-			$('#cargando').html('<div><center><img src="/bgrcdemo/assets/img/loading.gif" width="19" height="19"/></center></div>')
+			$('#cargando').html('<div><center><img src="/assets/img/loading.gif" width="19" height="19"/></center></div>')
 
 			$.get('controles.get_objective_controls.'+$("#organization_id").val(), function (result) {
 				var datos = JSON.parse(result);

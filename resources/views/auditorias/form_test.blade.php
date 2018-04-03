@@ -8,14 +8,6 @@
 							</div>
 						</div>
 
-						<!--
-						<div class="form-group">
-							{!!Form::label('Categor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
-							<div class="col-sm-4">
-								{!!Form::select('type2',['1'=>'Prueba de control','2'=>'Prueba de subproceso'],$type2,
-																['id'=>'type2_test_1','required'=>'true','onchange'=>'getType(1)','placeholder'=>'- Seleccione -','required'=>'true'])!!}
-							</div>
-						</div>-->
 
 						<div id="categoria_test_1" style="display:none;"></div>
 
@@ -39,9 +31,20 @@
 						<div class="form-group">
 							{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-6">
-								{!!Form::select('type',['0'=>'Prueba de diseño','1'=>'Prueba de efectividad operativa',
-															'2'=>'Prueba de cumplimiento','3'=>'Prueba sustantiva'],null,
-															['id'=>'type','placeholder'=>'- Seleccione -'])!!}
+							@if (!isset($test_selected))
+								{!!Form::select('type',$evaluation_tests,null,['id'=>'type','placeholder'=>'- Seleccione -'])!!}
+							@else
+								<select name="type">
+								<option value="">- Seleccione -</option>
+								@foreach ($evaluation_tests as $id=>$name)
+									@if ($id == $test_selected)
+										<option value="{{$id}}" selected="true">{{$name}}</option>
+									@else
+										<option value="{{$id}}">{{$name}}</option>
+									@endif
+								@endforeach
+								</select>
+							@endif
 							</div>
 						</div>
 

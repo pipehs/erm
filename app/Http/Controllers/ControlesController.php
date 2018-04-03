@@ -911,7 +911,7 @@ class ControlesController extends Controller
                                 ]);
 
                         //ahora calcularemos el valor de el o los riesgos a los que apunte este control
-                        $eval_risk = $this->calcControlledRisk($control_id,$_POST['org_id'],date('Y'),date('m'),date('d'));
+                        $eval_risk = $this->calcControlledRiskAutoeval($control_id,$_POST['org_id'],date('Y'),date('m'),date('d'));
 
 
                         //guardamos archivos de evidencias (si es que hay)
@@ -973,11 +973,12 @@ class ControlesController extends Controller
             {
                 $risks_selected = array(); //array de riesgos seleccionados previamente
                 $control = \Ermtool\Control::find($id);
-                $stakeholders = \Ermtool\Stakeholder::listStakeholders((int)$org);
+                $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
                 $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
                 //seleccionamos riesgos de proceso u objetivo que fueron seleccionados previamente (según corresponda)
                 //ACTUALIZACIÓN 02-04-17: Seleccionamos de control_organization_risk
                 //seleccionamos riesgos de proceso seleccionados previamente
+                
                 $risks = DB::table('control_organization_risk')
                             ->join('organization_risk','control_organization_risk.organization_risk_id','=','organization_risk.id')
                             ->join('risks','risks.id','=','organization_risk.risk_id')
@@ -993,6 +994,9 @@ class ControlesController extends Controller
                     $i += 1;
                 }
 
+                //ACT 26-03-18: Obtenemos de aquí el responsable del control
+                $stakeholder = \Ermtool\Control::getStakeholder($control->id,(int)$org);
+
                 //ACTUALIZACIÓN 16-11-17: Estados financieros
                 $financial_statements = \Ermtool\Financial_statement::where('status',0)->lists('name','id');
 
@@ -1001,11 +1005,11 @@ class ControlesController extends Controller
                 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,'risks_selected'=>json_encode($risks_selected),'org' => (int)$org,'categories' => $categories,'fs_selected' => $fs_selected,'financial_statements' => $financial_statements]);
+                    return view('en.controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,'risks_selected'=>json_encode($risks_selected),'org' => (int)$org,'categories' => $categories,'fs_selected' => $fs_selected,'financial_statements' => $financial_statements,'stakeholder' => $stakeholder]);
                 }
                 else
                 {
-                    return view('controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,'risks_selected'=>json_encode($risks_selected),'org' => (int)$org,'categories' => $categories,'fs_selected' => $fs_selected,'financial_statements' => $financial_statements]);
+                    return view('controles.edit',['control'=>$control,'stakeholders'=>$stakeholders,'risks_selected'=>json_encode($risks_selected),'org' => (int)$org,'categories' => $categories,'fs_selected' => $fs_selected,'financial_statements' => $financial_statements,'stakeholder' => $stakeholder]);
                 }
             }
         }
@@ -1279,7 +1283,7 @@ class ControlesController extends Controller
                             ]);
 
                     //ahora calcularemos el valor de el o los riesgos a los que apunte este control
-                    $eval_risk = $this->calcControlledRisk($GLOBALS['id1'],$_POST['org_id'],date('Y'),date('m'),date('d'));
+                    $eval_risk = $this->calcControlledRiskAutoeval($GLOBALS['id1'],$_POST['org_id'],date('Y'),date('m'),date('d'));
 
                     //ACTUALIZACIÓN 03-04-17: primero eliminamos los riesgos antiguos para no repetir
                     $control_organization_risk_id = \Ermtool\Control::getControlOrganizationRisk($control->id,$_POST['org_id']);
@@ -1555,8 +1559,8 @@ class ControlesController extends Controller
     //ACTUALIZADO MODO DE EVALUAR CONTROLES EL 14-11-2016: Ahora se tendrá una lista con los datos del control
     public function indexEvaluacion2()
     {
-        try
-        {
+        //try
+        //{
             //print_r($_GET);
             if (Auth::guest())
             {
@@ -1567,20 +1571,37 @@ class ControlesController extends Controller
                 //obtenemos datos del control 
                 $control = \Ermtool\Control::find($_GET['control_id']);
 
-                if ($control->stakeholder_id == NULL)
+                //ACT 26-03-18: Stakeholder está dentro de control_organization_risk
+                //if ($control->stakeholder_id == NULL)
+
+                //Obtenemos stakeholder
+                $stake = \Ermtool\Control::getStakeholder($control->id,$_GET['organization_id']);
+
+                if ($stake->id == NULL)
                 {
                     $stakeholder = NULL;
                 }
                 else
                 {
-                    $stakeholder = \Ermtool\Stakeholder::getName($control->stakeholder_id);
+                    $stakeholder = \Ermtool\Stakeholder::getName($stake->id);
                 }
 
                 //buscamos datos de cada una de las últimas pruebas (independiente de si se está editando o creando una nueva)
-                $last_diseno = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],0);
-                $last_efectividad = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],1);
-                $last_sustantiva = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],2);
-                $last_cumplimiento = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],3);
+                //ACT 28-03-18: Ahora las pruebas serán dinámicas, por lo que se obtendrán de la tabla evaluation_tests
+
+                $tests = \Ermtool\Evaluation_test::all();
+                $last_evaluations = array();
+                $i = 0;
+
+                foreach ($tests as $t)
+                {
+                    $last_evaluations[$i] = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],$t->id);
+                    $i += 1;
+                }
+                //$last_diseno = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],0);
+                //$last_efectividad = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],1);
+                //$last_sustantiva = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],2);
+                //$last_cumplimiento = \Ermtool\Control_evaluation::getLastEvaluation($_GET['control_id'],3);
 
                 if (isset($_GET['organization_id']))
                 {
@@ -1595,11 +1616,11 @@ class ControlesController extends Controller
                 //{
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.controles.evaluar2',['control' => $control,'risks' => $risks,'stakeholder' => $stakeholder,'last_diseno' => $last_diseno,'last_efectividad' => $last_efectividad,'last_sustantiva' => $last_sustantiva,'last_cumplimiento' => $last_cumplimiento,'org_id' => $_GET['organization_id']]);
+                    return view('en.controles.evaluar2',['control' => $control,'risks' => $risks,'stakeholder' => $stakeholder,'last_evaluations' => $last_evaluations,'org_id' => $_GET['organization_id']]);
                 }
                 else
                 {
-                    return view('controles.evaluar2',['control' => $control,'risks' => $risks,'stakeholder' => $stakeholder,'last_diseno' => $last_diseno,'last_efectividad' => $last_efectividad,'last_sustantiva' => $last_sustantiva,'last_cumplimiento' => $last_cumplimiento,'org_id' => $_GET['organization_id']]);
+                    return view('controles.evaluar2',['control' => $control,'risks' => $risks,'stakeholder' => $stakeholder,'last_evaluations' => $last_evaluations,'org_id' => $_GET['organization_id']]);
                 }
                 //}
                 /*else if ($_GET['control_kind'] == 2) //control de proceso
@@ -1619,12 +1640,12 @@ class ControlesController extends Controller
                 }*/
                 
             }
-        }
-        catch (\Exception $e)
-        {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
-        }
+        //}
+        //catch (\Exception $e)
+        //{
+        //    enviarMailSoporte($e);
+        //    return view('errors.query',['e' => $e]);
+        //}
     }
 
     public function createEvaluacion($id,$kind,$org)
@@ -1640,8 +1661,12 @@ class ControlesController extends Controller
                 //responsables del plan de acción (si es que la prueba es inefectiva)
                 $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
                 $control = \Ermtool\Control::name($id);
+
+                //ACT 28-03-18: Obtenemos kind de tabla evalution_test
+                $kind2 = \Ermtool\Evaluation_test::find($kind);
+
                 if (Session::get('languaje') == 'en')
-                {
+                {/*
                     switch ($kind) {
                         case 0:
                             $kind2 = 'Design test';
@@ -1658,11 +1683,11 @@ class ControlesController extends Controller
                         default:
                             # code...
                             break;
-                    }
+                    }*/
                     return view('en.controles.create_evaluation',['kind' => $kind, 'kind2' => $kind2, 'id' => $id,'control' => $control,'stakeholders' => $stakeholders,'control_evaluation'=>NULL]);
                 }
                 else
-                {
+                {/*
                     switch ($kind) {
                         case 0:
                             $kind2 = 'Prueba de diseño';
@@ -1679,7 +1704,7 @@ class ControlesController extends Controller
                         default:
                             # code...
                             break;
-                    }
+                    }*/
                     return view('controles.create_evaluation',['kind' => $kind, 'kind2' => $kind2, 'id' => $id,'control' => $control,'stakeholders' => $stakeholders,'control_evaluation'=>NULL,'org_id' => $org]);
                 }
             }
@@ -1705,8 +1730,12 @@ class ControlesController extends Controller
                 //responsables del plan de acción (si es que la prueba es inefectiva)
                 $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
                 $control = \Ermtool\Control::name($eval->control_id);
+
+                //ACT 28-03-18: Obtenemos kind de tabla evalution_test
+                $kind = \Ermtool\Evaluation_test::find($eval->evaluation_test_id);
+
                 if (Session::get('languaje') == 'en')
-                {
+                {/*
                     switch ($eval->kind) {
                         case 0:
                             $kind = 'Design test';
@@ -1723,11 +1752,11 @@ class ControlesController extends Controller
                         default:
                             # code...
                             break;
-                    }
-                    return view('en.controles.edit_evaluation',['eval'=>$eval,'control'=>$control,'kind'=>$kind,'stakeholders' => $stakeholders,'control_evaluation'=>$eval->id,'id'=>$eval->control_id]);
+                    }*/
+                    return view('en.controles.edit_evaluation',['eval'=>$eval,'control'=>$control,'kind'=>$kind,'stakeholders' => $stakeholders,'control_evaluation'=>$eval->id,'id'=>$eval->control_id,'org_id' => $eval->organization_id]);
                 }
                 else
-                {
+                {/*
                     switch ($eval->kind) {
                         case 0:
                             $kind = 'Prueba de diseño';
@@ -1744,8 +1773,8 @@ class ControlesController extends Controller
                         default:
                             # code...
                             break;
-                    }
-                    return view('controles.edit_evaluation',['eval'=>$eval,'control'=>$control,'kind'=>$kind,'stakeholders' => $stakeholders,'control_evaluation'=>$eval->id,'id'=>$eval->control_id]);
+                    }*/
+                    return view('controles.edit_evaluation',['eval'=>$eval,'control'=>$control,'kind'=>$kind,'stakeholders' => $stakeholders,'control_evaluation'=>$eval->id,'id'=>$eval->control_id,'org_id' => $eval->organization_id]);
                 }
             }
         }
@@ -1779,12 +1808,14 @@ class ControlesController extends Controller
                     {
                         $comments = NULL;
                     }
+                    //ACT 28-03-18: Ya no existe kind
                     $eval = \Ermtool\Control_evaluation::create([
                                 'control_id' => $_POST['control_id'],
                                 'description' => $_POST['description'],
                                 'results' => $_POST['results'],
                                 'comments' => $comments,
-                                'kind' => $_POST['kind'],
+                                //'kind' => $_POST['kind'],
+                                'evaluation_test_id' => $_POST['kind'],
                                 'status' => 1,
                                 'organization_id' => $_POST['org_id']
                             ]);
@@ -1907,11 +1938,13 @@ class ControlesController extends Controller
         }
     }
 
-    /*ACTUALIZACIÓN 21-11 función para cerrar una prueba; al cerrar una prueba se re evalua el valor del control (para ver si es efectivo o inefectivo), y su resultado es almacenado en la tabla
+    /*ACTUALIZACIÓN 21-11-16 función para cerrar una prueba; al cerrar una prueba se re evalua el valor del control (para ver si es efectivo o inefectivo), y su resultado es almacenado en la tabla
     control_eval_risk_temp, para luego re calcular el valor del riesgo controlado (a través de todos los controles que se encuentren en la tabla control_eval_risk_temp y que apunten a los riesgos creados en el sistema) */
 
-    /* ACTUALIZACIÓN 04-07-2017: Esta función no se utilizará en Coca Cola, y serán modificadas las funciones calcControlValue y calcControlledRisk, de modo que cada vez que se cree o actualice un control, se calculará el promedio de los controles, y luego este valor será aplicado a todos los riesgos asociados
-*/
+    /* ACTUALIZACIÓN 04-07-2017: Esta función no se utilizará en Coca Cola, y serán modificadas las funciones calcControlValue y calcControlledRisk, de modo que cada vez que se cree o actualice un control, se calculará el promedio de los controles, y luego este valor será aplicado a todos los riesgos asociados */
+
+    /* ACT 29-03-18: Se vuelve a activar esta función: Ahora se almacenará los valores en probabilidad e impacto como porcentaje (según pesos específicos almacenados en control_specific_weight). Luego se re-calculará valor residual de los riesgos asociados a este control y se almacenará en la tabla residual_risk. */
+
     public function closeEvaluation($id,$org)
     {
         global $id1;
@@ -1923,14 +1956,13 @@ class ControlesController extends Controller
             $logger = $this->logger2;
             //primero que todo, cerramos el estado de la prueba de id = $id
             $eval = \Ermtool\Control_evaluation::find($GLOBALS['id1']);
-            $eval->status = 2;
-            $eval->save();
-
+            //$eval->status = 2;
+            //$eval->save();
             //ahora calcularemos el resultado del control
-            //$control = $this->calcControlValue($eval->control_id);
+            $control = $this->calcControlValue($eval->control_id,$eval->organization_id);
 
             //ahora calcularemos el valor de el o los riesgos a los que apunte este control
-            //$eval_risk = $this->calcControlledRisk($eval->control_id,$GLOBALS['org1']);
+            $eval_risk = $this->calcControlledRisk($eval->control_id,$GLOBALS['org1']);
 
             if (Session::get('languaje') == 'en')
             {
@@ -1961,10 +1993,10 @@ class ControlesController extends Controller
 
             $name = \Ermtool\Control::name($eval->control_id);
 
-            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha cerrado la prueba '.$kind.' para el control con Id: '.$eval->control_id.' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+            //$logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha cerrado la prueba '.$kind.' para el control con Id: '.$eval->control_id.' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
         });
 
-        return 0;
+        //return 0;
     }
     
     //función que retornará documento de evidencia subidos, junto al control que corresponden
@@ -3181,203 +3213,205 @@ class ControlesController extends Controller
     }
 
     //calculamos el valor del control según las pruebas que posea
-    public function calcControlValue($id)
+    //ACT 29-03-18: Esta funcionalidad es actulizada por completa, debido a nuevas funcionalidades, como por ejemplo el que se puedan crear N tipos de prueba distintos, con pesos específicos
+    public function calcControlValue($id,$org)
     {
-        //obtenemos la última evaluación de cada una de las pruebas (independientes de si están abiertas o cerradas)
-        //primero obtenemos la fecha
-        $last_diseno_updated = DB::table('control_evaluation')
-                            ->where('control_id','=',$id)
-                            ->where('kind','=',0)
+        GLOBAL $id1;
+        $id1 = $id;
+        GLOBAL $org_id;
+        $org_id = $org;
+        DB::transaction(function() {
+            //Obtenemos los distintos tipos de prueba existentes
+            $evaluation_tests = \Ermtool\Evaluation_test::all();
+
+            $evaluations = array();
+            //Variables para guardar peso total entre todas las pruebas que se han respondido
+            $peso_total_p = 0;
+            $peso_total_i = 0;
+            $i = 0;
+            foreach ($evaluation_tests as $test)
+            {   
+                //Obtenemos primero la máxima fecha de evaluación de control asociada a esta prueba
+                $c_max_date = DB::table('control_evaluation')
+                            ->where('control_id','=',$GLOBALS['id1'])
+                            ->where('evaluation_test_id','=',$test->id)
+                            ->where('status','=',1)
                             ->max('updated_at');
 
-        //ACT 03-04-17: sacamos guiones de updated_at
-        //$last_diseno_updated = str_replace('-','',$last_diseno_updated);
+                //sacamos guiones de updated_at (SQL Server)
+                // $c_max_date = str_replace('-','',$c_max_date);
 
-        if (isset($last_diseno_updated) && !empty($last_diseno_updated))
-        {
-            //ahora obtenemos la evaluación en esa fecha
-            $last_diseno = DB::table('control_evaluation')
-                            ->where('control_id','=',$id)
-                            ->where('kind','=',0)
-                            ->where('updated_at','=',$last_diseno_updated)
-                            ->select('results','status')
-                            ->first();
-
-        }
-        else
-        {
-            $last_diseno = NULL;
-        }
-
-        //hacemos lo mismo con cada una de las pruebas
-        $last_efectividad_updated = DB::table('control_evaluation')
-                            ->where('control_id','=',$id)
-                            ->where('kind','=',1)
+                //Hacemos lo mismo para prueba de auditoría (para ver cuál tiene fecha mayor)
+                $a_max_date = DB::table('audit_tests')
+                            ->join('audit_test_control','audit_test_control.audit_test_id','=','audit_tests.id')
+                            ->where('audit_test_control.control_id','=',$GLOBALS['id1'])
+                            ->where('audit_tests.evaluation_test_id','=',$test->id)
+                            ->where('audit_tests.status','=',2)
                             ->max('updated_at');
 
-        //ACT 03-04-17: sacamos guiones de updated_at
-        //$last_efectividad_updated = str_replace('-','',$last_efectividad_updated);
+                //sacamos guiones de updated_at (SQL Server)
+                // $a_max_date = str_replace('-','',$a_max_date);
 
-        if (isset($last_efectividad_updated) && !empty($last_efectividad_updated))
-        {
-            //ahora obtenemos la evaluación en esa fecha
-            $last_efectividad = DB::table('control_evaluation')
-                            ->where('control_id','=',$id)
-                            ->where('kind','=',1)
-                            ->where('updated_at','=',$last_efectividad_updated)
-                            ->select('results','status')
+                if (!empty($c_max_date) && !empty($a_max_date))
+                {
+                    //vemos que fecha es mayor
+                    if ($c_max_date > $a_max_date)
+                    {
+                        //echo "Fecha de control es mayor";
+                        //obtenemos peso específico de la evaluacion en probabilidad e impacto
+                        $cew = DB::table('control_specific_weight')
+                                    ->where('evaluation_test_id','=',$test->id)
+                                    ->select('p','i')
+                                    ->first();
+
+                        //obtenemos resultado de la evaluación
+                        $eval = DB::table('control_evaluation')
+                                ->where('control_id','=',$GLOBALS['id1'])
+                                ->where('updated_at','=',$c_max_date)
+                                ->where('status','=',1)
+                                ->select('results')
+                                ->first();
+                        //guardamos el valor de la evaluación
+                        $evaluations[$i] = [
+                            'pp' => $cew->p, //peso proba
+                            'pi' => $cew->i, //peso impacto
+                            'results' => $eval->results
+                        ];
+
+                        $i += 1;
+                    }
+                    else
+                    {
+                        //echo "Fecha de auditoría es mayor";
+                        //obtenemos peso específico de la evaluacion en probabilidad e impacto
+                        $cew = DB::table('control_specific_weight')
+                                    ->where('evaluation_test_id','=',$test->id)
+                                    ->select('p','i')
+                                    ->first();
+
+                        //obtenemos resultado de la evaluación
+                        $eval = DB::table('audit_tests')
+                            ->join('audit_test_control','audit_test_control.audit_test_id','=','audit_tests.id')
+                            ->where('audit_test_control.control_id','=',$GLOBALS['id1'])
+                            ->where('audit_tests.updated_at','=',$a_max_date)
+                            ->where('audit_tests.status','=',2)
+                            ->select('audit_tests.results')
                             ->first();
-        }
-        else
-        {
-            $last_efectividad = NULL;
-        }
+                        //guardamos el valor de la evaluación
+                        $evaluations[$i] = [
+                            'pp' => $cew->p, //peso proba
+                            'pi' => $cew->i, //peso impacto
+                            'results' => $eval->results
+                        ];
 
-        $last_sustantiva_updated = DB::table('control_evaluation')
-                            ->where('control_id','=',$id)
-                            ->where('kind','=',2)
-                            ->max('updated_at');
+                        $i += 1;
+                    }
+                }
+                else if (!empty($c_max_date))
+                {
+                    //obtenemos peso específico de la evaluacion en probabilidad e impacto
+                    $cew = DB::table('control_specific_weight')
+                                ->where('evaluation_test_id','=',$test->id)
+                                ->select('p','i')
+                                ->first();
 
-        //ACT 03-04-17: sacamos guiones de updated_at
-        //$last_sustantiva_updated = str_replace('-','',$last_sustantiva_updated);
-
-        if (isset($last_sustantiva_updated) && !empty($last_sustantiva_updated))
-        {
-            //ahora obtenemos la evaluación en esa fecha
-            $last_sustantiva = DB::table('control_evaluation')
-                            ->where('control_id','=',$id)
-                            ->where('kind','=',2)
-                            ->where('updated_at','=',$last_sustantiva_updated)
-                            ->select('results','status')
+                    //obtenemos resultado de la evaluación
+                    $eval = DB::table('control_evaluation')
+                            ->where('control_id','=',$GLOBALS['id1'])
+                            ->where('updated_at','=',$c_max_date)
+                            ->where('status','=',1)
+                            ->select('results')
                             ->first();
-        }
-        else
-        {
-            $last_sustantiva = NULL;
-        }
+                    //guardamos el valor de la evaluación
+                    $evaluations[$i] = [
+                        'pp' => $cew->p, //peso proba
+                        'pi' => $cew->i, //peso impacto
+                        'results' => $eval->results
+                    ];
 
-        $last_cumplimiento_updated = DB::table('control_evaluation')
-                            ->where('control_id','=',$id)
-                            ->where('kind','=',3)
-                            ->max('updated_at');
+                    $i += 1; 
+                }
+                else if (!empty($a_max_date))
+                {
+                    //obtenemos peso específico de la evaluacion en probabilidad e impacto
+                    $cew = DB::table('control_specific_weight')
+                                ->where('evaluation_test_id','=',$test->id)
+                                ->select('p','i')
+                                ->first();
 
-        //ACT 03-04-17: sacamos guiones de updated_at
-        //$last_cumplimiento_updated = str_replace('-','',$last_cumplimiento_updated);
-
-        if (isset($last_cumplimiento_updated) && !empty($last_cumplimiento_updated))
-        {
-            //ahora obtenemos la evaluación en esa fecha
-            $last_cumplimiento = DB::table('control_evaluation')
-                            ->where('control_id','=',$id)
-                            ->where('kind','=',3)
-                            ->where('updated_at','=',$last_diseno_updated)
-                            ->select('results','status')
+                    //obtenemos resultado de la evaluación
+                    $eval = DB::table('audit_tests')
+                            ->join('audit_test_control','audit_test_control.audit_test_id','=','audit_tests.id')
+                            ->where('audit_test_control.control_id','=',$GLOBALS['id1'])
+                            ->where('audit_tests.updated_at','=',$a_max_date)
+                            ->where('audit_tests.status','=',2)
+                            ->select('audit_tests.results')
                             ->first();
-        }
-        else
-        {
-            $last_cumplimiento = NULL;
-        }
+                    //guardamos el valor de la evaluación
+                    $evaluations[$i] = [
+                        'pp' => $cew->p, //peso proba
+                        'pi' => $cew->i, //peso impacto
+                        'results' => $eval->results
+                    ];
 
-        //Actualización 05-12-16: Se debe ver también la última prueba de auditoría que se encuentre cerrada y que corresponda a dicho control
-        //primero obtenemos la última prueba
+                    $i += 1; 
+                }
 
-        $max_date = \Ermtool\Audit_test::getMaxDate($id);
-
-        //ACT 03-04-17: Sacamos guiones de max_date
-        //$max_date = str_replace('-','',$max_date);
-        //ahora obtenemos la prueba
-        $test = \Ermtool\Audit_test::getTestFromDate($max_date,$id);
-
-        //vemos cada una de las pruebas (que estén cerradas, y sumamos en variable de efectivo en el caso de que lo sean; además guardamos el total de pruebas)
-        $efectivas = 0;
-        $total = 0;
-        if ($last_diseno != NULL && isset($last_diseno->status) && $last_diseno->status == 2)
-        {
-            $total += 1;
-            if ($last_diseno->results == 1)
-            {
-                $efectivas += 1;
+                //vemos si la prueba tuvo evaluación
+                if (isset($cew))
+                {
+                    $peso_total_p += $cew->p;
+                    $peso_total_i += $cew->i;
+                }
             }
-        }
 
-        if ($last_efectividad != NULL && isset($last_efectividad->status) && $last_efectividad->status == 2)
-        {
-            $total += 1;
-            if ($last_efectividad->results == 1)
+            //Calculamos resultado: Para esto, calculamos porcentaje según peso específico de las pruebas que se encuentren correctas y lo sumamos
+            $result_p = 0;
+            $result_i = 0;
+            foreach ($evaluations as $eval)
             {
-                $efectivas += 1;
+                if ($eval['results'] == 1) //es efectiva
+                {
+                    $result_p += ($eval['pp'] * 100)/$peso_total_p;
+                    $result_i += ($eval['pi'] * 100)/$peso_total_i;
+                }
             }
-        }
 
-        if ($last_sustantiva != NULL && isset($last_sustantiva->status) && $last_sustantiva->status == 2)
-        {
-            $total += 1;
-            if ($last_sustantiva->results == 1)
-            {
-                $efectivas += 1;
-            }
-        }
+            //redondeamos porcentajes
+            $result_p = round($result_p,2);
+            $result_i = round($result_i,2);
 
-        if ($last_cumplimiento != NULL && isset($last_cumplimiento->status) && $last_cumplimiento->status == 2)
-        {
-            $total += 1;
-            if ($last_cumplimiento->results == 1)
-            {
-                $efectivas += 1;
-            }
-        }
+            //ahora guardamos los resultados: Para esto primero cambiamos el status de posibles evaluaciones anteriores, y luego guardamos
+            $update_evaluations = \Ermtool\Control_evaluation::changeStatus($GLOBALS['id1'],$GLOBALS['org_id']);
 
-        if ($test != NULL)
-        {
-            $total += 1;
-            if ($test->results == 1)
-            {
-                $efectivas += 1;
-            }
-        }
+            //Guardamos
+            $control_eval = \Ermtool\Control_evaluation::saveControlValue($GLOBALS['id1'],$GLOBALS['org_id'],$result_p,$result_i,Auth::user()->id);
 
-        //ahora vemos si el total de pruebas realizadas y cerradas es igual a la cantidad de pruebas efectivas
-        /*
-        if ($total == $efectivas)
-        {
-            //guardamos en control_eval_risk_temp como control efectivo
-            DB::table('control_eval_risk_temp')
-                ->insert([
-                    'result' => 1,
-                    'control_id' => $id,
-                    'created_at' => date('Y-m-d H:i:s'),
-                ]);
-        }
-        else
-        {
-            //guardamos como inefectivo
-            DB::table('control_eval_risk_temp')
-                ->insert([
-                    'result' => 2,
-                    'control_id' => $id,
-                    'created_at' => date('Y-m-d H:i:s'),
-                ]);
-        }
-        */
+        });
 
         return 0;
     }
 
-    //función que calcula el valor del o los riesgos controlados (a través de una nueva agregación o modificación en el valor de un control)
-    public function calcControlledRisk($control_id,$org,$ano,$mes,$dia)
+    public function calcControlledRisk($control_id,$org)
     {
         try
         {
-            //primero que todo, obtenemos todos los riesgos a los que apunta este control (vemos si apunta a riesgos de proceso o de entidad)
-            $risks = \Ermtool\Risk::getRisksFromControl($org,$control_id);
-            $kind = 1; //para facilitar la manipulación posterior del riesgo
+            global $org1;
+            $org1 = $org;
+            global $id;
+            $id = $control_id;
+            DB::transaction(function() {
+                //primero que todo, obtenemos todos los riesgos a los que apunta este control (vemos si apunta a riesgos de proceso o de entidad)
+                $risks = \Ermtool\Risk::getRisksFromControl($GLOBALS['org1'],$GLOBALS['id']);
+                $kind = 1; //para facilitar la manipulación posterior del riesgo
 
-            //ahora recorremos cada uno de esos riesgos, y obtenemos los controles que tiene asociado y cuáles de estos controles posee una evaluación en la tabla control_eval_risk_temp
-            foreach ($risks as $risk)
-            {
-                $this->calcResidualRisk($org,$risk->id,$ano,$mes,$dia);
-            }
+                //ahora recorremos cada uno de esos riesgos, y obtenemos los controles que tiene asociado y cuáles de estos controles posee una evaluación en la tabla control_eval_temp2
+                foreach ($risks as $risk)
+                {
+                    $this->calcResidualRisk($GLOBALS['org1'],$risk->id,date('Y'),date('m'),date('d'));
+                }
+            });
+            
 
             return 0;
         }
@@ -3389,6 +3423,130 @@ class ControlesController extends Controller
     }
 
     public function calcResidualRisk($org,$risk_id,$ano,$mes,$dia)
+    {
+        try
+        {
+        //obtenemos todos los controles de este riesgo
+        
+           $controls = \Ermtool\Control::getControlsFromRisk($org,$risk_id);
+
+           //ACT 03-04-17: Obtenemos organization_risk
+           $risk2 = \Ermtool\Risk::getOrganizationRisk($org,$risk_id);
+
+           $prom_p = 0; //promedio de probabilidad de todos los controles
+           $prom_i = 0; //promedio de impacto de todos los controles
+           $cont = 0; //contador de todos los controles asociados a cada riesgo
+           foreach ($controls as $control)
+           {
+                //ACT 05-07-17 (KOAndina): Obtenemos todas las pruebas vigentes
+                //para cada control, obtenemos las pruebas vigentes (Auto evaluaciones o no)
+                //Tendremos sólo una evaluación de control vigente, => cambiamos get por first()
+                $eval = DB::table('control_eval_temp2')
+                            ->where('control_id','=',$control->id)
+                            ->where('organization_id','=',$org)
+                            ->where('status','=',1)
+                            ->select('probability','impact')
+                            //->get();
+                            ->first();
+
+                //$prom_p = 0;
+                //$prom_i = 0;
+                //$cont = 0;
+
+                if (isset($eval) && $eval != NULL && !empty($eval))
+                {
+                    $prom_p += $eval->probability;
+                    $prom_i += $eval->impact;
+                    $cont += 1;
+                    //calculamos promedio en probabilidad e impacto
+                    //$prom_p = $prom_p / $cont;
+                    //$prom_i = $prom_i / $cont;
+                }
+
+                //sumamos el promedio de este control, al que será el promedio de todos los controles (primero será la suma, y una vez contados todos los controles (en cont_controles), será el promedio)
+                //$prom_controls += $prom;
+                //$cont_controls += 1;
+           }
+
+           //Vemos si es que hay controles asociados al riesgo, si es así calculamos promedio en proba e impacto
+            if ($cont != 0)
+            {
+                $prom_p = $prom_p / $cont;
+                $prom_i = $prom_i / $cont;
+
+                //---Cálculo de Riesgo Residual---//
+                //primero obtenemos fecha máx de evaluación para el riesgo indicado
+                $max_update = DB::table('evaluation_risk')
+                            ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                            ->where('evaluation_risk.organization_risk_id','=',$risk2->id)
+                            ->max('evaluations.updated_at');
+
+                //verificamos que haya alguna evaluación para este riesgo (sino, no se calcula el riesgo residual)
+                if (isset($max_update) && $max_update != null)
+                {
+                    //ahora debemos obtener severidad actual del riesgo
+                    $s = DB::table('evaluation_risk')
+                                ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                ->where('evaluations.updated_at','=',$max_update)
+                                ->where('evaluation_risk.organization_risk_id','=',$risk2->id)
+                                ->select('evaluation_risk.avg_probability as p','evaluation_risk.avg_impact as i')
+                                ->first();
+
+                    //CALCULAMOS proba e impacto a través de fórmula X-(X*Y/2) donde X es eval_in e Y porcentaje
+                    //porcentaje lo dividimos por 100
+                    $prom_p = $prom_p / 100;
+                    $prom_i = $prom_i / 100;
+                    //---- APLICACIÓN DE FÓRMULA ----//
+                    $p = $s->p - ($s->p*$prom_p/2);
+                    $i = $s->i - ($s->i*$prom_i/2);
+
+                    //OBS: función insertResidualRisk estará en Risk, ya que está asociado a éste, y no sólo a control_evaluation
+                    \Ermtool\Risk::insertResidualRisk($risk2->id,$p,$i,$ano,$mes,$dia);
+                    //\Ermtool\Control_evaluation::insertControlledRisk($risk2->id,$riesgo_residual,2,$ano,$mes,$dia);
+                }
+            }
+            else
+            {
+                //ACTUALIZACIÓN 19-07-17: significa que no hay controles, entonces eliminamos valor de riesgo residual
+                //ACT 30-03-18: Ahora se guarda en residual_risk (ya que controlled_risk es para autoeval)
+                DB::table('residual_risk')
+                    ->where('organization_risk_id','=',$risk2->id)
+                    ->delete();
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }      
+    }
+
+
+    //función que calcula el valor del o los riesgos controlados (a través de una nueva agregación o modificación en el valor de un control) en formato de Autoevaluación (utilizando fórmula de KOAndina)
+    public function calcControlledRiskAutoeval($control_id,$org,$ano,$mes,$dia)
+    {
+        try
+        {
+            //primero que todo, obtenemos todos los riesgos a los que apunta este control (vemos si apunta a riesgos de proceso o de entidad)
+            $risks = \Ermtool\Risk::getRisksFromControl($org,$control_id);
+            $kind = 1; //para facilitar la manipulación posterior del riesgo
+
+            //ahora recorremos cada uno de esos riesgos, y obtenemos los controles que tiene asociado y cuáles de estos controles posee una evaluación en la tabla control_eval_risk_temp
+            foreach ($risks as $risk)
+            {
+                $this->calcResidualRiskAutoeval($org,$risk->id,$ano,$mes,$dia);
+            }
+
+            return 0;
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    public function calcResidualRiskAutoeval($org,$risk_id,$ano,$mes,$dia)
     {
         try
         {
@@ -3460,7 +3618,7 @@ class ControlesController extends Controller
                     //ahora calculamos nivel de exposición al riesgo (riesgo residual) según fórmula de KOAndina
                     $riesgo_residual = ($s->avg_probability * $s->avg_impact)*(1-($prom_controls/100));
                     $riesgo_residual = round($riesgo_residual, 2);
-                    \Ermtool\Control_evaluation::insertControlledRisk($risk2->id,$riesgo_residual,2,$ano,$mes,$dia);
+                    \Ermtool\Risk::insertControlledRisk($risk2->id,$riesgo_residual,2,$ano,$mes,$dia);
                 }
             }
             else
@@ -3530,8 +3688,11 @@ class ControlesController extends Controller
                 $org_id = \Ermtool\Organization::getOrganizationIdFromControl($evaluation->control_id);
 
                 
+                //ACT 28-03-18: Obtenemos kind de tabla evalution_test
+                $kind = \Ermtool\Evaluation_test::find($evaluation->evaluation_test_id);
+
                 if (Session::get('languaje') == 'en')
-                {
+                {/*
                     switch ($evaluation->kind) {
                         case 0:
                             $kind = 'Design test';
@@ -3548,11 +3709,11 @@ class ControlesController extends Controller
                         default:
                             # code...
                             break;
-                    }
+                    }*/
                     return view('en.hallazgos.index3',['issues'=>$issues, 'evaluation' => $evaluation,'org_id' => $org_id,'kind' => $kind]);
                 }
                 else
-                {
+                {/*
                     switch ($evaluation->kind) {
                         case 0:
                             $kind = 'Prueba de diseño';
@@ -3569,7 +3730,7 @@ class ControlesController extends Controller
                         default:
                             # code...
                             break;
-                    }
+                    }*/
                     return view('hallazgos.index3',['issues'=>$issues, 'evaluation' => $evaluation,'control_name'=>$control_name,'org_id' => $org_id,'kind' => $kind]);
                 }
             }
@@ -3921,7 +4082,8 @@ class ControlesController extends Controller
                             $controls = \Ermtool\Control::getControlsFromRisk($_GET['organization_id'],$r->id);
 
                             //obtenemos evaluación del riesgo si es que hay
-                            $evaluation_risk = \Ermtool\Evaluation::getLastEvaluation($risk);
+                            //ACT 26-03-18: Agregamos kind (1 es para cualquier tipo de evaluación)
+                            $evaluation_risk = \Ermtool\Evaluation::getLastEvaluation($risk,1);
 
                             $riesgos[$i] = array('type' => 0,
                                                 'org_risk_id' => $risk,
@@ -3952,7 +4114,8 @@ class ControlesController extends Controller
                             $controls = \Ermtool\Control::getControlsFromRisk($_GET['organization_id'],$r->id);
 
                             //obtenemos evaluación del riesgo si es que hay
-                            $evaluation_risk = \Ermtool\Evaluation::getLastEvaluation($risk);
+                            //ACT 26-03-18: Agregamos kind (1 es para cualquier tipo de evaluación)
+                            $evaluation_risk = \Ermtool\Evaluation::getLastEvaluation($risk,1);
 
                             $riesgos[$i] = array('type' => 1,
                                                 'org_risk_id' => $risk,

@@ -50,7 +50,7 @@
 				</div>
 			@endif
 
-			<h4>{{ $kind }} para Control {{ $control }}.</h4>
+			<h4>{{ $kind->name }} para Control {{ $control }}.</h4>
 				{!!Form::model($eval,['route'=>['control_evaluation.update',$eval->id],'method'=>'PUT','class'=>'form-horizontal',
 				'enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 					@include('controles.evaluation_form')

@@ -8,8 +8,8 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Datos Maestros</a></li>
-			<li><a href="objetivos">Objetivos</a></li>
+			<li><a href="#">Gestión estratégica</a></li>
+			<li><a href="objetivos">Planes y objetivos estrat&eacute;gicos</a></li>
 			<li><a href="objetivos/{{ $objetivo['id'] }}/edit">Editar Objetivo</a></li>
 		</ol>
 	</div>

@@ -581,10 +581,11 @@ class AuditoriasController extends Controller
                             {
                                 foreach ($controls as $control)
                                 {
-                                    /*Por ahora no se usa en Coca Cola
+                                    /*Por ahora no se usa en Coca Cola */
+                                    //ACT 30-03-18: Volvemos a incorporarla
                                     if ($control->control_id != NULL)
                                     {
-                                        $result = $c->calcControlValue($control->control_id);
+                                        $result = $c->calcControlValue($control->control_id,$_POST['org_id']);
 
                                         $eval = $c->calcControlledRisk($control->control_id,$_POST['org_id']);
 
@@ -593,7 +594,8 @@ class AuditoriasController extends Controller
                                     else
                                     {
                                         $result = 2;
-                                    }*/
+                                    }
+                                    
                                     $result = 1;
                                 }
                             }
@@ -1131,9 +1133,13 @@ class AuditoriasController extends Controller
                     //damos formato a estado
                     $estado = $plan['status'];
                     //damos formato a fecha inicial
-                    $fecha_inicial = date("d-m-Y",strtotime($plan['initial_date']));
+                    $fecha_inicial = new DateTime($plan['initial_date']);
+                    $fecha_inicial = date_format($fecha_inicial, 'd-m-Y');
+                    //$fecha_inicial = date("d-m-Y",strtotime($plan['initial_date']));
                     //damos formato a fecha final
-                    $fecha_final = date("d-m-Y",strtotime($plan['final_date']));
+                    $fecha_final = new DateTime($plan['final_date']);
+                    $fecha_final = date_format($fecha_final, 'd-m-Y');
+                    //$fecha_final = date("d-m-Y",strtotime($plan['final_date']));
                     //obtenemos organizacion
                     $organizacion = \Ermtool\Organization::name($plan['organization_id']);
                     
@@ -1222,12 +1228,11 @@ class AuditoriasController extends Controller
                     $lala = new DateTime($audit_program->expiration_date);
                     $expiration_date = date_format($lala,"d-m-Y");
                 }
-                
+
                 //obtenemos pruebas de auditoría del programa
                 $audit_tests = DB::table('audit_tests')
                                 ->where('audit_audit_plan_audit_program_id','=',$id)
-                                ->select('id','name','description','type','status','results','created_at',
-                                         'updated_at','hh_plan','hh_real','stakeholder_id')
+                                ->select('id','name','description','evaluation_test_id','status','results','created_at','updated_at','hh_plan','hh_real','stakeholder_id')
                                 ->get();
                 $i = 0;
                 foreach ($audit_tests as $audit_test)
@@ -1249,8 +1254,8 @@ class AuditoriasController extends Controller
                     //damos formato a fecha de actualización
                     $lala = new DateTime($audit_test->updated_at);
                     $fecha_act = date_format($lala,"d-m-Y");
-
-                    $type = $audit_test->type;
+                    //ACT 30-03-18: Tipo desde evaluation_tests
+                    $type = \Ermtool\Evaluation_test::name($audit_test->evaluation_test_id);
                     $status = $audit_test->status;
                     $results = $audit_test->results;            
                     $description = $audit_test->description;
@@ -1330,7 +1335,7 @@ class AuditoriasController extends Controller
             return view('errors.query',['e' => $e]);
         }
     }
-    public function editTest($program_id)
+    public function editTest($test_id)
     {
         try
         {
@@ -1340,7 +1345,7 @@ class AuditoriasController extends Controller
             }
             else
             {
-                $audit_test = \Ermtool\Audit_test::find($program_id);
+                $audit_test = \Ermtool\Audit_test::find($test_id);
                 //obtenemos audit_plan para despues obtener controles, riesgos o subproceso de la prueba
                 $audit_plan = DB::table('audit_audit_plan_audit_program')
                             ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
@@ -1351,6 +1356,16 @@ class AuditoriasController extends Controller
                             ->first();
                 $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
                 //seleccionamos tipo o categoría
+                //ACT 30-03-18: Una prueba puede tener más de un control asociado
+                $audit_test_control = \Ermtool\Audit_test::getControls($test_id);
+
+                if ($audit_test->process_id != NULL) //es prueba de proceso
+                {
+                    //Vemos si se especificaron subprocessos
+                   $audit_test_subprocess = \Ermtool\Audit_test::getSubprocesses($test_id); 
+                }
+                
+                /*
                 if ($audit_test->control_id != NULL)
                 {
                     $type2 = 1;
@@ -1370,16 +1385,21 @@ class AuditoriasController extends Controller
                 {
                     $type2 = NULL;
                     $type_id = NULL;
-                }
+                }*/
+
                 //obtenemos evidencias de prueba (si es que existen)
                 //$evidence = getEvidences(5,$audit_test->id);
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.auditorias.edit_test',['audit_test'=>$audit_test,'stakeholders'=>$stakeholders,'type2'=>$type2,'audit_plan' => $audit_plan->id,'type_id'=>$type_id]);
+                    //ACT 30-03-18: Agregamos tipos de prueba dinámicos
+                    $evaluation_tests = \Ermtool\Evaluation_test::lists('name_eng','id');
+                    return view('en.auditorias.edit_test',['audit_test'=>$audit_test,'stakeholders'=>$stakeholders,'audit_plan' => $audit_plan->id,'evaluation_tests' => $evaluation_tests,'audit_test_control' => $audit_test_control]);
                 }
                 else
                 {
-                    return view('auditorias.edit_test',['audit_test'=>$audit_test,'stakeholders'=>$stakeholders,'type2'=>$type2,'audit_plan' => $audit_plan->id,'type_id'=>$type_id]);
+                    //ACT 30-03-18: Agregamos tipos de prueba dinámicos
+                    $evaluation_tests = \Ermtool\Evaluation_test::lists('name','id');
+                    return view('auditorias.edit_test',['audit_test'=>$audit_test,'stakeholders'=>$stakeholders,'audit_plan' => $audit_plan->id,'evaluation_tests' => $evaluation_tests,'audit_test_control' => $audit_test_control]);
                 }
             }
         }
@@ -1493,13 +1513,14 @@ class AuditoriasController extends Controller
                         $GLOBALS['audit_test']->description = NULL;
                     }
                     //si es que se ingreso tipo
+                    //ACT 29-03-18: Tipo será dinámico
                     if (isset($_POST['type']))
                     {
-                        $GLOBALS['audit_test']->type = $_POST['type'];
+                        $GLOBALS['audit_test']->evaluation_test_id = $_POST['type'];
                     }
                     else
                     {
-                        $GLOBALS['audit_test']->type = NULL;
+                        $GLOBALS['audit_test']->evaluation_test_id = NULL;
                     }
                     //si es que se ingreso stakeholder
                     if (isset($_POST['stakeholder_id']) && $_POST['stakeholder_id'] != '')
@@ -1540,7 +1561,7 @@ class AuditoriasController extends Controller
                                 //primero verificamos que no se encuentre vacío (ya que está enviando el último valor vacío)
                                 if ($c != NULL && $c != '')
                                 {
-                                    //primero eliminaos todas las relaciones
+                                    //primero eliminamos todas las relaciones
                                     DB::table('audit_test_control')
                                         ->where('audit_test_id','=',$GLOBALS['audit_test']->id)
                                         ->delete();
@@ -1548,7 +1569,7 @@ class AuditoriasController extends Controller
                                     //almacenamos controles en audit_test_control
                                     DB::table('audit_test_control')
                                         ->insert([
-                                            'audit_test_id' => $test_id,
+                                            'audit_test_id' => $GLOBALS['audit_test']->id,
                                             'control_id' => $c
                                             ]);
                                 }   
@@ -1565,7 +1586,7 @@ class AuditoriasController extends Controller
 
                                 DB::table('audit_test_subprocess')
                                     ->insert([
-                                        'audit_test_id' => $test_id,
+                                        'audit_test_id' => $GLOBALS['audit_test']->id,
                                         'subprocess_id' => $s
                                         ]);
                             }
@@ -1588,7 +1609,7 @@ class AuditoriasController extends Controller
                                     //almacenamos controles en audit_test_control
                                     DB::table('audit_test_control')
                                         ->insert([
-                                            'audit_test_id' => $test_id,
+                                            'audit_test_id' => $GLOBALS['audit_test']->id,
                                             'control_id' => $c
                                             ]);
                                 }   
@@ -1606,7 +1627,9 @@ class AuditoriasController extends Controller
                             }
                         }   
                     }
+
                     $GLOBALS['audit_test']->save();
+
                     if (Session::get('languaje') == 'en')
                     {
                         Session::flash('message','Test successfully updated');
@@ -1649,13 +1672,20 @@ class AuditoriasController extends Controller
                 $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
                 $type2 = NULL;
                 $type_id = NULL;
+
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.auditorias.create_test2',['audit_program'=>$id_program,'stakeholders'=>$stakeholders,'audit_plan' => $audit_plan->id,'type2'=>$type2,'type_id'=>$type_id]);
+                    //ACT 30-03-18: Agregamos tipos de prueba dinámicos
+                    $evaluation_tests = \Ermtool\Evaluation_test::lists('name_eng','id');
+
+                    return view('en.auditorias.create_test2',['audit_program'=>$id_program,'stakeholders'=>$stakeholders,'audit_plan' => $audit_plan->id,'type2'=>$type2,'type_id'=>$type_id,'evaluation_tests' => $evaluation_tests]);
                 }
                 else
                 {
-                    return view('auditorias.create_test2',['audit_program'=>$id_program,'stakeholders'=>$stakeholders,'audit_plan' => $audit_plan->id,'type2'=>$type2,'type_id'=>$type_id]);
+                    //ACT 30-03-18: Agregamos tipos de prueba dinámicos
+                    $evaluation_tests = \Ermtool\Evaluation_test::lists('name','id');
+
+                    return view('auditorias.create_test2',['audit_program'=>$id_program,'stakeholders'=>$stakeholders,'audit_plan' => $audit_plan->id,'type2'=>$type2,'type_id'=>$type_id,'evaluation_tests' => $evaluation_tests]);
                 }
             }
         }
@@ -1734,7 +1764,7 @@ class AuditoriasController extends Controller
                                 'audit_audit_plan_audit_program_id' => $_POST['audit_audit_plan_audit_program_id'],
                                 'name' => $_POST['name'],
                                 'description' => $description, 
-                                'type' => $type,
+                                'evaluation_test_id' => $type,
                                 'status' => 0,
                                 'results' => 2,
                                 'created_at' => $fecha,

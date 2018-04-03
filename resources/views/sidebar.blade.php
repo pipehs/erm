@@ -19,6 +19,7 @@
 				@include('menu.riesgos')
 				@include('menu.controles')
 				@include('menu.auditorias')
+				@include('menu.denuncias')
 			<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 			@endif
 		@endforeach

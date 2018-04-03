@@ -97,6 +97,13 @@
 						</div>
 					</div>
 
+					<div class="form-group">
+						{!!Form::label('Comentarios',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::textarea('comments',null,['id'=>'comments','class'=>'form-control','rows'=>'6','cols'=>'4'])!!}
+						</div>
+					</div>
+
 				@if (strstr($_SERVER["REQUEST_URI"],'create'))
 					@if (isset($org))
 						{!!Form::hidden('kind',$kind)!!}

@@ -10,7 +10,7 @@ use Carbon;
 class Audit_test extends Model
 {
     
-    protected $fillable = ['name','description','type','status','results','hh'];
+    protected $fillable = ['name','description','type','status','results','hh','evaluation_test_id'];
 
     public static function getTestNameById($id)
     {
@@ -115,5 +115,21 @@ class Audit_test extends Model
                 ->where('name','=',$name)
                 ->select('id')
                 ->first();
+    }
+
+    public static function getControls($test_id)
+    {
+        return DB::table('audit_test_control')
+                ->where('audit_test_id','=',$test_id)
+                ->select('control_id')
+                ->get();
+    }
+
+    public static function getSubprocesses($test_id)
+    {
+        return DB::table('audit_test_subprocess')
+                ->where('audit_test_id','=',$test_id)
+                ->select('subprocess_id')
+                ->get();
     }
 }

@@ -537,12 +537,24 @@ class Control extends Model
                 ->first();
     }
 
+    //Obtiene responsable según control y riesgo (id)
     public static function getResponsable($control_id,$risk_id)
     {
         return DB::table('control_organization_risk')
                 ->where('control_id','=',$control_id)
                 ->where('organization_risk_id','=',$risk_id)
                 ->select('stakeholder_id as id')
+                ->first();
+    }
+
+    //Obtiene responsable según control y organización (id)
+    public static function getStakeholder($control_id,$org_id)
+    {
+        return DB::table('control_organization_risk')
+                ->join('organization_risk','control_organization_risk.organization_risk_id','=','organization_risk.id')
+                ->where('control_id','=',$control_id)
+                ->where('organization_risk.organization_id','=',$org_id)
+                ->select('control_organization_risk.stakeholder_id as id')
                 ->first();
     }
 }

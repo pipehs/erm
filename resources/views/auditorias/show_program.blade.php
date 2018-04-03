@@ -100,15 +100,11 @@
 					<td>{{ $test['updated_at'] }}</td>
 
 					<td>
-					@if ($test['type'] == 0)
-						Prueba de diseño
-					@elseif($test['type'] == 1)
-						Prueba de efectivdad operativa
-					@elseif($test['type'] == 2)
-						Prueba sustantiva
-					@elseif($test['type'] == 3)
-						Prueba de cumplimiento
-					@endif	
+					@if ($test['type'] != NULL)
+						{{ $test['type']->name }}
+					@else
+						No definido
+					@endif
 					</td>
 
 					<td>

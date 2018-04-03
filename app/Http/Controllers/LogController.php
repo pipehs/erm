@@ -211,7 +211,7 @@ class LogController extends Controller
                 //Validación: Si la validación es pasada, el código continua
                 $this->validate($request, [
                     'id' => 'unique:users|min:7',
-                    'name' => 'required|max:45|min:4',
+                    'name' => 'required|max:45|min:2',
                     'email' => 'unique:users',
                     'password' => 'required|min:4'
                 ]);

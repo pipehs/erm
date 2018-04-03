@@ -53,5 +53,5 @@
 </div>
 
 	<center>
-		<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+		<p><a href="evaluar_controles2?organization_id={{$org_id}}&control_id={{$id}}" class="btn btn-danger">Volver</a></p>
 	<center>

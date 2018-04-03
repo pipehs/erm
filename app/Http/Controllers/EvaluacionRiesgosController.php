@@ -2103,6 +2103,110 @@ class EvaluacionRiesgosController extends Controller
         }
     }
 
+    //ACT 26-03-18: heatmap por categorías de riesgos
+    public function heatmapForCategories()
+    {
+        //obtenemos último nivel de categorías
+        $categories = \Ermtool\Risk_category::getSubcategories();
+        $cats = array(); //donde enviaremos las categorías con sus evaluaciones
+        $i = 0; //contador de categorías
+        foreach ($categories as $cat)
+        {
+            //creamos variables para promedio, tanto de encuestas como por evaluación manual (y tanto en impacto como en probabilidad)
+            $prom_eval_i = 0;
+            $prom_eval_p = 0;
+            $prom_eval_manual_i = 0;
+            $prom_eval_manual_p = 0;
+
+            $cont_eval = 0; //contador de riesgos asociados a la categoría (que tienen evaluación)
+            $cont_manual = 0; //contador de riesgos asociados a la categoría (que tienen eval. manual)
+            //obtenemos riesgos asociados a categoría
+            $risks = \Ermtool\Risk::getRisksFromCategory($cat['id']);
+
+            $risksdata = array(); //info de los riesgos asociados a la categoría
+            $j = 0;
+
+            foreach ($risks as $r)
+            {
+                //primero obtenemos org_risk asociadas (es decir, en qué organizaciones se encuentra el riesgo)
+                $org_risk = \Ermtool\Risk::getOrgRisks($r->id);
+                foreach ($org_risk as $or)
+                {
+                    //obtenemos datos del riesgo
+                    $org = \Ermtool\Organization::name($or->organization_id);
+                    $risk_name = \Ermtool\Risk::name($r->id);
+                    $risk_description = \Ermtool\Risk::description($r->id);
+                    //obtenemos últimas evaluaciones del riesgo, primero realizadas a través de evaluación
+                    $eval = \Ermtool\Evaluation::getLastEvaluation($or->id,2);
+
+                    if ($eval && !empty($eval)) //si es que el riesgo tiene evaluación
+                    {
+                        $cont_eval += 1;
+                        //hacemos sumatoria de impacto y probabilidad
+                        $prom_eval_i += $eval->avg_impact;
+                        $prom_eval_p += $eval->avg_probability;
+                    }
+
+                    //lo mismo para evaluaciones manuales
+                    $evalm = \Ermtool\Evaluation::getLastEvaluation($or->id,3);
+
+                    if ($evalm && !empty($evalm)) //si es que el riesgo tiene evaluación
+                    {
+                        $cont_manual += 1;
+                        //hacemos sumatoria de impacto y probabilidad
+                        $prom_eval_manual_i += $evalm->avg_impact;
+                        $prom_eval_manual_p += $evalm->avg_probability;
+                    }
+
+                    $risksdata[$j] = [
+                        'organization' => $org,
+                        'risk_name' => $risk_name,
+                        'risk_description' => $risk_description
+                    ];
+
+                    $j += 1;
+                }       
+            }
+
+            //obtenemos promedios para probabilidades e impactos
+            if ($cont_eval != 0) //verificamos que hayan evaluaciones dentro de esta categoría
+            {
+                $prom_eval_i = $prom_eval_i / $cont_eval;
+                $prom_eval_p = $prom_eval_p / $cont_eval;
+            }
+            else
+            {
+                $prom_eval_i = 0;
+                $prom_eval_p = 0;
+            }
+            
+            if ($cont_manual != 0) //verificamos que hayan evaluaciones manuales dentro de esta categoría
+            {
+                $prom_eval_manual_i = $prom_eval_manual_i / $cont_manual;
+                $prom_eval_manual_p = $prom_eval_manual_p / $cont_manual;
+            }
+            else
+            {
+                $prom_eval_manual_p = 0;
+                $prom_eval_manual_i = 0;
+            }
+            
+            $cats[$i] = [
+                'id' => $cat['id'],
+                'name' => $cat['name'],
+                'level' => $cat['level'],
+                'prom_eval_i' => $prom_eval_i,
+                'prom_eval_p' => $prom_eval_p,
+                'prom_eval_manual_i' => $prom_eval_manual_i,
+                'prom_eval_manual_p' => $prom_eval_manual_p,
+                'risksdata' => $risksdata
+            ];
+
+            $i += 1;
+        }
+
+        return $cats;
+    }
     //heatmap última evaluación
     public function heatmapLastEvaluation()
     {
@@ -2214,16 +2318,17 @@ class EvaluacionRiesgosController extends Controller
         $processes = array();
         $processes2 = array();
 
-        if (isset($_GET['kind2']) && $_GET['kind2'] == 1)
+        if (isset($_GET['kind2']) && $_GET['kind2'] == 1) //por categorías
         {
             //obtenemos subcategories
-            $risk_subcategories = \Ermtool\Risk_category::getSubcategories();
-            $i = 0;
+            //ACT 22-03-18: Esta función deberá obtener el último nivel de categorías
+            $categories = \Ermtool\Risk_category::getSubcategories();
+            /*$i = 0;
             foreach ($risk_subcategories as $subcategory)
             {
-                $categories[$i] = ['id' => $subcategory->id,'name' => $subcategory->name];
+                $categories[$i] = ['id' => $subcategory['id'],'name' => $subcategory[¿name];
                 $i += 1;
-            } 
+            }*/ 
         }
         else if (isset($_GET['kind2']) && $_GET['kind2'] == 2) //por procesos
         {

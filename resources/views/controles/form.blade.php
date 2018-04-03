@@ -99,8 +99,20 @@
 					<div class="form-group">
 						{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::select('stakeholder_id',$stakeholders,null,
-													['placeholder'=>'- Seleccione -'])!!}
+							@if (isset($stakeholder) && $stakeholder != NULL)
+								<select name="stakeholder_id">
+									<option value="">- Seleccione -</option>
+									@foreach ($stakeholders as $id => $name)
+										@if ($id == $stakeholder->id)
+											<option value="{{$id}}" selected="true">{{$name}}</option>
+										@else
+											<option value="{{$id}}">{{$name}}</option>
+										@endif
+									@endforeach
+								</select>
+							@else
+								{!!Form::select('stakeholder_id',$stakeholders,null, ['placeholder'=>'- Seleccione -'])!!}
+							@endif
 						</div>
 					</div>
 

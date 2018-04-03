@@ -10,7 +10,7 @@ use Carbon;
 class Issue extends Model
 {
     
-    protected $fillable = ['name','description','recommendations','evidence','classification_id','audit_test_id','audit_audit_plan_id','control_evaluation_id','organization_id'];
+    protected $fillable = ['name','description','recommendations','evidence','classification_id','audit_test_id','audit_audit_plan_id','control_evaluation_id','organization_id','comments'];
 
 
    	//obtiene datos del origen de un control
@@ -90,7 +90,7 @@ class Issue extends Model
 
     	$issues = DB::table('issues')
                         ->where('issues.audit_test_id','=',$id)
-                        ->select('issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification')
+                        ->select('issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification')
                         //->first();
                         ->get();
             $i = 0;
@@ -113,6 +113,7 @@ class Issue extends Model
 	                        'name' => $issue->name,
 	                        'description' => $issue->description,
 	                        'recommendations' => $issue->recommendations,
+                            'comments' => $issue->comments,
 	                        'classification' => $issue->classification,
 	                        'evidences' => $evidences,
 	                        'plan_description' => $plan->description,
@@ -127,6 +128,7 @@ class Issue extends Model
 	                        'name' => $issue->name,
 	                        'description' => $issue->description,
 	                        'recommendations' => $issue->recommendations,
+                            'comments' => $issue->comments,
 	                        'classification' => $issue->classification,
 	                        'evidences' => $evidences,
 	                        'plan_description' => NULL,
@@ -146,7 +148,7 @@ class Issue extends Model
     {
         $issues = DB::table('issues')
                     ->where('process_id','=',$process)
-                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations')
+                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
                     ->get();
 
         return $issues;
@@ -157,8 +159,8 @@ class Issue extends Model
     {
         $issues1 = DB::table('issues')
                     ->where('subprocess_id','=',$subprocess)
-                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations')
-                    ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations')
+                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
+                    ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations','issues.comments')
                     ->get();
 
         //hallazgos relacionados al subproceso a través de una evaluación de control
@@ -168,8 +170,8 @@ class Issue extends Model
                     ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
                     ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
                     ->where('risk_subprocess.subprocess_id','=',$subprocess)
-                    ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations')
-                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations')
+                    ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations','issues.comments')
+                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
                     ->get();
 
         //hallazgos de auditoría basada en procesos
@@ -178,8 +180,8 @@ class Issue extends Model
                         ->join('processes','processes.id','=','audit_tests.process_id')
                         ->join('subprocesses','subprocesses.process_id','=','processes.id')
                         ->where('subprocesses.id','=',$subprocess)
-                        ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations')
-                        ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations')
+                        ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations','issues.comments')
+                        ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
                         ->get();
 
         /* ACT. 14-12-16: YA NO EXISTEN LAS PRUEBAS DE RIESGOS
@@ -200,8 +202,8 @@ class Issue extends Model
                         ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
                         ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
                         ->where('risk_subprocess.subprocess_id','=',$subprocess)
-                        ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations')
-                        ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations')
+                        ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations','issues.comments')
+                        ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
                         ->get();
 
         $issues = array_merge($issues1,$issues2,$issues3,$issues4);
@@ -215,7 +217,7 @@ class Issue extends Model
         $issues1 = DB::table('issues')
                     ->where('issues.control_id','=',$control)
                     ->where('issues.organization_id','=',$org)
-                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations')
+                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
                     ->get();
 
         //hallazgos de controles generados a través de evaluación de controles
@@ -223,7 +225,7 @@ class Issue extends Model
                     ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
                     ->where('control_evaluation.control_id','=',$control)
                     ->where('issues.organization_id','=',$org)
-                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations')
+                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
                     ->get();
 
         $issues = array_merge($issues1,$issues2);
@@ -236,7 +238,7 @@ class Issue extends Model
     {
         $issues = DB::table('issues')
                     ->where('audit_audit_plan_audit_program_id','=',$audit_audit_plan_audit_program)
-                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations')
+                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
                     ->get();
 
         return $issues;
@@ -248,7 +250,7 @@ class Issue extends Model
                     ->join('audit_audit_plan','audit_audit_plan.id','=','issues.audit_audit_plan_id')
                     ->join('audits','audits.id','=','audit_audit_plan.audit_id')
                     ->where('audits.id','=',$audit_id)
-                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations')
+                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
                     ->get();
 
         return $issues;
@@ -261,7 +263,7 @@ class Issue extends Model
 
         $issues = DB::table('issues')
                     ->where('issues.control_evaluation_id','=',$id)
-                    ->select('issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification')
+                    ->select('issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.comments')
                     ->get();
             $i = 0;
 
@@ -283,6 +285,7 @@ class Issue extends Model
                     'name' => $issue->name,
                     'description' => $issue->description,
                     'recommendations' => $issue->recommendations,
+                    'comments' => $issue->comments,
                     'classification' => $issue->classification,
                     'evidences' => $evidences,
                     'plan_description' => $plan->description,
@@ -297,6 +300,7 @@ class Issue extends Model
                     'name' => $issue->name,
                     'description' => $issue->description,
                     'recommendations' => $issue->recommendations,
+                    'comments' => $issue->comments,
                     'classification' => $issue->classification,
                     'evidences' => $evidences,
                     'plan_description' => NULL,
@@ -328,7 +332,7 @@ class Issue extends Model
         $issues1 = DB::table('issues')
                 ->where('issues.organization_id','=',$org)
                 ->whereNotNull('issues.audit_audit_plan_id')
-                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.updated_at','issues.kind']);
+                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
         foreach ($issues1 as $i)
         {
             $i->kind = 1;
@@ -346,7 +350,7 @@ class Issue extends Model
         $issues2 = DB::table('issues')
                 ->where('issues.organization_id','=',$org)
                 ->whereNotNull('issues.audit_audit_plan_audit_program_id')
-                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.updated_at','issues.kind']);
+                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
 
         foreach ($issues2 as $i)
         {
@@ -366,7 +370,7 @@ class Issue extends Model
         $issues3 = DB::table('issues')
                 ->where('issues.organization_id','=',$org)
                 ->whereNotNull('issues.audit_test_id')
-                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.updated_at','issues.kind']);
+                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
 
         foreach ($issues3 as $i)
         {
@@ -387,7 +391,7 @@ class Issue extends Model
                     ->whereNull('issues.control_evaluation_id')
                     ->whereNull('issues.objective_id')
                     ->whereNull('issues.subprocess_id')
-                    ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.updated_at','issues.kind']);
+                    ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
 
         foreach ($issues4 as $i)
         {
@@ -403,7 +407,7 @@ class Issue extends Model
         $issues5 = DB::table('issues')
                 ->where('issues.organization_id','=',$org)
                 ->whereNotNull('subprocess_id')
-                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.updated_at','issues.kind']);
+                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
 
         foreach ($issues5 as $i)
         {
@@ -420,7 +424,7 @@ class Issue extends Model
         $issues6 = DB::table('issues')
                 ->where('issues.organization_id','=',$org)
                 ->whereNotNull('issues.process_id')
-                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.updated_at','issues.kind']);
+                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
 
         foreach ($issues6 as $i)
         {
@@ -441,7 +445,7 @@ class Issue extends Model
                     ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
                     ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
                     ->where('issues.organization_id','=',$org)
-                    ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.updated_at','issues.kind']);
+                    ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
 
         foreach ($issues7 as $i)
         {
@@ -461,7 +465,7 @@ class Issue extends Model
                     ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
                     ->join('objective_risk','objective_risk.risk_id','=','organization_risk.risk_id')
                     ->where('issues.organization_id','=',$org)
-                    ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.updated_at','issues.kind']);
+                    ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
 
         foreach ($issues8 as $i)
         {
@@ -472,7 +476,7 @@ class Issue extends Model
         $issues9 = DB::table('issues')
                 ->where('issues.organization_id','=',$org)
                 ->whereNotNull('issues.control_evaluation_id')
-                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.updated_at','issues.kind']);
+                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
 
         foreach ($issues9 as $i)
         {
@@ -486,7 +490,7 @@ class Issue extends Model
                     })
                     ->where('issues.kind','=',3)
                     ->where('issues.organization_id','=',$org)
-                    ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.updated_at','issues.kind']);
+                    ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
 
         foreach ($issues10 as $i)
         {
@@ -497,7 +501,7 @@ class Issue extends Model
         $issues11 = DB::table('issues')
                     ->where('issues.kind','=',1)
                     ->where('issues.organization_id','=',$org)
-                    ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.updated_at','issues.kind']);
+                    ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
 
         foreach ($issues11 as $i)
         {
@@ -508,7 +512,7 @@ class Issue extends Model
         $issues12 = DB::table('issues')
                     ->where('issues.kind','=',2)
                     ->where('issues.organization_id','=',$org)
-                    ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification','issues.updated_at','issues.kind']);
+                    ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
 
         foreach ($issues12 as $i)
         {
@@ -525,7 +529,7 @@ class Issue extends Model
         return DB::table('issues')
                 ->join('audit_tests','audit_tests.id','=','issues.audit_test_id')
                 ->where('audit_tests.id','=',$audit_test_id)
-                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.classification_id as classification']);
+                ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification']);
     }
 
     public static function getRiskIssues($org_id)
@@ -545,8 +549,8 @@ class Issue extends Model
                 ->where('issues.kind','=',3)
                 //->where('issue_organization_risk.organization_risk_id','=',$org_risk_id)
                 ->where('organization_risk.organization_id','=',(int)$org_id)
-                ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations')
-                ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations')
+                ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
+                ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations','issues.comments')
                 ->get();
 
         return $issues;
@@ -570,7 +574,7 @@ class Issue extends Model
                     ->join('organizations','organizations.id','=','issues.organization_id')
                     ->where('issues.kind','=',2)
                     ->where('organizations.id','=',$org_id)
-                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','organizations.name as organization')
+                    ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments','organizations.name as organization')
                     ->get();
 
         return $issues;
@@ -581,7 +585,7 @@ class Issue extends Model
         return DB::table('issues')
             ->where('organization_id','=',$org)
             ->where('control_id','=',$ctrl)
-            ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations')
+            ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
             ->get();
     }
 }

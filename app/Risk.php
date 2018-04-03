@@ -19,6 +19,11 @@ class Risk extends Model
     {
         return DB::table('risks')->where('id', $id)->value('name');
     }
+
+    public static function description($id)
+    {
+        return DB::table('risks')->where('id', $id)->value('description');
+    }
     
     public function causes()
     {
@@ -497,5 +502,37 @@ class Risk extends Model
                 ->select('organization_risk.id as id','risks.name','risks.description')
                 ->groupBy('organization_risk.id','risks.name','risks.description')
                 ->get();
+    }
+
+    //ACT 26-03-18: Obtenemos org_risks asociadas a un riesgo genérico
+    public static function getOrgRisks($risk_id)
+    {
+        return DB::table('organization_risk')
+                ->where('risk_id','=',$risk_id)
+                ->select('id','organization_id','risk_id')
+                ->get();
+    }
+
+    public static function insertControlledRisk($risk,$result,$kind,$ano,$mes,$dia)
+    {
+        //ACT 05-07-17: Kind ya no se usa
+        DB::table('controlled_risk')
+            ->insert([
+                'organization_risk_id' => $risk,
+                'results' => $result,
+                'created_at' => date($ano.'-'.$mes.'-'.$dia.' H:i:s')
+            ]);
+    }
+
+    public static function insertResidualRisk($risk,$p,$i,$ano,$mes,$dia)
+    {
+        DB::table('residual_risk')
+            ->insert([
+                'organization_risk_id' => $risk,
+                'probability' => $p,
+                'impact' => $i,
+                'created_at' => date($ano.'-'.$mes.'-'.$dia.' H:i:s'),
+                'updated_at' => date($ano.'-'.$mes.'-'.$dia.' H:i:s')
+            ]);
     }
 }
