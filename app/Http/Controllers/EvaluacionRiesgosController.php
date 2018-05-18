@@ -105,32 +105,49 @@ class EvaluacionRiesgosController extends Controller
     }
     public function mensaje($id)
     {
-        if (Session::get('languaje') == 'en')
+        //ACT 06-04-18: Obtenemos URL desde base de datos
+        $conf = \Ermtool\Configuration::where('option_name','=','system_url')->first();
+
+        if (!empty($conf))
         {
-            //Mensaje predeterminado al enviar encuestas (inglés)
-            $mensaje = "Dear User.
+            if (Session::get('languaje') == 'en')
+            {
+                //Mensaje predeterminado al enviar encuestas (inglés)
+                $mensaje = "Dear User.
 
-                        We send to you the following poll for risk assessments. You must assign a value on probability and impact for each one of the risks associated to the survey. To answer this poll you have to access to the following link:
+                            We send to you the following poll for risk assessments. You must assign a value on probability and impact for each one of the risks associated to the survey. To answer this poll you have to access to the following link:
 
-                        http://www.grc-koandina.com/evaluacion_encuesta.{$id}
+                            http://".$conf->option_value."/evaluacion_encuesta.{$id}
 
-                        Best Regards,
-                        Administration.";
-                    
+                            Best Regards,
+                            Administration.";
+                        
+            }
+            else
+            {
+                //Mensaje predeterminado al enviar encuestas
+                $mensaje = "Estimado Usuario.
+
+                            Le enviamos la siguiente encuesta para la evaluación de riesgos. Ud deberá asignar un valor de probabilidad e impacto para cada uno de los riesgos asociados a la encuesta. Para responderla deberá acceder al siguiente link.
+
+                            http://".$conf->option_value."/evaluacion_encuesta.{$id}
+
+                            Saludos cordiales,
+                            Administrador.";
+            }
+            return $mensaje;
         }
         else
         {
-            //Mensaje predeterminado al enviar encuestas
-            $mensaje = "Estimado Usuario.
-
-                        Le enviamos la siguiente encuesta para la evaluación de riesgos. Ud deberá asignar un valor de probabilidad e impacto para cada uno de los riesgos asociados a la encuesta. Para responderla deberá acceder al siguiente link.
-
-                        http://www.grc-koandina.com/evaluacion_encuesta.{$id}
-
-                        Saludos cordiales,
-                        Administrador.";
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.configuration.create');
+            }
+            else
+            {
+                return view('configuration.create');
+            }
         }
-        return $mensaje;
     }
     /**
      * Display a listing of the resource.
@@ -610,16 +627,27 @@ class EvaluacionRiesgosController extends Controller
                 {
                     $tipos_impacto = \Ermtool\Eval_description::getImpactValues(2); //2 es inglés
                     $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(2);
-
+                    $org_name = \Ermtool\Organization::name($org_id);
                     return view('en.evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,
-                            'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id,'user_answers' => $user_answers]);
+                            'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id,'user_answers' => $user_answers,'org_name' => $org_name]);
                 }
                 else
                 {
-                    $tipos_impacto = \Ermtool\Eval_description::getImpactValues(1);
-                    $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
-                    $org_name = \Ermtool\Organization::name($org_id);
-                    return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id,'user_answers' => $user_answers,'org_name' => $org_name]);
+                    if (isset($org_id))
+                    {
+                        $tipos_impacto = \Ermtool\Eval_description::getImpactValues(1);
+                        $tipos_proba = \Ermtool\Eval_description::getProbabilityValues(1);
+                        $org_name = \Ermtool\Organization::name($org_id);
+                        return view('evaluacion.encuesta',['encuesta'=>$encuesta,'riesgos'=>$riesgos,'tipo'=>$tipo,'tipos_impacto' => $tipos_impacto,'tipos_proba' => $tipos_proba,'id'=>$id,'user_answers' => $user_answers,'org_name' => $org_name]);
+                    }
+                    else
+                    {
+                        $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+                        $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
+                        Session::flash('error','Debe seleccionar a lo menos un Riesgo');
+                        return view('evaluacion.evaluacion_manual',['organizations' => $organizations,'categories' => $categories]);
+                    }
+                    
                 }
             }
         }
@@ -1569,8 +1597,8 @@ class EvaluacionRiesgosController extends Controller
                 }
 
                 //ACT 11-01-18: Ahora realizamos la actualización para mapa de riesgos residuales
-                if (isset($_GET['kind2_1'])) //Mapa de % de Contribución de acciones mitigante
-                {
+                //if (isset($_GET['kind2_1'])) //Mapa de % de Contribución de acciones mitigante
+                //{
 
                     $cont_ctrl = array();
                     for ($i=1; $i <= 25; $i++)
@@ -1605,7 +1633,7 @@ class EvaluacionRiesgosController extends Controller
                             }
                         }
                     }
-                }
+                //}
 
                 if (isset($_GET['kind2_2'])) //Mapa de Riesgo Residual Manual
                 {
@@ -1625,8 +1653,8 @@ class EvaluacionRiesgosController extends Controller
                 }
 
                 //ACT 05-03-18: Vemos si es que hay algún otro tipo de mapa de calor (aparte de inherente)
-                if (isset($_GET['kind2_1']) || (isset($_GET['kind2_2'])) || (isset($_GET['kind2_3']))) 
-                {
+                //if (isset($_GET['kind2_1']) || (isset($_GET['kind2_2'])) || (isset($_GET['kind2_3']))) 
+                //{
                     if (Session::get('languaje') == 'en')
                     {
                         //retornamos la misma vista con datos (inglés)
@@ -1656,7 +1684,7 @@ class EvaluacionRiesgosController extends Controller
                                                 'cont2' => $cont,
                                                 'cont_ctrl' => $cont_ctrl]);
                     } 
-                }
+                /*}
                 else
                 {
                     if (Session::get('languaje') == 'en')
@@ -1680,7 +1708,7 @@ class EvaluacionRiesgosController extends Controller
                                                 'exposicion' => $exposicion,
                                                 'cont2' => $cont]);
                     } 
-                }
+                }*/
             }
         }
         catch (\Exception $e)

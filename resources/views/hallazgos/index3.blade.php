@@ -47,7 +47,7 @@
 
 @if (isset($issues))
 
-		<h4><b>Hallazgo de evaluación para la {{ $kind }} del control {{ $control_name }}</b></h4>
+		<h4><b>Hallazgo para la {{ $kind->name }} del control {{ $control_name }}</b></h4>
 
 
 		@foreach (Session::get('roles') as $role)

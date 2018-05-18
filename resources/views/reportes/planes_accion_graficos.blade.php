@@ -37,7 +37,7 @@
 			<div class="box-content box ui-draggable ui-droppable" style="top: 0px; left: 0px; opacity: 1; z-index: 1999;">
       		<p>En esta secci&oacute;n podr&aacute; ver distintos gr&aacute;ficos que permitan observar de mejor manera toda la informaci&oacute;n relacionada a los planes de acci&oacute;n ingresados en el sistema.</p>
 
-		@if(!isset($issues_om))
+		@if(!isset($issues_class))
 			{!!Form::open(['url'=>'graficos_planes_accion2.0.0','method'=>'GET','class'=>'form-horizontal'])!!}
 			<div class="form-group">
 				  <div class="row">
@@ -61,7 +61,7 @@
 	</div>
 </div>
 
-@if (isset($issues_om))
+@if (isset($issues_class))
 <!-- Gráfico de planes accion de controles, auditorias u otros -->
 <div class="col-xs-12 col-sm-6">
 	<div class="box">
@@ -238,7 +238,7 @@
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
 
-@if (isset($issues_om))
+@if (isset($issues_class))
 	@if ($cont_ctrl > 0 || $cont_audit > 0 || $cont_audit_plan > 0 || $cont_program > 0 || $cont_org > 0 || $cont_subprocess > 0 || $cont_process > 0 || $cont_process_ctrl > 0 || $cont_bussiness_ctrl > 0)
       google.charts.load("visualization", "1", {packages:["corechart"]});
       google.charts.setOnLoadCallback(chart1);
@@ -629,21 +629,26 @@
     	//$('#alternativo2').html('<b>Aun no se han ejecutado controles</b>');
     @endif
 
-    @if ($op_mejora > 0 || $deficiencia > 0 || $deb_significativa > 0)
+    @if (count($issues_class) > 0)
     //aqui otro gráfico
     	google.charts.setOnLoadCallback(chart2);
       function chart2() {
         var data = google.visualization.arrayToDataTable([
-          ['Clasificación', 'Cantidad'],
-          ['Oportunidad de mejora',     {{ $op_mejora }}],
-          ['Deficiencia',     {{ $deficiencia }}],
-          ['Debilidad significativa',     {{ $deb_significativa }}]
+        ['Clasificación', 'Cantidad',{ role: 'style' }],
+        <?php $last = end($classifications); $cont = 0; ?>
+        @foreach ($classifications as $c)
+        	<?php $cont+=1; ?>
+        	@if ($c == $last)
+        		['{{$c->name}}', {{ $c->cont }}, '{{ $c->color }}']
+        	@else
+        		['{{$c->name}}', {{ $c->cont }}, '{{ $c->color }}'],
+        	@endif
+        @endforeach
+          
         ]);
 
         var options = {
           title: 'Clasificación de hallazgos',
-          is3D: false,
-          colors: ['#74DF00', '#FF8000', '#FF0000']
         };
 
         var chart2 = new google.visualization.PieChart(document.getElementById('piechart2'));
@@ -657,120 +662,54 @@
 
       	function clickHandler2(e) {
       		var sel = chart2.getSelection();
-
+      		<?php $i = 0; ?>
       		if (sel.length > 0)
 			{
-	      		if (sel[0].row == 0) //op_mejora
-				{
-					var title = '<b>Oportunidades de mejora</b>';
+	      		@while ($i < $cont)
+                //alert(sel[0].row);
+                if (sel[0].row == {{ $i }})
+                {
+                  var title = '<b>{{ $classifications[$i]->name }}</b>';
 
-						var text ='<table class="table table-striped table-datatable"><thead><th>Nombre</th><th>Descripci&oacute;n</th><th>Recomendaciones</th><th>Actualizado</th><th>Plan de acción</th><th>Fecha final plan</th><th>Estado plan</th><th>Responsable plan</th></thead>';
+                  var text ='<table class="table table-striped table-datatable"><thead><th>Nombre</th><th>Descripci&oacute;n</th><th>Recomendaciones</th><th>Actualizado</th><th>Plan de acción</th><th>Fecha final plan</th><th>Estado plan</th><th>Responsable plan</th></thead>';
 
-						@foreach ($issues_om as $issue)
-								text += '<tr><td>{{$issue["name"]}}</td>';
-								text += '<td>{{$issue["description"]}}</td>';
-								text += '<td>{{$issue["recommendations"]}}</td>';
-								text += '<td>{{$issue["updated_at"]}}</td>';
+                  @foreach ($issues_class as $issue)
+                  	@if ($issue['classification'] == $classifications[$i]->id)
+	                    text += '<tr><td>{{$issue["name"]}}</td>';
+						text += '<td>{{$issue["description"]}}</td>';
+						text += '<td>{{$issue["recommendations"]}}</td>';
+						text += '<td>{{$issue["updated_at"]}}</td>';
 
-								@if ($issue['action_plan'] == NULL)
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-								@else
-									text += '<td>{{$issue["action_plan"]["description"]}}</td>';
-									text += '<td>{{$issue["action_plan"]["final_date"]}}</td>';
-									text += '<td>{{$issue["action_plan"]["status"]}}</td>';
-									text += '<td>{{$issue["action_plan"]["stakeholder"]}}</td>';
-								@endif
+						@if ($issue['action_plan'] == NULL)
+							text += '<td>No se ha agregado plan</td>';
+							text += '<td>No se ha agregado plan</td>';
+							text += '<td>No se ha agregado plan</td>';
+							text += '<td>No se ha agregado plan</td>';
+						@else
+							text += '<td>{{$issue["action_plan"]["description"]}}</td>';
+							text += '<td>{{$issue["action_plan"]["final_date"]}}</td>';
+							text += '<td>{{$issue["action_plan"]["status"]}}</td>';
+							text += '<td>{{$issue["action_plan"]["stakeholder"]}}</td>';
+						@endif
 
-								text += '</tr>';
-						@endforeach
-						text += '</table>'
-						text += '<a class="btn btn-success" href="genexcelgraficos.10.{{ $org }}">Exportar</a>'
-						swal({   
-							title: title,   
-							text: text,
-							customClass: 'swal-wide3',
+						text += '</tr>';
+					@endif
+                  @endforeach
+                  
 
-							html: true 
-						});
-				}
-	      		else if (sel[0].row == 1) //deficiencia
-				{
-					var title = '<b>Deficiencias</b>';
+                  text += '</table>'
+                  text += '<a class="btn btn-success" href="genexcelgraficos.10.{{ $org }}">Exportar</a>'
 
-						var text ='<table class="table table-striped table-datatable"><thead><th>Nombre</th><th>Descripci&oacute;n</th><th>Recomendaciones</th><th>Actualizado</th><th>Plan de acción</th><th>Fecha final plan</th><th>Estado plan</th><th>Responsable plan</th></thead>';
-
-						@foreach ($issues_def as $issue)
-								text += '<tr><td>{{$issue["name"]}}</td>';
-								text += '<td>{{$issue["description"]}}</td>';
-								text += '<td>{{$issue["recommendations"]}}</td>';
-								text += '<td>{{$issue["updated_at"]}}</td>';
-
-								@if ($issue['action_plan'] == NULL)
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-								@else
-									text += '<td>{{$issue["action_plan"]["description"]}}</td>';
-									text += '<td>{{$issue["action_plan"]["final_date"]}}</td>';
-									text += '<td>{{$issue["action_plan"]["status"]}}</td>';
-									text += '<td>{{$issue["action_plan"]["stakeholder"]}}</td>';
-								@endif
-
-								text += '</tr>';
-						@endforeach
-						text += '</table>'
-						text += '<a class="btn btn-success" href="genexcelgraficos.11.{{ $org }}">Exportar</a>'
-						swal({   
-							title: title,   
-							text: text,
-							customClass: 'swal-wide3',
-
-							html: true 
-						});
-				}
-				else if (sel[0].row == 2) //debilidad
-				{
-					var title = '<b>Debilidades significativas</b>';
-
-						var text ='<table class="table table-striped table-datatable"><thead><th>Nombre</th><th>Descripci&oacute;n</th><th>Recomendaciones</th><th>Actualizado</th><th>Plan de acción</th><th>Fecha final plan</th><th>Estado plan</th><th>Responsable plan</th></thead>';
-
-						@foreach ($issues_deb as $issue)
-								text += '<tr><td>{{$issue["name"]}}</td>';
-								text += '<td>{{$issue["description"]}}</td>';
-								text += '<td>{{$issue["recommendations"]}}</td>';
-								text += '<td>{{$issue["updated_at"]}}</td>';
-
-								@if ($issue['action_plan'] == NULL)
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-									text += '<td>No se ha agregado plan</td>';
-								@else
-									text += '<td>{{$issue["action_plan"]["description"]}}</td>';
-									text += '<td>{{$issue["action_plan"]["final_date"]}}</td>';
-									text += '<td>{{$issue["action_plan"]["status"]}}</td>';
-									text += '<td>{{$issue["action_plan"]["stakeholder"]}}</td>';
-								@endif
-
-								text += '</tr>';
-						@endforeach
-						text += '</table>'
-						text += '<a class="btn btn-success" href="genexcelgraficos.12.{{ $org }}">Exportar</a>'
-						swal({   
-							title: title,   
-							text: text,
-							customClass: 'swal-wide3',
-
-							html: true 
-						});
-				}
+                  swal({   
+	                    title: title,   
+	                    text: text,
+	                    customClass: 'swal-wide3',   
+	                    html: true 
+	                  });
+                }
+                <?php $i += 1; ?>
+            @endwhile
 			}
-
-
       		//console.log(sel);
 		}
 		

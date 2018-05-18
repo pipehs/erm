@@ -396,14 +396,15 @@ class Risk extends Model
             ->get();
     }
 
-    public static function insertOrganizationRisk($org_id,$risk_id,$stakeholder_id,$comments)
+    public static function insertOrganizationRisk($org_id,$risk_id,$stakeholder_id,$comments,$risk_response)
     {
         DB::table('organization_risk')
             ->insert([
                     'organization_id' => $org_id,
                     'risk_id' => $risk_id,
                     'stakeholder_id' => $stakeholder_id,
-                    'comments' => $comments
+                    'comments' => $comments,
+                    'risk_response_id' => $risk_response 
                 ]);
     }
 

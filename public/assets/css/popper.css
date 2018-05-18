@@ -1,0 +1,38 @@
+.popper {
+    border-radius: 100%;
+    padding: 2px 6px;
+    background: #4132bc;
+    color: white !important;
+    margin-left: 10px;
+}
+
+.popbox {
+    display: none;
+    position: absolute;
+    z-index: 99999;
+    width: 400px;
+    padding: 10px;
+    background: #4132bc;
+    color: white;
+    border: 1px solid #4D4F53;
+    border-radius:3px;
+    margin: 0px;
+    -webkit-box-shadow: 0px 0px 5px 0px rgba(164, 164, 164, 1);
+    box-shadow: 0px 0px 5px 0px rgba(164, 164, 164, 1);
+}
+
+.popbox p{
+	margin:0;
+}
+
+.popbox h2
+{
+    background-color: #070664;
+    font-weight: bold;
+    color:  #E3E5DD;
+    font-size: 14px;
+    display: block;
+    width: 100%;
+    margin: -10px 0px 8px -10px;
+    padding: 5px 10px;
+}

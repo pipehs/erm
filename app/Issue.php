@@ -10,7 +10,7 @@ use Carbon;
 class Issue extends Model
 {
     
-    protected $fillable = ['name','description','recommendations','evidence','classification_id','audit_test_id','audit_audit_plan_id','control_evaluation_id','organization_id','comments'];
+    protected $fillable = ['name','description','recommendations','evidence','classification_id','audit_test_id','audit_audit_plan_id','control_evaluation_id','organization_id','comments','economic_value','kind'];
 
 
    	//obtiene datos del origen de un control

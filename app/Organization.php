@@ -229,7 +229,8 @@ class Organization extends Model
     public static function getOrgByControlEvaluation($id)
     {
         $org = DB::table('organizations')
-            ->join('control_evaluation','control_evaluation.organization_id','=','organizations.id')
+            ->join('control_organization','control_organization.organization_id','=','organizations.id')
+            ->join('control_evaluation','control_evaluation.control_organization_id','=','control_organization.id')
             ->where('control_evaluation.id','=',$id)
             ->select('organizations.id')
             ->first();
@@ -248,5 +249,24 @@ class Organization extends Model
         }
         
         return $org;
+    }
+
+    public static function getOrgByActionPlan($action_plan_id)
+    {
+        return DB::table('action_plans')
+            ->join('issues','issues.id','=','action_plans.issue_id')
+            ->join('organizations','organizations.id','=','issues.organization_id')
+            ->where('action_plans.id','=',$action_plan_id)
+            ->select('organizations.id','organizations.name','organizations.description')
+            ->first();
+    }
+
+    public static function getOrganizationByCO($ctrl_org_id)
+    {
+        return DB::table('organizations')
+            ->join('control_organization','control_organization.organization_id','=','organizations.id')
+            ->where('control_organization.id','=',$ctrl_org_id)
+            ->select('organizations.id','organizations.name','organizations.description')
+            ->first();
     }
 }

@@ -44,6 +44,7 @@
  	{!!Html::style('assets/css/semaforo.css')!!}
  	{!!Html::style('assets/css/upload.css')!!}
  	{!!Html::style('assets/css/fileinput.css')!!}
+ 	{!!Html::style('assets/css/popper.css')!!}
 
  	{!!Html::style('assets/bootstrap-toggle-master/css/bootstrap2-toggle.min.css')!!}
 

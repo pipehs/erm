@@ -92,22 +92,27 @@
 
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
-				<li>
-					<a href="logs" class="{{ activeMenu('logs') }}">
-						<i class="fa fa-th-list"></i>
-						<span class="hidden-xs">Registro actividades</span>
-					</a>
-				</li>
-			<?php //break; //si es admin terminamos ciclo para no repetir menú ?>
+				@if (isset(Auth::user()->superadmin) && Auth::user()->superadmin == 1)
+					<li>
+						<a href="logs" class="{{ activeMenu('logs') }}">
+							<i class="fa fa-th-list"></i>
+							<span class="hidden-xs">Registro actividades</span>
+						</a>
+					</li>
+					<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+				@endif
+			
 			@endif
 		@endforeach
 
-		<li>
-			<a href="importador" class="{{ activeMenu('importador') }}">
-				<i class="fa fa-wrench"></i>
-				<span class="hidden-xs">Importador Excel</span>
-			</a>
-		</li>
+		@if (isset(Auth::user()->superadmin) && Auth::user()->superadmin == 1)
+			<li>
+				<a href="importador" class="{{ activeMenu('importador') }}">
+					<i class="fa fa-wrench"></i>
+					<span class="hidden-xs">Importador Excel</span>
+				</a>
+			</li>
+		@endif
 
 	@endif
 @else

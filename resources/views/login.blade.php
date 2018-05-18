@@ -13,7 +13,13 @@
 						<!--<img src="assets/img/logo_testing.PNG" title="Testing" width="200px" height="120px"></img><br>-->
 						<!--<img src="assets/img/logo_parque_arauco2.jpg" title="Parque Arauco" width="230px" height="60px"></img><br>-->
 						<img src="assets/img/logoCompleto.PNG" title="Bussiness Governance and Risk Compliance" width="320px" height="120px"></img>
-						<h3 class="page-header"><style="font-family: arial; color: #2E2E2E;"> Business, Governance, Risk and Compliance</h3>
+						<h3 class="page-header"> Business, Governance, Risk and Compliance</h3>
+
+						@if (isset($version) && !empty($version))
+							<h6 class="page-header" style="color: darkblue;">
+								<b>Versión {{ $version->v }}</b>
+							</h6>
+						@endif
 					</div>
 					
 				    {!! Form::open(['route' => 'log.store', 'class' => 'form', 'method' => 'POST']) !!}

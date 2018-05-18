@@ -105,19 +105,19 @@
 									@if ($archivo[1] == 'pdf')
 										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
-									@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
+									@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx' || $archivo[1] == 'DOC' || $archivo[1] == 'DOCX')
 										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
-									@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
+									@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx' || $archivo[1] == 'XLS' || $archivo[1] == 'XLSX')
 										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
-									@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
+									@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx' || $archivo[1] == 'PPT' || $archivo[1] == 'PPTX')
 										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
-									@elseif ($archivo[1] == 'png')
+									@elseif ($archivo[1] == 'png' || $archivo[1] == 'PNG')
 										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
-									@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
+									@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg' || $archivo[1] == 'JPG' || $archivo[1] == 'JPEG')
 										<a href="downloadfile.{{$kind3}}.{{$id}}.{{$filename}}.{{$ext}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
 										{{ $filename }}
 									@else

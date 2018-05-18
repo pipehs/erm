@@ -18,6 +18,11 @@ Route::get('/',[
 	'as' => '/', 'uses' => 'HomeController@home'
 ]);
 
+//Ruta para redirigir a vista de errores (de esta manera no se envía correo 2 veces)
+Route::get('errors.query', function(){
+	return View::make('errors.query');
+});
+
 //Route::get('auth/login', 'Auth\AuthController@getLogin');
 //Route::post('auth/login', ['as' =>'auth/login', 'uses' => 'Auth\AuthController@postLogin']);
 //Route::get('auth/logout', ['as' => 'auth/logout', 'uses' => 'Auth\AuthController@getLogout']);
@@ -32,7 +37,7 @@ Route::get('home',[
 ]
 );
 
-// ----RUTAS PARA GESTIONAR CONTROLLED RISK CRITERIA ---- //
+// ---- RUTAS PARA GESTIONAR CONTROLLED RISK CRITERIA ---- //
 Route::get('controlled_risk_criteria', [
 	'as' => 'controlled_risk_criteria', 'uses' => 'ControlesController@controlledRiskCriteria'
 	]);
@@ -41,7 +46,14 @@ Route::post('criteria.update', [
     'as' => 'criteria.update', 'uses' => 'ControlesController@updateControlledRiskCriteria'
 ]);
 
-// ----RUTA PARA CREAR USUARIO---- //
+// ---- RUTAS DE CONFIGURACIÓN ---- //
+Route::post('configuration.store', [
+	'as' => 'configuration.store', 'uses' => 'ConfigurationController@store'
+	]);
+
+// ---- FIN RUTAS DE CONFIGURACIÓN ---- //
+
+// ---- RUTA PARA CREAR USUARIO ---- //
 Route::get('usuario.create', [
 	'as' => 'usuario.create', 'uses' => 'LogController@createUser'
 	]);
@@ -1158,7 +1170,10 @@ Route::get('get_causes', [
 Route::get('get_effects', [
 	'as' => 'get_effects', 'uses' => 'RiesgosController@getEffects']);
 
-
+//ACT 26-04-18: ruta para obtener respuestas al riesgo
+Route::get('get_risk_responses', function() {
+	return json_encode(\Ermtool\Risk_response::all(['id','name']));
+});
 //---- Rutas para mantenedor de Hallazgos ----//
 
 Route::get('hallazgos', [
@@ -1300,6 +1315,22 @@ Route::put('action_plan.update.{id}', [
 Route::get('get_issues.{kind}.{org}', [
 	'as' => 'get_issues', 'uses' => 'PlanesAccionController@getIssues']);
 
+//ACT 09-04-18: Alerta para planes de acción que están vencidos o próximos a vencer
+Route::get('alert_action_plans', function(){
+   return View::make('planes_accion.index_alerts');
+});
+
+Route::get('alert_action_plans2', [
+	'as' => 'alert_action_plans2', 'uses' => 'PlanesAccionController@indexAlerts']);
+
+Route::post('send_alert_pa', [
+	'as' => 'send_alert_pa', 'uses' => 'PlanesAccionController@sendAlerts']);
+
+Route::get('info_alerts.{id}', [
+	'as' => 'info_alerts', 'uses' => 'PlanesAccionController@getAlertsInfo']);
+
+//--- FIN rutas de planes de acción ---//
+
 Route::get('documentos', [
 	'as' => 'documentos', 'uses' => 'DocumentosController@index']);
 
@@ -1387,7 +1418,23 @@ Route::post('importar_excel', [
 ]);
 
 
-//19-03-18: Sistema (Canal) de Denuncias
+//19-03-18: ----- Sistema (Canal) de Denuncias ----- //
+Route::get('bgrc_denuncias', [
+	'as' => 'bgrc_denuncias', 'uses' => 'DenunciasController@index'
+	]);
+
+Route::get('cc_questions', [
+	'as' => 'cc_questions', 'uses' => 'DenunciasController@Questions'
+	]);
+
+Route::get('store_cc_questions1', [
+	'as' => 'store_cc_questions1', 'uses' => 'DenunciasController@storeCcQuestions1'
+	]);
+
+Route::post('store_cc_questions2', [
+	'as' => 'store_cc_questions2', 'uses' => 'DenunciasController@storeCcQuestions2'
+	]);
+
 Route::get('registro_denuncia', function(){
    return View::make('denuncias.registro');
 });

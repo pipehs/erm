@@ -41,16 +41,9 @@
 							{!!Form::text('name',null,['id'=>'nombre','class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
-
 					
-					<div class="form-group">
-						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-8">
-							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
-						</div>
-					</div>
+				@if (Session::get('org') == 'Parque Arauco' || Session::get('org') == 'Parque Arauco (testing)')
 					
-					<!--
 					<div class="form-group">
 						{!!Form::label('Establecimiento',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
@@ -71,8 +64,14 @@
 							{!!Form::textarea('supervision',null,['id'=>'supervision','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
-					-->
-					
+				@else
+					<div class="form-group">
+						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-8">
+							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'5','cols'=>'4','required'=>'true'])!!}
+						</div>
+					</div>
+				@endif
 					<div class="form-group">
 						{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
@@ -123,12 +122,21 @@
 						</div>
 					</div>
 
+				@if (isset($control_org))
+					<div class="form-group">
+						{!!Form::label('Porcentaje de contribución',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-8">
+							{!!Form::select('porcentaje_cont',['0'=>'0% - Deficiente','50'=>'50% - Media','85'=>'85% - Buena','95'=>'95% - Óptima'],$control_org->cont_percentage,['placeholder'=>'- Seleccione -','required' => 'true'])!!}
+						</div>
+					</div>
+				@else
 					<div class="form-group">
 						{!!Form::label('Porcentaje de contribución',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::select('porcentaje_cont',['0'=>'0% - Deficiente','50'=>'50% - Media','85'=>'85% - Buena','95'=>'95% - Óptima'],null,['placeholder'=>'- Seleccione -','required' => 'true'])!!}
 						</div>
 					</div>
+				@endif
 
 					<div class="form-group">
 						{!!Form::label('Control clave',null,['class'=>'col-sm-4 control-label'])!!}
@@ -140,14 +148,14 @@
 					<div class="form-group">
 						<label for="objective" class="col-sm-4 control-label">Objetivo de control</label>
 						<div class="col-sm-8">
-							{!!Form::textarea('objective',null,['id'=>'objective','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
+							{!!Form::textarea('objective',null,['id'=>'objective','class'=>'form-control','rows'=>'5','cols'=>'4'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						<label for="objective" class="col-sm-4 control-label">Plan de pruebas</label>
+						<label for="test_plan" class="col-sm-4 control-label">Plan de pruebas</label>
 						<div class="col-sm-8">
-							{!!Form::textarea('test_plan',null,['id'=>'test_plan','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
+							{!!Form::textarea('test_plan',null,['id'=>'test_plan','class'=>'form-control','rows'=>'5','cols'=>'4'])!!}
 						</div>
 					</div>
 
@@ -189,14 +197,37 @@
 					<div id="new_fs">
 					</div>
 
+				@if (isset($control_org))
 					<div class="form-group">
 						{!!Form::label('Evidencia',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::text('evidence',null,['id'=>'nombre','class'=>'form-control'])!!}
+							{!!Form::textarea('evidence',$control_org->evidence,['id'=>'evidence','class'=>'form-control','rows'=>'5','cols'=>'4'])!!}
 						</div>
 					</div>
 
-					{!!Form::hidden('org_id',$org)!!}
+					<div class="form-group">
+						<label for="comments" class="col-sm-4 control-label">Comentarios del control</label>
+						<div class="col-sm-8">
+							{!!Form::textarea('comments',$control_org->comments,['id'=>'comments','class'=>'form-control','rows'=>'5','cols'=>'4'])!!}
+						</div>
+					</div>
+				@else
+					<div class="form-group">
+						{!!Form::label('Evidencia',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-8">
+							{!!Form::textarea('evidence',null,['id'=>'evidence','class'=>'form-control','rows'=>'5','cols'=>'4'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="comments" class="col-sm-4 control-label">Comentarios del control</label>
+						<div class="col-sm-8">
+							{!!Form::textarea('comments',null,['id'=>'comments','class'=>'form-control','rows'=>'5','cols'=>'4'])!!}
+						</div>
+					</div>
+				@endif
+
+				{!!Form::hidden('org_id',$org)!!}
 
 					<div class="form-group">
 						<label for="file" class="col-sm-4 control-label">Cargar documentos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>

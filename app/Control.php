@@ -59,24 +59,27 @@ class Control extends Model
 
             if ($org_risk_id == NULL)
             {
+                //ACT 19-04-18: Se obtendrán datos de control_organization
                 $ctrls = DB::table('controls')
-                    ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
-                    ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
-                    ->where('organization_risk.organization_id','=',$org)
+                    ->join('control_organization','control_organization.control_id','=','controls.id')
+                    //->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+                    //->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                    ->where('control_organization.organization_id','=',$org)
                     ->where('controls.type2','=',1)
-                    ->select('controls.*','control_organization_risk.stakeholder_id')
+                    ->select('controls.*','control_organization.stakeholder_id','control_organization.evidence as control_evidence','control_organization.cont_percentage as porcentaje')
                     ->distinct('controls.id')
                     ->get();
             }
             else
             {
                 $ctrls = DB::table('controls')
+                    ->join('control_organization','control_organization.control_id','=','controls.id')
                     ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
                     ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
                     ->where('organization_risk.organization_id','=',$org)
                     ->where('organization_risk.risk_id','=',$org_risk_id)
                     ->where('controls.type2','=',1)
-                    ->select('controls.*','control_organization_risk.stakeholder_id')
+                    ->select('controls.*','control_organization.stakeholder_id','control_organization.evidence as control_evidence','control_organization.cont_percentage as porcentaje')
                     ->distinct('controls.id')
                     ->get();
             }
@@ -92,12 +95,12 @@ class Control extends Model
                     'expiration_date' => $ctrl->expiration_date,
                     'type' => $ctrl->type,
                     'type2' => $ctrl->type2,
-                    'evidence' => $ctrl->evidence,
+                    'evidence' => $ctrl->control_evidence,
                     'periodicity' => $ctrl->periodicity,
                     'purpose' => $ctrl->purpose,
                     'expected_cost' => $ctrl->expected_cost,
                     'stakeholder_id' => $ctrl->stakeholder_id,
-                    'porcentaje_cont' => $ctrl->porcentaje_cont,
+                    'porcentaje_cont' => $ctrl->porcentaje,
                     'key_control' => $ctrl->key_control,
                     'objective' => $ctrl->objective,
                     'establishment' => $ctrl->establishment,
@@ -148,24 +151,27 @@ class Control extends Model
 
             if ($org_risk_id == NULL)
             {
+                //ACT 19-04-18: Se obtendrán datos de control_organization
                 $ctrls = DB::table('controls')
-                    ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
-                    ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
-                    ->where('organization_risk.organization_id','=',$org)
+                    ->join('control_organization','control_organization.control_id','=','controls.id')
+                    //->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+                    //->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                    ->where('control_organization.organization_id','=',$org)
                     ->where('controls.type2','=',0)
-                    ->select('controls.*','control_organization_risk.stakeholder_id')
+                    ->select('controls.*','control_organization.stakeholder_id','control_organization.evidence as control_evidence','control_organization.cont_percentage as porcentaje')
                     ->distinct('controls.id')
                     ->get();
             }
             else
             {
                 $ctrls = DB::table('controls')
+                    ->join('control_organization','control_organization.control_id','=','controls.id')
                     ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
                     ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
                     ->where('organization_risk.organization_id','=',$org)
                     ->where('organization_risk.id','=',$org_risk_id)
                     ->where('controls.type2','=',0)
-                    ->select('controls.*','control_organization_risk.stakeholder_id')
+                    ->select('controls.*','control_organization.stakeholder_id','control_organization.evidence as control_evidence','control_organization.cont_percentage as porcentaje')
                     ->distinct('controls.id')
                     ->get();
             }
@@ -183,12 +189,12 @@ class Control extends Model
                     'expiration_date' => $ctrl->expiration_date,
                     'type' => $ctrl->type,
                     'type2' => $ctrl->type2,
-                    'evidence' => $ctrl->evidence,
+                    'evidence' => $ctrl->control_evidence,
                     'periodicity' => $ctrl->periodicity,
                     'purpose' => $ctrl->purpose,
                     'expected_cost' => $ctrl->expected_cost,
                     'stakeholder_id' => $ctrl->stakeholder_id,
-                    'porcentaje_cont' => $ctrl->porcentaje_cont,
+                    'porcentaje_cont' => $ctrl->porcentaje,
                     'key_control' => $ctrl->key_control,
                     'objective' => $ctrl->objective,
                     'establishment' => $ctrl->establishment,
@@ -402,6 +408,7 @@ class Control extends Model
     public static function getControlsFromSubprocess($org, $subprocess)
     {
         //ACT 03-04-17: Primero seleccionamos riesgos asociados al subproceso y a la org
+        /*
         $risks = DB::table('risk_subprocess')
                     ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                     ->where('organization_subprocess.organization_id','=',$org)
@@ -415,13 +422,28 @@ class Control extends Model
             $controls[$i] = DB::table('controls')
                         ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
                         ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                        ->join('organization_subprocess','organization_subprocess.organization_id','=','organization_risk.organization_id')
                         ->where('organization_risk.organization_id','=',$org)
                         ->where('organization_risk.risk_id','=',$risk->id)
+                        ->where('organization_subprocess.subprocess_id','=',$subprocess)
                         ->select('controls.id','controls.name','controls.description')
                         ->groupBy('controls.id','controls.name','controls.description')
                         ->get();
             $i += 1;
-        }
+        }*/
+
+        //ACT 19-04-18: En una sola consulta
+        $controls = DB::table('controls')
+            ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+            ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
+            ->where('organization_risk.organization_id','=',$org)
+            ->where('risk_subprocess.subprocess_id','=',$subprocess)
+            ->select('controls.id','controls.name','controls.description')
+            ->groupBy('controls.id','controls.name','controls.description')
+            ->get();
+
+        //$controls = array_unique($controls,SORT_REGULAR);
         return $controls;
     }
 
@@ -441,11 +463,10 @@ class Control extends Model
 
     public static function getEvaluatedControls($org)
     {
-        $controls = DB::table('control_eval_risk_temp')
-                ->join('control_organization_risk','control_organization_risk.control_id','=','control_eval_risk_temp.control_id')
-                ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
-                ->where('organization_risk.organization_id','=',$org)
-                ->select('control_eval_risk_temp.control_id as id')
+        $controls = DB::table('control_eval_temp2')
+                ->join('control_organization','control_organization.id','=','control_eval_temp2.control_organization_id')
+                ->where('control_organization.organization_id','=',$org)
+                ->select('control_eval_temp2.control_organization_id as id','control_organization.control_id')
                 ->distinct()
                 ->get();
 
@@ -456,15 +477,17 @@ class Control extends Model
     public static function getControlsFromRisk($org,$risk)
     {
         //ACT 03-01-17: Controles para todas las organizaciones
+        //ACT 18-04-18: Obtenemos algunos datos desde control_organization
         if ($org != NULL)
         {
             return DB::table('controls')
+                    ->join('control_organization','control_organization.control_id','=','controls.id')
                     ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
                     ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
                     ->where('organization_risk.risk_id','=',$risk)
                     ->where('organization_risk.organization_id','=',$org)
-                    ->select('controls.id','controls.name','controls.description','controls.porcentaje_cont','controls.periodicity','controls.purpose','controls.expected_cost','controls.evidence','controls.type','control_organization_risk.comments')
-                    ->groupBy('controls.id','controls.name','controls.description','controls.porcentaje_cont','controls.periodicity','controls.purpose','controls.expected_cost','controls.evidence','controls.type','control_organization_risk.comments')
+                    ->select('controls.id','controls.name','controls.description','control_organization.cont_percentage','controls.periodicity','controls.purpose','controls.expected_cost','control_organization.evidence','controls.type','control_organization.comments')
+                    ->groupBy('controls.id','controls.name','controls.description','control_organization.cont_percentage','controls.periodicity','controls.purpose','controls.expected_cost','control_organization.evidence','controls.type','control_organization.comments')
                     ->get();
         }
         else
@@ -489,6 +512,16 @@ class Control extends Model
                     ->get();
     }
 
+    //ACT 18-04-18: Obtenemos info de asociada en control_organization
+    public static function getControlOrganization($control_id,$org_id)
+    {
+        return DB::table('control_organization')
+                    ->where('control_id','=',$control_id)
+                    ->where('organization_id','=',$org_id)
+                    ->select('id','evidence','stakeholder_id','cont_percentage','comments')
+                    ->first();
+    }
+
     public static function listControls($org,$type)
     {
         return DB::table('controls')
@@ -502,10 +535,9 @@ class Control extends Model
     public static function getControls($org)
     {
         return DB::table('controls')
-                ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
-                ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
-                ->where('organization_risk.organization_id','=',(int)$org)
-                ->select('controls.*','control_organization_risk.stakeholder_id')
+                ->join('control_organization','control_organization.control_id','=','controls.id')
+                ->where('control_organization.organization_id','=',(int)$org)
+                ->select('controls.*','control_organization.stakeholder_id','control_organization.evidence as control_evidence','control_organization.cont_percentage','control_organization.comments as control_comments')
                 ->distinct()
                 ->get();
     }
@@ -540,21 +572,33 @@ class Control extends Model
     //Obtiene responsable según control y riesgo (id)
     public static function getResponsable($control_id,$risk_id)
     {
-        return DB::table('control_organization_risk')
-                ->where('control_id','=',$control_id)
-                ->where('organization_risk_id','=',$risk_id)
-                ->select('stakeholder_id as id')
+        return DB::table('control_organization')
+                ->join('organization_risk','organization_risk.organization_id','=','control_organization.organization_id')
+                ->where('organization_risk.id','=',$risk_id)
+                ->where('control_organization.control_id','=',$control_id)
+                ->select('control_organization.stakeholder_id as id')
                 ->first();
     }
 
     //Obtiene responsable según control y organización (id)
     public static function getStakeholder($control_id,$org_id)
     {
-        return DB::table('control_organization_risk')
-                ->join('organization_risk','control_organization_risk.organization_risk_id','=','organization_risk.id')
+        return DB::table('control_organization')
                 ->where('control_id','=',$control_id)
-                ->where('organization_risk.organization_id','=',$org_id)
-                ->select('control_organization_risk.stakeholder_id as id')
+                ->where('organization_id','=',$org_id)
+                ->select('control_organization.stakeholder_id as id')
                 ->first();
+    }
+
+    //Obtiene nombre de control según control_organization
+    public static function nameByCO($ctrl_org_id)
+    {
+        $ctrl = DB::table('controls')
+                ->join('control_organization','control_organization.control_id','=','controls.id')
+                ->where('control_organization.id','=',$ctrl_org_id)
+                ->select('controls.name')
+                ->first();
+
+        return $ctrl->name;
     }
 }

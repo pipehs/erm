@@ -1178,6 +1178,10 @@ class ExcelController extends Controller
         {
             return view('login');
         }
+        else if (!isset(Auth::user()->superadmin) || Auth::user()->superadmin != 1)
+        {
+            return Redirect::to('home');
+        }
         else
         {
             return view('importador');
@@ -1192,6 +1196,10 @@ class ExcelController extends Controller
         if (Auth::guest())
         {
             return view('login');
+        }
+        else if (!isset(Auth::user()->superadmin) || Auth::user()->superadmin != 1)
+        {
+            return Redirect::to('home');
         }
         else
         {
@@ -4381,9 +4389,17 @@ class ExcelController extends Controller
                                                 ]);
                                             }
                                         }
+                                    }    
+                                }
+                            }
+                            else if ($_POST['kind'] == 18) //Auditorías (genérico)
+                            {
+                                if ($row->getTitle() == 'Planes de Auditoría')
+                                {
+                                    foreach ($row as $row)
+                                    {
+                                        print_r($row);
                                     }
-
-                                    
                                 }
                                 
                             }
@@ -4402,7 +4418,7 @@ class ExcelController extends Controller
                 }
             });
 
-            return Redirect::to('importador');
+            //return Redirect::to('importador');
         }
     }
 

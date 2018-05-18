@@ -778,7 +778,14 @@ class StakeholdersController extends Controller
 
                                             if (empty($rev))
                                             {
-                                                $rev = DB::table('controls')
+                                                //ACT 04-05-18: Seteamos null en control y control_organization_risk
+                                                DB::table('control_organization_risk')
+                                                    ->where('stakeholder_id','=',$GLOBALS['id1'])
+                                                    ->update([
+                                                        'stakeholder_id' => NULL
+                                                    ]);
+
+                                                $rev = DB::table('control_organization')
                                                     ->where('stakeholder_id','=',$GLOBALS['id1'])
                                                     ->select('id')
                                                     ->get();

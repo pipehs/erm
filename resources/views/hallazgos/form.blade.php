@@ -56,12 +56,26 @@
 						<label for="audit_test_id" class="col-sm-4 control-label">Seleccione Riesgo(s) involucrado(s)</label>
 						<div class="col-sm-4">
 							<select name="organization_risk_id[]" multiple="true">
-								@foreach ($risks as $risk)
+							@foreach ($risks as $risk)
+
+								<?php $i = 0; //contador de causas 
+									$cont = 0; //contador para ver si una causa está seleccionada ?>
+								@while (isset($risks_selected[$i]))
+									@if ($risks_selected[$i] == $risks->id)
+										<option value="{{ $risk->id }}" selected>{{ $risk->name }} - {{ $risk->description }}</option>
+										<?php $cont += 1; ?>
+									@endif
+									<?php $i += 1; ?>
+								@endwhile
+
+								@if ($cont == 0)
 									<option value="{{ $risk->id }}">{{ $risk->name }} - {{ $risk->description }}</option>
-								@endforeach
+								@endif
+
+							@endforeach
 							</select>
 						</div>
-					</div>
+					 </div>
 				@endif
 					<div class="form-group">
 						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
@@ -98,6 +112,13 @@
 					</div>
 
 					<div class="form-group">
+						{!!Form::label('Valor económico',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::number('economic_value',null,['id'=>'economic_value','class'=>'form-control'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
 						{!!Form::label('Comentarios',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							{!!Form::textarea('comments',null,['id'=>'comments','class'=>'form-control','rows'=>'6','cols'=>'4'])!!}
@@ -122,136 +143,20 @@
 					{!!Form::hidden('evaluation_id',$evaluation_id)!!}
 				@endif
 
-					<div class="form-group">
-						<label for="file" class="col-sm-4 control-label">Para mayor detalle del hallazgo, puede agregar archivos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>
-						<div class="col-sm-4">
-							<input id="file-1" type="file" class="file" name="evidence_doc[]" multiple=true data-preview-file-type="any">
-						</div>
+				<div class="form-group">
+					<label for="file" class="col-sm-4 control-label">Para mayor detalle del hallazgo, puede agregar archivos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>
+					<div class="col-sm-4">
+						<input id="file-1" type="file" class="file" name="evidence_doc[]" multiple=true data-preview-file-type="any">
+					</div>
 						
-					</div>
+				</div>
+	
 
-				@if (!isset($action_plan) || $action_plan == NULL)
-					<center><b><font color="blue">Opcionalmente puede agregar plan de acci&oacute;n</font></b></center><hr>
-
-					<div class="form-group">
-						{!!Form::label('Descripci&oacute;n del plan',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							{!!Form::textarea('description_plan',null,['id'=>'descripcion_plan','class'=>'form-control','rows'=>'6','cols'=>'4'])!!}
-						</div>
-					</div>
-
-					<div class="form-group">
-						{!!Form::label('Seleccione responsable',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							{!!Form::select('stakeholder_id',$stakeholders,
-							null,['placeholder'=>'- Seleccione -'])!!}
-						</div>
-					</div>
-
-					<div class="form-group">
-						{!!Form::label('Fecha límite del plan',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							{!!Form::date('final_date',
-							null,['id'=>'final_date','class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)'])!!}
-						</div>
-					</div>
-
-					<div class="form-group">
-						{!!Form::label('Porcentaje de avance del plan',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							{!!Form::select('percentage',['0'=>'0 %','10'=>'10 %','20'=>'20 %','30'=>'30 %','40'=>'40 %','50'=>'50 %','60'=>'60 %','70'=>'70 %', '80' => '80 %', '90' => '90 %', '100' => '100 %'],null,['placeholder'=>'- Seleccione -','id' => 'percentage'])!!}
-						</div>
-					</div>
-
-					<div class="form-group">
-						{!!Form::label('Comentarios de avance',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							{!!Form::textarea('progress_comments',null,['id'=>'progress_comments','class'=>'form-control','rows'=>'6','cols'=>'4'])!!}
-						</div>
-					</div>
-
-				@else
-					<center><b><font color="blue">Opcionalmente puede agregar (o editar) plan de acci&oacute;n</font></b></center><hr>
-
-					<div class="form-group">
-						{!!Form::label('Descripci&oacute;n del plan',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							<textarea rows="6" cols="4" name="description_plan" class="form-control" id="description_plan">{{ $action_plan->description }}</textarea>
-						</div>
-					</div>
-
-					<div class="form-group">
-						{!!Form::label('Seleccione responsable',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							{!!Form::select('stakeholder_id',$stakeholders,
-							null,['placeholder'=>'- Seleccione -','id'=>'stakeholder_id'])!!}
-						</div>
-					</div>
-
-					<div class="form-group">
-						{!!Form::label('Fecha límite del plan',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-4">
-							{!!Form::date('final_date',$action_plan->final_date,['id'=>'final_date','class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)'])!!}
-						</div>
-					</div>
-
-					<div class="form-group">
-						<label for="status" class="control-label col-sm-4">Estado del plan</label>
-						<div class="col-sm-4">
-							<input type="checkbox" name="status" id="status" data-toggle="toggle" data-on="Cerrado" data-off="Abierto" data-width="100" data-offstyle="primary" data-onstyle="danger">
-						</div>
-					</div>
-
-					@if (!empty($per) && $per != NULL)
-						<div class="form-group">
-							{!!Form::label('Porcentaje de avance del plan',null,['class'=>'col-sm-4 control-label'])!!}
-							<div class="col-sm-4">
-								{!!Form::select('percentage',['0'=>'0 %','10'=>'10 %','20'=>'20 %','30'=>'30 %','40'=>'40 %','50'=>'50 %','60'=>'60 %','70'=>'70 %', '80' => '80 %', '90' => '90 %', '100' => '100 %'],$per->percentage,['placeholder'=>'- Seleccione -','id' => 'percentage'])!!}
-							</div>
-						</div>
-
-						<div class="form-group">
-							{!!Form::label('Comentarios de avance',null,['class'=>'col-sm-4 control-label'])!!}
-							<div class="col-sm-4">
-								{!!Form::textarea('progress_comments',$per->comments,['id'=>'progress_comments','class'=>'form-control','rows'=>'6','cols'=>'4'])!!}
-							</div>
-						</div>
-					@else
-						<div class="form-group">
-							{!!Form::label('Porcentaje de avance del plan',null,['class'=>'col-sm-4 control-label'])!!}
-							<div class="col-sm-4">
-								{!!Form::select('percentage',['0'=>'0 %','10'=>'10 %','20'=>'20 %','30'=>'30 %','40'=>'40 %','50'=>'50 %','60'=>'60 %','70'=>'70 %', '80' => '80 %', '90' => '90 %', '100' => '100 %'],null,['placeholder'=>'- Seleccione -','id' => 'percentage'])!!}
-							</div>
-						</div>
-
-						<div class="form-group">
-							{!!Form::label('Comentarios de avance',null,['class'=>'col-sm-4 control-label'])!!}
-							<div class="col-sm-4">
-								{!!Form::textarea('progress_comments',null,['id'=>'progress_comments','class'=>'form-control','rows'=>'6','cols'=>'4'])!!}
-							</div>
-						</div>
-					@endif
-
-					{!!Form::hidden('description_plan2',null,['id'=>'description_plan2'])!!}
-					{!!Form::hidden('stakeholder_id2',null,['id'=>'stakeholder_id2'])!!}
-					{!!Form::hidden('final_date2',null,['id'=>'final_date2'])!!}
-					{!!Form::hidden('percentage2',null,['id'=>'percentage2'])!!}
-					{!!Form::hidden('progress_comments2',null,['id'=>'progress_comments2'])!!}
-
-				@endif
-
-					<div class="form-group">
-						<label for="file" class="col-sm-4 control-label">Cargar documentos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>
-						<div class="col-sm-4">
-							<input id="file-1" type="file" class="file" name="evidence_doc2[]" multiple=true data-preview-file-type="any">
-						</div>
-					</div>
-
-					<div class="form-group">
-						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
-						</center>
-					</div>
+				<div class="form-group">
+					<center>
+					{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
+					</center>
+				</div>
 
 				@if (isset($test_id) AND $test_id != NULL)
 					<center>

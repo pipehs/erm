@@ -34,7 +34,7 @@ class Action_plan extends Model
     {
     	return DB::table('action_plans')
     			->where('status','=',0)
-    			->select('action_plans.id','action_plans.description','action_plans.final_date','action_plans.stakeholder_id')
+    			->select('action_plans.id','action_plans.description','action_plans.final_date','action_plans.stakeholder_id','action_plans.issue_id','action_plans.economic_value','action_plans.currency')
     			->get();
     }
 
@@ -158,6 +158,20 @@ class Action_plan extends Model
         return DB::table('action_plans')
                 ->where('description','=',$description)
                 ->select('*')
+                ->first();
+    }
+
+    public static function getProgressPercentage($id)
+    {
+        $max_date = DB::table('progress_percentage')
+                ->where('action_plan_id','=',$id)
+                ->max('updated_at');
+
+        //obtenemos porcentaje y comentarios
+        return DB::table('progress_percentage')
+                ->where('action_plan_id','=',$id)
+                ->where('updated_at','=',$max_date)
+                ->select('percentage','comments','updated_at')
                 ->first();
     }
 }

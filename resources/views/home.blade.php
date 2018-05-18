@@ -20,6 +20,12 @@
       </div>
     @endif
 
+    @if(Session::has('error'))
+      <div class="alert alert-danger alert-dismissible" role="alert">
+      {{ Session::get('error') }}
+      </div>
+    @endif
+
 <!-- Heatmap de categorías para evaluación de Riesgos -->
 <div class="row">
 	<div class="col-sm-6 col-m-6">

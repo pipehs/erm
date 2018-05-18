@@ -561,4 +561,37 @@ class Evaluation extends Model
             return NULL;
         }
     }
+
+    //ACT 08-05-18: Obtiene todas las evaluaciones de un riesgo
+    public static function getEvaluations($risk,$kind)
+    {
+        if ($kind == 1)
+        {
+            $evals = DB::table('evaluations')
+                ->join('evaluation_risk','evaluation_risk.evaluation_id','=','evaluations.id')
+                ->where('evaluation_risk.organization_risk_id','=',$risk)
+                ->where('consolidation','=',1)
+                ->get(['evaluations.updated_at','evaluation_risk.avg_probability','evaluation_risk.avg_impact']);
+        }
+        else if ($kind == 2)
+        {
+            $evals = DB::table('evaluations')
+                ->join('evaluation_risk','evaluation_risk.evaluation_id','=','evaluations.id')
+                ->where('evaluations.name','<>','Evaluación Manual')
+                ->where('consolidation','=',1)
+                ->where('evaluation_risk.organization_risk_id','=',$risk)
+                ->get(['evaluations.updated_at','evaluation_risk.avg_probability','evaluation_risk.avg_impact']);
+        }
+        else if ($kind == 3)
+        {
+            $evals = DB::table('evaluations')
+                ->join('evaluation_risk','evaluation_risk.evaluation_id','=','evaluations.id')
+                ->where('evaluations.name','=','Evaluación Manual')
+                ->where('consolidation','=',1)
+                ->where('evaluation_risk.organization_risk_id','=',$risk)
+                ->get(['evaluations.updated_at','evaluation_risk.avg_probability','evaluation_risk.avg_impact']);
+        }
+
+        return $evals;
+    }
 }

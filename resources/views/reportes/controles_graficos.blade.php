@@ -122,7 +122,7 @@
 </div>
 <!-- FIN Gráfico de controles efectivos v/s inefectivos -->
 <!-- Botón exportar-->
-<!--
+
 <div class="row">
 	<div class="col-xs-12 col-sm-12">
 		<div class="box">
@@ -162,7 +162,7 @@
 		</div>
 	</div>
 </div>
--->
+
 @endif
       		
 

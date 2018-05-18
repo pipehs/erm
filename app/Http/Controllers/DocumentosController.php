@@ -94,7 +94,10 @@ class DocumentosController extends Controller
                     //recorremos los controles para ver cuales tienen archivos
                     //foreach ($controls as $control)
                     //{
-                    $files = Storage::files('controles/'.$control->id);
+                    //ACT 24-04-18: Ahora se buscará control_org_id
+                    $co = \Ermtool\ControlOrganization::getByCO($_GET['control_id'],$_GET['organization_id']);
+                    $files = Storage::files('controles_org/'.$control->id);
+                    //$files = Storage::files('controles/'.$control->id);
                         //vemos si existe la carpeta (si existe es porque tiene archivos)
                     $risks = \Ermtool\Risk::getRisksFromControl($_GET['organization_id'],$control->id);
 

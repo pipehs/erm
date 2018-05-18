@@ -53,6 +53,10 @@ class LogController extends Controller
             {
                 return Redirect::route('/');
             }
+            else if (!isset(Auth::user()->superadmin) || Auth::user()->superadmin != 1)
+            {
+                return Redirect::to('home');
+            }
             else
             {
                 $users = array();
@@ -129,6 +133,10 @@ class LogController extends Controller
             {
                 return Redirect::route('/');
             }
+            else if (!isset(Auth::user()->superadmin) || Auth::user()->superadmin != 1)
+            {
+                return Redirect::to('home');
+            }
             else
             {
                 foreach (Session::get('roles') as $role)
@@ -171,117 +179,128 @@ class LogController extends Controller
     {
         try
         {
-            global $id;
-            global $dv;
-            //ACTUALIZACIÓN 20-08-17: Validaremos rut sólo si se ingresa Chileno
-            if ($_POST['nacionalidad'] == 'chileno')
+            if (Auth::guest())
             {
-                //validamos rut
-                $rut = $_POST['id'].'-'.$_POST['dv'];
-                $res = validaRut($rut);
-                $id = $_POST['id'];
-                $dv = $_POST['dv'];
+                return Redirect::route('/');
+            }
+            else if (!isset(Auth::user()->superadmin) || Auth::user()->superadmin != 1)
+            {
+                return Redirect::to('home');
             }
             else
             {
-                //ACTUALIZACIÓN 24-08-17: Veremos si el id es mayor o igual al máximo permitido por INT
-                if ($_POST['id2'] >= 2147483647)
+                global $id;
+                global $dv;
+                //ACTUALIZACIÓN 20-08-17: Validaremos rut sólo si se ingresa Chileno
+                if ($_POST['nacionalidad'] == 'chileno')
                 {
-                    //realizaremos división y guardamos entero
-                    $id = $_POST['id2'] / 100;
-                    $id = (int)$id;
-
-                    //ahora guardamos resto (utilizamos función substr por si resto parte con 0)
-                    global $id2;
-                    $id2 = (string)$_POST['id2'];
-                    $id2 = substr($id2, -2);
-                    $res = true;
-                    $dv = null;
+                    //validamos rut
+                    $rut = $_POST['id'].'-'.$_POST['dv'];
+                    $res = validaRut($rut);
+                    $id = $_POST['id'];
+                    $dv = $_POST['dv'];
                 }
                 else
                 {
-                    $res = true;
-                    $id = $_POST['id2'];
-                    $dv = null;
-                }
-            }
-
-            if ($res)
-            {
-                //Validación: Si la validación es pasada, el código continua
-                $this->validate($request, [
-                    'id' => 'unique:users|min:7',
-                    'name' => 'required|max:45|min:2',
-                    'email' => 'unique:users',
-                    'password' => 'required|min:4'
-                ]);
-
-                global $req;
-                $req = $request;
-
-                DB::transaction(function() {
-
-                    $logger = $this->logger;
-
-                    $GLOBALS['req']->merge(['password' => Hash::make($GLOBALS['req']->password)]);
-
-                    if (isset($GLOBALS['id2']))
+                    //ACTUALIZACIÓN 24-08-17: Veremos si el id es mayor o igual al máximo permitido por INT
+                    if ($_POST['id2'] >= 2147483647)
                     {
-                        $user = \Ermtool\User::create([
-                                'id' => $GLOBALS['id'],
-                                'dv' => $GLOBALS['dv'],
-                                'name' => $_POST['name'],
-                                'surnames' => $_POST['surnames'],
-                                'email' => $_POST['email'],
-                                'password' => $GLOBALS['req']['password'],
-                                'rest_id' => $GLOBALS['id2']
-                            ]);
+                        //realizaremos división y guardamos entero
+                        $id = $_POST['id2'] / 100;
+                        $id = (int)$id;
+
+                        //ahora guardamos resto (utilizamos función substr por si resto parte con 0)
+                        global $id2;
+                        $id2 = (string)$_POST['id2'];
+                        $id2 = substr($id2, -2);
+                        $res = true;
+                        $dv = null;
                     }
                     else
                     {
-                        $user = \Ermtool\User::create([
-                                'id' => $GLOBALS['id'],
-                                'dv' => $GLOBALS['dv'],
-                                'name' => $_POST['name'],
-                                'surnames' => $_POST['surnames'],
-                                'email' => $_POST['email'],
-                                'password' => $GLOBALS['req']['password']
-                            ]);
+                        $res = true;
+                        $id = $_POST['id2'];
+                        $dv = null;
                     }
-                    //agregamos en system_role_user
-                    foreach ($GLOBALS['req']['system_roles_id'] as $role)
-                    {
-                        DB::table('system_role_user')
-                            ->insert([
-                                'user_id' => $GLOBALS['id'],
-                                'system_role_id' => $role,
-                            ]);
-                    }
+                }
+
+                if ($res)
+                {
+                    //Validación: Si la validación es pasada, el código continua
+                    $this->validate($request, [
+                        'id' => 'unique:users|min:7',
+                        'name' => 'required|max:45|min:2',
+                        'email' => 'unique:users',
+                        'password' => 'required|min:4'
+                    ]);
+
+                    global $req;
+                    $req = $request;
+
+                    DB::transaction(function() {
+
+                        $logger = $this->logger;
+
+                        $GLOBALS['req']->merge(['password' => Hash::make($GLOBALS['req']->password)]);
+
+                        if (isset($GLOBALS['id2']))
+                        {
+                            $user = \Ermtool\User::create([
+                                    'id' => $GLOBALS['id'],
+                                    'dv' => $GLOBALS['dv'],
+                                    'name' => $_POST['name'],
+                                    'surnames' => $_POST['surnames'],
+                                    'email' => $_POST['email'],
+                                    'password' => $GLOBALS['req']['password'],
+                                    'rest_id' => $GLOBALS['id2']
+                                ]);
+                        }
+                        else
+                        {
+                            $user = \Ermtool\User::create([
+                                    'id' => $GLOBALS['id'],
+                                    'dv' => $GLOBALS['dv'],
+                                    'name' => $_POST['name'],
+                                    'surnames' => $_POST['surnames'],
+                                    'email' => $_POST['email'],
+                                    'password' => $GLOBALS['req']['password']
+                                ]);
+                        }
+                        //agregamos en system_role_user
+                        foreach ($GLOBALS['req']['system_roles_id'] as $role)
+                        {
+                            DB::table('system_role_user')
+                                ->insert([
+                                    'user_id' => $GLOBALS['id'],
+                                    'system_role_id' => $role,
+                                ]);
+                        }
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('message','User successfully created');
+                        }
+                        else
+                        {
+                            Session::flash('message','Usuario creado con &eacute;xito');
+                        }
+
+                        $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el usuario con Id: '.$user->id.' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
+                    });
+                
+                    return Redirect::to('usuarios');
+                }
+                else
+                {
                     if (Session::get('languaje') == 'en')
                     {
-                        Session::flash('message','User successfully created');
+                        Session::flash('message','The entered id was incorrect. Try again');
+                        return Redirect::to('usuario.create')->withInput();
                     }
                     else
                     {
-                        Session::flash('message','Usuario creado con &eacute;xito');
+                        Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente');
+                        return Redirect::to('usuario.create')->withInput();
                     }
-
-                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el usuario con Id: '.$user->id.' llamado: '.$user->name.' '.$user->surnames.', con fecha '.date('d-m-Y H:i:s').' a las '.date('H:i:s'));
-                });
-            
-                return Redirect::to('usuarios');
-            }
-            else
-            {
-                if (Session::get('languaje') == 'en')
-                {
-                    Session::flash('message','The entered id was incorrect. Try again');
-                    return Redirect::to('usuario.create')->withInput();
-                }
-                else
-                {
-                    Session::flash('message','El rut ingresado es incorrecto. Intentelo nuevamente');
-                    return Redirect::to('usuario.create')->withInput();
                 }
             }
         }
@@ -303,6 +322,21 @@ class LogController extends Controller
         try
         {
             Session::put('languaje',$request['languaje']);
+
+            //ACT 27-04-18: Agregamos nombre de organización a la Sesión, para configuraciones especiales
+            $org = \Ermtool\Configuration::where('option_name','organization')->first(['option_value']);
+
+            if (!empty($org))
+            {
+                $org_name = $org->option_value;
+            }
+            else
+            {
+                $org_name = NULL;
+            }
+            //Guardamos en variable de sesión
+            Session::put('org',$org_name);
+
             //return $request->email;
             if (Auth::attempt(['email'=>$request['email'], 'password' => $request['password']]))
             {
@@ -378,6 +412,10 @@ class LogController extends Controller
             if (Auth::guest())
             {
                 return Redirect::route('/');
+            }
+            else if (!isset(Auth::user()->superadmin) || Auth::user()->superadmin != 1)
+            {
+                return Redirect::to('home');
             }
             else
             {

@@ -331,6 +331,40 @@
 							<td>{{ $issue['responsable'] }}</td>
 						</tr>
 					@endforeach
+				@elseif ($kind == 8)
+					<h4><b>{{ $org }}: Hallazgos de Riesgos</b></h4>
+					<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+					<thead>
+						<th style="vertical-align:top;">Riesgos<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Clasificaci&oacute;n<label><input type="text" placeholder="Filtrar" /></lab style="vertical-align:top;"el></th>
+						<th style="vertical-align:top;">Recomendaciones<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Plan de acci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Estado<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Fecha final plan<label><input type="text" placeholder="Filtrar" /></label></th>
+						<th style="vertical-align:top;">Responsable plan<label><input type="text" placeholder="Filtrar" /></label></th>
+					</thead>
+
+				
+
+					@foreach ($issues as $issue)
+						<tr>
+							<td>
+							@foreach ($issue['datos']['risks'] as $r)
+								<li>{{ $r->name }} - {{ $r->description }}</li>
+							@endforeach
+							</td>
+							<td>{{ $issue['name'] }}</td>
+							<td>{{ $issue['description'] }}</td>
+							<td>{{ $issue['classification'] }}</td>
+							<td>{{ $issue['recommendations'] }}</td>
+							<td>{{ $issue['plan'] }}</td>
+							<td>{{ $issue['status'] }}</td>
+							<td>{{ $issue['final_date'] }}</td>
+							<td>{{ $issue['responsable'] }}</td>
+						</tr>
+					@endforeach
 				@endif
 			</div>
 				<div id="boton_exportar">

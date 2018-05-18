@@ -34,35 +34,53 @@ class EncuestasController extends Controller
 
     public function mensaje($id)
     {
-        if (Session::get('languaje') == 'en')
-        {   
-            //Mensaje predeterminado al enviar encuestas (inglés)
-            $mensaje = "Dear User.
+        //ACT 06-04-18: Obtenemos URL desde base de datos
+        $conf = \Ermtool\Configuration::where('option_name','=','system_url')->first();
 
-                        We send to you the following poll for the identification of risk events. Answer each one of the questions associated to the poll. To answer it you have to access to the following link:
+        if (!empty($conf))
+        {
+            if (Session::get('languaje') == 'en')
+            {   
+                //Mensaje predeterminado al enviar encuestas (inglés)
+                $mensaje = "Dear User.
 
-                        http://ec2-18-231-66-236.sa-east-1.compute.amazonaws.com/identificacion.encuesta.{$id}
+                            We send to you the following poll for the identification of risk events. Answer each one of the questions associated to the poll. To answer it you have to access to the following link:
 
-                        Best Regards,
-                        Administration.";
+                            http://".$conf->option_value."/identificacion.encuesta.{$id}
+
+                            Best Regards,
+                            Administration.";
+            }
+            else
+            {
+                //Mensaje predeterminado al enviar encuestas
+                $mensaje = "Estimado Usuario.
+
+                        Le enviamos la siguiente encuesta para la identificación de eventos de riesgos. 
+                        Responda cada una de las preguntas asociadas a la encuesta. 
+                        Para responderla deberá acceder al siguiente link.
+
+                        http://".$conf->option_value."/identificacion.encuesta.{$id}
+
+                        Saludos cordiales,
+                        Administrador.";
+            } 
+                
+            
+            return $mensaje;
         }
         else
         {
-            //Mensaje predeterminado al enviar encuestas
-            $mensaje = "Estimado Usuario.
-
-                    Le enviamos la siguiente encuesta para la identificación de eventos de riesgos. 
-                    Responda cada una de las preguntas asociadas a la encuesta. 
-                    Para responderla deberá acceder al siguiente link.
-
-                    http://ec2-18-231-66-236.sa-east-1.compute.amazonaws.com/identificacion.encuesta.{$id}
-
-                    Saludos cordiales,
-                    Administrador.";
-        } 
-            
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.configuration.create');
+            }
+            else
+            {
+                return view('configuration.create');
+            }
+        }
         
-        return $mensaje;
     }
 
     //Muestra las encuestas en su formato (No respuestas)
@@ -172,14 +190,29 @@ class EncuestasController extends Controller
 
     public function create()
     {
-        try
-        {
+        //try
+        //{
             if (Auth::guest())
             {
                 return view('login');
             }
             else
             {
+                //ACT 06-04: Primero, verificamos que se encuentre configurado el link de la encuesta
+                $url = \Ermtool\Configuration::where('option_name','=','system_url')->first();
+
+                if (empty($url) || $url->option_value == NULL || !$url)
+                {
+
+                    if (Session::get('languaje') == 'en')
+                    {
+                        return view('en.configuration.create');
+                    }
+                    else
+                    {
+                        return view('configuration.create');
+                    }
+                }
                 if (isset($_POST['agregar'])) //se agregaron las preguntas, ahora se deben agregar las respuestas
                 { /* NO CUMPLE AISLAMIENTO 
                     \Ermtool\Poll::create([
@@ -209,12 +242,12 @@ class EncuestasController extends Controller
                     }
                 }
             }
-        }
-        catch (\Exception $e)
-        {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
-        }
+        //}
+        //catch (\Exception $e)
+        //{
+        //    enviarMailSoporte($e);
+        //    return view('errors.query',['e' => $e]);
+        //}
     }
 
     /**

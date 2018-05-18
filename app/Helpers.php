@@ -277,6 +277,56 @@ function dropDown8()
 	}
 }
 
+//dropdown de sistema de denuncia
+function dropDown9()
+{
+	$uri = array('registro_denuncia','seguimiento_denuncia','reportes_denuncias');
+
+	foreach ($uri as $uri)
+	{
+		if(Request::is(Request::segment(1) . '/' . $uri . '/*') || Request::is(Request::segment(1) . '/' . $uri) || Request::is($uri))
+		{
+			return 'display: block;';
+		}
+
+		//verificación para menús compuestos
+		$compuesto = explode(".",Request::segment(1));
+
+		foreach ($compuesto as $compuesto)
+		{
+			if(Request::is($compuesto . '/' . $uri . '/*') || Request::is($compuesto . '.' . $uri) || $compuesto == $uri)
+			{
+				return 'display: block;';
+			}
+		}
+	}
+}
+
+//dropdown de planes de acción
+function dropDown10()
+{
+	$uri = array('action_plans','alert_action_plans');
+
+	foreach ($uri as $uri)
+	{
+		if(Request::is(Request::segment(1) . '/' . $uri . '/*') || Request::is(Request::segment(1) . '/' . $uri) || Request::is($uri))
+		{
+			return 'display: block;';
+		}
+
+		//verificación para menús compuestos
+		$compuesto = explode(".",Request::segment(1));
+
+		foreach ($compuesto as $compuesto)
+		{
+			if(Request::is($compuesto . '/' . $uri . '/*') || Request::is($compuesto . '.' . $uri) || $compuesto == $uri)
+			{
+				return 'display: block;';
+			}
+		}
+	}
+}
+
 //helper para cargar archivos
 function upload_file($archivo,$dir,$id)
 {
@@ -677,6 +727,7 @@ function eliminarSaltos($cadenaDeTexto)
 }
 
 //función para enviar correo de soporte para cuando se produce algún error en el sistema
+//ACT 09-04-18: Además, aquí guardaremos el error en tabla errors
 function enviarMailSoporte($e)
 {
     $mail = 'soporte@itappsolutions.com';
@@ -685,14 +736,23 @@ function enviarMailSoporte($e)
     {
     	$name = Auth::user()->name.' '.Auth::user()->surnames;
     	$user_mail = Auth::user()->email;
+    	$user_id = Auth::user()->id;
     }
     else
     {
     	$name = "No identificado";
     	$user_mail = "No identificado";
+    	$user_id = NULL;
     }
 
     //OBS: Deberia agregar también organización (o súper organización) para saber de que empresa se está enviando. Para esto se debe agregar en BBDD algún atributo que identifique la organización (Pendiente Agregado el 02-08-2017)
+    //ACT 09-04-18: Por el momento lo anterior no es necesario, ya que se guardará en la bbdd (y cada bd corresponde a una organización)
+    \Ermtool\Error::create([
+    	'user_id' => $user_id,
+    	'description' => $e,
+    	'status' => 0,
+    	'status2' => 0
+    ]);
     
     Mail::send('mail_error',['user' => $name,'user_mail' => $user_mail,'e' => $e], function ($message) use ($mail,$name)
     {

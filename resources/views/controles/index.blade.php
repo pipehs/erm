@@ -57,13 +57,16 @@
 		<th>Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
-		<th>Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Objetivo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Tipo Control<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Responsable del Control<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Evidencia<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Periodicidad<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Costo esperado<label><input type="text" placeholder="Filtrar" /></label></th>
-		<th>% de contribuci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+		@if (isset($controls1[0]['porcentaje_cont']))
+			<th>% de contribuci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+		@endif
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 		<th>Acci&oacute;n</th>
@@ -109,14 +112,14 @@
 				@endif
 				</td>
 				<td>
-				@if ($control['type'] === 0)
+				@if (is_null($control['type']) || $control['type'] === NULL)
+					No se ha definido
+				@elseif ($control['type'] == 0)
 					Manual
 				@elseif ($control['type'] == 1)
 					Semi-autom&aacute;tico
 				@elseif ($control['type'] == 2)
 					Autom&aacute;tico
-				@else
-					No se ha definido
 				@endif	
 				</td>			
 				<td>
@@ -134,7 +137,9 @@
 				@endif
 				</td>
 				<td>
-				@if ($control['purpose'] == 0)
+				@if (is_null($control['purpose']) || $control['purpose'] === NULL)
+					Propósito no definido
+				@elseif ($control['purpose'] == 0)
 					Preventivo
 				@elseif ($control['purpose'] == 1)
 					Detectivo
@@ -145,6 +150,27 @@
 				@endif
 				</td>
 				<td>
+					@if (is_null($control['periodicity']) || $control['periodicity'] === NULL)
+						Periodicidad no definida
+					@elseif ($control['periodicity'] == 0)
+						Diario
+					@elseif ($control['periodicity'] == 1)
+						Semanal
+					@elseif ($control['periodicity'] == 2)
+						Mensual
+					@elseif ($control['periodicity'] == 6)
+						Trimestral
+					@elseif ($control['periodicity'] == 3)
+						Semestral
+					@elseif ($control['periodicity'] == 4)
+						Anual
+					@elseif ($control['periodicity'] == 5)
+						Cada vez que ocurra
+					@else
+						Error al ingresar prop&oacute;sito
+					@endif
+				</td>
+				<td>
 				@if ($control['expected_cost'] === NULL)
 					No se ha definido
 				@else
@@ -152,7 +178,7 @@
 				@endif
 				</td>
 
-				@if (isset($cocacola))
+				@if (isset($control['porcentaje_cont']))
 					<td>
 					@if ($control['porcentaje_cont'] === NULL)
 						No se ha definido
@@ -188,8 +214,11 @@
 		<th>Responsable del Control<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Evidencia<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Periodicidad<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Costo esperado<label><input type="text" placeholder="Filtrar" /></label></th>
-		<th>% de contribuci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+		@if (isset($controls2[0]['porcentaje_cont']))
+			<th>% de contribuci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+		@endif
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 		<th>Acci&oacute;n</th>
@@ -235,14 +264,14 @@
 				@endif
 				</td>
 				<td>
-				@if ($control['type'] === 0)
+				@if (is_null($control['type']) || $control['type'] === NULL)
+					No se ha definido
+				@elseif ($control['type'] == 0)
 					Manual
 				@elseif ($control['type'] == 1)
 					Semi-autom&aacute;tico
 				@elseif ($control['type'] == 2)
 					Autom&aacute;tico
-				@else
-					No se ha definido
 				@endif
 				</td>
 				
@@ -261,7 +290,9 @@
 				@endif
 				</td>
 				<td>
-				@if ($control['purpose'] == 0)
+				@if (is_null($control['purpose']) || $control['purpose'] === NULL)
+					Propósito no definido
+				@elseif ($control['purpose'] == 0)
 					Preventivo
 				@elseif ($control['purpose'] == 1)
 					Detectivo
@@ -270,6 +301,27 @@
 				@else
 					Error al ingresar prop&oacute;sito
 				@endif
+				</td>
+				<td>
+					@if (is_null($control['periodicity']) || $control['periodicity'] === NULL)
+						Periodicidad no definida
+					@elseif ($control['periodicity'] == 0)
+						Diario
+					@elseif ($control['periodicity'] == 1)
+						Semanal
+					@elseif ($control['periodicity'] == 2)
+						Mensual
+					@elseif ($control['periodicity'] == 6)
+						Trimestral
+					@elseif ($control['periodicity'] == 3)
+						Semestral
+					@elseif ($control['periodicity'] == 4)
+						Anual
+					@elseif ($control['periodicity'] == 5)
+						Cada vez que ocurra
+					@else
+						Error al ingresar prop&oacute;sito
+					@endif
 				</td>
 				<td>
 				@if ($control['expected_cost'] === NULL)

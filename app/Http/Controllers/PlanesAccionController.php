@@ -368,16 +368,7 @@ class PlanesAccionController extends Controller
                     {
                         //ACT 15-11-17: Obtenemos info de porcentaje de avance
                         //primero, obtenemos la máxima fecha de porcentaje de avance
-                        $max_date = DB::table('progress_percentage')
-                                        ->where('action_plan_id','=',$plan->id)
-                                        ->max('updated_at');
-
-                        //obtenemos porcentaje y comentarios
-                        $per = DB::table('progress_percentage')
-                                ->where('action_plan_id','=',$plan->id)
-                                ->where('updated_at','=',$max_date)
-                                ->select('percentage','comments','updated_at')
-                                ->first();
+                        $per = \Ermtool\Action_plan::getProgressPercentage($plan->id);
 
                         if (!empty($per))
                         {
@@ -394,7 +385,7 @@ class PlanesAccionController extends Controller
                             $percentage_date = NULL;
                         }
 
-                        $short_des = substr($plan->description,0,100);
+                        //$short_des = substr($plan->description,0,100);
                                 
                         $action_plans[$i] = [
                             'Origen del hallazgo' => $origin,
@@ -407,23 +398,15 @@ class PlanesAccionController extends Controller
                             'Porcentaje' => $percentage,
                             'Comentarios Avance' => $percentage_comments,
                             'Fecha Avance' => $percentage_date,
+                            //'short_des' => $short_des
                         ];
                     }
                     else
                     {
                         //ACT 15-11-17: Obtenemos info de porcentaje de avance
                         //primero, obtenemos la máxima fecha de porcentaje de avance
-                        $max_date = DB::table('progress_percentage')
-                                        ->where('action_plan_id','=',$plan->id)
-                                        ->max('updated_at');
-
-                        //obtenemos porcentaje y comentarios
-                        $per = DB::table('progress_percentage')
-                                ->where('action_plan_id','=',$plan->id)
-                                ->where('updated_at','=',$max_date)
-                                ->select('percentage','comments','updated_at')
-                                ->first();
-
+                        $per = \Ermtool\Action_plan::getProgressPercentage($plan->id);
+                        
                         if (!empty($per))
                         {
                             $percentage = $per->percentage;
@@ -1201,16 +1184,23 @@ class PlanesAccionController extends Controller
 
                     //obtenemos nombre (descripción)
                     $description = DB::table('action_plans')->where('id',$GLOBALS['id1'])->value('description');
-                    //primero que todo, eliminamos plan de acción (si es que hay)
+                    //ACT 23-04-18: primero que todo, eliminamos porcentaje de avance
+                    DB::table('progress_percentage')
+                        ->where('action_plan_id','=',$GLOBALS['id1'])
+                        ->delete();
+
+                    //eliminamos plan de acción (si es que hay)
                     DB::table('action_plans')
-                    ->where('id','=',$GLOBALS['id1'])
-                    ->delete();
+                        ->where('id','=',$GLOBALS['id1'])
+                        ->delete();
+
+                    //eliminamos evidencia si es que existe (SE DEBE AGREGAR)
+                    eliminarArchivo($GLOBALS['id1'],5,NULL);
 
                     $GLOBALS['res'] = 0;
 
-                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el plan de acción con Id: '.$GLOBALS['id1'].' definido como: '.$description.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
-                    //eliminamos evidencia si es que existe (SE DEBE AGREGAR)
-                    eliminarArchivo($GLOBALS['id1'],5,NULL);
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el plan de acción con Id: '.$GLOBALS['id1'].' definido como: '.$description.', con fecha '.date('d-m-Y').' a las '.date('H:i:s')); 
+                    
                 });
 
                 return $res;
@@ -1389,13 +1379,30 @@ class PlanesAccionController extends Controller
             else
             {
                 //datos para gráfico de hallazgos
-                $issues_om = array();
+                /*$issues_om = array();
                 $issues_def = array();
                 $issues_deb = array();
                 $op_mejora = 0;
                 $deficiencia = 0;
-                $deb_significativa = 0;
-                
+                $deb_significativa = 0;*/
+
+                //ACT 17-04-18: Obtiene distintos tipos de clasificaciones de issue_classifications
+                $classifications = \Ermtool\IssueClassification::all();
+                //Colores aleatorios
+                $html_colors = ['#a9cce3','#aed6f1','#d4e6f1','#d6eaf8','#566573','#626567','#3498db','#2980b9','#5dade2','#5499c7','#85c1e9','#7fb3d5','#21618c','#1a5276','#2874a6','#1f618d','#2e86c1','#2471a3','#bdc3c7','#616a6b','#717d7e','#7f8c8d','#1b4f72','#154360'];
+                foreach ($classifications as $c)
+                {
+                    $c->cont = 0;
+
+                    //asignamos color
+                    $c1 = count($html_colors)-1;
+                    $randcolor = $html_colors[mt_rand(0,$c1)];
+                    $c->color = $randcolor;
+                }
+
+                $issues_class = array();
+                //$cont_i_class = array();
+
                 //ACT 12-12-16: Obtiene TODOS los issues de una organización (de los distintos tipos de issues)
                 if ($org == 0)
                 {
@@ -1462,6 +1469,13 @@ class PlanesAccionController extends Controller
                 $i = 0;
                 foreach ($issues_all as $issue)
                 {
+                    foreach ($classifications as $c)
+                    {
+                        if ($c->id == $issue->classification)
+                        {
+                            $c->cont += 1;
+                        }
+                    }
                     //debemos obtener datos de plan de acción y responsable de plan de acción (si es que hay)
                     $action_plan = NULL;
 
@@ -2014,6 +2028,7 @@ class PlanesAccionController extends Controller
                     $updated_at = date_format($updated_at_tmp, 'd-m-Y');
 
                     //determinamos clasificación
+                    /*
                     if ($issue->classification == 0)
                     {
                         $op_mejora += 1;
@@ -2052,7 +2067,18 @@ class PlanesAccionController extends Controller
                             'updated_at' => $updated_at,
                             'action_plan' => $act_plan,
                         ];
-                    }
+                    }*/
+
+                    //ACT 17-04-18: Ahora será dinámico, así que se hará el cruce en la vista (junto a la variable classifications)
+                    $issues_class[$i] = [
+                            'id' => $issue->id,
+                            'name' => $issue->name,
+                            'description' => $issue->description,
+                            'recommendations' => $issue->recommendations,
+                            'classification' => $issue->classification,
+                            'updated_at' => $updated_at,
+                            'action_plan' => $act_plan,
+                        ];
 
                     $i += 1;
                 }
@@ -2465,7 +2491,7 @@ class PlanesAccionController extends Controller
                     }
                     else
                     {
-                        return view('en.reportes.planes_accion_graficos',['issues_om'=>$issues_om,'issues_def'=>$issues_def,'issues_deb'=>$issues_deb,'op_mejora'=>$op_mejora,'deficiencia'=>$deficiencia,'deb_significativa'=>$deb_significativa,'cont_ctrl' => $cont_ctrl,'cont_audit' => $cont_audit,'action_plans_ctrl' => $action_plans_ctrl,'action_plans_audit' => $action_plans_audit,'action_plans_open' => $action_plans_open,'action_plans_warning' => $action_plans_warning,'action_plans_danger' => $action_plans_danger,'action_plans_closed' => $action_plans_closed,'cont_open' => $cont_open,'cont_warning' => $cont_warning,'cont_danger' => $cont_danger,'cont_closed' => $cont_closed,'cont_process' => $cont_process,'cont_subprocess' => $cont_subprocess,'cont_program' => $cont_program,'cont_audit_plan' => $cont_audit_plan,'cont_process_ctrl' => $cont_process_ctrl,'cont_bussiness_ctrl' => $cont_bussiness_ctrl,'cont_progress_percentage0' => $cont_progress_percentage0,'cont_progress_percentage10' => $cont_progress_percentage10,'cont_progress_percentage20' => $cont_progress_percentage20,'cont_progress_percentage30' => $cont_progress_percentage30,'cont_progress_percentage40' => $cont_progress_percentage40,'cont_progress_percentage50' => $cont_progress_percentage50,'cont_progress_percentage60' => $cont_progress_percentage60,'cont_progress_percentage70' => $cont_progress_percentage70,'cont_progress_percentage80' => $cont_progress_percentage80,'cont_progress_percentage90' => $cont_progress_percentage90,'cont_progress_percentage100' => $cont_progress_percentage100,'cont_org' => $cont_org,'action_plans_process' => $action_plans_process,'action_plans_subprocess' => $action_plans_subprocess,'action_plans_audit_plan' => $action_plans_audit_plan,'action_plans_process_ctrl' => $action_plans_process_ctrl,'action_plans_bussiness_ctrl' => $action_plans_bussiness_ctrl,'action_plans_org' => $action_plans_org,'action_plans_program' => $action_plans_program, 'action_plans_risk' => $action_plans_risk, 'action_plans_compliance' => $action_plans_compliance, 'action_plans_compliant_channel' => $action_plans_compliant_channel, 'action_plans_progress_percentage' => $action_plans_progress_percentage,'org' => $_GET['organization_id']]);
+                        return view('en.reportes.planes_accion_graficos',['issues_class'=>$issues_class,'cont_ctrl' => $cont_ctrl,'cont_audit' => $cont_audit,'action_plans_ctrl' => $action_plans_ctrl,'action_plans_audit' => $action_plans_audit,'action_plans_open' => $action_plans_open,'action_plans_warning' => $action_plans_warning,'action_plans_danger' => $action_plans_danger,'action_plans_closed' => $action_plans_closed,'cont_open' => $cont_open,'cont_warning' => $cont_warning,'cont_danger' => $cont_danger,'cont_closed' => $cont_closed,'cont_process' => $cont_process,'cont_subprocess' => $cont_subprocess,'cont_program' => $cont_program,'cont_audit_plan' => $cont_audit_plan,'cont_process_ctrl' => $cont_process_ctrl,'cont_bussiness_ctrl' => $cont_bussiness_ctrl,'cont_progress_percentage0' => $cont_progress_percentage0,'cont_progress_percentage10' => $cont_progress_percentage10,'cont_progress_percentage20' => $cont_progress_percentage20,'cont_progress_percentage30' => $cont_progress_percentage30,'cont_progress_percentage40' => $cont_progress_percentage40,'cont_progress_percentage50' => $cont_progress_percentage50,'cont_progress_percentage60' => $cont_progress_percentage60,'cont_progress_percentage70' => $cont_progress_percentage70,'cont_progress_percentage80' => $cont_progress_percentage80,'cont_progress_percentage90' => $cont_progress_percentage90,'cont_progress_percentage100' => $cont_progress_percentage100,'cont_org' => $cont_org,'action_plans_process' => $action_plans_process,'action_plans_subprocess' => $action_plans_subprocess,'action_plans_audit_plan' => $action_plans_audit_plan,'action_plans_process_ctrl' => $action_plans_process_ctrl,'action_plans_bussiness_ctrl' => $action_plans_bussiness_ctrl,'action_plans_org' => $action_plans_org,'action_plans_program' => $action_plans_program, 'action_plans_risk' => $action_plans_risk, 'action_plans_compliance' => $action_plans_compliance, 'action_plans_compliant_channel' => $action_plans_compliant_channel, 'action_plans_progress_percentage' => $action_plans_progress_percentage,'org' => $_GET['organization_id'],'classifications' => $classifications]);
                     }
                 }
                 else
@@ -2872,7 +2898,7 @@ class PlanesAccionController extends Controller
                             return $plans;
                         }
                     }
-                    return view('reportes.planes_accion_graficos',['issues_om'=>$issues_om,'issues_def'=>$issues_def,'issues_deb'=>$issues_deb,'op_mejora'=>$op_mejora,'deficiencia'=>$deficiencia,'deb_significativa'=>$deb_significativa,'cont_ctrl' => $cont_ctrl,'cont_audit' => $cont_audit,'action_plans_ctrl' => $action_plans_ctrl,'action_plans_audit' => $action_plans_audit,'action_plans_open' => $action_plans_open,'action_plans_warning' => $action_plans_warning,'action_plans_danger' => $action_plans_danger,'action_plans_closed' => $action_plans_closed,'cont_open' => $cont_open,'cont_warning' => $cont_warning,'cont_danger' => $cont_danger,'cont_closed' => $cont_closed,'cont_process' => $cont_process,'cont_subprocess' => $cont_subprocess,'cont_program' => $cont_program,'cont_audit_plan' => $cont_audit_plan,'cont_process_ctrl' => $cont_process_ctrl,'cont_bussiness_ctrl' => $cont_bussiness_ctrl, 'cont_risk' => $cont_risk, 'cont_compliance' => $cont_compliance, 'cont_compliant_channel' => $cont_compliant_channel,'cont_progress_percentage0' => $cont_progress_percentage0,'cont_progress_percentage10' => $cont_progress_percentage10,'cont_progress_percentage20' => $cont_progress_percentage20,'cont_progress_percentage30' => $cont_progress_percentage30,'cont_progress_percentage40' => $cont_progress_percentage40,'cont_progress_percentage50' => $cont_progress_percentage50,'cont_progress_percentage60' => $cont_progress_percentage60,'cont_progress_percentage70' => $cont_progress_percentage70,'cont_progress_percentage80' => $cont_progress_percentage80,'cont_progress_percentage90' => $cont_progress_percentage90,'cont_progress_percentage100' => $cont_progress_percentage100,'cont_org' => $cont_org,'action_plans_process' => $action_plans_process,'action_plans_subprocess' => $action_plans_subprocess,'action_plans_audit_plan' => $action_plans_audit_plan,'action_plans_process_ctrl' => $action_plans_process_ctrl,'action_plans_bussiness_ctrl' => $action_plans_bussiness_ctrl,'action_plans_org' => $action_plans_org,'action_plans_program' => $action_plans_program, 'action_plans_risk' => $action_plans_risk, 'action_plans_compliance' => $action_plans_compliance, 'action_plans_compliant_channel' => $action_plans_compliant_channel, 'action_plans_progress_percentage' => $action_plans_progress_percentage,'org' => $_GET['organization_id']]);
+                    return view('reportes.planes_accion_graficos',['issues_class'=>$issues_class,'cont_ctrl' => $cont_ctrl,'cont_audit' => $cont_audit,'action_plans_ctrl' => $action_plans_ctrl,'action_plans_audit' => $action_plans_audit,'action_plans_open' => $action_plans_open,'action_plans_warning' => $action_plans_warning,'action_plans_danger' => $action_plans_danger,'action_plans_closed' => $action_plans_closed,'cont_open' => $cont_open,'cont_warning' => $cont_warning,'cont_danger' => $cont_danger,'cont_closed' => $cont_closed,'cont_process' => $cont_process,'cont_subprocess' => $cont_subprocess,'cont_program' => $cont_program,'cont_audit_plan' => $cont_audit_plan,'cont_process_ctrl' => $cont_process_ctrl,'cont_bussiness_ctrl' => $cont_bussiness_ctrl, 'cont_risk' => $cont_risk, 'cont_compliance' => $cont_compliance, 'cont_compliant_channel' => $cont_compliant_channel,'cont_progress_percentage0' => $cont_progress_percentage0,'cont_progress_percentage10' => $cont_progress_percentage10,'cont_progress_percentage20' => $cont_progress_percentage20,'cont_progress_percentage30' => $cont_progress_percentage30,'cont_progress_percentage40' => $cont_progress_percentage40,'cont_progress_percentage50' => $cont_progress_percentage50,'cont_progress_percentage60' => $cont_progress_percentage60,'cont_progress_percentage70' => $cont_progress_percentage70,'cont_progress_percentage80' => $cont_progress_percentage80,'cont_progress_percentage90' => $cont_progress_percentage90,'cont_progress_percentage100' => $cont_progress_percentage100,'cont_org' => $cont_org,'action_plans_process' => $action_plans_process,'action_plans_subprocess' => $action_plans_subprocess,'action_plans_audit_plan' => $action_plans_audit_plan,'action_plans_process_ctrl' => $action_plans_process_ctrl,'action_plans_bussiness_ctrl' => $action_plans_bussiness_ctrl,'action_plans_org' => $action_plans_org,'action_plans_program' => $action_plans_program, 'action_plans_risk' => $action_plans_risk, 'action_plans_compliance' => $action_plans_compliance, 'action_plans_compliant_channel' => $action_plans_compliant_channel, 'action_plans_progress_percentage' => $action_plans_progress_percentage,'org' => $_GET['organization_id'],'classifications' => $classifications]);
                 }
             }
         }
@@ -2929,7 +2955,7 @@ class PlanesAccionController extends Controller
         }
     }
 
-    //Función para que verificará proximidad en fecha de término de planes de acción, para poder de esta manera enviar alertas a los usuarios
+    //Función que verificará proximidad en fecha de término de planes de acción, para poder de esta manera enviar alertas a los usuarios
     public function verificarFechaPlanes()
     {
         try
@@ -2997,5 +3023,367 @@ class PlanesAccionController extends Controller
             enviarMailSoporte($e);
             return view('errors.query',['e' => $e]);
         }
+    }
+
+    //ACT 09-04-18: Alerta para planes de acción que están vencidos o próximos a vencer (alerta manual)
+    public function indexAlerts()
+    {
+        //try
+        //{
+            $planes = \Ermtool\Action_plan::getOpenedActionPlans();
+            $plans = array();
+            $i = 0;
+
+            if (!empty($planes))
+            {
+                foreach ($planes as $p)
+                {
+                    //verificaremos en una variable diferencia en días entre fecha final y fecha actual
+                    $date = $p->final_date;
+                    $date = new DateTime($date);
+                    //$date = date_format($date,'Y-m-d');
+                    $date_actual = new DateTime(date('Y-m-d'));
+                    //$seconds= $date - $date_actual;
+                    //$dif = intval($seconds/60/60/24);
+
+                    $dif = $date_actual->diff($date);
+                    $dif = (int)$dif->format('%R%a');
+
+                    //Vemos que tipo o criterio se está utilizando 
+                    if ($_GET['kind'] == 1) //Planes de acción vencidos, por lo tanto la diferencia debe ser menor a 0
+                    {
+                        $title = 'Planes de acción vencidos';
+                        if ($dif <= -1)
+                        {
+                            if ($p->stakeholder_id != NULL && $p->stakeholder_id != '')
+                            {
+                                //obtenemos organización
+                                $org = \Ermtool\Organization::getOrgByActionPlan($p->id);
+                                //issue
+                                $issue = \Ermtool\Issue::find($p->issue_id);
+                                //responsable
+                                $stakeholder_mail = \Ermtool\Stakeholder::where('id',$p->stakeholder_id)->value('mail');
+                                $name = \Ermtool\Stakeholder::getName($p->stakeholder_id);
+
+                                //porcentaje avance
+                                $per = \Ermtool\Action_plan::getProgressPercentage($p->id);
+                                if (!empty($per))
+                                {
+                                    $percentage = $per->percentage;
+                                    $percentage_comments = $per->comments;
+                                    $percentage_comments = eliminarSaltos($percentage_comments);
+                                    $percentage_date = $per->updated_at;
+                                }
+
+                                else
+                                {
+                                    $percentage = NULL;
+                                    $percentage_comments = NULL;
+                                    $percentage_date = NULL;
+                                }
+
+                                $short_des = substr($p->description,0,100);
+
+                                //ACT 13-04-18: Obtenemos info de si es que ya se envío alerta anteriormente, en caso que exista
+
+                                $ap_alert = \Ermtool\Action_plan_alert::where('action_plan_id',$p->id)->orderBy('created_at','desc')->first();
+
+                                if (!empty($ap_alert))
+                                {
+                                    $ap_resp = \Ermtool\Stakeholder::getName($ap_alert->stakeholder_id);
+                                    //print_r($ap_alert);
+                                }
+                                else
+                                {
+                                    $ap_resp = NULL;   
+                                }
+
+                                $plans[$i] = [
+                                    'id' => $p->id,
+                                    'org_id' => $org->id,
+                                    'org_name' => $org->name,
+                                    'issue_id' => $issue->id,
+                                    'issue_name' => $issue->name,
+                                    'issue_description' => $issue->description,
+                                    'resp_name' => $name,
+                                    'resp_mail' => $stakeholder_mail,
+                                    'description' => $p->description,
+                                    'short_des' => $short_des,
+                                    'final_date' => $p->final_date,
+                                    'dif' => $dif,
+                                    'percentage' => $percentage,
+                                    'percentage_comments' => $percentage_comments,
+                                    'percentage_date' => $percentage_date,
+                                    'ap_resp' => $ap_resp,
+                                    'ap_alert' => $ap_alert
+                                ];
+
+                                $i += 1;
+                            }       
+                        }
+
+                        //Obtenemos mensaje básico de tabla Configurations (mensaje expirado)
+                        $message = \Ermtool\Configuration::where('option_name','=','alert_ap_message_expired')->value('option_value');
+                        $message = eliminarSaltos($message);
+                    }
+                    else if ($_GET['kind'] == 2) //Planes próximos a vencer (1 mes para empezar, pero se puede modificar)
+                    {
+                        $title = 'Planes de acción próximos a vencer (vencen en 1 mes)';
+                        if ($dif <= 31 && $dif >= 0)
+                        {
+                            if ($p->stakeholder_id != NULL && $p->stakeholder_id != '')
+                            {
+                                //obtenemos organización
+                                $org = \Ermtool\Organization::getOrgByActionPlan($p->id);
+                                //issue
+                                $issue = \Ermtool\Issue::find($p->issue_id);
+                                //responsable
+                                $stakeholder_mail = \Ermtool\Stakeholder::where('id',$p->stakeholder_id)->value('mail');
+                                $name = \Ermtool\Stakeholder::getName($p->stakeholder_id);
+
+                                //porcentaje avance
+                                $per = \Ermtool\Action_plan::getProgressPercentage($p->id);
+                                if (!empty($per))
+                                {
+                                    $percentage = $per->percentage;
+                                    $percentage_comments = $per->comments;
+                                    $percentage_comments = eliminarSaltos($percentage_comments);
+                                    $percentage_date = $per->updated_at;
+                                }
+
+                                else
+                                {
+                                    $percentage = NULL;
+                                    $percentage_comments = NULL;
+                                    $percentage_date = NULL;
+                                }
+
+                                $short_des = substr($p->description,0,100);
+
+                                //ACT 13-04-18: Obtenemos info de si es que ya se envío alerta anteriormente, en caso que exista
+                                /*
+                                $ap_alert = \Ermtool\Action_plan_alert::where('action_plan_id',$p->id)->orderBy('created_at','desc')->get();
+
+                                if (!empty($ap_alert))
+                                {
+                                    $ap_resp = \Ermtool\Stakeholder::getName($ap_alert->stakeholder_id);
+                                    //print_r($ap_alert);
+                                }
+                                else
+                                {
+                                    $ap_resp = NULL;   
+                                }
+                                */
+
+                                //ACT 16-05-18: Sólo veremos si tiene alerta, ya que se mostraran todas y no sólo la última
+                                $ap_alert = \Ermtool\Action_plan_alert::where('action_plan_id',$p->id)->first(['id']);
+
+                                $plans[$i] = [
+                                    'id' => $p->id,
+                                    'org_id' => $org->id,
+                                    'org_name' => $org->name,
+                                    'issue_id' => $issue->id,
+                                    'issue_name' => $issue->name,
+                                    'issue_description' => $issue->description,
+                                    'resp_name' => $name,
+                                    'resp_mail' => $stakeholder_mail,
+                                    'description' => $p->description,
+                                    'short_des' => $short_des,
+                                    'final_date' => $p->final_date,
+                                    'dif' => $dif,
+                                    'percentage' => $percentage,
+                                    'percentage_comments' => $percentage_comments,
+                                    'percentage_date' => $percentage_date,
+                                    //'ap_resp' => $ap_resp,
+                                    'ap_alert' => $ap_alert
+                                ];
+
+                                $i += 1;
+                            }       
+                        }
+
+                        //Obtenemos mensaje básico de tabla Configurations (mensaje por expirar)
+                        $message = \Ermtool\Configuration::where('option_name','=','alert_ap_message_to_expire')->value('option_value');
+                        $message = eliminarSaltos($message);
+                    }                
+                }
+            }
+            else
+            {
+                $title = 'No existen planes de acción abiertos';
+            }
+
+            //$message = nl2br($message);
+            //echo strpos($message, "\n");
+            //$message = "adasdasd";
+            return view('planes_accion.index_alerts',['action_plans'=>$plans, 'title' => $title,'message' => $message]);
+            
+        //}
+        //catch (\Exception $e)
+        //{
+        //    enviarMailSoporte($e);
+        //    return view('errors.query',['e' => $e]);
+        //}
+    }
+
+    public function sendAlerts()
+    {
+        //print_r($_POST);
+
+        DB::transaction(function() {
+
+            //Recorremos todos los planes de acción seleccionados
+            foreach ($_POST['plans_id'] as $p)
+            {
+                $ap = \Ermtool\Action_plan::find($p);
+
+                //volvemos a obtener diferencia en días de fecha (para enviar por correo)
+                $date = $ap->final_date;
+                $date = new DateTime($date);
+                //$date = date_format($date,'Y-m-d');
+                $date_actual = new DateTime(date('Y-m-d'));
+                //$seconds= $date - $date_actual;
+                //$dif = intval($seconds/60/60/24);
+
+                $dif = $date_actual->diff($date);
+                $dif = (int)$dif->format('%R%a');
+                $dif = abs($dif);
+                //obtenemos stakeholder (responsable) para enviarle un correo informando la situación
+                $stakeholder_mail = \Ermtool\Stakeholder::where('id',$ap->stakeholder_id)->value('mail');
+                $name = \Ermtool\Stakeholder::getName($ap->stakeholder_id);
+
+                $mensaje = array();
+
+                //Hacemos un replace de nombre de stakeholder, nombre de plan de acción y días de vencimiento
+                $message = str_replace('{{ Usuario }}', $name, $_POST['message']);
+                $message = str_replace('{{ Nombre_plan }}', $ap->description, $message);
+                $message = str_replace('{{ dias }}', $dif, $message);
+                //Separamos en distintos mensajes
+                $mensaje = explode('//', $message);
+
+                if (isset($_POST['cc']) && $_POST['cc'] != "")
+                {
+                    //primero, sacamos posibles espacios que haya agregado el usuario
+                    $cc_se = str_replace(' ','',$_POST['cc']);
+                    //cambiamos comas (de haber) por ;
+                    $cc_se = str_replace(',',';',$cc_se);
+                    //vemos si son varios correos o no
+                    //Primero todas las variables de ; con espacios
+                    if (strpos($cc_se,';'))
+                    {
+                        $cc = explode(';',$cc_se);
+                    }
+
+                    //cc_string para guardar en base de datos aunque sea array
+                    $cc_string = $cc_se;  
+                }
+                else
+                {
+                    $cc = NULL;
+                    $cc_string = NULL;
+                }
+
+                if (isset($_POST['cco']) && $_POST['cco'] != "")
+                {
+                    //primero, sacamos posibles espacios que haya agregado el usuario
+                    $cco_se = str_replace(' ','',$_POST['cco']);
+                    //cambiamos comas (de haber) por ;
+                    $cco_se = str_replace(',',';',$cco_se);
+                    //vemos si son varios correos o no
+                    if (strpos($cco_se,';'))
+                    {
+                        $cco = explode(';',$cco_se);
+                    }
+
+                    //cc_string para guardar en base de datos aunque sea array
+                    $cco_string = $cco_se;
+                    
+                }
+                else
+                {
+                    $cco = NULL;
+                    $cco_string = NULL;
+                }
+
+                Mail::queue('envio_mail_pa',['mensaje' => $mensaje], function ($msj) use ($stakeholder_mail,$name,$cc,$cco)
+                {
+                    //Vemos si se agregó con copia
+                    if ($cc != NULL)
+                    {
+                        if ($cco != NULL)
+                        {
+                            $msj->to($stakeholder_mail, $name)->cc($cc)->bcc($cco)->subject($_POST['subject']);
+                        }
+                        else
+                        {
+                            $msj->to($stakeholder_mail, $name)->cc($cc)->subject($_POST['subject']);
+                        }
+                    }
+                    else
+                    {
+                        if ($cco != NULL)
+                        {
+                            $msj->to($stakeholder_mail, $name)->bcc($cco)->subject($_POST['subject']);
+                        }
+                        else
+                        {
+                            $msj->to($stakeholder_mail, $name)->subject($_POST['subject']);
+                        }
+                    }
+                });
+
+                //Almacenamos en action_plan_alerts
+                \Ermtool\Action_plan_alert::create([
+                    'action_plan_id' => $ap->id,
+                    'message' => $message,
+                    'cc' => $cc_string,
+                    'cco' => $cco_string,
+                    'kind' => 1,
+                    'stakeholder_id' => $ap->stakeholder_id,
+                    'email' => $stakeholder_mail,
+                ]);
+            }
+
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','E-mail of alerts correctly sended');
+            }
+            else
+            {
+                Session::flash('message','E-mail de alertas enviado correctamente');
+            }
+
+        });
+        
+        return Redirect::to('alert_action_plans');
+    }
+
+    //Obtiene info de alertas enviadas para el plan de acción 
+    public function getAlertsInfo($id)
+    {
+        $ap_alerts = \Ermtool\Action_plan_alert::where('action_plan_id',$id)->orderBy('created_at','asc')->get();
+
+        if (!empty($ap_alerts))
+        {
+            foreach ($ap_alerts as $a)
+            {
+                if ($a->stakeholder_id != NULL)
+                {
+                    $a->resp = \Ermtool\Stakeholder::getName($a->stakeholder_id);
+                }
+                else
+                {
+                    $a->resp = NULL;
+                }
+
+                //seteamos fecha
+                $fechat = new DateTime($a->created_at);
+                $fecha = date_format($fechat,"d-m-Y");
+                $hora = date_format($fechat,"H:i:s");
+                $a->fecha = $fecha. ' a las '.$hora;
+            }
+        }
+
+        return json_encode($ap_alerts);
     }
 }

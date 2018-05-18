@@ -3,7 +3,7 @@
 		<i class="fa fa-warning"></i>
 		<span class="hidden-xs">Sistema de Denuncias</span>
 	</a>
-	<ul class="dropdown-menu" style="{{ dropDown2() }}">
+	<ul class="dropdown-menu" style="{{ dropDown9() }}">
 		<li class="dropdown">
 			<li><a href="registro_denuncia" class="{{ activeMenu('registro_denuncia') }}">Registro de Denuncia</a></li>
 

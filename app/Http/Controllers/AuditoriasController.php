@@ -3391,7 +3391,7 @@ class AuditoriasController extends Controller
                         //obtenemos issues
                         $issues = DB::table('issues')
                                         ->where('audit_test_id','=',$test->id)
-                                        ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
+                                        ->select('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations')
                                         ->get();
                         $debilidades = array();
                         $j = 0;
@@ -3401,7 +3401,7 @@ class AuditoriasController extends Controller
                                 'id' => $issue->id,
                                 'name' => $issue->name,
                                 'description' => $issue->description,
-                                'classification' => $issue->classification,
+                                'classification' => $issue->classification_id,
                                 'recommendations' => $issue->recommendations
                             ];
                             $j += 1;

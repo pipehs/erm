@@ -210,4 +210,43 @@ function generate_exposition2(ebt,id)
 	}
 }
 
+//ACT 26-04-18: Agregando respuesta al Riesgo
+function agregar_resp_riesgo()
+{
+			$("#risk_resp").empty();
+			var risk_resp = '<div class="form-group">';
+			risk_resp += '<label for="new_risk_response" class="col-sm-4 control-label">Respuesta al Riesgo</label>';
+			risk_resp += '<div class="col-sm-5">';
+
+			risk_resp += '<input type="text" name="new_risk_response" class="form-control" required placeholder="Agregue nueva respuesta">';
+			risk_resp +='<div style="cursor:hand" onclick="old_risk_resp()"><font color="CornflowerBlue"><u>Seleccionar respuesta al Riesgo</u></font></div> <br></div>';
+
+			$("#risk_resp").append(risk_resp);
+}
+
+function old_risk_resp()
+{
+		$("#risk_resp").empty();
+		var risk_resp = '<div class="form-group">';
+		risk_resp += '<label for="risk_response" class="col-sm-4 control-label">Respuesta al Riesgo</label>';
+		risk_resp += '<div class="col-sm-5">';
+		risk_resp += '<select name="risk_response" class="form-control" id="risk_response">';
+
+		//obtenemos todas las respuestas al riesgo
+		$.get('get_risk_responses', function (result) {
+			//parseamos datos obtenidos
+			var datos = JSON.parse(result);
+
+			$(datos).each( function() {
+				risk_resp += '<option value='+this.id+'>'+this.name+'</option>';
+			});
+
+			risk_resp += '</select>';
+			risk_resp += '</div>';
+			risk_resp += '<div style="cursor:hand" onclick="agregar_resp_riesgo()"><font color="CornflowerBlue"><u>Agregar Nueva Respuesta</u></font></div> <br>';
+			risk_resp += '</div>';
+			$("#risk_resp").append(risk_resp);
+		});
+}
+
 	

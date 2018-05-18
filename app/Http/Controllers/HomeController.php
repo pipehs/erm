@@ -29,7 +29,10 @@ class HomeController extends Controller
     {
         if (Auth::guest())
         {
-            return view('login');
+            //ACT 26-04-18: Obtenemos versión (si es que hay)
+            $version = \Ermtool\Configuration::where('option_name','version')->first(['option_value as v']);
+            
+            return view('login',['version' => $version]);
         }
         else
         {
@@ -57,6 +60,22 @@ class HomeController extends Controller
             //ACT 26-03-18: Obtenemos heatmap por categorías de Riesgo
             $cats = $evalclass->heatmapForCategories();
 
+            //ACT 17-04-18: Actualizamos nueva tabla control_organization según datos actuales
+            $ctrl = new ControlesController;
+
+            //función para actualizar porcentajes de contribución primero en control_organization_risk
+            $ctrl->updateContPercentage();
+
+            //Ahora en control_organization
+            $ctrl->updateControlOrganization();
+            //Actualizamos tablas asociadas a control_organization
+            $ctrl->updateAssociatesControlOrganization();
+
+            //Función para actualizar issue_classification
+            $issue = new IssuesController;
+            $issue->updateIssueClassification();
+            //OBS 26-04-18: No está seteada organización en Parque arauco
+            $issue->updateIssueOrganization();
             //$evals = $evalclass->heatmapLastEvaluation();
 
             //--- Gráfico de Riesgos clasificados por categoría ---//
@@ -406,7 +425,14 @@ class HomeController extends Controller
                             //obtenemos categoría principal (asociada a subcategoría)
                             $ppal_category = \Ermtool\Risk_category::getPrimaryCategory($risk->risk_category_id);
 
-                            $ppal_category = \Ermtool\Risk_category::name($ppal_category->id);
+                            if (!empty($ppal_category))
+                            {
+                                $ppal_category = \Ermtool\Risk_category::name($ppal_category->id);
+                            }
+                            else
+                            {
+                                $ppal_category = NULL;
+                            }
                             //obtenemos responsable
                             $risk_resp = \Ermtool\Stakeholder::getRiskStakeholder($org->id,$risk->risk_id);
                             if ($risk_resp->id != NULL)
@@ -442,7 +468,21 @@ class HomeController extends Controller
                                 $risk->expected_loss = 'No se ha definido pérdida';
                             }
 
-
+                            //obtenemos última evaluación
+                            //ACT 26-03-18: Agregamos kind (1 es para cualquier tipo de evaluación)
+                            //ACT 08-05-18: Obtenemos todas las evaluaciones
+                            $eval = \Ermtool\Evaluation::getEvaluations($risk->id,1);
+                            
+                            for ($j=0;$j<5;$j++)
+                            {
+                                if (!isset($eval[$j]))
+                                {
+                                    $eval[$j] = new stdClass;
+                                    $eval[$j]->avg_probability = NULL;
+                                    $eval[$j]->avg_impact = NULL;
+                                    $eval[$j]->updated_at = NULL;
+                                }
+                            }
                             //causas y efectos
                             $causes = \Ermtool\Cause::getCausesFromRisk($risk->risk_id);
                             $effects = \Ermtool\Effect::getEffectsFromRisk($risk->risk_id);
@@ -495,20 +535,6 @@ class HomeController extends Controller
 
                                     $effects = $e;
                                 }
-                            }
-
-                            //obtenemos última evaluación
-                            //ACT 26-03-18: Agregamos kind (1 es para cualquier tipo de evaluación)
-                            $last_evaluation = \Ermtool\Evaluation::getLastEvaluation($risk->id,1);
-                            if ($last_evaluation == NULL )
-                            {
-                                $proba = 'No evaluado';
-                                $impact = 'No evaluado';
-                            }
-                            else
-                            {
-                                $proba = $last_evaluation->avg_probability;
-                                $impact = $last_evaluation->avg_impact;
                             }
 
                             //obtenemos controles asociados al riesgo
@@ -640,21 +666,39 @@ class HomeController extends Controller
                                     {
                                         $control_resp = 'No se ha agregado responsable';
                                         $control_resp_mail = 'No se ha agregado responsable';
+                                        $control_resp_position = 'No se ha agregado responsable';
                                     }
 
                                     //seteamos riesgo residual
-                                    if ($last_evaluation != NULL)
+                                    $sev = array();
+                                    $residual_risk = array();
+
+                                    if (!empty($eval))
                                     {
-                                        //guardamos proba e impact, para poder enviar los datos en caso que no haya evaluación
-                                        $proba = $last_evaluation->avg_probability;
-                                        $impact = $last_evaluation->avg_impact;
-                                        $sev = $proba * $impact;
-                                        $residual_risk = $sev * (1-($ctrl->porcentaje_cont/100));
+                                        for($j=0;$j<5;$j++)
+                                        {
+                                            if ($eval[$j]->avg_probability != NULL)
+                                            {
+                                                $proba = $eval[$j]->avg_probability;
+                                                $impact = $eval[$j]->avg_impact;
+                                                $sev = $proba * $impact;
+                                                $residual_risk[$j] = $sev * (1-($ctrl->cont_percentage/100));
+                                            }
+                                            else
+                                            {
+                                                $sev = 'No hay evaluación';
+                                                $residual_risk[$j] = 'No hay evaluación';
+                                            }
+                                        }
                                     }
                                     else
                                     {
                                         $sev = 'No se ha evaluado';
-                                        $residual_risk = 'No se ha evaluado';
+                                        $residual_risk[0] = 'No se ha evaluado';
+                                        $residual_risk[1] = 'No se ha evaluado';
+                                        $residual_risk[2] = 'No se ha evaluado';
+                                        $residual_risk[3] = 'No se ha evaluado';
+                                        $residual_risk[4] = 'No se ha evaluado';
                                     }
                                     //obtenemos hallazgos de control
                                     $issues = \Ermtool\Issue::getIssuesFromControl($org->id,$ctrl->id);
@@ -780,9 +824,22 @@ class HomeController extends Controller
                                                             'Causas' => $causes,
                                                             'Efectos' => $effects,
                                                             'Pérdida Esperada' => $risk->expected_loss,
-                                                            'Probabilidad' => $proba,
-                                                            'Impacto' => $impact,
-                                                            'Severidad' => $sev,
+                                                            'Probabilidad 1' => $eval[0]->avg_probability,
+                                                            'Impacto 1' => $eval[0]->avg_impact,
+                                                            'Fecha 1' => $eval[0]->updated_at,
+                                                            'Probabilidad 2' => $eval[1]->avg_probability,
+                                                            'Impacto 2' => $eval[1]->avg_impact,
+                                                            'Fecha 2' => $eval[1]->updated_at,
+                                                            'Probabilidad 3' => $eval[2]->avg_probability,
+                                                            'Impacto 3' => $eval[2]->avg_impact,
+                                                            'Fecha 3' => $eval[2]->updated_at,
+                                                            'Probabilidad 4' => $eval[3]->avg_probability,
+                                                            'Impacto 4' => $eval[3]->avg_impact,
+                                                            'Fecha 4' => $eval[3]->updated_at,
+                                                            'Probabilidad 5' => $eval[4]->avg_probability,
+                                                            'Impacto 5' => $eval[4]->avg_impact,
+                                                            'Fecha 5' => $eval[4]->updated_at,
+                                                            //'Severidad' => $sev,
                                                             'Control' => $ctrl->name,
                                                             'Descripción Control' => $ctrl->description,
                                                             'Responsable Control' => $control_resp,
@@ -794,8 +851,12 @@ class HomeController extends Controller
                                                             'Costo Control' => $ctrl->expected_cost,
                                                             'Evidencia Control' => $ctrl->evidence,
                                                             'Comentarios Control' => $ctrl->comments,
-                                                            '% de Contribución' => $ctrl->porcentaje_cont.'%',            
-                                                            'Riesgo Residual' => $residual_risk,
+                                                            '% de Contribución' => $ctrl->cont_percentage.'%',            
+                                                            'Riesgo Residual 1' => $residual_risk[0],
+                                                            'Riesgo Residual 2' => $residual_risk[1],
+                                                            'Riesgo Residual 3' => $residual_risk[2],
+                                                            'Riesgo Residual 4' => $residual_risk[3],
+                                                            'Riesgo Residual 5' => $residual_risk[4],
                                                             'Hallazgo' => $issue->name,
                                                             'Descripción Hallazgo' => $issue->description,
                                                             'Clasificación Hallazgo' => $issue->classification,
@@ -826,9 +887,8 @@ class HomeController extends Controller
                                                             'risk_resp_mail' => $risk_resp_mail,
                                                             'causes' => $causes,
                                                             'effects' => $effects,
-                                                            'probability' => $proba,
-                                                            'impact' => $impact,
-                                                            'score' => $sev,
+                                                            'eval' => $eval,
+                                                            //'score' => $sev,
                                                             'residual_risk' => $residual_risk,
                                                             'control' => $ctrl,
                                                             'control_resp' => $control_resp,
@@ -877,9 +937,22 @@ class HomeController extends Controller
                                                         'Causas' => $causes,
                                                         'Efectos' => $effects,
                                                         'Pérdida Esperada' => $risk->expected_loss,
-                                                        'Probabilidad' => $proba,
-                                                        'Impacto' => $impact,
-                                                        'Severidad' => $sev,
+                                                        'Probabilidad 1' => $eval[0]->avg_probability,
+                                                        'Impacto 1' => $eval[0]->avg_impact,
+                                                        'Fecha 1' => $eval[0]->updated_at,
+                                                        'Probabilidad 2' => $eval[1]->avg_probability,
+                                                        'Impacto 2' => $eval[1]->avg_impact,
+                                                        'Fecha 2' => $eval[1]->updated_at,
+                                                        'Probabilidad 3' => $eval[2]->avg_probability,
+                                                        'Impacto 3' => $eval[2]->avg_impact,
+                                                        'Fecha 3' => $eval[2]->updated_at,
+                                                        'Probabilidad 4' => $eval[3]->avg_probability,
+                                                        'Impacto 4' => $eval[3]->avg_impact,
+                                                        'Fecha 4' => $eval[3]->updated_at,
+                                                        'Probabilidad 5' => $eval[4]->avg_probability,
+                                                        'Impacto 5' => $eval[4]->avg_impact,
+                                                        'Fecha 5' => $eval[4]->updated_at,
+                                                        //'Severidad' => $sev,
                                                         'Control' => $ctrl->name,
                                                         'Descripción Control' => $ctrl->description,
                                                         'Responsable Control' => $control_resp,
@@ -892,7 +965,11 @@ class HomeController extends Controller
                                                         'Evidencia Control' => $ctrl->evidence,
                                                         'Comentarios Control' => $ctrl->comments,
                                                         '% de Contribución' => $ctrl->porcentaje_cont.'%',
-                                                        'Riesgo Residual' => $residual_risk,
+                                                        'Riesgo Residual 1' => $residual_risk[0],
+                                                        'Riesgo Residual 2' => $residual_risk[1],
+                                                        'Riesgo Residual 3' => $residual_risk[2],
+                                                        'Riesgo Residual 4' => $residual_risk[3],
+                                                        'Riesgo Residual 5' => $residual_risk[4],
                                                         'Hallazgo' => $issue->name,
                                                         'Descripción Hallazgo' => $issue->description,
                                                         'Clasificación Hallazgo' => $issue->classification,
@@ -922,10 +999,9 @@ class HomeController extends Controller
                                                         'risk_resp_position' => $risk_resp_position,
                                                         'risk_resp_mail' => $risk_resp_mail,
                                                         'causes' => $causes,
-                                                        'effects' => $effects,
-                                                        'probability' => $proba,
+                                                        'eval' => $eval,
                                                         'impact' => $impact,
-                                                        'score' => $sev,
+                                                        //'score' => $sev,
                                                         'residual_risk' => $residual_risk,
                                                         'control' => $ctrl,
                                                         'control_resp' => $control_resp,
@@ -979,9 +1055,22 @@ class HomeController extends Controller
                                                 'Causas' => $causes,
                                                 'Efectos' => $effects,
                                                 'Pérdida Esperada' => $risk->expected_loss,
-                                                'Probabilidad' => $proba,
-                                                'Impacto' => $impact,
-                                                'Severidad' => $sev,
+                                                'Probabilidad 1' => $eval[0]->avg_probability,
+                                                'Impacto 1' => $eval[0]->avg_impact,
+                                                'Fecha 1' => $eval[0]->updated_at,
+                                                'Probabilidad 2' => $eval[1]->avg_probability,
+                                                'Impacto 2' => $eval[1]->avg_impact,
+                                                'Fecha 2' => $eval[1]->updated_at,
+                                                'Probabilidad 3' => $eval[2]->avg_probability,
+                                                'Impacto 3' => $eval[2]->avg_impact,
+                                                'Fecha 3' => $eval[2]->updated_at,
+                                                'Probabilidad 4' => $eval[3]->avg_probability,
+                                                'Impacto 4' => $eval[3]->avg_impact,
+                                                'Fecha 4' => $eval[3]->updated_at,
+                                                'Probabilidad 5' => $eval[4]->avg_probability,
+                                                'Impacto 5' => $eval[4]->avg_impact,
+                                                'Fecha 5' => $eval[4]->updated_at,
+                                                //'Severidad' => $sev,
                                                 'Control' => $ctrl->name,
                                                 'Descripción Control' => $ctrl->description,
                                                 'Responsable Control' => $control_resp,
@@ -993,8 +1082,12 @@ class HomeController extends Controller
                                                 'Costo Control' => $ctrl->expected_cost,
                                                 'Descripción Evidencia Control' => $ctrl->evidence,
                                                 'Comentarios Control' => $ctrl->comments,
-                                                '% de Contribución' => $ctrl->porcentaje_cont.'%',
-                                                'Riesgo Residual' => $residual_risk,
+                                                '% de Contribución' => $ctrl->cont_percentage.'%',
+                                                'Riesgo Residual 1' => $residual_risk[0],
+                                                'Riesgo Residual 2' => $residual_risk[1],
+                                                'Riesgo Residual 3' => $residual_risk[2],
+                                                'Riesgo Residual 4' => $residual_risk[3],
+                                                'Riesgo Residual 5' => $residual_risk[4],
                                                 'Hallazgo' => $issue->name,
                                                 'Descripción Hallazgo' => $issue->description,
                                                 'Clasificación Hallazgo' => $issue->classification,
@@ -1025,9 +1118,8 @@ class HomeController extends Controller
                                                 'risk_resp_mail' => $risk_resp_mail,
                                                 'causes' => $causes,
                                                 'effects' => $effects,
-                                                'probability' => $proba,
-                                                'impact' => $impact,
-                                                'score' => $sev,
+                                                'eval' => $eval,
+                                                //'score' => $sev,
                                                 'residual_risk' => $residual_risk,
                                                 'control' => $ctrl,
                                                 'control_resp' => $control_resp,
@@ -1058,12 +1150,17 @@ class HomeController extends Controller
                                 $ctrl->periodicity = 'No hay control';
                                 $ctrl->evidence = 'No hay control';
                                 $ctrl->comments = 'No hay control';
-                                $ctrl->porcentaje_cont = 'No hay control';
+                                $ctrl->cont_percentage = 'No hay control';
                                 $ctrl->expected_cost = 'No hay control';
                                 $control_resp = 'No hay control';
                                 $control_resp_mail = 'No hay control';
                                 $control_resp_position = 'No hay control';
-                                $residual_risk = 'No hay control';
+                                $residual_risk = array();
+                                $residual_risk[0] = 'No hay control';
+                                $residual_risk[1] = 'No hay control';
+                                $residual_risk[2] = 'No hay control';
+                                $residual_risk[3] = 'No hay control';
+                                $residual_risk[4] = 'No hay control';
                                 $issue->name = 'No hay hallazgo';
                                 $issue->description = 'No hay hallazgo';
                                 $issue->classification = 'No hay hallazgo';
@@ -1094,9 +1191,22 @@ class HomeController extends Controller
                                         'Causas' => $causes,
                                         'Efectos' => $effects,
                                         'Pérdida Esperada' => $risk->expected_loss,
-                                        'Probabilidad' => $proba,
-                                        'Impacto' => $impact,
-                                        'Severidad' => $sev,
+                                        'Probabilidad 1' => $eval[0]->avg_probability,
+                                        'Impacto 1' => $eval[0]->avg_impact,
+                                        'Fecha 1' => $eval[0]->updated_at,
+                                        'Probabilidad 2' => $eval[1]->avg_probability,
+                                        'Impacto 2' => $eval[1]->avg_impact,
+                                        'Fecha 2' => $eval[1]->updated_at,
+                                        'Probabilidad 3' => $eval[2]->avg_probability,
+                                        'Impacto 3' => $eval[2]->avg_impact,
+                                        'Fecha 3' => $eval[2]->updated_at,
+                                        'Probabilidad 4' => $eval[3]->avg_probability,
+                                        'Impacto 4' => $eval[3]->avg_impact,
+                                        'Fecha 4' => $eval[3]->updated_at,
+                                        'Probabilidad 5' => $eval[4]->avg_probability,
+                                        'Impacto 5' => $eval[4]->avg_impact,
+                                        'Fecha 5' => $eval[4]->updated_at,
+                                        //'Severidad' => $sev,
                                         'Control' => $ctrl->name,
                                         'Descripción Control' => $ctrl->description,
                                         'Responsable Control' => $control_resp,
@@ -1108,8 +1218,12 @@ class HomeController extends Controller
                                         'Costo Control' => $ctrl->expected_cost,
                                         'Evidencia Control' => $ctrl->evidence,
                                         'Comentarios Control' => $ctrl->comments,
-                                        '% de Contribución' => $ctrl->porcentaje_cont.'%',
-                                        'Riesgo Residual' => $residual_risk,
+                                        '% de Contribución' => $ctrl->cont_percentage.'%',
+                                        'Riesgo Residual 1' => $residual_risk[0],
+                                        'Riesgo Residual 2' => $residual_risk[1],
+                                        'Riesgo Residual 3' => $residual_risk[2],
+                                        'Riesgo Residual 4' => $residual_risk[3],
+                                        'Riesgo Residual 5' => $residual_risk[4],
                                         'Hallazgo' => $issue->name,
                                         'Descripción Hallazgo' => $issue->description,
                                         'Clasificación Hallazgo' => $issue->classification,
@@ -1140,9 +1254,8 @@ class HomeController extends Controller
                                         'risk_resp_mail' => $risk_resp_mail,
                                         'causes' => $causes,
                                         'effects' => $effects,
-                                        'probability' => $proba,
-                                        'impact' => $impact,
-                                        'score' => $sev,
+                                        'eval' => $eval,
+                                        //'score' => $sev,
                                         'residual_risk' => $residual_risk,
                                         'control' => $ctrl,
                                         'control_resp' => $control_resp,

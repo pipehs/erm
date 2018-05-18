@@ -45,16 +45,6 @@
 
 			{!!Form::open(['route'=>'residual_manual.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 
-			<div class="form-group">
-				<small>
-				    {!!Form::label('Ingrese su Rut o DNI (sin dígito verificador en caso de Chile)',null,['class'=>'col-sm-4 control-label'])!!}
-				<div class="col-sm-3">
-						{!!Form::number('rut',null,
-					['class'=>'form-control','required'=>'true'])!!}
-				</div>
-				</small>
-			</div>
-
 			<p>Por cada riesgo identificado, señale un nivel de probabilidad e impacto del mismo, tanto de forma cuantitativa (impacto y probabilidad neta) como cualitativa (Riesgo residual basado en las descripciones descritas).</p>
 
 			@foreach($riesgos as $riesgo)
@@ -74,9 +64,15 @@
 				{{ $riesgo['description'] }}</p>
 
 				<b>Control(es) asociado(s)</b><br>
-				@foreach ($riesgo['controls'] as $control)
-					<li>{{ $control->name }} - {{ $control->description }}</li>
-				@endforeach
+				@if (!empty($riesgo['controls']))
+					@foreach ($riesgo['controls'] as $control)
+						<li>{{ $control->name }} - {{ $control->description }}</li>
+					@endforeach
+				@else
+					<div class="alert alert-danger alert-dismissible" role="alert">
+						<small>No existen Controles asociados al Riesgo</small>
+					</div>
+				@endif
 				<br>
 
 				<table class="table table-bordered table-striped table-heading" style="font-size:11px">
@@ -107,15 +103,26 @@
 						@elseif ($riesgo['last_m']->calification == 3)
 							<b>Calificación: L<br>
 						@endif
+					@else
+						<div class="alert alert-danger alert-dismissible" role="alert">
+							No existe evaluación cuantitativa bruta del Riesgo
+						</div>
+					@endif
 					</td>
 					<td>
 						@if (!empty($riesgo['evaluation_risk']))
 							<b>Probabilidad: {{ $riesgo['evaluation_risk']->avg_probability }}<br>
 							<b>Impacto: {{ $riesgo['evaluation_risk']->avg_impact }}<br>
+						@else
+							<div class="alert alert-danger alert-dismissible" role="alert">
+								No existe evaluación inherente del Riesgo
+							</div>
 						@endif
 					</td>
 					</tr>
 				</table>
+				<h5><b>Evaluación Cuantitativa</b></h5>
+				@if (isset($ebt) && !empty($ebt) && $ebt != NULL && isset($riesgo['last_m']) && !empty($riesgo['last_m']) && $riesgo['last_m'] != NULL)
 					<div class="form-group">
 						{!!Form::label('Impacto neto',null,['class'=>'col-sm-2 control-label'])!!}
 						<div class="col-sm-3">
@@ -161,8 +168,12 @@
 							<input type="hidden" name="calification2_{{$riesgo['org_risk_id']}}" id="calification2_{{$riesgo['org_risk_id']}}">
 						</div>
 					</div>
-
+				@else
+					<div class="alert alert-danger alert-dismissible" role="alert">
+						Antes de ingresar una evaluación cuantitativa del Riesgo, debe primero que todo definir un EBT (Earns Before Tax) para la Organización, y luego ingresar la materialidad bruta del Riesgo en la sección de Identificación de Riesgos 
+					</div>
 				@endif
+				<h5><b>Evaluación Cualitativa</b></h5>
 				<b>Probabilidad:</b><br>
 				@for($i=1; $i<=5; $i++)
 				<div class="radio-inline">

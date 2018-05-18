@@ -305,7 +305,24 @@
 						</div>
 					</div>
 @endif
-
+				@if (isset($risk_responses))
+					<div id="risk_resp">
+						<div class="form-group">
+							<label for="risk_response" class="col-sm-4 control-label">Respuesta al Riesgo</label>
+							<div class="col-sm-5">
+								@if (isset($risk_response))
+									{!!Form::select('risk_response',$risk_responses,$risk_response->id, 
+									 	   ['id'=>'risk_response','placeholder'=>'- Seleccione -'])!!}
+								@else
+									{!!Form::select('risk_response',$risk_responses,null, 
+									 	   ['id'=>'risk_response','placeholder'=>'- Seleccione -'])!!}
+								@endif
+							</div>
+							<div style="cursor:hand" onclick="agregar_resp_riesgo()"><font color="CornflowerBlue"><u>Agregar Nueva Respuesta</u></font></div> <br>
+						</div>
+					</div>
+				@endif
+				
 @if (isset($objetivos) || isset($subprocesos))	
 			@if (isset($subprocesos))		
 					<div class="form-group">
@@ -341,6 +358,7 @@
 			@if (isset($org_id))			
 					{!!Form::hidden('org_id',$org_id)!!}
 			@endif
+
 					<div class="form-group">
 						<center>
 						{!!Form::submit('Guardar', ['class'=>'btn btn-success'])!!}

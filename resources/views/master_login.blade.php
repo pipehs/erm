@@ -17,8 +17,8 @@
  
  	{!!Html::style('assets/plugins/bootstrap/bootstrap.css')!!}
  	{!!Html::style('assets/plugins/jquery-ui/jquery-ui.min.css')!!}
- 	{!!Html::style('http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css')!!}
- 	{!!Html::style('http://fonts.googleapis.com/css?family=Righteous')!!}
+ 	{!!Html::style('https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css')!!}
+ 	{!!Html::style('https://fonts.googleapis.com/css?family=Righteous')!!}
  	{!!Html::style('assets/plugins/fancybox/jquery.fancybox.css')!!}
  	{!!Html::style('assets/plugins/xcharts/xcharts.min.css')!!}
  	{!!Html::style('assets/css/style.css')!!}
@@ -34,9 +34,9 @@
 	{!!Html::script('assets/plugins/tinymce/jquery.tinymce.min.js')!!}
 	{!!Html::script('assets/js/devoops.js')!!}
 
-	{!!Html::script('http://code.highcharts.com/highcharts.js')!!}
-	{!!Html::script('http://code.highcharts.com/modules/heatmap.js')!!}
-	{!!Html::script('http://code.highcharts.com/modules/exporting.js')!!}
+	{!!Html::script('https://code.highcharts.com/highcharts.js')!!}
+	{!!Html::script('https://code.highcharts.com/modules/heatmap.js')!!}
+	{!!Html::script('https://code.highcharts.com/modules/exporting.js')!!}
 
 	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}
 

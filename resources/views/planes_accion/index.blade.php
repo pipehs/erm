@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('hallazgos','Planes de Acci&oacute;n')!!}</li>
+			<li>{!!Html::link('action_plans','Planes de Acci&oacute;n')!!}</li>
 		</ol>
 	</div>
 </div>

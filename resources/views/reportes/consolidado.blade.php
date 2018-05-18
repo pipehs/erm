@@ -58,9 +58,22 @@
 				<th>Causas<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Efectos<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Pérdida esperada<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Probabilidad<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Impacto<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Severidad<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Probabilidad 1<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Impacto 1<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Fecha 1<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Probabilidad 2<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Impacto 2<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Fecha 2<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Probabilidad 3<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Impacto 3<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Fecha 3<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Probabilidad 4<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Impacto 4<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Fecha 4<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Probabilidad 5<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Impacto 5<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Fecha 5<label><input type="text" placeholder="Filtrar" /></label></th>
+				<!--<th>Severidad<label><input type="text" placeholder="Filtrar" /></label></th>-->
 				<th>Control<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Descripción Control<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Responsable Control<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -73,7 +86,11 @@
 				<th>Evidencia Control<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Comentarios Control<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>% Contribución Control<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Exposición efectiva (Riesgo Residual)<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Exposición efectiva 1(Riesgo Residual)<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Exposición efectiva 2(Riesgo Residual)<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Exposición efectiva 3(Riesgo Residual)<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Exposición efectiva 4(Riesgo Residual)<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Exposición efectiva 5(Riesgo Residual)<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Descripción Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Clasificación Hallazgo<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -120,9 +137,25 @@
 				@endif
 				</td>
 				<td>{{ $r['risk']->expected_loss }}</td>
-				<td>{{ $r['probability'] }}</td>
-				<td>{{ $r['impact'] }}</td>
-				<td>{{ $r['score'] }}</td>
+				<td>{{ $r['eval'][0]->avg_probability }}</td>
+				<td>{{ $r['eval'][0]->avg_impact }}</td>
+				<td>{{ $r['eval'][0]->updated_at }}</td>
+				<td>{{ $r['eval'][1]->avg_probability }}</td>
+				<td>{{ $r['eval'][1]->avg_impact }}</td>
+				<td>{{ $r['eval'][1]->updated_at }}</td>
+				<td>{{ $r['eval'][2]->avg_probability }}</td>
+				<td>{{ $r['eval'][2]->avg_impact }}</td>
+				<td>{{ $r['eval'][2]->updated_at }}</td>
+				<td>{{ $r['eval'][3]->avg_probability }}</td>
+				<td>{{ $r['eval'][3]->avg_impact }}</td>
+				<td>{{ $r['eval'][3]->updated_at }}</td>
+				<td>{{ $r['eval'][4]->avg_probability }}</td>
+				<td>{{ $r['eval'][4]->avg_impact }}</td>
+				<td>{{ $r['eval'][4]->updated_at }}</td>
+				
+
+				
+
 				<td>{{ $r['control']->name }}</td>
 				<td>{{ $r['control']->description }}</td>
 				<td>{{ $r['control_resp'] }} </td>
@@ -134,8 +167,12 @@
 				<td>{{ $r['control']->expected_cost }}</td>
 				<td>{{ $r['control']->evidence }}</td>
 				<td>{{ $r['control']->comments }}</td>
-				<td>{{ $r['control']->porcentaje_cont }}</td>
-				<td>{{ $r['residual_risk'] }}</td>
+				<td>{{ $r['control']->cont_percentage }}</td>
+				<td>{{ $r['residual_risk'][0] }}</td>
+				<td>{{ $r['residual_risk'][1] }}</td>
+				<td>{{ $r['residual_risk'][2] }}</td>
+				<td>{{ $r['residual_risk'][3] }}</td>
+				<td>{{ $r['residual_risk'][4] }}</td>
 				<td>{{ $r['issue']->name }}</td>
 				<td>{{ $r['issue']->description }}</td>
 				<td>{{ $r['issue']->classification }}</td>

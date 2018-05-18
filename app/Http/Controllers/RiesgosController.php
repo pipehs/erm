@@ -123,7 +123,7 @@ class RiesgosController extends Controller
                                                     //'id'=>$objective->id,
                                                     //'nombre'=>$objective->name);
 
-                            $subobj[$j] = ['id' => $subprocess->id, 'name' => $subprocess->name];
+                            $subobj[$j] = ['id' => $objective->id, 'name' => $objective->name];
                             $j += 1;
 
                         }
@@ -546,20 +546,26 @@ class RiesgosController extends Controller
                     //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
                     $short_des = substr($riesgo->description,0,100);
 
-                    $riesgos[$i] = array('id'=>$riesgo->id,
-                                        'nombre'=>$riesgo->name,
-                                        'descripcion'=>$riesgo->description,
-                                        'tipo'=>$tipo,
-                                        'fecha_creacion'=>$fecha_creacion,
-                                        'stakeholder'=>$stakeholder->name.' '.$stakeholder->surnames,
-                                        'fecha_exp'=>$fecha_exp,
-                                        'categoria'=>$categoria,
-                                        'causas'=>$causas,
-                                        'efectos'=>$efectos,
-                                        'short_des'=>$short_des,
-                                        'impacto' => $impacto,
-                                        'probabilidad' => $probabilidad,
-                                        'score' => $score);
+                    //ACT 26-04-18: Agregamos respuesta al riesgo
+                    $risk_response = \Ermtool\Risk_response::getByOrgRisk($org_risk->id);
+
+                    $riesgos[$i] = [
+                        'id'=>$riesgo->id,
+                        'nombre'=>$riesgo->name,
+                        'descripcion'=>$riesgo->description,
+                        'tipo'=>$tipo,
+                        'fecha_creacion'=>$fecha_creacion,
+                        'stakeholder'=>$stakeholder->name.' '.$stakeholder->surnames,
+                        'fecha_exp'=>$fecha_exp,
+                        'categoria'=>$categoria,
+                        'causas'=>$causas,
+                        'efectos'=>$efectos,
+                        'short_des'=>$short_des,
+                        'impacto' => $impacto,
+                        'probabilidad' => $probabilidad,
+                        'score' => $score,
+                        'risk_response' => $risk_response
+                    ];
 
                     $i += 1;
 
@@ -634,6 +640,9 @@ class RiesgosController extends Controller
                     }
                 }
 
+                //ACT 26-04-18: Agregamos respuesta al riesgo
+                $risk_responses = \Ermtool\Risk_response::lists('name','id');
+
                 if(isset($_GET['P']))
                 {
                     //ACTUALIZACIÓN 26-07-16: SOLO MOSTRAMOS PROCESOS PERTENECIENTES A LA EMPRESA QUE SE ESTÁ CONSULTANDO
@@ -649,12 +658,12 @@ class RiesgosController extends Controller
                     if (Session::get('languaje') == 'en')
                     {
                         return view('en.riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                            'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations,'kinds'=>$kinds,'ebt' => $ebt]);
+                            'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations,'kinds'=>$kinds,'ebt' => $ebt,'risk_responses' => $risk_responses]);
                     }
                     else
                     {
                         return view('riesgos.create',['categorias'=>$categorias,'causas'=>$causas,
-                            'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations,'kinds'=>$kinds,'ebt' => $ebt]);
+                            'efectos'=>$efectos,'subprocesos'=>$subprocesos,'riesgos_tipo'=>$riesgos_tipo,'stakeholders'=>$stakeholders,'org_id' => $_GET['org'],'organizations' => $organizations,'kinds'=>$kinds,'ebt' => $ebt,'risk_responses' => $risk_responses]);
                     }
                 }
 
@@ -891,6 +900,27 @@ class RiesgosController extends Controller
                                 } 
                             }
 
+                            //ACT 26-04-18: Respuestas al Riesgo
+                            if (isset($_POST['new_risk_response']) && $_POST['risk_responses'] != '')
+                            {
+                                $risk_response = \Ermtool\Risk_response::create([
+                                    'name'=>$_POST['new_risk_response']
+                                ]);
+
+                                $risk_response = $risk_response->id;
+                            }
+                            else //se están agregando causas ya creadas
+                            {
+                                if (isset($_POST['risk_response']) && $_POST['risk_response'] != '')
+                                {
+                                    $risk_response = $_POST['risk_response'];
+                                }
+                                else
+                                {
+                                    $risk_response = NULL;
+                                }
+                            }
+
                         //agregamos en tabla risk_subprocess o objective_risk
                         //obtenemos id de riesgo recien ingresado
                         //$risk = $risk->id;
@@ -920,10 +950,9 @@ class RiesgosController extends Controller
                         //ACTUALIZACIÓN 29-03-17: Agregamos en tabla organization_risk
                         //ACTUALIZACIÓN 16-08-17: Agregamos aquí también stakeholder_id
                         //ACTUALIZACIÓN 08-01-17: Agregamos aquí también comentarios
-                        //$organization = \Ermtool\Organization::find($_POST['org_id']);
-                        //$organization->risks()->attach($risk->id);
+                        //ACT 26-04-18: Agregamos respuesta al riesgo
 
-                        \Ermtool\Risk::insertOrganizationRisk($_POST['org_id'],$risk->id,$stake,$comments2);
+                        \Ermtool\Risk::insertOrganizationRisk($_POST['org_id'],$risk->id,$stake,$comments2,$risk_response);
 
                         //ACTUALIZACIÓN 16-08-17: Agregamos riesgo y subproceso para otras organizaciones
                         if (isset($_POST['organization_id']) && $_POST['organization_id'] != "")
@@ -952,7 +981,7 @@ class RiesgosController extends Controller
                                 }
                                 else
                                 {
-                                    \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,null,null);
+                                    \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,null,null,null);
                                 }
                             }
                         }
@@ -1223,6 +1252,12 @@ class RiesgosController extends Controller
 
                     //obtenemos último impacto y probabilidad (materialidad)
                     $last_m = \Ermtool\Risk::getLastMateriality($_GET['org'],$risk->id);
+
+                    //ACT 26-04-18: Agregamos respuesta al riesgo
+                    $org_risk = \Ermtool\Risk::getOrgRisk($risk->id,$_GET['org']);
+                    $risk_response = \Ermtool\Risk_response::getByOrgRisk($org_risk->id);
+
+                    $risk_responses = \Ermtool\Risk_response::lists('name','id');
                 }
                 else
                 {
@@ -1231,14 +1266,10 @@ class RiesgosController extends Controller
                     $comments2 = NULL;
                 }
                 //ACTUALIZACIÓN 29-03-17: SELECCIONAMOS SI SE DESEA AGREGAR A OTRAS ORGANIZACIONES
-                //ACT 17-08-17: No lo haremos al editar 
-                //ACT 16-10-17: Si lo haremos al editar
-                $organizations = \Ermtool\Organization::organizationsWithoutRisk($id);
-
-                
+                $organizations = \Ermtool\Organization::organizationsWithoutRisk($id);                
 
                 //ACTUALIZACIÓN 04-01-18: Agregamos tipos de moneda para materialidad
-                $kinds = ['1'=>'Peso','2'=>'Dólar','3'=>'Euro','4'=>'UF']; 
+                $kinds = ['1'=>'Peso','2'=>'Dólar','3'=>'Euro','4'=>'UF'];
 
                 if (Session::get('languaje') == 'en')
                 {
@@ -1246,11 +1277,11 @@ class RiesgosController extends Controller
                     {
                         if ($risk->type == 0)
                         {
-                            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org'],'organizations' => $organizations,'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds]);
+                            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org'],'organizations' => $organizations,'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds,'risk_response' => $risk_response,'risk_responses'=>$risk_responses]);
                         }
                         else
                         {
-                            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org'],'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds]);
+                            return view('en.riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org'],'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds,'risk_response' => $risk_response,'risk_responses'=>$risk_responses]);
                         }
                     }
                     else
@@ -1271,11 +1302,11 @@ class RiesgosController extends Controller
                     {
                         if ($risk->type == 0)
                         {
-                            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org'],'organizations' => $organizations,'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds]);
+                            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'subprocesos' => $subprocesos,'sub_selected' => $sub_selected,'org_id' => $_GET['org'],'organizations' => $organizations,'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds,'risk_response' => $risk_response,'risk_responses'=>$risk_responses]);
                         }
                         else
                         {
-                            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org'],'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds]);
+                            return view('riesgos.edit',['risk'=>$risk,'riesgos_tipo'=>$riesgos_tipo,'causas'=>$causas,'categorias'=>$categorias,'efectos'=>$efectos,'stakeholders' => $stakeholders, 'stakeholder' => $stakeholder,'causes_selected'=>$causes_selected,'effects_selected'=>$effects_selected,'objetivos' => $objectives,'obj_selected' => $obj_selected,'org_id' => $_GET['org'],'risk_category0' => $risk_category0,'risk_category1' => $risk_category1,'risk_category2' => $risk_category2,'last_m' => $last_m,'ebt'=>$ebt,'comments2'=>$comments2,'kinds' => $kinds,'risk_response' => $risk_response,'risk_responses'=>$risk_responses]);
                         }
                     }
                     else
@@ -1651,12 +1682,34 @@ class RiesgosController extends Controller
                         //ACTUALIZACIÓN 16-10-17: Si es que no se agrega org_id es porque se está modificando el riesgo en general
                         if (isset($_POST['org_id']))
                         {
+                            //ACT 26-04-18: Respuestas al Riesgo
+                            if (isset($_POST['new_risk_response']) && $_POST['new_risk_response'] != '')
+                            {
+                                $risk_response = \Ermtool\Risk_response::create([
+                                    'name'=>$_POST['new_risk_response']
+                                ]);
+
+                                $risk_response = $risk_response->id;
+                            }
+                            else //se están agregando causas ya creadas
+                            {
+                                if (isset($_POST['risk_response']) && $_POST['risk_response'] != '')
+                                {
+                                    $risk_response = $_POST['risk_response'];
+                                }
+                                else
+                                {
+                                    $risk_response = NULL;
+                                }
+                            }
+
                             //ACTUALIZACIÓN 17-08-17: Actualizamos stakeholder en organization_risk
                             DB::table('organization_risk')
                                 ->where('organization_id','=',$_POST['org_id'])
                                 ->where('risk_id','=',$riesgo->id)
                                 ->update([
-                                    'stakeholder_id' => $stake
+                                    'stakeholder_id' => $stake,
+                                    'risk_response_id' => $risk_response
                                     ]);
                         }
 

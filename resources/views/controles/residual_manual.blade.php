@@ -42,6 +42,12 @@
 			</div>
 		@endif
 
+		@if(Session::has('error'))
+			<div class="alert alert-danger alert-dismissible" role="alert">
+			{{ Session::get('error') }}
+			</div>
+		@endif
+
 		<p>Seleccione los riesgos que desee evaluar agregando impacto y probabilidad residual del mismo manualmente.</p>
 			
 			{!!Form::open(['url'=>'residual_manual2','method'=>'GET','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}

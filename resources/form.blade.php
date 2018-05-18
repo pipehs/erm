@@ -1,139 +1,102 @@
+				@if (strstr($_SERVER["REQUEST_URI"],'create'))
+					<div class="form-group">
+						<label for="subneg" class="col-sm-4 control-label">Seleccione si es control de negocio o proceso</label>
+						<div class="col-sm-4">
+							{!!Form::select('subneg',['0'=>'Proceso','1'=>'Negocio'],null, 
+							 	   ['id' => 'subneg','required'=>'true','placeholder'=>'- Seleccione -'])!!}
+						</div>
+					</div>
+				@endif
 
-@if (strstr($_SERVER["REQUEST_URI"],'create'))
-<!-- Actualización 20-08-17: Rut chileno o DNI Extranjero -->
-			<div class="form-group">
-				<label class="col-sm-4 control-label">Nacionalidad</label>
-				<div class="col-sm-3">
-				<div class="radio-inline">
-					<label> 
-						<input type="radio" name="nacionalidad" id="chileno" value="chileno" onclick="nac()">Chileno
-						<i class="fa fa-circle-o"></i>
-					</label>
-				</div>
-				<div class="radio-inline">
-					<label> 
-						<input type="radio" name="nacionalidad" id="extranjero" value="extranjero" onclick="nac()">Extranjero
-						<i class="fa fa-circle-o"></i>
-					</label>
-				</div>
-				</div>
-			</div>
-			
-			<div id="rut" style="display:none;">
-				<div class="form-group">
-			        {!!Form::label('Rut',null,['class'=>'col-sm-4 control-label'])!!}
-					<div class="col-sm-2">
-						{!!Form::text('id',null,
-						['class'=>'form-control','input maxlength'=>'8','input minlength'=>'7', $disabled])!!}
+					<div class="form-group" id="riesgos" style="display: none;">
+						<label for="select_riesgos" class="col-sm-4 control-label" id="label_riesgos">Seleccione Riesgo</label>
+						<div class="col-sm-4">
+							<select name="select_riesgos[]" id="select_riesgos" multiple="multiple">
+								<option value="">-Seleccione-</option>
+								<!-- Aquí se agregarán los riesgos/subprocesos a través de Jquery (en caso de que el usuario lo solicite) -->
+							</select>
+						</div>
 					</div>
-					<div class="col-sm-1">
-					{!!Form::select('dv',$dv, 
-				 	   null, 
-				 	   ['id' => 'el2','placeholder'=>'-',$disabled])!!}
-					</div>
-				</div>
-			</div>
-			<div id="dni" style="display:none;">
-				<div class="form-group">
-			        {!!Form::label('DNI',null,['class'=>'col-sm-4 control-label'])!!}
-					<div class="col-sm-3">
-						{!!Form::number('id2',null,
-						['class'=>'form-control','input minlength'=>'7', $disabled])!!}
-					</div>
-				</div>
-			</div>
-@endif
 
 					<div class="form-group">
 						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-							{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
+						<div class="col-sm-4">
+							{!!Form::text('name',null,['id'=>'nombre','class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Apellidos',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-							{!!Form::text('surnames',null,['class'=>'form-control','required'=>'true'])!!}
+						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
-					<div id="rol">
-						<div class="form-group">
-							{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
-							<div class="col-sm-3">
-							@if (strstr($_SERVER["REQUEST_URI"],'edit'))
-								<select name="role_id[]" multiple required id="el3">
-								@foreach ($roles as $id=>$name)
-
-									<?php $i = 0; //contador de roles del usuario 
-										  $cont = 0; //contador para ver si es que un rol está seleccionado ?>
-									@while (isset($types_selected[$i]))
-										@if ($types_selected[$i] == $id)
-											<option value="{{ $id }}" selected>{{ $name }}</option>
-											<?php $cont += 1; ?>
-										@endif
-										<?php $i += 1; ?>
-									@endwhile
-
-									@if ($cont == 0)
-										<option value="{{ $id }}">{{ $name }}</option>
-									@endif
-
-								@endforeach
-								</select>
-							@else
-								{!!Form::select('role_id[]',$roles, 
-							 	   null, 
-							 	   ['id' => 'el3','multiple'=>'true','required'=>'true'])!!}
-							@endif
-							</div>
-							<a href="#" id="agregar_rol">Agregar nuevo tipo</a> <br>
-						</div>
-					</div>
+					
 					<div class="form-group">
-						{!!Form::label('Correo Electr&oacute;nico',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-							{!!Form::email('mail',null,['class'=>'form-control','required'=>'true'])!!}
+						{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::select('type',['0'=>'Manual','1'=>'Semi-Automático','2'=>'Automático'],
+							null,['placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
+
 					<div class="form-group">
-						{!!Form::label('Cargo (opcional)',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-							{!!Form::text('position',null,['class'=>'form-control'])!!}
+						{!!Form::label('Periodicidad',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::select('periodicity',['0'=>'Diario','1'=>'Semanal','2'=>'Mensual','6' => 'Trimestral','3'=>'Semestral','4'=>'Anual','5'=>'Cada vez que ocurra'],null,['placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
+
 					<div class="form-group">
-						{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-						@if (strstr($_SERVER["REQUEST_URI"],'edit'))
-								<select name="organization_id[]" multiple required id="el3">
-								@foreach ($organizations as $id=>$name)
-
-									<?php $i = 0; //contador de orgs del usuario 
-										  $cont = 0; //contador para ver si es que una org está seleccionada ?>
-									@while (isset($orgs_selected[$i]))
-										@if ($orgs_selected[$i] == $id)
-											<option value="{{ $id }}" selected>{{ $name }}</option>
-											<?php $cont += 1; ?>
-										@endif
-										<?php $i += 1; ?>
-									@endwhile
-
-									@if ($cont == 0) //no estaba seleccionada
-										<option value="{{ $id }}">{{ $name }}</option>
-									@endif
-
-								@endforeach
-								</select>
-						@else
-							{!!Form::select('organization_id[]',$organizations, 
-						 	   null, 
-						 	   ['id' => 'el3','multiple'=>'true','required'=>'true'])!!}
-						@endif
+						{!!Form::label('Prop&oacute;sito',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::select('purpose',['0'=>'Preventivo','1'=>'Detectivo','2'=>'Correctivo'],null,
+													['placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
+
+					<div class="form-group">
+						{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::select('stakeholder_id',$stakeholders,null,
+													['placeholder'=>'- Seleccione -'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
+						{!!Form::label('Costo esperado',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::number('expected_cost',null,['id'=>'expected_cost','class'=>'form-control'])!!}
+						</div>
+					</div>
+
+
+					<div class="form-group">
+						{!!Form::label('Evidencia',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-4">
+							{!!Form::text('evidence',null,['id'=>'nombre','class'=>'form-control'])!!}
+						</div>
+					</div>
+
+					{!!Form::hidden('org_id',$org)!!}
+
+					<div class="form-group">
+						<label for="file" class="col-sm-4 control-label">Cargar documentos (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>
+						<div class="col-sm-4">
+							<input id="file-1" type="file" class="file" name="evidence_doc[]" multiple=true data-preview-file-type="any">
+						</div>
+					</div>
+				<!--	
+					<div class="form-group">
+						<label for="evidence_doc" class="col-sm-4 control-label">
+						Cargar Documentos (para seleccionar más de 1 use ctrl + click)</label>
+						<div class="col-sm-4">
+							<input type="file" name="evidence_doc" multiple>
+						</div>
+					</div>
+				-->
 					<div class="form-group">
 						<center>
-						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id'=>'btnsubmit'])!!}
+						{!!Form::submit('Guardar', ['class'=>'btn btn-primary','id' => 'btnsubmit'])!!}
 						</center>
 					</div>

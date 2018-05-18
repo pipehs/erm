@@ -103,7 +103,7 @@
 		</div>
 
 @if (isset($riesgos)) {{-- AGREGADO 26-07-16 obliga a seleccionar primero organización --}}
-{{-- MOD 13-10-17 Siempre se mostrarán los riesgos --}}
+{{-- ACT 13-10-17 Siempre se mostrarán los riesgos --}}
 
 <h4><b>
 @if (isset($org))
@@ -146,6 +146,9 @@
 			<th>Probabilidad<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Impacto<label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Score<label><input type="text" placeholder="Filtrar" /></label></th>
+			@if (isset($org_id))
+				<th>Respuesta al Riesgo<label><input type="text" placeholder="Filtrar" /></label></th>
+			@endif
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
 				<th>Editar</th>
@@ -244,6 +247,14 @@
 				<td>{{$riesgo['probabilidad']}}</td>
 				<td>{{$riesgo['impacto']}}</td>
 				<td>{{$riesgo['score']}}</td>
+				@if (isset($org_id))
+					<td>@if (!empty($riesgo['risk_response']))
+							{{$riesgo['risk_response']->name }}
+						@else
+							No se ha definido
+						@endif
+					</td>
+				@endif
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
 				@if (!isset($org_id))

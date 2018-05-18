@@ -661,7 +661,7 @@ class IssuesController extends Controller
                     }
                     else if ($kind == 8) //Hallazgos de Riesgos
                     {
-
+                        $issues[$i] = $this->setIssue1($datos['risks'],$datos['controls'],$temp['name'],$temp['classification'],$temp['recommendations'],$temp['plan'],$temp['status'],$temp['final_date'],$responsable);
                     }
                     else if ($kind == 9) //Hallazgos de Compliance
                     {
@@ -1242,13 +1242,11 @@ class IssuesController extends Controller
 
                 $risk = \Ermtool\Risk::find($element_id);
                 $risk_category = \Ermtool\Risk_category::name($risk->risk_category_id);
-
-                $datos = [
-                    'risk_category' => $risk_category,
-                    'risk' => $risk->name,
-                    'controls' => $controls
-                ];
                 */
+                $datos = [
+                    'risks' => $element_id
+                ];
+                
             }
             else if ($kind == 9) //Compliance
             {
@@ -1797,7 +1795,7 @@ class IssuesController extends Controller
                 {
                     $evaluation = \Ermtool\Control_evaluation::find($_GET['evaluation']);
 
-                    $org = \Ermtool\Organization::getOrganizationIdFromControl($evaluation->control_id);
+                    $org = \Ermtool\Organization::getOrganizationByCO($evaluation->control_organization_id);
                     //obtenemos stakeholders de la misma organización
                     $stakes = \Ermtool\Stakeholder::listStakeholders($org->id);
                     
@@ -1848,7 +1846,6 @@ class IssuesController extends Controller
                     if (isset($_POST['description']))
                     {
                         $description = $_POST['description'];
-
                         $description = eliminarSaltos($description);
                     }
                     else
@@ -1883,6 +1880,16 @@ class IssuesController extends Controller
                     {
                         $comments = NULL;
                     }
+
+                    //ACT 27-04-18: Valor económico
+                    if (isset($_POST['economic_value']))
+                    {
+                        $economic_value = $_POST['economic_value'];
+                    }
+                    else
+                    {
+                        $economic_value = NULL;
+                    }
                     
                     if (isset($_POST['kind']))
                     {
@@ -1899,6 +1906,7 @@ class IssuesController extends Controller
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
                                         'organization_id' => $_POST['organization_id'],
+                                        'economic_value' => $economic_value
                                         //'organization_risk_id' => $organization_risk_id
                                     ]);
                         }
@@ -1909,12 +1917,13 @@ class IssuesController extends Controller
                                         'name' => $_POST['name'],
                                         'description' => $description,
                                         'recommendations' => $recommendations,
-                                        'classification' => $classification,
+                                        'classification_id' => $classification,
                                         'comments' => $comments,
                                         'subprocess_id' => $_POST['subprocess_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
                                         'organization_id' => $_POST['organization_id'],
+                                        'economic_value' => $economic_value
                                         //'organization_risk_id' => $organization_risk_id
                                     ]);
                         }
@@ -1925,11 +1934,12 @@ class IssuesController extends Controller
                                         'name' => $_POST['name'],
                                         'description' => $description,
                                         'recommendations' => $recommendations,
-                                        'classification' => $classification,
+                                        'classification_id' => $classification,
                                         'comments' => $comments,
                                         'organization_id' => $_POST['org_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
+                                        'economic_value' => $economic_value
                                         //'organization_risk_id' => $organization_risk_id
                                     ]);
                         }
@@ -1940,12 +1950,13 @@ class IssuesController extends Controller
                                         'name' => $_POST['name'],
                                         'description' => $description,
                                         'recommendations' => $recommendations,
-                                        'classification' => $classification,
+                                        'classification_id' => $classification,
                                         'comments' => $comments,
                                         'control_id' => $_POST['control_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
                                         'organization_id' => $_POST['organization_id'],
+                                        'economic_value' => $economic_value
                                         //'organization_risk_id' => $organization_risk_id
                                     ]);
                         }
@@ -1956,12 +1967,13 @@ class IssuesController extends Controller
                                         'name' => $_POST['name'],
                                         'description' => $description,
                                         'recommendations' => $recommendations,
-                                        'classification' => $classification,
+                                        'classification_id' => $classification,
                                         'comments' => $comments,
                                         'audit_audit_plan_audit_program_id' => $_POST['audit_audit_plan_audit_program_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
                                         'organization_id' => $_POST['organization_id'],
+                                        'economic_value' => $economic_value
                                         //'organization_risk_id' => $organization_risk_id
                                     ]);
                         }
@@ -1972,12 +1984,13 @@ class IssuesController extends Controller
                                         'name' => $_POST['name'],
                                         'description' => $description,
                                         'recommendations' => $recommendations,
-                                        'classification' => $classification,
+                                        'classification_id' => $classification,
                                         'comments' => $comments,
                                         'audit_audit_plan_id' => $_POST['audit_audit_plan_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
                                         'organization_id' => $_POST['organization_id'],
+                                        'economic_value' => $economic_value
                                         //'organization_risk_id' => $organization_risk_id
                                     ]);
                         }
@@ -1988,12 +2001,13 @@ class IssuesController extends Controller
                                         'name' => $_POST['name'],
                                         'description' => $description,
                                         'recommendations' => $recommendations,
-                                        'classification' => $classification,
+                                        'classification_id' => $classification,
                                         'comments' => $comments,
                                         'audit_test_id' => $_POST['audit_test_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
                                         'organization_id' => $_POST['organization_id'],
+                                        'economic_value' => $economic_value
                                         //'organization_risk_id' => $organization_risk_id
                                     ]);
                         }
@@ -2005,13 +2019,14 @@ class IssuesController extends Controller
                                         'name' => $_POST['name'],
                                         'description' => $description,
                                         'recommendations' => $recommendations,
-                                        'classification' => $classification,
+                                        'classification_id' => $classification,
                                         'comments' => $comments,
                                         //'organization_risk_id' => $_POST['organization_risk_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
                                         'organization_id' => $_POST['organization_id'],
-                                        'kind' => 3
+                                        'kind' => 3,
+                                        'economic_value' => $economic_value
                                     ]);
                         }
 
@@ -2022,13 +2037,14 @@ class IssuesController extends Controller
                                         'name' => $_POST['name'],
                                         'description' => $description,
                                         'recommendations' => $recommendations,
-                                        'classification' => $classification,
+                                        'classification_id' => $classification,
                                         'comments' => $comments,
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
                                         'organization_id' => $_POST['organization_id'],
                                         //'organization_risk_id' => $organization_risk_id,
-                                        'kind' => 1
+                                        'kind' => 1,
+                                        'economic_value' => $economic_value
                                     ]);
                         }
 
@@ -2039,13 +2055,14 @@ class IssuesController extends Controller
                                         'name' => $_POST['name'],
                                         'description' => $description,
                                         'recommendations' => $recommendations,
-                                        'classification' => $classification,
+                                        'classification_id' => $classification,
                                         'comments' => $comments,
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
                                         'organization_id' => $_POST['organization_id'],
                                         //'organization_risk_id' => $organization_risk_id,
-                                        'kind' => 2
+                                        'kind' => 2,
+                                        'economic_value' => $economic_value
                                     ]);
                         }
                     }
@@ -2059,16 +2076,17 @@ class IssuesController extends Controller
                                     'name' => $_POST['name'],
                                     'description' => $description,
                                     'recommendations' => $recommendations,
-                                    'classification' => $classification,
+                                    'classification_id' => $classification,
                                     'comments' => $comments,
                                     'audit_test_id' => $_POST['test_id'],
                                     'created_at' => date('Y-m-d H:i:s'),
                                     'updated_at' => date('Y-m-d H:i:s'),
                                     'organization_id' => $org,
+                                    'economic_value' => $economic_value
                                     //'organization_risk_id' => $organization_risk_id
                                 ]);
                     }
-                    else if (isset($_POST['evaluation_id'])) //es un hallazgo de control
+                    else if (isset($_POST['evaluation_id'])) //es un hallazgo de evaluación de control
                     {
                         //ACT 20-01-18: Obtenemos id de organización a través de la evaluación de control
                         $org = \Ermtool\Organization::getOrgByControlEvaluation($_POST['evaluation_id']);
@@ -2078,12 +2096,13 @@ class IssuesController extends Controller
                                     'name' => $_POST['name'],
                                     'description' => $description,
                                     'recommendations' => $recommendations,
-                                    'classification' => $classification,
+                                    'classification_id' => $classification,
                                     'comments' => $comments,
                                     'control_evaluation_id' => $_POST['evaluation_id'],
                                     'created_at' => date('Y-m-d H:i:s'),
                                     'updated_at' => date('Y-m-d H:i:s'),
                                     'organization_id' => $org->id,
+                                    'economic_value' => $economic_value
                                     //'organization_risk_id' => $organization_risk_id
                                 ]);
                     }
@@ -2295,36 +2314,92 @@ class IssuesController extends Controller
                             ->first();
                 }
                 
-
-                //vemos si es hallazgo de proceso, organización, u otro
-                if ($issue['process_id'] != NULL)
+                if ($issue->organization_id != NULL)
                 {
-                    $processes = \Ermtool\Process::where('processes.status',0)
-                                ->join('subprocesses','subprocesses.process_id','=','processes.id')
-                                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                                ->where('organization_subprocess.organization_id','=',$_GET['org'])
-                                ->lists('processes.name','processes.id');
 
-                    $process_selected = $issue->process_id;
+                    //Cualquier tipo podría tener Riesgos
+                    $risks = DB::table('risks')
+                            ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                            ->where('organization_risk.organization_id','=',$_GET['org'])
+                            ->select('risks.name','organization_risk.id','risks.description')
+                            ->get();
+
+                    if ($_GET['kind'] == 0) //obtenemos procesos
+                    {
+                        $processes = \Ermtool\Process::where('processes.status',0)
+                                    ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                                    ->where('organization_subprocess.organization_id','=',$_GET['org'])
+                                    ->lists('processes.name','processes.id');
+
+                        $selected = $issue->process_id;
+                    }
+                    else if ($_GET['kind'] == 1) //obtenemos subprocesos
+                    {
+                        $subprocesses = \Ermtool\Subprocess::where('subprocesses.status',0)
+                                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                                    ->where('organization_subprocess.organization_id','=',$_GET['org'])
+                                    ->lists('subprocesses.name','subprocesses.id');
+
+                        $selected = $issue->subprocess_id;
+                    }
+                    else if ($_GET['kind'] == 3) //obtenemos controles de proceso
+                    {
+                        $controls = \Ermtool\Control::listControls($_GET['org'],0);
+                        $selected = $issue->control_id;
+                    }
+                    else if ($_GET['kind'] == 4) //obtenemos controles de entidad
+                    {
+                        $controls = \Ermtool\Control::listControls($_GET['org'],1);
+                        $selected = $issue->control_id;
+                    }
+                    else if ($_GET['kind'] == 5) //hallazgos de programas de auditoría
+                    {
+                        $audit_programs = DB::table('audit_programs')
+                                    ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_program_id','=','audit_programs.id')
+                                    ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                                    ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                                    ->where('audit_plans.organization_id','=',$_GET['org'])
+                                    ->lists('audit_programs.name','audit_audit_plan_audit_program.id');
+                        $selected = $issue->audit_audit_plan_audit_program_id;
+                    }
+                    else if ($_GET['kind'] == 6) //hallazgos de auditoría
+                    {
+                        $audits = DB::table('audit_audit_plan')
+                                ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                                ->where('audit_plans.organization_id','=',$_GET['org'])
+                                ->select('audit_audit_plan.id',DB::raw("CONCAT(audit_plans.name, ' - ', audits.name) AS audit_name"))
+                                ->lists('audit_name','audit_audit_plan.id');
+                        $selected = $issue->audit_audit_plan_id;
+                    }
+
+                    else if ($_GET['kind'] == 7) //hallazgos de pruebas de auditoría
+                    {
+                        $audit_tests = DB::table('audit_tests')
+                                    ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                                    ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                                    ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                                    ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                                    ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                                    ->where('audit_plans.organization_id','=',$_GET['org'])
+                                    ->select('audit_tests.name','audit_tests.id','audit_programs.name as audit_program','audits.name as audit','audit_plans.name as audit_plan')
+                                    ->get();
+                        $selected = $issue->audit_test_id;
+                    }
+
+                    $risks_selected = DB::table('issue_organization_risk')
+                                        ->where('issue_id','=',$issue->id)
+                                        ->select('organization_risk_id as id')
+                                        ->get();
 
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan,'test_id' => $test_id, 'kind' => $_GET['kind'],'per'=>$per,'classifications' => $classifications]);
+                        return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'per'=>$per,'classifications' => $classifications,'risks' => $risks,'risks_selected' => $risks_selected, 'selected' => $selected]);
                     }
                     else
                     {
-                        return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'processes'=>$processes,'process_selected' => $process_selected,'action_plan'=>$action_plan,'test_id' => $test_id, 'kind' => $_GET['kind'],'per'=>$per,'classifications' => $classifications]);
-                    }
-                }
-                else if ($issue['organization_id'] != NULL)
-                {
-                    if (Session::get('languaje') == 'en')
-                    {
-                        return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'per'=>$per,'classifications' => $classifications]);
-                    }
-                    else
-                    {
-                        return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'per'=>$per,'classifications' => $classifications]);
+                        return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'per'=>$per,'classifications' => $classifications,'risks' => $risks,'risks_selected' => $risks_selected, 'selected' => $selected]);
                     }
                 }
                 else
@@ -2386,6 +2461,8 @@ class IssuesController extends Controller
                 DB::transaction(function() {
                     $logger = $this->logger;
                     //vemos si el plan se mandó cerrado o abierto y damos formato a campos de plan de acción
+                    //ACT 02-05-18: Ya no agregaremos aquí plan de acción, ya que un hallazgo puede tener muchos planes de acción (lo dejaré comentado por ahora, en caso que se necesite que se vuelva a agregar)
+                    /*
                     if (isset($_POST['status']))
                     {
                         $status = 1;
@@ -2418,24 +2495,32 @@ class IssuesController extends Controller
                         {
                             $percentage = $_POST['percentage2'];
                         }
+                        else
+                        {
+                            $percentage = NULL;
+                        }
 
                         if (isset($_POST['progress_comments2']) AND $_POST['progress_comments2'] != "")
                         {
                             $progress_comments = $_POST['progress_comments2'];
+                        }
+                        else
+                        {
+                            $progress_comments = NULL;
                         }
                     }
                     else
                     {
                         $status = 0;
 
-                        if ($_POST['description_plan'] != "")
+                        if (isset ($_POST['description_plan']) && $_POST['description_plan'] != "")
                         {
                             $description_plan = eliminarSaltos($_POST['description_plan']);
                         }
                         else
                             $description_plan = NULL;
 
-                        if ($_POST['stakeholder_id'] != "")
+                        if (isset($_POST['stakeholder_id']) && $_POST['description_plan'] != "")
                         {
                             $stakeholder_id = $_POST['stakeholder_id'];
                         }
@@ -2469,7 +2554,7 @@ class IssuesController extends Controller
                         {
                             $progress_comments = NULL;
                         }
-                    }
+                    }*/
 
                     //verificamos ingreso de datos
                     if (isset($_POST['description']) AND $_POST['description'] != "")
@@ -2500,18 +2585,30 @@ class IssuesController extends Controller
                         $classification = NULL;
                     }
 
+                    //ACT 27-04-18: Valor económico
+                    if (isset($_POST['economic_value']) && $_POST['economic_value'] != "")
+                    {
+                        $economic_value = $_POST['economic_value'];
+                    }
+                    else
+                    {
+                        $economic_value = NULL;
+                    }
+
                     DB::table('issues')->where('id','=',$GLOBALS['id2'])
                         ->update([
                             'name' => $_POST['name'],
                             'description' => $description,
                             'recommendations' => $recommendations,
                             'classification_id' => $classification,
-                            'updated_at' => date('Y-m-d H:i:s')
+                            'updated_at' => date('Y-m-d H:i:s'),
+                            'economic_value' => $economic_value
                         ]);
                     
+                    /*
                     $id_action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($GLOBALS['id2']);
                     
-                    if ($id_action_plan)
+                    if (!empty($id_action_plan))
                     {
                         $id_action_plan = $id_action_plan->id;
 
@@ -2537,22 +2634,39 @@ class IssuesController extends Controller
                     }
                     else
                     {
-                        $plan = new PlanesAccion;
-                        $newplan = $plan->store($GLOBALS['id2'],$description_plan,$stakeholder_id,$final_date,$percentage,$progress_comments);
+                        if ($description_plan != "" && $description_plan != NULL)
+                        {
+                            $plan = new PlanesAccion;
+                            $newplan = $plan->store($GLOBALS['id2'],$description_plan,$stakeholder_id,$final_date,$percentage,$progress_comments);
+                        }
+                        
                     }
-                    
+                    */
+
                     //ACT 19-01-18: Posibilidad de asignar un Riesgo a cualquier tipo de hallazgo     
                     if (isset($_POST['organization_risk_id']) && $_POST['organization_risk_id'] != "")
                     {
+                        //ACT 18-05-18: Debemos eliminar primero los que ya existen
+                        DB::table('issue_organization_risk')
+                            ->where('issue_id','=',$GLOBALS['id2'])
+                            ->delete();
+                        //Ahora agregamos
                         //ACT 07-03-18: Puede ser más de un riesgo
                         foreach ($_POST['organization_risk_id'] as $org_risk)
                         {
                             DB::table('issue_organization_risk')
                                 ->insert([
-                                    'issue_id' => $issue,
+                                    'issue_id' => $GLOBALS['id2'],
                                     'organization_risk_id' => $org_risk
                                 ]);
                         }
+                    }
+                    else
+                    {
+                        //Si no se está agregando, entonces se eliminan (de existir)
+                        DB::table('issue_organization_risk')
+                            ->where('issue_id','=',$GLOBALS['id2'])
+                            ->delete();
                     }
 
                     //agregamos evidencia (si es que existe)
@@ -2581,11 +2695,11 @@ class IssuesController extends Controller
 
                     if (Session::get('languaje') == 'en')
                     {
-                        Session::flash('message','Issue and action plan successfully updated');
+                        Session::flash('message','Issue successfully updated');
                     }
                     else
                     {
-                        Session::flash('message','Hallazgo y plan de acción actualizado correctamente');
+                        Session::flash('message','Hallazgo actualizado correctamente');
                     }
 
                     $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el hallazgo con Id: '.$GLOBALS['id2'].' llamado: '.$_POST['name'].', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
@@ -2636,25 +2750,28 @@ class IssuesController extends Controller
                 DB::transaction(function() {
                     $logger = $this->logger;
                     $name = DB::table('issues')->where('id',$GLOBALS['id1'])->value('name');
-                    //primero que todo, eliminamos plan de acción (si es que hay)
-                    DB::table('action_plans')
-                    ->where('issue_id','=',$GLOBALS['id1'])
-                    ->delete();
-
-                    //ACT 09-03-18: Tenemos que eliminar también de issue_organization_risk
-                    DB::table('issue_organization_risk')
+                    //ACT 23-04-18: Primero que todo, vemos si tiene planes de acción
+                    $aps = DB::table('action_plans')
                         ->where('issue_id','=',$GLOBALS['id1'])
+                        ->select('id')
+                        ->get();
+
+                    if (empty($aps))
+                    {
+                        //ACT 09-03-18: Tenemos que eliminar también de issue_organization_risk
+                        DB::table('issue_organization_risk')
+                            ->where('issue_id','=',$GLOBALS['id1'])
+                            ->delete();
+
+                        //ahora eliminamos issue
+                        DB::table('issues')
+                        ->where('id','=',$GLOBALS['id1'])
                         ->delete();
 
-                    //ahora eliminamos issue
-                    DB::table('issues')
-                    ->where('id','=',$GLOBALS['id1'])
-                    ->delete();
-
-                    //eliminamos evidencia si es que existe (SE DEBE AGREGAR)
-                    eliminarArchivo($GLOBALS['id1'],2,NULL);
-
-                    $GLOBALS['res'] = 0;
+                        //eliminamos evidencia si es que existe (SE DEBE AGREGAR)
+                        eliminarArchivo($GLOBALS['id1'],2,NULL);
+                        $GLOBALS['res'] = 0;
+                    }   
 
                     $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha eliminado el hallazgo con Id: '.$GLOBALS['id1'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                 });
@@ -2753,6 +2870,37 @@ class IssuesController extends Controller
         {
             enviarMailSoporte($e);
             return view('errors.query',['e' => $e]);
+        }
+    }
+
+    public function updateIssueClassification()
+    {
+        //obtenemos todos los issues
+        $issues = \Ermtool\Issue::all();
+
+        foreach ($issues as $i)
+        {
+            if ($i->classification_id == NULL && $i->classification != NULL)
+            {
+                $i->classification_id = $i->classification;
+                $i->save();
+            }
+        }
+    }
+
+    public function updateIssueOrganization()
+    {
+        $issues = \Ermtool\Issue::all();
+
+        foreach ($issues as $i)
+        {
+            if ($i->organization_id == NULL)
+            {
+                //obtenemos org a través de audit_test_id
+                $org = \Ermtool\Organization::getOrgIdByTestId($i->audit_test_id);
+                $i->organization_id = $org;
+                $i->save();
+            }
         }
     }
 
