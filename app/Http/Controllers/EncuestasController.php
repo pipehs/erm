@@ -71,14 +71,7 @@ class EncuestasController extends Controller
         }
         else
         {
-            if (Session::get('languaje') == 'en')
-            {
-                return view('en.configuration.create');
-            }
-            else
-            {
-                return view('configuration.create');
-            }
+            return Redirect::to('configuration.create');
         }
         
     }

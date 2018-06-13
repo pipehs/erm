@@ -163,6 +163,7 @@ class Issue extends Model
                     ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations','issues.comments')
                     ->get();
 
+        /* ACT 31-05-18: Sólo mostraremos hallazgos de subproceso creados directamente
         //hallazgos relacionados al subproceso a través de una evaluación de control
         $issues2 = DB::table('issues')
                     ->join('control_evaluation','control_evaluation.id','=','issues.control_evaluation_id')
@@ -194,6 +195,7 @@ class Issue extends Model
                         ->select('issues.id','issues.name','issues.description','issues.classification','issues.recommendations')
                         ->get();
         */
+        /* ACT 31-05-18: Sólo mostraremos hallazgos de subproceso creados directamente
         //hallazgos de auditoría con pruebas de controles (controles orientados a subproceso)
         $issues4 = DB::table('audit_tests')
                         ->join('issues','issues.audit_test_id','=','audit_tests.id')
@@ -205,9 +207,9 @@ class Issue extends Model
                         ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations','issues.comments')
                         ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
                         ->get();
-
-        $issues = array_merge($issues1,$issues2,$issues3,$issues4);
-        $issuesX = array_unique($issues,SORT_REGULAR);
+        */
+        //$issues = array_merge($issues1,$issues2,$issues3,$issues4);
+        $issuesX = array_unique($issues1,SORT_REGULAR);
         return $issuesX;
     }
 
@@ -546,6 +548,7 @@ class Issue extends Model
         $issues = DB::table('issues')
                 ->join('issue_organization_risk','issue_organization_risk.issue_id','=','issues.id')
                 ->join('organization_risk','organization_risk.id','=','issue_organization_risk.organization_risk_id')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('issues.kind','=',3)
                 //->where('issue_organization_risk.organization_risk_id','=',$org_risk_id)
                 ->where('organization_risk.organization_id','=',(int)$org_id)
@@ -587,5 +590,30 @@ class Issue extends Model
             ->where('control_id','=',$ctrl)
             ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
             ->get();
+    }
+
+    public static function getOrganizationIssues($org)
+    {
+        return DB::table('issues')
+            ->where('organization_id','=',$org)
+            ->whereNull('issues.audit_audit_plan_id')
+            ->whereNull('issues.audit_audit_plan_audit_program_id')
+            ->whereNull('issues.audit_test_id')
+            ->whereNull('issues.subprocess_id')
+            ->whereNull('issues.process_id')
+            ->whereNull('issues.control_id')
+            ->whereNull('issues.control_evaluation_id')
+            ->whereNull('issues.objective_id')
+            ->whereNull('issues.subprocess_id')
+            ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
+    }
+
+    public static function getRiskIssuesByRisk($org_risk_id)
+    {
+        return DB::table('issues')
+            ->join('issue_organization_risk','issue_organization_risk.issue_id','=','issues.id')
+            ->where('issue_organization_risk.organization_risk_id','=',$org_risk_id)
+            ->where('issues.kind','=',3)
+            ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
     }
 }

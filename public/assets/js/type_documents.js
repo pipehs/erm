@@ -33,6 +33,7 @@ $("#kind").change(function() {
 			select += '<option value="4">Controles de entidad</option>'
 			select += '<option value="5">Programas de auditoría</option>'
 			select += '<option value="6">Auditorías</option>'
+			select += '<option value="7">Riesgos</option>'
 			select += '</select>';
 			select += '</div></div>';
 

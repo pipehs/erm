@@ -110,20 +110,33 @@ class OrganizationController extends Controller
                     {
                         $target_client = $organizaciones['target_client'];
                     }
+
+                    //ACT 07-06-2018: Obtenemos responsable
+                    if ($organizaciones['stakeholder_id'] == NULL)
+                    {
+                        $stakeholder = NULL;      
+                    }
+                    else
+                    {
+                        $stakeholder = \Ermtool\Stakeholder::getName($organizaciones['stakeholder_id']);
+                    }
                     
                     //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
                     $short_des = substr($organizaciones['description'],0,100);
 
-                    $organization[$i] = array('id'=>$organizaciones['id'],
-                                        'nombre'=>$organizaciones['name'],
-                                        'descripcion'=>$organizaciones['description'],
-                                        'target_client'=>$target_client,
-                                        'mision'=>$mision,
-                                        'vision'=>$vision,
-                                        'fecha_exp'=>$fecha_exp,
-                                        'serv_compartidos'=>$organizaciones['shared_services'],
-                                        'estado'=>$organizaciones['status'],
-                                        'short_des'=>$short_des);
+                    $organization[$i] = [
+                        'id'=>$organizaciones['id'],
+                        'nombre'=>$organizaciones['name'],
+                        'descripcion'=>$organizaciones['description'],
+                        'target_client'=>$target_client,
+                        'mision'=>$mision,
+                        'vision'=>$vision,
+                        'fecha_exp'=>$fecha_exp,
+                        'serv_compartidos'=>$organizaciones['shared_services'],
+                        'estado'=>$organizaciones['status'],
+                        'short_des'=>$short_des,
+                        'stakeholder' => $stakeholder
+                    ];
                     $i += 1;
                 }
 
@@ -163,13 +176,16 @@ class OrganizationController extends Controller
                 //ACTUALIZACIÓN 04-01-18: Agregamos tipos de moneda para materialidad
                 $kinds = ['1'=>'Peso','2'=>'Dólar','3'=>'Euro','4'=>'UF']; 
 
+                //ACT 07-06-18: obtenemos lista de stakeholders
+                $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
+
                 if (Session::get('languaje') == 'en')
                 {
                     //ACTUALIZACIÓN 31-10-17: Existirán distintos niveles de organizaciones, por lo que no sólo se mostrarán las de primer nivel, sino que todas
                     //$organizations = \Ermtool\Organization::where('status',0)->where('organization_id',NULL)->lists('name','id');
                     $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
-                    return view('en.datos_maestros.organization.create',['organizations'=>$organizations, 'kinds'=>$kinds]);
+                    return view('en.datos_maestros.organization.create',['organizations'=>$organizations, 'kinds'=>$kinds, 'stakeholders' => $stakeholders]);
                 }
                 else
                 {
@@ -177,7 +193,7 @@ class OrganizationController extends Controller
                     //$organizations = \Ermtool\Organization::where('status',0)->where('organization_id',NULL)->lists('name','id');
                     $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
-                    return view('datos_maestros.organization.create',['organizations'=>$organizations, 'kinds'=>$kinds]);
+                    return view('datos_maestros.organization.create',['organizations'=>$organizations, 'kinds'=>$kinds, 'stakeholders' => $stakeholders]);
                 }
             }
         }
@@ -207,67 +223,20 @@ class OrganizationController extends Controller
                 DB::transaction(function()
                 {
                     $logger = $this->logger;
-                    //vemos si tiene organización padre
-                    if($_POST['organization_id'] != "")
-                    {
-                        $organizacion_padre = $_POST['organization_id'];
-                    }
-                    else
-                    {
-                        $organizacion_padre = NULL;
-                    }
-
-                    if ($_POST['mision'] != "")
-                        $mision = $_POST['mision'];
-                    else
-                        $mision = NULL;
-
-                    if ($_POST['vision'] != "")
-                        $vision = $_POST['vision'];
-                    else
-                        $vision = NULL;
-
-                    if ($_POST['target_client'] != "")
-                        $target_client = $_POST['target_client'];
-                    else
-                        $target_client = NULL;
-
-                    if ($_POST['expiration_date'] == NULL || $_POST['expiration_date'] == "")
-                        $exp_date = NULL;
-                    else
-                        $exp_date = $_POST['expiration_date'];
-
-                    //ACT 08-01-17: Se agrega EBT al crear organización
-                    if (isset($_POST['ebt']))
-                    {
-                        if ($_POST['ebt'] != '')
-                        {
-                            $ebt = $_POST['ebt'];
-                            $kind = $_POST['kind_ebt'];
-                        }
-                        else
-                        {
-                            $ebt = NULL;
-                            $kind = NULL;
-                        }
-                    }
-                    else
-                    {
-                        $ebt = NULL;
-                        $kind = NULL;
-                    }
+                   
 
                     $org = \Ermtool\Organization::create([
                         'name' => $_POST['name'],
                         'description' => $_POST['description'],
-                        'expiration_date' => $exp_date,
+                        'expiration_date' => isset($_POST['expiration_date']) && $_POST['expiration_date'] != '' ? $_POST['expiration_date'] : NULL,
                         'shared_services' => $_POST['shared_services'],
-                        'organization_id' => $organizacion_padre,
-                        'mision' => $mision,
-                        'vision' => $vision,
-                        'target_client' => $target_client,
-                        'ebt' => $ebt,
-                        'kind_ebt' => $kind
+                        'organization_id' => isset($_POST['organization_id']) && $_POST['organization_id'] != '' ? $_POST['organization_id'] : NULL,
+                        'mision' => isset($_POST['mision']) && $_POST['mision'] != '' ? $_POST['mision'] : NULL,
+                        'vision' => isset($_POST['vision']) && $_POST['vision'] != '' ? $_POST['vision'] : NULL,
+                        'target_client' => isset($_POST['target_client']) && $_POST['target_client'] != '' ? $_POST['target_client'] : NULL,
+                        'ebt' => isset($_POST['ebt']) && $_POST['ebt'] != '' ? $_POST['ebt'] : NULL,
+                        'kind_ebt' => isset($_POST['kind_ebt']) && $_POST['kind_ebt'] != '' ? $_POST['kind_ebt'] : NULL,
+                        'stakeholder_id' => isset($_POST['stakeholder_id']) && $_POST['stakeholder_id'] != '' ? $_POST['stakeholder_id'] : NULL,
                         ]);
 
                     if (Session::get('languaje') == 'en')
@@ -321,8 +290,10 @@ class OrganizationController extends Controller
             {
                 //ACTUALIZACIÓN 04-01-18: Agregamos tipos de moneda para materialidad
                 $kinds = ['1'=>'Peso','2'=>'Dólar','3'=>'Euro','4'=>'UF']; 
-                //ACTUALIZACIÓN 31-10-17: Existirán distintos niveles de organizaciones, por lo que no sólo se mostrarán las de primer nivel, sino que todas
-                //$organizations = \Ermtool\Organization::where('id','<>',$id)->where('status',0)->where('organization_id',NULL)->lists('name','id');
+
+                //ACT 07-06-18: obtenemos lista de stakeholders
+                $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
+
                 global $id2;
                 $id2 = $id; 
                 $organizations = \Ermtool\Organization::where('id','<>',$id)
@@ -336,11 +307,11 @@ class OrganizationController extends Controller
 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.datos_maestros.organization.edit',['organizations'=>$organizations,'organization'=>$org, 'kinds'=>$kinds]);
+                    return view('en.datos_maestros.organization.edit',['organizations'=>$organizations,'organization'=>$org, 'kinds'=>$kinds, 'stakeholders' => $stakeholders]);
                 }
                 else
                 {
-                    return view('datos_maestros.organization.edit',['organizations'=>$organizations,'organization'=>$org, 'kinds'=>$kinds]);
+                    return view('datos_maestros.organization.edit',['organizations'=>$organizations,'organization'=>$org, 'kinds'=>$kinds, 'stakeholders' => $stakeholders]);
                 }
             }
         }
@@ -518,6 +489,7 @@ class OrganizationController extends Controller
                     $organization->target_client = $target_client;
                     $organization->ebt = $ebt;
                     $organization->kind_ebt = $kind;
+                    $organization->stakeholder_id = isset($_POST['stakeholder_id']) && $_POST['stakeholder_id'] != '' ? $_POST['stakeholder_id'] : NULL;
 
                     $organization->save();
                     if (Session::get('languaje') == 'en')

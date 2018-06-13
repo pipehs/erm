@@ -34,7 +34,7 @@ class DenunciasController extends Controller
         }
         else
         {
-            return $this->locked();
+            return locked();
         }
     }
 
@@ -55,7 +55,7 @@ class DenunciasController extends Controller
         }
         else
         {
-            return $this->locked();
+            return locked();
         }
     }
 
@@ -85,7 +85,7 @@ class DenunciasController extends Controller
         }
         else
         {
-            return $this->locked();
+            return locked();
         }   
     }
 
@@ -141,7 +141,7 @@ class DenunciasController extends Controller
         }
         else
         {
-            return $this->locked();
+            return locked();
         }   
     }
 
@@ -209,19 +209,5 @@ class DenunciasController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    public function locked()
-    {
-        if (Session::get('languaje') == 'en')
-        {
-            Session::flash('error','You don\'t have permission to access to this module');
-        }
-        else
-        {
-            Session::flash('error','Usted no tiene los permisos para acceder a este módulo');
-        }
-
-        return view('locked');
     }
 }

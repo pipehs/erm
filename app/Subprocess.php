@@ -80,6 +80,7 @@ class Subprocess extends Model
                             ->groupBy('subprocesses.id','subprocesses.name','subprocesses.description','processes.name')
                             ->get();
 
+            /* ACT 31-05-18: Sólo mostraremos hallazgos de subproceso creados directamente
             //hallazgos obtenidos a través de la evaluación de controles
             $subprocesses2 = DB::table('control_evaluation')
                             ->join('controls','controls.id','=','control_evaluation.control_id')
@@ -106,6 +107,7 @@ class Subprocess extends Model
                             ->select('subprocesses.id','subprocesses.name','subprocesses.description','processes.name as process_name')
                             ->groupBy('subprocesses.id','subprocesses.name','subprocesses.description','processes.name')
                             ->get();
+            */
         }
         else
         {
@@ -119,6 +121,7 @@ class Subprocess extends Model
                         ->groupBy('subprocesses.id','subprocesses.name','subprocesses.description','processes.name')
                         ->get();
 
+            /* ACT 31-05-18: Sólo mostraremos hallazgos de subproceso creados directamente
             //hallazgos obtenidos a través de la evaluación de controles
             $subprocesses2 = DB::table('control_evaluation')
                             ->join('controls','controls.id','=','control_evaluation.control_id')
@@ -143,11 +146,12 @@ class Subprocess extends Model
                             ->select('subprocesses.id','subprocesses.name','subprocesses.description','processes.name as process_name')
                             ->groupBy('subprocesses.id','subprocesses.name','subprocesses.description','processes.name')
                             ->get();
+            */
         }
 
-        $subprocesses = array_merge($subprocesses1,$subprocesses2,$subprocesses3);
+        //$subprocesses = array_merge($subprocesses1,$subprocesses2,$subprocesses3);
         //eliminamos duplicados (si es que hay)
-        $subprocessesX = array_unique($subprocesses,SORT_REGULAR);
+        $subprocessesX = array_unique($subprocesses1,SORT_REGULAR);
         return $subprocessesX;
     }
 

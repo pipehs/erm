@@ -55,9 +55,9 @@
 				</div>
 			@endif
 			
-			Antes de continuar, debe ingresar correctamente los datos de configuración.<br/>
+			Modifique los datos de configuración que desee actualizar.<br/>
 
-			{!!Form::open(['route'=>'configuration.store','method'=>'POST','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
+			{!!Form::open(['route'=>'configuration.update','method'=>'POST','class'=>'form-horizontal'])!!}
 
 				@include('configuration.form')
 					

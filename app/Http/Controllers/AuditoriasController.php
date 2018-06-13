@@ -1567,10 +1567,17 @@ class AuditoriasController extends Controller
                                         ->delete();
 
                                     //almacenamos controles en audit_test_control
+                                    //ACT 31-05-18: Se debe ingresar control_organization
+                                    //Primero obtenemos org
+                                    $org = \Ermtool\Organization::getOrgIdByTestId($GLOBALS['audit_test']->id);
+                                    //obtenemos control_organization
+                                    $co = \Ermtool\ControlOrganization::getByCO($c,$org);
+
                                     DB::table('audit_test_control')
                                         ->insert([
                                             'audit_test_id' => $GLOBALS['audit_test']->id,
-                                            'control_id' => $c
+                                            'control_id' => $c,
+                                            'control_organization_id' => $co->id
                                             ]);
                                 }   
                             }
@@ -1607,10 +1614,17 @@ class AuditoriasController extends Controller
                                         ->where('audit_test_id','=',$GLOBALS['audit_test']->id)
                                         ->delete();
                                     //almacenamos controles en audit_test_control
+                                    //ACT 31-05-18: Se debe ingresar control_organization
+                                    //Primero obtenemos org
+                                    $org = \Ermtool\Organization::getOrgIdByTestId($GLOBALS['audit_test']->id);
+                                    //obtenemos control_organization
+                                    $co = \Ermtool\ControlOrganization::getByCO($c,$org);
+
                                     DB::table('audit_test_control')
                                         ->insert([
                                             'audit_test_id' => $GLOBALS['audit_test']->id,
-                                            'control_id' => $c
+                                            'control_id' => $c,
+                                            'control_organization_id' => $co->id
                                             ]);
                                 }   
                             }

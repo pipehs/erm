@@ -10,7 +10,7 @@ use Carbon;
 class Organization extends Model
 {
     
-    protected $fillable = ['name','description','expiration_date','shared_services','organization_id','status','mision','vision','target_client','ebt','kind_ebt'];
+    protected $fillable = ['name','description','expiration_date','shared_services','organization_id','status','mision','vision','target_client','ebt','kind_ebt','stakeholder_id'];
 
     public static function name($organization_id)
     {
@@ -170,6 +170,7 @@ class Organization extends Model
     {
         return DB::table('organization_risk')
                 ->join('organizations','organizations.id','=','organization_risk.organization_id')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('organization_risk.risk_id','=',$risk_id)
                 ->select('organization_risk.organization_id','organization_risk.stakeholder_id','organizations.name')
                 ->get();

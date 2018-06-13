@@ -657,7 +657,7 @@ function eliminarArchivo($id,$kind,$name)
 	}
 	else if ($kind == 3) //control
 	{
-		$dir = "../storage/app/controles/".$id;
+		$dir = "../storage/app/controles_org/".$id;
 	}
 	else if ($kind == 4) //notas
 	{
@@ -769,7 +769,8 @@ function enviarMailSoporte($e)
 }
 
 //Función que divide un nombre completo en nombres y apellido paterno y materno //24-10-2017: MEJORAR!!
-function getNombreSplit($nombreCompleto, $apellido_primero = false){
+function getNombreSplit($nombreCompleto, $apellido_primero = false)
+{
     $chunks = ($apellido_primero)
         ? explode(" ", strtoupper($nombreCompleto))
         : array_reverse(explode(" ", strtoupper($nombreCompleto)));
@@ -867,4 +868,18 @@ function getNombreSplit($nombreCompleto, $apellido_primero = false){
     $nombre["Nombres"] = trim($nombre["Nombres"]);
     return $nombre;
 }
+
+function locked()
+    {
+        if (Session::get('languaje') == 'en')
+        {
+            Session::flash('error','You don\'t have permission to access to this module');
+        }
+        else
+        {
+            Session::flash('error','Usted no tiene los permisos para acceder a este módulo');
+        }
+
+        return view('locked');
+    }
 ?>

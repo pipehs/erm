@@ -57,27 +57,17 @@ class ProcesosController extends Controller
                     $procesos = \Ermtool\Process::where('status',0)->get(); //select procesos desbloqueados
                 }
                 $i = 0;
-                $j = 0; //contador de subprocesos
-                $k = 0; //contador de organizaciones
-
-                // ---recorremos todas los procesos para asignar formato de datos correspondientes--- //
-                $organizaciones = array(); //en este array almacenaremos todas las organizaciones que están relacionadas con un proceso
-                $subprocesos = array(); //en este array almacenraemos todos los subprocesos relacionados a un proceso
+                
 
                 foreach ($procesos as $process)
                 {
-
-                    //obtenemos todas las organizaciones a las que pertenece cada subproceso relacionado
-                    /*
-                    $orgs = DB::select('SELECT organizations.id, organizations.name
-                                        FROM organizations
-                                        WHERE organizations.id IN (SELECT DISTINCT organization_subprocess.organization_id
-                                            FROM organization_subprocess
-                                        WHERE organization_subprocess.subprocess_id IN (SELECT subprocesses.id
-                                            FROM subprocesses WHERE process_id = '.$process["id"].'))'); */
                     global $id;
                     $id = $process['id'];
 
+                    //ACT 07-06-18: Ahora se obtienen las orgs desde tabla organization_process_stakeholder
+                    $orgs = \Ermtool\OrganizationProcessStakeholder::where('process_id',$GLOBALS['id'])->get();
+
+                    /*
                     $orgs = DB::table('organizations')
                             ->join('organization_subprocess','organization_subprocess.organization_id','=','organizations.id')
                             ->join('subprocesses','subprocesses.id','=','organization_subprocess.subprocess_id')
@@ -89,16 +79,32 @@ class ProcesosController extends Controller
                             ->select('organizations.id','organizations.name')
                             ->groupBy('organizations.id','organizations.name')
                             ->get();
+                    */
+                    $k = 0; //contador de organizaciones
+                    
+                
 
-                    foreach ($orgs as $organization)
+                    // ---recorremos todas los procesos para asignar formato de datos correspondientes--- //
+                    $organizaciones = array(); //en este array almacenaremos todas las organizaciones que están relacionadas con un proceso
+                    
+                    foreach ($orgs as $ops)
                     {
+                        $org = \Ermtool\Organization::find($ops->organization_id);
+
+                        //ACT 08-06-18: Agregamos responsable correspondiente a la organización
+                        $responsable = $ops->stakeholder_id ? \Ermtool\Stakeholder::getName($ops->stakeholder_id) : NULL;
+
                         $organizaciones[$k] = [
-                            'id'=>$organization->id,
-                            'nombre'=>$organization->name];
+                            'id'=>$org->id,
+                            'nombre'=>$org->name,
+                            'responsable' => $responsable];
 
                         $k += 1;
                     }
 
+
+                    $j = 0; //contador de subprocesos
+                    $subprocesos = array(); //en este array almacenraemos todos los subprocesos relacionados a un proceso
 
                    //obtenemos subprocesos relacionados
                     $subprocesses = \Ermtool\Process::find($process['id'])->subprocesses;
@@ -106,8 +112,7 @@ class ProcesosController extends Controller
                     foreach ($subprocesses as $subprocess)
                     {
                        
-                        $subprocesos[$j] = array('proceso_id'=>$process['id'],
-                                                'id'=>$subprocess['id'],
+                        $subprocesos[$j] = array('id'=>$subprocess['id'],
                                                 'nombre'=>$subprocess['name']);
 
                         $j += 1;
@@ -171,18 +176,19 @@ class ProcesosController extends Controller
                                         'proceso_dependiente_id'=>$proceso_dependiente['id'],
                                         'estado'=>$process['status'],
                                         'short_des' => $short_des,
-                                        'organizaciones' => $organizaciones
+                                        'organizaciones' => $organizaciones,
+                                        'subprocesos' => $subprocesos
                                     );
                     $i += 1;
                 }
 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.datos_maestros.procesos.index',['procesos'=>$proceso,'subprocesos'=>$subprocesos,'organizaciones'=>$organizaciones]);
+                    return view('en.datos_maestros.procesos.index',['procesos'=>$proceso]);
                 }
                 else
                 {
-                    return view('datos_maestros.procesos.index',['procesos'=>$proceso,'subprocesos'=>$subprocesos,'organizaciones'=>$organizaciones]);
+                    return view('datos_maestros.procesos.index',['procesos'=>$proceso]);
                 }
             }
         }
@@ -208,13 +214,18 @@ class ProcesosController extends Controller
             }
             else
             {
+                //ACT 07-06-18: Enviamos organizaciones
+                $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
                 //Seleccionamos procesos que pueden ser padres
                 $procesos = \Ermtool\Process::where('process_id',NULL)->lists('name','id');
 
-                if (Session::get('languaje') == 'en') {
-                    return view('en.datos_maestros.procesos.create',['procesos'=>$procesos]);
-                } else {
-                    return view('datos_maestros.procesos.create',['procesos'=>$procesos]);
+                if (Session::get('languaje') == 'en') 
+                {
+                    return view('en.datos_maestros.procesos.create',['procesos'=>$procesos, 'organizations' => $organizations]);
+                } 
+                else 
+                {
+                    return view('datos_maestros.procesos.create',['procesos'=>$procesos, 'organizations' => $organizations]);
                 }
             }
         }
@@ -258,6 +269,15 @@ class ProcesosController extends Controller
                         'expiration_date' => $_POST['expiration_date'],
                         'process_id' => $process_id,
                         ]);
+
+                    //ACT 07-06-18: Agregamos en organization_process_stakeholder
+                    foreach ($_POST['organization_id'] as $organization_id)
+                    {
+                        \Ermtool\OrganizationProcessStakeholder::create([
+                            'organization_id' => $organization_id,
+                            'process_id' => $process->id
+                        ]);
+                    }
 
                     $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el proceso con Id: '.$process->id.' llamado: '.$process->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
@@ -311,13 +331,20 @@ class ProcesosController extends Controller
                 $proceso = \Ermtool\Process::find($id);
                 $combobox = \Ermtool\Process::where('id','<>',$id)->lists('name','id');
 
+                //obtenemos organizaciones del proceso
+                $orgs_selected = \Ermtool\OrganizationProcessStakeholder::where('process_id',$id)
+                                ->select('organization_id')
+                                ->get();
+
+                $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.datos_maestros.procesos.edit',['proceso'=>$proceso,'procesos'=>$combobox]);
+                    return view('en.datos_maestros.procesos.edit',['proceso'=>$proceso,'procesos'=>$combobox, 'organizations' => $organizations, 'orgs_selected' => $orgs_selected]);
                 }
                 else
                 {
-                    return view('datos_maestros.procesos.edit',['proceso'=>$proceso,'procesos'=>$combobox]);
+                    return view('datos_maestros.procesos.edit',['proceso'=>$proceso,'procesos'=>$combobox, 'organizations' => $organizations, 'orgs_selected' => $orgs_selected]);
                 }
             }
         }
@@ -453,6 +480,52 @@ class ProcesosController extends Controller
 
                     $proceso->save();
 
+                    //ACT 08-06-18: No se eliminan para no perder stakeholder. Haremos proceso más largo
+                    $ops = \Ermtool\OrganizationProcessStakeholder::where('process_id',$proceso->id)->get();
+
+                    foreach ($ops as $o)
+                    {
+                        $cont = 0; //para verificar que esté entre los seleccionados
+                        if (isset($_POST['organization_id']))
+                        {
+                            foreach ($_POST['organization_id'] as $org)
+                            {
+                                if ($o->organization_id == $org)
+                                {
+                                    $cont += 1;
+                                }
+                            }    
+                        }
+
+                        //Vemos si es que efectivamente está en las seleccionadas. Si no está, se elimina
+                        if ($cont == 0)
+                        {
+                            $o->delete();
+                        }
+                    }
+
+                    //Ahora agregamos las que no existan
+                    if (isset($_POST['organization_id']))
+                    {
+                        foreach ($_POST['organization_id'] as $org)
+                        {
+                            //Vemos si es que existe (lo hacemos a través de DB para ver si es que está en deleted_at)
+                            $ops = \Ermtool\OrganizationProcessStakeholder::withTrashed()->where('process_id',$proceso->id)->where('organization_id',$org)->first();
+
+                            if (empty($ops)) //Creamos
+                            {
+                                \Ermtool\OrganizationProcessStakeholder::create([
+                                    'process_id' => $proceso->id,
+                                    'organization_id' => $org
+                                ]);
+                            }
+                            else if ($ops->trashed()) //vemos si está eliminado con soft_deleting
+                            {
+                                $ops->restore(); //Restauramos
+                            }
+                        }
+                    }
+
                     $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha actualizado el proceso con Id: '.$GLOBALS['id1'].' llamado: '.$proceso->name.' con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
 
                     if (Session::get('languaje') == 'en')
@@ -549,6 +622,132 @@ class ProcesosController extends Controller
         {
             $processes = \Ermtool\Process::getProcesses($org);
             return json_encode($processes);
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    //ACT 07-06-18: Actualizamos tabla organization_process_stakeholder y también organization_subprocess
+    public function updateOrganizationProcessStakeholder()
+    {
+        DB::transaction(function(){
+            $org_sub = \Ermtool\OrganizationSubprocess::all();
+
+            foreach ($org_sub as $os)
+            {
+                //obtenemos subproceso asociado (no como eloquent ya que necesitamos created y updated_at)
+                $subprocess = DB::table('subprocesses')->where('id','=',$os->subprocess_id)->first();
+
+                //primero actualizamos created_at y updated_at en organization_subprocess
+                DB::table('organization_subprocess')
+                    ->where('subprocess_id','=',$os->subprocess_id)
+                    ->update([
+                        'created_at' => $subprocess->created_at,
+                        'updated_at' => $subprocess->updated_at
+                    ]);
+
+                //Ahora actualizamos organization_process_stakeholder
+                //Primero que todo, vemos si el proceso asociado al subproceso ya existe en la tabla organization_process_stakeholder, si es así no hacemos nada
+                $ops = DB::table('organization_process_stakeholder')
+                    ->where('process_id','=',$subprocess->process_id)
+                    ->where('organization_id','=',$os->organization_id)
+                    ->first(['id']);
+
+                if (empty($ops)) //Si no existe, creamos
+                {
+                    DB::table('organization_process_stakeholder')
+                        ->insert([
+                            'organization_id' => $os->organization_id,
+                            'process_id' => $subprocess->process_id,
+                            'created_at' => $subprocess->created_at,
+                            'updated_at' => $subprocess->updated_at
+                        ]);
+                }
+            }
+        });
+    }
+
+    //ACT 08-06-18: Función para asignar responsables
+    public function responsables($id)
+    {
+        try
+        {
+            if (Auth::guest())
+            {
+                return view('login');
+            }
+            else
+            {
+                //obtenemos todas las organizaciones a las que pertenece el proceso
+                $ops = \Ermtool\OrganizationProcessStakeholder::where('process_id',$id)->get();
+
+                foreach ($ops as $o)
+                {
+                    $o->org = \Ermtool\Organization::name($o->organization_id);
+                }
+
+                $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
+
+                $process = \Ermtool\Process::where('id',$id)->value('name');
+
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.datos_maestros.procesos.responsables',['id'=>$id,'ops'=>$ops,'stakeholders' => $stakeholders,'process' => $process]);
+                }
+                else
+                {
+                    return view('datos_maestros.procesos.responsables',['id'=>$id,'ops'=>$ops,'stakeholders' => $stakeholders,'process' => $process]);
+                }
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    public function agregarResp()
+    {
+        try
+        {
+            //Guardamos responsables
+            DB::transaction(function(){
+
+                foreach ($_POST as $id=>$p)
+                {
+                    if (strpos($id,"takeholder")) //No se porqué me funciona sin la s...
+                    {
+                        //verificamos que se haya ingresado algún valor
+                        if ($p != '' && $p != NULL)
+                        {
+                            //obtenemos organización
+                            $org = explode('_', $id);
+
+                            //obtenemos modelo y actualizamos
+                            $ops = \Ermtool\OrganizationProcessStakeholder::where('organization_id',$org[1])
+                                    ->where('process_id','=',$_POST['process_id'])->first();
+
+                            $ops->stakeholder_id = $p;
+                            $ops->save();
+                        }
+                    }
+                }
+
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Process owners was successfully updated');
+                }
+                else
+                {
+                    Session::flash('message','Responsables del proceso asignados correctamente');
+                }
+            });
+
+            return Redirect::to('/procesos');
         }
         catch (\Exception $e)
         {

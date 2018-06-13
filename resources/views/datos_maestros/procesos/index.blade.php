@@ -35,77 +35,78 @@
 			</div>
 			<div class="box-content">
 
-		@if(Session::has('message'))
-			<div class="alert alert-success alert-dismissible" role="alert">
-			{{ Session::get('message') }}
-			</div>
+	@if(Session::has('message'))
+		<div class="alert alert-success alert-dismissible" role="alert">
+		{{ Session::get('message') }}
+		</div>
+	@endif
+	@foreach (Session::get('roles') as $role)
+		@if ($role != 6)
+			{!! link_to_route('procesos.create', $title = 'Agregar Proceso', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
+
+		@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
+			{!! link_to_route('procesos.index', $title = 'Ver Desbloqueadas', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
+		@else
+			{!! link_to_route('procesos.verbloqueados', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
 		@endif
-@foreach (Session::get('roles') as $role)
-	@if ($role != 6)
-		{!! link_to_route('procesos.create', $title = 'Agregar Proceso', $parameters = NULL, $attributes = ['class'=>'btn btn-primary']) !!}
 
-	@if (strpos($_SERVER['REQUEST_URI'],"verbloqueados"))
-		{!! link_to_route('procesos.index', $title = 'Ver Desbloqueadas', $parameters = NULL, $attributes = ['class'=>'btn btn-success']) !!}
-	@else
-		{!! link_to_route('procesos.verbloqueados', $title = 'Ver Bloqueados', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
-	@endif
-
-	<?php break; ?>
-	@endif
-@endforeach
+		<?php break; ?>
+		@endif
+	@endforeach
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px" >
 					<thead>
-							<th>Organizaciones<label><input type="text" placeholder="Filtrar" /></label></th>
+							<th style="width:20%;">Organización - Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Proceso<label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Subprocesos<label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Fecha Creaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Fecha Actualizaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 							<th>¿Depende de otro proceso?<label><input type="text" placeholder="Filtrar" /></label></th>
 							@foreach (Session::get('roles') as $role)
 								@if ($role != 6)
-								<th style="vertical-align:top;">Acci&oacute;n</th>
-								<th style="vertical-align:top;">Acci&oacute;n</th>
-								<?php break; ?>
+									<th>Asignar responsable<label><input type="text" placeholder="Filtrar" /></label></th>
+									<th style="vertical-align:top;">Acci&oacute;n</th>
+									<th style="vertical-align:top;">Acci&oacute;n</th>
+									<?php break; ?>
 								@endif
 							@endforeach
 					</thead>
 	<tr style="display:none;">
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
-		<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+		<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 		<?php break; ?>
 	@else
-		<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+		<td></td><td></td><td></td><td></td><td></td><td></td></tr>
 	@endif
 @endforeach
 	@foreach ($procesos as $proceso)
 		<tr>
 		<td><ul>
-		<?php $cont = 0; //contador para verificar si hay organizaciones ?>
-		@foreach ($proceso['organizaciones'] as $organizacion)
-			<li>{{ $organizacion['nombre'] }}</li>
-			<?php $cont += 1;  //contador para verificar si hay organizaciones ?>
-		@endforeach
-		@if ($cont == 0)
+		@if (!empty($proceso['organizaciones']))
+			@foreach ($proceso['organizaciones'] as $o)
+				<li>{{ $o['nombre'] }} - 
+
+				@if ($o['responsable'] != NULL)
+					{{ $o['responsable'] }}
+				@else
+					No se ha asignado responsable
+				@endif
+				</li>
+			@endforeach
+		@else
 				No hay organización relacionada
 		@endif
 		</ul></td>
 		<td>{{ $proceso['nombre'] }}</td>
-		<td>
-		@if ($subprocesos != NULL)
-			<ul style="none">
-			@foreach ($subprocesos as $subproceso)
-				@if ($subproceso['proceso_id'] == $proceso['id'])
-					<li>{{ $subproceso['nombre'] }}</li>
-				@endif
+		<td><ul>
+		@if (!empty($proceso['subprocesos']))
+			@foreach ($proceso['subprocesos'] as $s)
+				<li>{{ $s['nombre'] }}</li>
 			@endforeach
-			</ul>
 		@else
-			Aun no hay subprocesos relacionados
+				No hay subprocesos asociados
 		@endif
-		</td>
+		</ul></td>
 		<td>
 		@if (strlen($proceso['descripcion']) > 100)
 			<div id="description_{{$proceso['id']}}" title="{{ $proceso['descripcion'] }}">{{ $proceso['short_des'] }}...
@@ -116,33 +117,29 @@
 			{{ $proceso['descripcion'] }}
 		@endif
 		</td>
-		@if ($proceso['fecha_creacion'] == NULL)
-			<td>Error al guardar fecha de creaci&oacute;n</td>
-		@else
-			<td>{{$proceso['fecha_creacion']}}</td>
-		@endif
-
-		@if ($proceso['fecha_act'] == NULL)
-			<td>Error al guardar fecha de &uacute;ltima actualizaci&oacute;n</td>
-		@else
-			<td>{{$proceso['fecha_act']}}</td>
-		@endif
-
 		@if ($proceso['fecha_exp'] == NULL)
 			<td>Ninguna</td>
 		@else
 			<td>{{$proceso['fecha_exp']}}</td>
 		@endif
 		<td>{{ $proceso['proceso_dependiente'] }}</td>
+		
 @foreach (Session::get('roles') as $role)
-	@if ($role != 6)		
+	@if ($role != 6)
+		<td>
+			@if (!empty($proceso['organizaciones']))
+				{!! link_to_route('procesos.responsables', $title = 'Asignar', $parameters = $proceso['id'], $attributes = ['class'=>'btn btn-info']) !!}
+			@else
+				Primero debe asignar organizaciones
+			@endif
+		</td>		
 		<td><div>
 			@if ($proceso['estado'] == 0)
 	            {!! link_to_route('procesos.edit', $title = 'Editar', $parameters = $proceso['id'], $attributes = ['class'=>'btn btn-success']) !!}
 	        @else
 	        	{!! link_to_route('procesos.desbloquear', $title = 'Desbloquear', $parameters = $proceso['id'], $attributes = ['class'=>'btn btn-success']) !!}
 	        @endif
-	        </div><!-- /btn-group --></td>
+	    </div></td>
 		<td><div>
 			@if ($proceso['estado'] == 0)
 	           	<button class="btn btn-danger" onclick="bloquear({{ $proceso['id'] }},'{{ $proceso['nombre'] }}','procesos','El proceso')">Bloquear</button>

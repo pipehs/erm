@@ -19,7 +19,9 @@
 				@include('menu.riesgos')
 				@include('menu.controles')
 				@include('menu.auditorias')
-				@include('menu.denuncias')
+				@if (isset(Auth::user()->superadmin) && Auth::user()->superadmin == 1)
+					@include('menu.denuncias')
+				@endif
 			<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 			@endif
 		@endforeach

@@ -229,7 +229,9 @@ class RiesgosController extends Controller
 
                     //obtenemos proba, impacto y score
                     $eval_risk = DB::table('evaluation_risk')
+                                    ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
                                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+                                    ->whereNull('organization_risk.deleted_at')
                                     ->where('evaluation_risk.organization_risk_id','=',$riesgo->id)
                                     ->where('evaluations.updated_at','=',$fecha)
                                     ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
@@ -243,7 +245,7 @@ class RiesgosController extends Controller
                             {
                                 $impacto = $eval->avg_impact.' ('.$impact_string[$eval->avg_impact-1].')';
                                 $probabilidad = $eval->avg_probability.' ('.$proba_string[$eval->avg_probability-1].')';
-                                $score = $impacto * $probabilidad;
+                                $score = $eval->avg_impact * $eval->avg_probability;
                             }
                         }
                     }
@@ -531,7 +533,7 @@ class RiesgosController extends Controller
                             {
                                 $impacto = $eval->avg_impact.' ('.$impact_string[$eval->avg_impact-1].')';
                                 $probabilidad = $eval->avg_probability.' ('.$proba_string[$eval->avg_probability-1].')';
-                                $score = $impacto * $probabilidad;
+                                $score = $eval->avg_impact * $eval->avg_probability;
                             }
                         }
                     }
@@ -909,7 +911,7 @@ class RiesgosController extends Controller
 
                                 $risk_response = $risk_response->id;
                             }
-                            else //se están agregando causas ya creadas
+                            else //se están agregando respuestas al riesgo ya creadas
                             {
                                 if (isset($_POST['risk_response']) && $_POST['risk_response'] != '')
                                 {
@@ -954,11 +956,40 @@ class RiesgosController extends Controller
 
                         \Ermtool\Risk::insertOrganizationRisk($_POST['org_id'],$risk->id,$stake,$comments2,$risk_response);
 
+                        //ACT 01-06-18: Obtenemos organization_risk_id
+                        $org_risk = \Ermtool\Risk::getOrganizationRisk($_POST['org_id'],$risk->id);
+
+                        //guardamos archivos de evidencias (si es que hay)
+                        if($GLOBALS['evidence'] != NULL)
+                        {
+                            foreach ($GLOBALS['evidence'] as $evidence)
+                            {
+                                if ($evidence != NULL)
+                                {
+                                    upload_file($evidence,'riesgos',$org_risk->id);
+                                }
+                            }                    
+                        }
                         //ACTUALIZACIÓN 16-08-17: Agregamos riesgo y subproceso para otras organizaciones
                         if (isset($_POST['organization_id']) && $_POST['organization_id'] != "")
                         {
                             foreach ($_POST['organization_id'] as $org)
                             {
+                                //ACT 01-06-18: Obtenemos organization_risk_id
+                                $org_risk = \Ermtool\Risk::getOrganizationRisk($org,$risk->id);
+
+                                //guardamos archivos de evidencias (si es que hay)
+                                if($GLOBALS['evidence'] != NULL)
+                                {
+                                    foreach ($GLOBALS['evidence'] as $evidence)
+                                    {
+                                        if ($evidence != NULL)
+                                        {
+                                            upload_file($evidence,'riesgos',$org_risk->id);
+                                        }
+                                    }                    
+                                }
+
                                 foreach($_POST['subprocesses_'.$org] as $sub)
                                 {
                                     //primero verificamos que el subproceso no exista previamente
@@ -984,18 +1015,6 @@ class RiesgosController extends Controller
                                     \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,null,null,null);
                                 }
                             }
-                        }
-
-                        //guardamos archivos de evidencias (si es que hay)
-                        if($GLOBALS['evidence'] != NULL)
-                        {
-                            foreach ($GLOBALS['evidence'] as $evidence)
-                            {
-                                if ($evidence != NULL)
-                                {
-                                    upload_file($evidence,'riesgos',$risk->id);
-                                }
-                            }                    
                         }
 
                         //ACT 08-01-18: Agregamos materialidad
@@ -1513,24 +1532,24 @@ class RiesgosController extends Controller
                             {
                                 //primero eliminamos relaciones previas
                                 //ACTUALIZACIÓN 02-03-2017: NO SE PUEDE ELIMINAR!!! YA QUE PUEDE TENER COSAS ASOCIADAS
-                                //DB::table('risk_subprocess')
-                                //    ->where('risk_id','=',$riesgo->id)
-                                //    ->delete();
+                                //ACT 04-06-18: Hasta ahora no tiene ningún elemento asociado, por lo que si se puede eliminar. Sin embargo, haremos soft deleting (en el futuro)
+                                DB::table('risk_subprocess')
+                                    ->where('risk_id','=',$riesgo->id)
+                                    ->delete();
 
                                 //agregamos en tabla risk_subprocess
                                 foreach ($_POST['subprocess_id'] as $subprocess_id)
                                 {
                                     //vemos si el subproceso ya se encuentra para el riesgo
-                                    $risk_sub = DB::table('risk_subprocess')
+                                    /*$risk_sub = DB::table('risk_subprocess')
                                                 ->where('risk_id','=',$riesgo->id)
                                                 ->where('subprocess_id','=',$subprocess_id)
                                                 ->get(['id']);
 
-                                    if (empty($risk_sub)) //si es que está vacío significa que la relación no existe
-                                    {
-                                        $subprocess = \Ermtool\Subprocess::find($subprocess_id);
-                                        $subprocess->risks()->attach($riesgo->id);
-                                    }
+                                    if (empty($risk_sub)) //si es que está vacío significa que la relación no existe*/
+                                    //ACT 04-06-18: Se deben eliminar los riesgos que existan previamente
+                                    $subprocess = \Ermtool\Subprocess::find($subprocess_id);
+                                    $subprocess->risks()->attach($riesgo->id);
                                 }       
                             }
                         }
@@ -1541,25 +1560,16 @@ class RiesgosController extends Controller
                             {
                                 //primero eliminamos relaciones previas
                                 //ACTUALIZACIÓN 02-03-2017: NO SE PUEDE ELIMINAR!!! YA QUE PUEDE TENER COSAS ASOCIADAS
-                                //DB::table('objective_risk')
-                                //    ->where('risk_id','=',$riesgo->id)
-                                //    ->delete();
+                                //ACT 04-06-18: Hasta ahora no tiene ningún elemento asociado, por lo que si se puede eliminar. Sin embargo, haremos soft deleting (en el futuro)
+                                DB::table('objective_risk')
+                                    ->where('risk_id','=',$riesgo->id)
+                                    ->delete();
 
                                 //agregamos en tabla objective_risk
                                 foreach ($_POST['objective_id'] as $objective_id)
                                 {
-                                    //vemos si el objetivo ya se encuentra para el riesgo
-                                    $obj_risk = DB::table('objective_risk')
-                                                ->where('risk_id','=',$riesgo->id)
-                                                ->where('objective_id','=',$objective_id)
-                                                ->get(['id']);
-
-                                    if (empty($obj_risk)) //si es que está vacío significa que la relación no existe
-                                    {
-                                        $objective = \Ermtool\Objective::find($objective_id);
-                                        $objective->risks()->attach($riesgo->id);
-                                    }
-                                    
+                                    $objective = \Ermtool\Objective::find($objective_id);
+                                    $objective->risks()->attach($riesgo->id);
                                 }       
                             }
                         }
@@ -1603,15 +1613,22 @@ class RiesgosController extends Controller
                             }
                         } 
 
-                        if($GLOBALS['evidence'] != NULL)
+                        if (isset($_POST['org_id']))
                         {
-                            foreach ($GLOBALS['evidence'] as $evidence)
+                            //ACT 01-06-18: Obtenemos organization_risk_id
+                            $org_risk = \Ermtool\Risk::getOrganizationRisk($_POST['org_id'],$riesgo->id);
+
+                            //guardamos archivos de evidencias (si es que hay)
+                            if($GLOBALS['evidence'] != NULL)
                             {
-                                if ($evidence != NULL)
+                                foreach ($GLOBALS['evidence'] as $evidence)
                                 {
-                                    upload_file($evidence,'riesgos',$GLOBALS['id1']);
-                                }
-                            }                    
+                                    if ($evidence != NULL)
+                                    {
+                                        upload_file($evidence,'riesgos',$org_risk->id);
+                                    }
+                                }                    
+                            }
                         }
 
                         if (!isset($_POST['description']) || $_POST['description'] == "")
@@ -1760,8 +1777,9 @@ class RiesgosController extends Controller
         }
         catch (\Exception $e)
         {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
+            print_r($e);
+            //enviarMailSoporte($e);
+            //return view('errors.query',['e' => $e]);
         }
     }
 
@@ -2597,6 +2615,47 @@ class RiesgosController extends Controller
 
         return $datos;
     }
+
+    //ACT 06-06-18: Función para bloquear un riesgo
+    public function bloquear($id,$org_id)
+    {
+        try
+        {
+            global $id1;
+            $id1 = $id;
+            global $res;
+            $res = 1;
+
+            global $org;
+
+
+            $org = $org_id;
+
+
+            DB::transaction(function() {
+                $logger = $this->logger;
+                $name = \Ermtool\Risk::name($GLOBALS['id1']);
+                
+                //obtenemos org_risk
+                $org_risk = \Ermtool\OrganizationRisk::where('organization_id',$GLOBALS['org'])->where('risk_id',$GLOBALS['id1']);
+
+                //Eliminamos (con soft_deleting)
+                $org_risk->delete();
+
+                $GLOBALS['res'] = 0;
+
+            });
+
+            return $res;
+        }
+        catch (\Exception $e)
+        {
+            print_r($e);
+            //enviarMailSoporte($e);
+            //return view('errors.query',['e' => $e]);
+        }
+    }
+
     /**
      * Remove the specified resource from storage.
      *
@@ -3056,17 +3115,13 @@ class RiesgosController extends Controller
             else
             {
                 $risks = DB::table('risks')
-                    ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
-                    ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                    ->where('organization_subprocess.organization_id','=',$org)
-                    ->where('risks.status','=',0)
+                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                    ->whereNull('organization_risk.deleted_at')
+                    ->where('organization_risk.organization_id','=',$org)
                     ->select('risks.id','risks.name','risks.description','risks.type','risks.risk_category_id')
                     ->distinct('risks.id')
                     ->get();
             }
-            
-            
 
             $i = 0;
 
@@ -3098,57 +3153,7 @@ class RiesgosController extends Controller
 
                 $i += 1;
             }
-
-            //obtenemos riesgos de negocio
-            //En el inicio, org será NULL
-            if ($org == NULL)
-            {
-                $risks = DB::table('risks')
-                    ->join('objective_risk','objective_risk.risk_id','=','risks.id')
-                    ->where('risks.status','=',0)
-                    ->select('risks.id','risks.name','risks.description','risks.type','risks.risk_category_id')
-                    ->distinct('risks.id')
-                    ->get();
-            }
-            else
-            {
-                $risks = DB::table('risks')
-                    ->join('objective_risk','objective_risk.risk_id','=','risks.id')
-                    ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                    ->where('objectives.organization_id','=',$org)
-                    ->where('risks.status','=',0)
-                    ->select('risks.id','risks.name','risks.description','risks.type','risks.risk_category_id')
-                    ->distinct('risks.id')
-                    ->get();
-            }
-
-            foreach ($risks as $risk)
-            {
-                //obtenemos nombre de categoria
-                $risk_category = \Ermtool\Risk_category::find($risk->risk_category_id);
-
-                //enviamos además si es que es categoría principal o secundaria
-                if ($risk_category->risk_category_id == NULL)
-                {
-                    //es categoría principal
-                    $sec = 0;
-                }
-                else 
-                {
-                    $sec = 1;
-                }
-                $results[$i] = [
-                    'id' => $risk->id,
-                    'name' => $risk->name,
-                    'description' => $risk->description,
-                    'type' => $risk->type,
-                    'risk_category_id' => $risk->risk_category_id,
-                    'risk_category' => $risk_category->name,
-                    'sec' => $sec
-                ];
-
-                $i += 1;
-            }
+            
 
             //si es en inicio, no enviaremos los datos a través de json
             if ($org == NULL)

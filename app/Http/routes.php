@@ -47,8 +47,20 @@ Route::post('criteria.update', [
 ]);
 
 // ---- RUTAS DE CONFIGURACIÓN ---- //
+Route::get('configuration.create', [
+	'as' => 'configuration.create', 'uses' => 'ConfigurationController@create'
+	]);
+
 Route::post('configuration.store', [
 	'as' => 'configuration.store', 'uses' => 'ConfigurationController@store'
+	]);
+
+Route::get('configuration.edit', [
+	'as' => 'configuration.edit', 'uses' => 'ConfigurationController@edit'
+	]);
+
+Route::post('configuration.update', [
+	'as' => 'configuration.update', 'uses' => 'ConfigurationController@update'
 	]);
 
 // ---- FIN RUTAS DE CONFIGURACIÓN ---- //
@@ -207,6 +219,15 @@ Route::put('procesos.update.{id}', [
 
 Route::get('procesos.destroy.{id}', [
 	'as' => 'procesos.destroy', 'uses' => 'ProcesosController@destroy'
+]);
+
+//ACT 08-06-18: Ruta para asignar responsables de proceso
+Route::get('procesos.responsables.{id}', [
+	'as' => 'procesos.responsables', 'uses' => 'ProcesosController@responsables'
+]);
+
+Route::post('procesos.agregar_resp', [
+	'as' => 'procesos.agregar_resp', 'uses' => 'ProcesosController@agregarResp'
 ]);
 
 //Rutas para CRUD + bloquear Subprocesos//
@@ -555,6 +576,10 @@ Route::put('riesgos.update.{id}', [
 Route::get('riesgos.setriesgotipo.{id}', [
 	'as' => 'riesgos.setriesgotipo', 'uses' => 'RiesgosController@setRiesgoTipo'
 ]);
+
+//ACT 06-06-18: Bloquear para riesgos
+Route::get('riesgos.bloquear.{id}.{org}', [
+	'as' => 'riesgos.bloquear', 'uses' => 'RiesgosController@bloquear']);
 
 Route::get('riesgos.destroy.{id}.{org}', [
 	'as' => 'riesgos.destroy', 'uses' => 'RiesgosController@destroy']);

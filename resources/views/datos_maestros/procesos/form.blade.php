@@ -1,9 +1,36 @@
+	<div class="form-group">
+		{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}
+		<div class="col-sm-3">
+			@if (strstr($_SERVER["REQUEST_URI"],'edit'))
+				<select name="organization_id[]" multiple id="organization_id">
+				@foreach ($organizations as $id=>$name)
+					
+					@foreach ($orgs_selected as $os) 
+						<?php $cont = 0; //contador para ver si una organización está seleccionada ?>
+							@if ($os->organization_id == $id)
+								<option value="{{ $id }}" selected>{{ $name }}</option>
+								<?php $cont += 1; ?>
+							@endif
+					@endforeach
+
+					@if (!isset($cont) || $cont == 0)
+						<option value="{{ $id }}">{{ $name }}</option>
+					@endif
+
+				@endforeach
+				</select>
+			@else
+				{!!Form::select('organization_id[]',$organizations,null, ['id' => 'organization_id','multiple'=>'true','required'=>'true'])!!}
+			@endif
+		</div>
+	</div>
+
 	<div class="form-group">	
 	{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
 		<div class="col-sm-3">
 			{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 		</div>
-					</div>
+	</div>
 
 	<div class="form-group">
 		{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}

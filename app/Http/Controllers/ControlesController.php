@@ -2454,9 +2454,10 @@ class ControlesController extends Controller
                                 }
                             }
 
-                            if (Session::get('languaje') == 'en')
+                            if (strstr($_SERVER["REQUEST_URI"],'genexcel')) 
                             {
-                                if (strstr($_SERVER["REQUEST_URI"],'genexcel')) 
+                            
+                                if (Session::get('languaje') == 'en')
                                 {
                                     $datos[$i] = [//'id' => $control->id,
                                             'Control' => $control->name,
@@ -2467,32 +2468,12 @@ class ControlesController extends Controller
                                             'Purpose' => $purpose,
                                             'Expected_cost' => $expected_cost,
                                             'Evidence' => $evidence,
-                                            'Cont_percentage' => $control->porcentaje_cont,
+                                            'Cont_percentage' => $control->cont_percentage,
                                             'Subprocesses' => $sub,
                                             'Risks' => $risks2];
                                 }
                                 else
                                 {
-                                    $datos[$i] = ['id' => $control->id,
-                                            'Control' => $control->name,
-                                            'Description' => $control->description,
-                                            'Responsable' => $stakeholder2,
-                                            'Kind' => $type,
-                                            'Periodicity' => $periodicity,
-                                            'Purpose' => $purpose,
-                                            'Expected_cost' => $expected_cost,
-                                            'Evidence' => $evidence,
-                                            'porcentaje_cont' => $control->porcentaje_cont,
-                                            'Subprocesses' => $sub,
-                                            'Risks' => $risks2,
-                                            'short_des' => $short_des];
-                                }
-
-                            }
-                            else
-                            {
-                                if (strstr($_SERVER["REQUEST_URI"],'genexcel')) 
-                                {
                                     $datos[$i] = [//'id' => $control->id,
                                             'Control' => $control->name,
                                             'Descripción' => $control->description,
@@ -2502,26 +2483,28 @@ class ControlesController extends Controller
                                             'Propósito' => $purpose,
                                             'Costo_control' => $expected_cost,
                                             'Evidencia' => $evidence,
-                                            'Porcentaje_contribución' => $control->porcentaje_cont,
+                                            'Porcentaje_contribución' => $control->cont_percentage,
                                             'Riesgos' => $risks2,
                                             'Subprocesos' => $sub];
                                 }
-                                else
-                                {
-                                    $datos[$i] = ['id' => $control->id,
-                                            'Control' => $control->name,
-                                            'Descripción' => $control->description,
-                                            'Responsable' => $stakeholder2,
-                                            'Tipo' => $type,
-                                            'Periodicidad' => $periodicity,
-                                            'Propósito' => $purpose,
-                                            'Costo_control' => $expected_cost,
-                                            'Evidencia' => $evidence,
-                                            'porcentaje_cont' => $control->porcentaje_cont,
-                                            'Riesgos' => $risks2,
-                                            'Subprocesos' => $sub,
-                                            'short_des' => $short_des];
-                                }
+
+                            }
+                            else
+                            {
+                                
+                                $datos[$i] = ['id' => $control->id,
+                                        'Control' => $control->name,
+                                        'Descripción' => $control->description,
+                                        'Responsable' => $stakeholder2,
+                                        'Tipo' => $type,
+                                        'Periodicidad' => $periodicity,
+                                        'Propósito' => $purpose,
+                                        'Costo_control' => $expected_cost,
+                                        'Evidencia' => $evidence,
+                                        'porcentaje_cont' => $control->cont_percentage,
+                                        'Riesgos' => $risks2,
+                                        'Subprocesos' => $sub,
+                                        'short_des' => $short_des];
                             }
                             $i += 1;
                         }
@@ -2564,9 +2547,9 @@ class ControlesController extends Controller
                                 }
                             }
                                     
-                            if (Session::get('languaje') == 'en')
+                            if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
                             {
-                                if (strstr($_SERVER["REQUEST_URI"],'genexcel')) 
+                                if (Session::get('languaje') == 'en')
                                 {
                                     $datos[$i] = [//'id' => $control->id,
                                             'Control' => $control->name,
@@ -2577,61 +2560,42 @@ class ControlesController extends Controller
                                             'Purpose' => $purpose,
                                             'Expected_cost' => $expected_cost,
                                             'Evidence' => $evidence,
-                                            'Cont_percentage' => $control->porcentaje_cont,
+                                            'Cont_percentage' => $control->cont_percentage,
                                             'Objectives' => $objs,
                                             'Risks' => $risks2];
                                 }
                                 else
                                 {
-                                    $datos[$i] = ['id' => $control->id,
+                                    $datos[$i] = [//'id' => $control->id,
                                             'Control' => $control->name,
-                                            'Description' => $control->description,
+                                            'Descripción' => $control->description,
                                             'Responsable' => $stakeholder2,
-                                            'Kind' => $type,
-                                            'Periodicity' => $periodicity,
-                                            'Purpose' => $purpose,
-                                            'Expected_cost' => $expected_cost,
-                                            'Evidence' => $evidence,
-                                            'porcentaje_cont' => $control->porcentaje_cont,
-                                            'Objectives' => $objs,
-                                            'Risks' => $risks2,
-                                            'short_des' => $short_des];
+                                            'Tipo' => $type,
+                                            'Periodicidad' => $periodicity,
+                                            'Propósito' => $purpose,
+                                            'Costo_control' => $expected_cost,
+                                            'Evidencia' => $evidence,
+                                            'Porcentaje_contribución' => $control->cont_percentage,
+                                            'Objetivos' => $objs,
+                                            'Riesgos' => $risks2];
                                 }        
                                 
                             }
                             else
                             {
-                                if (strstr($_SERVER["REQUEST_URI"],'genexcel')) 
-                                {
-                                    $datos[$i] = [//'id' => $control->id,
-                                                'Control' => $control->name,
-                                                'Descripción' => $control->description,
-                                                'Responsable' => $stakeholder2,
-                                                'Tipo' => $type,
-                                                'Periodicidad' => $periodicity,
-                                                'Propósito' => $purpose,
-                                                'Costo_control' => $expected_cost,
-                                                'Evidencia' => $evidence,
-                                                'Porcentaje_contribución' => $control->porcentaje_cont,
-                                                'Objetivos' => $objs,
-                                                'Riesgos' => $risks2];
-                                }
-                                else
-                                {
-                                    $datos[$i] = ['id' => $control->id,
-                                                'Control' => $control->name,
-                                                'Descripción' => $control->description,
-                                                'Responsable' => $stakeholder2,
-                                                'Tipo' => $type,
-                                                'Periodicidad' => $periodicity,
-                                                'Propósito' => $purpose,
-                                                'Costo_control' => $expected_cost,
-                                                'Evidencia' => $evidence,
-                                                'porcentaje_cont' => $control->porcentaje_cont,
-                                                'Objetivos' => $objs,
-                                                'Riesgos' => $risks2,
-                                                'short_des' => $short_des];
-                                }
+                                $datos[$i] = ['id' => $control->id,
+                                            'Control' => $control->name,
+                                            'Descripción' => $control->description,
+                                            'Responsable' => $stakeholder2,
+                                            'Tipo' => $type,
+                                            'Periodicidad' => $periodicity,
+                                            'Propósito' => $purpose,
+                                            'Costo_control' => $expected_cost,
+                                            'Evidencia' => $evidence,
+                                            'porcentaje_cont' => $control->cont_percentage,
+                                            'Objetivos' => $objs,
+                                            'Riesgos' => $risks2,
+                                            'short_des' => $short_des];
 
                             }
                             $i += 1;

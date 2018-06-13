@@ -3211,6 +3211,7 @@ class PlanesAccionController extends Controller
             else
             {
                 $title = 'No existen planes de acción abiertos';
+                $message = NULL;
             }
 
             //$message = nl2br($message);
@@ -3273,6 +3274,10 @@ class PlanesAccionController extends Controller
                     {
                         $cc = explode(';',$cc_se);
                     }
+                    else //sólo hay uno
+                    {
+                        $cc = $_POST['cc'];
+                    }
 
                     //cc_string para guardar en base de datos aunque sea array
                     $cc_string = $cc_se;  
@@ -3294,7 +3299,10 @@ class PlanesAccionController extends Controller
                     {
                         $cco = explode(';',$cco_se);
                     }
-
+                    else //sólo hay uno
+                    {
+                        $cco = $_POST['cco'];
+                    }
                     //cc_string para guardar en base de datos aunque sea array
                     $cco_string = $cco_se;
                     

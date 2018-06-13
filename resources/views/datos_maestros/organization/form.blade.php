@@ -38,7 +38,22 @@
 						<div class="col-sm-5">
 							{!!Form::date('expiration_date',null,['class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)'])!!}
 						</div>
-					</div>	
+					</div>
+
+					@if (isset($stakeholders) || isset($stakeholder))	
+							<div class="form-group">
+								{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
+								<div class="col-sm-5">
+								@if (isset($stakeholder))
+									{!!Form::select('stakeholder_id',$stakeholders,$stakeholder->id, 
+									 	   ['id'=>'stakeholder','placeholder'=>'- Seleccione -'])!!}
+								@else
+									{!!Form::select('stakeholder_id',$stakeholders,null, 
+									 	   ['id'=>'stakeholder','placeholder'=>'- Seleccione -'])!!}
+								@endif
+								</div>
+							</div>
+					@endif	
 
 					<div class="form-group">
 						{!!Form::label('¿Depende de otra organizaci&oacute;n?',null,['class'=>'col-sm-4 control-label'])!!}

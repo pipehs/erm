@@ -1399,7 +1399,12 @@ class EvaluacionRiesgosController extends Controller
                                             ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
                                             ->first();
 
-
+                                $updated_at_ctrl = DB::table('controlled_risk')
+                                        ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
+                                        ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
+                                        //->where('controlled_risk.created_at','<=',date($ano.$mes.$dia.' 23:59:59'))
+                                        ->max('controlled_risk.created_at');
+                                        
                                 //proba controlado (si es que hay)
                                 //ACT 05-03-18: Esto será para mapa de % de contribución
                                 if (isset($updated_at_ctrl) && $updated_at_ctrl != NULL)
@@ -1432,14 +1437,30 @@ class EvaluacionRiesgosController extends Controller
 
                                     //ACTUALIZACIÓN 06-07-17: COCA COLA
                                     //calculamos severidad y exposición al riesgo (dejaremos los nombres proba_ctrl para exposición, e impacto_ctrl para severidad para no modificar mucho la vista actual)
-                                    $impacto_ctrl = $proba_impacto_in->avg_probability * $proba_impacto_in->avg_impact;
-                                    //obtenemos exposición (1-X%) dividiendo el valor residual por la severidad
-                                    $proba_ctrl = $eval->results / $impacto_ctrl;
+                                    if (!empty($proba_impacto_in))
+                                    {
+                                        $impacto_ctrl = $proba_impacto_in->avg_probability * $proba_impacto_in->avg_impact;
+                                        //obtenemos exposición (1-X%) dividiendo el valor residual por la severidad
+                                        $proba_ctrl = $eval->results / $impacto_ctrl;
+                                    }
+                                    else
+                                    {
+                                        $impacto_ctrl = NULL;
+                                        $proba_ctrl = NULL;
+                                    }
                                 }
 
-                                //guardamos proba en $prom_proba
-                                $prom_proba_in[$i] = $proba_impacto_in->avg_probability;
-                                $prom_criticidad_in[$i] = $proba_impacto_in->avg_impact;
+                                if (!empty($proba_impacto_in))
+                                {
+                                    //guardamos proba en $prom_proba
+                                    $prom_proba_in[$i] = $proba_impacto_in->avg_probability;
+                                    $prom_criticidad_in[$i] = $proba_impacto_in->avg_impact;
+                                }
+                                else
+                                {
+                                    $prom_proba_in[$i] = NULL;
+                                    $prom_criticidad_in[$i] = NULL;
+                                }
 
                                 //prom_proba_ctrl para controlado (si es que hay)
                                 if (isset($proba_ctrl) && isset($impacto_ctrl))
@@ -1453,8 +1474,16 @@ class EvaluacionRiesgosController extends Controller
                                 {
                                     //agregamos variable para definir que el riesgo no está siendo controlado
                                     $control[$i] = 0;
-                                    $prom_proba_ctrl[$i] = $proba_impacto_in->avg_probability;
-                                    $prom_criticidad_ctrl[$i] = $proba_impacto_in->avg_impact;
+                                    if (!empty($proba_impacto_in))
+                                    {
+                                        $prom_proba_ctrl[$i] = $prom_proba_in[$i];
+                                        $prom_criticidad_ctrl[$i] = $prom_criticidad_in[$i];
+                                    }
+                                    else
+                                    {
+                                        $prom_proba_ctrl[$i] = NULL;
+                                        $prom_criticidad_ctrl[$i] = NULL;
+                                    }
                                 }
 
                                 //unseteamos variable de proba_impacto_ctrl para que no se repita

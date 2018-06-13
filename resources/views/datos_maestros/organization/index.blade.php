@@ -68,6 +68,7 @@
 	<th style="vertical-align:top;">Fecha expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th style="vertical-align:top;">Servicios compartidos<label><input type="text" placeholder="Filtrar" /></label></th>
 	<th style="vertical-align:top;">Organizaciones dependientes<label><input type="text" placeholder="Filtrar" /></label></th>
+	<th style="vertical-align:top;">Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
 
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
@@ -141,6 +142,12 @@
 			@endif
 		@endif
 		</td>
+
+		@if ($organization['stakeholder'] == NULL)
+			<td>No se ha asignado</td>
+		@else
+			<td>{{$organization['stakeholder']}}</td>
+		@endif
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 			<td>

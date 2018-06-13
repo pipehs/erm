@@ -77,7 +77,7 @@
 			<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 
 				<thead>
-				<th>ID Control<label><input type="text" placeholder="Filtrar" /></label></th>
+				<th>Control<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Tipo<label><input type="text" placeholder="Filtrar" /></label></th>

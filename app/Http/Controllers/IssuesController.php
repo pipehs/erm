@@ -313,7 +313,26 @@ class IssuesController extends Controller
             {
                 //CORRECCIÓN 08-11-2016: SÓLO SE MOSTRARÁN LOS ISSUES PARA LAS ORGANIZACIONES DIRECTAMENTE => PARA EVITAR MAYORES CAMBIOS QUE PUEDAN CONLLEVAR ERRORERS,
                 //LAS VARIABLES DE ISSUES SERÁN ENVIADAS PERO VACÍAS
-                $issues = \Ermtool\Organization::find($org_id)->issues;
+                //ACT 31-05-18: Todos los issues tienen organization_id. Se debe buscar que sea todo lo demás NULL
+                $issues2 = \Ermtool\Issue::getOrganizationIssues($org_id);
+
+                $issues = array();
+                $i = 0;
+                foreach ($issues2 as $issue)
+                {
+                    $issues[$i] = [
+                        'element_id' => $org_id,
+                        'id' => $issue->id,
+                        'name' => $issue->name,
+                        'description' => $issue->description,
+                        'classification' => $issue->classification,
+                        'recommendations' => $issue->recommendations,
+                        'comments' => $issue->comments
+                    ];
+
+                    $i += 1; 
+                }
+
                 $org_name = \Ermtool\Organization::name($org_id);
                 $org_description = \Ermtool\Organization::description($org_id);
             }
@@ -749,8 +768,9 @@ class IssuesController extends Controller
         }
         catch (\Exception $e)
         {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
+            print_r($e);
+            //enviarMailSoporte($e);
+            //return view('errors.query',['e' => $e]);
         }
     }
 
@@ -1518,8 +1538,9 @@ class IssuesController extends Controller
         }
         catch (\Exception $e)
         {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
+            //enviarMailSoporte($e);
+            //return view('errors.query',['e' => $e]);
+            print_r($e);
         }
     }
 
@@ -1744,11 +1765,7 @@ class IssuesController extends Controller
                     }
                     else if ($_GET['kind'] == 8) //Hallazgos de riesgos
                     {
-                        $risks = DB::table('risks')
-                                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
-                                    ->where('organization_risk.organization_id','=',$_GET['org'])
-                                    ->select('risks.name','organization_risk.id','risks.description')
-                                    ->get();
+                        $risks = \Ermtool\Risk::getRisks($_GET['org'],NULL);
 
                         if (Session::get('languaje') == 'en')
                         {     
@@ -2343,6 +2360,10 @@ class IssuesController extends Controller
 
                         $selected = $issue->subprocess_id;
                     }
+                    else if ($_GET['kind'] == 2) //mandamos id de org
+                    {
+                        $selected = $_GET['org'];
+                    }
                     else if ($_GET['kind'] == 3) //obtenemos controles de proceso
                     {
                         $controls = \Ermtool\Control::listControls($_GET['org'],0);
@@ -2722,8 +2743,9 @@ class IssuesController extends Controller
         }
         catch (\Exception $e)
         {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
+            print_r($e);
+            //enviarMailSoporte($e);
+            //return view('errors.query',['e' => $e]);
         }
     }
 

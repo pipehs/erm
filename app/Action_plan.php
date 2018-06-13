@@ -21,7 +21,7 @@ class Action_plan extends Model
     			->first();
     }
 
-    //ACT 29-01-18: Por ahora haremos 2 funciones, pero luego se debe actualizar y dejar sólo una (con el nombre de la de arriba), ya que posteriormente se debe actualizar y un hallazgo puede tener más de un plan de acción
+    //ACT 29-01-18: Por ahora haremos 2 funciones, pero luego se debe actualizar y dejar sólo una, ya que posteriormente se debe actualizar y un hallazgo puede tener más de un plan de acción
     public static function getActionPlanFromIssue2($issue)
     {
         return DB::table('action_plans')

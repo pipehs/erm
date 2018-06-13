@@ -63,6 +63,7 @@ class Risk extends Model
         $risks = DB::table('risks')
                     ->join('organization_risk','organization_risk.risk_id','=','risks.id')
                     ->join('control_organization_risk','control_organization_risk.organization_risk_id','=','organization_risk.id')
+                    ->whereNull('organization_risk.deleted_at')
                     ->where('control_organization_risk.control_id','=',$control)
                     ->where('organization_risk.organization_id','=',(int)$org)
                     ->where('risks.status','=',0)
@@ -82,6 +83,7 @@ class Risk extends Model
             return DB::table('objective_risk')
                 ->join('organization_risk','organization_risk.risk_id','=','objective_risk.risk_id')
                 ->join('risks','risks.id','=','organization_risk.risk_id')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('risks.type2','=',1)
                 ->where('risks.status','=',0)
                 ->groupBy('risks.id','risks.name','risks.description','risks.risk_category_id')
@@ -93,6 +95,7 @@ class Risk extends Model
             return DB::table('objective_risk')
                 ->join('organization_risk','organization_risk.risk_id','=','objective_risk.risk_id')
                 ->join('risks','risks.id','=','organization_risk.risk_id')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('organization_risk.organization_id','=',$org)
                 ->where('risks.type2','=',1)
                 ->where('risks.status','=',0)
@@ -117,6 +120,7 @@ class Risk extends Model
                 return DB::table('risks')
                         ->join('organization_risk','organization_risk.risk_id','=','risks.id')
                         ->where('organization_risk.organization_id','=',$org)
+                        ->whereNull('organization_risk.deleted_at')
                         ->where('risks.type2','=',1)
                         ->where('risks.status','=',0)
                         ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
@@ -128,6 +132,7 @@ class Risk extends Model
                 return DB::table('risks')
                         ->join('organization_risk','organization_risk.risk_id','=','risks.id')
                         ->where('organization_risk.organization_id','=',$org)
+                        ->whereNull('organization_risk.deleted_at')
                         ->where('risks.risk_category_id','=',$category)
                         ->where('risks.type2','=',1)
                         ->where('risks.status','=',0)
@@ -138,7 +143,10 @@ class Risk extends Model
         }
         else
         {
+            //ACT 06-06-18: Obtenemos los que no estén bloqueados en organization_risk
             return DB::table('risks')
+                ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('risks.type2','=',1)
                 ->where('risks.status','=',0)
                 ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id')
@@ -159,6 +167,7 @@ class Risk extends Model
                 //ACTUALIZACIÓN 29-03-17: Probablemente group by da lo mismo
                 return DB::table('risks')
                         ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                        ->whereNull('organization_risk.deleted_at')
                         ->where('organization_risk.organization_id','=',$org)
                         ->where('risks.type2','=',1)
                         ->where('risks.type','=',$type)
@@ -186,6 +195,7 @@ class Risk extends Model
                 //riesgos de categoría directamente
                 $risks1 = DB::table('risks')
                         ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                        ->whereNull('organization_risk.deleted_at')
                         ->where('organization_risk.organization_id','=',$org)
                         ->where('risks.risk_category_id','=',$category)
                         ->where('risks.type2','=',1)
@@ -198,6 +208,7 @@ class Risk extends Model
                 //riesgos de subcategoría
                 $risks2 = DB::table('risks')
                         ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                        ->whereNull('organization_risk.deleted_at')
                         ->where('organization_risk.organization_id','=',$org)
                         ->whereIn('risks.risk_category_id',$subcategories)
                         ->where('risks.type2','=',1)
@@ -220,6 +231,7 @@ class Risk extends Model
                 //ACTUALIZACIÓN 29-03-17: Probablemente group by da lo mismo
                 return DB::table('risks')
                         ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                        ->whereNull('organization_risk.deleted_at')
                         ->where('risks.type2','=',1)
                         ->where('risks.status','=',0)
                         ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id')
@@ -245,6 +257,7 @@ class Risk extends Model
                 //riesgos de categoría directamente
                 $risks1 = DB::table('risks')
                         ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                        ->whereNull('organization_risk.deleted_at')
                         ->where('risks.risk_category_id','=',$category)
                         ->where('risks.type2','=',1)
                         ->where('risks.status','=',0)
@@ -255,6 +268,7 @@ class Risk extends Model
                 //riesgos de subcategoría
                 $risks2 = DB::table('risks')
                         ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                        ->whereNull('organization_risk.deleted_at')
                         ->whereIn('risks.risk_category_id',$subcategories)
                         ->where('risks.type2','=',1)
                         ->where('risks.status','=',0)
@@ -288,8 +302,11 @@ class Risk extends Model
                 $i += 1;
             }
             //riesgos de categoría directamente
+            //ACT 06-06-2018: Verificamos que no esté bloqueado en organization_risk
             $risks1 = DB::table('risks')
                     ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
+                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                    ->whereNull('organization_risk.deleted_at')
                     ->where('risks.risk_category_id','=',$category)
                     ->where('risks.type2','=',1)
                     ->where('risks.status','=',0)
@@ -300,6 +317,8 @@ class Risk extends Model
             //riesgos de subcategoría
             $risks2 = DB::table('risks')
                     ->join('risk_categories','risk_categories.id','=','risks.risk_category_id')
+                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                    ->whereNull('organization_risk.deleted_at')
                     ->whereIn('risks.risk_category_id',$subcategories)
                     ->where('risks.type2','=',1)
                     ->where('risks.status','=',0)
@@ -321,6 +340,7 @@ class Risk extends Model
             return DB::table('risk_subprocess')
                 ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
                 ->join('risks','risks.id','=','risk_subprocess.risk_id')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('risks.type2','=',1)
                 ->where('risks.status','=',0)
                 ->groupBy('risks.id','risks.name','risks.description')
@@ -332,6 +352,7 @@ class Risk extends Model
             return DB::table('risk_subprocess')
                 ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
                 ->join('risks','risks.id','=','risk_subprocess.risk_id')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('organization_risk.organization_id','=',$org)
                 ->where('risks.type2','=',1)
                 ->where('risks.status','=',0)
@@ -344,9 +365,11 @@ class Risk extends Model
     public static function getRisksFromProcess($org,$process_id)
     {
         return DB::table('risks')
+                ->join('organization_risk','organization_risk.risk_id','=','risks.id')
                 ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
                 ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
                 ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('organization_subprocess.organization_id','=',$org)
                 ->where('subprocesses.process_id','=',$process_id)
                 ->where('risks.status','=',0)
@@ -360,6 +383,7 @@ class Risk extends Model
         return DB::table('risks')
                 ->join('organization_risk','organization_risk.risk_id','=','risks.id')
                 ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('organization_risk.organization_id','=',$org)
                 ->where('risk_subprocess.subprocess_id','=',$subprocess_id)
                 ->where('risks.status','=',0)
@@ -373,6 +397,7 @@ class Risk extends Model
                         ->join('risks','organization_risk.risk_id','=','risks.id')
                         ->join('organizations','organizations.id','=','organization_risk.organization_id')
                         ->where('risks.status','=',0)
+                        ->whereNull('organization_risk.deleted_at')
                         ->select('risks.id','risks.name as risk_name','risks.description','organizations.name as org','organizations.id as org_id')
                         ->get();
     }
@@ -380,6 +405,7 @@ class Risk extends Model
     public static function getOrganizationRisk($org,$risk_id)
     {
         return DB::table('organization_risk')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('organization_id','=',$org)
                 ->where('risk_id','=',$risk_id)
                 ->select('id')
@@ -391,6 +417,8 @@ class Risk extends Model
         return DB::table('objective_subprocess_risk')
             ->join('risks as risk_subprocess','risk_subprocess.id','=','objective_subprocess_risk.risk_subprocess_id')
             ->join('risks as objective_risk','objective_risk.id','=','objective_subprocess_risk.objective_risk_id')
+            ->join('organization_risk','organization_risk.risk_id','risk_subprocess.id')
+            ->whereNull('organization_risk.deleted_at')
             ->where('risk_subprocess.status','=',0)
             ->select('objective_subprocess_risk.id','objective_risk.name as obj_name','risk_subprocess.name as sub_name')
             ->get();
@@ -404,7 +432,10 @@ class Risk extends Model
                     'risk_id' => $risk_id,
                     'stakeholder_id' => $stakeholder_id,
                     'comments' => $comments,
-                    'risk_response_id' => $risk_response 
+                    'risk_response_id' => $risk_response,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'deleted_at' => NULL, 
                 ]);
     }
 
@@ -414,6 +445,7 @@ class Risk extends Model
         {
             return DB::table('risks')
                 ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('risks.name','=',$risk)
                 ->where('organization_risk.organization_id','=',$org_id)
                 ->select('risks.id','organization_risk.id as org_risk_id')
@@ -432,6 +464,7 @@ class Risk extends Model
     {
         return DB::table('risks')
             ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+            ->whereNull('organization_risk.deleted_at')
             ->where('risks.name','=',$name)
             ->where('risks.description','=',$description)
             ->where('organization_risk.organization_id','=',$org_id)
@@ -454,6 +487,7 @@ class Risk extends Model
         $risks = DB::table('risks')
                     ->join('organization_risk','organization_risk.risk_id','=','risks.id')
                     ->join('issue_organization_risk','issue_organization_risk.organization_risk_id','=','organization_risk.id')
+                    ->whereNull('organization_risk.deleted_at')
                     ->where('issue_organization_risk.issue_id','=',$issue)
                     ->select('organization_risk.id','risks.name','risks.description')
                     ->groupBy('organization_risk.id','risks.name','risks.description')
@@ -466,6 +500,7 @@ class Risk extends Model
     public static function getOrgRisk($risk_id,$org_id)
     {
         return DB::table('organization_risk')
+            ->whereNull('organization_risk.deleted_at')
             ->where('risk_id','=',$risk_id)
             ->where('organization_id','=',$org_id)
             ->select('id')
@@ -475,6 +510,7 @@ class Risk extends Model
     public static function getLastMateriality($org_id,$risk_id)
     {
         $org_risk = DB::table('organization_risk')
+                    ->whereNull('organization_risk.deleted_at')
                     ->where('risk_id','=',$risk_id)
                     ->where('organization_id','=',$org_id)
                     ->select('id')
@@ -499,6 +535,7 @@ class Risk extends Model
                 ->join('issue_organization_risk','issue_organization_risk.issue_id','=','issues.id')
                 ->join('organization_risk','organization_risk.id','=','issue_organization_risk.organization_risk_id')
                 ->join('risks','risks.id','=','organization_risk.risk_id')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('organization_risk.organization_id','=',(int)$org_id)
                 ->select('organization_risk.id as id','risks.name','risks.description')
                 ->groupBy('organization_risk.id','risks.name','risks.description')
@@ -509,6 +546,7 @@ class Risk extends Model
     public static function getOrgRisks($risk_id)
     {
         return DB::table('organization_risk')
+                ->whereNull('organization_risk.deleted_at')
                 ->where('risk_id','=',$risk_id)
                 ->select('id','organization_id','risk_id')
                 ->get();
@@ -535,5 +573,14 @@ class Risk extends Model
                 'created_at' => date($ano.'-'.$mes.'-'.$dia.' H:i:s'),
                 'updated_at' => date($ano.'-'.$mes.'-'.$dia.' H:i:s')
             ]);
+    }
+
+    public static function getRiskByOrgRisk($org_risk_id)
+    {
+        return DB::table('risks')
+            ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+            ->whereNull('organization_risk.deleted_at')
+            ->where('organization_risk.id','=',$org_risk_id)
+            ->first();
     }
 }

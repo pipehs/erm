@@ -96,7 +96,7 @@ class DocumentosController extends Controller
                     //{
                     //ACT 24-04-18: Ahora se buscará control_org_id
                     $co = \Ermtool\ControlOrganization::getByCO($_GET['control_id'],$_GET['organization_id']);
-                    $files = Storage::files('controles_org/'.$control->id);
+                    $files = Storage::files('controles_org/'.$co->id);
                     //$files = Storage::files('controles/'.$control->id);
                         //vemos si existe la carpeta (si existe es porque tiene archivos)
                     $risks = \Ermtool\Risk::getRisksFromControl($_GET['organization_id'],$control->id);
@@ -104,11 +104,11 @@ class DocumentosController extends Controller
                     //}
                     if (Session::get('languaje') == 'en')
                     {
-                        return view('en.documentos.show',['control' => $control,'kind' => $_GET['kind'], 'control_type' => $_GET['control_type'],'org_name' => $org_name,'risks' => $risks, 'files' => $files]);
+                        return view('en.documentos.show',['control' => $control,'kind' => $_GET['kind'], 'control_type' => $_GET['control_type'],'org_name' => $org_name,'risks' => $risks, 'files' => $files,'co' => $co]);
                     }
                     else
                     {
-                        return view('documentos.show',['control' => $control,'kind' => $_GET['kind'], 'control_type' => $_GET['control_type'],'org_name' => $org_name,'risks' => $risks,'files' => $files]);
+                        return view('documentos.show',['control' => $control,'kind' => $_GET['kind'], 'control_type' => $_GET['control_type'],'org_name' => $org_name,'risks' => $risks,'files' => $files,'co' => $co]);
                     }
                     break;
                 case 2: //hallazgos
@@ -135,23 +135,17 @@ class DocumentosController extends Controller
                                 foreach ($issues as $issue)
                                 {
                                     //obtenemos plan de acción del issue
-                                    $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
+                                    //ACT 31-05-18: Obtenemos todos los planes de acción (puede haber más de uno)
+                                    $action_plans = \Ermtool\Action_plan::getActionPlanFromIssue2($issue->id);
                                     //obtenemos files del plan de acción
-                                    if (!empty($action_plan))
+                                    if (!empty($action_plans))
                                     {
-                                        $files2 = Storage::files('planes_accion/'.$action_plan->id);
+                                        foreach ($action_plans as $ap)
+                                        {
+                                            $files2 = Storage::files('planes_accion/'.$ap->id);
 
-                                        $action_plan2 = [
-                                            'id' => $action_plan->id,
-                                            'description' => $action_plan->description,
-                                            'status' => $action_plan->status,
-                                            'files' => $files2,
-                                        ];
-                                    }
-                                    else
-                                    {
-                                        $files2 = NULL;
-                                        $action_plan2 = NULL;
+                                            $ap->files = $files2;
+                                        }
                                     }
 
                                     $files = Storage::files('evidencias_hallazgos/'.$issue->id);
@@ -165,7 +159,7 @@ class DocumentosController extends Controller
                                             'classification' => $issue->classification,
                                             'recommendations' => $issue->recommendations,
                                             'files' => $files,
-                                            'action_plan' => $action_plan2
+                                            'action_plans' => $action_plans
                                         ];
 
                                         $j += 1;
@@ -209,23 +203,17 @@ class DocumentosController extends Controller
                                 foreach ($issues as $issue)
                                 {
                                     //obtenemos plan de acción del issue
-                                    $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
+                                    //ACT 31-05-18: Obtenemos todos los planes de acción (puede haber más de uno)
+                                    $action_plans = \Ermtool\Action_plan::getActionPlanFromIssue2($issue->id);
                                     //obtenemos files del plan de acción
-                                    if (!empty($action_plan))
+                                    if (!empty($action_plans))
                                     {
-                                        $files2 = Storage::files('planes_accion/'.$action_plan->id);
+                                        foreach ($action_plans as $ap)
+                                        {
+                                            $files2 = Storage::files('planes_accion/'.$ap->id);
 
-                                        $action_plan2 = [
-                                            'id' => $action_plan->id,
-                                            'description' => $action_plan->description,
-                                            'status' => $action_plan->status,
-                                            'files' => $files2,
-                                        ];
-                                    }
-                                    else
-                                    {
-                                        $files2 = NULL;
-                                        $action_plan2 = NULL;
+                                            $ap->files = $files2;
+                                        }
                                     }
 
                                     $files = Storage::files('evidencias_hallazgos/'.$issue->id);
@@ -239,7 +227,7 @@ class DocumentosController extends Controller
                                             'classification' => $issue->classification,
                                             'recommendations' => $issue->recommendations,
                                             'files' => $files,
-                                            'action_plan' => $action_plan2
+                                            'action_plans' => $action_plans
                                         ];
 
                                         $j += 1;
@@ -269,7 +257,9 @@ class DocumentosController extends Controller
                             }
                             break;
                         case 2: //issues de organización
-                            $issues = \Ermtool\Organization::find($_GET['organization_id'])->issues;
+                            //ACT 31-05-18: Todos los issues tienen organization_id. Se debe buscar que sea todo lo demás NULL
+                            $issues = \Ermtool\Issue::getOrganizationIssues($_GET['organization_id']);
+
                             $org_name = \Ermtool\Organization::name($_GET['organization_id']);
                             $org_description = \Ermtool\Organization::description($_GET['organization_id']);
 
@@ -279,24 +269,19 @@ class DocumentosController extends Controller
                             foreach ($issues as $issue)
                             {
                                     //obtenemos plan de acción del issue
-                                    $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
+                                    //ACT 31-05-18: Obtenemos todos los planes de acción (puede haber más de uno)
+                                    $action_plans = \Ermtool\Action_plan::getActionPlanFromIssue2($issue->id);
                                     //obtenemos files del plan de acción
-                                    if (!empty($action_plan))
+                                    if (!empty($action_plans))
                                     {
-                                        $files2 = Storage::files('planes_accion/'.$action_plan->id);
+                                        foreach ($action_plans as $ap)
+                                        {
+                                            $files2 = Storage::files('planes_accion/'.$ap->id);
 
-                                        $action_plan2 = [
-                                            'id' => $action_plan->id,
-                                            'description' => $action_plan->description,
-                                            'status' => $action_plan->status,
-                                            'files' => $files2,
-                                        ];
+                                            $ap->files = $files2;
+                                        }
                                     }
-                                    else
-                                    {
-                                        $files2 = NULL;
-                                        $action_plan2 = NULL;
-                                    }
+
                                     $files = Storage::files('evidencias_hallazgos/'.$issue->id);
                                     //vemos si existe la carpeta (si existe es porque tiene archivos)
                                     if ($files != NULL)
@@ -308,7 +293,7 @@ class DocumentosController extends Controller
                                             'classification' => $issue->classification,
                                             'recommendations' => $issue->recommendations,
                                             'files' => $files,
-                                            'action_plan' => $action_plan2
+                                            'action_plans' => $action_plans
                                         ];
 
                                         $j += 1;
@@ -342,21 +327,17 @@ class DocumentosController extends Controller
                                     //obtenemos plan de acción del issue
                                     $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
                                     //obtenemos files del plan de acción
-                                    if (!empty($action_plan))
+                                    //ACT 31-05-18: Obtenemos todos los planes de acción (puede haber más de uno)
+                                    $action_plans = \Ermtool\Action_plan::getActionPlanFromIssue2($issue->id);
+                                    //obtenemos files del plan de acción
+                                    if (!empty($action_plans))
                                     {
-                                        $files2 = Storage::files('planes_accion/'.$action_plan->id);
+                                        foreach ($action_plans as $ap)
+                                        {
+                                            $files2 = Storage::files('planes_accion/'.$ap->id);
 
-                                        $action_plan2 = [
-                                            'id' => $action_plan->id,
-                                            'description' => $action_plan->description,
-                                            'status' => $action_plan->status,
-                                            'files' => $files2,
-                                        ];
-                                    }
-                                    else
-                                    {
-                                        $files2 = NULL;
-                                        $action_plan2 = NULL;
+                                            $ap->files = $files2;
+                                        }
                                     }
 
                                     $files = Storage::files('evidencias_hallazgos/'.$issue->id);
@@ -370,7 +351,7 @@ class DocumentosController extends Controller
                                             'classification' => $issue->classification,
                                             'recommendations' => $issue->recommendations,
                                             'files' => $files,
-                                            'action_plan' => $action_plan2
+                                            'action_plans' => $action_plans
                                         ];
 
                                         $j += 1;
@@ -416,21 +397,17 @@ class DocumentosController extends Controller
                                     //obtenemos plan de acción del issue
                                     $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
                                     //obtenemos files del plan de acción
-                                    if (!empty($action_plan))
+                                    //ACT 31-05-18: Obtenemos todos los planes de acción (puede haber más de uno)
+                                    $action_plans = \Ermtool\Action_plan::getActionPlanFromIssue2($issue->id);
+                                    //obtenemos files del plan de acción
+                                    if (!empty($action_plans))
                                     {
-                                        $files2 = Storage::files('planes_accion/'.$action_plan->id);
+                                        foreach ($action_plans as $ap)
+                                        {
+                                            $files2 = Storage::files('planes_accion/'.$ap->id);
 
-                                        $action_plan2 = [
-                                            'id' => $action_plan->id,
-                                            'description' => $action_plan->description,
-                                            'status' => $action_plan->status,
-                                            'files' => $files2,
-                                        ];
-                                    }
-                                    else
-                                    {
-                                        $files2 = NULL;
-                                        $action_plan2 = NULL;
+                                            $ap->files = $files2;
+                                        }
                                     }
 
                                     $files = Storage::files('evidencias_hallazgos/'.$issue->id);
@@ -444,7 +421,7 @@ class DocumentosController extends Controller
                                             'classification' => $issue->classification,
                                             'recommendations' => $issue->recommendations,
                                             'files' => $files,
-                                            'action_plan' => $action_plan2
+                                            'action_plans' => $action_plans
                                         ];
 
                                         $j += 1;
@@ -491,20 +468,17 @@ class DocumentosController extends Controller
                                     //obtenemos plan de acción del issue
                                     $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
                                     //obtenemos files del plan de acción
-                                    if (!empty($action_plan))
+                                    //ACT 31-05-18: Obtenemos todos los planes de acción (puede haber más de uno)
+                                    $action_plans = \Ermtool\Action_plan::getActionPlanFromIssue2($issue->id);
+                                    //obtenemos files del plan de acción
+                                    if (!empty($action_plans))
                                     {
-                                        $files2 = Storage::files('planes_accion/'.$action_plan->id);
+                                        foreach ($action_plans as $ap)
+                                        {
+                                            $files2 = Storage::files('planes_accion/'.$ap->id);
 
-                                        $action_plan2 = [
-                                            'id' => $action_plan->id,
-                                            'description' => $action_plan->description,
-                                            'status' => $action_plan->status,
-                                            'files' => $files2,
-                                        ];
-                                    }
-                                    else
-                                    {
-                                        $action_plan2 = NULL;
+                                            $ap->files = $files2;
+                                        }
                                     }
 
                                     $files = Storage::files('evidencias_hallazgos/'.$issue->id);
@@ -518,7 +492,7 @@ class DocumentosController extends Controller
                                             'classification' => $issue->classification,
                                             'recommendations' => $issue->recommendations,
                                             'files' => $files,
-                                            'action_plan' => $action_plan2
+                                            'action_plans' => $action_plans
                                         ];
 
                                         $j += 1;
@@ -565,21 +539,17 @@ class DocumentosController extends Controller
                                     //obtenemos plan de acción del issue
                                     $action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($issue->id);
                                     //obtenemos files del plan de acción
-                                    if (!empty($action_plan))
+                                    //ACT 31-05-18: Obtenemos todos los planes de acción (puede haber más de uno)
+                                    $action_plans = \Ermtool\Action_plan::getActionPlanFromIssue2($issue->id);
+                                    //obtenemos files del plan de acción
+                                    if (!empty($action_plans))
                                     {
-                                        $files2 = Storage::files('planes_accion/'.$action_plan->id);
+                                        foreach ($action_plans as $ap)
+                                        {
+                                            $files2 = Storage::files('planes_accion/'.$ap->id);
 
-                                        $action_plan2 = [
-                                            'id' => $action_plan->id,
-                                            'description' => $action_plan->description,
-                                            'status' => $action_plan->status,
-                                            'files' => $files2,
-                                        ];
-                                    }
-                                    else
-                                    {
-                                        $files2 = NULL;
-                                        $action_plan2 = NULL;
+                                            $ap->files = $files2;
+                                        }
                                     }
 
                                     $files = Storage::files('evidencias_hallazgos/'.$issue->id);
@@ -593,7 +563,7 @@ class DocumentosController extends Controller
                                             'classification' => $issue->classification,
                                             'recommendations' => $issue->recommendations,
                                             'files' => $files,
-                                            'action_plan' => $action_plan2
+                                            'action_plans' => $action_plans
                                         ];
 
                                         $j += 1;
@@ -620,6 +590,76 @@ class DocumentosController extends Controller
                             else
                             {
                                 return view('documentos.show',['elements' => $audit_issues,'kind2' => $_GET['kind_issue']]);
+                            }
+                            break;
+                        //ACT 01-06-18: Agregado opción hallazgos de Riesgo
+                        case 7: //issues de Riesgos
+                            $risks = \Ermtool\Risk::getrisksFromIssues($_GET['organization_id']);
+
+                            $org_name = \Ermtool\Organization::name($_GET['organization_id']);
+                            $risk_issues = array(); //se guardaran los subprocesos que tienen issues que además tienen documentos
+                            $i = 0;
+                            foreach ($risks as $risk)
+                            {
+                                //obtenemos issues del riesgo
+                                $issues = \Ermtool\Issue::getRiskIssuesByRisk($risk->id);
+
+                                $issues2 = array(); //array donde se guardaran los issues que tienen documentos
+                                //recorremos los issues para ver por cada uno si posee archivos
+                                $j = 0;
+                                foreach ($issues as $issue)
+                                {
+                                    //obtenemos plan de acción del issue
+                                    //ACT 31-05-18: Obtenemos todos los planes de acción (puede haber más de uno)
+                                    $action_plans = \Ermtool\Action_plan::getActionPlanFromIssue2($issue->id);
+                                    //obtenemos files del plan de acción
+                                    if (!empty($action_plans))
+                                    {
+                                        foreach ($action_plans as $ap)
+                                        {
+                                            $files2 = Storage::files('planes_accion/'.$ap->id);
+
+                                            $ap->files = $files2;
+                                        }
+                                    }
+
+                                    $files = Storage::files('evidencias_hallazgos/'.$issue->id);
+                                    //vemos si existe la carpeta (si existe es porque tiene archivos)
+                                    if ($files != NULL)
+                                    {
+                                        $issues2[$j] = [
+                                            'id' => $issue->id,
+                                            'name' => $issue->name,
+                                            'description' => $issue->description,
+                                            'classification' => $issue->classification,
+                                            'recommendations' => $issue->recommendations,
+                                            'files' => $files,
+                                            'action_plans' => $action_plans
+                                        ];
+
+                                        $j += 1;
+                                    }
+                                }
+
+                                //ahora guardamos solo aquellos subprocesos que tienen documentos asociados
+                                if (!empty($issues2))
+                                {
+                                    $risk_issues[$i] = [
+                                        'name' => $risk->name,
+                                        'description' => $risk->description,
+                                        'issues' => $issues2,
+                                    ];
+
+                                    $i += 1;
+                                }
+                            }
+                            if (Session::get('languaje') == 'en')
+                            {
+                                return view('en.documentos.show',['elements' => $risk_issues,'kind2' => $_GET['kind_issue'],'org_name' => $org_name]);
+                            }
+                            else
+                            {
+                                return view('documentos.show',['elements' => $risk_issues,'kind2' => $_GET['kind_issue'],'org_name' => $org_name]);
                             }
                             break;
                         default:
@@ -755,15 +795,17 @@ class DocumentosController extends Controller
                     }
                     break;
                 case 6: //riesgos
-                    $risk = \Ermtool\Risk::find($_GET['risk_id']);
-                    
+
+                    //ACT 01-06-18: Ahora se guardará organization_risk en evidencia (eso se envía en risk_id)
+                    //Obtenemos datos de riesgo por organization_risk
+                    $risk = \Ermtool\Risk::getRiskByOrgRisk($_GET['risk_id']);
                     //$i = 0;
 
                     $org_name = \Ermtool\Organization::name($_GET['organization_id']);
                     //recorremos los controles para ver cuales tienen archivos
                     //foreach ($controls as $control)
                     //{
-                    $files = Storage::files('riesgos/'.$risk->id);
+                    $files = Storage::files('riesgos/'.$_GET['risk_id']);
                         //vemos si existe la carpeta (si existe es porque tiene archivos)
                     $controls = \Ermtool\Control::getControlsFromRisk($_GET['organization_id'],$risk->id);
 
@@ -783,8 +825,9 @@ class DocumentosController extends Controller
         }
         catch (\Exception $e)
         {
-            enviarMailSoporte($e);
-            return view('errors.query',['e' => $e]);
+            //enviarMailSoporte($e);
+            //return view('errors.query',['e' => $e]);
+            print_r($e);
         }     
     }
 
