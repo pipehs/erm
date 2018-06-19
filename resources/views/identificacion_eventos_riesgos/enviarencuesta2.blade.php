@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Identificaci&oacute;n de Eventos de Riesgo</a></li>
+			<li><a href="#">Gestión de Encuestas</a></li>
 			<li><a href="enviar_encuesta">Enviar Encuesta</a></li>
 		</ol>
 	</div>
@@ -50,25 +50,20 @@
 {!!Form::open(['route'=>'identificacion.enviarCorreo','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 
 	@if ($tipo == 0)
-		Seleccione los destinatarios manualmente a trav&eacute;s de la siguiente lista.
+		Seleccione los destinatarios manualmente a trav&eacute;s de la siguiente lista *.
 	@elseif ($tipo == 1)
-		Seleccione la organizaci&oacute;n a la que desea enviar la encuesta.
+		Seleccione la organizaci&oacute;n a la que desea enviar la encuesta *.
 	@elseif ($tipo == 2)
-		Seleccione el rol de los usuarios a los que desea enviar la encuesta.
+		Seleccione el rol de los usuarios a los que desea enviar la encuesta *.
 	@endif
 
 		<div class="form-group">
-
-							{!!Form::select('stakeholder_id[]',$dest,
-							 	   null, 
-							 	   ['id' => 'el2','multiple'=>'true','required'=>'true'])!!}
+			{!!Form::select('stakeholder_id[]',$dest,null, ['id' => 'el2','multiple'=>'true','required'=>'true'])!!}
 		</div>
 
 		<div class="row form-group">
 				<small>
-				{!!Form::label('Si desea puede cambiar el mensaje predeterminado
-				(no cambie el link de la encuesta)',
-				null,['class'=>'col-sm-4 control-label'])!!}
+				<label for="mensaje" class="col-sm-4 control-label">Si desea puede cambiar el mensaje predeterminado (no cambie el link de la encuesta)</label>
 				<div class="col-sm-8">
 					{!!Form::textarea('mensaje',
 					$mensaje,['class'=>'form-control','rows'=>'5','cols'=>'8',

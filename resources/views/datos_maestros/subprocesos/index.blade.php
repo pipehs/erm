@@ -55,18 +55,18 @@
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size: 11px;">
 	<thead>
 		<tr>
-			<th>Organizaciones</small><label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Organización - Responsable</small><label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Proceso involucrado</small><label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Subproceso</small><label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Descripci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Fecha Creaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
-			<th>&Uacute;ltima actualizaci&oacute;n</small><label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Sistemas/Plataformas</small><label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Habeas Data</small><label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Marco Regulatorio</small><label><input type="text" placeholder="Filtrar" /></label></th>
 			<th>Subprocesos Dependientes</small><label><input type="text" placeholder="Filtrar" /></label></th>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)
+			<th style="vertical-align:top;">Asignar atributos</th>
 			<th style="vertical-align:top;">Acci&oacute;n</th>
 			<th style="vertical-align:top;">Acci&oacute;n</th>
 			<?php break; ?>
@@ -86,10 +86,15 @@
 	@foreach ($subprocesos as $subproceso)
 		<tr>
 		<td><ul>
-		@foreach ($organizaciones as $organizacion)
-			@if ($organizacion['subprocess_id'] == $subproceso['id'])
-				<li>{{ $organizacion['nombre'] }}</li>
+		@foreach ($subproceso['organizaciones'] as $o)
+			<li>{{ $o['nombre'] }} - 
+
+			@if ($o['responsable'] != NULL)
+				{{ $o['responsable'] }}
+			@else
+				No se ha asignado responsable
 			@endif
+			</li>
 		@endforeach
 		</ul></td>
 		<td>{{ $subproceso['proceso_relacionado'] }}</td>
@@ -108,12 +113,6 @@
 			<td>Error al registrar fecha de creaci&oacute;n</td>
 		@else
 			<td>{{ $subproceso['fecha_creacion'] }}</td>
-		@endif
-
-		@if ($subproceso['fecha_act'] == NULL)
-			<td>Error al registrar fecha de actualizaci&oacute;n</td>
-		@else
-			<td>{{ $subproceso['fecha_act'] }}</td>
 		@endif
 
 		@if ($subproceso['systems'] == NULL)
@@ -135,18 +134,23 @@
 		@endif
 
 		<td><ul style="none">
-		@if ($sub_dependientes == NULL)
+		@if (empty($subproceso['sub_dependientes']))
 			Ninguno
 		@else
-			@foreach ($sub_dependientes as $subprocesos)
-				@if ($subprocesos['subprocess_id'] == $subproceso['id'])
-					<li>{{ $subprocesos['nombre'] }}</li>
-				@endif
+			@foreach ($subproceso['sub_dependientes'] as $s)
+					<li>{{ $s['nombre'] }}</li>
 			@endforeach
 		@endif
 		</ul></td>
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
+		<td>
+			@if (!empty($subproceso['organizaciones']))
+				{!! link_to_route('subprocesos.attributes', $title = 'Asignar', $parameters = $subproceso['id'], $attributes = ['class'=>'btn btn-info']) !!}
+			@else
+				Primero debe asignar organizaciones
+			@endif
+		</td>	
 		<td><div>
 			@if ($subproceso['estado'] == 0)
 	            {!! link_to_route('subprocesos.edit', $title = 'Editar', $parameters = $subproceso['id'], $attributes = ['class'=>'btn btn-success']) !!}

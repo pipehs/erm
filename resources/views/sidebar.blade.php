@@ -1,76 +1,76 @@
-	
-		<div id="sidebar-left" class="col-xs-2 col-sm-2">
+<div id="sidebar-left" class="col-xs-2 col-sm-2">
+	<ul class="nav main-menu">
+	@if (!Auth::guest())
+		@if(Session::has('roles'))
+			<li>
+				<a href="home" class="{{ activeMenu('home') }}">
+					<i class="fa fa-home"></i>
+					<span class="hidden-xs">Inicio</span>
+				</a>
+			</li>
 		
-			<ul class="nav main-menu">
-@if (!Auth::guest())
-	@if(Session::has('roles'))
-		<li>
-			<a href="home" class="{{ activeMenu('home') }}">
-				<i class="fa fa-home"></i>
-				<span class="hidden-xs">Inicio</span>
-			</a>
-		</li>
-		
-		<?php $cont = 0; //contador en caso de tener rol de auditor y de audit manager ?>
-     	@foreach (Session::get('roles') as $role)
-			@if ($role == 1 || $role == 6) <!-- ADMIN TIENE ACCESO A TODO -->
-				@include('menu.datos_maestros')
-				@include('menu.estrategia')
-				@include('menu.riesgos')
-				@include('menu.controles')
-				@include('menu.auditorias')
-				@if (isset(Auth::user()->superadmin) && Auth::user()->superadmin == 1)
-					@include('menu.denuncias')
-				@endif
-			<?php break; //si es admin terminamos ciclo para no repetir menú ?>
-			@endif
-		@endforeach
-		<!-- ACT 11-04-17: Vuelvo a hacer Foreach sólo para ordenar el menú (ya que por ejemplo, datos maestros aparecía al final por tener id mayor -->
-		@foreach (Session::get('roles') as $role)
-			@if ($role == 8) <!-- Admin. de datos maestros -->
-				@include('menu.datos_maestros')
-			@endif
-		@endforeach
-
-		@foreach (Session::get('roles') as $role)
-			@if ($role == 7) <!-- Admin. de datos maestros -->
-				@include('menu.estrategia')
-			@endif
-		@endforeach
-
-		@foreach (Session::get('roles') as $role)
-			@if ($role == 2) <!-- Admin. de riesgo -->
-				@include('menu.riesgos')
-			@elseif ($role == 3) <!-- Admin. de control -->
-				@include('menu.controles')
-			@elseif ($role == 4 || $role == 5) <!-- Auditor Manager o Auditor-->
-				@if ($cont == 0)
+			<?php $cont = 0; //contador en caso de tener rol de auditor y de audit manager 
+			$verificador = 0; //Verifica que si tiene admin, no se debe mostrar nada más ?>
+	     	@foreach (Session::get('roles') as $role)
+				@if ($role == 1 || $role == 6) <!-- ADMIN TIENE ACCESO A TODO -->
+					@include('menu.datos_maestros')
+					@include('menu.estrategia')
+					@include('menu.encuestas')
+					@include('menu.riesgos')
+					@include('menu.controles')
 					@include('menu.auditorias')
-					<?php $cont = 1; //contador para ver si ya se agregó este menú ?>
-				@endif
-			@elseif ($role == 6) <!-- Display -->
-				<!-- Ver como hacer el visitante que solo puede ver -->
-			@endif
-
-		@endforeach
-
-		@include('menu.hallazgos')
-		@include('menu.planes_accion')
-		@include('menu.reportes')
-
-		@foreach (Session::get('roles') as $role)
-			@if ($role != 6) <!-- Rol distinto de display -->
-				@include('menu.documentos')
-				<?php break; ?>
-			@endif
-		@endforeach
-		<!--
-			@foreach (Session::get('roles') as $role)
-				@if ($role == 1) {{-- Administración del sistema --}}
-					@include('menu.admin')
+					<?php $verificador += 1; ?>
+					@if (isset(Auth::user()->superadmin) && Auth::user()->superadmin == 1)
+						@include('menu.denuncias')
+					@endif
+				<?php break; //si es admin terminamos ciclo para no repetir menú ?>
 				@endif
 			@endforeach
-		-->
+
+			<!-- ACT 19-06-18: Si es que verificador es mayor a 0, no se hace nada más -->
+			@if ($verificador == 0)
+				<!-- ACT 11-04-17: Vuelvo a hacer Foreach sólo para ordenar el menú (ya que por ejemplo, datos maestros aparecía al final por tener id mayor -->
+				@foreach (Session::get('roles') as $role)
+					@if ($role == 8) <!-- Admin. de datos maestros -->
+						@include('menu.datos_maestros')
+					@endif
+				@endforeach
+
+				@foreach (Session::get('roles') as $role)
+					@if ($role == 7) <!-- Admin. gestión estratégica -->
+						@include('menu.estrategia')
+					@endif
+				@endforeach
+
+				@foreach (Session::get('roles') as $role)
+					@if ($role == 2) <!-- Admin. de riesgo -->
+						@include('menu.riesgos')
+					@elseif ($role == 3) <!-- Admin. de control -->
+						@include('menu.controles')
+					@elseif ($role == 4 || $role == 5) <!-- Auditor Manager o Auditor-->
+						@if ($cont == 0)
+							@include('menu.auditorias')
+							<?php $cont = 1; //contador para ver si ya se agregó este menú ?>
+						@endif
+					@elseif ($role == 6) <!-- Display -->
+						<!-- Ver como hacer el visitante que solo puede ver -->
+					@endif
+
+				@endforeach
+			@endif
+
+			@include('menu.hallazgos')
+			@include('menu.planes_accion')
+			@include('menu.reportes')
+
+			@foreach (Session::get('roles') as $role)
+				@if ($role != 6) <!-- Rol distinto de display -->
+					@include('menu.documentos')
+					<?php break; ?>
+				@endif
+			@endforeach
+			
+			
 		<li>
 			<a href="cambiopass" class="{{ activeMenu('cambiopass') }}">
 				<i class="fa fa-lock"></i>
@@ -116,6 +116,9 @@
 			</li>
 		@endif
 
+		@if (isset(Auth::user()->superadmin) && Auth::user()->superadmin == 1)
+			@include('menu.admin')
+		@endif
 	@endif
 @else
 					<li>&nbsp;</li>

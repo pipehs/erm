@@ -56,11 +56,7 @@ class SubprocesosController extends Controller
                     $subprocesos = \Ermtool\Subprocess::where('status',0)->get(); //select subprocesos desbloqueados
                 }
                 $i = 0;
-                $j = 0; //contador de organizaciones relacionadas 
-                $k = 0; //contador de subprocesos relacionados
-                // ---recorremos todas los procesos para asignar formato de datos correspondientes--- //
-                $organizaciones = array(); //en este array almacenaremos todas las organizaciones que están relacionadas con un proceso
-                $sub_dependientes = array();
+                
                 foreach ($subprocesos as $subprocess)
                 {
 
@@ -69,7 +65,7 @@ class SubprocesosController extends Controller
 
                     global $id;
                     $id = $subprocess['id'];
-
+                    /*
                     $orgs = DB::table('organizations')
                             ->join('organization_subprocess','organization_subprocess.organization_id','=','organizations.id')
                             ->join('subprocesses','subprocesses.id','=','organization_subprocess.subprocess_id')
@@ -80,24 +76,37 @@ class SubprocesosController extends Controller
                             ->select('organizations.id','organizations.name')
                             ->groupBy('organizations.id','organizations.name')
                             ->get();
-
-                    foreach ($orgs as $organization)
+                    */
+                    //ACT 14-06-18: Probamos consulta más simple y con todos los datos
+                    $os = \Ermtool\OrganizationSubprocess::where('subprocess_id',$GLOBALS['id'])->get();
+                    $j = 0; //contador de organizaciones relacionadas
+                    $organizaciones = array(); //en este array almacenaremos todas las organizaciones que están relacionadas con un proceso
+                    
+                    foreach ($os as $o)
                     {
-                         $organizaciones[$j] = array('subprocess_id'=>$subprocess['id'],
-                                                     'id'=>$organization->id,
-                                                     'nombre'=>$organization->name);
+                        $org = \Ermtool\Organization::find($o->organization_id);
+
+                        //ACT 08-06-18: Agregamos responsable correspondiente a la organización
+                        $responsable = $o->stakeholder_id ? \Ermtool\Stakeholder::getName($o->stakeholder_id) : NULL;
+
+                         $organizaciones[$j] = [
+                                    'id'=>$org->id,
+                                    'nombre'=>$org->name,
+                                    'responsable' => $responsable];
 
                          $j += 1;
                     }
                 
                     $subprocesos_dependientes = \Ermtool\Subprocess::where('subprocess_id',$subprocess['id'])->get();
                     
-                    
-                    foreach ($subprocesos_dependientes as $hijos)
+                    $k = 0; //contador de subprocesos relacionados
+                    $sub_dependientes = array(); 
+
+                    foreach ($subprocesos_dependientes as $s)
                     {
-                        $sub_dependientes[$k] = array('subprocess_id'=>$subprocess['id'],
-                                                     'id'=>$hijos['id'],
-                                                     'nombre'=>$hijos['name']);
+                        $sub_dependientes[$k] = [
+                                    'nombre' => $s->name,
+                                    'descripcion' => $s->description];
                         $k += 1;
                     }
 
@@ -136,28 +145,32 @@ class SubprocesosController extends Controller
                     //ACT 25-04: HACEMOS DESCRIPCIÓN CORTA (100 caracteres)
                     $short_des = substr($subprocess['description'],0,100);
 
-                    $subproceso[$i] = array('id'=>$subprocess['id'],
-                                        'nombre'=>$subprocess['name'],
-                                        'descripcion'=>$subprocess['description'],
-                                        'fecha_creacion'=>$fecha_creacion,
-                                        'fecha_act'=>$fecha_act,
-                                        'fecha_exp'=>$fecha_exp,
-                                        'proceso_relacionado'=>$proceso['name'],
-                                        'estado'=>$subprocess['status'],
-                                        'short_des'=>$short_des,
-                                        'systems' => $subprocess['systems'],
-                                        'habeas_data' => $subprocess['habeas_data'],
-                                        'regulatory_framework' => $subprocess['regulatory_framework']);
+                    $subproceso[$i] = [
+                                'id'=>$subprocess['id'],
+                                'nombre'=>$subprocess['name'],
+                                'descripcion'=>$subprocess['description'],
+                                'fecha_creacion'=>$fecha_creacion,
+                                'fecha_act'=>$fecha_act,
+                                'fecha_exp'=>$fecha_exp,
+                                'proceso_relacionado'=>$proceso['name'],
+                                'estado'=>$subprocess['status'],
+                                'short_des'=>$short_des,
+                                'systems' => $subprocess['systems'],
+                                'habeas_data' => $subprocess['habeas_data'],
+                                'regulatory_framework' => $subprocess['regulatory_framework'],
+                                'organizaciones' => $organizaciones,
+                                'sub_dependientes' => $sub_dependientes
+                            ];
                     $i += 1;
                 }
 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.datos_maestros.subprocesos.index',['subprocesos'=>$subproceso,'sub_dependientes'=>$sub_dependientes,'organizaciones'=>$organizaciones]);
+                    return view('en.datos_maestros.subprocesos.index',['subprocesos'=>$subproceso]);
                 }
                 else
                 {
-                    return view('datos_maestros.subprocesos.index',['subprocesos'=>$subproceso,'sub_dependientes'=>$sub_dependientes,'organizaciones'=>$organizaciones]);
+                    return view('datos_maestros.subprocesos.index',['subprocesos'=>$subproceso]);
                 }
             }
         }
@@ -690,6 +703,213 @@ class SubprocesosController extends Controller
         {
             $subprocesses = \Ermtool\Subprocess::getSubprocessesFromProcess($org,$process);
             return json_encode($subprocesses);
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    //ACT 08-06-18: Función para asignar responsables y para identificar otros atributos del subproceso
+    public function attributes($id)
+    {
+        try
+        {
+            if (Auth::guest())
+            {
+                return view('login');
+            }
+            else
+            {
+                //obtenemos todas las organizaciones a las que pertenece el subproceso
+                $os = \Ermtool\OrganizationSubprocess::where('subprocess_id',$id)->get();
+
+                foreach ($os as $o)
+                {
+                    $o->org = \Ermtool\Organization::name($o->organization_id);
+                }
+
+                $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
+
+                $subprocess = \Ermtool\Subprocess::where('id',$id)->value('name');
+
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.datos_maestros.subprocesos.attributes',['id'=>$id,'os'=>$os,'stakeholders' => $stakeholders,'subprocess' => $subprocess]);
+                }
+                else
+                {
+                    return view('datos_maestros.subprocesos.attributes',['id'=>$id,'os'=>$os,'stakeholders' => $stakeholders,'subprocess' => $subprocess]);
+                }
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    public function assignAttributes()
+    {
+        try
+        {
+            //Guardamos responsables
+            DB::transaction(function(){
+
+                foreach ($_POST as $id=>$p)
+                {
+                    if (strpos($id,"takeholder")) //No se porqué me funciona sin la s...
+                    {
+                        //verificamos que se haya ingresado algún valor
+                        //if ($p != '' && $p != NULL)
+                        //{
+                        //obtenemos organización
+                        $org = explode('_', $id);
+
+                        //obtenemos modelo y actualizamos
+                        $os = \Ermtool\OrganizationSubprocess::where('organization_id',$org[1])
+                                    ->where('subprocess_id','=',$_POST['subprocess_id'])->first();
+
+                        //ACT 13-06-18: asignamos todos los datos
+                        $os->stakeholder_id = $p != '' ? $p : NULL;
+                        $os->key_subprocess = $_POST['key_subprocess_'.$org[1]] != '' ? $_POST['key_subprocess_'.$org[1]] : NULL;
+                        $os->criticality = $_POST['criticality_'.$org[1]] != '' ? $_POST['criticality_'.$org[1]] : NULL;
+
+                        $os->save();
+                        //}
+                    }
+                }
+
+                if (Session::get('languaje') == 'en')
+                {
+                    Session::flash('message','Subprocess attributes was successfully updated');
+                }
+                else
+                {
+                    Session::flash('message','Atributos del subproceso asignados correctamente');
+                }
+            });
+
+            return Redirect::to('/subprocesos');
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    //ACT 14-06-18: Reporte de matriz de subprocesos
+    public function matrix()
+    {
+        try
+        {
+            if (Auth::guest())
+            {
+                return view('login');
+            }
+            else
+            {
+                $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
+                //OBS: el nombre es con un 1 para diferenciar de los procesos de función generateMatrix
+                $subprocesses1 = \Ermtool\Subprocess::where('status',0)->lists('name','id');
+
+                if (Session::get('languaje') == 'en')
+                {
+                    //return view('en.reportes.matriz_riesgos',['organizations'=>$organizations,'categories' => $categories]);
+                    return view('en.reportes.matriz_subprocesos',['organizations'=>$organizations,'subprocesses1' => $subprocesses1]);
+                }
+                else
+                {
+                    //return view('reportes.matriz_riesgos',['organizations'=>$organizations,'categories' => $categories]);
+                    return view('reportes.matriz_subprocesos',['organizations'=>$organizations,'subprocesses1' => $subprocesses1]);
+                }
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    //Generación de matriz de subprocesos
+    public function generateMatrix()
+    {
+        try
+        {
+            if (Auth::guest())
+            {
+                return view('login');
+            }
+            else
+            {
+                //Por ahora no hay excel (13-06-18)
+                /*
+                if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //si no se está generando excel
+                {}
+                else 
+                {}*/
+                
+                $i = 0;
+
+                //obtenemos todos los registros de organization_process_stakeholder
+                if (isset($_GET['subprocess_id']) && $_GET['subprocess_id'] != '')
+                {
+                    $subprocesses = \Ermtool\OrganizationSubprocess::where('subprocess_id',$_GET['subprocess_id'])->get();
+                }
+                else if (isset($_GET['organization_id']) && $_GET['organization_id'] != '')
+                {
+                    $subprocesses = \Ermtool\OrganizationSubprocess::where('organization_id',$_GET['organization_id'])->get();
+                }
+                else
+                {
+                    $subprocesses = \Ermtool\OrganizationSubprocess::all();
+                }
+
+                foreach ($subprocesses as $s) //asignamos datos faltantes
+                {
+                    //guardamos nombre de stakeholder
+                    $s->stakeholder = $s->stakeholder_id != NULL ? \Ermtool\Stakeholder::getName($s->stakeholder_id) : NULL;
+
+                    $subprocess = \Ermtool\Subprocess::find($s->subprocess_id);
+
+                    $s->name = $subprocess->name;
+                    $s->description = $subprocess->description;
+                    $s->organization = \Ermtool\Organization::name($s->organization_id);
+
+                    //obtenemos nombre de subproceso padre (de existir)
+                    $s->macroprocess = $subprocess->subprocess_id != NULL ? \Ermtool\Subprocess::where('id',$subprocess->subprocess_id)->value('name') : NULL;
+
+                    //descripción corta
+                    $s->short_des = substr($subprocess->description,0,100);
+
+                    //obtenemos proceso
+                    $s->process = \Ermtool\Process::find($subprocess->process_id);
+                }
+
+                //$datos = $this->generateRiskMatrix($org,$category,$value);
+
+
+                if (strstr($_SERVER["REQUEST_URI"],'genexcel')) 
+                {
+                }
+                else
+                {
+                    if (Session::get('languaje') == 'en')
+                    {
+                        return view('en.reportes.matriz_subprocesos',['subprocesses'=>$subprocesses]);
+                    }
+                    else
+                    {
+                        return view('reportes.matriz_subprocesos',['subprocesses'=>$subprocesses]);
+                    }
+                    //return json_encode($datos);
+                }
+            }
         }
         catch (\Exception $e)
         {

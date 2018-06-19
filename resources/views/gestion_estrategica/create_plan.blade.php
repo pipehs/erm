@@ -47,7 +47,7 @@
 
 				{!!Form::hidden('organization_id',$org_id)!!}
 				<div class="form-group">	
-				<label class="col-sm-4 control-label">Nombre plan</label>
+				<label class="col-sm-4 control-label">Nombre plan *</label>
 					<div class="col-sm-3">
 						{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 					</div>
@@ -72,13 +72,13 @@
 					</div>
 				</div>
 				<div id="exp_date" class="form-group">
-					<label class="col-sm-4 control-label">Fecha inicio de vigencia</label>
+					<label class="col-sm-4 control-label">Fecha inicio de vigencia *</label>
 					<div class="col-sm-3">
 						{!!Form::date('initial_date',null,['class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)','required'=>'true'])!!}
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-sm-4 control-label">Horizonte del plan (duraci&oacute;n en años)</label>
+					<label class="col-sm-4 control-label">Horizonte del plan (duraci&oacute;n en años) *</label>
 					<div class="col-sm-1">
 						{!!Form::number('duration',null,['class'=>'form-control','min'=>'1','required'=>'true'])!!}
 					</div>

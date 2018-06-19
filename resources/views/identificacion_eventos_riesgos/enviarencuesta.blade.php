@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Identificaci&oacute;n de Eventos de Riesgo</a></li>
+			<li><a href="#">Gestión de Encuestas</a></li>
 			<li><a href="enviar_encuesta">Enviar Encuesta</a></li>
 		</ol>
 	</div>
@@ -65,7 +65,7 @@ En esta secci&oacute;n podr&aacute; enviar encuestas previamente creadas.
 
 {!!Form::open(['url'=>'enviar_encuesta','method'=>'GET','class'=>'form-horizontal'])!!}
 <div class="row form-group">
-	{!!Form::label('Seleccione una encuesta',null,['class'=>'col-sm-4 control-label'])!!}
+	<label for="encuesta" class="col-sm-4 control-label">Seleccione una encuesta *</label>
 	<div class="col-sm-4">
 		{!!Form::select('encuesta',$polls,
 							 	   null,
@@ -77,17 +77,9 @@ En esta secci&oacute;n podr&aacute; enviar encuestas previamente creadas.
 </div>	
 
 <div class="row form-group">
-	{!!Form::label('Seleccione modo de env&iacute;o de encuesta',null,['class'=>'col-sm-4 control-label'])!!}
+	<label for="destinatarios" class="col-sm-4 control-label">Seleccione modo de envío de encuesta *</label>
 	<div class="col-sm-4">
-		{!!Form::select('destinatarios', 
-							array('' => '- Seleccione una opci&oacute;n -',
-								  '0' => 'Seleccionar usuarios manualmente',
-							 	  '1' => 'Enviar por organizaci&oacute;n',
-							 	  '2' => 'Enviar por tipo de stakeholder'),
-							 	   null,
-							 	   ['required' => 'true',
-							 	   	'id' => 'el3'])
-						!!}
+		{!!Form::select('destinatarios',array('' => '- Seleccione una opci&oacute;n -','0' => 'Seleccionar usuarios manualmente','1' => 'Enviar por organizaci&oacute;n','2' => 'Enviar por tipo de stakeholder'),null,['required' => 'true','id' => 'el3'])!!}
 	</div>
 </div>	
 <center>

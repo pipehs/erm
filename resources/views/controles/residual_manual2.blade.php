@@ -41,6 +41,12 @@
 				</div>
 			@endif
 
+			@if(Session::has('error'))
+				<div class="alert alert-danger alert-dismissible" role="alert">
+					{{ Session::get('error') }}
+				</div>
+			@endif
+
 			<h4><center>Evaluaci&oacute;n manual de Riesgo residual</center></h4>
 
 			{!!Form::open(['route'=>'residual_manual.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}

@@ -1,6 +1,6 @@
 
 					<div class="form-group">
-						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Nombre *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>

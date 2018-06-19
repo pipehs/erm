@@ -1,7 +1,7 @@
 @if (strstr($_SERVER["REQUEST_URI"],'create'))
 <!-- Actualización 20-08-17: Rut chileno o DNI Extranjero -->
 			<div class="form-group">
-				<label class="col-sm-4 control-label">Nacionalidad</label>
+				<label class="col-sm-4 control-label">Nacionalidad *</label>
 				<div class="col-sm-3">
 				<div class="radio-inline">
 					<label> 
@@ -20,7 +20,7 @@
 			
 			<div id="rut" style="display:none;">
 				<div class="form-group">
-			        {!!Form::label('Rut',null,['class'=>'col-sm-4 control-label'])!!}
+			        {!!Form::label('Rut *',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-2">
 						{!!Form::text('id',null,
 						['class'=>'form-control','input maxlength'=>'8','input minlength'=>'7', $disabled])!!}
@@ -34,7 +34,7 @@
 			</div>
 			<div id="dni" style="display:none;">
 				<div class="form-group">
-			        {!!Form::label('DNI',null,['class'=>'col-sm-4 control-label'])!!}
+			        {!!Form::label('DNI *',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 						{!!Form::number('id2',null,
 						['class'=>'form-control','input minlength'=>'7', $disabled])!!}
@@ -44,21 +44,21 @@
 @endif
 
 					<div class="form-group">
-						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Nombre *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Apellidos',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Apellidos *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::text('surnames',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 					<div id="rol">
 						<div class="form-group">
-							{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
+							{!!Form::label('Tipo *',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-3">
 							@if (strstr($_SERVER["REQUEST_URI"],'edit'))
 								<select name="role_id[]" multiple required id="el3">
@@ -90,19 +90,19 @@
 						</div>
 					</div>
 					<div class="form-group">
-						{!!Form::label('Correo Electr&oacute;nico',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Correo Electr&oacute;nico *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::email('mail',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 					<div class="form-group">
-						{!!Form::label('Cargo (opcional)',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Cargo',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::text('position',null,['class'=>'form-control'])!!}
 						</div>
 					</div>
 					<div class="form-group">
-						{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Organizaci&oacute;n(es) *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 						@if (strstr($_SERVER["REQUEST_URI"],'edit'))
 								<select name="organization_id[]" multiple required id="el3">

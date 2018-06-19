@@ -221,13 +221,13 @@ Route::get('procesos.destroy.{id}', [
 	'as' => 'procesos.destroy', 'uses' => 'ProcesosController@destroy'
 ]);
 
-//ACT 08-06-18: Ruta para asignar responsables de proceso
-Route::get('procesos.responsables.{id}', [
-	'as' => 'procesos.responsables', 'uses' => 'ProcesosController@responsables'
+//ACT 08-06-18: Ruta para asignar responsables (ACT 13-06-18: y también otros datos) de proceso
+Route::get('procesos.attributes.{id}', [
+	'as' => 'procesos.attributes', 'uses' => 'ProcesosController@attributes'
 ]);
 
-Route::post('procesos.agregar_resp', [
-	'as' => 'procesos.agregar_resp', 'uses' => 'ProcesosController@agregarResp'
+Route::post('procesos.assign_attributes', [
+	'as' => 'procesos.assign_attributes', 'uses' => 'ProcesosController@assignAttributes'
 ]);
 
 //Rutas para CRUD + bloquear Subprocesos//
@@ -260,6 +260,15 @@ Route::put('subprocesos.update.{id}', [
 
 Route::get('subprocesos.destroy.{id}', [
 	'as' => 'subprocesos.destroy', 'uses' => 'SubprocesosController@destroy'
+]);
+
+//ACT 08-06-18: Ruta para asignar responsables (ACT 13-06-18: y también otros datos) de proceso
+Route::get('subprocesos.attributes.{id}', [
+	'as' => 'subprocesos.attributes', 'uses' => 'SubprocesosController@attributes'
+]);
+
+Route::post('subprocesos.assign_attributes', [
+	'as' => 'subprocesos.assign_attributes', 'uses' => 'SubprocesosController@assignAttributes'
 ]);
 
 //Rutas para CRUD + bloquear Categorías de Riesgo//
@@ -753,6 +762,18 @@ Route::get('heatmap', [
 Route::get('heatmap.{id}', [
 	'as' => 'heatmap2', 'uses' => 'EvaluacionRiesgosController@generarHeatmap'
 ]);
+
+Route::get('matriz_procesos', [
+	'as' => 'matriz_procesos', 'uses' => 'ProcesosController@matrix']);
+
+Route::get('matriz_procesos2', [
+	'as' => 'matriz_procesos2', 'uses' => 'ProcesosController@generateMatrix']);
+
+Route::get('matriz_subprocesos', [
+	'as' => 'matriz_subprocesos', 'uses' => 'SubprocesosController@matrix']);
+
+Route::get('matriz_subprocesos2', [
+	'as' => 'matriz_subprocesos2', 'uses' => 'SubprocesosController@generateMatrix']);
 
 Route::get('matrices', [
 	'as' => 'matrices', 'uses' => 'ControlesController@matrices']);

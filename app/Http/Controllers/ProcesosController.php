@@ -642,6 +642,7 @@ class ProcesosController extends Controller
                 $subprocess = DB::table('subprocesses')->where('id','=',$os->subprocess_id)->first();
 
                 //primero actualizamos created_at y updated_at en organization_subprocess
+                
                 DB::table('organization_subprocess')
                     ->where('subprocess_id','=',$os->subprocess_id)
                     ->update([
@@ -649,6 +650,28 @@ class ProcesosController extends Controller
                         'updated_at' => $subprocess->updated_at
                     ]);
 
+                //Ahora vemos si este subproceso depende de otro
+                if ($subprocess->subprocess_id != NULL)
+                {
+                    //Tiene un macrosubproceso relacionado que se debe asignar tambien en la tabla
+                    //Primero vemos si existe
+                    $orgsub = DB::table('organization_subprocess')
+                            ->where('subprocess_id','=',$subprocess->subprocess_id)
+                            ->where('organization_id','=',$os->organization_id)
+                            ->first(['id']);
+
+                    if (empty($orgsub)) //Si no existe, creamos
+                    {
+                        DB::table('organization_subprocess')
+                            ->insert([
+                                'organization_id' => $os->organization_id,
+                                'subprocess_id' => $subprocess->subprocess_id,
+                                'created_at' => $subprocess->created_at,
+                                'updated_at' => $subprocess->updated_at
+                            ]);
+                    }
+                }
+               
                 //Ahora actualizamos organization_process_stakeholder
                 //Primero que todo, vemos si el proceso asociado al subproceso ya existe en la tabla organization_process_stakeholder, si es así no hacemos nada
                 $ops = DB::table('organization_process_stakeholder')
@@ -666,12 +689,36 @@ class ProcesosController extends Controller
                             'updated_at' => $subprocess->updated_at
                         ]);
                 }
+
+                //Ahora vemos si este proceso depende de otro
+                $process = \Ermtool\Process::find($subprocess->process_id);
+
+                if ($process->process_id != NULL)
+                {
+                    //Tiene un macroproceso relacionado que se debe asignar tambien en la tabla
+                    //Primero vemos si existe
+                    $ops = DB::table('organization_process_stakeholder')
+                            ->where('process_id','=',$process->process_id)
+                            ->where('organization_id','=',$os->organization_id)
+                            ->first(['id']);
+
+                    if (empty($ops)) //Si no existe, creamos
+                    {
+                        DB::table('organization_process_stakeholder')
+                            ->insert([
+                                'organization_id' => $os->organization_id,
+                                'process_id' => $process->process_id,
+                                'created_at' => $subprocess->created_at,
+                                'updated_at' => $subprocess->updated_at
+                            ]);
+                    }
+                }
             }
         });
     }
 
-    //ACT 08-06-18: Función para asignar responsables
-    public function responsables($id)
+    //ACT 08-06-18: Función para asignar responsables y para identificar otros atributos del proceso
+    public function attributes($id)
     {
         try
         {
@@ -695,11 +742,11 @@ class ProcesosController extends Controller
 
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.datos_maestros.procesos.responsables',['id'=>$id,'ops'=>$ops,'stakeholders' => $stakeholders,'process' => $process]);
+                    return view('en.datos_maestros.procesos.attributes',['id'=>$id,'ops'=>$ops,'stakeholders' => $stakeholders,'process' => $process]);
                 }
                 else
                 {
-                    return view('datos_maestros.procesos.responsables',['id'=>$id,'ops'=>$ops,'stakeholders' => $stakeholders,'process' => $process]);
+                    return view('datos_maestros.procesos.attributes',['id'=>$id,'ops'=>$ops,'stakeholders' => $stakeholders,'process' => $process]);
                 }
             }
         }
@@ -710,7 +757,7 @@ class ProcesosController extends Controller
         }
     }
 
-    public function agregarResp()
+    public function assignAttributes()
     {
         try
         {
@@ -722,32 +769,153 @@ class ProcesosController extends Controller
                     if (strpos($id,"takeholder")) //No se porqué me funciona sin la s...
                     {
                         //verificamos que se haya ingresado algún valor
-                        if ($p != '' && $p != NULL)
-                        {
-                            //obtenemos organización
-                            $org = explode('_', $id);
+                        //if ($p != '' && $p != NULL)
+                        //{
+                        //obtenemos organización
+                        $org = explode('_', $id);
 
-                            //obtenemos modelo y actualizamos
-                            $ops = \Ermtool\OrganizationProcessStakeholder::where('organization_id',$org[1])
+                        //obtenemos modelo y actualizamos
+                        $ops = \Ermtool\OrganizationProcessStakeholder::where('organization_id',$org[1])
                                     ->where('process_id','=',$_POST['process_id'])->first();
 
-                            $ops->stakeholder_id = $p;
-                            $ops->save();
-                        }
+                        //ACT 13-06-18: asignamos todos los datos
+                        $ops->stakeholder_id = $p != '' ? $p : NULL;
+                        $ops->key_process = $_POST['key_process_'.$org[1]] != '' ? $_POST['key_process_'.$org[1]] : NULL;
+                        $ops->criticality = $_POST['criticality_'.$org[1]] != '' ? $_POST['criticality_'.$org[1]] : NULL;
+
+                        $ops->save();
+                        //}
                     }
                 }
 
                 if (Session::get('languaje') == 'en')
                 {
-                    Session::flash('message','Process owners was successfully updated');
+                    Session::flash('message','Process attributes was successfully updated');
                 }
                 else
                 {
-                    Session::flash('message','Responsables del proceso asignados correctamente');
+                    Session::flash('message','Atributos del proceso asignados correctamente');
                 }
             });
 
             return Redirect::to('/procesos');
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    //ACT 13-06-18: Reporte de matriz de procesos
+    public function matrix()
+    {
+        try
+        {
+            if (Auth::guest())
+            {
+                return view('login');
+            }
+            else
+            {
+                $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
+                //OBS: el nombre es con un 1 para diferenciar de los procesos de función generateMatrix
+                $processes1 = \Ermtool\Process::where('status',0)->lists('name','id');
+
+                if (Session::get('languaje') == 'en')
+                {
+                    //return view('en.reportes.matriz_riesgos',['organizations'=>$organizations,'categories' => $categories]);
+                    return view('en.reportes.matriz_procesos',['organizations'=>$organizations,'processes1' => $processes1]);
+                }
+                else
+                {
+                    //return view('reportes.matriz_riesgos',['organizations'=>$organizations,'categories' => $categories]);
+                    return view('reportes.matriz_procesos',['organizations'=>$organizations,'processes1' => $processes1]);
+                }
+            }
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
+    }
+
+    //Generación de matriz de procesos
+    public function generateMatrix()
+    {
+        try
+        {
+            if (Auth::guest())
+            {
+                return view('login');
+            }
+            else
+            {
+                //Por ahora no hay excel (13-06-18)
+                /*
+                if (!strstr($_SERVER["REQUEST_URI"],'genexcel')) //si no se está generando excel
+                {}
+                else 
+                {}*/
+                
+                $i = 0;
+
+                //obtenemos todos los registros de organization_process_stakeholder
+                if (isset($_GET['process_id']) && $_GET['process_id'] != '')
+                {
+                    $processes = \Ermtool\OrganizationProcessStakeholder::where('process_id',$_GET['process_id'])->get();
+                }
+                else if (isset($_GET['organization_id']) && $_GET['organization_id'] != '')
+                {
+                    $processes = \Ermtool\OrganizationProcessStakeholder::where('organization_id',$_GET['organization_id'])->get();
+                }
+                else
+                {
+                    $processes = \Ermtool\OrganizationProcessStakeholder::all();
+                }
+
+                foreach ($processes as $p) //asignamos datos faltantes
+                {
+                    //guardamos nombre de stakeholder
+                    $p->stakeholder = $p->stakeholder_id != NULL ? \Ermtool\Stakeholder::getName($p->stakeholder_id) : NULL;
+
+                    $process = \Ermtool\Process::find($p->process_id);
+
+                    $p->name = $process->name;
+                    $p->description = $process->description;
+                    $p->organization = \Ermtool\Organization::name($p->organization_id);
+
+                    //obtenemos nombre de proceso padre (de existir)
+                    $p->macroprocess = $process->process_id != NULL ? \Ermtool\Process::where('id',$process->process_id)->value('name') : NULL;
+
+                    //descripción corta
+                    $p->short_des = substr($process->description,0,100);
+
+                    //obtenemos subprocesos
+                    $p->subprocesses = \Ermtool\Subprocess::getSubprocesses2($p->organization_id,$p->process_id);
+                }
+
+                //$datos = $this->generateRiskMatrix($org,$category,$value);
+
+
+                if (strstr($_SERVER["REQUEST_URI"],'genexcel')) 
+                {
+                }
+                else
+                {
+                    if (Session::get('languaje') == 'en')
+                    {
+                        return view('en.reportes.matriz_procesos',['processes'=>$processes]);
+                    }
+                    else
+                    {
+                        return view('reportes.matriz_procesos',['processes'=>$processes]);
+                    }
+                    //return json_encode($datos);
+                }
+            }
         }
         catch (\Exception $e)
         {

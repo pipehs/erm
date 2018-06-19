@@ -54,22 +54,22 @@
 		@endif
 	@endforeach
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:11px" >
-					<thead>
-							<th style="width:20%;">Organización - Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Proceso<label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Subprocesos<label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-							<th>¿Depende de otro proceso?<label><input type="text" placeholder="Filtrar" /></label></th>
-							@foreach (Session::get('roles') as $role)
-								@if ($role != 6)
-									<th>Asignar responsable<label><input type="text" placeholder="Filtrar" /></label></th>
-									<th style="vertical-align:top;">Acci&oacute;n</th>
-									<th style="vertical-align:top;">Acci&oacute;n</th>
-									<?php break; ?>
-								@endif
-							@endforeach
-					</thead>
+		<thead>
+			<th style="width:20%;">Organización - Responsable<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Proceso<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Subprocesos<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>Fecha Expiraci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+			<th>¿Depende de otro proceso?<label><input type="text" placeholder="Filtrar" /></label></th>
+			@foreach (Session::get('roles') as $role)
+				@if ($role != 6)
+					<th>Asignar atributos<label><input type="text" placeholder="Filtrar" /></label></th>
+					<th style="vertical-align:top;">Acci&oacute;n</th>
+					<th style="vertical-align:top;">Acci&oacute;n</th>
+					<?php break; ?>
+				@endif
+			@endforeach
+		</thead>
 	<tr style="display:none;">
 @foreach (Session::get('roles') as $role)
 	@if ($role != 6)
@@ -128,7 +128,7 @@
 	@if ($role != 6)
 		<td>
 			@if (!empty($proceso['organizaciones']))
-				{!! link_to_route('procesos.responsables', $title = 'Asignar', $parameters = $proceso['id'], $attributes = ['class'=>'btn btn-info']) !!}
+				{!! link_to_route('procesos.attributes', $title = 'Asignar', $parameters = $proceso['id'], $attributes = ['class'=>'btn btn-info']) !!}
 			@else
 				Primero debe asignar organizaciones
 			@endif

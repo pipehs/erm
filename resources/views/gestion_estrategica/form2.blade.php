@@ -1,6 +1,6 @@
 				@if (isset($org_id))
 					<div class="form-group">
-						{!!Form::label('Objetivo(s) involucrado(s)',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Objetivo(s) involucrado(s) *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 					@if (strstr($_SERVER["REQUEST_URI"],'edit'))
 						<select name="objectives_id[]" multiple required id="el3">
@@ -32,7 +32,7 @@
 				@endif
 
 				<div class="form-group">
-					{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Nombre *',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 						{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 					</div>
@@ -55,8 +55,7 @@
 				<div class="form-group">
 					{!!Form::label('Responsable',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
-						{!!Form::select('stakeholder_id',$stakeholders,null,
-												['placeholder'=>'- Seleccione -'])!!}
+						{!!Form::select('stakeholder_id',$stakeholders,null,['placeholder'=>'- Seleccione -'])!!}
 					</div>
 				</div>
 

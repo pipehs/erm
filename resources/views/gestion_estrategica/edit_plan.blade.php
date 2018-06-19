@@ -42,7 +42,7 @@
 			Ingrese los nuevos datos para el plan estrat&eacute;gico.
 				{!!Form::model($strategic_plan,['route'=>['plan_estrategico.update',$strategic_plan->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
 					<div class="form-group">	
-					<label class="col-sm-4 control-label">Nombre plan</label>
+					<label class="col-sm-4 control-label">Nombre plan *</label>
 						<div class="col-sm-3">
 							{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
@@ -55,13 +55,13 @@
 						</div>
 					</div>
 					<div id="exp_date" class="form-group">
-						<label class="col-sm-4 control-label">Fecha inicio de vigencia</label>
+						<label class="col-sm-4 control-label">Fecha inicio de vigencia *</label>
 						<div class="col-sm-3">
 							{!!Form::date('initial_date',null,['class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)','required'=>'true'])!!}
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="col-sm-4 control-label">Duraci&oacute;n del plan (ingrese cantidad de años)</label>
+						<label class="col-sm-4 control-label">Duraci&oacute;n del plan (ingrese cantidad de años) *</label>
 						<div class="col-sm-1">
 							{!!Form::number('duration',$duration,['class'=>'form-control','min'=>'1','required'=>'true'])!!}
 						</div>

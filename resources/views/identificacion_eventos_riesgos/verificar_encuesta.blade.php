@@ -2,7 +2,7 @@
 
 @extends('master2')
 
-@section('title', 'Identificaci&oacute;n de eventos de riesgos')
+@section('title', 'Encuesta')
 
 @section('content')
 
@@ -47,7 +47,7 @@
 
 			<div class="form-group">
 				<small>
-			    {!!Form::label('Ingrese su Rut o DNI (sin puntos ni guiones, y en caso de Chile sin dígito verificador)',null,['class'=>'col-sm-4 control-label'])!!}
+				<label for="id" class="col-sm-4 control-label">Ingrese su Rut o DNI (sin puntos ni guiones, y en caso de Chile sin dígito verificador) *</label>
 				<div class="col-sm-3">
 					{!!Form::number('id',null,
 					['class'=>'form-control','required'=>'true'])!!}

@@ -1407,7 +1407,7 @@ class EvaluacionRiesgosController extends Controller
                                         
                                 //proba controlado (si es que hay)
                                 //ACT 05-03-18: Esto será para mapa de % de contribución
-                                if (isset($updated_at_ctrl) && $updated_at_ctrl != NULL)
+                                if (isset($updated_at_ctrl) && !empty($updated_at_ctrl) && $updated_at_ctrl != NULL)
                                 {
                                     //ACTUALIZACIÓN 01-12: Obtenemos valor de riesgo controlado de controlled_risk_criteria, según la evaluación de controlled_risk
                                     $eval = DB::table('controlled_risk')
@@ -1463,7 +1463,7 @@ class EvaluacionRiesgosController extends Controller
                                 }
 
                                 //prom_proba_ctrl para controlado (si es que hay)
-                                if (isset($proba_ctrl) && isset($impacto_ctrl))
+                                if (isset($proba_ctrl) && isset($impacto_ctrl) && $proba_ctrl != NULL && $impacto_ctrl != NULL)
                                 {
                                     $prom_proba_ctrl[$i] = $proba_ctrl;
                                     $prom_criticidad_ctrl[$i] = $impacto_ctrl;
@@ -1474,16 +1474,8 @@ class EvaluacionRiesgosController extends Controller
                                 {
                                     //agregamos variable para definir que el riesgo no está siendo controlado
                                     $control[$i] = 0;
-                                    if (!empty($proba_impacto_in))
-                                    {
-                                        $prom_proba_ctrl[$i] = $prom_proba_in[$i];
-                                        $prom_criticidad_ctrl[$i] = $prom_criticidad_in[$i];
-                                    }
-                                    else
-                                    {
-                                        $prom_proba_ctrl[$i] = NULL;
-                                        $prom_criticidad_ctrl[$i] = NULL;
-                                    }
+                                    $prom_proba_ctrl[$i] = NULL;
+                                    $prom_criticidad_ctrl[$i] = NULL;
                                 }
 
                                 //unseteamos variable de proba_impacto_ctrl para que no se repita
@@ -1662,6 +1654,8 @@ class EvaluacionRiesgosController extends Controller
                             }
                         }
                     }
+                    
+                    
                 //}
 
                 if (isset($_GET['kind2_2'])) //Mapa de Riesgo Residual Manual
@@ -1684,6 +1678,7 @@ class EvaluacionRiesgosController extends Controller
                 //ACT 05-03-18: Vemos si es que hay algún otro tipo de mapa de calor (aparte de inherente)
                 //if (isset($_GET['kind2_1']) || (isset($_GET['kind2_2'])) || (isset($_GET['kind2_3']))) 
                 //{
+                
                     if (Session::get('languaje') == 'en')
                     {
                         //retornamos la misma vista con datos (inglés)

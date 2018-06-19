@@ -1,5 +1,5 @@
 				<div class="form-group">
-					{!!Form::label('Objetivo(s) involucrado(s)',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Objetivo(s) involucrado(s) *',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 				@if (strstr($_SERVER["REQUEST_URI"],'edit'))
 					<select name="objectives_id[]" multiple required id="el3">
@@ -30,7 +30,7 @@
 				</div>
 
 				<div class="form-group">
-					{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Nombre *',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 						{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 					</div>
@@ -51,7 +51,7 @@
 				</div>
 
 				<div class="form-group">
-					{!!Form::label('Periodicidad',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Periodicidad *',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-3">
 					{!!Form::select('periodicity',['1'=>'Mensual','2'=>'Semestral','3'=>'Trimestral','4'=>'Anual'], 
 				 	   null, 
@@ -68,7 +68,7 @@
 				</div>
 
 				<div class="form-group">
-					{!!Form::label('Valor inicial',null,['class'=>'col-sm-4 control-label'])!!}
+					{!!Form::label('Valor inicial *',null,['class'=>'col-sm-4 control-label'])!!}
 					<div class="col-sm-2">
 					{!!Form::number('first_evaluation',null,['class'=>'form-control','required' => 'true'])!!}
 					</div>

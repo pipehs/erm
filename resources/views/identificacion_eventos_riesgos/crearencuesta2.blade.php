@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Identificaci&oacute;n de Eventos de Riesgo</a></li>
+			<li><a href="#">Gestión de Encuestas</a></li>
 			<li><a href="crear_encuesta">Crear Encuesta</a></li>
 		</ol>
 	</div>

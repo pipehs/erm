@@ -4151,7 +4151,7 @@ class ControlesController extends Controller
                 }
                 else
                 {
-                    if (!isset($_GET['risk_subprocess_id']) || !isset($_GET['objective_risk_id']))
+                    if (!isset($_GET['risk_subprocess_id']) && !isset($_GET['objective_risk_id']))
                     {
                         $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
                         $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');

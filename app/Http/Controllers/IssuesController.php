@@ -2299,37 +2299,22 @@ class IssuesController extends Controller
                     $eval_id = NULL;
                 }
 
-                $org = \Ermtool\Organization::where('id',$_GET['org'])->value('name');
-                $org_id = \Ermtool\Organization::where('id',$_GET['org'])->value('id');
-
                 //obtenemos stakeholders de la misma organización
                 $stakes = \Ermtool\Stakeholder::listStakeholders(NULL);
 
                 $issue = \Ermtool\Issue::find($_GET['id']);
 
-                //vemos si es que tiene plan de accion
-                $action_plan = NULL;
-                $per = NULL;
-                $action_plan = DB::table('action_plans')
-                                ->where('issue_id','=',$_GET['id'])
-                                ->select('id','stakeholder_id','description','final_date','status')
-                                ->first();
-
-                //ACTUALIZACIÓN 13-08-17: Obtenemos % de avance si es que hay
-                if (!empty($action_plan) AND $action_plan != NULL)
+                //ACT 13-06-18: Un hallazgo de evaluación no manda el id de la organización; manda issue id, de ahí se puede obtener el org. En realidad ahora siempre se puede obtener org desde issue
+                /*if (isset($_GET['org']))
                 {
-                    //primero, obtenemos la máxima fecha de porcentaje de avance
-                    $max_date = DB::table('progress_percentage')
-                                    ->where('action_plan_id','=',$action_plan->id)
-                                    ->max('updated_at');
-
-                    //obtenemos porcentaje y comentarios
-                    $per = DB::table('progress_percentage')
-                            ->where('action_plan_id','=',$action_plan->id)
-                            ->where('updated_at','=',$max_date)
-                            ->select('percentage','comments','updated_at')
-                            ->first();
+                    $org = \Ermtool\Organization::where('id',$_GET['org'])->value('name');
+                    $org_id = \Ermtool\Organization::where('id',$_GET['org'])->value('id');
                 }
+                else*/
+                //{
+                    $org = \Ermtool\Organization::where('id',$issue->organization_id)->value('name');
+                    $org_id = \Ermtool\Organization::where('id',$issue->organization_id)->value('id');
+                //}
                 
                 if ($issue->organization_id != NULL)
                 {
@@ -2337,76 +2322,79 @@ class IssuesController extends Controller
                     //Cualquier tipo podría tener Riesgos
                     $risks = DB::table('risks')
                             ->join('organization_risk','organization_risk.risk_id','=','risks.id')
-                            ->where('organization_risk.organization_id','=',$_GET['org'])
+                            ->where('organization_risk.organization_id','=',$org_id)
                             ->select('risks.name','organization_risk.id','risks.description')
                             ->get();
 
-                    if ($_GET['kind'] == 0) //obtenemos procesos
+                    if (isset($_GET['kind']))
                     {
-                        $processes = \Ermtool\Process::where('processes.status',0)
-                                    ->join('subprocesses','subprocesses.process_id','=','processes.id')
-                                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                                    ->where('organization_subprocess.organization_id','=',$_GET['org'])
-                                    ->lists('processes.name','processes.id');
+                        if ($_GET['kind'] == 0) //obtenemos procesos
+                        {
+                            $processes = \Ermtool\Process::where('processes.status',0)
+                                        ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                                        ->where('organization_subprocess.organization_id','=',$org_id)
+                                        ->lists('processes.name','processes.id');
 
-                        $selected = $issue->process_id;
-                    }
-                    else if ($_GET['kind'] == 1) //obtenemos subprocesos
-                    {
-                        $subprocesses = \Ermtool\Subprocess::where('subprocesses.status',0)
-                                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                                    ->where('organization_subprocess.organization_id','=',$_GET['org'])
-                                    ->lists('subprocesses.name','subprocesses.id');
+                            $selected = $issue->process_id;
+                        }
+                        else if ($_GET['kind'] == 1) //obtenemos subprocesos
+                        {
+                            $subprocesses = \Ermtool\Subprocess::where('subprocesses.status',0)
+                                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                                        ->where('organization_subprocess.organization_id','=',$org_id)
+                                        ->lists('subprocesses.name','subprocesses.id');
 
-                        $selected = $issue->subprocess_id;
-                    }
-                    else if ($_GET['kind'] == 2) //mandamos id de org
-                    {
-                        $selected = $_GET['org'];
-                    }
-                    else if ($_GET['kind'] == 3) //obtenemos controles de proceso
-                    {
-                        $controls = \Ermtool\Control::listControls($_GET['org'],0);
-                        $selected = $issue->control_id;
-                    }
-                    else if ($_GET['kind'] == 4) //obtenemos controles de entidad
-                    {
-                        $controls = \Ermtool\Control::listControls($_GET['org'],1);
-                        $selected = $issue->control_id;
-                    }
-                    else if ($_GET['kind'] == 5) //hallazgos de programas de auditoría
-                    {
-                        $audit_programs = DB::table('audit_programs')
-                                    ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_program_id','=','audit_programs.id')
-                                    ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
-                                    ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
-                                    ->where('audit_plans.organization_id','=',$_GET['org'])
-                                    ->lists('audit_programs.name','audit_audit_plan_audit_program.id');
-                        $selected = $issue->audit_audit_plan_audit_program_id;
-                    }
-                    else if ($_GET['kind'] == 6) //hallazgos de auditoría
-                    {
-                        $audits = DB::table('audit_audit_plan')
-                                ->join('audits','audits.id','=','audit_audit_plan.audit_id')
-                                ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
-                                ->where('audit_plans.organization_id','=',$_GET['org'])
-                                ->select('audit_audit_plan.id',DB::raw("CONCAT(audit_plans.name, ' - ', audits.name) AS audit_name"))
-                                ->lists('audit_name','audit_audit_plan.id');
-                        $selected = $issue->audit_audit_plan_id;
-                    }
-
-                    else if ($_GET['kind'] == 7) //hallazgos de pruebas de auditoría
-                    {
-                        $audit_tests = DB::table('audit_tests')
-                                    ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
-                                    ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
-                                    ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                            $selected = $issue->subprocess_id;
+                        }
+                        else if ($_GET['kind'] == 2) //mandamos id de org
+                        {
+                            $selected = $org_id;
+                        }
+                        else if ($_GET['kind'] == 3) //obtenemos controles de proceso
+                        {
+                            $controls = \Ermtool\Control::listControls($org_id,0);
+                            $selected = $issue->control_id;
+                        }
+                        else if ($_GET['kind'] == 4) //obtenemos controles de entidad
+                        {
+                            $controls = \Ermtool\Control::listControls($org_id,1);
+                            $selected = $issue->control_id;
+                        }
+                        else if ($_GET['kind'] == 5) //hallazgos de programas de auditoría
+                        {
+                            $audit_programs = DB::table('audit_programs')
+                                        ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_program_id','=','audit_programs.id')
+                                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                                        ->where('audit_plans.organization_id','=',$org_id)
+                                        ->lists('audit_programs.name','audit_audit_plan_audit_program.id');
+                            $selected = $issue->audit_audit_plan_audit_program_id;
+                        }
+                        else if ($_GET['kind'] == 6) //hallazgos de auditoría
+                        {
+                            $audits = DB::table('audit_audit_plan')
                                     ->join('audits','audits.id','=','audit_audit_plan.audit_id')
                                     ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
-                                    ->where('audit_plans.organization_id','=',$_GET['org'])
-                                    ->select('audit_tests.name','audit_tests.id','audit_programs.name as audit_program','audits.name as audit','audit_plans.name as audit_plan')
-                                    ->get();
-                        $selected = $issue->audit_test_id;
+                                    ->where('audit_plans.organization_id','=',$org_id)
+                                    ->select('audit_audit_plan.id',DB::raw("CONCAT(audit_plans.name, ' - ', audits.name) AS audit_name"))
+                                    ->lists('audit_name','audit_audit_plan.id');
+                            $selected = $issue->audit_audit_plan_id;
+                        }
+
+                        else if ($_GET['kind'] == 7) //hallazgos de pruebas de auditoría
+                        {
+                            $audit_tests = DB::table('audit_tests')
+                                        ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.id','=','audit_tests.audit_audit_plan_audit_program_id')
+                                        ->join('audit_programs','audit_programs.id','=','audit_audit_plan_audit_program.audit_program_id')
+                                        ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
+                                        ->join('audits','audits.id','=','audit_audit_plan.audit_id')
+                                        ->join('audit_plans','audit_plans.id','=','audit_audit_plan.audit_plan_id')
+                                        ->where('audit_plans.organization_id','=',$org_id)
+                                        ->select('audit_tests.name','audit_tests.id','audit_programs.name as audit_program','audits.name as audit','audit_plans.name as audit_plan')
+                                        ->get();
+                            $selected = $issue->audit_test_id;
+                        }
                     }
 
                     $risks_selected = DB::table('issue_organization_risk')
@@ -2414,35 +2402,27 @@ class IssuesController extends Controller
                                         ->select('organization_risk_id as id')
                                         ->get();
 
-                    if (Session::get('languaje') == 'en')
-                    {
-                        return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'per'=>$per,'classifications' => $classifications,'risks' => $risks,'risks_selected' => $risks_selected, 'selected' => $selected]);
-                    }
-                    else
-                    {
-                        return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'org_id'=>$_GET['org'],'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'per'=>$per,'classifications' => $classifications,'risks' => $risks,'risks_selected' => $risks_selected, 'selected' => $selected]);
-                    }
-                }
-                else
-                {
                     if (!isset($_GET['kind'])) //hallazgos de control de evaluación y de pruebas no poseen "kind"
                     {
                         if (Session::get('languaje') == 'en')
                         {
-                            return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => NULL,'per'=>$per,'classifications' => $classifications]);
+                            return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => NULL,'classifications' => $classifications,'risks' => $risks,'risks_selected' => $risks_selected]);
                         }
                         else
                         {
-                            return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => NULL,'per'=>$per,'classifications' => $classifications]);
+                            return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => NULL,'classifications' => $classifications,'risks' => $risks,'risks_selected' => $risks_selected]);
                         } 
-                    }
-                    if (Session::get('languaje') == 'en')
-                    {
-                        return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'per'=>$per,'classifications' => $classifications]);
                     }
                     else
                     {
-                        return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'action_plan'=>$action_plan,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'per'=>$per,'classifications' => $classifications]);
+                        if (Session::get('languaje') == 'en')
+                        {
+                            return view('en.hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'classifications' => $classifications,'risks' => $risks,'risks_selected' => $risks_selected, 'selected' => $selected]);
+                        }
+                        else
+                        {
+                            return view('hallazgos.edit',['org'=>$org, 'org_id' => $org_id, 'issue' => $issue,'stakeholders'=>$stakes,'test_id' => $test_id, 'eval_id' => $eval_id, 'kind' => $_GET['kind'],'classifications' => $classifications,'risks' => $risks,'risks_selected' => $risks_selected, 'selected' => $selected]);
+                        }
                     }
                 }
             }
@@ -2483,99 +2463,6 @@ class IssuesController extends Controller
                     $logger = $this->logger;
                     //vemos si el plan se mandó cerrado o abierto y damos formato a campos de plan de acción
                     //ACT 02-05-18: Ya no agregaremos aquí plan de acción, ya que un hallazgo puede tener muchos planes de acción (lo dejaré comentado por ahora, en caso que se necesite que se vuelva a agregar)
-                    /*
-                    if (isset($_POST['status']))
-                    {
-                        $status = 1;
-
-                        if ($_POST['description_plan2'] != "")
-                        {
-                            $description_plan = eliminarSaltos($_POST['description_plan2']);
-                        }
-                        else
-                            $description_plan = NULL;
-
-                        if ($_POST['stakeholder_id2'] != "")
-                        {
-                            $stakeholder_id = $_POST['stakeholder_id2'];
-                        }
-                        else
-                            $stakeholder_id = NULL;
-
-                        if ($_POST['final_date2'] != "")
-                        {
-                            $final_date = $_POST['final_date2'];
-                        }
-                        else
-                        {
-                            $final_date = NULL;
-                        }
-
-                        //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance
-                        if (isset($_POST['percentage2']) AND $_POST['percentage2'] != "")
-                        {
-                            $percentage = $_POST['percentage2'];
-                        }
-                        else
-                        {
-                            $percentage = NULL;
-                        }
-
-                        if (isset($_POST['progress_comments2']) AND $_POST['progress_comments2'] != "")
-                        {
-                            $progress_comments = $_POST['progress_comments2'];
-                        }
-                        else
-                        {
-                            $progress_comments = NULL;
-                        }
-                    }
-                    else
-                    {
-                        $status = 0;
-
-                        if (isset ($_POST['description_plan']) && $_POST['description_plan'] != "")
-                        {
-                            $description_plan = eliminarSaltos($_POST['description_plan']);
-                        }
-                        else
-                            $description_plan = NULL;
-
-                        if (isset($_POST['stakeholder_id']) && $_POST['description_plan'] != "")
-                        {
-                            $stakeholder_id = $_POST['stakeholder_id'];
-                        }
-                        else
-                            $stakeholder_id = NULL;
-
-                        if ($_POST['final_date'] != "")
-                        {
-                            $final_date = $_POST['final_date'];
-                        }
-                        else
-                        {
-                            $final_date = NULL;
-                        }
-
-                        //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance
-                        if (isset($_POST['percentage']) AND $_POST['percentage'] != "")
-                        {
-                            $percentage = $_POST['percentage'];
-                        }
-                        else
-                        {
-                            $percentage = NULL;
-                        }
-
-                        if (isset($_POST['progress_comments']) AND $_POST['progress_comments'] != "")
-                        {
-                            $progress_comments = $_POST['progress_comments'];
-                        }
-                        else
-                        {
-                            $progress_comments = NULL;
-                        }
-                    }*/
 
                     //verificamos ingreso de datos
                     if (isset($_POST['description']) AND $_POST['description'] != "")
@@ -2626,43 +2513,6 @@ class IssuesController extends Controller
                             'economic_value' => $economic_value
                         ]);
                     
-                    /*
-                    $id_action_plan = \Ermtool\Action_plan::getActionPlanFromIssue($GLOBALS['id2']);
-                    
-                    if (!empty($id_action_plan))
-                    {
-                        $id_action_plan = $id_action_plan->id;
-
-                        //actualizamos action_plan de issue_id = $id
-                        DB::table('action_plans')->where('id','=',$id_action_plan)
-                            ->update([
-                                'description' => $description_plan,
-                                'stakeholder_id' => $stakeholder_id,
-                                'final_date' => $final_date,
-                                'status' => $status,
-                                'updated_at' => date('Y-m-d H:i:s')
-                            ]);
-
-                        //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance y comentarios de progreso
-                        DB::table('progress_percentage')
-                            ->insert([
-                                'percentage' => $percentage,
-                                'comments' => $progress_comments,
-                                'action_plan_id' => $id_action_plan,
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s')
-                                ]);
-                    }
-                    else
-                    {
-                        if ($description_plan != "" && $description_plan != NULL)
-                        {
-                            $plan = new PlanesAccion;
-                            $newplan = $plan->store($GLOBALS['id2'],$description_plan,$stakeholder_id,$final_date,$percentage,$progress_comments);
-                        }
-                        
-                    }
-                    */
 
                     //ACT 19-01-18: Posibilidad de asignar un Riesgo a cualquier tipo de hallazgo     
                     if (isset($_POST['organization_risk_id']) && $_POST['organization_risk_id'] != "")

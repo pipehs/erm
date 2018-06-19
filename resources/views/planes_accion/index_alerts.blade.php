@@ -286,6 +286,12 @@ $('#generarCorreo').click(function(){
 						document.getElementById('cco').value = document.formEnvio.cco.value;
 						document.getElementById('message').value = document.formEnvio.message.value;
 		   				$('#checkboxes').submit();
+
+		   				swal({title:"Enviando alertas... por favor espere",
+							type:"success",
+							showCancelButton: false,//There won't be any cancle button
+							showConfirmButton: false, //There won't be any confirm button
+		                });
 		   			}
 		   			else
 		   			{
@@ -310,6 +316,11 @@ $('#generarCorreo').click(function(){
 							document.getElementById('cco').value = document.formEnvio.cco.value;
 							document.getElementById('message').value = document.formEnvio.message.value;
 			   				$('#checkboxes').submit();
+			   				swal({title:"Enviando alertas... por favor espere",
+								type:"success",
+								showCancelButton: false,//There won't be any cancle button
+								showConfirmButton: false, //There won't be any confirm button
+			                });
 			   			}
 			   			else
 			   			{
@@ -323,6 +334,12 @@ $('#generarCorreo').click(function(){
 							document.getElementById('message').value = document.formEnvio.message.value;
 
 							$('#checkboxes').submit();
+
+							swal({title:"Enviando alertas... por favor espere",
+								type:"success",
+								showCancelButton: false,//There won't be any cancle button
+								showConfirmButton: false, //There won't be any confirm button
+			                });
 			   			}
 			   		}
 			   		else
@@ -337,6 +354,12 @@ $('#generarCorreo').click(function(){
 						document.getElementById('message').value = document.formEnvio.message.value;
 
 						$('#checkboxes').submit();
+
+						swal({title:"Enviando alertas... por favor espere",
+							type:"success",
+							showCancelButton: false,//There won't be any cancle button
+							showConfirmButton: false, //There won't be any confirm button
+		                });
 			   		}
 		   		}
 		   		 

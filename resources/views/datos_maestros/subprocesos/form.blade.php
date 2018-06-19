@@ -1,26 +1,6 @@
 					<div class="form-group">
-						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Organizaci&oacute;n(es) *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
-							{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
-						</div>
-					</div>
-
-					<div class="form-group">
-						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
-						</div>
-					</div>
-					<div id="exp_date" class="form-group">
-						{!!Form::label('Fecha Expiraci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
-						<div class="col-sm-3">
-							{!!Form::date('expiration_date',null,['class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)'])!!}
-						</div>
-					</div>
-
-					<div class="form-group">
-							{!!Form::label('Organizaci&oacute;n(es)',null,['class'=>'col-sm-4 control-label'])!!}
-							<div class="col-sm-3">
 							@if (strstr($_SERVER["REQUEST_URI"],'edit'))
 								<select name="organization_id[]" multiple id="organization_id" required>
 								@foreach ($organizaciones as $id=>$name)
@@ -46,14 +26,28 @@
 								 	   null, 
 								 	   ['id' => 'organization_id','multiple'=>'true','required'=>'true'])!!}
 							@endif
-							</div>
 						</div>
+					</div>
+
 					<div class="form-group">
-						{!!Form::label('Proceso Involucrado',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Nombre *',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
+						{!!Form::label('Descripci&oacute;n *',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
+						</div>
+					</div>
+
+					<div class="form-group">
+						{!!Form::label('Proceso Involucrado *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::select('process_id',$procesos,
-							 	   null, 
-							 	   ['id' => 'el2','required'=>'true','placeholder'=>'-Seleccione-'])!!}
+							 	   null, ['id' => 'el2', 'required'=>'true', 'placeholder'=>'-Seleccione-'])!!}
 						</div>
 					</div>
 
@@ -63,6 +57,13 @@
 							{!!Form::select('subprocess_id',$subprocesos,
 							 	   null, 
 							 	   ['id' => 'el2','placeholder'=>'No'])!!}
+						</div>
+					</div>
+
+					<div id="exp_date" class="form-group">
+						{!!Form::label('Fecha Expiraci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						<div class="col-sm-3">
+							{!!Form::date('expiration_date',null,['class'=>'form-control','onblur'=>'validarFechaMayorActual(this.value)'])!!}
 						</div>
 					</div>
 

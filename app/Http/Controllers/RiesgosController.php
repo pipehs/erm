@@ -599,8 +599,8 @@ class RiesgosController extends Controller
      */
     public function create()
     {
-        //try
-        //{
+        try
+        {
             if (Auth::guest())
             {
                 return view('login');
@@ -689,12 +689,12 @@ class RiesgosController extends Controller
                     }
                 }
             }
-        //}
-        //catch (\Exception $e)
-        //{
-        //    enviarMailSoporte($e);
-        //    return view('errors.query',['e' => $e]);
-        //}
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
     }
 
     /**
@@ -705,8 +705,8 @@ class RiesgosController extends Controller
      */
     public function store(Request $request)
     {
-        //try
-        //{
+        try
+        {
             if (Auth::guest())
             {
                 return view('login');
@@ -1054,12 +1054,12 @@ class RiesgosController extends Controller
 
                 return Redirect::to('riesgos.index2?organization_id='.$_POST['org_id']);
             }
-        //}
-        //catch (\Exception $e)
-        //{
-        //    enviarMailSoporte($e);
-        //    return view('errors.query',['e' => $e]);
-        //}
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
     }
 
     //setea datos de un riesgo tipo cuando se está identificando un riesgo
@@ -1095,8 +1095,8 @@ class RiesgosController extends Controller
      */
     public function edit($id)
     {
-        //try
-        //{
+        try
+        {
             if (Auth::guest())
             {
                 return view('login');
@@ -1341,12 +1341,12 @@ class RiesgosController extends Controller
                     }
                 }
             }
-        //}
-        //catch (\Exception $e)
-        //{
-        //    enviarMailSoporte($e);
-        //    return view('errors.query',['e' => $e]);
-        //}
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
     }
 
     /**
@@ -1777,17 +1777,17 @@ class RiesgosController extends Controller
         }
         catch (\Exception $e)
         {
-            print_r($e);
-            //enviarMailSoporte($e);
-            //return view('errors.query',['e' => $e]);
+            //print_r($e);
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 
     //matriz de riesgos
     public function matrices()
     {
-        //try
-        //{
+        try
+        {
             if (Auth::guest())
             {
                 return view('login');
@@ -1851,12 +1851,12 @@ class RiesgosController extends Controller
                     return view('reportes.matriz_riesgos',['datos'=>$datos,'organizations'=>$organizations,'categories' => $categories]);
                 }
             }
-        //}
-        //catch (\Exception $e)
-        //{
-        //    enviarMailSoporte($e);
-        //    return view('errors.query',['e' => $e]);
-        //}
+        }
+        catch (\Exception $e)
+        {
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
+        }
     }
 
     public function generarMatriz($value,$org,$cat)
@@ -2204,7 +2204,7 @@ class RiesgosController extends Controller
                                 {
                                     $impacto = $eval->avg_impact.' ('.$impact_string[$eval->avg_impact-1].')';
                                     $probabilidad = $eval->avg_probability.' ('.$proba_string[$eval->avg_probability-1].')';
-                                    $score = $impacto * $probabilidad;
+                                    $score = $eval->avg_impact * $eval->avg_probability;
                                 }
                             }
                             //obtenemos controles

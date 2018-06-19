@@ -1,5 +1,5 @@
 					<div class="form-group">
-						{!!Form::label('Perspectiva',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Perspectiva *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::select('perspective',["1"=>"Financiera","2"=>"Clientes","3"=>"Procesos","4"=>"Aprendizaje"],
 								 	   null, 
@@ -19,21 +19,21 @@
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Código objetivo',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Código objetivo *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::text('code',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Nombre *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Descripci&oacute;n *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>

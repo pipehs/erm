@@ -1,12 +1,12 @@
 					<div class="form-group">
-						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Nombre *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
 							{!!Form::text('name',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Descripci&oacute;n *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
 							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
@@ -14,8 +14,7 @@
 					<div class="form-group">
 						{!!Form::label('Categor&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
-							{!!Form::select('risk_category_id',$categorias,
-							 	   null, 
+							{!!Form::select('risk_category_id',$categorias,null, 
 							 	   ['id' => 'el2','required'=>'true','placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>

@@ -53,7 +53,8 @@ function dropDown1()
 //dropdown GENERAL de gestión de riesgos
 function dropDown2()
 {
-	$uri = array('crear_encuesta','enviar_encuesta','encuestas','evaluacion','evaluacion_agregadas','evaluacion_manual','enlazar_riesgos','kri','riesgo_kri');
+	//OBS 19-06-18: No está riesgos en array para no confundir con reporte_riesgos... Lo que se debería hacer es cambiar el link de reporte_riesgos por, por ejemplo, risk_report
+	$uri = array('evaluacion','evaluacion_agregadas','evaluacion_manual','enlazar_riesgos','kri','riesgo_kri');
 
 	foreach ($uri as $uri)
 	{
@@ -150,10 +151,10 @@ function dropDown23()
 	}
 }
 
-//dropdown de reportes básicos
+//dropdown de reportes
 function dropDown4()
 {
-	$uri = array('heatmap','matrices','risk_matrix','reporte_planes','reporte_hallazgos','graficos_controles','graficos_auditorias','graficos_planes_accion','genriskmatrix','reporte_audits','reporte_riesgos','reporte_riesgos2');
+	$uri = array('heatmap','matrices','risk_matrix','matriz_procesos','matriz_procesos2','matriz_subprocesos','matriz_subprocesos2','reporte_planes','reporte_hallazgos','graficos_controles','graficos_auditorias','graficos_planes_accion','genriskmatrix','reporte_audits','reporte_riesgos','reporte_riesgos2');
 
 	foreach ($uri as $uri)
 	{

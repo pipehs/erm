@@ -70,7 +70,7 @@
 					<h5><center><b>Periodicidad del KPI: Mensual</b></center></h5>
 					<div class="row">
 	                  <div class="form-group">
-	                    {!!Form::label('Seleccione año y mes',null,['class'=>'col-sm-5 control-label'])!!}
+	                    {!!Form::label('Seleccione año y mes *',null,['class'=>'col-sm-5 control-label'])!!}
 
 	                    @if (isset($eval)) {{-- Si se está editando no se puede editar el periodo --}}
 	                    	<div class="col-sm-2">
@@ -103,7 +103,7 @@
 					<h5><center><b>Periodicidad del KPI: Semestral</b></center></h5>
 					<div class="row">
 	                  <div class="form-group">
-	                    {!!Form::label('Seleccione año y semestre (1 o 2)',null,['class'=>'col-sm-5 control-label'])!!}
+	                    {!!Form::label('Seleccione año y semestre (1 o 2) *',null,['class'=>'col-sm-5 control-label'])!!}
 	                    @if (isset($eval)) {{-- Si se está editando no se puede editar el periodo --}}
 		                    <div class="col-sm-2">
 		                      {!!Form::number('ano_muestra',$eval->year,
@@ -135,7 +135,7 @@
 					<h5><center><b>Periodicidad del KPI: Trimestral</b></center></h5>
 					<div class="row">
 	                  <div class="form-group">
-	                    {!!Form::label('Seleccione año y trimestre (del 1 al 4)',null,['class'=>'col-sm-5 control-label'])!!}
+	                    {!!Form::label('Seleccione año y trimestre (del 1 al 4) *',null,['class'=>'col-sm-5 control-label'])!!}
 
 	                     @if (isset($eval)) {{-- Si se está editando no se puede editar el periodo --}}
 	                     	<div class="col-sm-2">
@@ -167,7 +167,7 @@
 				@elseif ($kpi->periodicity == 4) {{-- Anual --}}
 					<h5><center><b>Periodicidad del KPI: Anual</b></center></h5>
 					<div class="form-group">
-	                    {!!Form::label('Seleccione año',
+	                    {!!Form::label('Seleccione año *',
 	                    null,['class'=>'col-sm-5 control-label'])!!}
 		                @if (isset($eval)) {{-- Si se está editando no se puede editar el periodo --}}
 		                    <div class="col-sm-2">
@@ -188,7 +188,7 @@
 
 
 				<div class="form-group">
-	                {!!Form::label('Valor de medición',
+	                {!!Form::label('Valor de medición *',
 	                null,['class'=>'col-sm-5 control-label'])!!}
 	                <div class="col-sm-4">
 	                @if (isset($eval)) {{-- Si se está editando no se puede editar el periodo --}}

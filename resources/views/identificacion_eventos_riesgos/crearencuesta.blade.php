@@ -8,7 +8,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="#">Identificaci&oacute;n de Eventos de Riesgo</a></li>
+			<li><a href="#">Gestión de Encuestas</a></li>
 			<li><a href="crear_encuesta">Crear Encuesta</a></li>
 		</ol>
 	</div>
@@ -41,14 +41,14 @@ En esta secci&oacute;n podr&aacute; crear encuestas para la identificaci&oacute;
 {!!Form::open(['url'=>'crear_encuesta','method'=>'POST','class'=>'form-horizontal'])!!}
 
 					<div class="form-group">
-						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Nombre *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::text('nombre',null,['class'=>'form-control','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Ingrese cantidad de preguntas',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Ingrese cantidad de preguntas *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							{!!Form::number('cantidad_preguntas',null,
 							['class'=>'form-control','id'=>'cantidad_preguntas','required'=>'true','min'=>'1'])!!}

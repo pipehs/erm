@@ -13,5 +13,5 @@ class OrganizationProcessStakeholder extends Model
 	
     protected $table = 'organization_process_stakeholder';
 
-    protected $fillable = ['organization_id','process_id','stakeholder_id'];
+    protected $fillable = ['organization_id','process_id','stakeholder_id','criticality'];
 }
