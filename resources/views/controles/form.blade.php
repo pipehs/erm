@@ -1,6 +1,6 @@
 				@if (strstr($_SERVER["REQUEST_URI"],'create'))
 					<div class="form-group">
-						<label for="subneg" class="col-sm-4 control-label">Seleccione si es control de negocio o proceso</label>
+						<label for="subneg" class="col-sm-4 control-label">Seleccione si es control de negocio o proceso *</label>
 						<div class="col-sm-8">
 							{!!Form::select('subneg',['0'=>'Proceso','1'=>'Negocio'],null, 
 							 	   ['id' => 'subneg','required'=>'true','placeholder'=>'- Seleccione -'])!!}
@@ -26,7 +26,7 @@
 		            </div>
 
 					<div class="form-group" id="riesgos" style="display: none;">
-						<label for="select_riesgos" class="col-sm-4 control-label" id="label_riesgos">Seleccione Riesgo</label>
+						<label for="select_riesgos" class="col-sm-4 control-label" id="label_riesgos">Seleccione Riesgo *</label>
 						<div class="col-sm-8">
 							<select name="select_riesgos[]" id="select_riesgos" multiple="multiple">
 								<option value="">-Seleccione-</option>
@@ -36,7 +36,7 @@
 					</div>
 				@endif
 					<div class="form-group">
-						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Nombre *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::text('name',null,['id'=>'nombre','class'=>'form-control','required'=>'true'])!!}
 						</div>
@@ -45,28 +45,28 @@
 				@if (Session::get('org') == 'Parque Arauco' || Session::get('org') == 'Parque Arauco (testing)')
 					
 					<div class="form-group">
-						{!!Form::label('Establecimiento',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Establecimiento *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::textarea('establishment',null,['id'=>'establishment','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Aplicaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Aplicaci&oacute;n *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::textarea('application',null,['id'=>'application','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Supervisi&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Supervisi&oacute;n *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::textarea('supervision',null,['id'=>'supervision','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
 				@else
 					<div class="form-group">
-						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Descripci&oacute;n *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'5','cols'=>'4','required'=>'true'])!!}
 						</div>
@@ -75,8 +75,7 @@
 					<div class="form-group">
 						{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::select('type',['0'=>'Manual','1'=>'Semi-Automático','2'=>'Automático'],
-							null,['placeholder'=>'- Seleccione -'])!!}
+							{!!Form::select('type',['0'=>'Manual','1'=>'Semi-Automático','2'=>'Automático'],null,['placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
 
@@ -90,8 +89,7 @@
 					<div class="form-group">
 						{!!Form::label('Prop&oacute;sito',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::select('purpose',['0'=>'Preventivo','1'=>'Detectivo','2'=>'Correctivo'],null,
-													['placeholder'=>'- Seleccione -'])!!}
+							{!!Form::select('purpose',['0'=>'Preventivo','1'=>'Detectivo','2'=>'Correctivo'],null,['placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
 
@@ -124,14 +122,14 @@
 
 				@if (isset($control_org))
 					<div class="form-group">
-						{!!Form::label('Porcentaje de contribución',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Porcentaje de contribución *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::select('porcentaje_cont',['0'=>'0% - Deficiente','50'=>'50% - Media','85'=>'85% - Buena','95'=>'95% - Óptima'],$control_org->cont_percentage,['placeholder'=>'- Seleccione -','required' => 'true'])!!}
 						</div>
 					</div>
 				@else
 					<div class="form-group">
-						{!!Form::label('Porcentaje de contribución',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Porcentaje de contribución *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::select('porcentaje_cont',['0'=>'0% - Deficiente','50'=>'50% - Media','85'=>'85% - Buena','95'=>'95% - Óptima'],null,['placeholder'=>'- Seleccione -','required' => 'true'])!!}
 						</div>

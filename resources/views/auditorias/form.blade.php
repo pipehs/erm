@@ -1,6 +1,6 @@
 					
 					<div class="form-group">
-						{!!Form::label('Seleccione organizaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Seleccione organizaci&oacute;n *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::select('organization_id',$organizations,null, 
 							 	   ['id' => 'orgs','required'=>'true','placeholder' => '- Seleccione -'])!!}
@@ -10,7 +10,7 @@
 					<b><font color="blue">Ingrese informaci&oacute;n para el plan de auditor&iacute;a</font></b></br>
 
 					<div class="form-group">
-						{!!Form::label('Nombre plan',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Nombre plan *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::text('name',null,['id'=>'nombre','class'=>'form-control',
 														'required'=>'true'])!!}
@@ -18,10 +18,9 @@
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Descripci&oacute;n *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3',
-																'cols'=>'4','required'=>'true'])!!}
+							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
 					
@@ -77,25 +76,23 @@
 					<div class="form-group">
 						{!!Form::label('Metodolog&iacute;a',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::textarea('methodology',null,['class'=>'form-control','rows'=>'3',
-																'cols'=>'4'])!!}
+							{!!Form::textarea('methodology',null,['class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
 						</div>
 					</div>
 
 					<div class="form-group" id="init_date">
-						{!!Form::label('Fecha Inicio',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Fecha Inicio *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::date('initial_date',null,['class'=>'form-control'
-																,'required'=>'true','id'=>'initial_date','onblur'=>'compararFechas(this.value,form.final_date.value)'])!!}
+								,'required'=>'true','id'=>'initial_date','onblur'=>'compararFechas(this.value,form.final_date.value)'])!!}
 						</div>
 					</div>
 
 					<div class="form-group" id="fin_date">
-						{!!Form::label('Fecha t&eacute;rmino',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Fecha t&eacute;rmino *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
 							{!!Form::date('final_date',null,['class'=>'form-control'
-															,'required'=>'true','id'=>'final_date'
-																,'required'=>'true','onblur'=>'compararFechas(form.initial_date.value,this.value)'])!!}
+								,'required'=>'true','id'=>'final_date','required'=>'true','onblur'=>'compararFechas(form.initial_date.value,this.value)'])!!}
 						</div>
 					</div>
 

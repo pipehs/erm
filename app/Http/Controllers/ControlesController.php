@@ -2916,19 +2916,21 @@ class ControlesController extends Controller
                     $res = DB::table('control_eval_temp2')
                                 ->where('control_organization_id','=',$co->id)
                                 ->where('created_at','=',$max_date)
-                                ->select('result')
+                                ->where('status','=',1)
+                                ->select('probability','impact')
                                 ->first();
 
                     if (!empty($res))
                     {
-                        if ($res->result == 2)
+                        //ACT  26-06-18: 
+                        if ($res->probability < 50 && $res->impact < 50)
                         {
-                            array_push($id_inefectivos,$control->id);
+                            array_push($id_inefectivos,$co->co->control_id);
                             $inefectivos += 1;
                         }
                         else
                         {
-                            array_push($id_efectivos,$control->id);
+                            array_push($id_efectivos,$co->control_id);
                             $efectivos += 1;
                         }
                     }
@@ -2965,7 +2967,7 @@ class ControlesController extends Controller
                     //fecha de actualización del control
                     $updated_at = new DateTime($control->updated_at);
                     $updated_at = date_format($updated_at, 'd-m-Y');
-                    $description = preg_replace("[\n|\r|\n\r]", ' ', $control->description); 
+                    $description = eliminarSaltos($control->description); 
                     foreach ($id_efectivos as $id_ef)
                     {
                         if ($id_ef == $control->id)
@@ -3009,7 +3011,7 @@ class ControlesController extends Controller
                 {
                     $updated_at = new DateTime($control->updated_at);
                     $updated_at = date_format($updated_at, 'd-m-Y');
-                    $description = preg_replace("[\n|\r|\n\r]", ' ', $control->description);  
+                    $description = eliminarSaltos($control->description);  
                     $no_ejecutados[$i] = [
                                 'id' => $control->id,
                                 'name' => $control->name,
@@ -3290,7 +3292,7 @@ class ControlesController extends Controller
                 $c_max_date = DB::table('control_evaluation')
                             ->where('control_organization_id','=',$GLOBALS['id1'])
                             ->where('evaluation_test_id','=',$test->id)
-                            ->where('status','=',1)
+                            ->where('status','=',2)
                             ->max('updated_at');
 
                 //sacamos guiones de updated_at (SQL Server)
@@ -3323,7 +3325,7 @@ class ControlesController extends Controller
                         $eval = DB::table('control_evaluation')
                                 ->where('control_organization_id','=',$GLOBALS['id1'])
                                 ->where('updated_at','=',$c_max_date)
-                                ->where('status','=',1)
+                                ->where('status','=',2)
                                 ->select('results')
                                 ->first();
                         //guardamos el valor de la evaluación
@@ -3374,7 +3376,7 @@ class ControlesController extends Controller
                     $eval = DB::table('control_evaluation')
                             ->where('control_organization_id','=',$GLOBALS['id1'])
                             ->where('updated_at','=',$c_max_date)
-                            ->where('status','=',1)
+                            ->where('status','=',2)
                             ->select('results')
                             ->first();
                     //guardamos el valor de la evaluación

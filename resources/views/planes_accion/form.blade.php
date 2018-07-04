@@ -1,13 +1,13 @@
 		@if (strstr($_SERVER["REQUEST_URI"],'create'))
 					<div class="form-group">
-						{!!Form::label('Seleccione tipo de hallazgo',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Seleccione tipo de hallazgo *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::select('kind',['0'=>'Procesos','1'=>'Subprocesos','2'=>'Organización','3'=>'Controles de proceso','4'=>'Controles de entidad','5'=>'Programas de auditoría','6'=>'Auditorías','7'=>'Pruebas de auditoría','8'=>'Riesgo','9'=>'Compliance','10'=>'Canal de Denuncia'],null,['placeholder'=>'- Seleccione -','id' => 'kind','required'=>'true'])!!}
+							{!!Form::select('kind',['0'=>'Procesos','1'=>'Subprocesos','2'=>'Organización','3'=>'Controles de proceso','4'=>'Controles de entidad','5'=>'Programas de auditoría','6'=>'Auditorías','7'=>'Pruebas de auditoría','8'=>'Riesgo','9'=>'Compliance','10'=>'Canal de Denuncia','11'=>'Evaluaciones de Controles'],null,['placeholder'=>'- Seleccione -','id' => 'kind','required'=>'true'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Hallazgo involucrado',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Hallazgo involucrado *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
 							<select id="issues" name="issue_id" required="true"></select>
 						</div>
@@ -23,9 +23,9 @@
 					</div>
 		@endif
 					<div class="form-group">
-						{!!Form::label('Descripcion Plan',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Descripcion Plan *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-4">
-							{!!Form::textarea('description',null,['id'=>'description','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
+							{!!Form::textarea('description',null,['id'=>'description','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 						</div>
 					</div>
 

@@ -616,4 +616,17 @@ class Issue extends Model
             ->where('issues.kind','=',3)
             ->get(['issues.id','issues.name','issues.description','issues.recommendations','issues.comments','issues.classification_id as classification','issues.updated_at','issues.kind']);
     }
+
+    public static function getControlEvaluationIssues($org_id)
+    {   
+        //ACT 09-03-18: Obtenemos los issues directamente de organización (para que no se repitan en caso de que un issue tenga muchos riesgos asociados)
+        $issues = DB::table('issues')
+                ->whereNotNull('issues.control_evaluation_id')
+                ->where('issues.organization_id','=',(int)$org_id)
+                ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments','issues.control_evaluation_id')
+                ->groupBy('issues.id','issues.name','issues.description','issues.classification_id','issues.recommendations','issues.comments','issues.control_evaluation_id')
+                ->get();
+
+        return $issues;
+    }
 }

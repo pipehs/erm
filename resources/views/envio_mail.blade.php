@@ -3,6 +3,13 @@
 </head>
 <body>
 
-<p>{!! $mensaje !!}</p>
+@foreach ($mensaje as $m)
+	@if (strpos($m,'http://'))
+		<p><a href="{{ $m }}">Ingresar a encuesta</a>
+	@else
+		<p>{!! $m !!}</p>
+	@endif
+@endforeach
+</hr>
 </body>
 </html>

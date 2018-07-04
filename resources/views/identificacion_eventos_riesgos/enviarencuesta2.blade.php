@@ -57,12 +57,22 @@
 		Seleccione el rol de los usuarios a los que desea enviar la encuesta *.
 	@endif
 
-		<div class="form-group">
-			{!!Form::select('stakeholder_id[]',$dest,null, ['id' => 'el2','multiple'=>'true','required'=>'true'])!!}
+		<div class="row form-group">
+			<div class="col-sm-12">
+				{!!Form::select('stakeholder_id[]',$dest,null, ['id' => 'el2','multiple'=>'true','required'=>'true'])!!}
+			</div>
+		</div>
+
+		{{-- ACT 20-06-18: Agregamos título a la encuesta --}}
+		<div class="row form-group">
+				<small>
+				<label for="title" class="col-sm-4 control-label">Título del correo</label>
+				<div class="col-sm-8">
+					{!!Form::text('title',$encuesta['name'],['class'=>'form-control','required'=>'true'])!!}
+				</div>
 		</div>
 
 		<div class="row form-group">
-				<small>
 				<label for="mensaje" class="col-sm-4 control-label">Si desea puede cambiar el mensaje predeterminado (no cambie el link de la encuesta)</label>
 				<div class="col-sm-8">
 					{!!Form::textarea('mensaje',

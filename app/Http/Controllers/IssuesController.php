@@ -599,6 +599,33 @@ class IssuesController extends Controller
                 }
             }
 
+            //ACT 20-06-18: Hallazgos de evaluación de controles
+            else if ($kind == 11) //Hallazgos de Evaluación de controles
+            {
+                $issues = array(); 
+                $i = 0;
+                //foreach ($risks as $risk)
+                //{
+                    //obtenemos issues de riesgos
+                    $issues2 = \Ermtool\Issue::getControlEvaluationIssues($org_id);
+
+                    foreach ($issues2 as $issue)
+                    {
+                        $issues[$i] = [
+                            'element_id' => $issue->control_evaluation_id,
+                            'id' => $issue->id,
+                            'name' => $issue->name,
+                            'description' => $issue->description,
+                            'classification' => $issue->classification,
+                            'recommendations' => $issue->recommendations,
+                            'comments' => $issue->comments
+                        ];
+
+                        $i += 1; 
+                    }
+                //}
+            }
+
             $i = 0;
             //  dd($issues1);
             
@@ -2394,6 +2421,10 @@ class IssuesController extends Controller
                                         ->select('audit_tests.name','audit_tests.id','audit_programs.name as audit_program','audits.name as audit','audit_plans.name as audit_plan')
                                         ->get();
                             $selected = $issue->audit_test_id;
+                        }
+                        else
+                        {
+                            $selected = NULL;
                         }
                     }
 

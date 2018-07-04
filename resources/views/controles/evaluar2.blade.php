@@ -193,8 +193,10 @@
 							<li>Resultado: 
 								@if ($e['results'] == 1)
 									Efectiva
-								@else
+								@elseif ($e['results'] == 2)
 									Inefectiva
+								@else
+									En proceso
 								@endif
 							</li>
 							<li>&Uacute;ltima actualizaci&oacute;n: 

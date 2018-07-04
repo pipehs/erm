@@ -1,10 +1,9 @@
 						{!!Form::hidden('audit_plans',$audit_plan,['id'=>'audit_plans'])!!}
 
 						<div class="form-group">
-							<label for="type1" class="col-sm-4 control-label">Tipo de prueba</label>
+							<label for="type1" class="col-sm-4 control-label">Tipo de prueba *</label>
 							<div class="col-sm-6">
-								{!!Form::select('type1',['1'=>'Prueba a nivel de procesos','2'=>'Prueba a nivel de entidad'],null,
-																['id'=>'type1','required'=>'true','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+								{!!Form::select('type1',['1'=>'Prueba a nivel de procesos','2'=>'Prueba a nivel de entidad'], null,['id'=>'type1','required'=>'true','placeholder'=>'- Seleccione -','required'=>'true'])!!}
 							</div>
 						</div>
 
@@ -12,16 +11,15 @@
 						<div id="categoria_test_1" style="display:none;"></div>
 
 						<div class="form-group">
-								{!!Form::label('Prueba: Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+								{!!Form::label('Prueba: Nombre *',null,['class'=>'col-sm-4 control-label'])!!}
 								<div class="col-sm-6">
-									{!!Form::text('name',null,['id'=>'name_test_1','class'=>'form-control',
-																'required'=>'true'])!!}
+									{!!Form::text('name',null,['id'=>'name_test_1','class'=>'form-control','required'=>'true'])!!}
 								</div>
 						</div>
 
 						<div class="form-group">
 
-								{!!Form::label('Descripción',null,['class'=>'col-sm-4 control-label'])!!}	
+								{!!Form::label('Descripción *',null,['class'=>'col-sm-4 control-label'])!!}	
 								<div class="col-sm-6">
 									{!!Form::textarea('description',null,['id'=>'description_test_1','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
 								</div>

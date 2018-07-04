@@ -135,7 +135,7 @@ function responder_nota(id,id_prueba)
 	//agregamos atributo hidden que señalará que se está guardando una nota y otro para identificar el id de la prueba
 	nota += '<input type="hidden" name="note_id" value="'+id+'">';
 	nota += '<div class="form-group col-sm-12">';
-	nota += '<textarea name="answer_'+id+'" rows="3" cols="4" class="form-control" placeholder="Ingrese comentarios" required></textarea></div>';
+	nota += '<textarea name="answer_'+id+'" rows="3" cols="4" class="form-control" placeholder="Ingrese comentarios *" required></textarea></div>';
 	nota += '<div class="form-group col-sm-12">';
 	nota += '<label class="control-label">Cargar evidencias (opcional)</label>';
 	nota += '<input type="file" name="evidencia_'+id+'[]" multiple class="file" data-show-preview="true"></div>';

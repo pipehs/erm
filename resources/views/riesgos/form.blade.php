@@ -2,7 +2,7 @@
 		<div id="cargando"><br></div>		
 			@if (isset($objetivos))
 					<div class="form-group">
-						{!!Form::label('Seleccione objetivos involucrados',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Seleccione objetivos involucrados *', null, ['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
 							@if (strstr($_SERVER["REQUEST_URI"],'edit'))
 								<select name="objective_id[]" multiple required id="el2">
@@ -34,7 +34,7 @@
 			@elseif (isset($subprocesos))
 
 					<div class="form-group">
-						{!!Form::label('Seleccione subprocesos involucrados',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Seleccione subprocesos involucrados *', null, ['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
 							@if (strstr($_SERVER["REQUEST_URI"],'edit'))
 								<select name="subprocess_id[]" multiple required id="el2">
@@ -77,7 +77,7 @@
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Nombre',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Nombre *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-5">
 							{!!Form::text('name',null,['id'=>'nombre','class'=>'form-control','required'=>'true'])!!}
 						</div>

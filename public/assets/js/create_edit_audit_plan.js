@@ -312,13 +312,13 @@ if (pathname.indexOf("create") == -1) //se está editando
 
 												//fecha inicio
 												$('#info_auditorias_sel').append('<div class="form-group">');
-												$('#info_auditorias_sel').append('<label for="audit_' + this.audit_id + '_initial_date" class="col-sm-4 control-label">Fecha de inicio</label>');
+												$('#info_auditorias_sel').append('<label for="audit_' + this.audit_id + '_initial_date" class="col-sm-4 control-label">Fecha de inicio *</label>');
 												$('#info_auditorias_sel').append('<div class="col-sm-8"><input type="date" name="audit_' + this.audit_id + '_initial_date" onblur="validarFechaMayorActual(this.value)" value="'+this.initial_date+'" class="form-control" required="required"></div>');
 
 
 												//fecha fin
 												$('#info_auditorias_sel').append('<div class="form-group">');
-												$('#info_auditorias_sel').append('<label for="audit_' + this.audit_id + '_final_date" class="col-sm-4 control-label">Fecha final</label>');
+												$('#info_auditorias_sel').append('<label for="audit_' + this.audit_id + '_final_date" class="col-sm-4 control-label">Fecha final *</label>');
 												$('#info_auditorias_sel').append('<div class="col-sm-8"><input type="date" name="audit_' + this.audit_id + '_final_date" onblur="validarFechaMayorActual(this.value)" value="'+this.final_date+'" class="form-control" required="required"></div>');
 												$('#info_auditorias_sel').append('</br></br>');
 											});
@@ -353,13 +353,13 @@ if (pathname.indexOf("create") == -1) //se está editando
 
 								//fecha inicio
 								$('#info_auditorias').append('<div class="form-group">');
-								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_initial_date" class="col-sm-4 control-label">Fecha de inicio</label>');
+								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_initial_date" class="col-sm-4 control-label">Fecha de inicio *</label>');
 								$('#info_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_' + $(this).val() + '_initial_date" onblur="validarFechaMayorActual(this.value)" class="form-control" required="required"></div>');
 
 
 								//fecha fin
 								$('#info_auditorias').append('<div class="form-group">');
-								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_final_date" class="col-sm-4 control-label">Fecha final</label>');
+								$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_final_date" class="col-sm-4 control-label">Fecha final *</label>');
 								$('#info_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_' + $(this).val() + '_final_date" onblur="validarFechaMayorActual(this.value)" class="form-control" required="required"></div>');
 								$('#info_auditorias').append('</br></br>');
 								
@@ -388,7 +388,7 @@ var cont = 1; //contador para nuevas auditorías
 
 				//nombre
 								$('#info_new_auditorias').append('<div class="form-group">');
-								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_name" class="col-sm-4 control-label">Nombre</label>');
+								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_name" class="col-sm-4 control-label">Nombre *</label>');
 								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_new'+cont+'_name" class="form-control"></div>');
 
 								//descripción
@@ -411,13 +411,13 @@ var cont = 1; //contador para nuevas auditorías
 
 								//fecha inicio
 								$('#info_new_auditorias').append('<div class="form-group">');
-								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_initial_date" class="col-sm-4 control-label">Fecha de inicio</label>');
+								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_initial_date" class="col-sm-4 control-label">Fecha de inicio *</label>');
 								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_initial_date" onblur="validarFechaMayorActual(this.value)" class="form-control" required="required"></div>');
 
 
 								//fecha fin
 								$('#info_new_auditorias').append('<div class="form-group">');
-								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_final_date" class="col-sm-4 control-label">Fecha final</label>');
+								$('#info_new_auditorias').append('<label for="audit_new'+cont+'_final_date" class="col-sm-4 control-label">Fecha final *</label>');
 								$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_final_date"  onblur="validarFechaMayorActual(this.value)"class="form-control" required="required"></div>');
 								$('#info_new_auditorias').append('</br></br>');
 

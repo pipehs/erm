@@ -54,15 +54,14 @@ class EncuestasController extends Controller
             else
             {
                 //Mensaje predeterminado al enviar encuestas
-                $mensaje = "Estimado Usuario.
-
-                        Le enviamos la siguiente encuesta para la identificación de eventos de riesgos. 
-                        Responda cada una de las preguntas asociadas a la encuesta. 
-                        Para responderla deberá acceder al siguiente link.
-
+                $mensaje = "Estimado {{ Usuario }}.
+                        <space>
+                        Le enviamos la siguiente encuesta para la identificación de eventos de riesgos.<space>
+                        Responda cada una de las preguntas asociadas a la encuesta. Para responderla deberá acceder al siguiente link.
+                        <space>
                         http://".$conf->option_value."/identificacion.encuesta.{$id}
-
-                        Saludos cordiales,
+                        <space>
+                        Saludos cordiales,<space>
                         Administrador.";
             } 
                 
@@ -452,77 +451,26 @@ class EncuestasController extends Controller
             }
             else
             {
-                //guardamos en un array todos los correos de los stakeholders
-                $correos = array();
-                $stakeholders = array();
-                $i = 0;
+                DB::transaction(function() {
+                    //guardamos en un array todos los correos de los stakeholders
+                    $correos = array();
+                    $stakeholders = array();
+                    $i = 0;
 
-                //OBS: STAKEHOLDER_ID[] PUEDE SER STAKEHOLDERS, ORGANIZACIONES O TIPO DE STAKEHOLDERS
-                if ($request['tipo'] == 0) //Se asignaron stakeholders manualmente
-                {
-                    foreach ($request['stakeholder_id'] as $stakeholder_id)
+                    //OBS: STAKEHOLDER_ID[] PUEDE SER STAKEHOLDERS, ORGANIZACIONES O TIPO DE STAKEHOLDERS
+                    if ($_POST['tipo'] == 0) //Se asignaron stakeholders manualmente
                     {
-                        $stakeholder = \Ermtool\Stakeholder::find($stakeholder_id);
-
-                        //ALMACENAMOS EN POLL_STAKEHOLDER (funcionalidad agregada 13-05-2016) PARA SABER A QUIENES SE ENVÍA LA ENCUESTA. OBS: Debemos ver que el usuario no exista
-                        try
+                        foreach ($_POST['stakeholder_id'] as $stakeholder_id)
                         {
-                            DB::table('poll_stakeholder')
-                                ->insert([
-                                    'stakeholder_id' => $stakeholder->id,
-                                    'poll_id' => $request['poll_id'],
-                                    'created_at' => date('Y-m-d H:i:s'),
-                                    ]);
+                            $stakeholder = \Ermtool\Stakeholder::find($stakeholder_id);
 
-                            $correos[$i] = $stakeholder->mail;
-                        }
-                        catch(\Illuminate\Database\QueryException $e)
-                        {
-                            //creamos array de error si es que no existe
-                            if (!isset($errors))
-                            {
-                                $errors = new ArrayObject();
-                            }
-
-                            if (Session::get('languaje') == 'en')
-                            {
-                                $errors->append("The poll was already sent to the user ".$stakeholder->name." ".$stakeholder->surnames.". It can't be send again.");
-                            }
-                            else
-                            {
-                                $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
-                            }
-                        }
-
-                        if (isset($errors))
-                        {
-                            Session::flash('error',$errors);
-                        }
-                        $i += 1;
-                    }
-                }
-                else if ($request['tipo'] == 1) //Se asignaron stakeholders por organización
-                {
-                    foreach ($request['stakeholder_id'] as $stakeholder_id)
-                    {
-                        //obteneos los id de stakeholders de la organizacion (ACT: 23-01-17 stakeholders que no se encuentren bloqueados)
-                        $stakeholders = DB::table('organization_stakeholder')
-                                            ->join('stakeholders','stakeholders.id','=','organization_stakeholder.stakeholder_id')
-                                            ->where('stakeholders.status','=',0)
-                                            ->where('organization_id',$stakeholder_id)
-                                            ->select('stakeholder_id as id')->get();
-
-                        //para cada stakeholder de la organización
-                        foreach ($stakeholders as $stakeholder)
-                        {
-                            //obtenemos datos de stakeholder
-                            $stakeholder = \Ermtool\Stakeholder::find($stakeholder->id);
+                            //ALMACENAMOS EN POLL_STAKEHOLDER (funcionalidad agregada 13-05-2016) PARA SABER A QUIENES SE ENVÍA LA ENCUESTA. OBS: Debemos ver que el usuario no exista
                             try
                             {
                                 DB::table('poll_stakeholder')
                                     ->insert([
                                         'stakeholder_id' => $stakeholder->id,
-                                        'poll_id' => $request['poll_id'],
+                                        'poll_id' => $_POST['poll_id'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         ]);
 
@@ -553,126 +501,179 @@ class EncuestasController extends Controller
                             $i += 1;
                         }
                     }
-                }
-                else if ($request['tipo'] == 2) //Se asignaron stakeholders por rol
-                {
-                    foreach ($request['stakeholder_id'] as $stakeholder_id) //para cada id de rol
+                    else if ($_POST['tipo'] == 1) //Se asignaron stakeholders por organización
                     {
-                        //obtenemos los id de stakeholders del rol seleccionado
-                        $stakeholders = DB::table('role_stakeholder')
-                                            ->join('stakeholders','stakeholders.id','=','role_stakeholder.stakeholder_id')
-                                            ->where('stakeholders.status','=',0)
-                                            ->where('role_id',$stakeholder_id)
-                                            ->select('stakeholder_id as id')->get();
-
-                        //para cada stakeholder con el rol seleccionado
-                        foreach ($stakeholders as $stakeholder)
+                        foreach ($_POST['stakeholder_id'] as $stakeholder_id)
                         {
-                            //obtenemos datos de stakeholder
-                            $stakeholder = \Ermtool\Stakeholder::find($stakeholder->id);
-                            try
-                            {
-                                DB::table('poll_stakeholder')
-                                    ->insert([
-                                        'stakeholder_id' => $stakeholder->id,
-                                        'poll_id' => $request['poll_id'],
-                                        'created_at' => date('Y-m-d H:i:s'),
-                                        ]);
+                            //obteneos los id de stakeholders de la organizacion (ACT: 23-01-17 stakeholders que no se encuentren bloqueados)
+                            $stakeholders = DB::table('organization_stakeholder')
+                                                ->join('stakeholders','stakeholders.id','=','organization_stakeholder.stakeholder_id')
+                                                ->where('stakeholders.status','=',0)
+                                                ->where('organization_id',$stakeholder_id)
+                                                ->select('stakeholder_id as id')->get();
 
-                                $correos[$i] = $stakeholder->mail;
-                            }
-                            catch(\Illuminate\Database\QueryException $e)
+                            //para cada stakeholder de la organización
+                            foreach ($stakeholders as $stakeholder)
                             {
-                                //creamos array de error si es que no existe
-                                if (!isset($errors))
+                                //obtenemos datos de stakeholder
+                                $stakeholder = \Ermtool\Stakeholder::find($stakeholder->id);
+                                try
                                 {
-                                    $errors = new ArrayObject();
+                                    DB::table('poll_stakeholder')
+                                        ->insert([
+                                            'stakeholder_id' => $stakeholder->id,
+                                            'poll_id' => $_POST['poll_id'],
+                                            'created_at' => date('Y-m-d H:i:s'),
+                                            ]);
+
+                                    $correos[$i] = $stakeholder->mail;
+                                }
+                                catch(\Illuminate\Database\QueryException $e)
+                                {
+                                    //creamos array de error si es que no existe
+                                    if (!isset($errors))
+                                    {
+                                        $errors = new ArrayObject();
+                                    }
+
+                                    if (Session::get('languaje') == 'en')
+                                    {
+                                        $errors->append("The poll was already sent to the user ".$stakeholder->name." ".$stakeholder->surnames.". It can't be send again.");
+                                    }
+                                    else
+                                    {
+                                        $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
+                                    }
                                 }
 
-                                if (Session::get('languaje') == 'en')
+                                if (isset($errors))
                                 {
-                                    $errors->append("The poll was already sent to the user ".$stakeholder->name." ".$stakeholder->surnames.". It can't be send again.");
+                                    Session::flash('error',$errors);
                                 }
-                                else
-                                {
-                                    $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
-                                }
-                            }
-
-                            if (isset($errors))
-                            {
-                                Session::flash('error',$errors);
-                            }
-                            $i += 1;
-                        }
-                    }
-                }
-
-                Mail::send('envio_mail',$request->all(), 
-                    function ($msj) use ($correos)
-                    {
-                        if (Session::get('languaje') == 'en')
-                        {
-                            $msj->subject('Poll for events of risk identification');
-                        }
-                        else
-                        {
-                            $msj->subject('ENCUESTA DE SATISFACCIÓN MESA DE RIESGOS 2017');
-                        }
-                        //Seleccionamos correos de stakeholders
-                        $i = 0; //verifica si se debe ingresar to o cc
-                        foreach ($correos as $correo)
-                        {
-                            if ($i == 0)
-                            {
-                                $msj->to($correo);
                                 $i += 1;
                             }
-                            else
-                                $msj->cc($correo);
                         }
                     }
-                );
+                    else if ($_POST['tipo'] == 2) //Se asignaron stakeholders por rol
+                    {
+                        foreach ($_POST['stakeholder_id'] as $stakeholder_id) //para cada id de rol
+                        {
+                            //obtenemos los id de stakeholders del rol seleccionado
+                            $stakeholders = DB::table('role_stakeholder')
+                                                ->join('stakeholders','stakeholders.id','=','role_stakeholder.stakeholder_id')
+                                                ->where('stakeholders.status','=',0)
+                                                ->where('role_id',$stakeholder_id)
+                                                ->select('stakeholder_id as id')->get();
 
-                if (isset($errors))
-                {
-                    if (sizeof($errors) != sizeof($request['stakeholder_id']) && $request['tipo'] == 0) //para verificar que se enviaron correos en caso de que se hayan asignado manualmente los stakeholders
-                    {
-                        if (Session::get('languaje') == 'en')
-                        {
-                            Session::flash('message','Poll successfully sent');
-                        }
-                        else
-                        {
-                            Session::flash('message','Encuesta enviada correctamente');    
+                            //para cada stakeholder con el rol seleccionado
+                            foreach ($stakeholders as $stakeholder)
+                            {
+                                //obtenemos datos de stakeholder
+                                $stakeholder = \Ermtool\Stakeholder::find($stakeholder->id);
+                                try
+                                {
+                                    DB::table('poll_stakeholder')
+                                        ->insert([
+                                            'stakeholder_id' => $stakeholder->id,
+                                            'poll_id' => $_POST['poll_id'],
+                                            'created_at' => date('Y-m-d H:i:s'),
+                                            ]);
+
+                                    $correos[$i] = $stakeholder->mail;
+                                }
+                                catch(\Illuminate\Database\QueryException $e)
+                                {
+                                    //creamos array de error si es que no existe
+                                    if (!isset($errors))
+                                    {
+                                        $errors = new ArrayObject();
+                                    }
+
+                                    if (Session::get('languaje') == 'en')
+                                    {
+                                        $errors->append("The poll was already sent to the user ".$stakeholder->name." ".$stakeholder->surnames.". It can't be send again.");
+                                    }
+                                    else
+                                    {
+                                        $errors->append('Ya se le envió la encuesta al usuario '.$stakeholder->name.' '.$stakeholder->surnames.'. No se puede enviar nuevamente.');
+                                    }
+                                }
+
+                                if (isset($errors))
+                                {
+                                    Session::flash('error',$errors);
+                                }
+                                $i += 1;
+                            }
                         }
                     }
-                    else if (sizeof($errors) == sizeof($request['stakeholder_id']) && ($request['tipo'] == 1 || $request['tipo'] == 2)) //pueden ser iguales en tamaño en caso de que se esté enviando por organización o por rol
+
+                    //ACT 20-06-18
+                    //obtenemos stakeholder (responsable) para enviarle un correo informando la situación
+
+                    foreach ($correos as $c)
                     {
-                        if (Session::get('languaje') == 'en')
-                        {
-                            Session::flash('message','Poll successfully sent');
-                        }
-                        else
-                        {
-                            Session::flash('message','Encuesta enviada correctamente');    
-                        }
+                        $user = \Ermtool\Stakeholder::getUserByMail($c);
+                        $name = \Ermtool\Stakeholder::getName($user->id);
+
+                        $mensaje = array();
+
+                        //Hacemos un replace de nombre de stakeholder, nombre de plan de acción y días de vencimiento
+                        $message = str_replace('{{ Usuario }}', $name, $_POST['mensaje']);
+
+                        //Separamos en distintos mensajes
+                        $mensaje = explode('<space>', $message);
+
+                        Mail::queue('envio_mail',['mensaje' => $mensaje], function ($msj) use ($c)
+                        {       
+                            $msj->to($c)->subject($_POST['title']);
+                        });
+
                     }
-                }
-                else
-                {
-                    if (Session::get('languaje') == 'en')
+                    
+
+                    
+
+                    if (isset($errors))
                     {
-                        Session::flash('message','Poll successfully sent');
+                        if (sizeof($errors) != sizeof($_POST['stakeholder_id']) && $_POST['tipo'] == 0) //para verificar que se enviaron correos en caso de que se hayan asignado manualmente los stakeholders
+                        {
+                            if (Session::get('languaje') == 'en')
+                            {
+                                Session::flash('message','Poll successfully sent');
+                            }
+                            else
+                            {
+                                Session::flash('message','Encuesta enviada correctamente');    
+                            }
+                        }
+                        else if (sizeof($errors) == sizeof($_POST['stakeholder_id']) && ($_POST['tipo'] == 1 || $_POST['tipo'] == 2)) //pueden ser iguales en tamaño en caso de que se esté enviando por organización o por rol
+                        {
+                            if (Session::get('languaje') == 'en')
+                            {
+                                Session::flash('message','Poll successfully sent');
+                            }
+                            else
+                            {
+                                Session::flash('message','Encuesta enviada correctamente');    
+                            }
+                        }
                     }
                     else
                     {
-                        Session::flash('message','Encuesta enviada correctamente');    
+                        if (Session::get('languaje') == 'en')
+                        {
+                            Session::flash('message','Poll successfully sent');
+                        }
+                        else
+                        {
+                            Session::flash('message','Encuesta enviada correctamente');    
+                        }
                     }
-                }
-
-                return Redirect::to('enviar_encuesta');
+                });
             }
+
+            return Redirect::to('enviar_encuesta');
         }
         catch (\Exception $e)
         {

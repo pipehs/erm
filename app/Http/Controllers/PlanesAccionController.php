@@ -661,6 +661,7 @@ class PlanesAccionController extends Controller
                     $issues[$i] = [
                         'id' => $is['id'],
                         'name' => $is['name'],
+                        'description' => $is['description']
                     ];
 
                     $i += 1;

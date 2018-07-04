@@ -1,6 +1,6 @@
 <div id="cargando"><br></div>
 <div class="form-group">
-	<label for="results" class="col-sm-4 control-label">Descripci&oacute;n de la prueba</label>
+	<label for="results" class="col-sm-4 control-label">Descripci&oacute;n de la prueba *</label>
 	<div class="col-sm-4">
 			{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'5','required'=>'true'])!!}
 	</div>

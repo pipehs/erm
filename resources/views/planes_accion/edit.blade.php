@@ -126,7 +126,7 @@ $('#kind').change(function() {
 			var datos = JSON.parse(result);
 			var issues = '<option value="" disabled selected>- Seleccione </option>';
 			$(datos).each( function() {
-				issues += '<option value='+this.id+'>'+this.name+'</option>';
+				issues += '<option value='+this.id+'>'+this.name+' - '+this.description+'</option>';
 			});
 
 			$("#issues").append(issues);

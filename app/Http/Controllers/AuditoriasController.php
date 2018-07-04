@@ -1062,26 +1062,31 @@ class AuditoriasController extends Controller
                     {   
                         while (isset($_POST['audit_new'.$i.'_name']))
                         {
-                            //primero insertamos en tabla audits y obtenemos id
-                            $audit_id = DB::table('audits')
-                                        ->insertGetId([
-                                            'name' => $_POST['audit_new'.$i.'_name'],
-                                            'description' => $_POST['audit_new'.$i.'_description'],
-                                            'created_at' => date('Y-m-d H:i:s'),
-                                            'updated_at' => date('Y-m-d H:i:s')
-                                            ]);
+                            //ACT 29-06-18: Verificamos que se ingrese nombre de auditoría
+                            if ($_POST['audit_new'.$i.'_name'] != '')
+                            {
+                                //primero insertamos en tabla audits y obtenemos id
+                                $audit_id = DB::table('audits')
+                                            ->insertGetId([
+                                                'name' => $_POST['audit_new'.$i.'_name'],
+                                                'description' => $_POST['audit_new'.$i.'_description'],
+                                                'created_at' => date('Y-m-d H:i:s'),
+                                                'updated_at' => date('Y-m-d H:i:s')
+                                                ]);
+                                
+                                //ahora insertamos en audit_audit_plan
+                                $audit_audit_plan_id = DB::table('audit_audit_plan')
+                                            ->insertGetId([
+                                                'audit_plan_id' => $audit_plan_id,
+                                                'audit_id' => $audit_id,
+                                                'initial_date' => $_POST['audit_new'.$i.'_initial_date'],
+                                                'final_date' => $_POST['audit_new'.$i.'_final_date'],
+                                                'resources' => $_POST['audit_new'.$i.'_resources'],
+                                                ]);
+                            }
+
+                            $i += 1;
                             
-                            //ahora insertamos en audit_audit_plan
-                            $audit_audit_plan_id = DB::table('audit_audit_plan')
-                                        ->insertGetId([
-                                            'audit_plan_id' => $audit_plan_id,
-                                            'audit_id' => $audit_id,
-                                            'initial_date' => $_POST['audit_new'.$i.'_initial_date'],
-                                            'final_date' => $_POST['audit_new'.$i.'_final_date'],
-                                            'resources' => $_POST['audit_new'.$i.'_resources'],
-                                            ]);
-     
-                           $i += 1;
                         }
                     } //fin isset($_POST['audit_new'.$i.'_name']))
                     if (Session::get('languaje') == 'en')
