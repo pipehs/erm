@@ -262,7 +262,7 @@
 					<td><button class="btn btn-danger" onclick="eliminar2({{ $riesgo['id'] }}.0,'{{ $riesgo['nombre'] }}','riesgos','El riesgo')">Eliminar</button></td>
 				@else
 					<td>{!! link_to_route('riesgos.edit', $title = 'Editar', $parameters = ['id' => $riesgo['id'], 'org' => $org_id], $attributes = ['class'=>'btn btn-success']) !!}</td>
-					<td><button class="btn btn-danger" onclick="bloquear({{ $riesgo['id'] }}.{{ $org_id }},'{{ $riesgo['nombre'] }}','riesgos','El riesgo')">Bloquear</button></td>
+					<td><button class="btn btn-danger" onclick="bloquear('{{ $riesgo['id'] }}.{{ $org_id }}','{{ $riesgo['nombre'] }}','riesgos','El riesgo')">Bloquear</button></td>
 				@endif
 			<?php break; ?>
 			@endif

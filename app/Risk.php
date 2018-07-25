@@ -115,16 +115,14 @@ class Risk extends Model
             if ($category == NULL)
             {
                 //primero obtenemos sólo el id de los riesgos y luego su información
-                //ACTUALIZACIÓN 29-03-17: Probablemente group by da lo mismo
-                //ACTUALIZACIÓN 16-08-17
                 return DB::table('risks')
                         ->join('organization_risk','organization_risk.risk_id','=','risks.id')
                         ->where('organization_risk.organization_id','=',$org)
                         ->whereNull('organization_risk.deleted_at')
                         ->where('risks.type2','=',1)
                         ->where('risks.status','=',0)
-                        ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
-                        ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
+                        ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id','organization_risk.id')
+                        ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id','organization_risk.id as org_risk_id')
                         ->get();
             }
             else
@@ -136,8 +134,8 @@ class Risk extends Model
                         ->where('risks.risk_category_id','=',$category)
                         ->where('risks.type2','=',1)
                         ->where('risks.status','=',0)
-                        ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
-                        ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id')
+                        ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id','organization_risk.id')
+                        ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id','organization_risk.id as org_risk_id')
                         ->get();
             }
         }
@@ -149,8 +147,8 @@ class Risk extends Model
                 ->whereNull('organization_risk.deleted_at')
                 ->where('risks.type2','=',1)
                 ->where('risks.status','=',0)
-                ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id')
-                ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id')
+                ->groupBy('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id','organization_risk.id')
+                ->select('risks.id','risks.name','risks.created_at','risks.updated_at','risks.expiration_date','risks.description','risks.type','risks.type2','risks.status','risks.expected_loss','risks.risk_category_id','organization_risk.stakeholder_id','organization_risk.id as org_risk_id')
                 ->get();
         }
         

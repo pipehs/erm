@@ -3,46 +3,7 @@
 @section('title', 'Registro de denuncia')
 
 @section('content')
-<style>
-.popper {
-    border-radius: 100%;
-    padding: 2px 6px;
-    background: #4132bc;
-    color: white !important;
-    margin-left: 10px;
-}
 
-.popbox {
-    display: none;
-    position: absolute;
-    z-index: 99999;
-    width: 400px;
-    padding: 10px;
-    background: #4132bc;
-    color: white;
-    border: 1px solid #4D4F53;
-    border-radius:3px;
-    margin: 0px;
-    -webkit-box-shadow: 0px 0px 5px 0px rgba(164, 164, 164, 1);
-    box-shadow: 0px 0px 5px 0px rgba(164, 164, 164, 1);
-}
-
-.popbox p{
-	margin:0;
-}
-
-.popbox h2
-{
-    background-color: #070664;
-    font-weight: bold;
-    color:  #E3E5DD;
-    font-size: 14px;
-    display: block;
-    width: 100%;
-    margin: -10px 0px 8px -10px;
-    padding: 5px 10px;
-}
-</style>
 <!-- header menu de arbol -->
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
@@ -111,14 +72,6 @@
 	</div>
 </div>
 
-<div id="pop1" class="popbox">
-	<h2>Denuncia</h2>
-	<p>Una denuncia consiste en una acusación anónima o no, de alguna situación o circunstancia que usted considere haya infringido las normas de conducta o las leyes del país. Por ejemplo: Acoso por parte de un compañero de trabajo.</p><br>
-	<h2>Reclamo</h2>
-	<p>Un reclamo implica alguna situación o hecho que no sea de su agrado, aunque no constituye necesariamente una falta a las normas y leyes. Por ejemplo, compra de bebida con poca cantidad de gas o sin gas.</p><br>
-	<h2>Consulta</h2>
-	<p>Corresponde a cualquier duda o comentario que quiera realizar a través del sistema. Por ejemplo, quisiera saber cuál es el procedimiento para ser un pequeño comerciante de productos CCU.</p><br>
-</div>
 @stop
 
 @section('scripts2')

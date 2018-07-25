@@ -2925,7 +2925,7 @@ class ControlesController extends Controller
                         //ACT  26-06-18: 
                         if ($res->probability < 50 && $res->impact < 50)
                         {
-                            array_push($id_inefectivos,$co->co->control_id);
+                            array_push($id_inefectivos,$co->control_id);
                             $inefectivos += 1;
                         }
                         else

@@ -145,6 +145,36 @@ class DenunciasController extends Controller
         }   
     }
 
+    public function registerComplaint()
+    {
+        $questions = \Ermtool\CcQuestion::all();
+
+        foreach ($questions as $q)
+        {
+            if ($q->cc_kind_answer_id != 1) //no es respuesta de texto
+            {
+                $p_answers = \Ermtool\CcPossibleAnswer::where('cc_question_id',$q->id)->get();
+
+                if (!empty($p_answers))
+                {
+                    $q->p_answers = $p_answers;
+                }
+                else
+                {
+                    $q->p_answers = array();
+                }
+            }
+        }
+
+        return view('denuncias.registro',['questions' => $questions]);
+
+    }
+
+    public function registerComplaint2()
+    {
+        print_r($_POST);
+
+    }
     /**
      * Show the form for creating a new resource.
      *

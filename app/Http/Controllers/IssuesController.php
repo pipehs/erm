@@ -1595,11 +1595,11 @@ class IssuesController extends Controller
                 {
                     if ($issue['plan_description'] != NULL)
                     {
-                        $temp = $this->formatearIssue($issue['id'],$issue['name'],$issue['classification'],$issue['recommendations'],$issue['plan_description'],$issue['plan_status'],$issue['plan_final_date']);  
+                        $temp = $this->formatearIssue($issue['id'],$issue['name'],$issue['classification'],$issue['recommendations'],$issue['comments'],$issue['plan_description'],$issue['plan_status'],$issue['plan_final_date']);  
                     }
                     else
                     {
-                        $temp = $this->formatearIssue($issue['id'],$issue['name'],$issue['classification'],$issue['recommendations'],NULL,NULL,NULL);  
+                        $temp = $this->formatearIssue($issue['id'],$issue['name'],$issue['classification'],$issue['recommendations'],$issue['comments'],NULL,NULL,NULL);  
                     }
 
                     $issues[$i] = [
@@ -2350,7 +2350,7 @@ class IssuesController extends Controller
                     $risks = DB::table('risks')
                             ->join('organization_risk','organization_risk.risk_id','=','risks.id')
                             ->where('organization_risk.organization_id','=',$org_id)
-                            ->select('risks.name','organization_risk.id','risks.description')
+                            ->select('risks.name','organization_risk.id as org_risk_id','risks.description')
                             ->get();
 
                     if (isset($_GET['kind']))

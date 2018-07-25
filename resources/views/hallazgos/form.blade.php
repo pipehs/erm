@@ -61,15 +61,15 @@
 								<?php $i = 0; //contador de causas 
 									$cont = 0; //contador para ver si una causa está seleccionada ?>
 								@while (isset($risks_selected[$i]))
-									@if ($risks_selected[$i]->id == $risk->id)
-										<option value="{{ $risk->id }}" selected>{{ $risk->name }} - {{ $risk->description }}</option>
+									@if ($risks_selected[$i]->id == $risk->org_risk_id)
+										<option value="{{ $risk->org_risk_id }}" selected>{{ $risk->name }} - {{ $risk->description }}</option>
 										<?php $cont += 1; ?>
 									@endif
 									<?php $i += 1; ?>
 								@endwhile
 
 								@if ($cont == 0)
-									<option value="{{ $risk->id }}">{{ $risk->name }} - {{ $risk->description }}</option>
+									<option value="{{ $risk->org_risk_id }}">{{ $risk->name }} - {{ $risk->description }}</option>
 								@endif
 
 							@endforeach
