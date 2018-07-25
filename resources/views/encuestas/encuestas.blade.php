@@ -58,28 +58,25 @@
 			</div>
 		@endif
 
-<p>En esta secci&oacute;n podr&aacute; ver las respuestas a las encuestas de identificaci&oacute;n de eventos de riesgos.</p>
+<p>En esta secci&oacute;n podr&aacute; ver las respuestas a las encuestas.</p>
 
 @if (isset($polls))
 
-	{!!Form::open(['url'=>'encuestas','method'=>'GET','class'=>'form-horizontal'])!!}
-	<div class="row form-group">
-		{!!Form::label('Seleccione una encuesta',null,['class'=>'col-sm-4 control-label'])!!}
-		<div class="col-sm-4">
-			{!!Form::select('encuesta',$polls,
-								 	   null,
-								 	   ['required' => 'true',
-								 	   	'placeholder' => '- Seleccione -',
-								 	   	'id' => 'el2'])
-							!!}
-		</div>
-	</div>	
-
-	<center>
-		<div class="row form-group">
-		  {!!Form::submit('Seleccionar', ['class'=>'btn btn-success','name'=>'aplicar'])!!}
-		</div>
-	</center>
+	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
+		<thead>
+			<th>Encuesta</th><th>Fecha creación</th><th>Ver detalles</th><th>Exportar</th>
+		</thead>
+		
+		@foreach ($polls as $p)
+			<tr>
+				<td>{{ $p->name }}</td>
+				<?php $date = new DateTime($p->created_at); ?>
+				<td>{{ date_format($date,'d-m-Y') }}</td>
+				<td>{!! link_to_route('encuestas2', $title = 'Ver', $parameters = "$p->id", $attributes = ['class'=>'btn btn-primary']) !!}</td>
+				<td>{!! link_to_route('genexcelencuesta', $title = 'Exportar', $parameters = "$p->id", $attributes = ['class'=>'btn btn-success']) !!}</td>
+			</tr>
+		@endforeach
+	</table>
 @elseif (isset($stakeholders))
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 	<thead>

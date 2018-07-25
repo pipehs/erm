@@ -247,6 +247,12 @@ class RiesgosController extends Controller
                                 $probabilidad = $eval->avg_probability.' ('.$proba_string[$eval->avg_probability-1].')';
                                 $score = $eval->avg_impact * $eval->avg_probability;
                             }
+                            else
+                            {
+                                $impacto = 'Evaluación no se guardó correctamente';
+                                $probabilidad = 'Evaluación no se guardó correctamente';
+                                $score = 'Evaluación no se guardó correctamente';
+                            }
                         }
                     }
                     else
@@ -903,7 +909,7 @@ class RiesgosController extends Controller
                             }
 
                             //ACT 26-04-18: Respuestas al Riesgo
-                            if (isset($_POST['new_risk_response']) && $_POST['risk_responses'] != '')
+                            if (isset($_POST['new_risk_response']) && $_POST['new_risk_response'] != '')
                             {
                                 $risk_response = \Ermtool\Risk_response::create([
                                     'name'=>$_POST['new_risk_response']
@@ -2639,20 +2645,34 @@ class RiesgosController extends Controller
                 //obtenemos org_risk
                 $org_risk = \Ermtool\OrganizationRisk::where('organization_id',$GLOBALS['org'])->where('risk_id',$GLOBALS['id1']);
 
+                //$deleted = DB::table('organization_risk')->where('organization_id',$GLOBALS['org'])->where('risk_id',$GLOBALS['id1'])->value('deleted_at');
+
+                //echo $deleted;
                 //Eliminamos (con soft_deleting)
-                $org_risk->delete();
+                if (!empty($org_risk))
+                {
+                    $org_risk->delete();
+                
+                    //$deleted = DB::table('organization_risk')->where('organization_id',$GLOBALS['org'])->where('risk_id',$GLOBALS['id1'])->value('deleted_at');
 
-                $GLOBALS['res'] = 0;
+                    //echo $deleted;
+                    $GLOBALS['res'] = 0;
 
+                    $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha bloqueado el riesgo con Id: '.$GLOBALS['id1'].' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                }
+                else
+                {
+                    $GLOBALS['res'] = 2;
+                }
             });
 
             return $res;
         }
         catch (\Exception $e)
         {
-            print_r($e);
-            //enviarMailSoporte($e);
-            //return view('errors.query',['e' => $e]);
+            //print_r($e);
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 

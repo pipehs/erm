@@ -92,19 +92,46 @@ function bloquear(id,name,kind,type)
 		   closeOnConfirm: false }, 
 		   function(){
 		   		$.get(kind+'.bloquear.'+id, function (result) {
-		   			swal({   title: "",
-		   			   text: ""+type+" "+name+" fue bloqueado(a) con éxito ",
-		   			   type: "success",   
-		   			   showCancelButton: false,   
-		   			   confirmButtonColor: "#31B404",   
-		   			   confirmButtonText: "Aceptar",   
-		   			   closeOnConfirm: false }, 
-		   			   function(){   
-		   			   	location.reload();
-		   			   });
-
-		   			});
-		   		 
+		   			if (result == 2)
+		   			{
+		   				swal({   title: "",
+			   			   text: "No se encontro "+type+" "+name+". Favor contáctese con el administrador",
+			   			   type: "error",   
+			   			   showCancelButton: false,   
+			   			   confirmButtonColor: "#31B404",   
+			   			   confirmButtonText: "Aceptar",   
+			   			   closeOnConfirm: false }, 
+			   			   function(){   
+			   			   	location.reload();
+			   			});
+		   			}
+		   			if (result != 1)
+		   			{
+		   				swal({   title: "",
+			   			   text: ""+type+" "+name+" fue bloqueado(a) con éxito ",
+			   			   type: "success",   
+			   			   showCancelButton: false,   
+			   			   confirmButtonColor: "#31B404",   
+			   			   confirmButtonText: "Aceptar",   
+			   			   closeOnConfirm: false }, 
+			   			   function(){   
+			   			   	location.reload();
+			   			});
+		   			}
+		   			else
+		   			{
+		   				swal({   title: "",
+			   			   text: ""+type+" "+name+" no pudo ser bloqueado. Favor contáctese con el administrador",
+			   			   type: "error",   
+			   			   showCancelButton: false,   
+			   			   confirmButtonColor: "#31B404",   
+			   			   confirmButtonText: "Aceptar",   
+			   			   closeOnConfirm: false }, 
+			   			   function(){   
+			   			   	location.reload();
+			   			});
+		   			}
+		   		});
 		   	});
 }
 

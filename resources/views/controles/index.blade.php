@@ -64,9 +64,7 @@
 		<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Periodicidad<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Costo esperado<label><input type="text" placeholder="Filtrar" /></label></th>
-		@if (isset($controls1[0]['porcentaje_cont']))
-			<th>% de contribuci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-		@endif
+		<th>% de contribuci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 		<th>Acci&oacute;n</th>
@@ -177,16 +175,17 @@
 					{{ $control['expected_cost'] }}
 				@endif
 				</td>
-
+				<td>
 				@if (isset($control['porcentaje_cont']))
-					<td>
 					@if ($control['porcentaje_cont'] === NULL)
 						No se ha definido
 					@else
 						{{ $control['porcentaje_cont'] }} %
 					@endif
-					</td>
+				@else
+					No se ha definido
 				@endif
+				</td>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)	
 				<td>{!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'].'.'.$org_id, $attributes = ['class'=>'btn btn-success']) !!}</td>
@@ -216,9 +215,7 @@
 		<th>Prop&oacute;sito<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Periodicidad<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Costo esperado<label><input type="text" placeholder="Filtrar" /></label></th>
-		@if (isset($controls2[0]['porcentaje_cont']))
-			<th>% de contribuci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
-		@endif
+		<th>% de contribuci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
 	@foreach (Session::get('roles') as $role)
 		@if ($role != 6)
 		<th>Acci&oacute;n</th>
@@ -331,15 +328,17 @@
 				@endif
 				</td>
 
-				@if (isset($cocacola))
-					<td>
+				<td>
+				@if (isset($control['porcentaje_cont']))
 					@if ($control['porcentaje_cont'] === NULL)
 						No se ha definido
 					@else
 						{{ $control['porcentaje_cont'] }} %
 					@endif
-					</td>
+				@else
+					No se ha definido
 				@endif
+				</td>
 		@foreach (Session::get('roles') as $role)
 			@if ($role != 6)	
 				<td>{!! link_to_route('controles.edit', $title = 'Editar', $parameters = $control['id'].'.'.$org_id, $attributes = ['class'=>'btn btn-success']) !!}</td>

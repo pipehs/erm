@@ -47,7 +47,7 @@
 		@endif
 
 		@if(Session::has('error'))
-			<div class="alert alert-danger alert-dismissible" role="alert">
+			<div class="alert alert-warning alert-dismissible" role="alert">
 			@foreach (Session::get('error') as $error)
 				{{ $error }}
 				<br>
@@ -67,12 +67,7 @@ En esta secci&oacute;n podr&aacute; enviar encuestas previamente creadas.
 <div class="row form-group">
 	<label for="encuesta" class="col-sm-4 control-label">Seleccione una encuesta *</label>
 	<div class="col-sm-4">
-		{!!Form::select('encuesta',$polls,
-							 	   null,
-							 	   ['required' => 'true',
-							 	   	'placeholder' => '- Seleccione -',
-							 	   	'id' => 'el2'])
-						!!}
+		{!!Form::select('encuesta',$polls,null,['required' => 'true','placeholder' => '- Seleccione -','id' => 'el2'])!!}
 	</div>
 </div>	
 

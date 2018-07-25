@@ -4466,4 +4466,223 @@ class ExcelController extends Controller
             //return view('errors.query',['e' => $e]);
         //}
     }
+
+    public function exportSessions()
+    {
+        if (!Auth::guest())
+        {
+           $logs = file_get_contents('../storage/logs/sessions.log');
+
+            $rows = explode("[] []", $logs);
+
+            $users = array();
+            
+            $i = 0;
+            foreach ($rows as $row)
+            {
+                //Rut
+                //echo $row.'<br>';
+                $pos1 = explode('Rut: ',$row);
+                if (isset($pos1[1]))
+                {
+                    $pos1 = explode(',',$pos1[1]);
+                
+                    $rut = $pos1[0];
+
+                    //Nombre
+                    $pos1 = explode('usuario ',$row);
+
+                    if (strpos($pos1[1],' ,'))
+                    {
+                       $pos1 = explode(' ,',$pos1[1]); 
+                    }
+                    else if (strpos($pos1[1],','))
+                    {
+                       $pos1 = explode(',',$pos1[1]); 
+                    }
+                    
+                    $nombre = $pos1[0];
+
+                    //fecha y hora
+                    $pos1 = explode('fecha ',$row);
+                    $fecha = $pos1[1];
+                    $fechatotal = explode(' a las ',$fecha);
+                    $hora = $fechatotal[1];
+
+                    //En fechatotal[0] igual está la hora, así que separamos por espacio
+                    $fechatotal = explode(' ',$fechatotal[0]);
+
+                    $fecha = $fechatotal[0  ];
+
+                    //echo $rut.' ,,, '.$nombre.' ,,, '.$fecha.'<br>';
+
+                    if ($rut != 16396924 && $rut != 14196805)
+                    {
+                        $users[$i] = [
+                            'Rut' => $rut,
+                            'Nombre' => $nombre,
+                            'Fecha' => $fecha,
+                            'Hora' => $hora 
+                        ];
+
+                    }
+                    
+                    $i += 1;
+                }
+            }
+
+            global $users2;
+            $users2 = $users;
+
+            //print_r($users2);
+
+            Excel::create('Reporte Inicios de Sesión '.date("d-m-Y"), function($excel) {
+
+                    // título excel
+                    $excel->setTitle('Reporte Inicios de Sesión');
+
+                    //creador y compañia
+                    $excel->setCreator('Sistema B-GRC')
+                          ->setCompany('It Apps Bussiness Solutions');
+
+                    //descripción
+                    $excel->setDescription('Reporte de inicios de sesión en sistema B-GRC');
+
+                    $excel->sheet('B-GRC', function($sheet) {
+                        $datos = $GLOBALS['users2'];
+
+                        //$datos2 = json_decode($datos);
+                        $sheet->fromArray($datos);
+
+                        //editamos formato de salida de celdas
+                        $sheet->cells('A1:D1', function($cells) {
+                                $cells->setBackground('#013ADF');
+                                $cells->setFontColor('#ffffff');
+                                $cells->setFontFamily('Calibri');
+                                $cells->setFontWeight('bold');
+                                $cells->setFontSize(16);
+                        });
+
+                        $sheet->freezeFirstRow();
+
+                    });
+
+            })->export('xls'); 
+        }
+    }
+
+    public function generarExcelEncuesta($id)
+    {
+        if (!Auth::guest())
+        {
+            $poll = \Ermtool\Poll::find($id);
+
+            $poll->created_at = date_create($poll->created_at);
+            $poll->created_at = date_format($poll->created_at, 'd-m-Y');
+            $questions = $poll->questions;
+            $stakeholders = $poll->stakeholders;
+            $datos = array();
+
+            //$datos[0] = ['Encuesta: '.$poll->name];
+            $i = 0;
+            foreach ($stakeholders as $s)
+            {
+                foreach ($questions as $q)
+                {
+                    $a = DB::table('answers')
+                            ->where('stakeholder_id','=',$s->id)
+                            ->where('question_id','=',$q->id)
+                            ->first(['answer']);
+
+                    $datos[$i] = [
+                        'rut' => $s->id,
+                        'name' => $s->name.' '.$s->surnames,
+                        'mail' => $s->mail,
+                        'q' => $q->question,
+                        'a' => $a->answer,
+                    ];
+
+                    $i += 1;
+                }
+            }
+            global $datos2;
+            $datos2 = $datos;
+            $GLOBALS['poll2'] = $poll;
+
+            Excel::create('Reporte Encuesta '.$GLOBALS['poll2']->name.' '.date("d-m-Y"), function($excel) {
+
+                    // título excel
+                    $excel->setTitle('Reporte Encuesta');
+
+                    //creador y compañia
+                    $excel->setCreator('Sistema B-GRC')
+                          ->setCompany('It Apps Bussiness Solutions');
+
+                    //descripción
+                    $excel->setDescription('Reporte de encuesta B-GRC');
+
+                    $excel->sheet('B-GRC', function($sheet) {
+                        $sheet->mergeCells('A1:D1');
+                        $datos = $GLOBALS['datos2'];
+                        //$sheet->fromArray($datos);
+                        $sheet->setWidth(array(
+                            'A'     =>  15,
+                            'B'     =>  25,
+                            'C'     =>  25,
+                            'D'     =>  50,
+                            'E'     =>  95,
+                        ));
+
+                        $sheet->cells('A2:E100', function($cells) {
+                            $cells->setValignment('center');
+                            $cells->setAlignment('center');
+                        });
+
+                        $sheet->cell('A1', function($cell) {
+                            $cell->setValue('Encuesta: '.$GLOBALS['poll2']->name);   
+                        });
+
+                        $sheet->cell('E1', function($cell) {
+                            $cell->setValue('Fecha creación encuesta: '.$GLOBALS['poll2']->created_at);   
+                        });
+
+                        $sheet->cell('A2', function($cell) {$cell->setValue('ID Usuario');   });
+                        $sheet->cell('B2', function($cell) {$cell->setValue('Nombre');   });
+                        $sheet->cell('C2', function($cell) {$cell->setValue('Correo');   });
+                        $sheet->cell('D2', function($cell) {$cell->setValue('Pregunta');   });
+                        $sheet->cell('E2', function($cell) {$cell->setValue('Respuesta');   });
+                        //editamos formato de salida de celdas
+                        $sheet->cells('A1:E1', function($cells) {
+                                $cells->setBackground('#013ADF');
+                                $cells->setFontColor('#ffffff');
+                                $cells->setFontFamily('Calibri');
+                                $cells->setFontWeight('bold');
+                                $cells->setFontSize(14);
+                        });
+
+                        $sheet->cells('A2:E2', function($cells) {
+                                $cells->setBackground('#013ADF');
+                                $cells->setFontColor('#ffffff');
+                                $cells->setFontFamily('Calibri');
+                                $cells->setFontWeight('bold');
+                                $cells->setFontSize(14);
+                        });
+
+                        $sheet->setFreeze('A2');
+                        $i = 3;
+                        foreach ($datos as $d) 
+                        {
+                            $sheet->cell('A'.$i, $d['rut']); 
+                            $sheet->cell('B'.$i, $d['name']); 
+                            $sheet->cell('C'.$i, $d['mail']);
+                            $sheet->cell('D'.$i, $d['q']); 
+                            $sheet->cell('E'.$i, $d['a']); 
+                            $i += 1;
+                        }
+
+                    });
+
+            })->export('xls'); 
+        }
+    }
 }

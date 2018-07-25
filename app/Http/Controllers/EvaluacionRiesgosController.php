@@ -1290,17 +1290,33 @@ class EvaluacionRiesgosController extends Controller
                 }
 
                 //ACT 11-04-17: Formateamos $dia mes escogido
-                if ($mes == '01' || $mes == '03' || $mes == '05' || $mes == '07' || $mes == '08' || $mes == '10') //son 31 días
+                //ACT 04-07-18: Agregamos posibilidad de ingresar día
+                if (isset($_GET['dia']) && $_GET['dia'] != '')
                 {
-                    $dia = '31';
+                    $dia = $_GET['dia'];
+
+                    if ((int)$dia < 10)
+                    {
+                        if (strlen($dia) < 2) //falta un cero
+                        {
+                            $dia = '0'.$dia;
+                        }
+                    }
                 }
-                else if ($mes == '02') //febrero, sólo 28 días
+                else //no se agregó día
                 {
-                    $dia = '28';
-                }
-                else
-                {
-                    $dia = '30';
+                    if ($mes == '01' || $mes == '03' || $mes == '05' || $mes == '07' || $mes == '08' || $mes == '10') //son 31 días
+                    {
+                        $dia = '31';
+                    }
+                    else if ($mes == '02') //febrero, sólo 28 días
+                    {
+                        $dia = '28';
+                    }
+                    else
+                    {
+                        $dia = '30';
+                    }
                 }
 
                 //ACTUALIZACIÓN 02-03-2017: Filtro de categoría
@@ -1362,7 +1378,7 @@ class EvaluacionRiesgosController extends Controller
                                             ->where('evaluation_risk.organization_risk_id','=',$evaluation->risk_id)
                                             ->where('evaluations.consolidation','=',1)
                                             ->where('evaluations.type','=',1)
-                                            ->where('evaluations.updated_at','<=',date($ano.$mes.$dia.' 23:59:59'))
+                                            ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
                                             ->max('evaluations.updated_at');
 
                                 //$updated_at_in = str_replace('-','',$updated_at_in);
@@ -1374,7 +1390,7 @@ class EvaluacionRiesgosController extends Controller
                                     $updated_at_ctrl = DB::table('controlled_risk')
                                             ->join('organization_risk','organization_risk.id','=','controlled_risk.organization_risk_id')
                                             ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
-                                            ->where('controlled_risk.created_at','<=',date($ano.$mes.$dia.' 23:59:59'))
+                                            ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
                                             ->max('controlled_risk.created_at');
 
                                     //$updated_at_ctrl = str_replace('-','',$updated_at_ctrl);
@@ -1385,7 +1401,7 @@ class EvaluacionRiesgosController extends Controller
                                     $updated_at_ctrl = DB::table('controlled_risk_manual')
                                             ->join('organization_risk','organization_risk.id','=','controlled_risk.organization_risk_id')
                                             ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
-                                            ->where('controlled_risk.created_at','<=',date($ano.$mes.$dia.' 23:59:59'))
+                                            ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
                                             ->max('controlled_risk.created_at');
 
                                     //$updated_at_ctrl = str_replace('-','',$updated_at_ctrl);

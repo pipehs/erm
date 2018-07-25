@@ -545,6 +545,10 @@ Route::get('encuestaresp', function(){
 Route::get('encuestas', [
 	'as' => 'encuestas', 'uses' => 'EncuestasController@verEncuestas']);
 
+Route::get('encuestas2.{id}', [
+	'as' => 'encuestas2', 'uses' => 'EncuestasController@encuestas2']);
+
+
 Route::get('encuestas.destroy.{id}', [
 	'as' => 'encuestas.destroy', 'uses' => 'EncuestasController@destroy']);
 
@@ -1006,6 +1010,9 @@ Route::get('genexcelgraficosdinamicos.{kind},{id}.{org}', [
 Route::get('genexcelconsolidado', [
 	'as' => 'genexcelconsolidado', 'uses' => 'ExcelController@generarExcelConsolidado']);
 
+Route::get('genexcelencuesta.{id}', [
+	'as' => 'genexcelencuesta', 'uses' => 'ExcelController@generarExcelEncuesta']);
+
 //------ RUTAS PARA ENLACES A TRAVÉS DE JSON --------//
 
 //ruta para seleccionar a través de JSON los riesgos de negocio o de procesos en campo select (al crear controles)
@@ -1420,6 +1427,11 @@ Route::get('error', function(){
 
 Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
 
+//ACT 17-07-18: Inicios de sesión a excel
+Route::get('sessions', [
+	'as' => 'sessions', 'uses' => 'ExcelController@exportSessions'
+]);
+
 Route::post('export_audit_graphics', [
 	'as' => 'export_audit_graphics', 'uses' => 'AuditoriasController@docxGraficos'
 ]);
@@ -1481,13 +1493,13 @@ Route::post('store_cc_questions2', [
 	'as' => 'store_cc_questions2', 'uses' => 'DenunciasController@storeCcQuestions2'
 	]);
 
-Route::get('registro_denuncia', function(){
-   return View::make('denuncias.registro');
-});
+Route::get('registro_denuncia', [
+   'as' => 'registro_denuncia', 'uses' => 'DenunciasController@registerComplaint'
+	]);
 
-Route::get('registro_denuncia2', function(){
-   return View::make('denuncias.registro2');
-});
+Route::post('registro_denuncia2', [
+   'as' => 'registro_denuncia2', 'uses' => 'DenunciasController@registerComplaint2'
+	]);
 
 Route::get('seguimiento_admin', function(){
    return View::make('denuncias.seguimiento_admin');

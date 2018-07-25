@@ -114,9 +114,7 @@
                 <div class="row">
                   {!!Form::label('Riesgo inherente o residual',null,['class'=>'col-sm-4 control-label'])!!}
                   <div class="col-sm-3">
-                    {!!Form::select('kind2',(['0'=>'Riesgos inherentes','1'=>'Riesgo inherente v/s Riesgo residual']), 
-                         null, 
-                         ['id' => 'kind2','placeholder'=>'- Seleccione -','required'=>'true'])!!}
+                    {!!Form::select('kind2',(['0'=>'Riesgos inherentes','1'=>'Riesgo inherente v/s Riesgo residual']), null, ['id' => 'kind2','placeholder'=>'- Seleccione -','required'=>'true'])!!}
                   </div>
                 </div>
             </div>
@@ -125,15 +123,19 @@
                   <div class="form-group">
                     {!!Form::label('Seleccione mes Y año (si desea ver heatmap de todo un año el mes debe quedar en blanco)',
                     null,['class'=>'col-sm-4 control-label'])!!}
-                    <div class="col-sm-2">
+                    <div class="col-sm-1">
                       {!!Form::number('ano',null,
                       ['id'=>'ano','class'=>'form-control','input maxlength'=>'4',
                        'placeholder'=>'AAAA','min'=>'2016','required'=>'true'])!!}
                     </div>
                     <div class="col-sm-1">
-                    {!!Form::number('mes',null,
-                      ['class'=>'form-control','input maxlength'=>'2',
+                      {!!Form::number('mes',null,['class'=>'form-control','input maxlength'=>'2',
                        'placeholder'=>'MM','min'=>'01','max'=>'12'])!!}
+                    </div>
+                    <div class="col-sm-1">
+                    {!!Form::number('dia',null,
+                      ['class'=>'form-control','input maxlength'=>'2',
+                       'placeholder'=>'DD','min'=>'01','max'=>'31'])!!}
                     </div>
                   </div>
                 </div>
@@ -312,11 +314,11 @@
     @for($k=0; $k < count($riesgos); $k++)
         @if ($cont2[intval($prom_criticidad_in[$k])][intval($prom_proba_in[$k])] > 5)
           @if (!isset($verificador[intval($prom_criticidad_in[$k])][intval($prom_proba_in[$k])]))
-            $('#{{$prom_criticidad_in[$k]}}_{{$prom_proba_in[$k]}}').append("<span class='circulo' title='Haga click para ver detalles' onclick='getRiesgos({{intval($prom_criticidad_in[$k])}},{{intval($prom_proba_in[$k])}})'>N{{$cont2[intval($prom_criticidad_in[$k])][intval($prom_proba_in[$k])]}}</span>");
+            $('#{{intval($prom_criticidad_in[$k])}}_{{intval($prom_proba_in[$k])}}').append("<span class='circulo' title='Haga click para ver detalles' onclick='getRiesgos({{intval($prom_criticidad_in[$k])}},{{intval($prom_proba_in[$k])}})'>N{{$cont2[intval($prom_criticidad_in[$k])][intval($prom_proba_in[$k])]}}</span>");
             <?php $verificador[intval($prom_criticidad_in[$k])][intval($prom_proba_in[$k])] = 1; ?>
           @endif
         @else
-            $('#{{$prom_criticidad_in[$k]}}_{{$prom_proba_in[$k]}}').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_in[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_in[$k],1) }}'>{{ $cont }}</span>");
+            $('#{{intval($prom_criticidad_in[$k])}}_{{intval($prom_proba_in[$k])}}').append("<span class='circulo' title='{{ $riesgos[$k]['description'] }}. Probabilidad: {{ number_format($prom_proba_in[$k],1) }} &nbsp; Impacto: {{ number_format($prom_criticidad_in[$k],1) }}'>{{ $cont }}</span>");
 
                          var leyendas = "<p><ul><li><small><span class='circulo-small'>{{ $cont }}</span> : <b>Riesgo:</b>";
                          leyendas += "{{ $riesgos[$k]['name'] }}</li>";

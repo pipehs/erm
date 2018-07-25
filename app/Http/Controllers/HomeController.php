@@ -511,9 +511,16 @@ class HomeController extends Controller
 
                             $last_eval = \Ermtool\Evaluation::getLastEvaluation($risk->id,1);
 
-                            $last_proba = $last_eval->avg_probability;
-                            $last_impact = $last_eval->avg_impact;
-
+                            if (!empty($last_eval) || $last_eval != NULL)
+                            {
+                                $last_proba = $last_eval->avg_probability;
+                                $last_impact = $last_eval->avg_impact;
+                            }
+                            else
+                            {
+                                $last_proba = NULL;
+                                $last_impact = NULL;
+                            }
 
                             
                             for ($j=0;$j<5;$j++)
@@ -587,6 +594,7 @@ class HomeController extends Controller
                             {
                                 foreach ($controls as $ctrl)
                                 {
+                                    $co = \Ermtool\ControlOrganization::getByCO($ctrl->id,$org->id);
                                     //seteamos datos
                                     if (Session::get('languaje') == 'es')
                                     {
@@ -715,22 +723,52 @@ class HomeController extends Controller
                                     //seteamos riesgo residual
                                     $sev = array();
                                     $residual_risk = array();
-
+                                    $cont_per = array();
                                     if (!empty($eval))
                                     {
                                         for($j=0;$j<5;$j++)
                                         {
                                             if ($eval[$j]->avg_probability != NULL)
                                             {
+                                                if ($eval[$j]->updated_at != NULL)
+                                                {
+                                                    $cont_per[$j] = DB::table('control_eval_risk_temp')
+                                                        ->where('created_at','<=',$eval[$j]->updated_at)
+                                                        ->where('control_organization_id','=',$co->id)
+                                                        ->orderBy('created_at','desc')
+                                                        ->select('result')
+                                                        ->first();
+
+                                                    if (!empty($cont_per[$j]))
+                                                    {
+                                                        $cont_per[$j] = $cont_per[$j]->result;
+                                                    }
+                                                    else
+                                                    {
+                                                        $cont_per[$j] = NULL;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    $cont_per[$j] = NULL;
+                                                }
                                                 $proba = $eval[$j]->avg_probability;
                                                 $impact = $eval[$j]->avg_impact;
                                                 $sev = $proba * $impact;
-                                                $residual_risk[$j] = $sev * (1-($ctrl->cont_percentage/100));
+                                                if ($cont_per[$j] !== NULL)
+                                                {
+                                                    $residual_risk[$j] = $sev * (1-($cont_per[$j]/100));
+                                                }
+                                                else
+                                                {
+                                                    $residual_risk[$j] = NULL;
+                                                }
                                             }
                                             else
                                             {
                                                 $sev = 'No hay evaluación';
                                                 $residual_risk[$j] = 'No hay evaluación';
+                                                $cont_per[$j] = NULL;
                                             }
                                         }
                                     }
@@ -742,12 +780,13 @@ class HomeController extends Controller
                                         $residual_risk[2] = 'No se ha evaluado';
                                         $residual_risk[3] = 'No se ha evaluado';
                                         $residual_risk[4] = 'No se ha evaluado';
+                                        $cont_per[$j] = NULL;
                                     }
 
                                     //Agregamos último riesgo residual
                                     if ($last_proba != NULL && $last_impact != NULL)
                                     {
-                                        $last_residual_risk = ($last_proba*$last_impact) * (1-($ctrl_cont_percentage/100));
+                                        $last_residual_risk = ($last_proba*$last_impact) * (1-($ctrl->cont_percentage/100));
                                     }
 
                                     //obtenemos hallazgos de control
@@ -903,11 +942,17 @@ class HomeController extends Controller
                                                             'Costo Control' => $ctrl->expected_cost,
                                                             'Evidencia Control' => $ctrl->evidence,
                                                             'Comentarios Control' => $ctrl->comments,
-                                                            '% de Contribución' => $ctrl->cont_percentage.'%',            
+                                                            '% de Contribución actual' => $ctrl->cont_percentage.'%',
+                                                            'Riesgo Residual actual' => $last_residual_risk,
+                                                            '% de Contribución 1' => $cont_per[0].'%',            
                                                             'Riesgo Residual 1' => $residual_risk[0],
+                                                            '% de Contribución 2' => $cont_per[1].'%',
                                                             'Riesgo Residual 2' => $residual_risk[1],
+                                                            '% de Contribución 3' => $cont_per[2].'%',
                                                             'Riesgo Residual 3' => $residual_risk[2],
+                                                            '% de Contribución 4' => $cont_per[3].'%',
                                                             'Riesgo Residual 4' => $residual_risk[3],
+                                                            '% de Contribución 5' => $cont_per[4].'%',
                                                             'Riesgo Residual 5' => $residual_risk[4],
                                                             'Hallazgo' => $issue->name,
                                                             'Descripción Hallazgo' => $issue->description,
@@ -956,7 +1001,8 @@ class HomeController extends Controller
                                                             'percentage_comments' => $percentage_comments,
                                                             'last_residual_risk' => $last_residual_risk,
                                                             'last_proba' => $last_proba,
-                                                            'last_impact' => $last_impact
+                                                            'last_impact' => $last_impact,
+                                                            'cont_per' => $cont_per
                                                         ];
                                                     }
 
@@ -1021,11 +1067,17 @@ class HomeController extends Controller
                                                         'Costo Control' => $ctrl->expected_cost,
                                                         'Evidencia Control' => $ctrl->evidence,
                                                         'Comentarios Control' => $ctrl->comments,
-                                                        '% de Contribución' => $ctrl->porcentaje_cont.'%',
+                                                        '% de Contribución actual' => $ctrl->cont_percentage.'%',
+                                                        'Riesgo Residual actual' => $last_residual_risk,
+                                                        '% de Contribución 1' => $cont_per[0].'%',            
                                                         'Riesgo Residual 1' => $residual_risk[0],
+                                                        '% de Contribución 2' => $cont_per[1].'%',
                                                         'Riesgo Residual 2' => $residual_risk[1],
+                                                        '% de Contribución 3' => $cont_per[2].'%',
                                                         'Riesgo Residual 3' => $residual_risk[2],
+                                                        '% de Contribución 4' => $cont_per[3].'%',
                                                         'Riesgo Residual 4' => $residual_risk[3],
+                                                        '% de Contribución 5' => $cont_per[4].'%',
                                                         'Riesgo Residual 5' => $residual_risk[4],
                                                         'Hallazgo' => $issue->name,
                                                         'Descripción Hallazgo' => $issue->description,
@@ -1074,7 +1126,8 @@ class HomeController extends Controller
                                                         'percentage_comments' => $percentage_comments,
                                                         'last_residual_risk' => $last_residual_risk,
                                                         'last_proba' => $last_proba,
-                                                        'last_impact' => $last_impact
+                                                        'last_impact' => $last_impact,
+                                                           'cont_per' => $cont_per
                                                     ];
                                                 }
 
@@ -1144,11 +1197,17 @@ class HomeController extends Controller
                                                 'Costo Control' => $ctrl->expected_cost,
                                                 'Descripción Evidencia Control' => $ctrl->evidence,
                                                 'Comentarios Control' => $ctrl->comments,
-                                                '% de Contribución' => $ctrl->cont_percentage.'%',
+                                                '% de Contribución actual' => $ctrl->cont_percentage.'%',
+                                                'Riesgo Residual actual' => $last_residual_risk,
+                                                '% de Contribución 1' => $cont_per[0].'%',            
                                                 'Riesgo Residual 1' => $residual_risk[0],
+                                                '% de Contribución 2' => $cont_per[1].'%',
                                                 'Riesgo Residual 2' => $residual_risk[1],
+                                                '% de Contribución 3' => $cont_per[2].'%',
                                                 'Riesgo Residual 3' => $residual_risk[2],
+                                                '% de Contribución 4' => $cont_per[3].'%',
                                                 'Riesgo Residual 4' => $residual_risk[3],
+                                                '% de Contribución 5' => $cont_per[4].'%',
                                                 'Riesgo Residual 5' => $residual_risk[4],
                                                 'Hallazgo' => $issue->name,
                                                 'Descripción Hallazgo' => $issue->description,
@@ -1197,7 +1256,8 @@ class HomeController extends Controller
                                                 'percentage_comments' => $percentage_comments,
                                                 'last_residual_risk' => $last_residual_risk,
                                                 'last_proba' => $last_proba,
-                                                'last_impact' => $last_impact
+                                                'last_impact' => $last_impact,
+                                                'cont_per' => $cont_per
                                             ];
                                         }
 
@@ -1226,6 +1286,13 @@ class HomeController extends Controller
                                 $residual_risk[2] = 'No hay control';
                                 $residual_risk[3] = 'No hay control';
                                 $residual_risk[4] = 'No hay control';
+                                $last_residual_risk = 'No hay control';
+                                $cont_pero = array();
+                                $cont_per[0] = 'No hay control';
+                                $cont_per[1] = 'No hay control';
+                                $cont_per[2] = 'No hay control';
+                                $cont_per[3] = 'No hay control';
+                                $cont_per[4] = 'No hay control';
                                 $issue->name = 'No hay hallazgo';
                                 $issue->description = 'No hay hallazgo';
                                 $issue->classification = 'No hay hallazgo';
@@ -1338,7 +1405,8 @@ class HomeController extends Controller
                                         'percentage_comments' => $percentage_comments,
                                         'last_residual_risk' => $last_residual_risk,
                                         'last_proba' => $last_proba,
-                                        'last_impact' => $last_impact
+                                        'last_impact' => $last_impact,
+                                        'cont_per' => $cont_per
                                     ];
                                 }
 

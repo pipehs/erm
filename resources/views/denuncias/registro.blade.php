@@ -51,7 +51,7 @@
 			@endif
 
 			En esta secci&oacute;n podr&aacute; enviar y registrar una consulta, reclamo o denuncia.
-			{!!Form::open(['route'=>'updatepass','method'=>'GET','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'registro_denuncia2','method'=>'POST','class'=>'form-horizontal'])!!}
 
 			<div class="form-group">
 				<label for="terms" class="col-sm-4 control-label">Aceptar <a href="#">términos y condiciones</a></label>
@@ -74,12 +74,34 @@
 				</div>
 			</div>
 
-			<div class="form-group">
-				<label for="description" class="col-sm-4 control-label">Describa su situación</label>
-				<div class="col-sm-5">
-					{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'8','cols'=>'4','required' => 'true'])!!}
+			@foreach ($questions as $q)
+				<div class="form-group">
+					<label for="description" class="col-sm-4 control-label">{{$q->description}}</label>
+					<div class="col-sm-5">
+						@if ($q->cc_kind_answer_id == 1)
+							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'8','cols'=>'4','required' => 'true'])!!}
+						@elseif ($q->cc_kind_answer_id == 2)
+							@foreach ($q->p_answers as $ans)
+								<div class="radio-inline">
+									<label>
+										<input type="radio" name="answer_{{$q->id}}[]" value="{{$ans->id}}"> {{ $ans->description }}
+										<i class="fa fa-circle-o"></i>
+									</label>
+								</div>
+							@endforeach
+						@elseif ($q->cc_kind_answer_id == 3)
+							@foreach ($q->p_answers as $ans)
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="answer_{{$q->id}}[]" value="{{$ans->id}}"> {{ $ans->description }}
+										<i class="fa fa-square-o"></i>
+									</label>
+								</div>
+							@endforeach
+						@endif
+					</div>
 				</div>
-			</div>
+			@endforeach
 
 			<div class="form-group">
 				<label for="file" class="col-sm-4 control-label">Cargar documentos asociados a la situación (para seleccionar más de uno haga click en ctrl + botón izquierdo)</label>
@@ -93,15 +115,45 @@
 				<div class="col-sm-5">
 					<div class="radio-inline">
 						<label>
-							<input type="radio" name="anonymous" value="1" checked> Si
+							<input type="radio" name="anonymous[]" value="1" checked> Si
 							<i class="fa fa-circle-o"></i>
 						</label>
 					</div>
 					<div class="radio-inline">
 						<label>
-							<input type="radio" name="anonymous" value="2"> No
+							<input type="radio" name="anonymous[]" value="2"> No
 							<i class="fa fa-circle-o"></i>
 						</label>
+					</div>
+				</div>
+			</div>
+
+			<div id="anonymous2" style="display: none;">
+				<div class="form-group">
+					{!!Form::label('Nombre *',null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="col-sm-5">
+						<input type="text" class="form-control" name="name" id="name"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					{!!Form::label('Apellidos *',null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="col-sm-5">
+						<input type="text" class="form-control" name="surnames" id="surnames"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					{!!Form::label('E-mail *',null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="col-sm-5">
+						<input type="text" class="form-control" name="email" id="email"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					{!!Form::label('Teléfono',null,['class'=>'col-sm-4 control-label'])!!}
+					<div class="col-sm-5">
+						<input type="text" class="form-control" name="telephone" id="telephone"/>
 					</div>
 				</div>
 			</div>
@@ -121,11 +173,11 @@
 				</div>
 			</div>
 
-				<div class="form-group">
-					<center>
+			<div class="form-group">
+				<center>
 					{!!Form::submit('Enviar', ['class'=>'btn btn-primary','id'=>'guardar'])!!}
-					</center>
-				</div>
+				</center>
+			</div>
 			{!!Form::close()!!}
 				<center>
 					<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
@@ -165,5 +217,17 @@
 			$("#guardar").removeAttr('disabled');
 		}
 	}
+
+$("input[name='anonymous[]']").change(function(){
+	//alert($("input[name='anonymous[]']:checked").val())
+	if ($("input[name='anonymous[]']:checked").val() == 1)
+	{
+		$('#anonymous2').hide(500);
+	}
+	else
+	{
+		$('#anonymous2').show(500);
+	}
+});
 </script>
 @stop

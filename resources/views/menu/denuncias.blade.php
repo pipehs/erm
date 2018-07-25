@@ -10,5 +10,9 @@
 			<li><a href="seguimiento_denuncia" class="{{ activeMenu('seguimiento_denuncia') }}">Seguimiento de Denuncia</a></li>
 
 			<li><a href="reportes_denuncias" class="{{ activeMenu('reportes_denuncias') }}">Reportes</a></li>
+
+			@if (isset(Auth::user()->superadmin) && (Auth::user()->superadmin == 1 || Auth::user()->superadmin == 2 ))
+				<li><a href="cc_questions" class="{{ activeMenu('configdenuncias') }}">Configurar preguntas</a></li>
+			@endif
 		</ul>
 	</li>
