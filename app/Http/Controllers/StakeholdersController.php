@@ -854,7 +854,7 @@ class StakeholdersController extends Controller
         {
             $results = array();
 
-            $stakeholders = \Ermtool\Stakeholder::where('status',0)->get();
+            $stakeholders = \Ermtool\Stakeholder::where('status',0)->orderBy('name','asc')->get();
 
             $i = 0;
             foreach ($stakeholders as $stake)
