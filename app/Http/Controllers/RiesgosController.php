@@ -694,10 +694,13 @@ class RiesgosController extends Controller
                         $orgs = [$_GET['org']];
                     }
 
+                    //ACT 26-07-18: No se muestran objetivos estratégicos de planes que se encuentren cerrados
                     $objectives = DB::table('objectives')
-                                    ->whereIn('organization_id',$orgs)
-                                    ->where('status','=',0)
-                                    ->lists('name','id');
+                                    ->join('strategic_plans','strategic_plans.id','=','objectives.strategic_plan_id')
+                                    ->where('strategic_plans.status','=',1)
+                                    ->whereIn('objectives.organization_id',$orgs)
+                                    ->where('objectives.status','=',0)
+                                    ->lists('objectives.name','objectives.id');
 
                     if (Session::get('languaje') == 'en')
                     {
