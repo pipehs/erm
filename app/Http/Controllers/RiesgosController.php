@@ -677,9 +677,25 @@ class RiesgosController extends Controller
 
                 else if (isset($_GET['N']))
                 {
-                    
+                    //ACT 26-07-18: Obtenemos también objetivos de organización padre (si es que hay), y en todos los niveles posibles
+                    $org = \Ermtool\Organization::find($_GET['org']);
+                    $orgs = array();
+                    if ($org->organization_id != NULL)
+                    {
+                        while ($org->organization_id != NULL)
+                        {
+                            array_push($orgs,$org->organization_id);
+                            $org = \Ermtool\Organization::find($org->organization_id);
+                        }
+                    }
+                    else
+                    {
+                        //2do nivel
+                        $orgs = [$_GET['org']];
+                    }
+
                     $objectives = DB::table('objectives')
-                                    ->where('organization_id','=',$_GET['org'])
+                                    ->whereIn('organization_id',$orgs)
                                     ->where('status','=',0)
                                     ->lists('name','id');
 
