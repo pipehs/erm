@@ -128,7 +128,16 @@ class ConfigurationController extends Controller
                         break;
                     case 'alert_ap_message_to_expire':
                         $alert_ap_message_to_expire = $c->option_value;
-                        break;             
+                        break;
+                    case 'logo':
+                        $logo = $c->option_value;
+                        break;
+                    case 'logo_width':
+                        $logo_width = $c->option_value;
+                        break;
+                    case 'logo_height':
+                        $logo_height = $c->option_value;
+                        break;                
                     default:
                         # code...
                         break;
@@ -141,6 +150,9 @@ class ConfigurationController extends Controller
                 'organization' => isset($organization) ? $organization : NULL,
                 'alert_ap_message_expired' => isset($alert_ap_message_expired) ? $alert_ap_message_expired : NULL,
                 'alert_ap_message_to_expire' => isset($alert_ap_message_to_expire) ? $alert_ap_message_to_expire : NULL,
+                'logo' => isset($logo) ? $logo : NULL,
+                'logo_width' => isset($logo_width) ? $logo_width : NULL,
+                'logo_height' => isset($logo_height) ? $logo_height : NULL,
             ];
 
             return view('configuration.edit',['data' => $data]);

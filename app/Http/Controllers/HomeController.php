@@ -30,9 +30,15 @@ class HomeController extends Controller
         if (Auth::guest())
         {
             //ACT 26-04-18: Obtenemos versión (si es que hay)
-            $version = \Ermtool\Configuration::where('option_name','version')->first(['option_value as v']);
+            //ACT 27-07-18: Seteamos toda la data de configuración, ya que también obtenedremos de ahí: logo, colores, etc.
+            $data = [];
+            $data['version'] = \Ermtool\Configuration::where('option_name','version')->first(['option_value as v']);
+            $data['logo'] = \Ermtool\Configuration::where('option_name','logo')->first(['option_value as l']);
+            $data['logo_width'] = \Ermtool\Configuration::where('option_name','logo_width')->first(['option_value as w']);
+            $data['logo_height'] = \Ermtool\Configuration::where('option_name','logo_height')->first(['option_value as h']);
+            $data['organization'] = \Ermtool\Configuration::where('option_name','organization')->first(['option_value as o']);
             
-            return view('login',['version' => $version]);
+            return view('login',['data' => $data]);
         }
         else
         {

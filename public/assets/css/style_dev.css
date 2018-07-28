@@ -1,6 +1,6 @@
 body {
   color: #525252;
-  background: #6AA6D6 url(../img/devoops_pattern_b10.png) 0 0 repeat;
+  background: #11A11E url(../img/devoops_pattern_b10.png) 0 0 repeat;
 }
 .body-expanded, .modal-open {
   overflow-y:hidden;
@@ -68,7 +68,7 @@ a.show-sidebar:hover {
   z-index: inherit;
   padding-bottom: 3000px !important;
   margin-bottom: -3000px !important;
-  background: #6AA6D6 url(../img/devoops_pattern_b10.png) 0 0 repeat;
+  background: #11A11E url(../img/devoops_pattern_b10.png) 0 0 repeat;
   -webkit-transition: 0.2s;
   -moz-transition: 0.2s;
   -o-transition: 0.2s;
@@ -143,7 +143,7 @@ a.show-sidebar:hover {
   -moz-border-radius: 0 4px 4px 0;
   border-radius: 0 4px 4px 0;
   padding: 0;
-  background: #6AA6D6 url(../img/devoops_pattern_b10.png) 0 0 repeat;
+  background: #11A11E url(../img/devoops_pattern_b10.png) 0 0 repeat;
   box-shadow: none;
   visibility:hidden;
 }
@@ -606,8 +606,8 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
 #breadcrumb {
   padding: 0;
   line-height: 40px;
-  background: #525252;
-  background: #5a8db6 url(../img/devoops_pattern_b10.png) 0 0 repeat;
+  background: #DF0101;
+  background: #DF0101 url(../img/devoops_pattern_b10.png) 0 0 repeat;
   margin-bottom: 20px;
 }
 .breadcrumb {
@@ -833,7 +833,7 @@ td.beauty-hover {
 }
 .btn-primary, .btn-primary.disabled, .btn-primary[disabled], fieldset[disabled] .btn-primary, .btn-primary.disabled:hover, .btn-primary[disabled]:hover, fieldset[disabled] .btn-primary:hover, .btn-primary.disabled:focus, .btn-primary[disabled]:focus, fieldset[disabled] .btn-primary:focus, .btn-primary.disabled:active, .btn-primary[disabled]:active, fieldset[disabled] .btn-primary:active, .btn-primary.disabled.active, .btn-primary[disabled].active, fieldset[disabled] .btn-primary.active,
 .table > thead > tr > td.primary, .table > tbody > tr > td.primary, .table > tfoot > tr > td.primary, .table > thead > tr > th.primary, .table > tbody > tr > th.primary, .table > tfoot > tr > th.primary, .table > thead > tr.primary > td, .table > tbody > tr.primary > td, .table > tfoot > tr.primary > td, .table > thead > tr.primary > th, .table > tbody > tr.primary > th, .table > tfoot > tr.primary > th {
-  background-color: #6AA6D6;
+  background-color: #11A11E;
   border-color: rgba(0, 0, 0, 0.3);
   color: #f8f8f8;
 }
@@ -857,7 +857,7 @@ td.beauty-hover {
 }
 .btn-danger, .btn-danger.disabled, .btn-danger[disabled], fieldset[disabled] .btn-danger, .btn-danger.disabled:hover, .btn-danger[disabled]:hover, fieldset[disabled] .btn-danger:hover, .btn-danger.disabled:focus, .btn-danger[disabled]:focus, fieldset[disabled] .btn-danger:focus, .btn-danger.disabled:active, .btn-danger[disabled]:active, fieldset[disabled] .btn-danger:active, .btn-danger.disabled.active, .btn-danger[disabled].active, fieldset[disabled] .btn-danger.active, .progress-bar-danger,
 .table > thead > tr > td.danger, .table > tbody > tr > td.danger, .table > tfoot > tr > td.danger, .table > thead > tr > th.danger, .table > tbody > tr > th.danger, .table > tfoot > tr > th.danger, .table > thead > tr.danger > td, .table > tbody > tr.danger > td, .table > tfoot > tr.danger > td, .table > thead > tr.danger > th, .table > tbody > tr.danger > th, .table > tfoot > tr.danger > th {
-  background-color: #D15E5E;
+  background-color: #A4A4A4;
   border-color: rgba(0, 0, 0, 0.3);
   color: #f8f8f8;
 }
@@ -869,7 +869,7 @@ td.beauty-hover {
 .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open .dropdown-toggle.btn-primary,
 .table-hover > tbody > tr > td.primary:hover, .table-hover > tbody > tr > th.primary:hover, .table-hover > tbody > tr.primary:hover > td, .table-hover > tbody > tr.primary:hover > th {
   color: #fff;
-  background-color: #5a8db6;
+  background-color: #b25050;
   border-color: rgba(0, 0, 0, 0.3);
 }
 
@@ -912,7 +912,7 @@ td.beauty-hover {
 .btn-danger:hover, .btn-danger:focus, .btn-danger:active, .btn-danger.active, .open .dropdown-toggle.btn-danger,
 .table-hover > tbody > tr > td.danger:hover, .table-hover > tbody > tr > th.danger:hover, .table-hover > tbody > tr.danger:hover > td, .table-hover > tbody > tr.danger:hover > th {
   color: #fff;
-  background-color: #b25050;
+  background-color: #585858;
   border-color: rgba(0, 0, 0, 0.3);
 }
 .progress {
@@ -954,7 +954,7 @@ td.beauty-hover {
   background: #D8D8D8;
 }
 .progress-bar-primary .ui-widget-header {
-  background: #6AA6D6;
+  background: #11A11E;
   color:#f8f8f8;
 }
 .progress-bar-success .ui-widget-header {
@@ -1199,8 +1199,8 @@ td.beauty-hover {
   background: #63CC9E;
 }
 .toggle-switch-primary input:checked + .toggle-switch-inner + .toggle-switch-switch {
-  border:2px solid #6AA6D6;
-  background: #6AA6D6;
+  border:2px solid #11A11E;
+  background: #11A11E;
 }
 .select2-container {
   width: 100%;
@@ -1334,7 +1334,7 @@ td.beauty-hover {
   background: #D8D8D8 !important;
 }
 .bg-primary {
-  background: #6AA6D6 !important;
+  background: #11A11E !important;
   color:#f8f8f8 !important;
 }
 .bg-success {
@@ -1357,7 +1357,7 @@ td.beauty-hover {
   color: #D8D8D8 !important;
 }
 .txt-primary {
-  color: #6AA6D6 !important;
+  color: #11A11E !important;
 }
 .txt-success, .has-success .help-block, .has-success .control-label, .has-success .radio, .has-success .checkbox, .has-success .radio-inline, .has-success .checkbox-inline {
   color: #63CC9E !important;
@@ -1966,7 +1966,7 @@ td.beauty-hover {
 }
 .external-event:hover {
   cursor: move;
-  background: #6AA6D6;
+  background: #11A11E;
   color:#f8f8f8;
 }
 #add-new-event {
@@ -1984,8 +1984,8 @@ td.beauty-hover {
   z-index: 2001;
 }
 .fc-event {
-  border: 1px solid #6AA6D6;
-  background-color: #6AA6D6;
+  border: 1px solid #11A11E;
+  background-color: #11A11E;
 }
 .qq-upload-drop-area {
   position: absolute;
@@ -2179,7 +2179,7 @@ td.beauty-hover {
   float: left;
 }
 .likebox .fa-thumbs-up {
-  color:#6AA6D6;
+  color:#11A11E;
 }
 .likebox .fa-thumbs-down {
   color:#D15E5E;
@@ -2199,7 +2199,7 @@ td.beauty-hover {
 #modalbox .devoops-modal {
   position:absolute;top:90px;margin-left: -300px;left: 50%;
   border: 1px solid #f8f8f8;
-  box-shadow: 0 0 20px #6AA6D6;
+  box-shadow: 0 0 20px #11A11E;
   background: transparent;
   margin-bottom: 20px;
   -webkit-border-radius: 3px;
@@ -2254,8 +2254,8 @@ td.beauty-hover {
   z-index: 2;
   color: #fff;
   cursor: default;
-  background-color: #6AA6D6;
-  border-color: #6AA6D6;
+  background-color: #11A11E;
+  border-color: #11A11E;
 }
 .fancybox-nav {
   position: fixed;
@@ -2447,4 +2447,10 @@ td.beauty-hover {
   background-image: none;
   border: 1px solid transparent;
   border-radius: 5px;
+}
+
+.table-scroll {
+  width:auto;
+  display: block;
+  overflow:auto;
 }

@@ -298,7 +298,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -326,7 +326,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -574,7 +574,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -612,7 +612,7 @@ class ControlesController extends Controller
         //{
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -988,7 +988,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1058,7 +1058,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1618,7 +1618,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1663,7 +1663,7 @@ class ControlesController extends Controller
             //print_r($_GET);
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1755,7 +1755,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1823,7 +1823,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1900,7 +1900,7 @@ class ControlesController extends Controller
             //print_r($_POST);
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -2124,7 +2124,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -2154,7 +2154,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -2844,7 +2844,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -2872,7 +2872,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -3698,7 +3698,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -4015,7 +4015,7 @@ class ControlesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -4047,7 +4047,7 @@ class ControlesController extends Controller
         //{
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {

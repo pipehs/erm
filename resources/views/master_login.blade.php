@@ -21,7 +21,13 @@
  	{!!Html::style('https://fonts.googleapis.com/css?family=Righteous')!!}
  	{!!Html::style('assets/plugins/fancybox/jquery.fancybox.css')!!}
  	{!!Html::style('assets/plugins/xcharts/xcharts.min.css')!!}
- 	{!!Html::style('assets/css/style.css')!!}
+
+ 	@if (file_exists(public_path().'/assets/css/style_'.strtolower($data["organization"]->o).'.css'))
+ 		{!!Html::style('assets/css/style_'.strtolower($data["organization"]->o).'.css')!!}
+ 	@else
+ 		{!!Html::style('assets/css/style.css')!!}
+ 	@endif
+
  	{!!Html::style('assets/plugins/select2/select2.css')!!}
  	{!!Html::style('assets/plugins/sweetalert-master/dist/sweetalert.css')!!}
  	{!!Html::style('assets/plugins/sweetalert-master/themes/twitter.css')!!}
