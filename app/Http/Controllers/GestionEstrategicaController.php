@@ -50,7 +50,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -112,7 +112,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -150,7 +150,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -240,7 +240,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -273,7 +273,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {           
@@ -331,7 +331,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -360,7 +360,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -553,7 +553,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -722,7 +722,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -750,7 +750,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -833,7 +833,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -874,7 +874,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -910,7 +910,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1138,7 +1138,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1381,7 +1381,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1430,7 +1430,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1461,7 +1461,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1704,7 +1704,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1974,7 +1974,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -2032,7 +2032,7 @@ class GestionEstrategicaController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -2149,7 +2149,7 @@ class GestionEstrategicaController extends Controller
     {
         if (Auth::guest())
         {
-            return view('login');
+            return Redirect::route('/');
         }
         else
         {
@@ -2169,7 +2169,7 @@ class GestionEstrategicaController extends Controller
     {
         if (Auth::guest())
         {
-            return view('login');
+            return Redirect::route('/');
         }
         else
         {

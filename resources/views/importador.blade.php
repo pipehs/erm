@@ -59,7 +59,7 @@
 				<div class="form-group">
 					<label for="kind" class="col-sm-4 control-label">Seleccione el dato maestro que desea cargar</label>
 					<div class="col-sm-4">
-						{!!Form::select('kind',['0'=>'Usuarios (PArauco)','1'=>'Organizaciones','2' => 'Categorías de Riesgos','3'=>'Procesos/Subprocesos(PArauco)','4'=>'Usuarios (KOAndina)','5'=>'Riesgos (KOAndina)','6'=>'Riesgos TI (KOAndina)','7'=>'Planes de Acción (PArauco)','8' => 'Riesgos (genérico)','9'=>'Controles (genérco)','10'=>'Hallazgos y Planes de acción (genérico)','11'=>'Riesgos (PArauco)','12'=>'Riesgos tipo','13'=>'Cuentas contables','14'=>'Actualizar comentarios controles','15'=>'Actulizar Categorías (PArauco)','16'=>'Actualizar Organization_subprocess (PArauco)','17'=>'Actualizar Proceso de Riesgo (PArauco)','18'=>'Auditorías (completas) (genérico)'],null, 
+						{!!Form::select('kind',['0'=>'Usuarios (Progreso)','1'=>'Organizaciones','2' => 'Categorías de Riesgos','3'=>'Procesos/Subprocesos(PArauco)','4'=>'Usuarios (KOAndina)','5'=>'Riesgos (KOAndina)','6'=>'Riesgos TI (KOAndina)','7'=>'Planes de Acción (PArauco)','8' => 'Riesgos (genérico)','9'=>'Controles (genérco)','10'=>'Hallazgos y Planes de acción (genérico)','11'=>'Riesgos (PArauco)','12'=>'Riesgos tipo','13'=>'Cuentas contables','14'=>'Actualizar comentarios controles','15'=>'Actulizar Categorías (PArauco)','16'=>'Actualizar Organization_subprocess (PArauco)','17'=>'Actualizar Proceso de Riesgo (PArauco)','18'=>'Auditorías (completas) (genérico)'],null, 
 							 	   ['id' => 'kind','required'=>'true','placeholder'=>'- Seleccione -'])!!}
 					</div>
 				</div>

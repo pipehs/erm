@@ -40,7 +40,7 @@ class ObjetivosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -275,7 +275,7 @@ class ObjetivosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -320,7 +320,7 @@ class ObjetivosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -465,7 +465,7 @@ class ObjetivosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -532,7 +532,7 @@ class ObjetivosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -574,7 +574,7 @@ class ObjetivosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -615,7 +615,7 @@ class ObjetivosController extends Controller
     {
         if (Auth::guest())
         {
-            return view('login');
+            return Redirect::route('/');
         }
         else
         {
@@ -691,7 +691,7 @@ class ObjetivosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {

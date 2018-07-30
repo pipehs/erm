@@ -42,7 +42,7 @@ class RiesgosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -315,7 +315,7 @@ class RiesgosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -609,7 +609,7 @@ class RiesgosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -677,11 +677,30 @@ class RiesgosController extends Controller
 
                 else if (isset($_GET['N']))
                 {
-                    
+                    //ACT 26-07-18: Obtenemos también objetivos de organización padre (si es que hay), y en todos los niveles posibles
+                    $org = \Ermtool\Organization::find($_GET['org']);
+                    $orgs = array();
+                    if ($org->organization_id != NULL)
+                    {
+                        while ($org->organization_id != NULL)
+                        {
+                            array_push($orgs,$org->organization_id);
+                            $org = \Ermtool\Organization::find($org->organization_id);
+                        }
+                    }
+                    else
+                    {
+                        //2do nivel
+                        $orgs = [$_GET['org']];
+                    }
+
+                    //ACT 26-07-18: No se muestran objetivos estratégicos de planes que se encuentren cerrados
                     $objectives = DB::table('objectives')
-                                    ->where('organization_id','=',$_GET['org'])
-                                    ->where('status','=',0)
-                                    ->lists('name','id');
+                                    ->join('strategic_plans','strategic_plans.id','=','objectives.strategic_plan_id')
+                                    ->where('strategic_plans.status','=',1)
+                                    ->whereIn('objectives.organization_id',$orgs)
+                                    ->where('objectives.status','=',0)
+                                    ->lists('objectives.name','objectives.id');
 
                     if (Session::get('languaje') == 'en')
                     {
@@ -715,7 +734,7 @@ class RiesgosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1105,7 +1124,7 @@ class RiesgosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1368,7 +1387,7 @@ class RiesgosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1796,7 +1815,7 @@ class RiesgosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1871,7 +1890,7 @@ class RiesgosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -3256,7 +3275,7 @@ class RiesgosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -3283,7 +3302,7 @@ class RiesgosController extends Controller
         //{
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -3455,7 +3474,7 @@ class RiesgosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {

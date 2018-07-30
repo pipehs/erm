@@ -415,7 +415,7 @@ class Risk extends Model
         return DB::table('objective_subprocess_risk')
             ->join('risks as risk_subprocess','risk_subprocess.id','=','objective_subprocess_risk.risk_subprocess_id')
             ->join('risks as objective_risk','objective_risk.id','=','objective_subprocess_risk.objective_risk_id')
-            ->join('organization_risk','organization_risk.risk_id','risk_subprocess.id')
+            ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.id')
             ->whereNull('organization_risk.deleted_at')
             ->where('risk_subprocess.status','=',0)
             ->select('objective_subprocess_risk.id','objective_risk.name as obj_name','risk_subprocess.name as sub_name')

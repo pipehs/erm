@@ -548,7 +548,7 @@ class PlanesAccionController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -578,7 +578,7 @@ class PlanesAccionController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -744,7 +744,7 @@ class PlanesAccionController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -931,7 +931,7 @@ class PlanesAccionController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {   
@@ -993,7 +993,7 @@ class PlanesAccionController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1172,7 +1172,7 @@ class PlanesAccionController extends Controller
             //action plan está enlazado con stakeholders e issues, pero ninguno de ellos depende de éste, por lo que simplemente se borarrá
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1274,7 +1274,7 @@ class PlanesAccionController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1346,7 +1346,7 @@ class PlanesAccionController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1375,7 +1375,7 @@ class PlanesAccionController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -2917,7 +2917,7 @@ class PlanesAccionController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {

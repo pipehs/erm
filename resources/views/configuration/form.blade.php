@@ -35,6 +35,42 @@
 </div>
 
 <div class="form-group">
+	<label for="system_url" class="col-sm-4 control-label">URL del logo<a href="#" class="popper" data-popbox="pop6">?</a></label>
+	<div class="col-sm-2">
+		http://"url_sistema"/public/
+	</div>
+	<div class="col-sm-2">
+		@if (isset($data['logo']))
+			{!!Form::text('logo',$data['logo'],['id'=>'logoimage','class'=>'form-control','required'=>'true'])!!}
+		@else
+			{!!Form::text('logo',null,['id'=>'logoimage','class'=>'form-control','required'=>'true'])!!}
+		@endif
+	</div>
+</div>
+
+<div class="form-group">
+	<label for="logo_width" class="col-sm-4 control-label">Ancho del logo (en px)<a href="#" class="popper" data-popbox="pop7">?</a></label>
+	<div class="col-sm-4">
+		@if (isset($data['logo_width']))
+			{!!Form::text('logo_width',$data['logo_width'],['id'=>'logo_width','class'=>'form-control','required'=>'true'])!!}
+		@else
+			{!!Form::text('logo_width',null,['id'=>'logo_width','class'=>'form-control','required'=>'true'])!!}
+		@endif
+	</div>
+</div>
+
+<div class="form-group">
+	<label for="logo_height" class="col-sm-4 control-label">Alto del logo (en px)<a href="#" class="popper" data-popbox="pop8">?</a></label>
+	<div class="col-sm-4">
+		@if (isset($data['logo_height']))
+			{!!Form::text('logo_height',$data['logo_height'],['id'=>'logo_height','class'=>'form-control','required'=>'true'])!!}
+		@else
+			{!!Form::text('logo_height',null,['id'=>'logo_height','class'=>'form-control','required'=>'true'])!!}
+		@endif
+	</div>
+</div>
+
+<div class="form-group">
 	<label for="alert_ap_message_expired" class="col-sm-4 control-label">Mensaje alerta Plan de acción (expirado)<a href="#" class="popper" data-popbox="pop4">?</a></label>
 	<div class="col-sm-4">
 		@if (isset($data['alert_ap_message_expired']))
@@ -74,4 +110,16 @@
 
 <div id="pop5" class="popbox">
 	<p>Mensaje de alerta que se enviará a través de la sección de alertas de planes de acción por vencer (copie y pegue desde otro ambiente).</p>
+</div>
+
+<div id="pop6" class="popbox">
+	<p>URL del logo de inicio que aparece en el sistema. (ingresar link local. por ej: assets/img/logo.png)</p>
+</div>
+
+<div id="pop7" class="popbox">
+	<p>Ancho del logo (especificar en px, por ej: 150px).</p>
+</div>
+
+<div id="pop8" class="popbox">
+	<p>Alto del logo (especificar en px, por ej: 150px).</p>
 </div>
