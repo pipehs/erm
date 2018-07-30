@@ -41,7 +41,7 @@ class SubprocesosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -193,7 +193,7 @@ class SubprocesosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -232,7 +232,7 @@ class SubprocesosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -359,7 +359,7 @@ class SubprocesosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -414,7 +414,7 @@ class SubprocesosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -529,7 +529,7 @@ class SubprocesosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -568,7 +568,7 @@ class SubprocesosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -718,7 +718,7 @@ class SubprocesosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -808,7 +808,7 @@ class SubprocesosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -843,7 +843,7 @@ class SubprocesosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {

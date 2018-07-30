@@ -1176,7 +1176,7 @@ class ExcelController extends Controller
     {
         if (Auth::guest())
         {
-            return view('login');
+            return Redirect::route('/');
         }
         else if (!isset(Auth::user()->superadmin) || Auth::user()->superadmin != 1)
         {
@@ -1195,7 +1195,7 @@ class ExcelController extends Controller
     {
         if (Auth::guest())
         {
-            return view('login');
+            return Redirect::route('/');
         }
         else if (!isset(Auth::user()->superadmin) || Auth::user()->superadmin != 1)
         {

@@ -1498,7 +1498,7 @@ class IssuesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1528,7 +1528,7 @@ class IssuesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1578,7 +1578,7 @@ class IssuesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1647,7 +1647,7 @@ class IssuesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1875,7 +1875,7 @@ class IssuesController extends Controller
         //{
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -2303,7 +2303,7 @@ class IssuesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -2478,7 +2478,7 @@ class IssuesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -2642,7 +2642,7 @@ class IssuesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -2696,7 +2696,7 @@ class IssuesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -2726,7 +2726,7 @@ class IssuesController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {

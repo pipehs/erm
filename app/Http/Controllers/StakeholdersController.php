@@ -40,7 +40,7 @@ class StakeholdersController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -170,7 +170,7 @@ class StakeholdersController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -210,7 +210,7 @@ class StakeholdersController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -410,7 +410,7 @@ class StakeholdersController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -485,7 +485,7 @@ class StakeholdersController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -581,7 +581,7 @@ class StakeholdersController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -630,7 +630,7 @@ class StakeholdersController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {

@@ -44,7 +44,7 @@ class KriController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -177,7 +177,7 @@ class KriController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -247,7 +247,7 @@ class KriController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -341,7 +341,7 @@ class KriController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -375,7 +375,7 @@ class KriController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -476,7 +476,7 @@ class KriController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -557,7 +557,7 @@ class KriController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -673,7 +673,7 @@ class KriController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -745,7 +745,7 @@ class KriController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -822,7 +822,7 @@ class KriController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -858,7 +858,7 @@ class KriController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {
@@ -1156,7 +1156,7 @@ class KriController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {

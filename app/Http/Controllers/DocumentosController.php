@@ -25,7 +25,7 @@ class DocumentosController extends Controller
         {
             if (Auth::guest())
             {
-                return view('login');
+                return Redirect::route('/');
             }
             else
             {

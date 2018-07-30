@@ -606,8 +606,8 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
 #breadcrumb {
   padding: 0;
   line-height: 40px;
-  background: #DF0101;
-  background: #DF0101 url(../img/devoops_pattern_b10.png) 0 0 repeat;
+  background: #11A11E;
+  background: #11A11E url(../img/devoops_pattern_b10.png) 0 0 repeat;
   margin-bottom: 20px;
 }
 .breadcrumb {
@@ -833,7 +833,7 @@ td.beauty-hover {
 }
 .btn-primary, .btn-primary.disabled, .btn-primary[disabled], fieldset[disabled] .btn-primary, .btn-primary.disabled:hover, .btn-primary[disabled]:hover, fieldset[disabled] .btn-primary:hover, .btn-primary.disabled:focus, .btn-primary[disabled]:focus, fieldset[disabled] .btn-primary:focus, .btn-primary.disabled:active, .btn-primary[disabled]:active, fieldset[disabled] .btn-primary:active, .btn-primary.disabled.active, .btn-primary[disabled].active, fieldset[disabled] .btn-primary.active,
 .table > thead > tr > td.primary, .table > tbody > tr > td.primary, .table > tfoot > tr > td.primary, .table > thead > tr > th.primary, .table > tbody > tr > th.primary, .table > tfoot > tr > th.primary, .table > thead > tr.primary > td, .table > tbody > tr.primary > td, .table > tfoot > tr.primary > td, .table > thead > tr.primary > th, .table > tbody > tr.primary > th, .table > tfoot > tr.primary > th {
-  background-color: #11A11E;
+  background-color: #0F7708;
   border-color: rgba(0, 0, 0, 0.3);
   color: #f8f8f8;
 }
@@ -857,7 +857,7 @@ td.beauty-hover {
 }
 .btn-danger, .btn-danger.disabled, .btn-danger[disabled], fieldset[disabled] .btn-danger, .btn-danger.disabled:hover, .btn-danger[disabled]:hover, fieldset[disabled] .btn-danger:hover, .btn-danger.disabled:focus, .btn-danger[disabled]:focus, fieldset[disabled] .btn-danger:focus, .btn-danger.disabled:active, .btn-danger[disabled]:active, fieldset[disabled] .btn-danger:active, .btn-danger.disabled.active, .btn-danger[disabled].active, fieldset[disabled] .btn-danger.active, .progress-bar-danger,
 .table > thead > tr > td.danger, .table > tbody > tr > td.danger, .table > tfoot > tr > td.danger, .table > thead > tr > th.danger, .table > tbody > tr > th.danger, .table > tfoot > tr > th.danger, .table > thead > tr.danger > td, .table > tbody > tr.danger > td, .table > tfoot > tr.danger > td, .table > thead > tr.danger > th, .table > tbody > tr.danger > th, .table > tfoot > tr.danger > th {
-  background-color: #A4A4A4;
+  background-color: #D15E5E;
   border-color: rgba(0, 0, 0, 0.3);
   color: #f8f8f8;
 }
@@ -869,7 +869,7 @@ td.beauty-hover {
 .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open .dropdown-toggle.btn-primary,
 .table-hover > tbody > tr > td.primary:hover, .table-hover > tbody > tr > th.primary:hover, .table-hover > tbody > tr.primary:hover > td, .table-hover > tbody > tr.primary:hover > th {
   color: #fff;
-  background-color: #b25050;
+  background-color: #11580C;
   border-color: rgba(0, 0, 0, 0.3);
 }
 
@@ -912,7 +912,7 @@ td.beauty-hover {
 .btn-danger:hover, .btn-danger:focus, .btn-danger:active, .btn-danger.active, .open .dropdown-toggle.btn-danger,
 .table-hover > tbody > tr > td.danger:hover, .table-hover > tbody > tr > th.danger:hover, .table-hover > tbody > tr.danger:hover > td, .table-hover > tbody > tr.danger:hover > th {
   color: #fff;
-  background-color: #585858;
+  background-color: #b25050;
   border-color: rgba(0, 0, 0, 0.3);
 }
 .progress {
