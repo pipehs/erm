@@ -1519,7 +1519,7 @@ class AuditoriasController extends Controller
                     }
                     //si es que se ingreso tipo
                     //ACT 29-03-18: Tipo será dinámico
-                    if (isset($_POST['type']))
+                    if (isset($_POST['type']) && $_POST['type'] != '')
                     {
                         $GLOBALS['audit_test']->evaluation_test_id = $_POST['type'];
                     }
