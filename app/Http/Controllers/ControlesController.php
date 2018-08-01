@@ -2041,12 +2041,10 @@ class ControlesController extends Controller
 
     /* ACT 29-03-18: Se vuelve a activar esta función: Ahora se almacenará los valores en probabilidad e impacto como porcentaje (según pesos específicos almacenados en control_specific_weight). Luego se re-calculará valor residual de los riesgos asociados a este control y se almacenará en la tabla residual_risk. */
 
-    public function closeEvaluation($id,$org)
+    public function closeEvaluation($id)
     {
         global $id1;
         $id1 = $id;
-        global $org1;
-        $org1 = $org;
 
         DB::transaction(function() {
             $logger = $this->logger2;
@@ -2079,7 +2077,7 @@ class ControlesController extends Controller
             $org = \Ermtool\Organization::getOrganizationByCO($eval->control_organization_id);
             $name = \Ermtool\Control::nameByCO($eval->control_organization_id);
 
-            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha cerrado la prueba '.$eval_test->name.' para el control (asociado a la organización '.$org->name.' con Id: '.$eval->control_organization_id.' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+            //$logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha cerrado la prueba '.$eval_test->name.' para el control (asociado a la organización '.$org->name.' con Id: '.$eval->control_organization_id.' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
         });
 
         //return 0;
@@ -2922,7 +2920,7 @@ class ControlesController extends Controller
 
                     if (!empty($res))
                     {
-                        //ACT  26-06-18: 
+                        //ACT  26-06-18: Si la probabilidad calculada es menos a 50, el control se considerará inefectivo
                         if ($res->probability < 50 && $res->impact < 50)
                         {
                             array_push($id_inefectivos,$co->control_id);
@@ -3286,8 +3284,10 @@ class ControlesController extends Controller
             $peso_total_p = 0;
             $peso_total_i = 0;
             $i = 0;
+
             foreach ($evaluation_tests as $test)
-            {   
+            {
+                unset($cew); //ACT 01-08-18: Para corroborar que no se esté tomando el valor anterior   
                 //Obtenemos primero la máxima fecha de evaluación de control asociada a esta prueba
                 $c_max_date = DB::table('control_evaluation')
                             ->where('control_organization_id','=',$GLOBALS['id1'])

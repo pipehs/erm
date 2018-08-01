@@ -696,7 +696,7 @@ Route::get('volver_evaluacion', [
 	'as' => 'volver_evaluacion', 'uses' => 'ControlesController@indexEvaluacion2'
 ]);
 
-Route::get('cerrar_evaluacion.{id}.{org}', [
+Route::get('cerrar_evaluacion.{id}', [
 	'as' => 'cerrar_evaluacion', 'uses' => 'ControlesController@closeEvaluation'
 ]);
 
