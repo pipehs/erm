@@ -1210,7 +1210,9 @@ class ExcelController extends Controller
                 if($GLOBALS['request2']->file('document') != NULL)
                 {
                     Excel::load($GLOBALS['request2']->file('document'), function($reader) {
-                        //$i = 1; //contador para nombres de acciones mitigantes (KOAndina)    
+                        //$i = 1; //contador para nombres de acciones mitigantes (KOAndina)
+                        global $j;
+                        $j = 1; //contador para orgsubs con falla (PArauco)    
                         //recorremos filas
                         $reader->each(function($row,$i) {
                                 //print_r($row);
@@ -4375,6 +4377,35 @@ class ExcelController extends Controller
                                 }
                                 
                             }
+                            else if ($_POST['kind'] == 19) //Corrección enlace Riesgos / Subprocesos (PArauco)
+                            {
+                                //print_r($row);
+                                $org = \Ermtool\Organization::getOrgByName($row['sociedad']);
+
+                                if (!empty($org))
+                                {
+                                    //obtenemos subproceso
+                                    $subprocess = \Ermtool\Subprocess::getSubprocessByName($row['id_proceso_de_negocios']);
+
+                                    if (!empty($subprocess) && !empty($org))
+                                    {
+                                        //Vemos si existe enlace entre subproceso y organización
+                                        $org_sub = \Ermtool\OrganizationSubprocess::where('organization_id',$org->id)->where('subprocess_id',$subprocess->id)->first();
+
+                                        if (empty($org_sub))
+                                        {
+                                            
+                                            //Agregamos enlace entre org y subproceso
+                                            
+                                            $orgsub = \Ermtool\OrganizationSubprocess::create([
+                                                'organization_id' => $org->id,
+                                                'subprocess_id' => $subprocess->id,
+                                            ]);                                            
+                                        }
+                                    }
+
+                                }                             
+                            }
                         });
 
                     });
@@ -4396,47 +4427,54 @@ class ExcelController extends Controller
 
     public function generarExcelConsolidado()
     {
-        //try
-        //{
-            Excel::create('Reporte Consolidado '.date("d-m-Y"), function($excel) {
+        if (!Auth::guest())
+        {
+            //try
+            //{
+                Excel::create('Reporte Consolidado '.date("d-m-Y"), function($excel) {
 
-                // título excel
-                $excel->setTitle('Reporte Consolidado');
+                    // título excel
+                    $excel->setTitle('Reporte Consolidado');
 
-                //creador y compañia
-                $excel->setCreator('Sistema B-GRC')
-                      ->setCompany('It Apps Bussiness Solutions');
+                    //creador y compañia
+                    $excel->setCreator('Sistema B-GRC')
+                          ->setCompany('It Apps Bussiness Solutions');
 
-                //descripción
-                $excel->setDescription('Reporte consolidado de Riesgos, Controles, Hallazgos y Planes de acción');
+                    //descripción
+                    $excel->setDescription('Reporte consolidado de Riesgos, Controles, Hallazgos y Planes de acción');
 
-                $excel->sheet('B-GRC', function($sheet) {
-                    $home = new Home;
-                    $datos = $home->reporteConsolidado();
+                    $excel->sheet('B-GRC', function($sheet) {
+                        $home = new Home;
+                        $datos = $home->reporteConsolidado();
 
-                    //$datos2 = json_decode($datos);
-                    $sheet->fromArray($datos);
+                        //$datos2 = json_decode($datos);
+                        $sheet->fromArray($datos);
 
-                    //editamos formato de salida de celdas
-                    $sheet->cells('A1:AP1', function($cells) {
-                            $cells->setBackground('#013ADF');
-                            $cells->setFontColor('#ffffff');
-                            $cells->setFontFamily('Calibri');
-                            $cells->setFontWeight('bold');
-                            $cells->setFontSize(16);
+                        //editamos formato de salida de celdas
+                        $sheet->cells('A1:AP1', function($cells) {
+                                $cells->setBackground('#013ADF');
+                                $cells->setFontColor('#ffffff');
+                                $cells->setFontFamily('Calibri');
+                                $cells->setFontWeight('bold');
+                                $cells->setFontSize(16);
+                        });
+
+                        $sheet->freezeFirstRow();
+
                     });
 
-                    $sheet->freezeFirstRow();
-
-                });
-
-            })->export('xls');
-        //}
-        //catch (\Exception $e)
-        //{
-            //enviarMailSoporte($e);
-            //return view('errors.query',['e' => $e]);
-        //}
+                })->export('xls');
+            //}
+            //catch (\Exception $e)
+            //{
+                //enviarMailSoporte($e);
+                //return view('errors.query',['e' => $e]);
+            //}
+        }
+        else
+        {
+            return Redirect::route('/');
+        }
     }
 
     public function exportSessions()
@@ -4540,6 +4578,10 @@ class ExcelController extends Controller
                     });
 
             })->export('xls'); 
+        }
+        else
+        {
+            return Redirect::route('/');
         }
     }
 
@@ -4655,6 +4697,10 @@ class ExcelController extends Controller
                     });
 
             })->export('xls'); 
+        }
+        else
+        {
+            return Redirect::route('/');
         }
     }
 }
