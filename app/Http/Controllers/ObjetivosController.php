@@ -46,108 +46,6 @@ class ObjetivosController extends Controller
             {
                 $organizations = \Ermtool\Organization::where('status',0)->lists('name','id'); //select organizaciones desbloqueadas en lista para select
 
-
-                /*
-                if (isset($_GET['organizacion'])) //se seleccionó la organización para ver objetivos
-                {
-
-                        //vemos si la organización seleccionada tiene algún plan activo
-                    $strategic_plan = \Ermtool\Strategic_plan::where('status',1)->where('organization_id',$_GET['organizacion'])->select('id')->first();
-
-                    if ($strategic_plan != "")
-                    {
-                        $objetivos = \Ermtool\Objective::where('organization_id',(int)$_GET['organizacion'])
-                                                        ->where('strategic_plan_id',$strategic_plan['id'])
-                                                            ->where('status',0)->get();
-
-                        //seleccionamos todos los datos del plan para mostrarlo
-                        $datos_plan = \Ermtool\Strategic_plan::find($strategic_plan['id']);
-                        $nombre_organizacion = \Ermtool\Organization::name($_GET['organizacion']);
-                        $i=0; //para saber si hay objetivos
-                        $objectives = array(); //almacenará los objetivos con el formato correcto de sus atributos
-                        foreach ($objetivos as $objetivo)
-                        {
-                            $i = $i+1;
-                             //damos formato a fecha expiración
-                            if ($objetivo['expiration_date'] == NULL OR $objetivo['expiration_date'] == "0000-00-00")
-                            {
-                                $fecha_exp = NULL;
-                            }
-                            else 
-                            {
-                                $expiration_date = new DateTime($objetivo['expiration_date']);
-                                $fecha_exp = date_format($expiration_date, 'd-m-Y');
-                            }
-
-                            //damos formato a fecha creación
-                            if ($objetivo['created_at'] != NULL)
-                            {
-                                $fecha_creacion = date_format($objetivo['created_at'],"d-m-Y");
-                            }
-                            else
-                                $fecha_creacion = NULL;
-
-                            //damos formato a fecha de actualización 
-                            if ($objetivo['updated_at'] != NULL)
-                            {
-                                $fecha_act = date_format($objetivo['updated_at'],"d-m-Y");
-                            }
-                            else
-                                $fecha_act = NULL;
-
-                            //damos formato a categoría de objetivo
-                            if ($objetivo['objective_category_id'] == NULL)
-                            {
-                                $categoria = NULL;
-                            }
-                            else
-                                $categoria = \Ermtool\Objective_category::where('id',$objetivo['objective_category_id'])->value('name');
-
-                            if ($objetivo['perspective'] == NULL)
-                            {
-                                $perspective = NULL;
-                            }
-                            else
-                            {
-                                $perspective = $objetivo['perspective'];   
-                            }
-
-                            $objectives[$i] = array('id'=>$objetivo['id'],
-                                            'nombre'=>$objetivo['name'],
-                                            'descripcion'=>$objetivo['description'],
-                                            'fecha_creacion'=>$fecha_creacion,
-                                            'fecha_act'=>$fecha_act,
-                                            'fecha_exp'=>$fecha_exp,
-                                            'categoria'=>$categoria,
-                                            'estado'=>$objetivo['status'],
-                                            'perspective' => $perspective);
-                            $i += 1;
-
-                        }
-                        if (Session::get('languaje') == 'en')
-                        {
-                            return view('en.datos_maestros.objetivos.index',['organizations'=>$organizations,'objetivos'=>$objectives,'nombre_organizacion'=>$nombre_organizacion,'datos_plan' => $datos_plan, 'probador' => $i,'strategic_plan_id' => $strategic_plan['id']]);
-                        }
-                        else
-                        {
-                            return view('datos_maestros.objetivos.index',['organizations'=>$organizations,'objetivos'=>$objectives,'nombre_organizacion'=>$nombre_organizacion,'datos_plan' => $datos_plan, 'probador' => $i,'strategic_plan_id' => $strategic_plan['id']]);
-                        }
-                    }
-                    else
-                    {
-                        if (Session::get('languaje') == 'en')
-                        {
-                            return view('en.datos_maestros.objetivos.index',['organizations'=>$organizations,'validador' => 1]);
-                        }
-                        else
-                        {
-                            return view('datos_maestros.objetivos.index',['organizations'=>$organizations, 'validador' => 1]);
-                        }
-                    }  
-                } */
-
-                //se dejará el if anterior (comentado) en caso que volviera a ser necesario, sin embargo expiró en 04-10-2016; actualmente los objetivos serán vistos por id de plan estratégico (a través de la función objetivosPlan)
-
                 if (Session::get('languaje') == 'en')
                 {
                     return view('en.datos_maestros.objetivos.index',['organizations'=>$organizations]);
@@ -286,10 +184,10 @@ class ObjetivosController extends Controller
 
                 //ahora seleccionamos objetivos pertenecientes a este plan
                 $objectives = \Ermtool\Objective::where('strategic_plan_id','=',$_GET['strategic_plan_id'])
-                                            ->select('id', DB::raw("CONCAT (code, ' - ', name) AS code_name"))
-                                            ->orderBy('code')
-                                            ->where('status','=',0)
-                                            ->lists('code_name','id');
+                        ->select('id', DB::raw("CONCAT (code, ' - ', name) AS code_name"))
+                        ->orderBy('code')
+                        ->where('status','=',0)
+                        ->lists('code_name','id');
                 
                 if (Session::get('languaje') == 'en')
                 {

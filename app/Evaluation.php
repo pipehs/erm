@@ -616,4 +616,28 @@ class Evaluation extends Model
 
         return $evals;
     }
+
+    public static function getMaxUpdatedAt($org_risk_id,$ano,$mes,$dia)
+    {
+        return DB::table('evaluation_risk')
+            ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+            ->where('evaluation_risk.organization_risk_id','=',$org_risk_id)
+            ->where('evaluations.consolidation','=',1)
+            ->where('evaluations.type','=',1)
+            ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
+            ->max('evaluations.updated_at');
+    }
+
+    public static function getProbaImpact($org_risk_id,$ano,$mes,$dia)
+    {
+        return DB::table('evaluation_risk')
+            ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
+            ->where('evaluation_risk.organization_risk_id','=',$org_risk_id)
+            ->where('evaluations.consolidation','=',1)
+            ->where('evaluations.type','=',1)
+            ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
+            ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+            ->orderBy('evaluations.updated_at','DESC')
+            ->first();
+    }
 }

@@ -1220,109 +1220,7 @@ class ExcelController extends Controller
                             //ACT 24-07-18: Ahora estará configurado para Excel de Progreso
                             if ($_POST['kind'] == 0) //excel de usuarios
                             {
-                                //Primero que todo, vemos si existe organización asociada y correo correcto, si no no hacemos nada
-                                $org = \Ermtool\Organization::where('name',$row['dependencia'])->first(['id']);
-
-                                if (isset($org))
-                                {
-                                    if (strpos($row['correo'],'@')) //Correo válido (básicamente)
-                                    {
-                                        //Vemos si rut ya existe
-                                        //Primero lo separamos
-                                        $rut = explode('-',$row['rut']);
-
-                                        $verrut = \Ermtool\Stakeholder::find($rut[0]);
-
-                                        if (empty($verrut)) //significa que esta vacío y se puede cargar
-                                        {
-                                            //$row['nombrecompleto'] = ucwords(strtolower($row['nombrecompleto'])); Problema con Ñ
-                                            $row['nombre'] = mb_convert_encoding(mb_convert_case($row['nombre'], MB_CASE_TITLE), "UTF-8");  
-                                            $nombrecom = explode(' ',$row['nombre']);
-
-                                            if (isset($nombrecom[5])) //4 nombres
-                                            {   
-                                                //Eliminamos coma separadora de apellidos y nombres
-                                                $seclastname = explode(',',$nombrecom[1]);
-
-                                                $nombre = $nombrecom[2].' '.$nombrecom[3].' '.$nombrecom[4].' '.$nombrecom[5];
-                                                $apellido = $nombrecom[0].' '.$seclastname[0];
-
-                                            }
-                                            else if (isset($nombrecom[4])) //3 nombres
-                                            {   
-                                                //Eliminamos coma separadora de apellidos y nombres
-                                                $seclastname = explode(',',$nombrecom[1]);
-
-                                                $nombre = $nombrecom[2].' '.$nombrecom[3].' '.$nombrecom[4];
-                                                $apellido = $nombrecom[0].' '.$seclastname[0];
-
-                                            }
-                                            else if (isset($nombrecom[3])) //2 apellidos y 2 nombres
-                                            {
-                                                //Eliminamos coma separadora de apellidos y nombres
-                                                $seclastname = explode(',',$nombrecom[1]);
-
-                                                $nombre = $nombrecom[2].' '.$nombrecom[3];
-                                                $apellido = $nombrecom[0].' '.$seclastname[0];
-                                            }
-                                            else if (isset($nombrecom[2])) //2 apellidos y 1 nombre
-                                            {
-                                                //Eliminamos coma separadora de apellidos y nombres
-                                                $seclastname = explode(',',$nombrecom[1]);
-
-                                                $nombre = $nombrecom[2];
-                                                $apellido = $nombrecom[0].' '.$seclastname[0];
-                                            }
-                                            else if (isset($nombrecom[1])) //1 apellido y 1 nombre
-                                            {
-                                                //Eliminamos coma separadora de apellidos y nombres
-                                                $seclastname = explode(',',$nombrecom[0]);
-
-                                                $nombre = $nombrecom[1];
-                                                $apellido = $seclastname[0];
-                                            }
-                                            else
-                                            {
-                                                print_r($nombrecom);
-                                            }
-
-                                            $usuario = \Ermtool\Stakeholder::create([
-                                                'id' => $rut[0],
-                                                'dv' => $rut[1],
-                                                'name' => $nombre,
-                                                'surnames' => $apellido,
-                                                'position' => $row['cargo'],
-                                                'mail' => $row['correo']
-                                            ]);
-
-                                            //agregamos enlace entre usuario y organización
-                                            DB::table('organization_stakeholder')->insert([
-                                                'organization_id'=>$org->id,
-                                                'stakeholder_id'=>$usuario->id
-                                            ]);
-
-                                
-
-                                            //Seleccionamos rol (si es que existe)
-                                            $role = \Ermtool\Role::getRoleByName($row['tipo_usuario']);
-
-                                            if (empty($role)) //hay que crear el rol
-                                            {
-                                                $role = \Ermtool\Role::create([
-                                                    'name' => $row['tipo_usuario'],
-                                                    'status' => 0
-                                                ]);
-                                            }
-
-                                            //agregamos enlace entre usuario y rol
-                                            DB::table('role_stakeholder')->insert([
-                                                'stakeholder_id' => $usuario->id,
-                                                'role_id' => $role->id
-                                            ]);
-                                        }
-                                        //echo $nombre.' '.$apellido.'<br>';
-                                    }
-                                }
+                                print_r($row);
                             
                             }/*
                             else if ($_POST['kind'] == 1) //Matriz de Riesgos Parque Arauco
@@ -4421,7 +4319,7 @@ class ExcelController extends Controller
                 }
             });
 
-            return Redirect::to('importador');
+            //return Redirect::to('importador');
         }
     }
 
