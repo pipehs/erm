@@ -61,7 +61,7 @@
 						<th style="vertical-align:top;">Resultado</th>
 						<th style="vertical-align:top;">Descripci&oacute;n de la evaluaci&oacute;n</th>
 						<th style="vertical-align:top;">Riesgo</th>
-						<th style="vertical-align:top;">Responsables del riesgo - Org</th>
+						<th style="vertical-align:top;">Responsable</th>
 						<th style="vertical-align:top;">Intervalo de evaluaci&oacute;n</th>
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
@@ -77,17 +77,21 @@
 							<td>{{ $k['name'] }} </td>
 							<td>{{ $k['description'] }}</td>
 							<td>
-							@if ($k['periodicity'] == 0)
+							@if (is_null($k['periodicity']) || $k['periodicity'] === NULL)
+								No definida
+							@elseif ($k['periodicity'] == 0)
 								Diario
 							@elseif ($k['periodicity'] == 1)
 								Semanal
 							@elseif ($k['periodicity'] == 2)
 								Mensual
 							@elseif ($k['periodicity'] == 3)
-								Semestral
+								Trimestral
 							@elseif ($k['periodicity'] == 4)
-								Anual
+								Semestral
 							@elseif ($k['periodicity'] == 5)
+								Anual
+							@elseif ($k['periodicity'] == 6)
 								Cada vez que ocurra
 							@else
 								No definida
@@ -117,12 +121,10 @@
 							<td>{{ $k['description_eval'] }}</td>
 							<td>{{ $k['risk'] }}</td>
 							<td>
-							@if (empty($k['stakeholders']))
+							@if (empty($k['stakeholder']))
 								No se han definido
 							@else
-								@foreach ($k['stakeholders'] as $s)
-									<li>{{ $s->name }} {{ $s->surnames }} - {{ $s->organization }}</li>
-								@endforeach
+								{{ $k['stakeholder']->name }} {{ $k['stakeholder']->surnames }}
 							@endif
 							</td>
 							<td>

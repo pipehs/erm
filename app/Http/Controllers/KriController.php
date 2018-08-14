@@ -130,7 +130,8 @@ class KriController extends Controller
                     //obtenemos stakeholder
                     //ACTUALIZACIÓN 18-08-17: Obtenemos responsables del riesgo por cada org
                         //obtenemos stakeholder
-                    $stakeholders = \Ermtool\Stakeholder::getStakeholdersFromRisk($k->risk_id);
+                    //ACT 03-08-18: Responsable está directamente asociado a KRI
+                    $stakeholder = \Ermtool\Stakeholder::find($k->stakeholder_id);
                         
                     $kri[$i] = [
                         'id' => $k->id,
@@ -143,7 +144,7 @@ class KriController extends Controller
                         'type' => $tipo,
                         'periodicity' => $periodicity,
                         'risk' => $k->risk_name,
-                        'stakeholders' => $stakeholders,
+                        'stakeholder' => $stakeholder,
                         'eval' => $eval,
                         'description_eval' => $description_eval,
                         'last_evaluation' => $last_eval,
@@ -318,13 +319,15 @@ class KriController extends Controller
                     $i += 1;
                 }
 
+                $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
+
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
+                    return view('en.kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk,'stakeholders' => $stakeholders]);
                 }
                 else
                 {
-                    return view('kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk]);
+                    return view('kri.create',['risk_subprocess' => $kri_risk_subprocess, 'objective_risk' => $kri_objective_risk,'stakeholders' => $stakeholders]);
                 }
             }
         }
@@ -345,13 +348,15 @@ class KriController extends Controller
             }
             else
             {
+                $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
+
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.kri.create',['risk_id' => $id]);
+                    return view('en.kri.create',['risk_id' => $id,'stakeholders' => $stakeholders]);
                 }
                 else
                 {
-                    return view('kri.create',['risk_id' => $id]);   
+                    return view('kri.create',['risk_id' => $id,'stakeholders' => $stakeholders]);   
                 }
             }
         }
@@ -396,25 +401,23 @@ class KriController extends Controller
                 //creamos NUEVO KRI
                 DB::transaction(function() {
                     $logger = $this->logger;
-                    $in = DB::table('kri')
-                            ->insertGetId([
-                                'risk_id' => $_POST['risk_id'],
-                                'name' => $_POST['name'],
-                                'description' => $_POST['description'],
-                                'type' => $_POST['type'],
-                                'periodicity' => $_POST['periodicity'],
-                                'uni_med' => $_POST['uni_med'],
-                                'min_max' => $_POST['min_max'],
-                                'green_min' => $_POST['green_min'],
-                                'description_green' => $_POST['description_green'],
-                                'interval_min' => $_POST['interval_min'],
-                                'interval_max' => $_POST['interval_max'],
-                                'description_yellow' => $_POST['description_yellow'],
-                                'red_max' => $_POST['red_max'],
-                                'description_red' => $_POST['description_red'],
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'updated_at' => date('Y-m-d H:i:s')
-                            ]);
+                    $in = \Ermtool\KRI::create([
+                        'risk_id' => $_POST['risk_id'],
+                        'name' => $_POST['name'],
+                        'description' => $_POST['description'],
+                        'type' => isset($_POST['type']) && $_POST['type'] != '' ? $_POST['type'] : NULL,
+                        'periodicity' => isset($_POST['periodicity']) && $_POST['periodicity'] != '' ? $_POST['periodicity'] : NULL,
+                        'uni_med' => isset($_POST['uni_med']) && $_POST['uni_med'] != '' ? $_POST['uni_med'] : NULL,
+                        'min_max' => isset($_POST['min_max']) && $_POST['min_max'] != '' ? $_POST['min_max'] : NULL,
+                        'green_min' => isset($_POST['green_min']) && $_POST['green_min'] != '' ? $_POST['green_min'] : NULL,
+                        'description_green' => isset($_POST['description_green']) && $_POST['description_green'] != '' ? $_POST['description_green'] : NULL,
+                        'interval_min' => isset($_POST['interval_min']) && $_POST['interval_min'] != '' ? $_POST['interval_min'] : NULL,
+                        'interval_max' => isset($_POST['interval_max']) && $_POST['interval_max'] != '' ? $_POST['interval_max'] : NULL,
+                        'description_yellow' => isset($_POST['description_yellow']) && $_POST['description_yellow'] != '' ? $_POST['description_yellow'] : NULL,
+                        'red_max' => isset($_POST['red_max']) && $_POST['red_max'] != '' ? $_POST['red_max'] : NULL,
+                        'description_red' => isset($_POST['description_red']) && $_POST['description_red'] != '' ? $_POST['description_red'] : NULL,
+                        'stakeholder_id' => isset($_POST['stakeholder_id']) && $_POST['stakeholder_id'] != '' ? $_POST['stakeholder_id'] : NULL
+                    ]);
                     
 
                     if (isset($in))
@@ -527,13 +530,15 @@ class KriController extends Controller
                 $kri->interval_max = round($kri->interval_max,1);
                 $kri->red_max  = round($kri->red_max,1);
 
+                $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
+
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.kri.edit',['kri'=>$kri,'risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);
+                    return view('en.kri.edit',['kri'=>$kri,'risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk,'stakeholders'=> $stakeholders]);
                 }
                 else
                 {
-                    return view('kri.edit',['kri'=>$kri,'risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk]);   
+                    return view('kri.edit',['kri'=>$kri,'risk_subprocess'=>$kri_risk_subprocess,'objective_risk'=>$kri_objective_risk,'stakeholders'=>$stakeholders]);   
                 }
             }
         }
@@ -583,16 +588,18 @@ class KriController extends Controller
                     $kri->risk_id = $_POST['risk_id'];
                     $kri->name = $_POST['name'];
                     $kri->description = $_POST['description'];
-                    $kri->type = $_POST['type'];
-                    $kri->min_max = $_POST['min_max'];
-                    $kri->uni_med = $_POST['uni_med'];
-                    $kri->green_min = $_POST['green_min'];
-                    $kri->description_green = $_POST['description_green'];
-                    $kri->interval_min = $_POST['interval_min'];
-                    $kri->interval_max = $_POST['interval_max'];
-                    $kri->description_yellow = $_POST['description_yellow'];
-                    $kri->red_max = $_POST['red_max'];
-                    $kri->description_red = $_POST['description_red'];
+                    $kri->type = isset($_POST['type']) ? $_POST['type'] : NULL;
+                    $kri->periodicity = isset($_POST['periodicity']) ? $_POST['periodicity'] : NULL;
+                    $kri->min_max = isset($_POST['min_max']) ? $_POST['min_max'] : NULL;
+                    $kri->uni_med = isset($_POST['uni_med']) ? $_POST['uni_med'] : NULL;
+                    $kri->green_min = isset($_POST['green_min']) ? $_POST['green_min'] : NULL;
+                    $kri->description_green = isset($_POST['description_green']) ? $_POST['description_green'] : NULL;
+                    $kri->interval_min = isset($_POST['interval_min']) ? $_POST['interval_min'] : NULL;
+                    $kri->interval_max = isset($_POST['interval_max']) ? $_POST['interval_max'] : NULL;
+                    $kri->description_yellow = isset($_POST['description_yellow']) ? $_POST['description_yellow'] : NULL;
+                    $kri->red_max = isset($_POST['red_max']) ? $_POST['red_max'] : NULL;
+                    $kri->description_red = isset($_POST['description_red']) ? $_POST['description_red'] : NULL;
+                    $kri->stakeholder_id = isset($_POST['stakeholder_id']) ? $_POST['stakeholder_id'] : NULL;
 
                     $kri->save();
 
@@ -967,7 +974,7 @@ class KriController extends Controller
                 $stakeholder = $stake->full_name;
             } */
 
-            $stakeholders = \Ermtool\Stakeholder::getStakeholdersFromRisk($id);
+
 
             $i=0;
             foreach ($kri_query as $k)
@@ -1018,6 +1025,20 @@ class KriController extends Controller
 
                 }
 
+                //ACT 03-08-18: Responsable está directamente enlazado a KRI
+                if ($k->stakeholder_id != NULL)
+                {
+                    $stakeholder = \Ermtool\Stakeholder::find($k->stakeholder_id);
+                    $name = $stakeholder->name;
+                    $surnames = $stakeholder->surnames;
+                }
+                else
+                {
+                    $name = NULL;
+                    $surnames = NULL;
+                }
+                
+
                 $kri[$i] = [
                     'id' => $k->id,
                     'name' => $k->name,
@@ -1029,7 +1050,8 @@ class KriController extends Controller
                     'type' => $tipo,
                     'eval' => $eval,
                     'description_eval' => $description_eval,
-                    'stakeholders' => $stakeholders
+                    's_name' => $name,
+                    's_surnames' => $surnames
                 ];
 
                 $i += 1;

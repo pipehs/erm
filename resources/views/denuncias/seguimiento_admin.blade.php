@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Clasificación de casos')
+@section('title', 'Seguimiento de denuncias')
 
 @section('content')
 <style>
@@ -47,7 +47,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="seguimiento_admin">Clasificación de casos</a></li>
+			<li><a href="seguimiento_admin">Seguimiento de denuncias</a></li>
 		</ol>
 	</div>
 </div>
@@ -57,7 +57,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-ticket"></i>
-					<span>Clasificación de casos</span>
+					<span>Seguimiento de denuncias</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">

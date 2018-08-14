@@ -578,7 +578,7 @@ class ControlesController extends Controller
             }
             else
             {
-                $stakeholders = \Ermtool\Stakeholder::listStakeholders($org);
+                $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
                 $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
 
                 //ACTUALIZACIÓN 16-11-17: Estados financieros

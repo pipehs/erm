@@ -1543,24 +1543,19 @@ class EvaluacionRiesgosController extends Controller
 
                             if (isset($_GET['sub_organizations'])) //verificamos que se haya seleccionado ver filiales
                             {
-                                $orgs1 = \Ermtool\Organization::where('organization_id','=',$_GET['org'])->select('id')->get();
+                                $orgs1 = \Ermtool\Organization::where('organization_id','=',$_GET['organization_id'])->select('id')->get();
                                 $orgs = array();
 
                                 if (!empty($orgs1)) //Hay suborganizaciones
                                 {
-                                    while (!empty($orgs1)) //Ciclo recursiva para tomar todos los niveles
+                                    foreach ($orgs1 as $org)
                                     {
-                                        foreach ($orgs1 as $org)
+                                        $subs = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($riesgo_temp->id,$org->id);
+
+                                        foreach ($subs as $s)
                                         {
-                                            $subs = getSubprocessesFromOrgRisk($riesgo_temp->id,$org->id);
-
-                                            foreach ($subs as $s)
-                                            {
-                                                array_push($subobj2,$s);
-                                            }
+                                            array_push($subobj2,$s);
                                         }
-
-                                        $orgs1 = \Ermtool\Organization::where('organization_id','=',$org->id)->select('id')->get();
                                     } 
                                 }
                                         
