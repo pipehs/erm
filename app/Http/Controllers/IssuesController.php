@@ -352,7 +352,10 @@ class IssuesController extends Controller
                 foreach ($controls as $control)
                 {
                     //obtenemos issues del control
-                    $issues2 = \Ermtool\Issue::getControlIssues($control->id,$org_id);
+                    //ACT 24-08-18: Obtenemos control_organization_id
+                    $co = \Ermtool\ControlOrganization::getByCO($control->id,$org_id);
+
+                    $issues2 = \Ermtool\Issue::getControlIssues($control->id,$org_id,$co->id);
 
                     foreach ($issues2 as $issue)
                     {
@@ -795,9 +798,9 @@ class IssuesController extends Controller
         }
         catch (\Exception $e)
         {
-            print_r($e);
-            //enviarMailSoporte($e);
-            //return view('errors.query',['e' => $e]);
+            //print_r($e);
+            enviarMailSoporte($e);
+            return view('errors.query',['e' => $e]);
         }
     }
 

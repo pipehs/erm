@@ -213,7 +213,7 @@ class Issue extends Model
         return $issuesX;
     }
 
-    public static function getControlIssues($control,$org)
+    public static function getControlIssues($control,$org,$co)
     {
         //hallazgos de controles creados directamente
         $issues1 = DB::table('issues')
@@ -225,7 +225,7 @@ class Issue extends Model
         //hallazgos de controles generados a través de evaluación de controles
         $issues2 = DB::table('control_evaluation')
                     ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
-                    ->where('control_evaluation.control_id','=',$control)
+                    ->where('control_evaluation.control_organization_id','=',$co)
                     ->where('issues.organization_id','=',$org)
                     ->select('issues.id','issues.name','issues.description','issues.classification_id as classification','issues.recommendations','issues.comments')
                     ->get();
