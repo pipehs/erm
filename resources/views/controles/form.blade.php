@@ -45,30 +45,30 @@
 				@if (Session::get('org') == 'Parque Arauco' || Session::get('org') == 'Parque Arauco (testing)')
 					
 					<div class="form-group">
-						{!!Form::label('Establecimiento *',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Establecimiento',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::textarea('establishment',null,['id'=>'establishment','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
+							{!!Form::textarea('establishment',null,['id'=>'establishment','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Aplicaci&oacute;n *',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Aplicaci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::textarea('application',null,['id'=>'application','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
+							{!!Form::textarea('application',null,['id'=>'application','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
 						</div>
 					</div>
 
 					<div class="form-group">
-						{!!Form::label('Supervisi&oacute;n *',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Supervisi&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::textarea('supervision',null,['id'=>'supervision','class'=>'form-control','rows'=>'3','cols'=>'4','required'=>'true'])!!}
+							{!!Form::textarea('supervision',null,['id'=>'supervision','class'=>'form-control','rows'=>'3','cols'=>'4'])!!}
 						</div>
 					</div>
 				@else
 					<div class="form-group">
-						{!!Form::label('Descripci&oacute;n *',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Descripci&oacute;n',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'5','cols'=>'4','required'=>'true'])!!}
+							{!!Form::textarea('description',null,['id'=>'descripcion','class'=>'form-control','rows'=>'5','cols'=>'4'])!!}
 						</div>
 					</div>
 				@endif
