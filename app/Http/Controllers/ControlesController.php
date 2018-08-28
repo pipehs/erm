@@ -449,7 +449,7 @@ class ControlesController extends Controller
                                         'establishment' => $control->establishment,
                                         'application' => $control->application,
                                         'supervision' => $control->supervision,
-                                        'test_plan' => $control->test_plan,
+                                        'test_plan' => $control->test_plan
                                     );
                     $i += 1;
                 }
@@ -542,7 +542,14 @@ class ControlesController extends Controller
                                         'risks' => $risks,
                                         'subprocesses' => $subprocesses,
                                         'short_des' => $short_des,
-                                        'porcentaje_cont' => $control->porcentaje_cont);
+                                        'porcentaje_cont' => $control->porcentaje_cont,
+                                        'key_control' => $control->key_control,
+                                        'objective' => $control->objective,
+                                        'establishment' => $control->establishment,
+                                        'application' => $control->application,
+                                        'supervision' => $control->supervision,
+                                        'test_plan' => $control->test_plan
+                                    );
                     $i += 1;
                 }
 

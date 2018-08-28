@@ -55,7 +55,13 @@
 		<table id="datatable-2" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 		<thead>
 		<th>Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
+	@if (Session::get('org') == 'Parque Arauco' || Session::get('org') == 'Parque Arauco (testing)')
+		<th>Establecimiento<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Aplicaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Supervisi&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	@else
 		<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	@endif
 		<th>Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Objetivo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Tipo Control<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -77,16 +83,23 @@
 		@foreach($controls1 as $control)
 			<tr>
 				<td>{{ $control['name'] }}</td>
-				<td>
-				@if (strlen($control['description']) > 100)
-					<div id="description_{{$control['id']}}" title="{{ $control['description'] }}">{{ $control['short_des'] }}...
-					<div style="cursor:hand" onclick="expandir({{ $control['id'] }},'{{ $control['description'] }}','{{ $control['short_des'] }}');">
-					<font color="CornflowerBlue">Ver completo</font>
-					</div></div>
+				
+				@if (Session::get('org') == 'Parque Arauco' || Session::get('org') == 'Parque Arauco (testing)')
+					<td>{{ $control['establishment'] }}</td>
+					<td>{{ $control['application'] }}</td>
+					<td>{{ $control['supervision'] }}</td>
 				@else
-					{{ $control['description'] }}
+					<td>
+						@if (strlen($control['description']) > 100)
+							<div id="description_{{$control['id']}}" title="{{ $control['description'] }}">{{ $control['short_des'] }}...
+							<div style="cursor:hand" onclick="expandir({{ $control['id'] }},'{{ $control['description'] }}','{{ $control['short_des'] }}');">
+							<font color="CornflowerBlue">Ver completo</font>
+							</div></div>
+						@else
+							{{ $control['description'] }}
+						@endif
+					</td>
 				@endif
-				</td>
 				<td><ul>
 				@foreach ($control['risks'] as $risk)
 					@if (strlen($risk['description']) > 50)
@@ -206,7 +219,13 @@
 		<table id="datatable-3" class="table table-bordered table-striped table-hover table-heading table-datatable" style="font-size:11px">
 		<thead>
 		<th>Nombre<label><input type="text" placeholder="Filtrar" /></label></th>
+	@if (Session::get('org') == 'Parque Arauco' || Session::get('org') == 'Parque Arauco (testing)')
+		<th>Establecimiento<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Aplicaci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+		<th>Supervisi&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	@else
 		<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+	@endif
 		<th>Riesgo(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Subproceso(s)<label><input type="text" placeholder="Filtrar" /></label></th>
 		<th>Tipo Control<label><input type="text" placeholder="Filtrar" /></label></th>
@@ -228,16 +247,22 @@
 		@foreach($controls2 as $control)
 			<tr>
 				<td>{{ $control['name'] }}</td>
-				<td>
-				@if (strlen($control['description']) > 50)
-					<div id="description_{{$control['id']}}" title="{{ $control['description'] }}">{{ $control['short_des'] }}...
-					<div style="cursor:hand" onclick="expandir({{ $control['id'] }},'{{ $control['description'] }}','{{ $control['short_des'] }}');">
-					<font color="CornflowerBlue">Ver completo</font>
-					</div></div>
+				@if (Session::get('org') == 'Parque Arauco' || Session::get('org') == 'Parque Arauco (testing)')
+					<td>{{ $control['establishment'] }}</td>
+					<td>{{ $control['application'] }}</td>
+					<td>{{ $control['supervision'] }}</td>
 				@else
-					{{ $control['description'] }}
+					<td>
+						@if (strlen($control['description']) > 100)
+							<div id="description_{{$control['id']}}" title="{{ $control['description'] }}">{{ $control['short_des'] }}...
+							<div style="cursor:hand" onclick="expandir({{ $control['id'] }},'{{ $control['description'] }}','{{ $control['short_des'] }}');">
+							<font color="CornflowerBlue">Ver completo</font>
+							</div></div>
+						@else
+							{{ $control['description'] }}
+						@endif
+					</td>
 				@endif
-				</td>
 				<td><ul>
 				@foreach ($control['risks'] as $risk)
 					@if (strlen($risk['description']) > 100)
