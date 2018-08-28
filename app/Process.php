@@ -115,4 +115,13 @@ class Process extends Model
                 ->first();
     }
 
+    public static function getProcessFromSubprocess($org,$sub)
+    {
+        return DB::table('processes')
+            ->join('subprocesses','subprocesses.process_id','=','processes.id')
+            ->where('subprocesses.id','=',$sub)
+            ->select('processes.id','processes.name','processes.description')
+            ->first();      
+    }
+
 }

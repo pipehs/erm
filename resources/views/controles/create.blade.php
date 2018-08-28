@@ -155,29 +155,20 @@
 			else
 			{
 				//REseteamos datos
-						$("#nombre").val("");
-						$("#descripcion").val("");
-						$("#categoria").val(""); 
-						$("#categoria").change(); //cambiamos texto que muestra select
-						$("#input_date2").val("");
-						$("#cause_id").val("");
-						$("#cause_id").change();
-						$("#effect_id").val("");
-						$("#effect_id").change();
-						$('#select_riesgos').empty();
-						$('#select_riesgos').change();
+				$("#nombre").val("");
+				$("#descripcion").val("");
+				$("#categoria").val(""); 
+				$("#categoria").change(); //cambiamos texto que muestra select
+				$("#input_date2").val("");
+				$("#cause_id").val("");
+				$("#cause_id").change();
+				$("#effect_id").val("");
+				$("#effect_id").change();
+				$('#select_riesgos').empty();
+				$('#select_riesgos').change();
 			}
 			
 	    });
-
-	$("#upload").uploadFile({
-	  url:"cargar",
-	  multiple: true,
-	  allowedTypes: "jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx",
-	  doneStr:"Cargado !",
-	  extErrorStr:"Solo puedes realizar carga de archivos! ",
-	  uploadErrorStr:"Ocurrio un error al carga. Intentelo de nuevo!"
-	});
 
 
 

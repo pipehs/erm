@@ -1210,7 +1210,9 @@ class ExcelController extends Controller
                 if($GLOBALS['request2']->file('document') != NULL)
                 {
                     Excel::load($GLOBALS['request2']->file('document'), function($reader) {
-                        //$i = 1; //contador para nombres de acciones mitigantes (KOAndina)    
+                        //$i = 1; //contador para nombres de acciones mitigantes (KOAndina)
+                        global $j;
+                        $j = 1; //contador para orgsubs con falla (PArauco)    
                         //recorremos filas
                         $reader->each(function($row,$i) {
                                 //print_r($row);
@@ -1218,109 +1220,7 @@ class ExcelController extends Controller
                             //ACT 24-07-18: Ahora estará configurado para Excel de Progreso
                             if ($_POST['kind'] == 0) //excel de usuarios
                             {
-                                //Primero que todo, vemos si existe organización asociada y correo correcto, si no no hacemos nada
-                                $org = \Ermtool\Organization::where('name',$row['dependencia'])->first(['id']);
-
-                                if (isset($org))
-                                {
-                                    if (strpos($row['correo'],'@')) //Correo válido (básicamente)
-                                    {
-                                        //Vemos si rut ya existe
-                                        //Primero lo separamos
-                                        $rut = explode('-',$row['rut']);
-
-                                        $verrut = \Ermtool\Stakeholder::find($rut[0]);
-
-                                        if (empty($verrut)) //significa que esta vacío y se puede cargar
-                                        {
-                                            //$row['nombrecompleto'] = ucwords(strtolower($row['nombrecompleto'])); Problema con Ñ
-                                            $row['nombre'] = mb_convert_encoding(mb_convert_case($row['nombre'], MB_CASE_TITLE), "UTF-8");  
-                                            $nombrecom = explode(' ',$row['nombre']);
-
-                                            if (isset($nombrecom[5])) //4 nombres
-                                            {   
-                                                //Eliminamos coma separadora de apellidos y nombres
-                                                $seclastname = explode(',',$nombrecom[1]);
-
-                                                $nombre = $nombrecom[2].' '.$nombrecom[3].' '.$nombrecom[4].' '.$nombrecom[5];
-                                                $apellido = $nombrecom[0].' '.$seclastname[0];
-
-                                            }
-                                            else if (isset($nombrecom[4])) //3 nombres
-                                            {   
-                                                //Eliminamos coma separadora de apellidos y nombres
-                                                $seclastname = explode(',',$nombrecom[1]);
-
-                                                $nombre = $nombrecom[2].' '.$nombrecom[3].' '.$nombrecom[4];
-                                                $apellido = $nombrecom[0].' '.$seclastname[0];
-
-                                            }
-                                            else if (isset($nombrecom[3])) //2 apellidos y 2 nombres
-                                            {
-                                                //Eliminamos coma separadora de apellidos y nombres
-                                                $seclastname = explode(',',$nombrecom[1]);
-
-                                                $nombre = $nombrecom[2].' '.$nombrecom[3];
-                                                $apellido = $nombrecom[0].' '.$seclastname[0];
-                                            }
-                                            else if (isset($nombrecom[2])) //2 apellidos y 1 nombre
-                                            {
-                                                //Eliminamos coma separadora de apellidos y nombres
-                                                $seclastname = explode(',',$nombrecom[1]);
-
-                                                $nombre = $nombrecom[2];
-                                                $apellido = $nombrecom[0].' '.$seclastname[0];
-                                            }
-                                            else if (isset($nombrecom[1])) //1 apellido y 1 nombre
-                                            {
-                                                //Eliminamos coma separadora de apellidos y nombres
-                                                $seclastname = explode(',',$nombrecom[0]);
-
-                                                $nombre = $nombrecom[1];
-                                                $apellido = $seclastname[0];
-                                            }
-                                            else
-                                            {
-                                                print_r($nombrecom);
-                                            }
-
-                                            $usuario = \Ermtool\Stakeholder::create([
-                                                'id' => $rut[0],
-                                                'dv' => $rut[1],
-                                                'name' => $nombre,
-                                                'surnames' => $apellido,
-                                                'position' => $row['cargo'],
-                                                'mail' => $row['correo']
-                                            ]);
-
-                                            //agregamos enlace entre usuario y organización
-                                            DB::table('organization_stakeholder')->insert([
-                                                'organization_id'=>$org->id,
-                                                'stakeholder_id'=>$usuario->id
-                                            ]);
-
-                                
-
-                                            //Seleccionamos rol (si es que existe)
-                                            $role = \Ermtool\Role::getRoleByName($row['tipo_usuario']);
-
-                                            if (empty($role)) //hay que crear el rol
-                                            {
-                                                $role = \Ermtool\Role::create([
-                                                    'name' => $row['tipo_usuario'],
-                                                    'status' => 0
-                                                ]);
-                                            }
-
-                                            //agregamos enlace entre usuario y rol
-                                            DB::table('role_stakeholder')->insert([
-                                                'stakeholder_id' => $usuario->id,
-                                                'role_id' => $role->id
-                                            ]);
-                                        }
-                                        //echo $nombre.' '.$apellido.'<br>';
-                                    }
-                                }
+                                print_r($row);
                             
                             }/*
                             else if ($_POST['kind'] == 1) //Matriz de Riesgos Parque Arauco
@@ -4375,6 +4275,35 @@ class ExcelController extends Controller
                                 }
                                 
                             }
+                            else if ($_POST['kind'] == 19) //Corrección enlace Riesgos / Subprocesos (PArauco)
+                            {
+                                //print_r($row);
+                                $org = \Ermtool\Organization::getOrgByName($row['sociedad']);
+
+                                if (!empty($org))
+                                {
+                                    //obtenemos subproceso
+                                    $subprocess = \Ermtool\Subprocess::getSubprocessByName($row['id_proceso_de_negocios']);
+
+                                    if (!empty($subprocess) && !empty($org))
+                                    {
+                                        //Vemos si existe enlace entre subproceso y organización
+                                        $org_sub = \Ermtool\OrganizationSubprocess::where('organization_id',$org->id)->where('subprocess_id',$subprocess->id)->first();
+
+                                        if (empty($org_sub))
+                                        {
+                                            
+                                            //Agregamos enlace entre org y subproceso
+                                            
+                                            $orgsub = \Ermtool\OrganizationSubprocess::create([
+                                                'organization_id' => $org->id,
+                                                'subprocess_id' => $subprocess->id,
+                                            ]);                                            
+                                        }
+                                    }
+
+                                }                             
+                            }
                         });
 
                     });
@@ -4390,53 +4319,60 @@ class ExcelController extends Controller
                 }
             });
 
-            return Redirect::to('importador');
+            //return Redirect::to('importador');
         }
     }
 
     public function generarExcelConsolidado()
     {
-        //try
-        //{
-            Excel::create('Reporte Consolidado '.date("d-m-Y"), function($excel) {
+        if (!Auth::guest())
+        {
+            //try
+            //{
+                Excel::create('Reporte Consolidado '.date("d-m-Y"), function($excel) {
 
-                // título excel
-                $excel->setTitle('Reporte Consolidado');
+                    // título excel
+                    $excel->setTitle('Reporte Consolidado');
 
-                //creador y compañia
-                $excel->setCreator('Sistema B-GRC')
-                      ->setCompany('It Apps Bussiness Solutions');
+                    //creador y compañia
+                    $excel->setCreator('Sistema B-GRC')
+                          ->setCompany('It Apps Bussiness Solutions');
 
-                //descripción
-                $excel->setDescription('Reporte consolidado de Riesgos, Controles, Hallazgos y Planes de acción');
+                    //descripción
+                    $excel->setDescription('Reporte consolidado de Riesgos, Controles, Hallazgos y Planes de acción');
 
-                $excel->sheet('B-GRC', function($sheet) {
-                    $home = new Home;
-                    $datos = $home->reporteConsolidado();
+                    $excel->sheet('B-GRC', function($sheet) {
+                        $home = new Home;
+                        $datos = $home->reporteConsolidado();
 
-                    //$datos2 = json_decode($datos);
-                    $sheet->fromArray($datos);
+                        //$datos2 = json_decode($datos);
+                        $sheet->fromArray($datos);
 
-                    //editamos formato de salida de celdas
-                    $sheet->cells('A1:AP1', function($cells) {
-                            $cells->setBackground('#013ADF');
-                            $cells->setFontColor('#ffffff');
-                            $cells->setFontFamily('Calibri');
-                            $cells->setFontWeight('bold');
-                            $cells->setFontSize(16);
+                        //editamos formato de salida de celdas
+                        $sheet->cells('A1:AP1', function($cells) {
+                                $cells->setBackground('#013ADF');
+                                $cells->setFontColor('#ffffff');
+                                $cells->setFontFamily('Calibri');
+                                $cells->setFontWeight('bold');
+                                $cells->setFontSize(16);
+                        });
+
+                        $sheet->freezeFirstRow();
+
                     });
 
-                    $sheet->freezeFirstRow();
-
-                });
-
-            })->export('xls');
-        //}
-        //catch (\Exception $e)
-        //{
-            //enviarMailSoporte($e);
-            //return view('errors.query',['e' => $e]);
-        //}
+                })->export('xls');
+            //}
+            //catch (\Exception $e)
+            //{
+                //enviarMailSoporte($e);
+                //return view('errors.query',['e' => $e]);
+            //}
+        }
+        else
+        {
+            return Redirect::route('/');
+        }
     }
 
     public function exportSessions()
@@ -4540,6 +4476,10 @@ class ExcelController extends Controller
                     });
 
             })->export('xls'); 
+        }
+        else
+        {
+            return Redirect::route('/');
         }
     }
 
@@ -4655,6 +4595,10 @@ class ExcelController extends Controller
                     });
 
             })->export('xls'); 
+        }
+        else
+        {
+            return Redirect::route('/');
         }
     }
 }

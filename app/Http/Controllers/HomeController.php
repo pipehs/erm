@@ -426,21 +426,12 @@ class HomeController extends Controller
             foreach ($orgs as $org)
             {
                 //obtenemos subprocesos
-                $subs = DB::table('subprocesses')
-                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                        ->where('organization_subprocess.organization_id','=',$org->id)
-                        ->where('subprocesses.status','=',0)
-                        ->get(['subprocesses.id','subprocesses.name','subprocesses.description']);
+                $subs = \Ermtool\Subprocess::getSubprocesses($org->id);
 
                 foreach ($subs as $sub)
                 {
                     //obtenemos proceso
-                    $process = DB::table('processes')
-                            ->join('subprocesses','subprocesses.process_id','=','processes.id')
-                            ->where('subprocesses.id','=',$sub->id)
-                            ->where('processes.status','=',0)
-                            ->select('processes.id','processes.name','processes.description')
-                            ->first();
+                    $process = \Ermtool\Process::getProcessFromSubprocess($org->id,$sub->id);
 
                     //obtenemos riesgos asociados al subproceso y la organización
                     $risks = \Ermtool\Risk::getRisksFromSubprocess($org->id,$sub->id);
@@ -453,6 +444,8 @@ class HomeController extends Controller
                         $risk_resp_mail = 'No definido';
                         foreach ($risks as $risk)
                         {
+                            //ACT 14-08-18: obtenemos hallazgos asociados directamente a riesgos
+                            $issues2 = \Ermtool\Issue::getRiskIssuesByRisk($risk->id);
                             //seteamos variables que dependen de cada riesgo
                             $causes = new stdClass();
                             $effects = new stdClass();
@@ -797,6 +790,9 @@ class HomeController extends Controller
 
                                     //obtenemos hallazgos de control
                                     $issues = \Ermtool\Issue::getIssuesFromControl($org->id,$ctrl->id);
+
+                                    $issues = array_merge($issues,$issues2);
+                                    $issues = array_unique($issues,SORT_REGULAR);
 
                                     if (!empty($issues))
                                     {
@@ -1273,6 +1269,131 @@ class HomeController extends Controller
                             }
                             else
                             {
+                                //Vemos si hay hallazgo de riesgo
+                                if (!empty($issues2))
+                                {
+                                    foreach ($issues2 as $issue)
+                                    {
+                                        if (Session::get('languaje') == 'es')
+                                        {
+                                            //clasificación de hallazgo
+                                            if ($issue->classification === 0)
+                                            {
+                                                $issue->classification = 'Oportunidad de mejora';
+                                            }
+                                            else if ($issue->classification == 1)
+                                            {
+                                                $issue->classification = 'Deficiencia'; 
+                                            }
+                                            else if ($issue->classification == 2)
+                                            {
+                                                $issue->classification = 'Debilidad significativa';
+                                            }
+                                            else
+                                            {
+                                                $issue->classification = 'No se ha definido';
+                                            }
+                                        }
+                                        else //variables en inglés
+                                        {
+
+                                        }
+                                        //obtenemos plan(es) de acción asociado(s) al hallazgo
+                                        $action_plans = \Ermtool\Action_plan::getActionPlanFromIssue2($issue->id);
+
+                                        if (!empty($action_plans))
+                                        {
+                                            foreach ($action_plans as $plan)
+                                            {
+                                                if (Session::get('languaje') == 'es')
+                                                {
+                                                    //estado de plan de acción
+                                                    if ($plan->status === 0)
+                                                    {
+                                                        $plan->status = 'En progreso';
+                                                    }
+                                                    else if ($plan->status == 1)
+                                                    {
+                                                        $plan->status = 'Cerrado';
+                                                    }
+                                                    else
+                                                    {
+                                                        $plan->status = 'No se ha definido';
+                                                    }
+                                                }
+                                                else //variables en inglés
+                                                {
+
+                                                }
+
+                                                //responsable plan de acción
+                                                if ($plan->stakeholder_id != NULL)
+                                                {
+                                                    $plan_resp = \Ermtool\Stakeholder::getName($plan->stakeholder_id);
+                                                    $plan_resp_mail = \Ermtool\Stakeholder::getMail($plan->stakeholder_id);
+                                                    $plan_resp_mail = $plan_resp_mail->mail;
+
+                                                    //cargo
+                                                    $plan_resp_position = \Ermtool\Stakeholder::getPosition($plan->stakeholder_id);
+                                                    $plan_resp_position = $plan_resp_position->position;
+
+                                                    if ($plan_resp_position == NULL)
+                                                    {
+                                                        $plan_resp_position = 'No se ha definido cargo';
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    $plan_resp = 'No se ha definido responsable';
+                                                    $plan_resp_mail = 'No se ha definido responsable';
+                                                    $plan_resp_position = 'No se ha definido responsable';
+                                                }
+                                                //obtenemos porcentaje de avance del plan
+                                                //primero, obtenemos la máxima fecha de porcentaje de avance
+                                                $max_date = DB::table('progress_percentage')
+                                                                ->where('action_plan_id','=',$plan->id)
+                                                                ->max('updated_at');
+
+                                                //obtenemos porcentaje y comentarios
+                                                $per = DB::table('progress_percentage')
+                                                        ->where('action_plan_id','=',$plan->id)
+                                                        ->where('updated_at','=',$max_date)
+                                                        ->select('percentage','comments','updated_at')
+                                                        ->first();
+
+                                                if (!empty($per))
+                                                {
+                                                    $percentage = $per->percentage.'%';
+                                                    $percentage_comments = $per->comments;
+                                                    $percentage_date = $per->updated_at;
+                                                }
+
+                                                else
+                                                {
+                                                    $percentage = 'No hay porcentaje de avance';
+                                                    $percentage_comments = 'No hay porcentaje de avance';
+                                                    $percentage_date = 'No hay porcentaje de avance';
+                                                }
+                                            } 
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    $issue->name = 'No hay hallazgo';
+                                    $issue->description = 'No hay hallazgo';
+                                    $issue->classification = 'No hay hallazgo';
+                                    $issue->recommendations = 'No hay hallazgo';
+                                    $plan->description = 'No hay plan de acción';
+                                    $plan->status = 'No hay plan de acción';
+                                    $plan->final_date = 'No hay plan de acción';
+                                    $percentage = 'No hay plan de acción';
+                                    $percentage_date = 'No hay plan de acción';
+                                    $percentage_comments = 'No hay plan de acción';
+                                    $plan_resp = 'No hay plan de acción';
+                                    $plan_resp_mail = 'No hay plan de acción';
+                                    $plan_resp_position = 'No hay plan de acción';
+                                }
                                 //echo "NO HAY CONTROLES<br>";
                                 $ctrl->name = 'No hay control';
                                 $ctrl->description = 'No hay control';
@@ -1299,19 +1420,6 @@ class HomeController extends Controller
                                 $cont_per[2] = 'No hay control';
                                 $cont_per[3] = 'No hay control';
                                 $cont_per[4] = 'No hay control';
-                                $issue->name = 'No hay hallazgo';
-                                $issue->description = 'No hay hallazgo';
-                                $issue->classification = 'No hay hallazgo';
-                                $issue->recommendations = 'No hay hallazgo';
-                                $plan->description = 'No hay plan de acción';
-                                $plan->status = 'No hay plan de acción';
-                                $plan->final_date = 'No hay plan de acción';
-                                $percentage = 'No hay plan de acción';
-                                $percentage_date = 'No hay plan de acción';
-                                $percentage_comments = 'No hay plan de acción';
-                                $plan_resp = 'No hay plan de acción';
-                                $plan_resp_mail = 'No hay plan de acción';
-                                $plan_resp_position = 'No hay plan de acción';
 
                                 if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
                                 {

@@ -146,7 +146,7 @@ $("#risk_id").change(function() {
 					table_row += '<th>Resultado</th>';
 					table_row += '<th>Descripci&oacute;n de la evaluaci&oacute;n</th>';
 					table_row += '<th>Riesgo</th>';
-					table_row += '<th>Responsable del riesgo</th>';
+					table_row += '<th>Responsable</th>';
 					table_row += '<th>Fecha evaluaci&oacute;n</th>';
 			@foreach (Session::get('roles') as $role)
 				@if ($role != 6)
@@ -201,11 +201,9 @@ $("#risk_id").change(function() {
 
 							table_row += '<td>';
 
-							if (this.stakeholders.length > 0)
+							if (this.s_name != 'NULL')
 							{
-								$(this.stakeholders).each(function() {
-									table_row += '<li>'+this.name+' '+this.surnames+' - '+this.organization+'</li>'
-								});
+								table_row += this.s_name+' '+this.s_surnames
 							}
 							else
 							{

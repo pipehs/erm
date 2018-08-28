@@ -9,7 +9,7 @@
 			<div class="box">
 				<div class="box-content">
 					<div class="text-center">
-					@if (isset($data['logo']) && !empty($data['logo']) && isset($data['logo_width']) && !empty($data['logo_width']) && isset($data['logo_height']) && !empty($data['logo_height']))
+					@if (isset($data['logo']) && !empty($data['logo']) && $data['logo']->l != '' &&  isset($data['logo_width']) && !empty($data['logo_width']) && isset($data['logo_height']) && !empty($data['logo_height']))
 						<img src="{{ $data['logo']->l }}" title="{{$data['organization']->o}}" width="{{ $data['logo_width']->w }}" height="{{ $data['logo_height']->h }}"></img><br>
 					@endif
 						<img src="assets/img/Logobgrcfinal.png" title="Bussiness Governance and Risk Compliance" width="180px" height="120px"></img>

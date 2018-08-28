@@ -347,11 +347,14 @@ class Risk extends Model
         }
         else
         {
+            //ACT 30-07-18: Se agrega verificar que el subproceso se encuentre en la organización
             return DB::table('risk_subprocess')
                 ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                 ->join('risks','risks.id','=','risk_subprocess.risk_id')
                 ->whereNull('organization_risk.deleted_at')
                 ->where('organization_risk.organization_id','=',$org)
+                ->where('organization_subprocess.organization_id','=',$org)
                 ->where('risks.type2','=',1)
                 ->where('risks.status','=',0)
                 ->groupBy('organization_risk.id','risks.id','risks.name','risks.description')

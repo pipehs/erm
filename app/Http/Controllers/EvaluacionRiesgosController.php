@@ -1245,25 +1245,17 @@ class EvaluacionRiesgosController extends Controller
                 //Nombre y descripción de la encuesta u organización
                 $nombre = "";
                 $descripcion = "";
-                //inherente
-                $prom_proba_in = array();
-                $prom_criticidad_in = array();
-                //controlado
-
-                //ACT 06-07-17: No se utilizan en Coca Cola
-                //$prom_proba_ctrl = array();
-                //$prom_criticidad_ctrl = array();
                 $exposicion = array();
-
-                //asignamos niveles estándares de exposición (para dibujar en matriz)
-                for ($cont=100;$cont>0;$cont--)
+                if (isset($_GET['kind2_1']))
                 {
-                    //variable de resta (sin porcentaje)
-                    $cont2 = $cont / 100;
-                    $exposicion[$cont] = 1 - $cont2;
-                }
-
-                $control = array(); //define si un riesgo está siendo controlado o no
+                    //asignamos niveles estándares de exposición (para dibujar en matriz)
+                    for ($cont=100;$cont>0;$cont--)
+                    {
+                        //variable de resta (sin porcentaje)
+                        $cont2 = $cont / 100;
+                        $exposicion[$cont] = 1 - $cont2;
+                    }
+                } 
 
                 $riesgo_temp = array();
                 $riesgos = array();
@@ -1373,250 +1365,233 @@ class EvaluacionRiesgosController extends Controller
                 {
                     foreach ($evaluations as $evaluation)
                     {
-                                $updated_at_in = DB::table('evaluation_risk')
-                                            ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                            ->where('evaluation_risk.organization_risk_id','=',$evaluation->risk_id)
-                                            ->where('evaluations.consolidation','=',1)
-                                            ->where('evaluations.type','=',1)
-                                            ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
-                                            ->max('evaluations.updated_at');
+                        //unseteamos variable de proba_impacto_ctrl para que no se repita
+                        unset($proba_ctrl1);
+                        unset($impact_ctrl1);
+                        unset($control1);
+                        unset($proba_ctrl2);
+                        unset($impact_ctrl2);
+                        unset($control2);
+                        unset($proba_ctrl3);
+                        unset($impact_ctrl3);
+                        unset($control3);
+                        unset($prom_proba_in);
+                        unset($prom_impacto_in);
+                            /*
+                                $updated_at_in = \Ermtool\Evaluation::getMaxUpdatedAt($evaluation->risk_id,$ano,$mes,$dia);
 
                                 //$updated_at_in = str_replace('-','',$updated_at_in);
 
                                 //ACT 05-03-18: Ahora existirá kind2_1. kind2_2, kind2_3 (según los mapas que existan)
                                 if (isset($_GET['kind2_1'])) //Mapa % de contribución
                                 {
-                                    //ACTUALIZACIÓN 22-11-16: Obtendremos los riesgos controlados a través de la tabla controlled_risk sólo para la organización y el tipo seleccionado
-                                    $updated_at_ctrl = DB::table('controlled_risk')
-                                            ->join('organization_risk','organization_risk.id','=','controlled_risk.organization_risk_id')
-                                            ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
-                                            ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
-                                            ->max('controlled_risk.created_at');
+                                    $created_at_ctrl1 = \Ermtool\ControlledRisk::getMaxCreatedAt($evaluation->risk_id,$ano,$mes,$dia);
 
                                     //$updated_at_ctrl = str_replace('-','',$updated_at_ctrl);
                                 }
 
-                                if (isset($_GET['kind2_2'])) //Mapa Residual Manual
+                                if (isset($_GET['kind2_2'])) //Mapa Evaluación de controles
                                 {
-                                    $updated_at_ctrl = DB::table('controlled_risk_manual')
-                                            ->join('organization_risk','organization_risk.id','=','controlled_risk.organization_risk_id')
-                                            ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
-                                            ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
-                                            ->max('controlled_risk.created_at');
+                                    $created_at_ctrl2 = \Ermtool\ResidualRisk::getMaxCreatedAt($evaluation->risk_id,$ano,$mes,$dia);
 
                                     //$updated_at_ctrl = str_replace('-','',$updated_at_ctrl);
                                 }
 
-                                //obtenemos promedio de probabilidad e impacto
-                                $proba_impacto_in = DB::table('evaluation_risk')
-                                            ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                            ->where('evaluations.updated_at','=',$updated_at_in)
-                                            ->where('evaluation_risk.organization_risk_id','=',$evaluation->risk_id)
-                                            ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
-                                            ->first();
-
-                                $updated_at_ctrl = DB::table('controlled_risk')
-                                        ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
-                                        ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
-                                        //->where('controlled_risk.created_at','<=',date($ano.$mes.$dia.' 23:59:59'))
-                                        ->max('controlled_risk.created_at');
-                                        
-                                //proba controlado (si es que hay)
-                                //ACT 05-03-18: Esto será para mapa de % de contribución
-                                if (isset($updated_at_ctrl) && !empty($updated_at_ctrl) && $updated_at_ctrl != NULL)
+                                if (isset($_GET['kind2_3'])) //Mapa residual manual
                                 {
-                                    //ACTUALIZACIÓN 01-12: Obtenemos valor de riesgo controlado de controlled_risk_criteria, según la evaluación de controlled_risk
-                                    $eval = DB::table('controlled_risk')
-                                                ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
-                                                ->where('controlled_risk.created_at','=',$updated_at_ctrl)
-                                                ->select('results')
-                                                ->first();
+                                    $created_at_ctrl3 = \Ermtool\ControlledRiskManual::getMaxCreatedAt($evaluation->risk_id,$ano,$mes,$dia);
 
-                                    //obtenemos valor de evaluación controlada, para este resultado y con los valores del riesgo inherente
+                                    //$updated_at_ctrl = str_replace('-','',$updated_at_ctrl);
+                                }*/
 
-                                    /*
-                                    $proba_ctrl = DB::table('controlled_risk_criteria')
-                                                            ->where('dim_eval','=',1)
-                                                            ->where('eval_in_risk','=',(int)$proba_impacto_in->avg_probability)
-                                                            ->where('control_evaluation','=',$eval->results)
-                                                            ->select('eval_ctrl_risk as eval')
-                                                            ->first();
+                        //obtenemos promedio de probabilidad e impacto
+                        $proba_impacto_in = \Ermtool\Evaluation::getProbaImpact($evaluation->risk_id,$ano,$mes,$dia);
 
-                                    $impacto_ctrl = DB::table('controlled_risk_criteria')
-                                                            ->where('dim_eval','=',2)
-                                                            ->where('eval_in_risk','=',(int)$proba_impacto_in->avg_impact)
-                                                            ->where('control_evaluation','=',$eval->results)
-                                                            ->select('eval_ctrl_risk as eval')
-                                                            ->first();
+                        if (isset($_GET['kind2_1'])) //Mapa % de contribución
+                        {
+                            //ACTUALIZACIÓN 01-12: Obtenemos valor de riesgo controlado de controlled_risk_criteria, según la evaluación de controlled_risk
+                            $eval = \Ermtool\ControlledRisk::getResults($evaluation->risk_id,$ano,$mes,$dia);
 
-                                    */
+                            //calculamos severidad y exposición al riesgo (dejaremos los nombres proba_ctrl para exposición, e impacto_ctrl para severidad para no modificar mucho la vista actual)
+                            if (!empty($proba_impacto_in) && !empty($eval))
+                            {
+                                $impact_ctrl1 = $proba_impacto_in->avg_probability * $proba_impacto_in->avg_impact;
+                                //obtenemos exposición (1-X%) dividiendo el valor residual por la severidad
+                                $proba_ctrl1 = $eval->results / $impact_ctrl1;
 
-                                    //ACTUALIZACIÓN 06-07-17: COCA COLA
-                                    //calculamos severidad y exposición al riesgo (dejaremos los nombres proba_ctrl para exposición, e impacto_ctrl para severidad para no modificar mucho la vista actual)
-                                    if (!empty($proba_impacto_in))
-                                    {
-                                        $impacto_ctrl = $proba_impacto_in->avg_probability * $proba_impacto_in->avg_impact;
-                                        //obtenemos exposición (1-X%) dividiendo el valor residual por la severidad
-                                        $proba_ctrl = $eval->results / $impacto_ctrl;
-                                    }
-                                    else
-                                    {
-                                        $impacto_ctrl = NULL;
-                                        $proba_ctrl = NULL;
-                                    }
-                                }
+                            }
+                            else
+                            {
+                                $impact_ctrl1 = NULL;
+                                $proba_ctrl1 = NULL;
+                            }
 
-                                if (!empty($proba_impacto_in))
-                                {
-                                    //guardamos proba en $prom_proba
-                                    $prom_proba_in[$i] = $proba_impacto_in->avg_probability;
-                                    $prom_criticidad_in[$i] = $proba_impacto_in->avg_impact;
-                                }
-                                else
-                                {
-                                    $prom_proba_in[$i] = NULL;
-                                    $prom_criticidad_in[$i] = NULL;
-                                }
+                            //prom_proba_ctrl para controlado (si es que hay)
+                            if ($proba_ctrl1 != NULL && $impact_ctrl1 != NULL)
+                            {
+                                $control1 = 1;
+                            }
+                            //ACTUALIZACIÓN 05-05-17: SI ES QUE NO HAY EVALUACIÓN DE RIESGO CONTROLADO (ES DECIR, NO HAY CONTROL). MOSTRAREMOS EL RIESGO INHERENTE COMO RESIDUAL
+                            else
+                            {
+                                //agregamos variable para definir que el riesgo no está siendo controlado
+                                $control1 = 0;
+                            }
+                        }
+                        else
+                        {
+                            $impact_ctrl1 = NULL;
+                            $proba_ctrl1 = NULL;
+                            $control1 = NULL;
+                        }
 
-                                //prom_proba_ctrl para controlado (si es que hay)
-                                if (isset($proba_ctrl) && isset($impacto_ctrl) && $proba_ctrl != NULL && $impacto_ctrl != NULL)
-                                {
-                                    $prom_proba_ctrl[$i] = $proba_ctrl;
-                                    $prom_criticidad_ctrl[$i] = $impacto_ctrl;
-                                    $control[$i] = 1;
-                                }
+                        if (isset($_GET['kind2_2'])) //Mapa de evaluación de controles
+                        {
+                            $eval = \Ermtool\ResidualRisk::getProbaImpact($evaluation->risk_id,$ano,$mes,$dia);
+
+                            //calculamos severidad y exposición al riesgo (dejaremos los nombres proba_ctrl para exposición, e impacto_ctrl para severidad para no modificar mucho la vista actual)
+                            if (!empty($proba_impacto_in) && !empty($eval))
+                            {
+                                $impact_ctrl2 = $eval->impact;
+                                //obtenemos exposición (1-X%) dividiendo el valor residual por la severidad
+                                $proba_ctrl2 = $eval->probability;
+                            }
+                            else
+                            {
+                                $impact_ctrl2 = NULL;
+                                $proba_ctrl2 = NULL;
+                            }
+
+                            //prom_proba_ctrl para controlado (si es que hay)
+                            if (isset($proba_ctrl2) && isset($impact_ctrl2) && $proba_ctrl2 != NULL && $impact_ctrl2 != NULL)
+                            {
+                                $control2 = 1;
+                            }
                                 //ACTUALIZACIÓN 05-05-17: SI ES QUE NO HAY EVALUACIÓN DE RIESGO CONTROLADO (ES DECIR, NO HAY CONTROL). MOSTRAREMOS EL RIESGO INHERENTE COMO RESIDUAL
-                                else
+                            else
+                            {
+                                //agregamos variable para definir que el riesgo no está siendo controlado
+                                $control2 = 0;
+                            }
+                        }
+                        else
+                        {
+                            $impact_ctrl2 = NULL;
+                            $proba_ctrl2 = NULL;
+                            $control2 = NULL;
+                        }
+
+                        if (isset($_GET['kind2_3'])) //Mapa de evaluación residual manual
+                        {
+                            $eval = \Ermtool\ControlledRiskManual::getProbaImpact($evaluation->risk_id,$ano,$mes,$dia);
+
+                            //calculamos severidad y exposición al riesgo (dejaremos los nombres proba_ctrl para exposición, e impacto_ctrl para severidad para no modificar mucho la vista actual)
+                            if (!empty($proba_impacto_in) && !empty($eval))
+                            {
+                                $impact_ctrl3 = $eval->impact;
+                                //obtenemos exposición (1-X%) dividiendo el valor residual por la severidad
+                                $proba_ctrl3 = $eval->probability;
+                            }
+                            else
+                            {
+                                $impact_ctrl3 = NULL;
+                                $proba_ctrl3 = NULL;
+                            }
+
+                            //prom_proba_ctrl para controlado (si es que hay)
+                            if (isset($proba_ctrl3) && isset($impact_ctrl3) && $proba_ctrl3 != NULL && $impact_ctrl3 != NULL)
+                            {
+                                $control3 = 1;
+                            }
+                                //ACTUALIZACIÓN 05-05-17: SI ES QUE NO HAY EVALUACIÓN DE RIESGO CONTROLADO (ES DECIR, NO HAY CONTROL). MOSTRAREMOS EL RIESGO INHERENTE COMO RESIDUAL
+                            else
+                            {
+                                //agregamos variable para definir que el riesgo no está siendo controlado
+                                $control3 = 0;
+                            }
+                        }
+                        else
+                        {
+                            $impact_ctrl3 = NULL;
+                            $proba_ctrl3 = NULL;
+                            $control3 = NULL;
+                        }
+
+                        if (!empty($proba_impacto_in))
+                        {
+                                //guardamos proba en $prom_proba
+                                $prom_proba_in = $proba_impacto_in->avg_probability;
+                                $prom_impacto_in = $proba_impacto_in->avg_impact;
+                        }
+                        else
+                        {
+                            $prom_proba_in = NULL;
+                            $prom_impacto_in = NULL;
+                        }
+
+                            
+
+                        //ACTUALIZACIÓN 25-07: OBTENEMOS DATOS DEL RIESGO Y LOS POSIBLES RIESGOS ASOCIADOS
+                        $riesgo_temp = \Ermtool\Risk::find($evaluation->risk);
+                        //$objectives = $riesgo_temp->objectives ----> NO SIRVE MUESTRA OBJ. DE OTRAS ORGANIZACIONES
+                        if ($_GET['kind'] == 0) //riesgos de proceso
+                        {
+                            $subobj = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($riesgo_temp->id,$_GET['organization_id']);
+
+                            //ACT 11-01-18: obtenemos subprocesos de filiales (para cualquier tipo de nivel)
+                            $subobj2 = array(); //array temporal para guardar subprocesos
+
+                            if (isset($_GET['sub_organizations'])) //verificamos que se haya seleccionado ver filiales
+                            {
+                                $orgs1 = \Ermtool\Organization::where('organization_id','=',$_GET['organization_id'])->select('id')->get();
+                                $orgs = array();
+
+                                if (!empty($orgs1)) //Hay suborganizaciones
                                 {
-                                    //agregamos variable para definir que el riesgo no está siendo controlado
-                                    $control[$i] = 0;
-                                    $prom_proba_ctrl[$i] = NULL;
-                                    $prom_criticidad_ctrl[$i] = NULL;
-                                }
-
-                                //unseteamos variable de proba_impacto_ctrl para que no se repita
-                                unset($proba_ctrl);
-                                unset($impacto_ctrl);
-
-                                //ACTUALIZACIÓN 25-07: OBTENEMOS DATOS DEL RIESGO Y LOS POSIBLES RIESGOS ASOCIADOS
-                                $riesgo_temp = \Ermtool\Risk::find($evaluation->risk);
-                                //$objectives = $riesgo_temp->objectives ----> NO SIRVE MUESTRA OBJ. DE OTRAS ORGANIZACIONES
-                                if ($_GET['kind'] == 0) //riesgos de proceso
-                                {
-
-                                    $subobj = DB::table('subprocesses')
-                                            ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                                            ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                                            ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
-                                            ->where('organization_subprocess.organization_id','=',$_GET['organization_id'])
-                                            ->select('subprocesses.name')
-                                            ->get();
-
-                                    //ACT 11-01-18: obtenemos subprocesos de filiales (para cualquier tipo de nivel)
-                                    $subobj2 = array(); //array temporal para guardar subprocesos
-
-                                    if (isset($_GET['sub_organizations'])) //verificamos que se haya seleccionado ver filiales
+                                    foreach ($orgs1 as $org)
                                     {
-                                        //organizaciones dependientes de primer nivel (después de la seleccionada)
-                                        $orgs = DB::table('organizations')
-                                                ->where('organization_id','=',$_GET['organization_id'])
-                                                ->select('id')
-                                                ->get();
+                                        $subs = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($riesgo_temp->id,$org->id);
 
-                                        foreach ($orgs as $org) //organizaciones de 2 nivel (después de la seleccionada)
+                                        foreach ($subs as $s)
                                         {
-                                            $subobj_temp = DB::table('subprocesses')
-                                                ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                                                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                                                ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
-                                                ->where('organization_subprocess.organization_id','=',$org->id)
-                                                ->select('subprocesses.name')
-                                                ->get();
-
-                                            foreach ($subobj_temp as $t)
-                                            {
-                                                array_push($subobj2,$t);
-                                            }
-
-                                            $orgs2 = DB::table('organizations')
-                                                    ->where('organization_id','=',$org->id)
-                                                    ->select('id')
-                                                    ->get();
-
-                                            foreach ($orgs2 as $org2) //organizaciones de 3 nivel (después de la seleccionada)
-                                            {
-                                                $subobj_temp = DB::table('subprocesses')
-                                                    ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                                                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                                                    ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
-                                                    ->where('organization_subprocess.organization_id','=',$org2->id)
-                                                    ->select('subprocesses.name')
-                                                    ->get();
-
-                                                foreach ($subobj_temp as $t)
-                                                {
-                                                    array_push($subobj2,$t);
-                                                }
-
-                                                $orgs3 = DB::table('organizations')
-                                                        ->where('organization_id','=',$org->id)
-                                                        ->select('id')
-                                                        ->get();
-
-                                                foreach ($orgs3 as $org2) //organizaciones de 3 nivel (después de la seleccionada)
-                                                {
-                                                    $subobj_temp = DB::table('subprocesses')
-                                                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                                                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                                                        ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
-                                                        ->where('organization_subprocess.organization_id','=',$org2->id)
-                                                        ->select('subprocesses.name')
-                                                        ->get();
-
-                                                    foreach ($subobj_temp as $t)
-                                                    {
-                                                        array_push($subobj2,$t);
-                                                    }
-                                                }
-                                            }
+                                            array_push($subobj2,$s);
                                         }
+                                    } 
+                                }
                                         
-                                        $subobj2 = array_unique($subobj2,SORT_REGULAR);  
-                                        $subobj = array_merge($subobj,$subobj2);
-                                        $subobj = array_unique($subobj,SORT_REGULAR);
-                                    }
-                                }
-                                else if ($_GET['kind'] == 1) //riesgos de negocio
-                                {
-                                    $subobj = DB::table('objectives')
-                                            ->join('objective_risk','objective_risk.objective_id','=','objectives.id')
-                                            ->where('objective_risk.risk_id','=',$riesgo_temp->id)
-                                            ->where('objectives.organization_id','=',$_GET['organization_id'])
-                                            ->select('objectives.name')
-                                            ->get();
-                                }
+                                $subobj2 = array_unique($subobj2,SORT_REGULAR);  
+                                $subobj = array_merge($subobj,$subobj2);
+                                $subobj = array_unique($subobj,SORT_REGULAR);
+                            }
+                        }
+                        else if ($_GET['kind'] == 1) //riesgos de negocio
+                        {
+                            $subobj = \Ermtool\Objective::getObjectivesFromOrgRisk($riesgo_temp->id,$_GET['organization_id']);
+                        }
                                 
+                        //ACT 12-12-17: Eliminamos saltos
+                        $description = eliminarSaltos($riesgo_temp->description);
+                        $name = eliminarSaltos($riesgo_temp->name);
 
-                                //eliminamos posibles espacios que puedan llevar a error en descripción
-                                //$description = preg_replace('(\n)',' ',$riesgo_temp->description);
-                                //$description = preg_replace('(\r)',' ',$description);
-                                //ACT 12-12-17: Eliminamos saltos
-                                $description = eliminarSaltos($riesgo_temp->description);
-                                $name = eliminarSaltos($riesgo_temp->name);
+                        $riesgos[$i] = [
+                            'name' => $name,
+                            'subobj' => $subobj,
+                            'description' => $description,
+                            'proba_in' => $prom_proba_in,
+                            'impact_in' => $prom_impacto_in,
+                            'impact_ctrl1' => $impact_ctrl1,
+                            'proba_ctrl1' => $proba_ctrl1,
+                            'control1' => $control1,
+                            'impact_ctrl2' => $impact_ctrl2,
+                            'proba_ctrl2' => $proba_ctrl2,
+                            'control2' => $control2,
+                            'impact_ctrl3' => $impact_ctrl3,
+                            'proba_ctrl3' => $proba_ctrl3,
+                            'control3' => $control3];
 
-                                $riesgos[$i] = array('name' => $name,
-                                                    'subobj' => $subobj,
-                                                    'description' => $description);
-
-                                $i += 1;
+                        $i += 1;
                     }   
                 }        
-                else
-                {
-                    //ACTUALIZACIÓN 19-07-17: Se debe declarar prom_proba_ctrl y prom_criticidad_ctrl ya que si es que no hay evaluaciones, no se declaran
-                    $prom_proba_ctrl = null;
-                    $prom_criticidad_ctrl = null;
-                }
 
                 //ACT 10-01-18: Si es que son muchos los riesgos, los juntamos. Para esto, realizamos contador de los riesgos para cada uno de los cuadrantes (primero en mapa inherente)
                 $cont = array();
@@ -1628,16 +1603,15 @@ class EvaluacionRiesgosController extends Controller
                     }
                 }
                 
-                for($k=0; $k < count($riesgos); $k++)
+                foreach ($riesgos as $r)
                 {
-                    $cont[intval($prom_criticidad_in[$k])][intval($prom_proba_in[$k])] += 1;
+                    $cont[intval($r['impact_in'])][intval($r['proba_in'])] += 1;
                 }
 
                 //ACT 11-01-18: Ahora realizamos la actualización para mapa de riesgos residuales
-                //if (isset($_GET['kind2_1'])) //Mapa de % de Contribución de acciones mitigante
-                //{
-
-                    $cont_ctrl = array();
+                $cont_ctrl = array();
+                if (isset($_GET['kind2_1'])) //Mapa de % de Contribución de acciones mitigante
+                {
                     for ($i=1; $i <= 25; $i++)
                     {
                         $cont_ctrl[$i][1] = 0;
@@ -1647,108 +1621,101 @@ class EvaluacionRiesgosController extends Controller
                     }
                     for ($i=1; $i <= 25; $i++) //ciclo de severidad
                     {
-                        for($k=0; $k < count($riesgos); $k++)
+                        foreach ($riesgos as $r)
                         {
-                            if (intval($prom_criticidad_ctrl[$k]) == $i) //si es que la severidad del riesgo es igual a la del ciclo
+                            if (intval($r['impact_ctrl1']) == $i) //si es que la severidad del riesgo es igual a la del ciclo
                             {
-                                if ($prom_proba_ctrl[$k] <= 0.05 && $prom_proba_ctrl[$k] >= 0)
+                                if ($r['proba_ctrl1'] <= 0.05 && $r['proba_ctrl1'] >= 0)
                                 {
                                     $cont_ctrl[$i][1] += 1;
                                 }
-                                else if ($prom_proba_ctrl[$k] <= 0.15 && $prom_proba_ctrl[$k] > 0.05)
+                                else if ($r['proba_ctrl1'] <= 0.15 && $r['proba_ctrl1'] > 0.05)
                                 {
                                     $cont_ctrl[$i][2] += 1;
                                 }
-                                else if ($prom_proba_ctrl[$k] <= 0.5 && $prom_proba_ctrl[$k] > 0.15)
+                                else if ($r['proba_ctrl1'] <= 0.5 && $r['proba_ctrl1'] > 0.15)
                                 {
                                     $cont_ctrl[$i][3] += 1;
                                 }
-                                else if ($prom_proba_ctrl[$k] <= 1 && $prom_proba_ctrl[$k] > 0.5)
+                                else if ($r['proba_ctrl1'] <= 1 && $r['proba_ctrl1'] > 0.5)
                                 {
                                     $cont_ctrl[$i][4] += 1;
                                 }
                             }
                         }
-                    }
-                    
-                    
-                //}
+                    }    
+                }
 
-                if (isset($_GET['kind2_2'])) //Mapa de Riesgo Residual Manual
-                {
-                    $cont_manual = array();
+                $cont2 = array();
+                if (isset($_GET['kind2_2'])) //Mapa de Riesgos por evaluación de controles
+                {   
                     for($i=1; $i <= 5; $i++)
                     {
                         for ($j=1; $j <= 5; $j++)
                         {
-                            $cont_manual[$i][$j] = 0;
+                            $cont2[$i][$j] = 0;
                         }
                     }
                     
-                    for($k=0; $k < count($riesgos); $k++)
+                    foreach ($riesgos as $r)
                     {
-                        $cont_manual[intval($prom_criticidad_manual[$k])][intval($prom_proba_manual[$k])] += 1;
+                        if ($r['impact_ctrl2'] != NULL && $r['proba_ctrl2'] != NULL)
+                        {
+                            $cont2[intval($r['impact_ctrl2'])][intval($r['proba_ctrl2'])] += 1;
+                        }
+                        
                     }
                 }
-
-                //ACT 05-03-18: Vemos si es que hay algún otro tipo de mapa de calor (aparte de inherente)
-                //if (isset($_GET['kind2_1']) || (isset($_GET['kind2_2'])) || (isset($_GET['kind2_3']))) 
-                //{
-                
-                    if (Session::get('languaje') == 'en')
+                $cont3 = array();
+                if (isset($_GET['kind2_3'])) //Mapa de Riesgo Residual Manual
+                {
+                    for($i=1; $i <= 5; $i++)
                     {
-                        //retornamos la misma vista con datos (inglés)
-                        return view('en.reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
-                                                'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
-                                                'prom_criticidad_in'=>$prom_criticidad_in,
-                                                'prom_proba_ctrl'=>$prom_proba_ctrl,
-                                                'prom_criticidad_ctrl'=>$prom_criticidad_ctrl,
-                                                'control' => $control,
-                                                'kind' => $_GET['kind'],
-                                                'kind2' => $_GET['kind2'],
-                                                'exposicion' => $exposicion,
-                                                'cont2' => $cont,
-                                                'cont_ctrl' => $cont_ctrl]);
+                        for ($j=1; $j <= 5; $j++)
+                        {
+                            $cont3[$i][$j] = 0;
+                        }
                     }
-                    else
+                    
+                    foreach ($riesgos as $r)
                     {
-                        return view('reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
-                                                'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
-                                                'prom_criticidad_in'=>$prom_criticidad_in,
-                                                'prom_proba_ctrl'=>$prom_proba_ctrl,
-                                                'prom_criticidad_ctrl'=>$prom_criticidad_ctrl,
-                                                'control' => $control,
-                                                'kind' => $_GET['kind'],
-                                                'kind2' => $_GET['kind2'],
-                                                'exposicion' => $exposicion,
-                                                'cont2' => $cont,
-                                                'cont_ctrl' => $cont_ctrl]);
-                    } 
-                /*}
+                        if ($r['impact_ctrl3'] != NULL && $r['proba_ctrl3'] != NULL)
+                        {
+                            $cont3[intval($r['impact_ctrl3'])][intval($r['proba_ctrl3'])] += 1;
+                        }
+                    }
+                }
+                
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.reportes.heatmap',[
+                        'nombre'=>$nombre,
+                        'descripcion'=>$descripcion,
+                        'riesgos'=>$riesgos,
+                        'kind' => $_GET['kind'],
+                        'kind2_1' => isset($_GET['kind2_1']) ? 1 : NULL,
+                        'kind2_2' => isset($_GET['kind2_2']) ? 1 : NULL,
+                        'kind2_3' => isset($_GET['kind2_3']) ? 1 : NULL,
+                        'exposicion' => $exposicion,
+                        'cont2' => $cont,
+                        'cont_ctrl' => $cont_ctrl]);
+                }
                 else
                 {
-                    if (Session::get('languaje') == 'en')
-                    {
-                        //retornamos la misma vista con datos pero solo de riesgos inherentes (inglés)
-                        return view('en.reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
-                                                'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
-                                                'prom_criticidad_in'=>$prom_criticidad_in,
-                                                'kind' => $_GET['kind'],
-                                                'kind2' => $_GET['kind2'],
-                                                'exposicion' => $exposicion,
-                                                'cont2' => $cont]);
-                    }
-                    else
-                    {
-                        return view('reportes.heatmap',['nombre'=>$nombre,'descripcion'=>$descripcion,
-                                                'riesgos'=>$riesgos,'prom_proba_in'=>$prom_proba_in,
-                                                'prom_criticidad_in'=>$prom_criticidad_in,
-                                                'kind' => $_GET['kind'],
-                                                'kind2' => $_GET['kind2'],
-                                                'exposicion' => $exposicion,
-                                                'cont2' => $cont]);
-                    } 
-                }*/
+                    return view('reportes.heatmap',[
+                        'nombre'=>$nombre,
+                        'descripcion'=>$descripcion,
+                        'riesgos'=>$riesgos,
+                        'kind' => $_GET['kind'],
+                        'kind2_1' => isset($_GET['kind2_1']) ? 1 : NULL,
+                        'kind2_2' => isset($_GET['kind2_2']) ? 1 : NULL,
+                        'kind2_3' => isset($_GET['kind2_3']) ? 1 : NULL,
+                        'exposicion' => $exposicion,
+                        'cont2' => $cont,
+                        'cont3' => $cont2,
+                        'cont4' => $cont3,
+                        'cont_ctrl' => $cont_ctrl]);
+                } 
             }
         }
         catch (\Exception $e)

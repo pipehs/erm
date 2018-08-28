@@ -578,7 +578,7 @@ class ControlesController extends Controller
             }
             else
             {
-                $stakeholders = \Ermtool\Stakeholder::listStakeholders($org);
+                $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
                 $categories = \Ermtool\Risk_category::where('status',0)->where('risk_category_id',NULL)->lists('name','id');
 
                 //ACTUALIZACIÓN 16-11-17: Estados financieros
@@ -2041,12 +2041,10 @@ class ControlesController extends Controller
 
     /* ACT 29-03-18: Se vuelve a activar esta función: Ahora se almacenará los valores en probabilidad e impacto como porcentaje (según pesos específicos almacenados en control_specific_weight). Luego se re-calculará valor residual de los riesgos asociados a este control y se almacenará en la tabla residual_risk. */
 
-    public function closeEvaluation($id,$org)
+    public function closeEvaluation($id)
     {
         global $id1;
         $id1 = $id;
-        global $org1;
-        $org1 = $org;
 
         DB::transaction(function() {
             $logger = $this->logger2;
@@ -2079,7 +2077,7 @@ class ControlesController extends Controller
             $org = \Ermtool\Organization::getOrganizationByCO($eval->control_organization_id);
             $name = \Ermtool\Control::nameByCO($eval->control_organization_id);
 
-            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha cerrado la prueba '.$eval_test->name.' para el control (asociado a la organización '.$org->name.' con Id: '.$eval->control_organization_id.' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+            //$logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha cerrado la prueba '.$eval_test->name.' para el control (asociado a la organización '.$org->name.' con Id: '.$eval->control_organization_id.' llamado: '.$name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
         });
 
         //return 0;
@@ -2895,6 +2893,7 @@ class ControlesController extends Controller
                 if ($org == 0)
                 {
                     $ctrl_org = \Ermtool\Control::getEvaluatedControls($_GET['organization_id']);
+                    $org = $_GET['organization_id'];
                 }
                 else
                 {
@@ -2922,7 +2921,7 @@ class ControlesController extends Controller
 
                     if (!empty($res))
                     {
-                        //ACT  26-06-18: 
+                        //ACT  26-06-18: Si la probabilidad calculada es menos a 50, el control se considerará inefectivo
                         if ($res->probability < 50 && $res->impact < 50)
                         {
                             array_push($id_inefectivos,$co->control_id);
@@ -2935,32 +2934,10 @@ class ControlesController extends Controller
                         }
                     }
                 }
-                //ahora en audit_tests y que no hayan sido encontrados en control_evaluation
-                /*
-                $controles = DB::table('audit_tests')
-                                ->join('audit_test_control','audit_test_control.audit_test_id','=','audit_tests.id')
-                                ->where('audit_tests.status','=',2)
-                                ->whereNotIn('audit_test_control.control_id',$controls_temp)
-                                ->distinct()
-                                ->get(['control_id as id','results']);
-                foreach ($controles as $control)
-                {
-                    $controls_temp[$i] = $control->id;
-                    $i += 1;
-                    if ($control->results == 0)
-                    {
-                        $inefectivos += 1;
-                        array_push($id_inefectivos,$control->id);
-                    }
-                    else
-                    {
-                        $efectivos += 1;
-                        array_push($id_efectivos,$control->id);
-                    }
-                } */
+                
                 //ahora obtenemos los datos de los controles seleccionados
                 $i = 0;
-                foreach ($controls as $id)
+                foreach ($controls_temp as $id)
                 {
                     $control = \Ermtool\Control::find($id);
                     //obtenemos resultado del control
@@ -3002,8 +2979,10 @@ class ControlesController extends Controller
                 $cont_ejec = $i;
                 //ahora obtenemos el resto de controles (para obtener los no ejecutados)
 
-                $controles = \Ermtool\Control::whereNotIn('id',$controls_temp)
-                            ->select('id','name','description','updated_at')
+                $controles = \Ermtool\Control::whereNotIn('controls.id',$controls_temp)
+                            ->join('control_organization','control_organization.control_id','=','controls.id')
+                            ->where('control_organization.organization_id','=',$org)
+                            ->select('controls.id','controls.name','controls.description','controls.updated_at')
                             ->get();
                 //guardamos en array
                 $i = 0;
@@ -3143,15 +3122,11 @@ class ControlesController extends Controller
                 {
                    if (Session::get('languaje') == 'en')
                     {
-                        return view('en.reportes.controles_graficos',['controls'=>$controls,'no_ejecutados'=>$no_ejecutados,
-                                                      'cont_ejec' => $cont_ejec,'cont_no_ejec'=>$cont_no_ejec,
-                                                      'efectivos' => $efectivos,'inefectivos'=>$inefectivos,'org' => $_GET['organization_id']]);
+                        return view('en.reportes.controles_graficos',['controls'=>$controls,'no_ejecutados'=>$no_ejecutados,'cont_ejec' => $cont_ejec,'cont_no_ejec'=>$cont_no_ejec,'efectivos' => $efectivos,'inefectivos'=>$inefectivos,'org' => $org]);
                     }
                     else
                     {
-                        return view('reportes.controles_graficos',['controls'=>$controls,'no_ejecutados'=>$no_ejecutados,
-                                                      'cont_ejec' => $cont_ejec,'cont_no_ejec'=>$cont_no_ejec,
-                                                      'efectivos' => $efectivos,'inefectivos'=>$inefectivos,'org' => $_GET['organization_id']]);
+                        return view('reportes.controles_graficos',['controls'=>$controls,'no_ejecutados'=>$no_ejecutados,'cont_ejec' => $cont_ejec,'cont_no_ejec'=>$cont_no_ejec,'efectivos' => $efectivos,'inefectivos'=>$inefectivos,'org' => $org]);
                     } 
                 }
             }
@@ -3286,8 +3261,10 @@ class ControlesController extends Controller
             $peso_total_p = 0;
             $peso_total_i = 0;
             $i = 0;
+
             foreach ($evaluation_tests as $test)
-            {   
+            {
+                unset($cew); //ACT 01-08-18: Para corroborar que no se esté tomando el valor anterior   
                 //Obtenemos primero la máxima fecha de evaluación de control asociada a esta prueba
                 $c_max_date = DB::table('control_evaluation')
                             ->where('control_organization_id','=',$GLOBALS['id1'])
