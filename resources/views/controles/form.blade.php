@@ -122,16 +122,16 @@
 
 				@if (isset($control_org))
 					<div class="form-group">
-						{!!Form::label('Porcentaje de contribución *',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Porcentaje de contribución',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::select('porcentaje_cont',['0'=>'0% - Deficiente','50'=>'50% - Media','85'=>'85% - Buena','95'=>'95% - Óptima'],$control_org->cont_percentage,['placeholder'=>'- Seleccione -','required' => 'true'])!!}
+							{!!Form::select('porcentaje_cont',['0'=>'0% - Deficiente','50'=>'50% - Media','85'=>'85% - Buena','95'=>'95% - Óptima'],$control_org->cont_percentage,['placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
 				@else
 					<div class="form-group">
-						{!!Form::label('Porcentaje de contribución *',null,['class'=>'col-sm-4 control-label'])!!}
+						{!!Form::label('Porcentaje de contribución',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-8">
-							{!!Form::select('porcentaje_cont',['0'=>'0% - Deficiente','50'=>'50% - Media','85'=>'85% - Buena','95'=>'95% - Óptima'],null,['placeholder'=>'- Seleccione -','required' => 'true'])!!}
+							{!!Form::select('porcentaje_cont',['0'=>'0% - Deficiente','50'=>'50% - Media','85'=>'85% - Buena','95'=>'95% - Óptima'],null,['placeholder'=>'- Seleccione -'])!!}
 						</div>
 					</div>
 				@endif

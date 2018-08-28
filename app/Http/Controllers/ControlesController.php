@@ -703,16 +703,9 @@ class ControlesController extends Controller
                         }
 
                         //ACT 03-07-17: Se agrega porcentaje de contribución
-                        if (isset($_POST['porcentaje_cont']))
+                        if (isset($_POST['porcentaje_cont']) && $_POST['porcentaje_cont'] != "")
                         {
-                            if ($_POST['porcentaje_cont'] == NULL || $_POST['porcentaje_cont'] == "")
-                            {
-                                $porcentaje_cont = NULL;
-                            }
-                            else
-                            {
-                                $porcentaje_cont = $_POST['porcentaje_cont'];
-                            }
+                            $porcentaje_cont = $_POST['porcentaje_cont'];
                         }
                         else
                         {
@@ -919,18 +912,22 @@ class ControlesController extends Controller
                         //ACTUALIZACION 05-07-2017: Para Coca Cola Andina, calcularemos aquí el valor del control y almacenaremos porcentaje de resultado (según evaluaciones y autoevaluaciones) en tabla control_eval_risk_temp
 
                         //Guardamos en control_eval_risk_temp valor del control (autoevaluación)
+                        //ACT 28-08-18: Si es que no se ingresó porcentaje de contribución, no realizar el proceso
+                        if (isset($_POST['porcentaje_cont']) && $_POST['porcentaje_cont'] != "")
+                        {
+                            DB::table('control_eval_risk_temp')
+                                ->insert([
+                                    'result' => $_POST['porcentaje_cont'],
+                                    'control_organization_id' => $ctrl_org->id,
+                                    'auto_evaluation' => 1,
+                                    'status' => 1,
+                                    'created_at' => date('Y-m-d H:i:s')
+                                    ]);
 
-                        DB::table('control_eval_risk_temp')
-                            ->insert([
-                                'result' => $_POST['porcentaje_cont'],
-                                'control_organization_id' => $ctrl_org->id,
-                                'auto_evaluation' => 1,
-                                'status' => 1,
-                                'created_at' => date('Y-m-d H:i:s')
-                                ]);
-
-                        //ahora calcularemos el valor de el o los riesgos a los que apunte este control
-                        $eval_risk = $this->calcControlledRiskAutoeval($control_id,$_POST['org_id'],date('Y'),date('m'),date('d'));
+                            //ahora calcularemos el valor de el o los riesgos a los que apunte este control
+                            $eval_risk = $this->calcControlledRiskAutoeval($control_id,$_POST['org_id'],date('Y'),date('m'),date('d'));
+                        }
+                        
 
 
                         //guardamos archivos de evidencias (si es que hay)
@@ -1297,21 +1294,25 @@ class ControlesController extends Controller
                     //ACT 19-04-18: Obtenemos control_organization
                     $ctrl_org = \Ermtool\ControlOrganization::getByCO($control->id,$_POST['org_id']);
 
-                    DB::table('control_eval_risk_temp')
-                        ->where('control_id','=',$ctrl_org->id)
-                        ->update(['status' => 0]);
-                        
-                    DB::table('control_eval_risk_temp')
-                            ->insert([
-                                'result' => $_POST['porcentaje_cont'],
-                                'control_organization_id' => $ctrl_org->id,
-                                'auto_evaluation' => 1,
-                                'status' => 1,
-                                'created_at' => date('Y-m-d H:i:s')
-                            ]);
+                    //ACT 28-08-18: Si es que no se ingresó porcentaje de contribución, no realizar el proceso
+                    if (isset($_POST['porcentaje_cont']) && $_POST['porcentaje_cont'] != "")
+                    {
+                        DB::table('control_eval_risk_temp')
+                            ->where('control_id','=',$ctrl_org->id)
+                            ->update(['status' => 0]);
+                            
+                        DB::table('control_eval_risk_temp')
+                                ->insert([
+                                    'result' => $_POST['porcentaje_cont'],
+                                    'control_organization_id' => $ctrl_org->id,
+                                    'auto_evaluation' => 1,
+                                    'status' => 1,
+                                    'created_at' => date('Y-m-d H:i:s')
+                                ]);
 
-                    //ahora calcularemos el valor de el o los riesgos a los que apunte este control
-                    $eval_risk = $this->calcControlledRiskAutoeval($GLOBALS['id1'],$_POST['org_id'],date('Y'),date('m'),date('d'));
+                        //ahora calcularemos el valor de el o los riesgos a los que apunte este control
+                        $eval_risk = $this->calcControlledRiskAutoeval($GLOBALS['id1'],$_POST['org_id'],date('Y'),date('m'),date('d'));
+                    }
 
                     //ACTUALIZACIÓN 03-04-17: primero eliminamos los riesgos antiguos para no repetir
                     //$control_organization_risk_id = \Ermtool\Control::getControlOrganizationRisk($control->id,$_POST['org_id']);
