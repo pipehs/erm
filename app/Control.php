@@ -230,14 +230,16 @@ class Control extends Model
                             ->get();
 
             //a través de evaluación de controles
+            //ACT 24-08-18: control evaluation ahora posee atributo control_organization
             $controls2 = DB::table('control_evaluation')
-                            ->join('control_organization_risk','control_organization_risk.control_id','=','control_evaluation.control_id')
-                            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                            ->join('control_organization','control_organization.id','=','control_evaluation.control_organization_id')
+                            ->join('organization_risk','organization_risk.organization_id','=','control_organization.organization_id')
                             ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
                             ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
                             ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
                             ->join('controls','controls.id','=','control_organization_risk.control_id')
                             ->where('organization_risk.organization_id','=',$org)
+                            ->where('control_organization.organization_id','=',$org)
                             ->where('subprocesses.process_id','=',$kind)
                             ->select('controls.id','controls.name','controls.description')
                             ->groupBy('controls.id','controls.name','controls.description')
@@ -245,24 +247,9 @@ class Control extends Model
         }
         else
         {
-            //controles de issues generados directamente a través de mantenedor de hallazgos
-            /*$controls1 = DB::table('control_organization_risk')
-                            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
-                            ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
-                            ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                            ->join('issues','issues.control_id','=','control_organization_risk.control_id')
-                            ->join('controls','controls.id','=','control_organization_risk.control_id')
-                            ->where('organization_risk.organization_id','=',$org)
-                            ->select('controls.id','controls.name','controls.description')
-                            ->groupBy('controls.id','controls.name','controls.description')
-                            ->get();*/
 
             //ACT 11-12-17: Ahora todos los issues deben tener organización
             $controls1 = DB::table('controls')
-                        ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
-                        ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
-                        ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
-                        ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
                         ->join('issues','issues.control_id','=','controls.id')
                         ->where('issues.organization_id','=',$org)
                         ->whereNotNull('issues.control_id')
@@ -271,14 +258,12 @@ class Control extends Model
                         ->get();
 
             //a través de evaluación de controles
+            //ACT 24-08-18: control evaluation ahora posee atributo control_organization
             $controls2 = DB::table('control_evaluation')
-                            ->join('control_organization_risk','control_organization_risk.control_id','=','control_evaluation.control_id')
-                            ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
-                            ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
-                            ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
+                            ->join('control_organization','control_organization.id','=','control_evaluation.control_organization_id')
                             ->join('issues','issues.control_evaluation_id','=','control_evaluation.id')
-                            ->join('controls','controls.id','=','control_organization_risk.control_id')
-                            ->where('organization_risk.organization_id','=',$org)
+                            ->join('controls','controls.id','=','control_organization.control_id')
+                            ->where('control_organization.organization_id','=',$org)
                             ->select('controls.id','controls.name','controls.description')
                             ->groupBy('controls.id','controls.name','controls.description')
                             ->get();
