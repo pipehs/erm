@@ -37,7 +37,8 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos del subproceso.
-				{!!Form::open(['route'=>'subprocesos.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
+				{!!Form::open(['route'=>'subprocesos.store','method'=>'POST','class'=>'form-horizontal',
+				'enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.subprocesos.form')
 
 				{!!Form::close()!!}
@@ -49,40 +50,9 @@
 		</div>
 	</div>
 </div>
+
+<div id="pop1" class="popbox">
+	<p>Este documento asociado a subprocesos, será relacionado a todas las organizaciones que se encuentren asociadas al mismo. Posteriormente en la opción de asignar atributos específicos, se podrá agregar atributos específicos para cada organización independiente</p>
+</div>
+
 @stop
-
-@section('scripts')
-<script>
-// Run Select2 on element
-function Select2Test(){
-	$("#el2").select2();
-	$("#el3").select2();
-}
-
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
-}
-$(document).ready(function() {
-	// Load script of Select2 and run this
-	LoadSelect2Script(Select2Test);
-	// Add slider for change test input length
-	FormLayoutExampleInputLength($( ".slider-style" ));
-	// Initialize datepicker
-	$('#input_date').datepicker({setDate: new Date()});
-	// Initialize datepicker
-	$('#input_date2').datepicker({setDate: new Date()});
-	// Load Timepicker plugin
-	LoadTimePickerScript(DemoTimePicker);
-	// Add tooltip to form-controls
-	$('.form-control').tooltip();
-	// Load example of form validation
-	LoadBootstrapValidatorScript(DemoFormValidator);
-	// Add Drag-n-Drop feature
-	WinMove();
-});
-</script>
-@stop
-
