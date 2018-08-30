@@ -36,7 +36,8 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos del proceso.
-				{!!Form::open(['route'=>'procesos.store','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
+				{!!Form::open(['route'=>'procesos.store','method'=>'POST','class'=>'form-horizontal',
+				'enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.procesos.form')
 				{!!Form::close()!!}
 
@@ -46,6 +47,10 @@
 			</div>
 		</div>
 	</div>
+</div>
+
+<div id="pop1" class="popbox">
+	<p>Este documento asociado a procesos, será relacionado a todas las organizaciones que se encuentren asociadas al mismo. Posteriormente en la opción de asignar atributos específicos, se podrá agregar atributos específicos para cada organización independiente</p>
 </div>
 @stop
 

@@ -37,7 +37,7 @@
 			</div>
 			<div class="box-content">
 			Ingrese los nuevos datos del subproceso.
-				{!!Form::model($subproceso,['route'=>['subprocesos.update',$subproceso->id],'method'=>'PUT','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
+				{!!Form::model($subproceso,['route'=>['subprocesos.update',$subproceso->id],'method'=>'PUT','class'=>'form-horizontal','enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 					@include('datos_maestros.subprocesos.form')
 				{!!Form::close()!!}
 
@@ -49,30 +49,9 @@
 	</div>
 </div>
 
-<script>
-function MakeSelect2(){
-	$('select').select2();
-	$('.dataTables_filter').each(function(){
-		$(this).find('label input[type=text]').attr('placeholder', 'Search');
-	});
-}
-$(document).ready(function() {
-	// Add slider for change test input length
-	FormLayoutExampleInputLength($( ".slider-style" ));
-	// Initialize datepicker
-	$('#input_date').datepicker({setDate: new Date()});
-	// Initialize datepicker
-	$('#input_date2').datepicker({setDate: new Date()});
-	// Load Timepicker plugin
-	LoadTimePickerScript(DemoTimePicker);
-	// Add tooltip to form-controls
-	$('.form-control').tooltip();
-	LoadSelect2Script(DemoSelect2);
-	// Load example of form validation
-	LoadBootstrapValidatorScript(DemoFormValidator);
-	// Add Drag-n-Drop feature
-	WinMove();
-});
-</script>
+<div id="pop1" class="popbox">
+	<p>Este documento asociado a procesos, será relacionado a todas las organizaciones que se encuentren asociadas al mismo. Posteriormente en la opción de asignar atributos específicos, se podrá agregar atributos específicos para cada organización independiente</p>
+</div>
+
 @stop
 

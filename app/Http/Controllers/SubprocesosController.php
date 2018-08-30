@@ -236,6 +236,8 @@ class SubprocesosController extends Controller
             }
             else
             {
+                global $evidence;
+                $evidence = $request->file('evidence_doc');
 
                 try {
 
@@ -289,7 +291,7 @@ class SubprocesosController extends Controller
                             $regulatory_framework = NULL;
                         }
 
-                        $new_subprocess = \Ermtool\Subprocess::create([
+                        $subprocess = \Ermtool\Subprocess::create([
                             'name' => $_POST['name'],
                             'description' => $_POST['description'],
                             'expiration_date' => $expiration_date,
@@ -301,29 +303,41 @@ class SubprocesosController extends Controller
                         ]);
 
                         //agregamos la relación a cada organización
-                            // primero obtenemos subproceso que acabamos de agregar   
-                            $subprocess = $new_subprocess->id;
+                            // primero obtenemos subproceso que acabamos de agregar
 
                             foreach ($_POST['organization_id'] as $organization_id)
                             {
                                 $organization = \Ermtool\Organization::find($organization_id);
                                 //agregamos la relación (para agregar en atributos)
-                                $organization->subprocesses()->attach($subprocess);
+                                $organization->subprocesses()->attach($subprocess->id);
+                            }
+
+                            if($GLOBALS['evidence'] != NULL)
+                            {
+                                foreach ($GLOBALS['evidence'] as $evidence)
+                                {
+                                    if ($evidence != NULL)
+                                    {
+                                        upload_file($evidence,'subprocesos',$subprocess->id);
+                                    }
+                                }                    
                             }
 
                             if (Session::get('languaje') == 'en')
                             {
-                                Session::flash('message','Process successfully created');
+                                Session::flash('message','Subprocess successfully created');
                             }
                             else
                             {
                                 Session::flash('message','Subproceso agregado correctamente');
                             }
 
-                            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el subproceso con Id: '.$subprocess.' llamado: '.$new_subprocess->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
+                            $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el subproceso con Id: '.$subprocess->id.' llamado: '.$subprocess->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
                     });
                     return Redirect::to('/subprocesos');
-                } catch(\Exception $e) {
+                } 
+                catch(\Exception $e) 
+                {
                     Session::flash('message','Subproceso no pudo agregarse. '.$e);
                     return Redirect::to('/subprocesos');
                 }
@@ -751,10 +765,12 @@ class SubprocesosController extends Controller
         }
     }
 
-    public function assignAttributes()
+    public function assignAttributes(Request $request)
     {
         try
         {
+            global $request2;
+            $request2 = $request;
             //Guardamos responsables
             DB::transaction(function(){
 
@@ -762,10 +778,6 @@ class SubprocesosController extends Controller
                 {
                     if (strpos($id,"takeholder")) //No se porqué me funciona sin la s...
                     {
-                        //verificamos que se haya ingresado algún valor
-                        //if ($p != '' && $p != NULL)
-                        //{
-                        //obtenemos organización
                         $org = explode('_', $id);
 
                         //obtenemos modelo y actualizamos
@@ -777,8 +789,18 @@ class SubprocesosController extends Controller
                         $os->key_subprocess = $_POST['key_subprocess_'.$org[1]] != '' ? $_POST['key_subprocess_'.$org[1]] : NULL;
                         $os->criticality = $_POST['criticality_'.$org[1]] != '' ? $_POST['criticality_'.$org[1]] : NULL;
 
+                        if($GLOBALS['request2']->file('evidence_doc_'.$org[1]) != NULL)
+                        {
+                            foreach ($GLOBALS['request2']->file('evidence_doc_'.$org[1]) as $evidence)
+                            {
+                                if ($evidence != NULL)
+                                {
+                                    upload_file($evidence,'subprocesos_org',$os->id);
+                                }
+                            }                    
+                        }
+
                         $os->save();
-                        //}
                     }
                 }
 

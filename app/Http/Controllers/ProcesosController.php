@@ -252,6 +252,9 @@ class ProcesosController extends Controller
             }
             else
             {
+                global $evidence;
+                $evidence = $request->file('evidence_doc');
+
                 DB::transaction(function()
                 {
                     $logger = $this->logger;
@@ -277,6 +280,17 @@ class ProcesosController extends Controller
                             'organization_id' => $organization_id,
                             'process_id' => $process->id
                         ]);
+                    }
+
+                    if($GLOBALS['evidence'] != NULL)
+                    {
+                        foreach ($GLOBALS['evidence'] as $evidence)
+                        {
+                            if ($evidence != NULL)
+                            {
+                                upload_file($evidence,'procesos',$process->id);
+                            }
+                        }                    
                     }
 
                     $logger->info('El usuario '.Auth::user()->name.' '.Auth::user()->surnames. ', Rut: '.Auth::user()->id.', ha creado el proceso con Id: '.$process->id.' llamado: '.$process->name.', con fecha '.date('d-m-Y').' a las '.date('H:i:s'));
@@ -757,10 +771,12 @@ class ProcesosController extends Controller
         }
     }
 
-    public function assignAttributes()
+    public function assignAttributes(Request $request)
     {
         try
         {
+            global $request2;
+            $request2 = $request;
             //Guardamos responsables
             DB::transaction(function(){
 
@@ -782,6 +798,17 @@ class ProcesosController extends Controller
                         $ops->stakeholder_id = $p != '' ? $p : NULL;
                         $ops->key_process = $_POST['key_process_'.$org[1]] != '' ? $_POST['key_process_'.$org[1]] : NULL;
                         $ops->criticality = $_POST['criticality_'.$org[1]] != '' ? $_POST['criticality_'.$org[1]] : NULL;
+
+                        if($GLOBALS['request2']->file('evidence_doc_'.$org[1]) != NULL)
+                        {
+                            foreach ($GLOBALS['request2']->file('evidence_doc_'.$org[1]) as $evidence)
+                            {
+                                if ($evidence != NULL)
+                                {
+                                    upload_file($evidence,'procesos_org',$ops->id);
+                                }
+                            }                    
+                        }
 
                         $ops->save();
                         //}

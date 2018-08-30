@@ -36,13 +36,15 @@
 			</div>
 			<div class="box-content">
 			Ingrese los datos del proceso para cada organización.
-				{!!Form::open(['route'=>'procesos.assign_attributes','method'=>'POST','class'=>'form-horizontal','onsubmit'=>'return checkSubmit();'])!!}
+				{!!Form::open(['route'=>'procesos.assign_attributes','method'=>'POST','class'=>'form-horizontal',
+				'enctype'=>'multipart/form-data','onsubmit'=>'return checkSubmit();'])!!}
 				<table class="table table-bordered table-striped table-hover table-heading">
 					<thead>
 						<th>Organización</th>
 						<th>Responsable</th>
 						<th>Proceso clave</th>
 						<th>Criticidad proceso</th>
+						<th>Documentos</th>
 					</thead>
 					@foreach ($ops as $o)
 						<tr>
@@ -55,6 +57,9 @@
 							</td>
 							<td>
 								{!!Form::select('criticality_'.$o->organization_id,['0'=>'0 %','10'=>'10 %','20'=>'20 %','30'=>'30 %','40'=>'40 %','50'=>'50 %','60'=>'60 %','70'=>'70 %', '80' => '80 %', '90' => '90 %', '100' => '100 %'], $o->criticality, ['placeholder'=>'- Seleccione -','id' => 'critically'])!!}
+							</td>
+							<td>
+								<input id="file-1" type="file" class="file" name="evidence_doc_{{$o->organization_id}}[]" multiple=true data-preview-file-type="any">
 							</td>
 						</tr>
 					@endforeach
