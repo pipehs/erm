@@ -53,6 +53,13 @@
 			 	   ['id' => 'el2','placeholder'=>'No'])!!}
 		</div>
 	</div>
+
+	<div class="form-group">
+		<label for="file" class="col-sm-3 control-label">Cargar documentos (para seleccionar más de uno haga click en ctrl + botón izquierdo)<a href="#" class="popper" data-popbox="pop1">?</a></label>
+		<div class="col-sm-5">
+			<input id="file-1" type="file" class="file" name="evidence_doc[]" multiple=true data-preview-file-type="any">
+		</div>
+	</div>
 					
 	<div class="form-group">
 		<center>
