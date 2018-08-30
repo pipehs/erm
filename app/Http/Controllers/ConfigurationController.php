@@ -137,6 +137,9 @@ class ConfigurationController extends Controller
                         break;
                     case 'logo_height':
                         $logo_height = $c->option_value;
+                        break;
+                    case 'alert_ap':
+                        $alert_ap = $c->option_value;
                         break;                
                     default:
                         # code...
@@ -153,6 +156,7 @@ class ConfigurationController extends Controller
                 'logo' => isset($logo) ? $logo : NULL,
                 'logo_width' => isset($logo_width) ? $logo_width : NULL,
                 'logo_height' => isset($logo_height) ? $logo_height : NULL,
+                'alert_ap' => isset($alert_ap) ? $alert_ap : NULL,
             ];
 
             return view('configuration.edit',['data' => $data]);
@@ -178,7 +182,7 @@ class ConfigurationController extends Controller
         }
         else if (Auth::user()->superadmin == 1)
         {
-            //Primero, nose aseguramos de que exista sólo un registro
+            //Primero, nos aseguramos de que exista sólo un registro
             DB::transaction(function() {
                 foreach ($_POST as $op_name => $op_val)
                 {
@@ -203,6 +207,28 @@ class ConfigurationController extends Controller
                         }                    
                     }
                     
+                }
+
+                //Para alertas hacer verificación (por ejemplo, alert_ap)
+                if (!isset($_POST['alert_ap']))
+                {
+                    //Vemos si es que existe o se debe crear
+                    $q = \Ermtool\Configuration::where('option_name','=','alert_ap')->first();
+
+                    if (empty($q))
+                    {
+                        \Ermtool\Configuration::create([
+                            'option_name' => 'alert_ap',
+                            'option_value' => 0
+                        ]);
+                    }
+                    else
+                    {
+                        \Ermtool\Configuration::where('option_name','=','alert_ap')
+                            ->update([
+                                'option_value' => 0
+                            ]);
+                    }       
                 }
                 
                 Session::flash('message','Configuración actualizada exitosamente');
