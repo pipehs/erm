@@ -79,8 +79,4 @@
 @stop
 
 @section('scripts2')
-
-<script>
-
-</script>
 @stop
