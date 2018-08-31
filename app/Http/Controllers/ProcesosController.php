@@ -607,6 +607,20 @@ class ProcesosController extends Controller
                             ->where('id','=',$GLOBALS['id1'])
                             ->select('name')
                             ->first();
+
+                        //ACT 31-08-18: Eliminamos también de organization_process_stakeholder
+                        $ops = \Ermtool\OrganizationProcessStakeholder::where('process_id','=',$GLOBALS['id1'])->get();
+
+                        foreach ($ops as $o)
+                        {
+                            //Eliminamos docs asociados a proceso_org
+                            eliminarArchivo($o->id,10,NULL);
+                            $o->forceDelete();
+                        }
+
+                        //Eliminamos docs asociados
+                        eliminarArchivo($GLOBALS['id1'],9,NULL);
+                        
                         //ahora eliminamos
                         DB::table('processes')
                             ->where('id','=',$GLOBALS['id1'])
