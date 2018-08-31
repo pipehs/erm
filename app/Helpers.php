@@ -685,9 +685,17 @@ function eliminarArchivo($id,$kind,$name)
 	{
 		$dir = "../storage/app/procesos/".$id;
 	}
-	else if ($kind == 10) //evidencias de procesos generales
+	else if ($kind == 10) //evidencias de procesos específicos de org
 	{
 		$dir = "../storage/app/procesos_org/".$id;
+	}
+	else if ($kind == 11) //evidencias de subprocesos generales
+	{
+		$dir = "../storage/app/subprocesos/".$id;
+	}
+	else if ($kind == 12) //evidencias de subprocesos específicos de org
+	{
+		$dir = "../storage/app/subprocesos_org/".$id;
 	}
 	
 	if (file_exists($dir))
