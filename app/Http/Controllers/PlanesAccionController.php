@@ -864,6 +864,63 @@ class PlanesAccionController extends Controller
                             'status' => $status,
                         ]);
 
+                    //Verificamos si en config está activado el envío de correos de alerta
+                    $alert = \Ermtool\Configuration::where('option_name','alert_ap')->first(['option_value as v']);
+
+                    if (!empty($alert) && $alert->v == 1)
+                    {
+                        //Enviamos correo a usuario informando de la creación del plan de acción
+                        if (isset($action_plan) && $stakeholder_id != NULL)
+                        {
+                            //obtenemos stakeholder (responsable) para enviarle un correo informando la situación
+                            $stakeholder_mail = \Ermtool\Stakeholder::where('id',$stakeholder_id)->value('mail');
+                            $name = \Ermtool\Stakeholder::getName($stakeholder_id);
+
+                            $message = array();
+
+                            //Hacemos un replace de nombre de stakeholder, nombre de plan de acción y días de vencimiento
+                            $message[0] = 'Estimado '.$name;
+                            $message[1] = 'Se acaba de generar un plan de acción en el sistema B-GRC del cual usted es responsable';
+                            $message[2] = 'Nombre plan: '.$action_plan->description;
+
+                            $final_date = new DateTime($action_plan->final_date);
+                            $message[3] = 'Fecha límite: '.date_format($final_date,'d-m-Y');
+
+                            if ($status == 0)
+                            {
+                                $message[4] = 'Estado: Abierto';
+                            }
+                            else
+                            {
+                                $message[5] = 'Estado: Cerrado';
+                            }
+
+                            if ($percentage != NULL)
+                            {
+                                $message[6] = 'Porcentaje de avance: '.$percentage.'%';
+                            }
+                            else
+                            {
+                                $message[6] = 'Porcentaje de avance: 0%';
+                            }
+
+                            if ($progress_comments != NULL)
+                            {
+                                $message[7] = 'Comentarios de avance: '.$progress_comments;
+                            }
+                            else
+                            {
+                                $message[7] = 'Comentarios de avance: No se han agregado';
+                            }
+
+                            $message[8] = 'Atentamente,';
+                            $message[9] = 'Equipo B-GRC';
+
+                            sendAlertMail($message,$stakeholder_mail,$name,Auth::user()->email,'Creación plan de acción');
+                        }
+                    }
+                    
+
                     //ACTUALIZACIÓN 13-08-17: Se agrega porcentaje de avance y comentarios de progreso
                     DB::table('progress_percentage')
                         ->insert([
@@ -3314,7 +3371,7 @@ class PlanesAccionController extends Controller
                     $cco_string = NULL;
                 }
 
-                Mail::queue('envio_mail_pa',['mensaje' => $mensaje], function ($msj) use ($stakeholder_mail,$name,$cc,$cco)
+                Mail::queue('envio_mail3',['mensaje' => $mensaje], function ($msj) use ($stakeholder_mail,$name,$cc,$cco)
                 {
                     //Vemos si se agregó con copia
                     if ($cc != NULL)

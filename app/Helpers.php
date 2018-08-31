@@ -871,7 +871,7 @@ function getNombreSplit($nombreCompleto, $apellido_primero = false)
 }
 
 function locked()
-    {
+{
         if (Session::get('languaje') == 'en')
         {
             Session::flash('error','You don\'t have permission to access to this module');
@@ -882,5 +882,13 @@ function locked()
         }
 
         return view('locked');
-    }
+}
+
+function sendAlertMail($message,$stakeholder_mail,$name,$user_mail,$subject)
+{
+	Mail::queue('envio_mail3',['mensaje' => $message], function ($msj) use ($stakeholder_mail,$name,$user_mail,$subject)
+    {   
+		$msj->to($stakeholder_mail, $name)->bcc($user_mail)->subject($subject);
+    });
+}
 ?>
