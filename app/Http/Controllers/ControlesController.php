@@ -467,7 +467,8 @@ class ControlesController extends Controller
                     $k = 0;
                     foreach ($risks1 as $risk)
                     {
-                        $subprocesses2 = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($risk->id,$_GET['organization_id']);
+                        $org_risk = \Ermtool\OrganzationRisk::getByOrgRisk($risk->id,$_GET['organization_id']);
+                        $subprocesses2 = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($org_risk->id);
 
                         foreach ($subprocesses2 as $sub)
                         {
@@ -4072,7 +4073,7 @@ class ControlesController extends Controller
 
                                 //$org_id = $r->org_id;
                                 //obtenemos subprocesos relacionados
-                                $subobj = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($r->id,$_GET['organization_id']);
+                                $subobj = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($risk);
 
                                 //obtenemos controles asociados al riesgo
                                 $controls = \Ermtool\Control::getControlsFromRisk($_GET['organization_id'],$r->id);

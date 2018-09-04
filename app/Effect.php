@@ -17,11 +17,12 @@ class Effect extends Model
     	return $this->belongsToMany('Ermtool\Risk');
     }
 
-    public static function getEffectsFromRisk($risk_id)
+    public static function getEffectsFromRisk($org_risk_id)
     {
         return DB::table('effect_risk')
                 ->join('effects','effects.id','=','effect_risk.effect_id')
-                ->where('effect_risk.risk_id','=',$risk_id)
+                ->join('organization_risk','organization_risk.risk_id','=','effect_risk.risk_id')
+                ->where('organization_risk.id','=',$org_risk_id)
                 ->select('effects.name','effects.description')
                 ->get();
     }
