@@ -17,11 +17,12 @@ class Cause extends Model
     	return $this->belongsToMany('Ermtool\Risk');
     }
 
-    public static function getCausesFromRisk($risk_id)
+    public static function getCausesFromRisk($org_risk_id)
     {
         return DB::table('causes')
                 ->join('cause_risk','cause_risk.cause_id','=','causes.id')
-                ->where('cause_risk.risk_id','=',$risk_id)
+                ->join('organization_risk','organization_risk.risk_id','=','cause_risk.risk_id')
+                ->where('organization_risk.id','=',$org_risk_id)
                 ->select('causes.name','causes.description')
                 ->get();
     }

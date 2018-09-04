@@ -2010,9 +2010,9 @@ class RiesgosController extends Controller
 
                         if ($risk->type == 0) //obtenemos procesos y subprocesos
                         {
-                            $processes = \Ermtool\Process::getProcessesFromRisk($org,$risk->id);
+                            $processes = \Ermtool\Process::getProcessesFromRisk($risk->id);
 
-                            $subprocesses = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($risk->id,$org);
+                            $subprocesses = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($risk->id);
 
                             if (!empty($processes))
                             {
@@ -2232,8 +2232,9 @@ class RiesgosController extends Controller
                                     $score = $eval->avg_impact * $eval->avg_probability;
                                 }
                             }
+
                             //obtenemos controles
-                            $controls = \Ermtool\Control::getControlsFromRisk($org,$risk->id);
+                            $controls = \Ermtool\Control::getControlsFromRisk($org,$risk->risk_id);
 
                         //seteamos controles
                         if ($controls == NULL || empty($controls))
@@ -2366,25 +2367,14 @@ class RiesgosController extends Controller
 
                         if (isset($org) && $org != NULL)
                         {
-                                $orgs_name = \Ermtool\Organization::name($org);
+                            $org_name = \Ermtool\Organization::name($org);
                         }
                         else
                         {
-                            $orgs = \Ermtool\Organization::getOrganizationsFromRisk($risk->id);
+                            $org2 = \Ermtool\Organization::getOrganizationByOrgRisk($risk->id);
 
-                            $last = end($orgs);
-                            $orgs_name = '';
-                            foreach ($orgs as $org1)
-                            {
-                                if ($last == $org1)
-                                {
-                                    $orgs_name .= $org1->name;
-                                }
-                                else
-                                {
-                                    $orgs_name .= $org1->name.', ';
-                                }
-                            }
+                            $org_name = $org2->name;
+
                         }
 
                         if ($org == NULL && strstr($_SERVER["REQUEST_URI"],'genexcel'))
@@ -2402,7 +2392,7 @@ class RiesgosController extends Controller
                                     $temp = $objetivos;
                                 }
                                 $datos[$i] = [//'id' => $control->id,
-                                        'Organizations' => $orgs_name,
+                                        'Organizations' => $org_name,
                                         'Kind' => $type,
                                         'Process/Objective' => $temp,
                                         'Risk' => $risk->name,
@@ -2432,7 +2422,7 @@ class RiesgosController extends Controller
                                 }
 
                                 $datos[$i] = [//'id' => $control->id,
-                                        'Organizaciones' => $orgs_name,
+                                        'Organizaciones' => $org_name,
                                         'Tipo' => $type,
                                         'Procesos/Objetivo' => $temp,
                                         'Riesgo' => $risk->name,
@@ -2461,7 +2451,7 @@ class RiesgosController extends Controller
                                     if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
                                     {
                                         $datos[$i] = [//'id' => $control->id,
-                                                'Organizations' => $orgs_name,
+                                                'Organizations' => $org_name,
                                                 'Process' => $procesos,
                                                 'Subprocess' => $subprocesos,
                                                 'Risk' => $risk->name,
@@ -2480,7 +2470,7 @@ class RiesgosController extends Controller
                                     else
                                     {
                                         $datos[$i] = ['id' => $risk->id,
-                                                'Organizations' => $orgs_name,
+                                                'Organizations' => $org_name,
                                                 'Process' => $procesos,
                                                 'Subprocess' => $subprocesos,
                                                 'Risk' => $risk->name,
@@ -2504,7 +2494,7 @@ class RiesgosController extends Controller
                                     if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
                                     {
                                         $datos[$i] = [//'id' => $control->id,
-                                                    'Organizaciones' => $orgs_name,
+                                                    'Organizaciones' => $org_name,
                                                     'Procesos' => $procesos,
                                                     'Subprocesos' => $subprocesos,
                                                     'Riesgo' => $risk->name,
@@ -2523,7 +2513,7 @@ class RiesgosController extends Controller
                                     else
                                     {
                                         $datos[$i] = ['id' => $risk->id,
-                                                    'Organizaciones' => $orgs_name,
+                                                    'Organizaciones' => $org_name,
                                                     'Procesos' => $procesos,
                                                     'Subprocesos' => $subprocesos,
                                                     'Riesgo' => $risk->name,
@@ -2553,7 +2543,7 @@ class RiesgosController extends Controller
                                     if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
                                     {
                                         $datos[$i] = [//'id' => $control->id,
-                                                    'Organizations' => $orgs_name,
+                                                    'Organizations' => $org_name,
                                                     'Objective' => $objetivos,
                                                     'Risk' => $risk->name,
                                                     'Description' => $description,
@@ -2571,7 +2561,7 @@ class RiesgosController extends Controller
                                     else
                                     {
                                         $datos[$i] = ['id' => $risk->id,
-                                                    'Organizations' => $orgs_name,
+                                                    'Organizations' => $org_name,
                                                     'Objective' => $objetivos,
                                                     'Risk' => $risk->name,
                                                     'Description' => $description,
@@ -2595,7 +2585,7 @@ class RiesgosController extends Controller
                                     if (strstr($_SERVER["REQUEST_URI"],'genexcel'))
                                     {
                                         $datos[$i] = [//'id' => $control->id,
-                                                    'Organizaciones' => $orgs_name,
+                                                    'Organizaciones' => $org_name,
                                                     'Objetivos' => $objetivos,
                                                     'Riesgo' => $risk->name,
                                                     'Descripción' => $description,
@@ -2613,7 +2603,7 @@ class RiesgosController extends Controller
                                     else
                                     {
                                         $datos[$i] = ['id' => $risk->id,
-                                                    'Organizaciones' => $orgs_name,
+                                                    'Organizaciones' => $org_name,
                                                     'Objetivos' => $objetivos,
                                                     'Riesgo' => $risk->name,
                                                     'Descripción' => $description,

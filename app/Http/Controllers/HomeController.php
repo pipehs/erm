@@ -533,8 +533,8 @@ class HomeController extends Controller
                                 }
                             }
                             //causas y efectos
-                            $causes = \Ermtool\Cause::getCausesFromRisk($risk->risk_id);
-                            $effects = \Ermtool\Effect::getEffectsFromRisk($risk->risk_id);
+                            $causes = \Ermtool\Cause::getCausesFromRisk($risk->id);
+                            $effects = \Ermtool\Effect::getEffectsFromRisk($risk->id);
 
                             //seteamos causas en caso de excel
                             if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
