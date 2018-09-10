@@ -1737,7 +1737,7 @@ class ExcelController extends Controller
                                         'role_id' => $role->id
                                     ]);
                                 }
-                            }
+                            }/*
                             else if ($_POST['kind'] == 5) //Plantillas Riesgos (KOAndina)
                             {
                                 //print_r($row);
@@ -1798,7 +1798,7 @@ class ExcelController extends Controller
                                             }
                                             $risk_category2 = \Ermtool\Risk_category::getRiskCategoryByName($rc);
                                             */
-
+                                            /*
                                             $risk_category2 = \Ermtool\Risk_category::getRiskCategoryByName($row['riesgo_ppal']);
 
                                             if (empty($risk_category2))
@@ -1992,7 +1992,7 @@ class ExcelController extends Controller
                                                     {
                                                         $porcentaje_cont = 0;
                                                     }*/
-
+                                                    /*
                                                     $porcentaje_cont = $row['contribucion_acciones_mitigantes']*100;
 
                                                     
@@ -2280,6 +2280,981 @@ class ExcelController extends Controller
                                     }
                                     
                                 }    
+                            }*/
+                            else if ($_POST['kind'] == 5) //Carga a través de reporte consolidado
+                            {
+                                foreach ($row as $row)
+                                {
+                                    if (isset($row['organizacion']) && $row['organizacion'] != '')
+                                    {
+                                        $process2 = array();
+                                        $subprocess2 = array();
+                                        //echo $row['organizacion'].'<br>';
+                                        //print_r($row);
+
+                                        //obtenemos org id
+                                        $org = \Ermtool\Organization::getOrgByName($row['organizacion']);
+
+                                        //Cargamos proceso si es que no existe
+                                        //Vemos si es que hay algún / en proceso y subproceso
+                                        $prc = explode('/',$row['proceso']);
+                                        $subprc = explode('/',$row['subproceso']);
+                                        if (isset($prc[2])) //son 3 procesos
+                                        {
+                                            $process3 =  \Ermtool\Process::getProcessByName($prc[2]);
+
+                                            if (empty($process3)) //Si no existe, lo creamos
+                                            {
+                                                $process3 = \Ermtool\Process::create([
+                                                    'name' => $prc[2],
+                                                    'description' => $prc[2]
+                                                ]);
+                                            }
+
+                                            //Vemos si existe ops
+                                            $ops = \Ermtool\OrganizationProcessStakeholder::getByOrgProcess($org->id,$process3->id);
+
+                                            if (empty($ops))
+                                            {
+                                                $ops = \Ermtool\OrganizationProcessStakeholder::create([
+                                                    'organization_id' => $org->id,
+                                                    'process_id' => $process3->id
+                                                ]);
+                                            }
+                                            
+
+                                            if (isset($subprc[2]))
+                                            {
+                                                $subprocess3 =  \Ermtool\Subprocess::getSubprocessByName($subprc[2]);
+
+                                                if (empty($subprocess3)) //Si no existe, lo creamos
+                                                {
+                                                    $subprocess3 = \Ermtool\Subprocess::create([
+                                                        'name' => $subprc[2],
+                                                        'description' => $subprc[2],
+                                                        'process_id' => $process3->id
+                                                    ]);
+                                                }
+
+                                                //Vemos si existe org_sub
+                                                $os = \Ermtool\OrganizationSubprocess::getByOrgSub($org->id,$subprocess3->id);
+
+                                                if (empty($os))
+                                                {
+                                                    $os = \Ermtool\OrganizationSubprocess::create([
+                                                        'organization_id' => $org->id,
+                                                        'subprocess_id' => $subprocess3->id
+                                                    ]);
+                                                }
+                                            }
+                                        }
+                                        if (isset($prc[1])) //Son 2 procesos
+                                        {
+                                            $process2 =  \Ermtool\Process::getProcessByName($prc[1]);
+
+                                            if (empty($process2)) //Si no existe, lo creamos
+                                            {
+                                                $process2 = \Ermtool\Process::create([
+                                                    'name' => $prc[1],
+                                                    'description' => $prc[1]
+                                                ]);
+                                            }
+
+                                            //Vemos si existe ops
+                                            $ops = \Ermtool\OrganizationProcessStakeholder::getByOrgProcess($org->id,$process2->id);
+
+                                            if (empty($ops))
+                                            {
+                                                $ops = \Ermtool\OrganizationProcessStakeholder::create([
+                                                    'organization_id' => $org->id,
+                                                    'process_id' => $process2->id
+                                                ]);
+                                            }
+
+                                            if (isset($subprc[1]))
+                                            {
+                                                $subprocess2 =  \Ermtool\Subprocess::getSubprocessByName($subprc[1]);
+
+                                                if (empty($subprocess2)) //Si no existe, lo creamos
+                                                {
+                                                    $subprocess2 = \Ermtool\Subprocess::create([
+                                                        'name' => $subprc[1],
+                                                        'description' => $subprc[1],
+                                                        'process_id' => $process2->id
+                                                    ]);
+                                                }
+
+                                                //Vemos si existe org_sub
+                                                $os = \Ermtool\OrganizationSubprocess::getByOrgSub($org->id,$subprocess2->id);
+
+                                                if (empty($os))
+                                                {
+                                                    $os = \Ermtool\OrganizationSubprocess::create([
+                                                        'organization_id' => $org->id,
+                                                        'subprocess_id' => $subprocess2->id
+                                                    ]);
+                                                }
+                                            } 
+                                        }
+                                        if (isset($prc[0]))
+                                        {
+                                            $process1 =  \Ermtool\Process::getProcessByName($prc[0]);
+
+                                            if (empty($process1)) //Si no existe, lo creamos
+                                            {
+                                                $process1 = \Ermtool\Process::create([
+                                                    'name' => $prc[0],
+                                                    'description' => $prc[0]
+                                                ]);
+                                            }
+
+                                            //Vemos si existe ops
+                                            $ops = \Ermtool\OrganizationProcessStakeholder::getByOrgProcess($org->id,$process1->id);
+
+                                            if (empty($ops))
+                                            {
+                                                $ops = \Ermtool\OrganizationProcessStakeholder::create([
+                                                    'organization_id' => $org->id,
+                                                    'process_id' => $process1->id
+                                                ]);
+                                            }
+
+                                            $subprocess1 =  \Ermtool\Subprocess::getSubprocessByName($subprc[0]);
+
+                                            if (empty($subprocess1)) //Si no existe, lo creamos
+                                            {
+                                                $subprocess1 = \Ermtool\Subprocess::create([
+                                                    'name' => $subprc[0],
+                                                    'description' => $subprc[0],
+                                                    'process_id' => $process1->id
+                                                ]);
+                                            }
+
+                                            //Vemos si existe org_sub
+                                            $os = \Ermtool\OrganizationSubprocess::getByOrgSub($org->id,$subprocess1->id);
+
+                                            if (empty($os))
+                                            {
+                                                $os = \Ermtool\OrganizationSubprocess::create([
+                                                    'organization_id' => $org->id,
+                                                    'subprocess_id' => $subprocess1->id
+                                                ]);
+                                            }
+                                        }
+
+                                        //Primero, Vemos si existe el riesgo genérico
+                                        $risk = \Ermtool\Risk::getRiskByName2($row['riesgo']);
+
+                                        if (empty($risk))
+                                        {
+                                            //Vemos si existe subcategoría
+                                            $cat = \Ermtool\Risk_category::getRiskCategoryByName($row['subcategoria_de_riesgo']);
+
+                                            if (empty($cat))
+                                            {
+                                                //Obtenemos categoría principal
+                                                $catpp = \Ermtool\Risk_category::getRiskCategoryByName($row['categoria_de_riesgo']);
+
+                                                if (empty($catpp))
+                                                {
+                                                    $catpp = \Ermtool\Risk_category::create([
+                                                        'name' => $row['categoria_de_riesgo'],
+                                                        'description' => $row['categoria_de_riesgo']
+                                                    ]);
+                                                }
+
+                                                $cat = \Ermtool\Risk_category::create([
+                                                    'name' => $row['subcategoria_de_riesgo'],
+                                                    'description' => $row['subcategoria_de_riesgo'],
+                                                    'risk_category_id' => $catpp->id
+                                                ]);
+                                            }
+
+                                            //Creamos el riesgo
+                                            $risk = \Ermtool\Risk::create([
+                                                'name' => $row['riesgo'],
+                                                'description' => $row['descripcion_riesgo'],
+                                                'risk_category_id' => $cat->id,
+                                                'type' => 0,
+                                                'type2' => 1,
+                                            ]);
+                                        }
+
+                                        //Ahora vemos si existe el Riesgo para la organización
+                                        $orgrisk = \Ermtool\Risk::getRiskByName($risk->id,$org->id);
+
+                                        if (empty($orgrisk))
+                                        {
+                                            //Obtenemos responsable
+                                            $resp = \Ermtool\Stakeholder::getUserByMail($row['correo_responsable']);
+
+                                            if (empty($resp))
+                                            {
+                                                $resp_id = NULL;
+                                            }
+                                            else
+                                            {
+                                                $resp_id = $resp->id;
+                                            }
+
+                                            if ($row['comentarios_del_riesgo'] != NULL && $row['comentarios_del_riesgo'] != '')
+                                            {
+                                                $comments = $row['comentarios_del_riesgo'];
+                                            }
+                                            else
+                                            {
+                                                $comments = NULL;
+                                            }
+
+                                            $orgrisk = \Ermtool\OrganizationRisk::create([
+                                                'organization_id' => $org->id,
+                                                'risk_id' => $risk->id,
+                                                'stakeholder_id' => $resp_id,
+                                                'comments' => $comments
+                                            ]);
+                                        }
+                                        //Asignamos subproceso al riesgo y a la organización
+                                        if (!empty($subprocess3))
+                                        {
+                                            //Vemos si existe Risk Subprocess
+                                            $subprocess3 = \Ermtool\Subprocess::find($subprocess3->id);
+                                            $hasSub3 = $subprocess3->risks()->where('risks.id', $risk->id)->exists();
+
+                                            if (!$hasSub3) //Si es falso, se crea enlace
+                                            {
+                                                $risk_subprocess3 = $subprocess3->risks()->attach($risk->id);
+                                            }
+                                            
+                                        }
+
+                                        if (!empty($subprocess2))
+                                        {
+                                            //Vemos si existe Risk Subprocess
+                                            $subprocess2 = \Ermtool\Subprocess::find($subprocess2->id);
+                                            $hasSub2 = $subprocess2->risks()->where('risks.id', $risk->id)->exists();
+
+                                            if (!$hasSub2) //Si es falso, se crea enlace
+                                            {
+                                                $risk_subprocess2 = $subprocess2->risks()->attach($risk->id);
+                                            }
+                                            
+                                        }
+
+                                        if (!empty($subprocess1))
+                                        {
+                                            //Vemos si existe Risk Subprocess
+                                            $subprocess1 = \Ermtool\Subprocess::find($subprocess1->id);
+                                            //$hasSub1 = $subprocess1->risks()->where('risks.id', $risk->id)->exists();
+                                            $hasSub1 = $subprocess1->risks()->find($risk->id);
+                                            if (empty($hasSub1)) //Si es falso, se crea enlace
+                                            {
+                                                $risk_subprocess1 = $subprocess1->risks()->attach($risk->id);
+                                            }
+                                        }
+
+                                        //Agregamos evaluaciones, viendo primero si la fecha existe
+                                        
+                                        for ($j=0; $j<=5; $j++)
+                                        {
+                                            if ($row['impacto_'.$j] != '' && $row['impacto_'.$j] != NULL)
+                                            {
+                                                $eval1 = \Ermtool\Evaluation::where('created_at','=',$row['fecha_'.$j])->first(['id']);
+
+                                                if (empty($eval1))
+                                                {
+                                                    $eval1 = DB::table('evaluations')
+                                                            ->insertGetId([
+                                                                'name' => 'Evaluación Manual',
+                                                                'type' => 1,
+                                                                'consolidation' => 1,
+                                                                'description' => 'Evaluación Manual',
+                                                                'created_at' => $row['fecha_'.$j],
+                                                                'updated_at' => $row['fecha_'.$j],
+                                                            ]);
+                                                }
+                                                else
+                                                {
+                                                    $eval1 = $eval1->id;
+                                                }
+
+                                                //vemos si ya existe evaluación para este riesgo y en esta evaluación (para el caso que los riesgos se repiten)
+                                                $evaluation_risk = DB::table('evaluation_risk')
+                                                        ->where('evaluation_id','=',$eval1)
+                                                        ->where('organization_risk_id','=',$orgrisk->id)
+                                                        ->select('id')
+                                                        ->first();
+
+                                                if (empty($evaluation_risk))
+                                                {
+                                                    //insertamos riesgo evaluation_risk
+                                                    $evaluation_risk = DB::table('evaluation_risk')->insertGetId([
+                                                            'evaluation_id' => $eval1,
+                                                            'organization_risk_id' => $orgrisk->id,
+                                                            'avg_probability' => $row['probabilidad_'.$j],
+                                                            'avg_impact' => $row['impacto_'.$j]
+                                                        ]);
+                                                }
+                                                else
+                                                {
+                                                    $evaluation_risk = $evaluation_risk->id;
+                                                }
+                                                            
+                                                //vemos si existe en evaluation_risk_stakeholder
+                                                $evaluation_risk_stake = DB::table('evaluation_risk_stakeholder')
+                                                    ->join('evaluation_risk','evaluation_risk.id','=','evaluation_risk_stakeholder.evaluation_risk_id')
+                                                    ->where('evaluation_risk_stakeholder.evaluation_risk_id','=',$evaluation_risk)
+                                                    ->where('evaluation_risk_stakeholder.user_id','=',Auth::user()->id)
+                                                    ->where('evaluation_risk.evaluation_id','=',$eval1)
+                                                    ->select('evaluation_risk_stakeholder.id')
+                                                    ->first();
+
+                                                if (empty($evaluation_risk_stake))
+                                                {
+                                                    //insertamos en evaluation_risk_stakeholder
+                                                    DB::table('evaluation_risk_stakeholder')->insert([
+                                                        'evaluation_risk_id'=>$evaluation_risk,
+                                                        'user_id'=>Auth::user()->id,
+                                                        'probability'=>$row['probabilidad_'.$j],
+                                                        'impact'=>$row['impacto_'.$j],
+                                                    ]);
+                                                }
+
+                                                //RECORDAR CALCULAR EVALUACIÓN RESIDUAL ---------
+                                            }
+                                        }
+
+                                        //Control
+                                        if ($row['control'] != NULL && $row['control'] != '')
+                                        {
+                                            $control = \Ermtool\Control::getControlByName($row['control']);
+
+                                            if (empty($control))
+                                            {
+                                                //definimos preventivo, contingencia (correctivo)
+                                                if ($row['proposito'] == 'Preventivo')
+                                                {
+                                                    $purpose = 0;
+                                                }
+                                                else if ($row['proposito'] == 'Detectivo')
+                                                {
+                                                    $purpose = 1;
+                                                }
+                                                else if ($row['proposito'] == 'Correctivo')
+                                                {
+                                                    $purpose = 2;
+                                                }
+                                                else
+                                                {
+                                                    $purpose = NULL;
+                                                }
+
+                                                if ($row['tipo_control'] == 'Manual')
+                                                {
+                                                    $type = 0;
+                                                }
+                                                else if ($row['tipo_control'] == 'Semi-automático')
+                                                {
+                                                    $type = 1;
+                                                }
+                                                else if ($row['tipo_control'] == 'Automático')
+                                                {
+                                                    $type = 2;
+                                                }
+                                                else
+                                                {
+                                                    $type = NULL;
+                                                }
+
+                                                $nombre = $row['control'];
+                                                $nombre = eliminarSaltos($nombre);
+
+                                                $description = eliminarSaltos($row['descripcion_control']);
+
+                                                $control = \Ermtool\Control::create([
+                                                    'name'=>$nombre,
+                                                    'description'=>$description,
+                                                    'type' =>$type,
+                                                    'type2'=>0,
+                                                    'purpose'=>$purpose
+                                                ]);
+                                            }
+
+                                            //Vemos si existe el control para la organización
+                                            $co = \Ermtool\ControlOrganization::getByCO($control->id,$org->id);
+
+                                            if (empty($co))
+                                            {
+                                                //identificamos usuario por mail
+                                                $user_control = \Ermtool\Stakeholder::getUserByMail($row['correo_responsable_control']);
+
+                                                $user_control = empty($user_control) ? NULL : $user_control->id;
+                                                $evidence = $row['evidencia_control'] != '' ? $row['evidencia_control'] : NULL;
+                                                $evidence = eliminarSaltos($comments);
+
+                                                $comments = $row['comentarios_control'] != '' ? $row['comentarios_control'] : NULL;
+                                                $comments = eliminarSaltos($comments);
+
+                                                $co = \Ermtool\ControlOrganization::create([
+                                                    'control_id' => $control->id,
+                                                    'organization_id' => $org->id,
+                                                    'stakeholder_id' => $user_control,
+                                                    'comments' => $comments,
+                                                    'evidence' => $evidence,
+                                                    'cont_percentage' => intval($row['de_contribucion_0'])
+                                                ]);
+                                            }
+
+                                            //Vemos si existe cor
+                                            $cor = DB::table('control_organization_risk')
+                                                            ->where('organization_risk_id','=',$orgrisk->id)
+                                                            ->where('control_id','=',$control->id)
+                                                            ->get(['id']);
+
+                                            if (empty($cor))
+                                            {
+                                                //insertamos control_organization_risk
+                                                DB::table('control_organization_risk')
+                                                    ->insert([
+                                                        'organization_risk_id' => $orgrisk->id,
+                                                        'control_id' => $control->id
+                                                    ]);
+                                            }
+
+                                            //Agregamos evaluación de control
+                                            for ($j=0; $j<=5; $j++)
+                                            {
+                                                //Vemos si hay porcentaje de contribución
+                                                if ($row['de_contribucion_'.$j] != '' && $row['fecha_'.$j] != '')
+                                                {
+                                                    $fecha = explode('-',$row['fecha_'.$j]);
+                                                    $ano = $fecha[0];
+                                                    $mes = $fecha[1];
+                                                    $dia = explode(' ',$fecha[2]);
+                                                    $dia = $dia[0];
+
+                                                    //Guardamos en control_eval_risk_temp valor del control (autoevaluación)
+                                                    DB::table('control_eval_risk_temp')
+                                                        ->insert([
+                                                            'result' => intval($row['de_contribucion_'.$j]),
+                                                            'control_organization_id' => $co->id,
+                                                            'auto_evaluation' => 1,
+                                                            'status' => 1,
+                                                            'created_at' => $row['fecha_'.$j]
+                                                        ]);
+
+                                                    //agregamos valor residual de riesgo
+                                                    $controlclass = new Controles;
+                                                    //ahora calculamos riesgo residual 
+                                                    $controlclass->calcControlledRiskAutoEval($control->id,$org->id,$ano,$mes,$dia);
+                                                }
+                                            }   
+                                        }
+
+                                        //Agregamos hallazgo si es que no está
+                                        if ($row['hallazgo'] != '')
+                                        {
+                                            $issue = \Ermtool\Issue::getIssueByName($row['hallazgo']);
+
+                                            if (empty($issue))
+                                            {
+                                                if ($row['clasificacion_hallazgo'] != '')
+                                                {
+                                                    $classification_id = \Ermtool\IssueClassification::getIssueClassificationByName($row['clasificacion_hallazgo']);
+                                                }
+                                                
+                                                $rec = $row['recomendaciones'] != '' ? $row['recomendaciones'] : NULL;
+                                                $desc = $row['descripcion_hallazgo'] != '' ? $row['descripcion_hallazgo'] : NULL;
+
+                                                $issue = \Ermtool\Issue::create([
+                                                    'name' => $row['hallazgo'],
+                                                    'description' => $desc,
+                                                    'recommendations' => $rec,
+                                                    'classification_id' => $classification_id,
+                                                    'control_id' => $control->id,
+                                                    'organization_id' => $org->id
+                                                ]);
+                                            }
+
+                                            if ($row['plan_de_accion'] != '')
+                                            {
+                                                $action_plan = \Ermtool\Action_plan::getActionPlanByDescription($row['plan_de_accion']);
+
+                                                if (empty($action_plan))
+                                                {
+                                                    if ($row['estado_plan'] == 'En progreso')
+                                                    {
+                                                        $status = 0;
+                                                    }
+                                                    else if ($row['estado_plan'] == 'Cerrado')
+                                                    {
+                                                        $status = 1;
+                                                    }
+                                                    else
+                                                    {
+                                                        $status = NULL;
+                                                    }
+                                                    
+
+                                                    if ($row['correo_responsable_plan'] != '')
+                                                    {
+                                                        $resp_plan = \Ermtool\Stakeholder::getUserByMail($row['correo_responsable_plan']);
+
+                                                        if (empty($resp_plan))
+                                                        {
+                                                            $resp_plan = NULL;
+                                                        }
+                                                        else
+                                                        {
+                                                            $resp_plan = $resp_plan->id;
+                                                        }
+                                                    }
+
+                                                    $final_date = $row['fecha_final_plan'] != '' ? $row['fecha_final_plan'] : NULL;
+
+                                                    $action_plan = \Ermtool\Action_plan::create([
+                                                        'issue_id' => $issue->id,
+                                                        'description' => $row['plan_de_accion'],
+                                                        'final_date' => $final_date,
+                                                        'status' => $status,
+                                                        'stakeholder_id' => $resp_plan
+                                                    ]);  
+
+                                                    if ($row['de_avance'] != '')
+                                                    {
+                                                        $comments = $row['comentarios_de_avance'] != '' ? $row['comentarios_de_avance'] : NULL;
+
+                                                        $per = intval($row['de_avance']);
+
+                                                        //insertamos porcentaje de avance
+                                                         DB::table('progress_percentage')
+                                                            ->insert([
+                                                                'percentage' => $per,
+                                                                'comments' => $comments,
+                                                                'action_plan_id' => $action_plan->id,
+                                                                'created_at' => $row['fecha_de_avance'],
+                                                                'updated_at' => $row['fecha_de_avance']
+                                                            ]);  
+                                                    }
+                                                }
+                                            }
+                                        }
+
+
+                                    }
+                                }
+                                   
+                            }
+                            else if ($_POST['kind'] == 20) //Carga Riesgos KOAndina
+                            {
+                                foreach ($row as $row)
+                                {
+                                    if (isset($row['organizacion']) && $row['organizacion'] != '')
+                                    {
+                                        //echo $row['organizacion'].'<br>';
+                                        //print_r($row);
+
+                                        //obtenemos org id
+                                        $org = \Ermtool\Organization::getOrgByName($row['organizacion']);
+
+                                        $process =  \Ermtool\Process::getProcessByName($row['proceso']);
+
+                                        if (empty($process)) //Si no existe, lo creamos
+                                        {
+                                            $process = \Ermtool\Process::create([
+                                                'name' => $row['proceso'],
+                                                'description' => $row['proceso']
+                                            ]);
+                                        }
+
+                                        //Vemos si existe ops
+                                        $ops = \Ermtool\OrganizationProcessStakeholder::getByOrgProcess($org->id,$process->id);
+
+                                        if (empty($ops))
+                                        {
+                                            $ops = \Ermtool\OrganizationProcessStakeholder::create([
+                                                'organization_id' => $org->id,
+                                                'process_id' => $process->id
+                                            ]);
+                                        }
+
+                                        $subprocess =  \Ermtool\Subprocess::getSubprocessByName($row['subproceso']);
+
+                                        if (empty($subprocess)) //Si no existe, lo creamos
+                                        {
+                                            $subprocess = \Ermtool\Subprocess::create([
+                                                'name' => $row['subproceso'],
+                                                'description' => $row['subproceso'],
+                                                'process_id' => $process->id
+                                            ]);
+                                        }
+
+                                        //Vemos si existe org_sub
+                                        $os = \Ermtool\OrganizationSubprocess::getByOrgSub($org->id,$subprocess->id);
+
+                                        if (empty($os))
+                                        {
+                                            $os = \Ermtool\OrganizationSubprocess::create([
+                                                'organization_id' => $org->id,
+                                                'subprocess_id' => $subprocess->id
+                                            ]);
+                                        }
+                                        
+
+                                        //Primero, Vemos si existe el riesgo genérico
+                                        $risk = \Ermtool\Risk::getRiskByName2($row['riesgo']);
+
+                                        if (empty($risk))
+                                        {
+                                            //Vemos si existe subcategoría
+                                            $cat = \Ermtool\Risk_category::getRiskCategoryByName($row['subcategoria_de_riesgo']);
+
+                                            if (empty($cat))
+                                            {
+                                                //Obtenemos categoría principal
+                                                $catpp = \Ermtool\Risk_category::getRiskCategoryByName($row['categoria_de_riesgo']);
+
+                                                if (empty($catpp))
+                                                {
+                                                    $catpp = \Ermtool\Risk_category::create([
+                                                        'name' => $row['categoria_de_riesgo'],
+                                                        'description' => $row['categoria_de_riesgo']
+                                                    ]);
+                                                }
+
+                                                $cat = \Ermtool\Risk_category::create([
+                                                    'name' => $row['subcategoria_de_riesgo'],
+                                                    'description' => $row['subcategoria_de_riesgo'],
+                                                    'risk_category_id' => $catpp->id
+                                                ]);
+                                            }
+
+                                            //Creamos el riesgo
+                                            $risk = \Ermtool\Risk::create([
+                                                'name' => $row['riesgo'],
+                                                'description' => $row['descripcion_riesgo'],
+                                                'risk_category_id' => $cat->id,
+                                                'type' => 0,
+                                                'type2' => 1,
+                                            ]);
+                                        }
+
+                                        //Ahora vemos si existe el Riesgo para la organización
+                                        $orgrisk = \Ermtool\Risk::getRiskByName($risk->id,$org->id);
+
+                                        if (empty($orgrisk))
+                                        {
+                                            //Obtenemos responsable
+                                            $resp = \Ermtool\Stakeholder::getUserByMail($row['correo_responsable']);
+
+                                            if (empty($resp))
+                                            {
+                                                $resp_id = NULL;
+                                            }
+                                            else
+                                            {
+                                                $resp_id = $resp->id;
+                                            }
+
+                                            $orgrisk = \Ermtool\OrganizationRisk::create([
+                                                'organization_id' => $org->id,
+                                                'risk_id' => $risk->id,
+                                                'stakeholder_id' => $resp_id
+                                            ]);
+                                        }
+                                        //Asignamos subproceso al riesgo y a la organización
+                                        if (!empty($subprocess))
+                                        {
+                                            //Vemos si existe Risk Subprocess
+                                            $subprocess = \Ermtool\Subprocess::find($subprocess->id);
+                                            //$hasSub1 = $subprocess1->risks()->where('risks.id', $risk->id)->exists();
+                                            $hasSub = $subprocess->risks()->find($risk->id);
+                                            if (empty($hasSub)) //Si es falso, se crea enlace
+                                            {
+                                                $risk_subprocess = $subprocess->risks()->attach($risk->id);
+                                            }
+                                        }
+
+                                        //Agregamos evaluaciones, viendo primero si la fecha existe
+                                            if ($row['impacto_actual'] != '' && $row['impacto_actual'] != NULL)
+                                            {
+                                                $eval1 = \Ermtool\Evaluation::where('created_at','=',$row['fecha_actual'])->first(['id']);
+
+                                                if (empty($eval1))
+                                                {
+                                                    $eval1 = DB::table('evaluations')
+                                                            ->insertGetId([
+                                                                'name' => 'Evaluación Manual',
+                                                                'type' => 1,
+                                                                'consolidation' => 1,
+                                                                'description' => 'Evaluación Manual',
+                                                                'created_at' => $row['fecha_actual'],
+                                                                'updated_at' => $row['fecha_actual'],
+                                                            ]);
+                                                }
+                                                else
+                                                {
+                                                    $eval1 = $eval1->id;
+                                                }
+
+                                                //vemos si ya existe evaluación para este riesgo y en esta evaluación (para el caso que los riesgos se repiten)
+                                                $evaluation_risk = DB::table('evaluation_risk')
+                                                        ->where('evaluation_id','=',$eval1)
+                                                        ->where('organization_risk_id','=',$orgrisk->id)
+                                                        ->select('id')
+                                                        ->first();
+
+                                                if (empty($evaluation_risk))
+                                                {
+                                                    //insertamos riesgo evaluation_risk
+                                                    $evaluation_risk = DB::table('evaluation_risk')->insertGetId([
+                                                            'evaluation_id' => $eval1,
+                                                            'organization_risk_id' => $orgrisk->id,
+                                                            'avg_probability' => $row['probabilidad_actual'],
+                                                            'avg_impact' => $row['impacto_actual']
+                                                        ]);
+                                                }
+                                                else
+                                                {
+                                                    $evaluation_risk = $evaluation_risk->id;
+                                                }
+                                                            
+                                                //vemos si existe en evaluation_risk_stakeholder
+                                                $evaluation_risk_stake = DB::table('evaluation_risk_stakeholder')
+                                                    ->join('evaluation_risk','evaluation_risk.id','=','evaluation_risk_stakeholder.evaluation_risk_id')
+                                                    ->where('evaluation_risk_stakeholder.evaluation_risk_id','=',$evaluation_risk)
+                                                    ->where('evaluation_risk_stakeholder.user_id','=',Auth::user()->id)
+                                                    ->where('evaluation_risk.evaluation_id','=',$eval1)
+                                                    ->select('evaluation_risk_stakeholder.id')
+                                                    ->first();
+
+                                                if (empty($evaluation_risk_stake))
+                                                {
+                                                    //insertamos en evaluation_risk_stakeholder
+                                                    DB::table('evaluation_risk_stakeholder')->insert([
+                                                        'evaluation_risk_id'=>$evaluation_risk,
+                                                        'user_id'=>Auth::user()->id,
+                                                        'probability'=>$row['probabilidad_actual'],
+                                                        'impact'=>$row['impacto_actual'],
+                                                    ]);
+                                                }
+                                            }
+
+                                        //Control
+                                        if ($row['control'] != NULL && $row['control'] != '')
+                                        {
+                                            $control = \Ermtool\Control::getControlByName($row['control']);
+
+                                            if (empty($control))
+                                            {
+                                                //definimos preventivo, contingencia (correctivo)
+                                                if ($row['proposito'] == 'Preventivo')
+                                                {
+                                                    $purpose = 0;
+                                                }
+                                                else if ($row['proposito'] == 'Detectivo')
+                                                {
+                                                    $purpose = 1;
+                                                }
+                                                else if ($row['proposito'] == 'Correctivo')
+                                                {
+                                                    $purpose = 2;
+                                                }
+                                                else
+                                                {
+                                                    $purpose = NULL;
+                                                }
+
+                                                if ($row['tipo_control'] == 'Manual')
+                                                {
+                                                    $type = 0;
+                                                }
+                                                else if ($row['tipo_control'] == 'Semi-automático')
+                                                {
+                                                    $type = 1;
+                                                }
+                                                else if ($row['tipo_control'] == 'Automático')
+                                                {
+                                                    $type = 2;
+                                                }
+                                                else
+                                                {
+                                                    $type = NULL;
+                                                }
+
+                                                $nombre = $row['control'];
+                                                $nombre = eliminarSaltos($nombre);
+
+                                                $description = eliminarSaltos($row['descripcion_control']);
+
+                                                $control = \Ermtool\Control::create([
+                                                    'name'=>$nombre,
+                                                    'description'=>$description,
+                                                    'type' =>$type,
+                                                    'type2'=>0,
+                                                    'purpose'=>$purpose
+                                                ]);
+                                            }
+
+                                            //Vemos si existe el control para la organización
+                                            $co = \Ermtool\ControlOrganization::getByCO($control->id,$org->id);
+
+                                            if (empty($co))
+                                            {
+                                                //identificamos usuario por mail
+                                                $user_control = \Ermtool\Stakeholder::getUserByMail($row['correo_responsable_control']);
+
+                                                $user_control = empty($user_control) ? NULL : $user_control->id;
+                                                $evidence = $row['evidencia_control'] != '' ? $row['evidencia_control'] : NULL;
+                                                $evidence = eliminarSaltos($evidence);
+
+                                                $comments = $row['comentarios_control'] != '' ? $row['comentarios_control'] : NULL;
+                                                $comments = eliminarSaltos($comments);
+
+                                                $co = \Ermtool\ControlOrganization::create([
+                                                    'control_id' => $control->id,
+                                                    'organization_id' => $org->id,
+                                                    'stakeholder_id' => $user_control,
+                                                    'comments' => $comments,
+                                                    'evidence' => $evidence,
+                                                    'cont_percentage' => intval($row['de_contribucion_actual'])
+                                                ]);
+                                            }
+
+                                            //Vemos si existe cor
+                                            $cor = DB::table('control_organization_risk')
+                                                            ->where('organization_risk_id','=',$orgrisk->id)
+                                                            ->where('control_id','=',$control->id)
+                                                            ->get(['id']);
+
+                                            if (empty($cor))
+                                            {
+                                                //insertamos control_organization_risk
+                                                DB::table('control_organization_risk')
+                                                    ->insert([
+                                                        'organization_risk_id' => $orgrisk->id,
+                                                        'control_id' => $control->id
+                                                    ]);
+                                            }
+
+                                            //Agregamos evaluación de control
+                                                //Vemos si hay porcentaje de contribución
+                                                if ($row['de_contribucion_actual'] != '' && $row['fecha_actual'] != '')
+                                                {
+                                                    $fecha = explode('-',$row['fecha_actual']);
+                                                    $ano = $fecha[0];
+                                                    $mes = $fecha[1];
+                                                    $dia = explode(' ',$fecha[2]);
+                                                    $dia = $dia[0];
+
+                                                    //Guardamos en control_eval_risk_temp valor del control (autoevaluación)
+                                                    DB::table('control_eval_risk_temp')
+                                                        ->insert([
+                                                            'result' => intval($row['de_contribucion_actual']),
+                                                            'control_organization_id' => $co->id,
+                                                            'auto_evaluation' => 1,
+                                                            'status' => 1,
+                                                            'created_at' => $row['fecha_actual']
+                                                        ]);
+
+                                                    //agregamos valor residual de riesgo
+                                                    $controlclass = new Controles;
+                                                    //ahora calculamos riesgo residual 
+                                                    $controlclass->calcControlledRiskAutoEval($control->id,$org->id,$ano,$mes,$dia);
+                                                }
+                                        }
+
+                                        //Agregamos hallazgo si es que no está
+                                        if ($row['hallazgo'] != '')
+                                        {
+                                            $issue = \Ermtool\Issue::getIssueByName($row['hallazgo']);
+
+                                            if (empty($issue))
+                                            {
+                                                if ($row['clasificacion_hallazgo'] != '')
+                                                {
+                                                    $classification_id = \Ermtool\IssueClassification::getIssueClassificationByName($row['clasificacion_hallazgo']);
+                                                }
+                                                
+                                                $rec = $row['recomendaciones'] != '' ? $row['recomendaciones'] : NULL;
+                                                $desc = $row['descripcion_hallazgo'] != '' ? $row['descripcion_hallazgo'] : NULL;
+
+                                                $issue = \Ermtool\Issue::create([
+                                                    'name' => $row['hallazgo'],
+                                                    'description' => $desc,
+                                                    'recommendations' => $rec,
+                                                    'classification_id' => $classification_id->id,
+                                                    'control_id' => $control->id,
+                                                    'organization_id' => $org->id
+                                                ]);
+                                            }
+
+                                            if ($row['plan_de_accion'] != '')
+                                            {
+                                                $action_plan = \Ermtool\Action_plan::getActionPlanByDescription($row['plan_de_accion']);
+
+                                                if (empty($action_plan))
+                                                {
+                                                    if ($row['estado_plan'] == 'En progreso')
+                                                    {
+                                                        $status = 0;
+                                                    }
+                                                    else if ($row['estado_plan'] == 'Cerrado')
+                                                    {
+                                                        $status = 1;
+                                                    }
+                                                    else
+                                                    {
+                                                        $status = NULL;
+                                                    }
+                                                    
+
+                                                    if ($row['correo_responsable_plan'] != '')
+                                                    {
+                                                        $resp_plan = \Ermtool\Stakeholder::getUserByMail($row['correo_responsable_plan']);
+
+                                                        if (empty($resp_plan))
+                                                        {
+                                                            $resp_plan = NULL;
+                                                        }
+                                                        else
+                                                        {
+                                                            $resp_plan = $resp_plan->id;
+                                                        }
+                                                    }
+
+                                                    $final_date = $row['fecha_final_plan'] != '' ? $row['fecha_final_plan'] : NULL;
+
+                                                    $action_plan = \Ermtool\Action_plan::create([
+                                                        'issue_id' => $issue->id,
+                                                        'description' => $row['plan_de_accion'],
+                                                        'final_date' => $final_date,
+                                                        'status' => $status,
+                                                        'stakeholder_id' => $resp_plan
+                                                    ]);  
+
+                                                    if ($row['de_avance'] != '')
+                                                    {
+                                                        $comments = $row['comentarios_de_avance'] != '' ? $row['comentarios_de_avance'] : NULL;
+
+                                                        $per = intval($row['de_avance']);
+
+                                                        //insertamos porcentaje de avance
+                                                         DB::table('progress_percentage')
+                                                            ->insert([
+                                                                'percentage' => $per,
+                                                                'comments' => $comments,
+                                                                'action_plan_id' => $action_plan->id,
+                                                                'created_at' => $row['fecha_de_avance'],
+                                                                'updated_at' => $row['fecha_de_avance']
+                                                            ]);  
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+                                   
                             }
                             else if ($_POST['kind'] == 6) //Planilla TI KOAndina
                             {
