@@ -629,4 +629,11 @@ class Issue extends Model
 
         return $issues;
     }
+
+    public static function getIssueByName($name)
+    {
+        return DB::table('issues')
+            ->where('name','=',$name)
+            ->first(['*']);
+    }
 }
