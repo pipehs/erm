@@ -449,14 +449,14 @@ class Risk extends Model
                 ->whereNull('organization_risk.deleted_at')
                 ->where('risks.name','=',$risk)
                 ->where('organization_risk.organization_id','=',$org_id)
-                ->select('risks.id','organization_risk.id as org_risk_id')
+                ->select('risks.id as risk_id','organization_risk.id as id')
                 ->first();
         }
         else
         {
             return DB::table('risks')
                 ->where('risks.name','LIKE','%'.$risk.'%')
-                ->select('risks.id')
+                ->select('risks.id as risk_id')
                 ->first();
         }
     }

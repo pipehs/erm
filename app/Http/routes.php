@@ -1516,3 +1516,9 @@ Route::get('cerrar_caso', function(){
 Route::get('reportes_denuncias', function(){
    return View::make('denuncias.reportes');
 });
+
+
+//Ruta temporal para eliminar riesgos y controles, excepto contables y TI
+Route::get('delete_all',[
+	'as' => 'delete_all', 'uses' => 'HomeController@deleteAll'
+]);
