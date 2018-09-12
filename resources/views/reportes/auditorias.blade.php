@@ -147,6 +147,36 @@ function veraudit(id)
 			});
 		}
 		text += '</td></tr>'
+
+		text += '<tr><td><b>Auditor(es)</b></td><td>'
+
+		if (datos.audit.auditors.length > 0)
+		{
+			$(datos.audit.auditors).each( function(i, auditor) {
+				text += '<li>'+auditor.name+' '+auditor.surnames+'</li>'
+			});
+		}
+		else 
+		{
+			text += 'No se han agregado auditores'
+		}	
+		
+		text += '</td></tr>'
+
+		text += '<tr><td><b>Auditado(s)</b></td><td>'
+
+		if (datos.audit.audited.length > 0)
+		{
+			$(datos.audit.audited).each( function(i, audited) {
+				text += '<li>'+audited.name+' '+audited.surnames+'</li>'
+			});
+		}
+		else 
+		{
+			text += 'No se han agregado auditados'
+		}	
+		text += '</td></tr>'
+
 		text += '<tr><td><b>Recursos</b></td><td>'
 
 		if (datos.audit.resources == null)

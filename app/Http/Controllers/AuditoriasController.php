@@ -1046,13 +1046,38 @@ class AuditoriasController extends Controller
 
                             //insertamos y obtenemos id para ingresarlo en audit_risk y otros
                             $audit_audit_plan_id = DB::table('audit_audit_plan')
-                                        ->insertGetId([
-                                            'audit_plan_id' => $audit_plan_id,
-                                            'audit_id' => $audit,
-                                            'initial_date' => $_POST['audit_'.$audit.'_initial_date'],
-                                            'final_date' => $_POST['audit_'.$audit.'_final_date'],
-                                            'resources' => $resources,
-                                            ]);
+                                    ->insertGetId([
+                                        'audit_plan_id' => $audit_plan_id,
+                                        'audit_id' => $audit,
+                                        'initial_date' => $_POST['audit_'.$audit.'_initial_date'],
+                                        'final_date' => $_POST['audit_'.$audit.'_final_date'],
+                                        'resources' => $resources,
+                                    ]);
+
+                            //ACT 10-09-18: Insertamos auditores y auditados si es que hay
+                            if (isset($_POST['audit_'.$audit.'_auditors']))
+                            {
+                                foreach ($_POST['audit_'.$audit.'_auditors'] as $auditor)
+                                {
+                                    \Ermtool\AuditAuditor::create([
+                                        'audit_audit_plan_id' => $audit_audit_plan_id,
+                                        'stakeholder_id' => $auditor,
+                                        'kind' => 'Auditor'
+                                    ]);
+                                }
+                            }
+
+                            if (isset($_POST['audit_'.$audit.'_audited']))
+                            {
+                                foreach ($_POST['audit_'.$audit.'_audited'] as $audited)
+                                {
+                                    \Ermtool\AuditAuditor::create([
+                                        'audit_audit_plan_id' => $audit_audit_plan_id,
+                                        'stakeholder_id' => $audited,
+                                        'kind' => 'Auditado'
+                                    ]);
+                                }
+                            }
                             
                         }
                     } //fin isset($_POST['audits'])
@@ -1083,6 +1108,31 @@ class AuditoriasController extends Controller
                                                 'final_date' => $_POST['audit_new'.$i.'_final_date'],
                                                 'resources' => $_POST['audit_new'.$i.'_resources'],
                                                 ]);
+
+                                //ACT 10-09-18: Insertamos auditores y auditados si es que hay
+                                if (isset($_POST['audit_new'.$i.'_auditors']))
+                                {
+                                    foreach ($_POST['audit_new'.$i.'_auditors'] as $auditor)
+                                    {
+                                        \Ermtool\AuditAuditor::create([
+                                            'audit_audit_plan_id' => $audit_audit_plan_id,
+                                            'stakeholder_id' => $auditor,
+                                            'kind' => 'Auditor'
+                                        ]);
+                                    }
+                                }
+
+                                if (isset($_POST['audit_new'.$i.'_audited']))
+                                {
+                                    foreach ($_POST['audit_new'.$i.'_audited'] as $audited)
+                                    {
+                                        \Ermtool\AuditAuditor::create([
+                                            'audit_audit_plan_id' => $audit_audit_plan_id,
+                                            'stakeholder_id' => $audited,
+                                            'kind' => 'Auditado'
+                                        ]);
+                                    }
+                                }
                             }
 
                             $i += 1;
@@ -4655,21 +4705,26 @@ class AuditoriasController extends Controller
     {
         try
         {
-            $audit = DB::table('audits')
-                    ->join('audit_audit_plan','audit_audit_plan.audit_id','=','audits.id')
-                    ->where('audit_audit_plan.id','=',$id)
-                    ->select('audits.id','audits.name','audits.description','audit_audit_plan.resources','audit_audit_plan.initial_date','audit_audit_plan.final_date')
-                    ->first();
+            $audit = \Ermtool\Audit::getAuditById($id);
+
             $initial_date = new DateTime($audit->initial_date);
             $audit->initial_date = date_format($initial_date, 'd-m-Y');
             $final_date = new DateTime($audit->final_date);
             $audit->final_date = date_format($final_date, 'd-m-Y');
+
+            //ACT 12-09-18: Agregamos organizaciones de auditoría y responsables
+            $orgs = \Ermtool\Audit::getOrganizations($id);
+
+            $auditors = \Ermtool\AuditAuditor::getAuditors($id,'Auditor');
+
+            $audited = \Ermtool\AuditAuditor::getAuditors($id,'Auditado');
+
+            $audit->orgs = $orgs;
+            $audit->auditors = $auditors;
+            $audit->audited = $audited;
+
             //obtenemos programas
-            $audit_programs = DB::table('audit_programs')
-                        ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_program_id','=','audit_programs.id')
-                        ->where('audit_audit_plan_audit_program.audit_audit_plan_id','=',$id)
-                        ->select('audit_programs.name','audit_audit_plan_audit_program.id')
-                        ->get();
+            $audit_programs = \Ermtool\Audit_program::getAuditProgramsByAudit($id);
             $i = 0;
             $programs = array();
             foreach ($audit_programs as $program)

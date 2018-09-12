@@ -128,4 +128,22 @@ class Audit extends Model
                 ->select('id')
                 ->first();
     }
+
+    public static function getAuditById($id)
+    {
+        return DB::table('audits')
+                ->join('audit_audit_plan','audit_audit_plan.audit_id','=','audits.id')
+                ->where('audit_audit_plan.id','=',$id)
+                ->select('audits.id','audits.name','audits.description','audit_audit_plan.resources','audit_audit_plan.initial_date','audit_audit_plan.final_date')
+                ->first();
+    }
+
+    public static function getOrganizations($id)
+    {
+        return DB::table('audit_audit_plan_organization')
+                ->join('organizations','organizations.id','=','audit_audit_plan_organization.organization_id')
+                ->where('audit_audit_plan_organization.audit_audit_plan_id','=',$id)
+                ->select('organizations.id','organizations.name','organizations.description')
+                ->get();
+    }
 }
