@@ -2490,7 +2490,7 @@ class EvaluacionRiesgosController extends Controller
                     ->where('evaluation_risk.organization_risk_id','=',$evaluation->risk_id)
                     ->where('evaluations.consolidation','=',1)
                     ->where('evaluations.type','=',1)
-                    ->where('evaluations.updated_at','<=',date($ano.$mes.$dia.' 23:59:59'))
+                    ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
                     ->max('evaluations.updated_at');
 
                     //$updated_at_in = str_replace('-','',$updated_at_in);
@@ -2500,7 +2500,7 @@ class EvaluacionRiesgosController extends Controller
             $updated_at_ctrl = DB::table('controlled_risk')
                     ->join('organization_risk','organization_risk.id','=','controlled_risk.organization_risk_id')
                     ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
-                    ->where('controlled_risk.created_at','<=',date($ano.$mes.$dia.' 23:59:59'))
+                    ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
                     ->max('controlled_risk.created_at');
 
                     //$updated_at_ctrl = str_replace('-','',$updated_at_ctrl);
@@ -2562,7 +2562,7 @@ class EvaluacionRiesgosController extends Controller
                     //ACT 12-01-18: Vemos por organización igual ya que para cada organización habrá distinta evaluación
                     $subobj = DB::table('subprocesses')
                         ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                        ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+                        ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
                         ->where('organization_risk.id','=',$evaluation->risk_id)
                         ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
                         ->select('subprocesses.name')
@@ -2572,9 +2572,9 @@ class EvaluacionRiesgosController extends Controller
                 {
                     $subobj = DB::table('subprocesses')
                     ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                    ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                    ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
                     ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
-                    ->where('organization_subprocess.organization_id','=',$org)
+                    ->where('organization_risk.organization_id','=',$org)
                     ->select('subprocesses.name')
                     ->get();
                 }
@@ -2617,7 +2617,7 @@ class EvaluacionRiesgosController extends Controller
                 {
                     $subobj = DB::table('subprocesses')
                         ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                        ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+                        ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
                         ->where('organization_risk.id','=',$evaluation->risk_id)
                         ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
                         ->select('subprocesses.name')
@@ -2652,7 +2652,7 @@ class EvaluacionRiesgosController extends Controller
                 $processes = DB::table('processes')
                             ->join('subprocesses','subprocesses.process_id','=','processes.id')
                             ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                            ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+                            ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
                             ->where('organization_risk.id','=',$evaluation->risk_id)
                             ->select('processes.id','processes.name')
                             ->get();
