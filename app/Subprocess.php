@@ -181,7 +181,7 @@ class Subprocess extends Model
     {
         return DB::table('subprocesses')
             ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-            ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+            ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
             ->where('organization_risk.id','=',$org_risk)
             ->select('subprocesses.name','subprocesses.description')
             ->get();
@@ -193,7 +193,7 @@ class Subprocess extends Model
                 ->join('organization_risk','organization_risk.risk_id','=','risks.id')
                 ->join('organization_subprocess','organization_subprocess.organization_id','=','organization_risk.organization_id')
                 ->join('control_organization_risk','control_organization_risk.organization_risk_id','=','organization_risk.id')
-                ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
+                ->join('risk_subprocess','risk_subprocess.organization_risk_id','=','organization_risk.id')
                 ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
                 ->where('control_organization_risk.control_id','=',$control)
                 ->where('organization_subprocess.organization_id','=',(int)$org)

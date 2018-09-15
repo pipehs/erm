@@ -1992,7 +1992,8 @@ class RiesgosController extends Controller
                 $risks = \Ermtool\Risk::getRisksWithType($org,$category,$value);
             
                 foreach ($risks as $risk)
-                {       
+                {
+                    $controls = array();    
                         if (Session::get('languaje') == 'en')
                         {
                             $probabilidad = "No evaluation";
@@ -2234,7 +2235,7 @@ class RiesgosController extends Controller
                             }
 
                             //obtenemos controles
-                            $controls = \Ermtool\Control::getControlsFromRisk($org,$risk->risk_id);
+                            $controls = \Ermtool\Control::getControlsFromOrgRisk($risk->id);
 
                         //seteamos controles
                         if ($controls == NULL || empty($controls))

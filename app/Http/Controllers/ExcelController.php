@@ -2892,7 +2892,7 @@ class ExcelController extends Controller
                                     }
                                 }
                                    
-                            }
+                            }/*
                             else if ($_POST['kind'] == 20) //Carga Riesgos KOAndina
                             {
                                 foreach ($row as $row)
@@ -3313,7 +3313,7 @@ class ExcelController extends Controller
                                     }
                                 }
                                    
-                            }
+                            }*/
                             else if ($_POST['kind'] == 20) //Carga Riesgos KOAndina Simplificado
                             {
                                 //foreach ($row as $row)
@@ -3457,7 +3457,7 @@ class ExcelController extends Controller
                                     }
                                 //}
                                    
-                            }*/
+                            }
                             else if ($_POST['kind'] == 6) //Planilla TI KOAndina
                             {
                                 //Primero que todo, si no existe el proceso, no se agrega nada:
