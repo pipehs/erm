@@ -148,17 +148,23 @@ horasPlan = 0;
 							});
 					});
 
-
+					stakeholders = [];
 					//obtenemos stakeholders de la organización
 					//ACT 24-01-18: Puede ser de cualquier organización. Continuamos enviando id de org para facilitar mod en caso de que algún cliente desee que se aplique el filtro 
 					$.get('get_stakeholders.'+$("#orgs").val(), function (result) {
+
+							
 							//parseamos datos obtenidos
 							var datos = JSON.parse(result);
 							//seteamos datos en select de stakeholders
 							$(datos).each( function() {
 								$("#stakeholder_id").append('<option value="' + this.rut + '">' + this.fullname +'</option>');
+								//Guardamos datos de usuarios en array para utilizar en auditorías
+								data = {id:this.rut, name:this.fullname}
+								stakeholders.push(data)
 							});
 					});
+
 			}
 
 			else
@@ -375,18 +381,60 @@ $("#auditorias").change(function()
 				$('#info_auditorias').append('<div class="form-group">');
 				$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_resources" class="col-sm-4 control-label">Recursos</label>');
 				$('#info_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_' + $(this).val() + '_resources" class="form-control" ></div>');
+				$('#info_auditorias').append('</div>');
 
 				//fecha inicio
 				$('#info_auditorias').append('<div class="form-group">');
 				$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_initial_date" class="col-sm-4 control-label">Fecha de inicio *</label>');
 				$('#info_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_' + $(this).val() + '_initial_date" onblur="validarFechaMayorActual(this.value)" class="form-control" required="required"></div>');
-
+				$('#info_auditorias').append('</div>');
 
 				//fecha fin
 				$('#info_auditorias').append('<div class="form-group">');
 				$('#info_auditorias').append('<label for="audit_' + $(this).val() + '_final_date" class="col-sm-4 control-label">Fecha final *</label>');
 				$('#info_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_' + $(this).val() + '_final_date" onblur="validarFechaMayorActual(this.value)" class="form-control" required="required"></div>');
-				$('#info_auditorias').append('</br></br>');
+				$('#info_auditorias').append('</div></br>');
+
+				//ACT 12-09-18: Organizaciones
+				orgs = ''
+				orgs += '<div class="form-group">';
+				orgs += '<label for="audit_'+ $(this).val() +'_organizations" class="col-sm-4 control-label">Organización(es)</label>';
+				orgs += '<div class="col-sm-8"><select name="audit_'+ $(this).val() +'_organizations[]" class="form-control" multiple="true">';
+
+				//seteamos datos que se guardaron en array en auditorias->create.blade.php
+				$(organizations).each( function() {
+					orgs += '<option value="' + this.id + '">' + this.name +'</option>';
+				});
+
+				orgs += '</select></div></div>'
+				$('#info_auditorias').append(orgs);
+
+				//ACT 10-09-18: Equipo de auditores y auditados
+				auditors = ''
+				auditors += '<div class="form-group">';
+				auditors += '<label for="audit_'+ $(this).val() +'_auditors" class="col-sm-4 control-label">Auditor(es)</label>';
+				auditors += '<div class="col-sm-8"><select name="audit_'+ $(this).val() +'_auditors[]" class="form-control" multiple="true">';
+
+				//seteamos datos que se guardaron en array en auditorias->create.blade.php
+				$(stakeholders).each( function() {
+					auditors += '<option value="' + this.id + '">' + this.name +'</option>';
+				});
+
+				auditors += '</select></div>'
+				$('#info_auditorias').append(auditors);
+
+				audited = ''
+				audited += '<div class="form-group">';
+				audited += '<label for="audit_'+ $(this).val() +'_audited" class="col-sm-4 control-label">Auditado(s)</label>';
+				audited += '<div class="col-sm-8"><select name="audit_'+ $(this).val() +'_audited[]" class="form-control" multiple="true">';
+
+				//seteamos datos que se guardaron en array en auditorias->create.blade.php
+				$(stakeholders).each( function() {
+					audited += '<option value="' + this.id + '">' + this.name +'</option>';
+				});
+
+				audited += '</select></div>'
+				$('#info_auditorias').append(audited);
 				
 			})				
 		}
@@ -414,65 +462,78 @@ $("#agregar_auditoria").click(function() {
 		$('#info_new_auditorias').append('<div class="form-group">');
 		$('#info_new_auditorias').append('<label for="audit_new'+cont+'_name" class="col-sm-4 control-label">Nombre *</label>');
 		$('#info_new_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_new'+cont+'_name" class="form-control"></div>');
+		$('#info_new_auditorias').append('</div>');
 
 		//descripción
 		$('#info_new_auditorias').append('<div class="form-group">');
 		$('#info_new_auditorias').append('<label for="audit_new'+cont+'_description" class="col-sm-4 control-label">Descripci&oacute;n</label>');
 		$('#info_new_auditorias').append('<div class="col-sm-8"><textarea rows="3" cols="4" name="audit_new'+cont+'_description" class="form-control"></textarea></div>');
-													
-		$('#info_new_auditorias').append('</br></br>');
-
-		//ACT 10-09-18: Equipo de auditores y auditados
-		auditors = '</br>'
-		auditors += '<div class="form-group">';
-		auditors += '<label for="audit_new'+cont+'_auditors" class="col-sm-4 control-label">Auditor(es)</label>';
-		auditors += '<div class="col-sm-8"><select name="audit_new'+cont+'_auditors[]" class="form-control" multiple="true">';
-
-		audited = '</br>'
-		audited += '<div class="form-group">';
-		audited += '<label for="audit_new'+cont+'_auditors" class="col-sm-4 control-label">Auditado(s)</label>';
-		audited += '<div class="col-sm-8"><select name="audit_new'+cont+'_audited[]" class="form-control" multiple="true">';
-
-		$.get('get_stakeholders.'+null, function (result) {
-
-			auditors2 = ''
-			//parseamos datos obtenidos
-			var datos = JSON.parse(result);
-			//seteamos datos en select de stakeholders
-			$(datos).each( function() {
-				auditors2 += '<option value="' + this.rut + '">' + this.fullname +'</option>';
-			});
-
-			auditors = auditors + auditors2
-			audited += auditors2 
-
-			auditors += '</select></div>'
-			audited += '</select></div>'
-			$('#info_new_auditorias').append(auditors);
-			$('#info_new_auditorias').append(audited);
-		});
+		$('#info_new_auditorias').append('</div>');
 
 		//recursos
 		$('#info_new_auditorias').append('<div class="form-group">');
 		$('#info_new_auditorias').append('<label for="audit_new'+cont+'_resources" class="col-sm-4 control-label">Recursos</label>');
 		$('#info_new_auditorias').append('<div class="col-sm-8"><input type="text" name="audit_new'+cont+'_resources" class="form-control" ></div>');
+		$('#info_new_auditorias').append('</div>');
 
 		//HH
 		$('#info_new_auditorias').append('<div class="form-group">');
 		$('#info_new_auditorias').append('<label for="audit_new' + cont + '_HH"  class="col-sm-4 control-label">Horas-Hombre de auditoría</label>');
 		$('#info_new_auditorias').append('<div class="col-sm-8"><input type="number" id="newaudit_'+cont+'" min="0" onchange="horas()" name="audit_new' + cont + '_HH" class="form-control" ></div>');
+		$('#info_new_auditorias').append('</div>');
 
 		//fecha inicio
 		$('#info_new_auditorias').append('<div class="form-group">');
 		$('#info_new_auditorias').append('<label for="audit_new'+cont+'_initial_date" class="col-sm-4 control-label">Fecha de inicio *</label>');
 		$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_initial_date" onblur="validarFechaMayorActual(this.value)" class="form-control" required="required"></div>');
-
+		$('#info_new_auditorias').append('</div>');
 
 		//fecha fin
 		$('#info_new_auditorias').append('<div class="form-group">');
 		$('#info_new_auditorias').append('<label for="audit_new'+cont+'_final_date" class="col-sm-4 control-label">Fecha final *</label>');
 		$('#info_new_auditorias').append('<div class="col-sm-8"><input type="date" name="audit_new'+cont+'_final_date"  onblur="validarFechaMayorActual(this.value)"class="form-control" required="required"></div>');
-		$('#info_new_auditorias').append('</br></br>');
+		$('#info_new_auditorias').append('</div></br>');
+
+		//ACT 12-09-18: Organizaciones
+		orgs = '</br>'
+		orgs += '<div class="form-group">';
+		orgs += '<label for="audit_new'+cont+'_organizations" class="col-sm-4 control-label">Organización(es)</label>';
+		orgs += '<div class="col-sm-8"><select name="audit_new'+cont+'_organizations[]" class="form-control" multiple="true">';
+
+		//seteamos datos que se guardaron en array en auditorias->create.blade.php
+		$(organizations).each( function() {
+			orgs += '<option value="' + this.id + '">' + this.name +'</option>';
+		});
+
+		orgs += '</select></div>'
+		$('#info_new_auditorias').append(orgs);
+
+		//ACT 10-09-18: Equipo de auditores y auditados
+		auditors = ''
+		auditors += '<div class="form-group">';
+		auditors += '<label for="audit_new'+cont+'_auditors" class="col-sm-4 control-label">Auditor(es)</label>';
+		auditors += '<div class="col-sm-8"><select name="audit_new'+cont+'_auditors[]" class="form-control" multiple="true">';
+
+		//seteamos datos que se guardaron en array en auditorias->create.blade.php
+		$(stakeholders).each( function() {
+			auditors += '<option value="' + this.id + '">' + this.name +'</option>';
+		});
+
+		auditors += '</select></div>'
+		$('#info_new_auditorias').append(auditors);
+
+		audited = ''
+		audited += '<div class="form-group">';
+		audited += '<label for="audit_new'+cont+'_audited" class="col-sm-4 control-label">Auditado(s)</label>';
+		audited += '<div class="col-sm-8"><select name="audit_new'+cont+'_audited[]" class="form-control" multiple="true">';
+
+		//seteamos datos que se guardaron en array en auditorias->create.blade.php
+		$(stakeholders).each( function() {
+			audited += '<option value="' + this.id + '">' + this.name +'</option>';
+		});
+
+		audited += '</select></div>'
+		$('#info_new_auditorias').append(audited);
 
 		//movemos pantalla a nueva auditoría
 		$('html,body').animate({
