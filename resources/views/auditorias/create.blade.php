@@ -117,6 +117,11 @@
 $(document).ready(function () {
 
 	audit_plan_id = 0;
+	organizations = [];
+	@foreach ($organizations as $key => $value)
+		data = {id:{{$key}}, name:'{{$value}}'}
+		organizations.push(data)
+	@endforeach
 });
 </script>
 {!!Html::script('assets/js/create_edit_audit_plan.js')!!}
