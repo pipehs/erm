@@ -10,7 +10,7 @@ use Carbon;
 class Issue extends Model
 {
     
-    protected $fillable = ['name','description','recommendations','evidence','classification_id','audit_test_id','audit_audit_plan_id','control_evaluation_id','organization_id','comments','economic_value','kind'];
+    protected $fillable = ['name','description','recommendations','evidence','classification_id','audit_test_id','audit_audit_plan_id','control_evaluation_id','organization_id','comments','economic_value','kind','control_id'];
 
 
    	//obtiene datos del origen de un control
@@ -634,6 +634,14 @@ class Issue extends Model
     {
         return DB::table('issues')
             ->where('name','=',$name)
+            ->first(['*']);
+    }
+
+    public static function getIssueByNameAndOrg($name,$org)
+    {
+        return DB::table('issues')
+            ->where('name','=',$name)
+            ->where('organization_id','=',$org)
             ->first(['*']);
     }
 }

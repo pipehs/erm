@@ -189,6 +189,7 @@ class AuditoriasController extends Controller
                 //->lists('full_name', 'id');
                 //obtenemos lista de organizaciones
                 $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
+
                 //obtenemos universo de auditorias
                 $audits = \Ermtool\Audit::lists('name','id');
                 //obtenemos riesgos de proceso

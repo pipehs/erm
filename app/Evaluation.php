@@ -320,13 +320,14 @@ class Evaluation extends Model
         if ($cat == NULL)
         {
             //ACTUALIZACIÓN 29-08-17: Para Mostrar Consolidado en semáforo de Riesgos, enviaremos org como null
+            //ACT 15-09-18: Risk subprocess asociado a organization_risk
             if ($org == NULL)
             {
                 return $eval1 = DB::table('evaluation_risk')
                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                     ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
                     ->join('risks','risks.id','=','organization_risk.risk_id')
-                    ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                    ->join('risk_subprocess','risk_subprocess.organization_risk_id','=','organization_risk.id')
                     //->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                     ->whereNotNull('evaluation_risk.organization_risk_id')
                     ->whereNull('organization_risk.deleted_at')
@@ -342,7 +343,7 @@ class Evaluation extends Model
                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                     ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
                     ->join('risks','risks.id','=','organization_risk.risk_id')
-                    ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                    ->join('risk_subprocess','risk_subprocess.organization_risk_id','=','organization_risk.id')
                     //->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                     ->whereNotNull('evaluation_risk.organization_risk_id')
                     ->whereNull('organization_risk.deleted_at')
@@ -364,7 +365,7 @@ class Evaluation extends Model
                 ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                 ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
                 ->join('risks','risks.id','=','organization_risk.risk_id')
-                ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                ->join('risk_subprocess','risk_subprocess.organization_risk_id','=','organization_risk.id')
                 ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                 ->where('risks.risk_category_id','=',$subcat)
                 ->whereNotNull('evaluation_risk.organization_risk_id')
@@ -402,7 +403,7 @@ class Evaluation extends Model
                 ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                 ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
                 ->join('risks','risks.id','=','organization_risk.risk_id')
-                ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                ->join('risk_subprocess','risk_subprocess.organization_risk_id','=','organization_risk.id')
                 ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                 ->whereIn('risks.risk_category_id',$subcategories)
                 ->whereNotNull('evaluation_risk.organization_risk_id')

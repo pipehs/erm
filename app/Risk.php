@@ -63,8 +63,10 @@ class Risk extends Model
         $risks = DB::table('risks')
                     ->join('organization_risk','organization_risk.risk_id','=','risks.id')
                     ->join('control_organization_risk','control_organization_risk.organization_risk_id','=','organization_risk.id')
+                    ->join('control_organization','control_organization.control_id','=','control_organization_risk.control_id')
                     ->whereNull('organization_risk.deleted_at')
                     ->where('control_organization_risk.control_id','=',$control)
+                    ->where('control_organization.organization_id','=',(int)$org)
                     ->where('organization_risk.organization_id','=',(int)$org)
                     ->where('risks.status','=',0)
                     ->select('risks.id','risks.name','risks.description')
@@ -379,11 +381,12 @@ class Risk extends Model
                 ->get();
     }
 
+    //ACT 14-09-18: Ahora risk_subprocess está enlazado con organization_risk
     public static function getRisksFromSubprocess($org,$subprocess_id)
     {
         return DB::table('risks')
                 ->join('organization_risk','organization_risk.risk_id','=','risks.id')
-                ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                ->join('risk_subprocess','risk_subprocess.organization_risk_id','=','organization_risk.id')
                 ->whereNull('organization_risk.deleted_at')
                 ->where('organization_risk.organization_id','=',$org)
                 ->where('risk_subprocess.subprocess_id','=',$subprocess_id)
@@ -449,14 +452,14 @@ class Risk extends Model
                 ->whereNull('organization_risk.deleted_at')
                 ->where('risks.name','=',$risk)
                 ->where('organization_risk.organization_id','=',$org_id)
-                ->select('risks.id','organization_risk.id as org_risk_id')
+                ->select('risks.id as risk_id','organization_risk.id as id','risks.name','risks.description')
                 ->first();
         }
         else
         {
             return DB::table('risks')
                 ->where('risks.name','LIKE','%'.$risk.'%')
-                ->select('risks.id')
+                ->select('risks.id as risk_id','risks.name','risks.description')
                 ->first();
         }
     }
@@ -477,7 +480,7 @@ class Risk extends Model
     {
         return DB::table('risks')
             ->where('risks.name','=',$risk)
-            ->select('risks.id')
+            ->select('risks.id','risks.name','risks.description')
             ->first();
     }
 
