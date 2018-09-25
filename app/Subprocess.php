@@ -31,9 +31,19 @@ class Subprocess extends Model
     	return $this->belongsTo('Ermtool\Process');
     }
 
+    //25-09-18: Obsoleto
     public function risks()
     {
         return $this->belongsToMany('Ermtool\Risk');
+    }
+
+    public static function insertOrganizationRisk($id,$org_risk_id)
+    {
+        return DB::table('risk_subprocess')
+            ->insertGetId([
+                'subprocess_id' => $id,
+                'organization_risk_id' => $org_risk_id
+            ]);
     }
 
     public static function getSubprocesses($org)

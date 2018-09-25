@@ -89,7 +89,7 @@ class RiesgosController extends Controller
                         //$subprocesses = \Ermtool\Risk::find($riesgo['id'])->subprocesses;
                         $subprocesses = DB::table('subprocesses')
                                         ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                                        ->where('risk_subprocess.risk_id','=',$riesgo->id)
+                                        ->where('risk_subprocess.organization_risk_id','=',$riesgo->org_risk_id)
                                         ->groupBy('subprocesses.name','subprocesses.id')
                                         ->select('subprocesses.name','subprocesses.id')
                                         ->get();
@@ -363,7 +363,7 @@ class RiesgosController extends Controller
                         $subprocesses = DB::table('subprocesses')
                                         ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
                                         ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                                        ->where('risk_subprocess.risk_id','=',$riesgo->id)
+                                        ->where('risk_subprocess.organization_risk_id','=',$riesgo->org_risk_id)
                                         ->where('organization_subprocess.organization_id','=',$_GET['organization_id'])
                                         ->select('subprocesses.name','subprocesses.id')
                                         ->get();
@@ -952,14 +952,25 @@ class RiesgosController extends Controller
                         //obtenemos id de riesgo recien ingresado
                         //$risk = $risk->id;
 
+                        //ACTUALIZACIÓN 29-03-17: Agregamos en tabla organization_risk
+                        //ACTUALIZACIÓN 16-08-17: Agregamos aquí también stakeholder_id
+                        //ACTUALIZACIÓN 08-01-17: Agregamos aquí también comentarios
+                        //ACT 26-04-18: Agregamos respuesta al riesgo
+                        //ACT 25-09-18: Obtenemos aquí mismo org_risk
+                        $org_risk = \Ermtool\Risk::insertOrganizationRisk($_POST['org_id'],$risk->id,$stake,$comments2,$risk_response);
+
+                        //ACT 01-06-18: Obtenemos organization_risk_id
+                        //$org_risk = \Ermtool\Risk::getOrganizationRisk($_POST['org_id'],$risk->id);
+
                         if ($type == 0)
                         {        
                             //agregamos en tabla risk_subprocess
 
                             foreach ($_POST['subprocess_id'] as $subprocess_id)
                             {
-                                $subprocess = \Ermtool\Subprocess::find($subprocess_id);
-                                $subprocess->risks()->attach($risk->id);
+                                $risk_sub = \Ermtool\Subprocess::insertOrganizationRisk($subprocess_id,$org_risk);
+                                //$subprocess = \Ermtool\Subprocess::find($subprocess_id);
+                                //$subprocess->risks()->attach($risk->id);
                             }       
                         }
 
@@ -973,16 +984,6 @@ class RiesgosController extends Controller
                                 $objective->risks()->attach($risk->id);
                             }       
                         }
-
-                        //ACTUALIZACIÓN 29-03-17: Agregamos en tabla organization_risk
-                        //ACTUALIZACIÓN 16-08-17: Agregamos aquí también stakeholder_id
-                        //ACTUALIZACIÓN 08-01-17: Agregamos aquí también comentarios
-                        //ACT 26-04-18: Agregamos respuesta al riesgo
-
-                        \Ermtool\Risk::insertOrganizationRisk($_POST['org_id'],$risk->id,$stake,$comments2,$risk_response);
-
-                        //ACT 01-06-18: Obtenemos organization_risk_id
-                        $org_risk = \Ermtool\Risk::getOrganizationRisk($_POST['org_id'],$risk->id);
 
                         //guardamos archivos de evidencias (si es que hay)
                         if($GLOBALS['evidence'] != NULL)
@@ -1001,7 +1002,24 @@ class RiesgosController extends Controller
                             foreach ($_POST['organization_id'] as $org)
                             {
                                 //ACT 01-06-18: Obtenemos organization_risk_id
-                                $org_risk = \Ermtool\Risk::getOrganizationRisk($org,$risk->id);
+                                $org_risk2 = \Ermtool\Risk::getOrganizationRisk($org,$risk->id);
+
+                                if (empty($org_risk2))
+                                {
+                                    //ahora agregamos organization_risk con responsable (si es que se agregó)
+                                    if (isset($_POST['stakeholder_'.$org]) && $_POST['stakeholder_'.$org] != '' && !empty($_POST['stakeholder_'.$org]))
+                                    {
+                                        $org_risk2 = \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,$_POST['stakeholder_'.$org],null);
+                                    }
+                                    else
+                                    {
+                                        $org_risk2 = \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,null,null,null);
+                                    }
+                                }
+                                else
+                                {
+                                    $org_risk2 = $org_risk2->id;
+                                }
 
                                 //guardamos archivos de evidencias (si es que hay)
                                 if($GLOBALS['evidence'] != NULL)
@@ -1010,7 +1028,7 @@ class RiesgosController extends Controller
                                     {
                                         if ($evidence != NULL)
                                         {
-                                            upload_file($evidence,'riesgos',$org_risk->id);
+                                            upload_file($evidence,'riesgos',$org_risk2);
                                         }
                                     }                    
                                 }
@@ -1019,25 +1037,14 @@ class RiesgosController extends Controller
                                 {
                                     //primero verificamos que el subproceso no exista previamente
                                     $risk_subprocess = DB::table('risk_subprocess')
-                                                        ->where('risk_id','=',$risk->id)
+                                                        ->where('organization_risk_id','=',$org_risk2)
                                                         ->where('subprocess_id','=',$sub)
                                                         ->get(['id']);
 
                                     if (empty($risk_subprocess) || $risk_subprocess == null) //agregamos el risk_subprocess
                                     {
-                                        $subprocess = \Ermtool\Subprocess::find($sub);
-                                        $subprocess->risks()->attach($risk->id); 
+                                        $risk_sub = \Ermtool\Subprocess::insertOrganizationRisk($sub,$org_risk2); 
                                     } 
-                                }
-
-                                //ahora agregamos organization_risk con responsable (si es que se agregó)
-                                if (isset($_POST['stakeholder_'.$org]) && $_POST['stakeholder_'.$org] != '' && !empty($_POST['stakeholder_'.$org]))
-                                {
-                                    \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,$_POST['stakeholder_'.$org],null);
-                                }
-                                else
-                                {
-                                    \Ermtool\Risk::insertOrganizationRisk($org,$risk->id,null,null,null);
                                 }
                             }
                         }
@@ -1047,9 +1054,6 @@ class RiesgosController extends Controller
                         {
                             if (isset($_POST['probability']) && $_POST['probability'] != "")
                             {
-                                //obtenemos org_risk_id
-                                $org_risk = \Ermtool\Risk::getOrganizationRisk($_POST['org_id'],$risk->id);
-
                                 DB::table('materiality')
                                     ->insert([
                                         'impact' => $_POST['impact'],
@@ -1058,12 +1062,10 @@ class RiesgosController extends Controller
                                         'calification' => $_POST['calification2'],
                                         'created_at' => date('Y-m-d H:i:s'),
                                         'updated_at' => date('Y-m-d H:i:s'),
-                                        'organization_risk_id' => $org_risk->id
+                                        'organization_risk_id' => $org_risk
                                     ]);
                             }
                         }
-
-
 
                         if (Session::get('languaje') == 'en')
                         {
@@ -1130,6 +1132,16 @@ class RiesgosController extends Controller
             {
                 //obtenemos riesgo
                 $risk = \Ermtool\Risk::find($id);
+
+                if (isset($_GET['org']) && $_GET['org'] != NULL)
+                {
+                    $org_risk = \Ermtool\Risk::getOrganizationRisk($risk->id,$_GET['org']);
+                }
+                else
+                {
+                    $org_risk = NULL;
+                }
+
                 if ($risk->type == 0) //es de proceso
                 {
                     //ACTUALIZACIÓN 16-19-17: Vemos si se seleccionó organización o se editará el riesgo en general
@@ -1146,7 +1158,7 @@ class RiesgosController extends Controller
 
                         $sub_selected = array();
                         $subs = DB::table('risk_subprocess')
-                                    ->where('risk_subprocess.risk_id','=',$id)
+                                    ->where('risk_subprocess.organization_risk_id','=',$org_risk->id)
                                     ->select('risk_subprocess.subprocess_id')
                                     ->get();
 
@@ -1274,8 +1286,7 @@ class RiesgosController extends Controller
 
                     //ACT 08-01-17: Agregamos comentarios específicos de la organización, ebt
                     $comments2 = DB::table('organization_risk')
-                                    ->where('organization_id','=',$_GET['org'])
-                                    ->where('risk_id','=',$risk->id)
+                                    ->where('id','=',$org_risk->id)
                                     ->select('comments')
                                     ->first();
 
@@ -1296,9 +1307,7 @@ class RiesgosController extends Controller
 
                     //obtenemos último impacto y probabilidad (materialidad)
                     $last_m = \Ermtool\Risk::getLastMateriality($_GET['org'],$risk->id);
-
                     //ACT 26-04-18: Agregamos respuesta al riesgo
-                    $org_risk = \Ermtool\Risk::getOrgRisk($risk->id,$_GET['org']);
                     $risk_response = \Ermtool\Risk_response::getByOrgRisk($org_risk->id);
 
                     $risk_responses = \Ermtool\Risk_response::lists('name','id');
@@ -1551,31 +1560,39 @@ class RiesgosController extends Controller
                             $stake = $_POST['stakeholder_id'];
                         }
 
-                        if (isset($_POST['subprocess_id']))
+                        if (isset($_POST['org_id']))
                         {
-                            if ($riesgo->type == 0)
+                            //ACT 01-06-18: Obtenemos organization_risk_id
+                            $org_risk = \Ermtool\Risk::getOrganizationRisk($_POST['org_id'],$riesgo->id);
+
+                            //guardamos archivos de evidencias (si es que hay)
+                            if($GLOBALS['evidence'] != NULL)
                             {
-                                //primero eliminamos relaciones previas
-                                //ACTUALIZACIÓN 02-03-2017: NO SE PUEDE ELIMINAR!!! YA QUE PUEDE TENER COSAS ASOCIADAS
-                                //ACT 04-06-18: Hasta ahora no tiene ningún elemento asociado, por lo que si se puede eliminar. Sin embargo, haremos soft deleting (en el futuro)
-                                DB::table('risk_subprocess')
-                                    ->where('risk_id','=',$riesgo->id)
-                                    ->delete();
-
-                                //agregamos en tabla risk_subprocess
-                                foreach ($_POST['subprocess_id'] as $subprocess_id)
+                                foreach ($GLOBALS['evidence'] as $evidence)
                                 {
-                                    //vemos si el subproceso ya se encuentra para el riesgo
-                                    /*$risk_sub = DB::table('risk_subprocess')
-                                                ->where('risk_id','=',$riesgo->id)
-                                                ->where('subprocess_id','=',$subprocess_id)
-                                                ->get(['id']);
+                                    if ($evidence != NULL)
+                                    {
+                                        upload_file($evidence,'riesgos',$org_risk->id);
+                                    }
+                                }                    
+                            }
 
-                                    if (empty($risk_sub)) //si es que está vacío significa que la relación no existe*/
-                                    //ACT 04-06-18: Se deben eliminar los riesgos que existan previamente
-                                    $subprocess = \Ermtool\Subprocess::find($subprocess_id);
-                                    $subprocess->risks()->attach($riesgo->id);
-                                }       
+                            if (isset($_POST['subprocess_id']))
+                            {
+                                if ($riesgo->type == 0)
+                                {
+                                    //primero eliminamos relaciones previas
+                                    //ACT 04-06-18: Hasta ahora no tiene ningún elemento asociado, por lo que si se puede eliminar. Sin embargo, haremos soft deleting (en el futuro)
+                                    DB::table('risk_subprocess')
+                                        ->where('organization_risk_id','=',$org_risk->id)
+                                        ->delete();
+
+                                    //agregamos en tabla risk_subprocess
+                                    foreach ($_POST['subprocess_id'] as $subprocess_id)
+                                    {
+                                        $risk_sub = \Ermtool\Subprocess::insertOrganizationRisk($subprocess_id,$org_risk->id);
+                                    }       
+                                }
                             }
                         }
                         
@@ -1610,49 +1627,30 @@ class RiesgosController extends Controller
                                 //ACTUALIZACIÓN 17-08-17: Debemos verificar que se ingrese al menos un subproceso
                                 if (isset($_POST['subprocesses_'.$org]))
                                 {
+                                    //ahora agregamos organization_risk con responsable (si es que se agregó)
+                                    if (isset($_POST['stakeholder_'.$org]) && $_POST['stakeholder_'.$org] != '' && !empty($_POST['stakeholder_'.$org]))
+                                    {
+                                        $org_risk2 = \Ermtool\Risk::insertOrganizationRisk($org,$riesgo->id,$_POST['stakeholder_'.$org],null);
+                                    }
+                                    else
+                                    {
+                                        $org_risk2 = \Ermtool\Risk::insertOrganizationRisk($org,$riesgo->id,null,null);
+                                    }
+
                                     foreach($_POST['subprocesses_'.$org] as $sub)
                                     {
                                         //primero verificamos que el subproceso no exista previamente
                                         $risk_subprocess = DB::table('risk_subprocess')
-                                                            ->where('risk_id','=',$riesgo->id)
-                                                            ->where('subprocess_id','=',$sub)
-                                                            ->get(['id']);
+                                                        ->where('organization_risk_id','=',$org_risk2)
+                                                        ->where('subprocess_id','=',$sub)
+                                                        ->get(['id']);
 
                                         if (empty($risk_subprocess) || $risk_subprocess == null) //agregamos el risk_subprocess
                                         {
-                                            $subprocess = \Ermtool\Subprocess::find($sub);
-                                            $subprocess->risks()->attach($riesgo->id); 
+                                            $risk_sub = \Ermtool\Subprocess::insertOrganizationRisk($sub,$org_risk2); 
                                         } 
                                     }
-
-                                    //ahora agregamos organization_risk con responsable (si es que se agregó)
-                                    if (isset($_POST['stakeholder_'.$org]) && $_POST['stakeholder_'.$org] != '' && !empty($_POST['stakeholder_'.$org]))
-                                    {
-                                        \Ermtool\Risk::insertOrganizationRisk($org,$riesgo->id,$_POST['stakeholder_'.$org],null);
-                                    }
-                                    else
-                                    {
-                                        \Ermtool\Risk::insertOrganizationRisk($org,$riesgo->id,null,null);
-                                    }
                                 }
-                            }
-                        } 
-
-                        if (isset($_POST['org_id']))
-                        {
-                            //ACT 01-06-18: Obtenemos organization_risk_id
-                            $org_risk = \Ermtool\Risk::getOrganizationRisk($_POST['org_id'],$riesgo->id);
-
-                            //guardamos archivos de evidencias (si es que hay)
-                            if($GLOBALS['evidence'] != NULL)
-                            {
-                                foreach ($GLOBALS['evidence'] as $evidence)
-                                {
-                                    if ($evidence != NULL)
-                                    {
-                                        upload_file($evidence,'riesgos',$org_risk->id);
-                                    }
-                                }                    
                             }
                         }
 
@@ -2852,10 +2850,13 @@ class RiesgosController extends Controller
                                                     //        ->get();
                                                     //Seleccionamos subprocesos u objetivos que sean de la organización y se encuentre el riesgo
 
+                                            //ACT 25-09-18: Obtenemos org_risk para risk_subprocess
+                                            $org_risk = \Ermtool\Risk::getOrganizationRisk($GLOBALS['org'],$GLOBALS['id1']);
+
                                             $risk_subprocesses = DB::table('risk_subprocess')
                                                             ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
                                                             ->where('organization_subprocess.organization_id','=',$GLOBALS['org'])
-                                                            ->where('risk_subprocess.risk_id','=',$GLOBALS['id1'])
+                                                            ->where('risk_subprocess.organization_risk_id','=',$org_risk->id)
                                                             ->select('risk_subprocess.id')
                                                             ->get();
 
@@ -3066,17 +3067,24 @@ class RiesgosController extends Controller
                                                     ->delete();
                                             }                                    
 
-                                            $risk_subprocesses = DB::table('risk_subprocess')
-                                                            ->where('risk_subprocess.risk_id','=',$GLOBALS['id1'])
+                                            //ACT 25-09-18: Obtenemos org_risk para risk_subprocess
+                                            $org_risks = \Ermtool\OrganizationRisk::getByRisk($GLOBALS['id1']);
+
+                                            foreach ($org_risks as $or)
+                                            {
+                                                $risk_subprocesses = DB::table('risk_subprocess')
+                                                            ->where('risk_subprocess.organization_risk_id','=',$or->id)
                                                             ->select('risk_subprocess.id')
                                                             ->get();
 
-                                            foreach ($risk_subprocesses as $r)
-                                            {
-                                                DB::table('risk_subprocess')        
-                                                    ->where('risk_subprocess.id','=',$r->id)
-                                                    ->delete();
+                                                foreach ($risk_subprocesses as $r)
+                                                {
+                                                    DB::table('risk_subprocess')        
+                                                        ->where('risk_subprocess.id','=',$r->id)
+                                                        ->delete();
+                                                }
                                             }
+                                            
 
                                             DB::table('organization_risk')
                                                 ->where('risk_id','=',$GLOBALS['id1'])
@@ -3136,7 +3144,8 @@ class RiesgosController extends Controller
             if ($org == NULL)
             {
                 $risks = DB::table('risks')
-                    ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                    ->join('organization_risk','organization_risk.risk_id','=','risks.id')
+                    ->join('risk_subprocess','risk_subprocess.organization_risk_id','=','organization_risk.id')
                     ->where('risks.status','=',0)
                     ->select('risks.id','risks.name','risks.description','risks.type','risks.risk_category_id')
                     ->distinct('risks.id')

@@ -20,8 +20,17 @@ class OrganizationRisk extends Model
     public static function getByOrgRisk($risk_id,$org_id)
     {
     	return DB::table('organization_risk')
+            ->whereNull('organization_risk.deleted_at')
     		->where('risk_id','=',$risk_id)
     		->where('organization_id','=',$org_id)
     		->first(['id']);
+    }
+
+    public static function getByRisk($risk_id)
+    {
+        return DB::table('organization_risk')
+            ->where('risk_id','=',$risk_id)
+            ->select('id')
+            ->get();
     }
 }

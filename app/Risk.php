@@ -338,7 +338,7 @@ class Risk extends Model
         if ($org == NULL)
         {
             return DB::table('risk_subprocess')
-                ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+                ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
                 ->join('risks','risks.id','=','risk_subprocess.risk_id')
                 ->whereNull('organization_risk.deleted_at')
                 ->where('risks.type2','=',1)
@@ -351,9 +351,9 @@ class Risk extends Model
         {
             //ACT 30-07-18: Se agrega verificar que el subproceso se encuentre en la organización
             return DB::table('risk_subprocess')
-                ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+                ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
                 ->join('organization_subprocess','organization_subprocess.subprocess_id','=','risk_subprocess.subprocess_id')
-                ->join('risks','risks.id','=','risk_subprocess.risk_id')
+                ->join('risks','risks.id','=','organization_risk.risk_id')
                 ->whereNull('organization_risk.deleted_at')
                 ->where('organization_risk.organization_id','=',$org)
                 ->where('organization_subprocess.organization_id','=',$org)
@@ -369,7 +369,7 @@ class Risk extends Model
     {
         return DB::table('risks')
                 ->join('organization_risk','organization_risk.risk_id','=','risks.id')
-                ->join('risk_subprocess','risk_subprocess.risk_id','=','risks.id')
+                ->join('risk_subprocess','risk_subprocess.organization_risk_id','=','organization_risk.id')
                 ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
                 ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
                 ->whereNull('organization_risk.deleted_at')
@@ -421,7 +421,7 @@ class Risk extends Model
         return DB::table('objective_subprocess_risk')
             ->join('risks as risk_subprocess','risk_subprocess.id','=','objective_subprocess_risk.risk_subprocess_id')
             ->join('risks as objective_risk','objective_risk.id','=','objective_subprocess_risk.objective_risk_id')
-            ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.id')
+            ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
             ->whereNull('organization_risk.deleted_at')
             ->where('risk_subprocess.status','=',0)
             ->select('objective_subprocess_risk.id','objective_risk.name as obj_name','risk_subprocess.name as sub_name')
@@ -430,8 +430,8 @@ class Risk extends Model
 
     public static function insertOrganizationRisk($org_id,$risk_id,$stakeholder_id,$comments,$risk_response)
     {
-        DB::table('organization_risk')
-            ->insert([
+        return DB::table('organization_risk')
+                ->insertGetId([
                     'organization_id' => $org_id,
                     'risk_id' => $risk_id,
                     'stakeholder_id' => $stakeholder_id,
