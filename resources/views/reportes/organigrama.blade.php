@@ -1,6 +1,6 @@
 @extends('master')
 
-@section('title', 'Auditor&iacute;as')
+@section('title', 'Organigrama')
 
 @section('content')
 <style>
