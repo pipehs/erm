@@ -1591,10 +1591,13 @@ class HomeController extends Controller
 
             foreach ($rss as $rs)
             {
+                //Obtenemos organization_risk
+                $or = \Ermtool\OrganizationRisk::getByRisk($rs->risk_id);
+
                 DB::table('risk_subprocess')
                     ->where('id','=',$rs->id)
                     ->update([
-                        'organization_risk_id' => $rs->risk_id
+                        'organization_risk_id' => $or[0]->id
                     ]);
             }
         });
