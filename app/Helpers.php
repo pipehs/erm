@@ -154,7 +154,7 @@ function dropDown23()
 //dropdown de reportes
 function dropDown4()
 {
-	$uri = array('heatmap','matrices','risk_matrix','matriz_procesos','matriz_procesos2','matriz_subprocesos','matriz_subprocesos2','reporte_planes','reporte_hallazgos','graficos_controles','graficos_auditorias','graficos_planes_accion','genriskmatrix','reporte_audits','reporte_riesgos','reporte_riesgos2');
+	$uri = array('heatmap','organigrama','matriz_procesos','matriz_procesos2','matriz_subprocesos','matriz_subprocesos2','matrices','risk_matrix','reporte_planes','reporte_hallazgos','graficos_controles','graficos_auditorias','graficos_planes_accion','genriskmatrix','reporte_audits','reporte_riesgos','reporte_riesgos2');
 
 	foreach ($uri as $uri)
 	{
