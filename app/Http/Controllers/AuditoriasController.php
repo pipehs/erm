@@ -1079,6 +1079,15 @@ class AuditoriasController extends Controller
                                     ]);
                                 }
                             }
+
+                            //ACT 15-09-2018: Insertamos organizaciones si es que hay
+                            if (isset($_POST['audit_'.$audit.'_organizations']))
+                            {
+                                foreach ($_POST['audit_'.$audit.'_organizations'] as $org)
+                                {
+                                    \Ermtool\Audit::insertAuditOrganization($audit_audit_plan_id,$org);
+                                }
+                            }
                             
                         }
                     } //fin isset($_POST['audits'])
@@ -1132,6 +1141,15 @@ class AuditoriasController extends Controller
                                             'stakeholder_id' => $audited,
                                             'kind' => 'Auditado'
                                         ]);
+                                    }
+                                }
+
+                                //ACT 15-09-2018: Insertamos organizaciones si es que hay
+                                if (isset($_POST['audit_new'.$i.'_organizations']))
+                                {
+                                    foreach ($_POST['audit_new'.$i.'_organizations'] as $org)
+                                    {
+                                        \Ermtool\Audit::insertAuditOrganization($audit_audit_plan_id,$org);
                                     }
                                 }
                             }

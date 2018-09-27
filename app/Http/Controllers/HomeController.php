@@ -1583,6 +1583,7 @@ class HomeController extends Controller
         }
     }
 
+
     public function updateRiskSubprocess()
     {
         DB::transaction(function() {
@@ -1615,9 +1616,11 @@ class HomeController extends Controller
                 //obtenemos orgrisk
                 $org_risk = \Ermtool\OrganizationRisk::where('risk_id','=',$r->id)->get();
                 $evals = array();
+
                 $controls = array();
                 $subs = array();
                 $prcs = array();
+
 
                 foreach ($org_risk as $or)
                 {
@@ -1640,16 +1643,20 @@ class HomeController extends Controller
 
                     foreach ($cor as $cor2)
                     {
+
                         array_push($controls,$cor2->control_id);
+
                         //Seleccionamos control_organizatión, donde control_id sea igual a cor2
                         $co = DB::table('control_organization')
                                 ->where('control_id','=',$cor2->control_id)
                                 ->select('*')
                                 ->get();
 
+
                         DB::table('control_eval_risk_temp')
                                 ->where('control_id','=',$cor2->control_id)
                                 ->delete();
+
 
                         foreach ($co as $co2)
                         {
@@ -1664,6 +1671,7 @@ class HomeController extends Controller
                                     ->where('organization_id','=',$co2->organization_id)
                                     ->get(['id']);
 
+
                             //Seleccionamos issues mal cargados
                             $issues2 = DB::table('issues')
                                     ->whereNull('control_id')
@@ -1673,6 +1681,8 @@ class HomeController extends Controller
 
                             $issues = array_merge($issues,$issues2);
                             $issues = array_unique($issues,SORT_REGULAR);
+
+
 
                             foreach ($issues as $i)
                             {
@@ -1698,18 +1708,22 @@ class HomeController extends Controller
                                 ->where('organization_id','=',$co2->organization_id)
                                 ->delete(); 
 
+
                             //Eliminamos issues 2
                             DB::table('issues')
                                 ->whereNull('control_id')
                                 ->where('organization_id','=',$co2->organization_id)
                                 ->whereNull('kind')
                                 ->delete();
+
+
                         }
 
                         //eliminamos co
                         $co = DB::table('control_organization')
                                 ->where('control_id','=',$cor2->control_id)
                                 ->delete();
+
 
                         //Eliminamos issues, action_plans y progress_percentage que sólo esté asociado a control
                         $action_plans = DB::table('action_plans')
@@ -1734,6 +1748,7 @@ class HomeController extends Controller
                         DB::table('issues')
                             ->where('control_id',$cor2->control_id)
                             ->delete();
+
                     }
 
                     //eliminamos co
@@ -1752,6 +1767,7 @@ class HomeController extends Controller
                     {
                         array_push($evals,$er->evaluation_id);
                     }
+
 
                     //Obtenemos subprocesses_id a través de risk_subprocess para eliminar
                     $risk_sub = DB::table('risk_subprocess')->where('organization_risk_id','=',$or->id)->get(['subprocess_id']);
@@ -1815,6 +1831,20 @@ class HomeController extends Controller
                 //Eliminamos org_risk
                 $org_risk = DB::table('organization_risk')->where('risk_id','=',$r->id)->delete();
 
+                //Obtenemos subprocesses_id a través de risk_subprocess para eliminar
+                $risk_sub = DB::table('risk_subprocess')->where('risk_id','=',$r->id)->get(['subprocess_id']);
+                $subs = array();
+                $prcs = array();
+                foreach ($risk_sub as $rs)
+                {
+                    $sub = \Ermtool\Subprocess::find($rs->subprocess_id);
+
+                    array_push($subs,$rs->subprocess_id);
+                    array_push($prcs,$sub->process_id);
+                }
+                //Eliminamos risk_subprocess
+                $risk_sub = DB::table('risk_subprocess')->where('risk_id','=',$r->id)->delete();
+
                 //Eliminamos cause_risk
                 DB::table('cause_risk')->where('risk_id','=',$r->id)->delete();
             }
@@ -1833,6 +1863,7 @@ class HomeController extends Controller
             DB::table('organization_process_stakeholder')
                 ->whereIn('process_id',$prcs)
                 ->delete();
+
 
             //Eliminamos hallazgos de riesgos
             //Primero seleccionamos planes de acción
@@ -1869,7 +1900,9 @@ class HomeController extends Controller
             {
                 echo "No se puede eliminar de uno de los siguientes subprocesos: <br>";
                 print_r($subs);
+
                 echo "<br>";
+
             }
 
             try{
@@ -1881,9 +1914,10 @@ class HomeController extends Controller
             {
                 echo "No se puede eliminar de uno de los siguientes procesos: <br>";
                 print_r($prcs);
+
                 echo "<br>";
+         
             }
-            
         });
         
     }

@@ -5,6 +5,7 @@
 	</a>
 	<ul class="dropdown-menu" style="{{ dropDown4() }}">
 		<li>{!!HTML::link('heatmap','Mapa de Calor',['class'=>activeMenu('heatmap')])!!}</li>
+		<li>{!!HTML::link('organigrama','Organigrama',['class'=>activeMenu('organigrama')])!!}</li>
 		<li>{!!HTML::link('matriz_procesos','Matriz de Procesos',['class'=>activeMenu('matriz_procesos')])!!}</li>
 		<li>{!!HTML::link('matriz_subprocesos','Matriz de Subprocesos',['class'=>activeMenu('matriz_subprocesos')])!!}</li>
 		<li>{!!HTML::link('risk_matrix','Matriz de Riesgos',['class'=>activeMenu('risk_matrix')])!!}</li>
