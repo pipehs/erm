@@ -146,4 +146,15 @@ class Audit extends Model
                 ->select('organizations.id','organizations.name','organizations.description')
                 ->get();
     }
+
+    public static function insertAuditOrganization($audit_audit_plan_id,$org_id)
+    {
+        return DB::table('audit_audit_plan_organization')
+            ->insertGetId([
+                'audit_audit_plan_id' => $audit_audit_plan_id,
+                'organization_id' => $org_id,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+    }
 }

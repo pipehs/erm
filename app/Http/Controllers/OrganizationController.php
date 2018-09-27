@@ -597,4 +597,29 @@ class OrganizationController extends Controller
             return view('errors.query',['e' => $e]);
         }
     }
+
+    public function organizationChart()
+    {
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.reportes.organigrama');
+        }
+        else
+        {
+            return view('reportes.organigrama');
+        }
+    }
+
+    public function getOrganizations()
+    {
+        $organizations = \Ermtool\Organization::where('status',0)->get();
+
+        foreach ($organizations as $o)
+        {
+            //Obtenemos nombre de org padre
+            $org = $o->organization_id != NULL ? \Ermtool\Organization::name($o->organization_id) : '';
+            $o->org_father = $org;
+        }
+        return json_encode($organizations);
+    }
 }

@@ -452,6 +452,7 @@ class Risk extends Model
                 ->whereNull('organization_risk.deleted_at')
                 ->where('risks.name','=',$risk)
                 ->where('organization_risk.organization_id','=',$org_id)
+
                 ->select('risks.id as risk_id','organization_risk.id as id','risks.name','risks.description')
                 ->first();
         }

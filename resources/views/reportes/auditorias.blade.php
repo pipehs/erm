@@ -133,6 +133,20 @@ function veraudit(id)
 
 		var text ='<table class="table table-striped table-datatable">';
 
+		text += '<tr><td><b>Organización(es)</b></td><td>'
+
+		if (datos.audit.orgs.length > 0)
+		{
+			$(datos.audit.orgs).each( function(i, orgs) {
+				text += '<li>'+orgs.name+'</li>'
+			});
+		}
+		else 
+		{
+			text += 'No se han agregado organizaciones'
+		}	
+		text += '</td></tr>'
+
 		text += '<tr><td><b>Descripción</b></td>'
 		text += '<td>'+ datos.audit.description +'</td>'
 		text += '</tr><tr><td><b>Programas</b></td><td>'

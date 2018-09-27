@@ -2483,11 +2483,8 @@ class ExcelController extends Controller
                                         }
 
                                         //Ahora vemos si existe el Riesgo para la organización
-                                        //echo 'Riesgo: '.$risk->name.'<br>';
-                                        //echo 'Org id: '.$org->id.'<br>';
-                                        //echo 'Org name: '.$row['organizacion'];
+                                        $orgrisk = \Ermtool\Risk::getRiskByName($row['riesgo'],$org->id);
 
-                                        $orgrisk = \Ermtool\Risk::getRiskByName($risk->name,$org->id);
 
                                         if (empty($orgrisk))
                                         {
@@ -2738,7 +2735,7 @@ class ExcelController extends Controller
 
                                                 $user_control = empty($user_control) ? NULL : $user_control->id;
                                                 $evidence = $row['evidencia_control'] != '' ? $row['evidencia_control'] : NULL;
-                                                $evidence = eliminarSaltos($comments);
+                                                $evidence = eliminarSaltos($evidence);
 
                                                 $comments = $row['comentarios_control'] != '' ? $row['comentarios_control'] : NULL;
                                                 $comments = eliminarSaltos($comments);
@@ -2818,7 +2815,7 @@ class ExcelController extends Controller
                                                     'name' => $row['hallazgo'],
                                                     'description' => $desc,
                                                     'recommendations' => $rec,
-                                                    'classification_id' => $classification_id,
+                                                    'classification_id' => $classification_id->id,
                                                     'control_id' => $control->id,
                                                     'organization_id' => $org->id
                                                 ]);
@@ -2989,6 +2986,7 @@ class ExcelController extends Controller
 
                                         //Ahora vemos si existe el Riesgo para la organización
                                         $orgrisk = \Ermtool\Risk::getRiskByName($risk->name,$org->id);
+
 
                                         if (empty($orgrisk))
                                         {
@@ -4715,6 +4713,160 @@ class ExcelController extends Controller
                                 }
                             }
 
+                            else if ($_POST['kind'] == 21) //Planes de acción y Hallazgos (genérico) --> Riesgos
+                            {
+                                //foreach ($row as $row)
+                                //{
+                                    if (isset($row['organizacion']) && $row['organizacion'] != '')
+                                    {
+                                        //print_r($row);
+                                        //obtenemos org
+                                        $org = \Ermtool\Organization::getOrgByName($row['organizacion']);
+
+                                        //obtenemos riesgo de organización
+                                        $risk = \Ermtool\Risk::getRiskByName($row['riesgo'],$org->id);
+
+                                        if ($row['recomendaciones'] != '' && $row['recomendaciones'] != NULL)
+                                        {
+                                            $recommendations = $row['recomendaciones'];
+                                            $recommendations = eliminarSaltos($recommendations);
+                                        }
+                                        else
+                                        {
+                                            $recommendations = NULL;
+                                        }
+                                        /*
+                                        if ($row['clasificacion_coso'] != '' && $row['clasificacion_coso'] != NULL)
+                                        {
+                                            $coso = $row['clasificacion_coso'];
+                                        }
+                                        else
+                                        {
+                                            $coso = NULL;
+                                        }
+
+                                        if ($row['tipo_de_partida'] != '' && $row['tipo_de_partida'] != NULL)
+                                        {
+                                            $accounting_item = $row['tipo_de_partida'];
+                                        }
+                                        else
+                                        {
+                                            $accounting_item = NULL;
+                                        }
+
+                                        if ($row['moneda'] != '' && $row['moneda'] != NULL)
+                                        {
+                                            $currency = $row['moneda'];
+                                        }
+                                        else
+                                        {
+                                            $currency = NULL;
+                                        }
+
+                                        if ($row['valor_economico_hallazgo'] != '' && $row['valor_economico_hallazgo'] != NULL)
+                                        {
+                                            $economic_value = $row['valor_economico_hallazgo'];
+                                        }
+                                        else
+                                        {
+                                            $economic_value = NULL;
+                                        }*/
+
+                                        $name = eliminarSaltos($row['nombre']);
+                                        $description = eliminarSaltos($row['descripcion']);
+
+                                        if ($row['clasificacion'] != '')
+                                        {
+                                            $classification_id = \Ermtool\IssueClassification::getIssueClassificationByName($row['clasificacion']);
+                                        }
+                                        //creamos issue asociado a riesgo
+                                        $issue = \Ermtool\Issue::create([
+                                                'name' => $name,
+                                                'description' => $description,
+                                                'recommendations' => $recommendations,
+                                                'organization_id' => $org->id,
+                                                'classification_id' => $classification_id->id,
+                                                'kind' => 3
+                                            ]);
+
+                                        $issue_org_risk = DB::table('issue_organization_risk')
+                                            ->insertGetId([
+                                                'issue_id' => $issue->id,
+                                                'organization_risk_id' => $risk->id,
+                                                'created_at' => date('Y-m-d H:i:s'),
+                                                'updated_at' => date('Y-m-d H:i:s')
+                                            ]);
+
+                                        if ($row['plan_de_accion'] != '' && $row['plan_de_accion'] != NULL)
+                                        {
+                                            if ($row['status'] == 'Cerrado')
+                                            {
+                                                $status = 1;
+                                            }
+                                            else
+                                            {
+                                                $status = 0;
+                                            }
+
+                                            //echo $row['responsable_plan'].'<br>';
+
+                                            if ($row['responsable'] != '' && $row['responsable'] != NULL)
+                                            {
+                                                $stakeholder = \Ermtool\Stakeholder::getUserByName($row['responsable']);
+                                                $stakeholder = !empty($stakeholder) ? $stakeholder->id : NULL;
+                                            }
+                                            else
+                                            {
+                                                $stakeholder = NULL;
+                                            }
+
+                                            $description = eliminarSaltos($row['plan_de_accion']);
+                                            //Ahora agregamos plan de acción
+
+                                            if ($row['plazo'] != '')
+                                            {
+                                                $fecha_limite = $row['plazo'];
+                                            }
+                                            else
+                                            {
+                                                $fecha_limite = NULL;
+                                            }
+                                            $action_plan = \Ermtool\Action_plan::create([
+                                                    'issue_id' => $issue->id,
+                                                    'description' => $description,
+                                                    'stakeholder_id' => $stakeholder,
+                                                    'status' => $status,
+                                                    'final_date' => $fecha_limite
+                                                ]);
+   
+                                            if (isset($row['estado_avance']) && $row['estado_avance'] != '')
+                                            {
+                                                $per = $row['estado_avance'] * 100;
+
+                                                if (isset($row['comentarios_avance']) && $row['comentarios_avance'] != '')
+                                                    {
+                                                        $comments = $row['comentarios_avance'];
+                                                        $comments = eliminarSaltos($row['comentarios_avance']);
+                                                    } 
+                                                    else
+                                                    {
+                                                        $comments = NULL;
+                                                    }
+                                                    //insertamos porcentaje de avance
+                                                     DB::table('progress_percentage')
+                                                        ->insert([
+                                                            'percentage' => $per,
+                                                            'comments' => $comments,
+                                                            'action_plan_id' => $action_plan->id,
+                                                            'created_at' => date('Y-m-d H:i:s'),
+                                                            'updated_at' => date('Y-m-d H:i:s')
+                                                        ]);
+                                            }   
+                                        } 
+                                    }
+                                //}
+                            }
+
                             else if ($_POST['kind'] == 11) //Riesgos (PArauco)
                             {
                                 //print_r($row);
@@ -5175,7 +5327,7 @@ class ExcelController extends Controller
                                 else
                                 {
                                     //obtenemos riesgo
-                                    $risk = \Ermtool\Risk::find($risk->id);
+                                    $risk = \Ermtool\Risk::find($risk->risk_id);
                                     //echo $risk->id.'<br>';
 
                                     //actualizamos categoría del riesgo

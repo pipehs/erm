@@ -831,6 +831,10 @@ Route::get('reporte_riesgos2', [
 	'as' => 'reporte_riesgos2', 'uses' => 'EvaluacionRiesgosController@reporteRiesgos2'
 ]);
 
+Route::get('organigrama', [
+	'as' => 'organigrama', 'uses' => 'OrganizationController@organizationChart'
+]);
+
 //ACT 29-01-18: Lo dejamos en el home ya que utilizará todas las tablas
 Route::get('reporte_consolidado', [
 	'as' => 'reporte_consolidado', 'uses' => 'HomeController@reporteConsolidado'
@@ -1071,16 +1075,6 @@ Route::get('get_audit_programs.{id}', [
 //ruta para obtener datos de prueba de auditoría seleccionada (al supervisar un plan de auditoria)
 Route::get('auditorias.get_audit_program2.{id}', [
 	'as' => 'auditorias.get_audit_program2', 'uses' => 'AuditoriasController@getAuditProgram2']);
-
-//ruta para obtener controles de negocio asociados a un plan de auditoría
-//(según los objetivos corporativos que contemple este plan)
-//Route::get('auditorias.objective_controls.{id}', [
-//	'as' => 'auditorias.controls', 'uses' => 'AuditoriasController@getObjectiveControls']);
-
-//ruta para obtener controles de proceso asociados a un plan de auditoría
-//(según los objetivos corporativos que contemple este plan)
-//Route::get('auditorias.subprocess_controls.{id}', [
-//	'as' => 'auditorias.controls', 'uses' => 'AuditoriasController@getSubprocessControls']);
 
 //ruta para obtener auditorias según el plan seleccionado (al crear prueba de auditoría)
 Route::get('auditorias.auditorias.{id}', [
@@ -1467,6 +1461,10 @@ Route::get('downloadfile.{kind}.{id}.{filename}.{ext}', function($kind,$id,$file
 //	return downloadFile2($kind,$id,$filename);
 //});
 
+//ruta para obtener organizaciones
+Route::get('get_organizations', [
+	'as' => 'get_organizations', 'uses' => 'OrganizationController@getOrganizations']);
+
 Route::get('importador',[
 	'as' => 'importador', 'uses' => 'ExcelController@importarIndex'
 ]);
@@ -1517,10 +1515,12 @@ Route::get('reportes_denuncias', function(){
    return View::make('denuncias.reportes');
 });
 
-//Ruta temporal para eliminar riesgos y controles, excepto contables (koandina)
+
+//Ruta temporal para eliminar riesgos y controles, excepto contables y TI
 Route::get('delete_all',[
 	'as' => 'delete_all', 'uses' => 'HomeController@deleteAll'
 ]);
+
 
 //ACT 15-09-18: Ruta para actualizar risk_subprocess
 Route::get('update_rs',[
