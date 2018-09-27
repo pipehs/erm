@@ -143,4 +143,13 @@ class Audit_program extends Model
                 ->select('id')
                 ->first();
     }
+
+    public static function getAuditProgramsByAudit($id)
+    {
+        return DB::table('audit_programs')
+            ->join('audit_audit_plan_audit_program','audit_audit_plan_audit_program.audit_program_id','=','audit_programs.id')
+            ->where('audit_audit_plan_audit_program.audit_audit_plan_id','=',$id)
+            ->select('audit_programs.name','audit_audit_plan_audit_program.id')
+            ->get();
+    }
 }

@@ -81,30 +81,17 @@ class Process extends Model
                 ->get();
     }
 
-    public static function getProcessesFromRisk($org,$risk_id)
+    public static function getProcessesFromRisk($org_risk_id)
     {
-        if ($org == NULL)
-        {
-            return DB::table('processes')
-                ->join('subprocesses','subprocesses.process_id','=','processes.id')
-                ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                ->where('risk_subprocess.risk_id','=',$risk_id)
-                ->select('processes.id','processes.name','processes.description')
-                ->groupBy('processes.id','processes.name','processes.description')
-                ->get();
-        }
-        else
-        {
-            return DB::table('processes')
-                ->join('subprocesses','subprocesses.process_id','=','processes.id')
-                ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
-                ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                ->where('organization_subprocess.organization_id','=',$org)
-                ->where('risk_subprocess.risk_id','=',$risk_id)
-                ->select('processes.id','processes.name','processes.description')
-                ->groupBy('processes.id','processes.name','processes.description')
-                ->get();
-        }
+        return DB::table('processes')
+            ->join('subprocesses','subprocesses.process_id','=','processes.id')
+            ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
+            ->join('organization_risk','organization_risk.risk_id','=','risk_subprocess.risk_id')
+            ->where('organization_risk.id','=',$org_risk_id)
+            ->select('processes.id','processes.name','processes.description')
+            ->groupBy('processes.id','processes.name','processes.description')
+            ->get();
+        
     }
 
     public static function getProcessByName($name)

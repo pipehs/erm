@@ -644,12 +644,12 @@ function eliminarArchivo($id,$kind,$name)
 	//Elimina evidencias de prueba (carpeta pruebas_auditoria)
 	if ($kind == 0)
 	{
-		$dir = "../../bgrcdemo2.ixus.cl/storage/app/pruebas_auditoria/".$id;
+		$dir = "../storage/app/pruebas_auditoria/".$id;
 	}
 	//Elimina evidencias de programa (carpeta programas_auditoria)
 	else if ($kind == 1)
 	{
-		$dir = "../../bgrcdemo2.ixus.cl/storage/app/programas_auditoria/".$id;
+		$dir = "../storage/app/programas_auditoria/".$id;
 	}
 	//Elimina evidencias de hallazgos (carpeta evidencias_hallazgos)
 	else if ($kind == 2)
@@ -680,6 +680,22 @@ function eliminarArchivo($id,$kind,$name)
 	else if ($kind == 8) //evidencias para ejecución de pruebas de auditoría
 	{
 		$dir = "../storage/app/ejecucion_auditoria/".$id;
+	}
+	else if ($kind == 9) //evidencias de procesos generales
+	{
+		$dir = "../storage/app/procesos/".$id;
+	}
+	else if ($kind == 10) //evidencias de procesos específicos de org
+	{
+		$dir = "../storage/app/procesos_org/".$id;
+	}
+	else if ($kind == 11) //evidencias de subprocesos generales
+	{
+		$dir = "../storage/app/subprocesos/".$id;
+	}
+	else if ($kind == 12) //evidencias de subprocesos específicos de org
+	{
+		$dir = "../storage/app/subprocesos_org/".$id;
 	}
 	
 	if (file_exists($dir))

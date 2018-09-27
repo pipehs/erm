@@ -533,8 +533,8 @@ class HomeController extends Controller
                                 }
                             }
                             //causas y efectos
-                            $causes = \Ermtool\Cause::getCausesFromRisk($risk->risk_id);
-                            $effects = \Ermtool\Effect::getEffectsFromRisk($risk->risk_id);
+                            $causes = \Ermtool\Cause::getCausesFromRisk($risk->id);
+                            $effects = \Ermtool\Effect::getEffectsFromRisk($risk->id);
 
                             //seteamos causas en caso de excel
                             if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
@@ -1581,5 +1581,196 @@ class HomeController extends Controller
         //    return view('errors.query',['e' => $e]);
         //}
         }
+    }
+
+    //Para carga masiva de koandina
+    public function deleteAll()
+    {
+        DB::transaction(function(){
+            //Obtenemos riesgos que no son contables ni de TI
+            $risks = DB::table('risks')
+                    ->whereNotIn('risk_category_id',[33,35])
+                    ->select('id')
+                    ->get();
+
+            foreach ($risks as $r)
+            {
+                //obtenemos orgrisk
+                $org_risk = \Ermtool\OrganizationRisk::where('risk_id','=',$r->id)->get();
+                $evals = array();
+                foreach ($org_risk as $or)
+                {
+                    
+                    //Eliminamos controlled_risk
+                    DB::table('controlled_risk')
+                        ->where('organization_risk_id','=',$or->id)
+                        ->delete();
+
+                    //Eliminamos issue_organization_risk
+                    DB::table('issue_organization_risk')
+                        ->where('organization_risk_id','=',$or->id)
+                        ->delete();
+
+                    //obtenemos cor, para obtener control_organization
+                    $cor = DB::table('control_organization_risk')
+                            ->where('organization_risk_id','=',$or->id)
+                            ->select('*')
+                            ->get();
+
+                    foreach ($cor as $cor2)
+                    {
+                        //Seleccionamos control_organizatión, donde control_id sea igual a cor2
+                        $co = DB::table('control_organization')
+                                ->where('control_id','=',$cor2->control_id)
+                                ->select('*')
+                                ->get();
+
+                        foreach ($co as $co2)
+                        {
+                            //Eliminamos control_eval_risk_temp
+                            DB::table('control_eval_risk_temp')
+                                ->where('control_organization_id','=',$co2->id)
+                                ->delete();
+
+                            //Seleccionamos issues para eliminar action_plan y progress_percentage
+                            $issues = DB::table('issues')
+                                    ->where('control_id','=',$co2->control_id)
+                                    ->where('organization_id','=',$co2->organization_id)
+                                    ->get(['id']);
+
+                            foreach ($issues as $i)
+                            {
+                                $aps = DB::table('action_plans')
+                                    ->where('action_plans.issue_id','=',$i->id)
+                                    ->get(['id']);
+
+                                foreach ($aps as $ap)
+                                {
+                                    DB::table('progress_percentage')
+                                        ->where('progress_percentage.action_plan_id','=',$ap->id)
+                                        ->delete();
+                                }
+
+                                DB::table('action_plans')
+                                    ->where('action_plans.issue_id','=',$i->id)
+                                    ->delete();
+                            }
+
+                            //Eliminamos issues
+                            DB::table('issues')
+                                ->where('control_id','=',$co2->control_id)
+                                ->where('organization_id','=',$co2->organization_id)
+                                ->delete(); 
+                        }
+
+                        //eliminamos co
+                        $co = DB::table('control_organization')
+                                ->where('control_id','=',$cor2->control_id)
+                                ->delete();
+                    }
+
+                    //eliminamos co
+                    $cor = DB::table('control_organization_risk')
+                            ->where('organization_risk_id','=',$or->id)
+                            ->delete();
+
+                    //Eliminamos evaluation y sus atributos
+                    $eval_risks = DB::table('evaluation_risk')
+                            ->where('organization_risk_id','=',$or->id)
+                            ->select('id','evaluation_id')
+                            ->get();
+
+                    
+                    foreach ($eval_risks as $er)
+                    {
+                        array_push($evals,$er->evaluation_id);
+                    }
+                }
+
+                $evalrisk = DB::table('evaluation_risk')
+                    ->whereIn('evaluation_id',$evals)
+                    ->get();
+
+                foreach ($evalrisk as $er)
+                {
+                    //Eliminamos evaluation_risk_stakeholder
+                        DB::table('evaluation_risk_stakeholder')
+                            ->where('evaluation_risk_id','=',$er->id)
+                            ->delete();
+                }
+
+                DB::table('evaluation_risk')
+                    ->whereIn('evaluation_id',$evals)
+                    ->delete();
+
+                //Eliminamos de evaluation_stakeholder
+                DB::table('evaluation_stakeholder')
+                    ->whereIn('evaluation_id',$evals)
+                    ->delete();
+                //Eliminamos evaluations
+                DB::table('evaluations')
+                    ->whereIn('id',$evals)
+                    ->delete();
+
+
+                //Eliminamos org_risk
+                $org_risk = DB::table('organization_risk')->where('risk_id','=',$r->id)->delete();
+
+                //Obtenemos subprocesses_id a través de risk_subprocess para eliminar
+                $risk_sub = DB::table('risk_subprocess')->where('risk_id','=',$r->id)->get(['subprocess_id']);
+                $subs = array();
+                $prcs = array();
+                foreach ($risk_sub as $rs)
+                {
+                    $sub = \Ermtool\Subprocess::find($rs->subprocess_id);
+
+                    array_push($subs,$rs->subprocess_id);
+                    array_push($prcs,$sub->process_id);
+                }
+                //Eliminamos risk_subprocess
+                $risk_sub = DB::table('risk_subprocess')->where('risk_id','=',$r->id)->delete();
+                //Eliminamos cause_risk
+                DB::table('cause_risk')->where('risk_id','=',$r->id)->delete();
+            }
+                
+            //eliminamos risk 
+            DB::table('risks')
+                ->whereNotIn('risk_category_id',[33,35])
+                ->delete();
+
+            //Eliminamos organization_subprocess
+            DB::table('organization_subprocess')
+                ->whereIn('subprocess_id',$subs)
+                ->delete();
+
+            //Eliminamos organization_process_stakeholder
+            DB::table('organization_process_stakeholder')
+                ->whereIn('process_id',$prcs)
+                ->delete();
+            
+            //Eliminamos subprocesses y processes
+            try{
+                DB::table('subprocesses')
+                    ->whereIn('id',$subs)
+                    ->delete();
+            }
+            catch (\Exception $e)
+            {
+                echo "No se puede eliminar de uno de los siguientes subprocesos: <br>";
+                print_r($subs);
+            }
+
+            try{
+                DB::table('processes')
+                    ->whereIn('id',$prcs)
+                    ->delete();
+            }
+            catch (\Exception $e)
+            {
+                echo "No se puede eliminar de uno de los siguientes procesos: <br>";
+                print_r($prcs);
+            }
+        });
+        
     }
 }

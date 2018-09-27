@@ -659,9 +659,21 @@ class SubprocesosController extends Controller
                                 ->update(['subprocess_id' => NULL]);
 
                             //ahora se debe eliminar de organization_subprocess
-                            DB::table('organization_subprocess')
-                                ->where('subprocess_id','=',$GLOBALS['id1'])
-                                ->delete();
+                            //DB::table('organization_subprocess')
+                            //    ->where('subprocess_id','=',$GLOBALS['id1'])
+                            //    ->delete();
+                            //ACT 31-08-18: Incluimos archivos y salto en protección soft_deleting
+                            $os = \Ermtool\OrganizationSubprocess::where('subprocess_id','=',$GLOBALS['id1'])->get();
+
+                            foreach ($os as $o)
+                            {
+                                //Eliminamos docs asociados a subprocesos_org
+                                eliminarArchivo($o->id,12,NULL);
+                                $o->forceDelete();
+                            }
+
+                            //Eliminamos docs asociados
+                            eliminarArchivo($GLOBALS['id1'],11,NULL);
 
                             DB::table('subprocesses')
                                 ->where('id','=',$GLOBALS['id1'])
