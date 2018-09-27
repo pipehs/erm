@@ -471,6 +471,7 @@ class Control extends Model
                     ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
                     ->where('organization_risk.risk_id','=',$risk)
                     ->where('organization_risk.organization_id','=',$org)
+                    ->where('control_organization.organization_id','=',$org)
                     ->select('controls.id','controls.name','controls.description','control_organization.cont_percentage','controls.periodicity','controls.purpose','controls.expected_cost','control_organization.evidence','controls.type','control_organization.comments')
                     ->groupBy('controls.id','controls.name','controls.description','control_organization.cont_percentage','controls.periodicity','controls.purpose','controls.expected_cost','control_organization.evidence','controls.type','control_organization.comments')
                     ->get();
@@ -485,6 +486,19 @@ class Control extends Model
                     ->groupBy('controls.id','controls.name','controls.description')
                     ->get();
         }
+    }
+
+    public static function getControlsFromOrgRisk($org_risk)
+    {
+            return DB::table('controls')
+                    ->join('control_organization','control_organization.control_id','=','controls.id')
+                    ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
+                    ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
+                    ->where('organization_risk.id','=',$org_risk)
+                    ->select('controls.id','controls.name','controls.description','control_organization.cont_percentage','controls.periodicity','controls.purpose','controls.expected_cost','control_organization.evidence','controls.type','control_organization.comments')
+                    ->groupBy('controls.id','controls.name','controls.description','control_organization.cont_percentage','controls.periodicity','controls.purpose','controls.expected_cost','control_organization.evidence','controls.type','control_organization.comments')
+                    ->get();
+        
     }
 
     public static function getControlOrganizationRisk($control_id,$org_id)

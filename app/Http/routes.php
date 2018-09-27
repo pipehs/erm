@@ -1515,8 +1515,14 @@ Route::get('reportes_denuncias', function(){
    return View::make('denuncias.reportes');
 });
 
+
 //Ruta temporal para eliminar riesgos y controles, excepto contables y TI
 Route::get('delete_all',[
 	'as' => 'delete_all', 'uses' => 'HomeController@deleteAll'
 ]);
 
+
+//ACT 15-09-18: Ruta para actualizar risk_subprocess
+Route::get('update_rs',[
+	'as' => 'update_rs', 'uses' => 'HomeController@updateRiskSubprocess'
+]);

@@ -2281,7 +2281,7 @@ class ExcelController extends Controller
                                     
                                 }    
                             }*/
-                            else if ($_POST['kind'] == 5) //Carga a través de reporte consolidado
+                            else if ($_POST['kind'] == 5) //Carga reporte consolidado
                             {
                                 foreach ($row as $row)
                                 {
@@ -2485,6 +2485,7 @@ class ExcelController extends Controller
                                         //Ahora vemos si existe el Riesgo para la organización
                                         $orgrisk = \Ermtool\Risk::getRiskByName($row['riesgo'],$org->id);
 
+
                                         if (empty($orgrisk))
                                         {
                                             //Obtenemos responsable
@@ -2515,16 +2516,28 @@ class ExcelController extends Controller
                                                 'comments' => $comments
                                             ]);
                                         }
+
+                                        //echo 'orgrisk_id: '.$orgrisk->id.'... risk:'.$risk->name.'... org:'.$row['organizacion'].'<br>';
                                         //Asignamos subproceso al riesgo y a la organización
                                         if (!empty($subprocess3))
                                         {
                                             //Vemos si existe Risk Subprocess
                                             $subprocess3 = \Ermtool\Subprocess::find($subprocess3->id);
-                                            $hasSub3 = $subprocess3->risks()->where('risks.id', $risk->id)->exists();
 
-                                            if (!$hasSub3) //Si es falso, se crea enlace
+                                            //$hasSub3 = $subprocess3->risks()->where('risks.id', $risk->id)->exists();
+
+                                            $hasSub3 = DB::table('risk_subprocess')
+                                                    ->where('organization_risk_id','=',$orgrisk->id)
+                                                    ->where('subprocess_id','=',$subprocess3->id)
+                                                    ->first(['id']);
+
+                                            if (empty($hasSub3)) //Si es falso, se crea enlace
                                             {
-                                                $risk_subprocess3 = $subprocess3->risks()->attach($risk->id);
+                                                $risk_subprocess3 = DB::table('risk_subprocess')
+                                                        ->insertGetId([
+                                                            'organization_risk_id' => $orgrisk->id,
+                                                            'subprocess_id' => $subprocess3->id
+                                                        ]);
                                             }
                                             
                                         }
@@ -2533,11 +2546,26 @@ class ExcelController extends Controller
                                         {
                                             //Vemos si existe Risk Subprocess
                                             $subprocess2 = \Ermtool\Subprocess::find($subprocess2->id);
-                                            $hasSub2 = $subprocess2->risks()->where('risks.id', $risk->id)->exists();
 
-                                            if (!$hasSub2) //Si es falso, se crea enlace
+                                            //Vemos si existe Risk Subprocess
+                                            //$hasSub2 = $subprocess2->risks()->where('risks.id', $risk->id)->exists();
+
+                                            //if (!$hasSub2) //Si es falso, se crea enlace
+                                            //{
+                                            //    $risk_subprocess2 = $subprocess2->risks()->attach($risk->id);
+                                            //}
+                                            $hasSub2 = DB::table('risk_subprocess')
+                                                    ->where('organization_risk_id','=',$orgrisk->id)
+                                                    ->where('subprocess_id','=',$subprocess2->id)
+                                                    ->first(['id']);
+
+                                            if (empty($hasSub2)) //Si es falso, se crea enlace
                                             {
-                                                $risk_subprocess2 = $subprocess2->risks()->attach($risk->id);
+                                                $risk_subprocess2 = DB::table('risk_subprocess')
+                                                        ->insertGetId([
+                                                            'organization_risk_id' => $orgrisk->id,
+                                                            'subprocess_id' => $subprocess2->id
+                                                        ]);
                                             }
                                             
                                         }
@@ -2546,11 +2574,21 @@ class ExcelController extends Controller
                                         {
                                             //Vemos si existe Risk Subprocess
                                             $subprocess1 = \Ermtool\Subprocess::find($subprocess1->id);
+
                                             //$hasSub1 = $subprocess1->risks()->where('risks.id', $risk->id)->exists();
-                                            $hasSub1 = $subprocess1->risks()->find($risk->id);
+                                            //$hasSub1 = $subprocess1->risks()->find($risk->id);
+                                            $hasSub1 = DB::table('risk_subprocess')
+                                                    ->where('organization_risk_id','=',$orgrisk->id)
+                                                    ->where('subprocess_id','=',$subprocess1->id)
+                                                    ->first(['id']);
+
                                             if (empty($hasSub1)) //Si es falso, se crea enlace
                                             {
-                                                $risk_subprocess1 = $subprocess1->risks()->attach($risk->id);
+                                                $risk_subprocess1 = DB::table('risk_subprocess')
+                                                        ->insertGetId([
+                                                            'organization_risk_id' => $orgrisk->id,
+                                                            'subprocess_id' => $subprocess1->id
+                                                        ]);
                                             }
                                         }
 
@@ -2570,9 +2608,16 @@ class ExcelController extends Controller
                                                                 'type' => 1,
                                                                 'consolidation' => 1,
                                                                 'description' => 'Evaluación Manual',
-                                                                'created_at' => $row['fecha_'.$j],
-                                                                'updated_at' => $row['fecha_'.$j],
+                                                                'created_at' => date($row['fecha_'.$j]),
+                                                                'updated_at' => date($row['fecha_'.$j]),
                                                             ]);
+
+                                                    $evv = \Ermtool\Evaluation::find($eval1);
+                                                    if ($evv->created_at == '0000-00-00 00:00:00')
+                                                    {
+                                                        echo 'fecha_'.$j.': '.$row['fecha_'.$j].'<br>';
+                                                        echo $evv->created_at.'<br>';
+                                                    }
                                                 }
                                                 else
                                                 {
@@ -2621,7 +2666,6 @@ class ExcelController extends Controller
                                                     ]);
                                                 }
 
-                                                //RECORDAR CALCULAR EVALUACIÓN RESIDUAL ---------
                                             }
                                         }
 
@@ -2755,7 +2799,7 @@ class ExcelController extends Controller
                                         //Agregamos hallazgo si es que no está
                                         if ($row['hallazgo'] != '')
                                         {
-                                            $issue = \Ermtool\Issue::getIssueByName($row['hallazgo']);
+                                            $issue = \Ermtool\Issue::getIssueByNameAndOrg($row['hallazgo'],$org->id);
 
                                             if (empty($issue))
                                             {
@@ -2779,10 +2823,10 @@ class ExcelController extends Controller
 
                                             if ($row['plan_de_accion'] != '')
                                             {
-                                                $action_plan = \Ermtool\Action_plan::getActionPlanByDescription($row['plan_de_accion']);
+                                                //$action_plan = \Ermtool\Action_plan::getActionPlanByDescription($row['plan_de_accion']);
 
-                                                if (empty($action_plan))
-                                                {
+                                                //if (empty($action_plan))
+                                                //{
                                                     if ($row['estado_plan'] == 'En progreso')
                                                     {
                                                         $status = 0;
@@ -2811,7 +2855,7 @@ class ExcelController extends Controller
                                                         }
                                                     }
 
-                                                    $final_date = $row['fecha_final_plan'] != '' ? $row['fecha_final_plan'] : NULL;
+                                                    $final_date = $row['fecha_final_plan'] != '' ? date($row['fecha_final_plan']) : NULL;
 
                                                     $action_plan = \Ermtool\Action_plan::create([
                                                         'issue_id' => $issue->id,
@@ -2833,11 +2877,11 @@ class ExcelController extends Controller
                                                                 'percentage' => $per,
                                                                 'comments' => $comments,
                                                                 'action_plan_id' => $action_plan->id,
-                                                                'created_at' => $row['fecha_de_avance'],
-                                                                'updated_at' => $row['fecha_de_avance']
+                                                                'created_at' => date($row['fecha_de_avance']),
+                                                                'updated_at' => date($row['fecha_de_avance'])
                                                             ]);  
                                                     }
-                                                }
+                                                //}
                                             }
                                         }
 
@@ -2845,7 +2889,7 @@ class ExcelController extends Controller
                                     }
                                 }
                                    
-                            }
+                            }/*
                             else if ($_POST['kind'] == 20) //Carga Riesgos KOAndina
                             {
                                 foreach ($row as $row)
@@ -2941,7 +2985,8 @@ class ExcelController extends Controller
                                         }
 
                                         //Ahora vemos si existe el Riesgo para la organización
-                                        $orgrisk = \Ermtool\Risk::getRiskByName($row['riesgo'],$org->id);
+                                        $orgrisk = \Ermtool\Risk::getRiskByName($risk->name,$org->id);
+
 
                                         if (empty($orgrisk))
                                         {
@@ -2969,10 +3014,19 @@ class ExcelController extends Controller
                                             //Vemos si existe Risk Subprocess
                                             $subprocess = \Ermtool\Subprocess::find($subprocess->id);
                                             //$hasSub1 = $subprocess1->risks()->where('risks.id', $risk->id)->exists();
-                                            $hasSub = $subprocess->risks()->find($risk->id);
+                                            //$hasSub1 = $subprocess1->risks()->find($risk->id);
+                                            $hasSub = DB::table('risk_subprocess')
+                                                    ->where('organization_risk_id','=',$orgrisk->id)
+                                                    ->where('subprocess_id','=',$subprocess->id)
+                                                    ->first(['id']);
+
                                             if (empty($hasSub)) //Si es falso, se crea enlace
                                             {
-                                                $risk_subprocess = $subprocess->risks()->attach($risk->id);
+                                                $risk_subprocess = DB::table('risk_subprocess')
+                                                        ->insertGetId([
+                                                            'organization_risk_id' => $orgrisk->id,
+                                                            'subprocess_id' => $subprocess->id
+                                                        ]);
                                             }
                                         }
 
@@ -3118,7 +3172,7 @@ class ExcelController extends Controller
                                                     'stakeholder_id' => $user_control,
                                                     'comments' => $comments,
                                                     'evidence' => $evidence,
-                                                    'cont_percentage' => intval($row['de_contribucion_actual'])
+                                                    'cont_percentage' => ($row['de_contribucion_actual']*100)
                                                 ]);
                                             }
 
@@ -3151,11 +3205,11 @@ class ExcelController extends Controller
                                                     //Guardamos en control_eval_risk_temp valor del control (autoevaluación)
                                                     DB::table('control_eval_risk_temp')
                                                         ->insert([
-                                                            'result' => intval($row['de_contribucion_actual']),
+                                                            'result' => ($row['de_contribucion_actual']*100),
                                                             'control_organization_id' => $co->id,
                                                             'auto_evaluation' => 1,
                                                             'status' => 1,
-                                                            'created_at' => $row['fecha_actual']
+                                                            'created_at' => date($row['fecha_actual'])
                                                         ]);
 
                                                     //agregamos valor residual de riesgo
@@ -3168,7 +3222,7 @@ class ExcelController extends Controller
                                         //Agregamos hallazgo si es que no está
                                         if ($row['hallazgo'] != '')
                                         {
-                                            $issue = \Ermtool\Issue::getIssueByName($row['hallazgo']);
+                                            $issue = \Ermtool\Issue::getIssueByNameAndOrg($row['hallazgo'],$org->id);
 
                                             if (empty($issue))
                                             {
@@ -3192,10 +3246,10 @@ class ExcelController extends Controller
 
                                             if ($row['plan_de_accion'] != '')
                                             {
-                                                $action_plan = \Ermtool\Action_plan::getActionPlanByDescription($row['plan_de_accion']);
+                                                //$action_plan = \Ermtool\Action_plan::getActionPlanByDescription($row['plan_de_accion']);
 
-                                                if (empty($action_plan))
-                                                {
+                                                //if (empty($action_plan))
+                                                //{
                                                     if ($row['estado_plan'] == 'En progreso')
                                                     {
                                                         $status = 0;
@@ -3238,7 +3292,7 @@ class ExcelController extends Controller
                                                     {
                                                         $comments = $row['comentarios_de_avance'] != '' ? $row['comentarios_de_avance'] : NULL;
 
-                                                        $per = intval($row['de_avance']);
+                                                        $per = $row['de_avance'];
 
                                                         //insertamos porcentaje de avance
                                                          DB::table('progress_percentage')
@@ -3246,16 +3300,160 @@ class ExcelController extends Controller
                                                                 'percentage' => $per,
                                                                 'comments' => $comments,
                                                                 'action_plan_id' => $action_plan->id,
-                                                                'created_at' => $row['fecha_de_avance'],
-                                                                'updated_at' => $row['fecha_de_avance']
+                                                                'created_at' => date($row['fecha_de_avance']),
+                                                                'updated_at' => date($row['fecha_de_avance'])
                                                             ]);  
                                                     }
-                                                }
+                                                //}
                                             }
                                         }
 
                                     }
                                 }
+                                   
+                            }*/
+                            else if ($_POST['kind'] == 20) //Carga Riesgos KOAndina Simplificado
+                            {
+                                //foreach ($row as $row)
+                                //{
+                                    if (isset($row['organizacion']) && $row['organizacion'] != '')
+                                    {
+                                        //echo $row['organizacion'].'<br>';
+                                        //print_r($row);
+
+                                        //obtenemos org id
+                                        $org = \Ermtool\Organization::getOrgByName($row['organizacion']);
+
+                                        $process =  \Ermtool\Process::getProcessByName($row['proceso']);
+
+                                        if (empty($process)) //Si no existe, lo creamos
+                                        {
+                                            $process = \Ermtool\Process::create([
+                                                'name' => $row['proceso'],
+                                                'description' => $row['proceso']
+                                            ]);
+                                        }
+
+                                        //Vemos si existe ops
+                                        $ops = \Ermtool\OrganizationProcessStakeholder::getByOrgProcess($org->id,$process->id);
+
+                                        if (empty($ops))
+                                        {
+                                            $ops = \Ermtool\OrganizationProcessStakeholder::create([
+                                                'organization_id' => $org->id,
+                                                'process_id' => $process->id
+                                            ]);
+                                        }
+
+                                        $subprocess =  \Ermtool\Subprocess::getSubprocessByName($row['subproceso']);
+
+                                        if (empty($subprocess)) //Si no existe, lo creamos
+                                        {
+                                            $subprocess = \Ermtool\Subprocess::create([
+                                                'name' => $row['subproceso'],
+                                                'description' => $row['subproceso'],
+                                                'process_id' => $process->id
+                                            ]);
+                                        }
+
+                                        //Vemos si existe org_sub
+                                        $os = \Ermtool\OrganizationSubprocess::getByOrgSub($org->id,$subprocess->id);
+
+                                        if (empty($os))
+                                        {
+                                            $os = \Ermtool\OrganizationSubprocess::create([
+                                                'organization_id' => $org->id,
+                                                'subprocess_id' => $subprocess->id
+                                            ]);
+                                        }
+                                        
+
+                                        //Primero, Vemos si existe el riesgo genérico
+                                        $risk = \Ermtool\Risk::getRiskByName2($row['riesgo']);
+
+                                        if (empty($risk))
+                                        {
+                                            //Vemos si existe subcategoría
+                                            $cat = \Ermtool\Risk_category::getRiskCategoryByName($row['subcategoria_de_riesgo']);
+
+                                            if (empty($cat))
+                                            {
+                                                //Obtenemos categoría principal
+                                                $catpp = \Ermtool\Risk_category::getRiskCategoryByName($row['categoria_de_riesgo']);
+
+                                                if (empty($catpp))
+                                                {
+                                                    $catpp = \Ermtool\Risk_category::create([
+                                                        'name' => $row['categoria_de_riesgo'],
+                                                        'description' => $row['categoria_de_riesgo']
+                                                    ]);
+                                                }
+
+                                                $cat = \Ermtool\Risk_category::create([
+                                                    'name' => $row['subcategoria_de_riesgo'],
+                                                    'description' => $row['subcategoria_de_riesgo'],
+                                                    'risk_category_id' => $catpp->id
+                                                ]);
+                                            }
+
+                                            //Creamos el riesgo
+                                            $risk = \Ermtool\Risk::create([
+                                                'name' => $row['riesgo'],
+                                                'description' => $row['descripcion_riesgo'],
+                                                'risk_category_id' => $cat->id,
+                                                'type' => 0,
+                                                'type2' => 1,
+                                            ]);
+                                        }
+
+                                        //Ahora vemos si existe el Riesgo para la organización
+                                        $orgrisk = \Ermtool\Risk::getRiskByName($risk->name,$org->id);
+
+                                        if (empty($orgrisk))
+                                        {
+                                            //Obtenemos responsable
+                                            //$resp = \Ermtool\Stakeholder::getUserByMail($row['correo_responsable']);
+
+                                            //if (empty($resp))
+                                            //{
+                                                $resp_id = NULL;
+                                            //}
+                                            //else
+                                            //{
+                                            //    $resp_id = $resp->id;
+                                            //}
+
+                                            $orgrisk = \Ermtool\OrganizationRisk::create([
+                                                'organization_id' => $org->id,
+                                                'risk_id' => $risk->id,
+                                                'stakeholder_id' => $resp_id
+                                            ]);
+                                        }
+                                        //Asignamos subproceso al riesgo y a la organización
+                                        if (!empty($subprocess))
+                                        {
+                                            //Vemos si existe Risk Subprocess
+                                            $subprocess = \Ermtool\Subprocess::find($subprocess->id);
+                                            //$hasSub1 = $subprocess1->risks()->where('risks.id', $risk->id)->exists();
+                                            $hasSub = DB::table('risk_subprocess')
+                                                    ->where('organization_risk_id','=',$orgrisk->id)
+                                                    ->where('subprocess_id','=',$subprocess->id)
+                                                    ->first(['id']);
+
+                                            if (empty($hasSub)) //Si es falso, se crea enlace
+                                            {
+                                                $risk_subprocess = DB::table('risk_subprocess')
+                                                        ->insertGetId([
+                                                            'organization_risk_id' => $orgrisk->id,
+                                                            'subprocess_id' => $subprocess->id
+                                                        ]);
+                                            }
+                                        }
+
+                                        
+
+                                    }
+                                //}
                                    
                             }
                             else if ($_POST['kind'] == 6) //Planilla TI KOAndina
@@ -4325,7 +4523,7 @@ class ExcelController extends Controller
                                         //ACT 15-12-17: Insertamos porcentaje_cont aquí
                                         //vemos si existe el control para la org_risk
                                         $cor = DB::table('control_organization_risk')
-                                                ->where('organization_risk_id','=',$risk->org_risk_id)
+                                                ->where('organization_risk_id','=',$risk->id)
                                                 ->where('control_id','=',$control->id)
                                                 ->select('id')
                                                 ->first();
@@ -4347,7 +4545,7 @@ class ExcelController extends Controller
                                             DB::table('control_organization_risk')
                                             ->insert([
                                                 //'id' => $id,
-                                                'organization_risk_id' => $risk->org_risk_id,
+                                                'organization_risk_id' => $risk->id,
                                                 'control_id' => $control->id,
                                                 //'stakeholder_id'=>$user_control,
                                                 //'cont_percentage' => $porcentaje_cont,
@@ -5480,12 +5678,12 @@ class ExcelController extends Controller
                         $sheet->fromArray($datos);
 
                         //editamos formato de salida de celdas
-                        $sheet->cells('A1:AP1', function($cells) {
+                        $sheet->cells('A1:BN1', function($cells) {
                                 $cells->setBackground('#013ADF');
                                 $cells->setFontColor('#ffffff');
                                 $cells->setFontFamily('Calibri');
                                 $cells->setFontWeight('bold');
-                                $cells->setFontSize(16);
+                                $cells->setFontSize(14);
                         });
 
                         $sheet->freezeFirstRow();
