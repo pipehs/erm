@@ -2090,7 +2090,7 @@ class RiesgosController extends Controller
                         }
                         else if ($risk->type == 1) //obtenemos objetivos
                         {
-                            $objectives = \Ermtool\Objective::getObjectivesFromOrgRisk($risk->id,$org);
+                            $objectives = \Ermtool\Objective::getObjectivesFromOrgRisk($risk->risk_id,NULL);
 
                             if (!empty($objectives))
                             {
