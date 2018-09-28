@@ -103,6 +103,17 @@
 	</div>
 </div>
 
+<div class="form-group">
+	<label for="alert_ap" class="col-sm-4 control-label">Alertas notas auditoría<a href="#" class="popper" data-popbox="pop9">?</a></label>
+	<div class="col-sm-4">
+		@if (isset($data['alert_audit_notes']) && $data['alert_audit_notes'] == '1')
+			<input type="checkbox" value="1" name="alert_audit_notes" id="alert_audit_notes" data-toggle="toggle" data-on="Si" data-off="No" data-width="100" data-offstyle="danger" data-onstyle="success" checked>
+		@else
+			<input type="checkbox" value="1" name="alert_audit_notes" id="alert_audit_notes" data-toggle="toggle" data-on="Si" data-off="No" data-width="100" data-offstyle="danger" data-onstyle="success">
+		@endif
+	</div>
+</div>
+
 <div id="pop1" class="popbox">
 	<p>Nombre de la organización que se está habilitando</p>
 </div>
@@ -137,4 +148,8 @@
 
 <div id="pop9" class="popbox">
 	<p>Se enviarán alertas al responsable de un plan de acción al crear un plan de acción (siempre que se especifique el responsable del plan)</p>
+</div>
+
+<div id="pop10" class="popbox">
+	<p>Se enviarán alertas a quien vaya dirigida una nota de auditoría al crear al crear la misma</p>
 </div>
