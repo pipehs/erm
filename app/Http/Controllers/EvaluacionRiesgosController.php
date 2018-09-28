@@ -1113,11 +1113,7 @@ class EvaluacionRiesgosController extends Controller
                                 //obtenemos subprocesos relacionados
                                 $subprocesses = array();
 
-                                $subs = DB::table('subprocesses')
-                                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                                        ->where('risk_subprocess.risk_id','=',$r->id)
-                                        ->select('subprocesses.name','subprocesses.description')
-                                        ->get();
+                                $subs = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($risk);
                                 $j = 0;
                                 foreach ($subs as $sub)
                                 {
@@ -2557,27 +2553,8 @@ class EvaluacionRiesgosController extends Controller
             //$objectives = $riesgo_temp->objectives ----> NO SIRVE MUESTRA OBJ. DE OTRAS ORGANIZACIONES
             if (isset($_GET['kind']) && $_GET['kind'] == 0) //riesgos de proceso
             {
-                if ($org == NULL)
-                {
-                    //ACT 12-01-18: Vemos por organización igual ya que para cada organización habrá distinta evaluación
-                    $subobj = DB::table('subprocesses')
-                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                        ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
-                        ->where('organization_risk.id','=',$evaluation->risk_id)
-                        ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
-                        ->select('subprocesses.name')
-                        ->get();
-                }
-                else
-                {
-                    $subobj = DB::table('subprocesses')
-                    ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                    ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
-                    ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
-                    ->where('organization_risk.organization_id','=',$org)
-                    ->select('subprocesses.name')
-                    ->get();
-                }
+                //ACT 12-01-18: Vemos por organización igual ya que para cada organización habrá distinta evaluación
+                $subobj = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($evaluation->risk_id);
                 
             }
             else if (isset($_GET['kind']) && $_GET['kind'] == 1) //riesgos de negocio
@@ -2615,13 +2592,7 @@ class EvaluacionRiesgosController extends Controller
 
                 if (!isset($subobj) || empty($subobj))
                 {
-                    $subobj = DB::table('subprocesses')
-                        ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                        ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
-                        ->where('organization_risk.id','=',$evaluation->risk_id)
-                        ->where('risk_subprocess.risk_id','=',$riesgo_temp->id)
-                        ->select('subprocesses.name')
-                        ->get();
+                    $subobj = \Ermtool\Subprocess::getSubprocessesFromOrgRisk($evaluation->risk_id);
                 }
             }
                                 
@@ -2649,13 +2620,7 @@ class EvaluacionRiesgosController extends Controller
             if (isset($_GET['kind2']) &&  $_GET['kind2'] == 2) //reporte por procesos
             {
                 //obtenemos todos los procesos asociado al Riesgo (puede ser uno o muchos)
-                $processes = DB::table('processes')
-                            ->join('subprocesses','subprocesses.process_id','=','processes.id')
-                            ->join('risk_subprocess','risk_subprocess.subprocess_id','=','subprocesses.id')
-                            ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
-                            ->where('organization_risk.id','=',$evaluation->risk_id)
-                            ->select('processes.id','processes.name')
-                            ->get();
+                $processes = \Ermtool\Process::getProcessesFromRisk($evaluation->risk_id);
             }
 
             //obtenemos nombre de responsable

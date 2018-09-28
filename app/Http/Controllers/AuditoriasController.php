@@ -183,30 +183,19 @@ class AuditoriasController extends Controller
             }
             else
             {
-                //obtenemos lista de stakeholders (LOS OBTENDREMOS SEGÚN ORGANIZACIÓN)
-                //$stakeholders = \Ermtool\Stakeholder::select('id', DB::raw('CONCAT(name, " ", surnames) AS full_name'))
-                //->orderBy('name')
-                //->lists('full_name', 'id');
                 //obtenemos lista de organizaciones
                 $organizations = \Ermtool\Organization::where('status',0)->lists('name','id');
 
                 //obtenemos universo de auditorias
                 $audits = \Ermtool\Audit::lists('name','id');
-                //obtenemos riesgos de proceso
-                $risk_subprocess = DB::table('risk_subprocess')
-                                        ->join('risks','risk_subprocess.risk_id','=','risks.id')
-                                        ->where('risks.type2','=',1)
-                                        ->select('risk_subprocess.id AS riskid','risks.name')
-                                        ->lists('risks.name','riskid');
+
                 if (Session::get('languaje') == 'en')
                 {
-                    return view('en.auditorias.create',[/*'stakeholders'=>$stakeholders,*/'organizations'=>$organizations,
-                                                'audits'=>$audits,'risk_subprocess'=>$risk_subprocess]);
+                    return view('en.auditorias.create',['organizations'=>$organizations,'audits'=>$audits]);
                 }
                 else
                 {
-                    return view('auditorias.create',[/*'stakeholders'=>$stakeholders,*/'organizations'=>$organizations,
-                                                'audits'=>$audits,'risk_subprocess'=>$risk_subprocess]);
+                    return view('auditorias.create',['organizations'=>$organizations,'audits'=>$audits]);
                 }
             }
         }
@@ -886,20 +875,14 @@ class AuditoriasController extends Controller
                         foreach ($request['risk_subprocess_id'] as $risk_subprocess)
                         {
                             //obtenemos nombre del riesgo de de proceso
-                            $risk_name = DB::table('risk_subprocess')
-                                            ->where('risk_subprocess.id',$risk_subprocess)
-                                            ->join('risks','risk_subprocess.risk_id','=','risks.id')
-                                            ->select('risks.name')
-                                            ->get();
+                            $risk_name = \Ermtool\Risk::getNameByRiskSubprocess($risk_subprocess);
+                        
                             //almacenamos id y nombre del riesgo
-                            foreach ($risk_name as $name)
-                            {
-                                $risk_subprocess_id[$i] = [
-                                            'id' => $risk_subprocess,
-                                            'name' => $name->name
-                                            ];
-                                $i += 1;    
-                            }
+                            $risk_subprocess_id[$i] = [
+                                'id' => $risk_subprocess,
+                                'name' => $risk_name->name
+                            ];
+                            $i += 1;    
                         }
                     }
                 $i = 0;
@@ -2052,36 +2035,7 @@ class AuditoriasController extends Controller
                             ->where('audit_plan_id','=',$id)
                             ->select('audits.id as id','audits.name as name')
                             ->get();
-                //cada una de las auditorías pertenecientes al plan
-                //obtenemos riesgos de procesos que ya fueron seleccionados
-                //ACT 05-04-17: Ya no se usan
-                /*$riesgos_selected = DB::table('audit_plan_risk')
-                                        ->join('risk_subprocess','risk_subprocess.id','=','audit_plan_risk.risk_subprocess_id')
-                                        ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                                        ->where('audit_plan_risk.audit_plan_id','=',$id)
-                                        ->whereNotNull('audit_plan_risk.risk_subprocess_id')
-                                        ->select('risk_subprocess.id')
-                                        ->get();
-                $i = 0;
-                foreach ($riesgos_selected as $risk)
-                {
-                    $riesgos_proc[$i] = $risk->id;
-                    $i += 1;
-                }
-                //obtenemos riesgos de negocio que ya fueron seleccionados
-                $riesgos_selected = DB::table('audit_plan_risk')
-                                        ->join('objective_risk','objective_risk.id','=','audit_plan_risk.objective_risk_id')
-                                        ->join('risks','risks.id','=','objective_risk.risk_id')
-                                        ->where('audit_plan_risk.audit_plan_id','=',$id)
-                                        ->whereNotNull('audit_plan_risk.objective_risk_id')
-                                        ->select('objective_risk.id')
-                                        ->get();
-                $i = 0;
-                foreach ($riesgos_selected as $risk)
-                {
-                    $riesgos_neg[$i] = $risk->id;
-                    $i += 1;
-                }*/
+                
                 //obtenemos stakeholder responsable
                 $stakeholder1 = DB::table('audit_plan_stakeholder')
                                 ->where('audit_plan_id','=',$id)
@@ -4080,46 +4034,7 @@ class AuditoriasController extends Controller
                         }
                         
                     }
-                     //obtenemos riesgos de negocio del plan
-                    //ACT 11-04-17: Ya no hay riesgos asociados directamente al plan
-                    /*
-                    $objective_risks = DB::table('audit_plan_risk')
-                                        ->join('objective_risk','objective_risk.id','=','audit_plan_risk.objective_risk_id')
-                                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                        ->join('risks','risks.id','=','objective_risk.risk_id')
-                                        ->where('audit_plan_risk.audit_plan_id','=',$audit_plan_id)
-                                        ->select('objective_risk.id as id','risks.name as risk_name','objectives.name as objective_name')
-                                        ->get();
-                    //obtenemos riesgos de negocio del plan
-                    $subprocess_risks = DB::table('audit_plan_risk')
-                                        ->join('risk_subprocess','risk_subprocess.id','=','audit_plan_risk.risk_subprocess_id')
-                                        ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                                        ->join('processes','processes.id','=','subprocesses.process_id')
-                                        ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                                        ->where('audit_plan_risk.audit_plan_id','=',$audit_plan_id)
-                                        ->select('risk_subprocess.id as id','risks.name as risk_name','subprocesses.name as subprocess_name',
-                                                'processes.name as process_name')
-                                        ->get();
-
-                    $j = 0; //contador de riesgos en cero
-                    //seteamos en variables los riesgos de negocio
-                    foreach ($objective_risks as $objective_risk)
-                    {
-                        $obj_plan_risks[$j] = ['name' => $objective_risk->risk_name,
-                                               'objective_name' => $objective_risk->objective_name,
-                                               ];
-                        $j += 1;
-                    }
-                    $j = 0; //contador de riesgos en cero
-                    //seteamos en variables los riesgos de proceso
-                    foreach ($subprocess_risks as $subprocess_risk)
-                    {
-                        $sub_plan_risks[$j] = ['name' => $subprocess_risk->risk_name,
-                                               'subprocess_name' => $subprocess_risk->subprocess_name,
-                                               'process_name' => $subprocess_risk->process_name];
-                        $j += 1;
-                    }
-                    */
+                    
                     //ahora obtenemos los datos requeridos de auditoría para el plan
                     $audits = DB::table('audit_audit_plan')
                                         ->join('audits','audits.id','=','audit_audit_plan.id')
@@ -4163,30 +4078,6 @@ class AuditoriasController extends Controller
                         else
                             $description = $audit->description;
 
-                        //ACT 11-04-17: Ya no hay riesgos asociados directamente a la auditoría
-                        /*
-                        $obj_risks = array();
-                        $sub_risks = array();
-                        //obtenemos riesgos de negocio asociados a la auditoría
-                        $objective_risks = DB::table('audit_risk')
-                                        ->join('objective_risk','objective_risk.id','=','audit_risk.objective_risk_id')
-                                        ->join('objectives','objectives.id','=','objective_risk.objective_id')
-                                        ->join('risks','risks.id','=','objective_risk.risk_id')
-                                        ->where('audit_risk.audit_audit_plan_id','=',$audit->id)
-                                        ->select('risks.name as risk_name','objectives.name as objective_name')
-                                        ->get();
-                        //obtenemos riesgos de negocio asociados a la auditoría
-                        $subprocess_risks = DB::table('audit_risk')
-                                        ->join('risk_subprocess','risk_subprocess.id','=','audit_risk.risk_subprocess_id')
-                                        ->join('subprocesses','subprocesses.id','=','risk_subprocess.subprocess_id')
-                                        ->join('processes','processes.id','=','subprocesses.process_id')
-                                        ->join('risks','risks.id','=','risk_subprocess.risk_id')
-                                        ->where('audit_risk.audit_audit_plan_id','=',$audit->id)
-                                        ->select('risks.name as risk_name','subprocesses.name as subprocess_name',
-                                                'processes.name as process_name')
-                                        ->get();
-
-                        */
                         //obtenemos programas de auditoría realizadas en cada auditoría (si es que hay)
                         $audit_programs1 = DB::table('audit_audit_plan_audit_program')
                                     ->join('audit_audit_plan','audit_audit_plan.id','=','audit_audit_plan_audit_program.audit_audit_plan_id')
@@ -4205,27 +4096,7 @@ class AuditoriasController extends Controller
                                 $j += 1;
                             }
                         }
-                        /*
-                        $j = 0; //contador de riesgos en cero
-                        //seteamos en variables los riesgos de negocio (si es que hay)
-                        foreach ($objective_risks as $objective_risk)
-                        {
-                            $obj_risks[$j] = ['audit_id' => $audit->id,
-                                              'name' => $objective_risk->risk_name,
-                                              'objective_name' => $objective_risk->objective_name];
-                            $j += 1;
-                        }
-                        $j = 0; //contador de riesgos en cero
-                        //seteamos en variables los riesgos de proceso
-                        foreach ($subprocess_risks as $subprocess_risk)
-                        {
-                            $sub_risks[$j] = ['audit_id' => $audit->id,
-                                              'name' => $subprocess_risk->risk_name,
-                                              'subprocess_name' => $subprocess_risk->subprocess_name,
-                                              'process_name' => $subprocess_risk->process_name];
-                            $j += 1;
-                        }
-                        */
+                        
                         //guardamos datos de pruebas de auditoría de la auditoría seleccionada
                         $auditorias[$i] = ['name' => $audit->name,
                                             'description' => $description,
