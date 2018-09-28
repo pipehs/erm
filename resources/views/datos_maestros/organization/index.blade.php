@@ -53,10 +53,11 @@
 		@else
 			{!! link_to_route('organization.verbloqueados', $title = 'Ver Bloqueadas', $parameters = 'verbloqueados', $attributes = ['class'=>'btn btn-danger']) !!}
 		@endif
-
 		<?php break; ?>
 	@endif
 @endforeach
+
+	{!! link_to_route('organigrama', $title = 'Ver organigrama', $parameters = NULL, $attributes = ['class'=>'btn btn-default']) !!}
 
 	<table class="table table-bordered table-striped table-hover table-heading table-datatable" id="datatable-2" style="font-size:10px;">
 	<thead>
