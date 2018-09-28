@@ -742,6 +742,39 @@ class AuditoriasController extends Controller
                                 'user_id' => Auth::user()->id,
                                 'stakeholder_id' => $stake
                             ]);
+
+                    if ($res && isset($_POST['stakeholder_id']) && $_POST['stakeholder_id'] != NULL)
+                    {
+                        //Verificamos si en config está activado el envío de correos de alerta
+                        $alert = \Ermtool\Configuration::where('option_name','alert_audit_notes')->first(['option_value as v']);
+
+                        if (!empty($alert) && $alert->v == 1)
+                        {
+                            //Enviamos correo a usuario informando de la creación del plan de acción
+                            //obtenemos stakeholder (responsable) para enviarle un correo informando la situación
+                            $stakeholder_mail = \Ermtool\Stakeholder::where('id',$_POST['stakeholder_id'])->value('mail');
+                            $name = \Ermtool\Stakeholder::getName($_POST['stakeholder_id']);
+
+                            $audit_test = \Ermtool\Audit_test::where('id',$_POST['test_id'])->value('name');
+                            $message = array();
+
+                            //Hacemos un replace de nombre de stakeholder, nombre de plan de acción y días de vencimiento
+                            $message[0] = 'Estimado '.$name;
+                            $message[1] = 'Se acaba de generar una nota de auditoría en el sistema B-GRC dirigida a ud.';
+                            $message[2] = '<b>Nombre nota:</b> '.$_POST['name_'.$_POST['test_id']];
+                            $message[4] = '<b>Descripción de la nota:</b> '.$_POST['description_'.$_POST['test_id']];
+                            $message[5] = '<b>Prueba asociada:</b> '.$audit_test;
+                            $message[6] = '<b>Realizada por:</b> '.Auth::user()->name.' '.Auth::user()->surnames;
+                            $message[7] = '<b>Correo:</b> '.Auth::user()->email;
+
+                            $message[8] = 'Para cualquier duda, comentario o consulta, favor contáctese con el usuario que generó esta nota.';
+
+                            $message[9] = 'Atentamente,';
+                            $message[10] = 'Equipo B-GRC';
+
+                            sendAlertMail($message,$stakeholder_mail,$name,Auth::user()->email,'Creación nota de auditoría');
+                        }
+                    }
                 
                     //guardamos archivo de evidencia (si es que hay)
                     if($GLOBALS['evidence'] != NULL)
