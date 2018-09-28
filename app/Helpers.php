@@ -256,7 +256,7 @@ function dropDown7()
 //dropdown de administración del sistema
 function dropDown8()
 {
-	$uri = array('usuarios','controlled_risk_criteria');
+	$uri = array('usuarios','controlled_risk_criteria','configuration');
 
 	foreach ($uri as $uri)
 	{

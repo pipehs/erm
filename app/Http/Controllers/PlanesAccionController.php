@@ -892,29 +892,29 @@ class PlanesAccionController extends Controller
                             }
                             else
                             {
-                                $message[5] = 'Estado: Cerrado';
+                                $message[4] = 'Estado: Cerrado';
                             }
 
                             if ($percentage != NULL)
                             {
-                                $message[6] = 'Porcentaje de avance: '.$percentage.'%';
+                                $message[5] = 'Porcentaje de avance: '.$percentage.'%';
                             }
                             else
                             {
-                                $message[6] = 'Porcentaje de avance: 0%';
+                                $message[5] = 'Porcentaje de avance: 0%';
                             }
 
                             if ($progress_comments != NULL)
                             {
-                                $message[7] = 'Comentarios de avance: '.$progress_comments;
+                                $message[6] = 'Comentarios de avance: '.$progress_comments;
                             }
                             else
                             {
-                                $message[7] = 'Comentarios de avance: No se han agregado';
+                                $message[6] = 'Comentarios de avance: No se han agregado';
                             }
 
-                            $message[8] = 'Atentamente,';
-                            $message[9] = 'Equipo B-GRC';
+                            $message[7] = 'Atentamente,';
+                            $message[8] = 'Equipo B-GRC';
 
                             sendAlertMail($message,$stakeholder_mail,$name,Auth::user()->email,'Creación plan de acción');
                         }

@@ -140,6 +140,9 @@ class ConfigurationController extends Controller
                         break;
                     case 'alert_ap':
                         $alert_ap = $c->option_value;
+                        break;
+                    case 'alert_audit_notes':
+                        $alert_audit_notes = $c->option_value;
                         break;                
                     default:
                         # code...
@@ -157,6 +160,7 @@ class ConfigurationController extends Controller
                 'logo_width' => isset($logo_width) ? $logo_width : NULL,
                 'logo_height' => isset($logo_height) ? $logo_height : NULL,
                 'alert_ap' => isset($alert_ap) ? $alert_ap : NULL,
+                'alert_audit_notes' => isset($alert_audit_notes) ? $alert_audit_notes : NULL,
             ];
 
             return view('configuration.edit',['data' => $data]);
@@ -225,6 +229,27 @@ class ConfigurationController extends Controller
                     else
                     {
                         \Ermtool\Configuration::where('option_name','=','alert_ap')
+                            ->update([
+                                'option_value' => 0
+                            ]);
+                    }       
+                }
+
+                if (!isset($_POST['alert_audit_notes']))
+                {
+                    //Vemos si es que existe o se debe crear
+                    $q = \Ermtool\Configuration::where('option_name','=','alert_audit_notes')->first();
+
+                    if (empty($q))
+                    {
+                        \Ermtool\Configuration::create([
+                            'option_name' => 'alert_audit_notes',
+                            'option_value' => 0
+                        ]);
+                    }
+                    else
+                    {
+                        \Ermtool\Configuration::where('option_name','=','alert_audit_notes')
                             ->update([
                                 'option_value' => 0
                             ]);
