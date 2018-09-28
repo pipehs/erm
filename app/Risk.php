@@ -588,4 +588,14 @@ class Risk extends Model
             ->where('organization_risk.id','=',$org_risk_id)
             ->first();
     }
+
+    public static function getNameByRiskSubprocess($risk_subprocess_id)
+    {
+        return DB::table('risk_subprocess')
+                ->where('risk_subprocess.id',$risk_subprocess)
+                ->join('organization_risk','organization_risk.id','=','risk_subprocess.organization_risk_id')
+                ->join('risks','organization_risk.risk_id','=','risks.id')
+                ->select('risks.name')
+                ->first();
+    }
 }
