@@ -221,7 +221,7 @@ class RiesgosController extends Controller
                     //primero obtenemos maxima fecha de evaluacion para el riesgo
                     $fecha = DB::table('evaluation_risk')
                                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                                    ->where('evaluation_risk.organization_risk_id','=',$riesgo->id)
+                                    ->where('evaluation_risk.organization_risk_id','=',$riesgo->org_risk_id)
                                     ->max('evaluations.updated_at');
 
                     //ACT 04-04-17: Sacamos guiones para SQL Server
@@ -232,7 +232,7 @@ class RiesgosController extends Controller
                                     ->join('organization_risk','organization_risk.id','=','evaluation_risk.organization_risk_id')
                                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                                     ->whereNull('organization_risk.deleted_at')
-                                    ->where('evaluation_risk.organization_risk_id','=',$riesgo->id)
+                                    ->where('evaluation_risk.organization_risk_id','=',$riesgo->org_risk_id)
                                     ->where('evaluations.updated_at','=',$fecha)
                                     ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
                                     ->get();

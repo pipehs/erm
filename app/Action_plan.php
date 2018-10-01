@@ -174,4 +174,13 @@ class Action_plan extends Model
                 ->select('percentage','comments','updated_at')
                 ->first();
     }
+
+    public static function getActionPlanByIssueAndDescription($issue_id,$description)
+    {
+        return DB::table('action_plans')
+                ->where('issue_id','=',$issue_id)
+                ->where('description','=',$description)
+                ->select('*')
+                ->first();
+    }
 }
