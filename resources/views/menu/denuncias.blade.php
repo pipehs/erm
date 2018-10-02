@@ -12,7 +12,8 @@
 			<li><a href="reportes_denuncias" class="{{ activeMenu('reportes_denuncias') }}">Reportes</a></li>
 
 			@if (isset(Auth::user()->superadmin) && (Auth::user()->superadmin == 1 || Auth::user()->superadmin == 2 ))
-				<li><a href="cc_questions" class="{{ activeMenu('configdenuncias') }}">Configurar preguntas</a></li>
+				<li><a href="cc_questions" class="{{ activeMenu('preguntasdenuncias') }}">Configurar preguntas</a></li>
+				<li><a href="cc_config" class="{{ activeMenu('configdenuncias') }}">Configuración general</a></li>
 			@endif
 		</ul>
 	</li>

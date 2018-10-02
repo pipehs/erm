@@ -1,9 +1,13 @@
-@extends('master')
+
+@extends(Auth::user() ? 'master' : 'master2')
+
 
 @section('title', 'Registro de denuncia')
 
 @section('content')
-
+<style type="text/css">
+	
+</style>
 <!-- header menu de arbol -->
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
@@ -52,13 +56,13 @@
 
 			<p>Canal de denuncia</p>
 			<center>
-			<p><button class="btn-lg btn-info" onclick="window.location.href='registro_denuncia'"><b>Registro de denuncia</button></p>
+			<p><button class="block" onclick="window.location.href='registro_denuncia'"><b>Registro de denuncia</button></p>
 			<br>
-			<p><button class="btn-lg btn-info" onclick="window.location.href='seguimiento'">Seguimiento de denuncia</button></p>
+			<p><button class="block" onclick="window.location.href='seguimiento'">Seguimiento de denuncia</button></p>
 			<br>
-			<p><button class="btn-lg btn-info" onclick="window.location.href='seguimiento_admin'">Seguimiento Administrador</button></p>
+			<p><button class="block"onclick="window.location.href='seguimiento_admin'">Seguimiento Administrador</button></p>
 			<br>
-			<p><button class="btn-lg btn-info" onclick="window.location.href='reportes_denuncias'">Reportes</button></p>
+			<p><button class="block" onclick="window.location.href='reportes_denuncias'">Reportes</button></p>
 			<br>
 
 			</center>

@@ -35,7 +35,13 @@
  	{!!Html::style('assets/plugins/fancybox/jquery.fancybox.css')!!}
  	{!!Html::style('assets/plugins/fullcalendar/fullcalendar.css')!!}
  	{!!Html::style('assets/plugins/xcharts/xcharts.min.css')!!}
- 	{!!Html::style('assets/css/style.css')!!}
+ 	
+ 	@if (Session::get('org') != NULL && file_exists(public_path().'/assets/css/style_'.strtolower(Session::get('org')).'.css'))
+ 		{!!Html::style('assets/css/style_'.strtolower(Session::get('org')).'.css')!!}
+ 	@else
+ 		{!!Html::style('assets/css/style.css')!!}
+ 	@endif
+
  	{!!Html::style('assets/plugins/select2/select2.css')!!}
  	{!!Html::style('assets/plugins/sweetalert-master/dist/sweetalert.css')!!}
  	{!!Html::style('assets/plugins/sweetalert-master/themes/twitter/twitter.css')!!}
@@ -44,6 +50,7 @@
  	{!!Html::style('assets/css/semaforo.css')!!}
  	{!!Html::style('assets/css/upload.css')!!}
  	{!!Html::style('assets/css/fileinput.css')!!}
+ 	{!!Html::style('assets/css/popper.css')!!}
 
  	{!!Html::style('assets/bootstrap-toggle-master/css/bootstrap2-toggle.min.css')!!}
 

@@ -106,14 +106,14 @@
 cont_q = 2;
 function add_questions()
 {
-			var new_questions = '<div class="form-group">'
-			new_questions += '<label for="cc_question_'+cont_q+'" class="col-sm-4 control-label">Pregunta '+cont_q+'</label>'
-			new_questions += '<div class="col-sm-4">'
-			new_questions += '<input type="text" name="cc_question_'+cont_q+'" class="form-control"></input>'
-			new_questions += '</div></div>'
+	var new_questions = '<div class="form-group">'
+	new_questions += '<label for="cc_question_'+cont_q+'" class="col-sm-4 control-label">Pregunta '+cont_q+'</label>'
+	new_questions += '<div class="col-sm-4">'
+	new_questions += '<input type="text" name="cc_question_'+cont_q+'" class="form-control"></input>'
+	new_questions += '</div></div>'
 
-			$("#new_questions").append(new_questions)
-			cont_q = cont_q + 1
+	$("#new_questions").append(new_questions)
+	cont_q = cont_q + 1
 }
 </script>
 @stop

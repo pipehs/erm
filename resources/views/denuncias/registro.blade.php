@@ -1,4 +1,4 @@
-@extends('master')
+@extends(Auth::user() ? 'master' : 'master2')
 
 @section('title', 'Registro de denuncia')
 
@@ -51,7 +51,7 @@
 			@endif
 
 			En esta secci&oacute;n podr&aacute; enviar y registrar una consulta, reclamo o denuncia.
-			{!!Form::open(['route'=>'registro_denuncia2','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'registro_denuncia2','method'=>'POST','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
 
 			<div class="form-group">
 				<label for="terms" class="col-sm-4 control-label">Aceptar <a href="#">términos y condiciones</a></label>
@@ -70,21 +70,21 @@
 					Seleccione el tipo de caso<a href="#" class="popper" data-popbox="pop1">?</a>
 				</label>
 				<div class="col-sm-5">
-					{!!Form::select('kind_id',['1' => 'Denuncia','2'=>'Reclamo','3'=>'Consulta'], null, ['id' => 'kind_id','placeholder'=>'- Seleccione -'])!!}
+					{!!Form::select('cc_kind_id',$cc_kinds, null, ['id' => 'kind_id','placeholder'=>'- Seleccione -'])!!}
 				</div>
 			</div>
 
 			@foreach ($questions as $q)
 				<div class="form-group">
-					<label for="description" class="col-sm-4 control-label">{{$q->description}}</label>
+					<label for="answer_{{$q->id}}" class="col-sm-4 control-label">{{$q->description}}</label>
 					<div class="col-sm-5">
 						@if ($q->cc_kind_answer_id == 1)
-							{!!Form::textarea('description',null,['class'=>'form-control','rows'=>'8','cols'=>'4','required' => 'true'])!!}
+							{!!Form::textarea('answer_'.$q->id,null,['class'=>'form-control','rows'=>'8','cols'=>'4','required' => 'true'])!!}
 						@elseif ($q->cc_kind_answer_id == 2)
 							@foreach ($q->p_answers as $ans)
 								<div class="radio-inline">
 									<label>
-										<input type="radio" name="answer_{{$q->id}}[]" value="{{$ans->id}}"> {{ $ans->description }}
+										<input type="radio" required="true" name="answer_{{$q->id}}" value="{{$ans->id}}"> {{ $ans->description }}
 										<i class="fa fa-circle-o"></i>
 									</label>
 								</div>
@@ -98,6 +98,8 @@
 									</label>
 								</div>
 							@endforeach
+						@elseif ($q->cc_kind_answer_id == 4)
+							{!!Form::date('answer_'.$q->id,null,['class'=>'form-control','required' => 'true'])!!}
 						@endif
 					</div>
 				</div>
@@ -115,13 +117,13 @@
 				<div class="col-sm-5">
 					<div class="radio-inline">
 						<label>
-							<input type="radio" name="anonymous[]" value="1" checked> Si
+							<input type="radio" name="anonymous" value="1" checked> Si
 							<i class="fa fa-circle-o"></i>
 						</label>
 					</div>
 					<div class="radio-inline">
 						<label>
-							<input type="radio" name="anonymous[]" value="2"> No
+							<input type="radio" name="anonymous" value="2"> No
 							<i class="fa fa-circle-o"></i>
 						</label>
 					</div>
@@ -159,16 +161,16 @@
 			</div>
 
 			<div class="form-group" id="divpass">
-				{!!Form::label('Contraseña',null,['class'=>'col-sm-4 control-label'])!!}
+				{!!Form::label('Contraseña *',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-5">
-					<input type="password" class="form-control" name="password" id="pass" onchange="compararPass(this.value,form.repass.value)" />
+					<input type="password" class="form-control" name="password" id="pass" required="true" onchange="compararPass(this.value,form.repass.value)" />
 				</div>
 			</div>
 
 			<div class="form-group" id="divrepass">
-				{!!Form::label('Re-ingrese Contraseña',null,['class'=>'col-sm-4 control-label'])!!}
+				{!!Form::label('Re-ingrese Contraseña *',null,['class'=>'col-sm-4 control-label'])!!}
 				<div class="col-sm-5">
-					<input type="password" class="form-control" name="repassword" id="repass"  onchange="compararPass(form.pass.value,this.value)"/>
+					<input type="password" class="form-control" name="repassword" id="repass" required="true" onchange="compararPass(form.pass.value,this.value)"/>
 					<div id="error_pass"></div>
 				</div>
 			</div>
@@ -218,9 +220,9 @@
 		}
 	}
 
-$("input[name='anonymous[]']").change(function(){
+$("input[name='anonymous']").change(function(){
 	//alert($("input[name='anonymous[]']:checked").val())
-	if ($("input[name='anonymous[]']:checked").val() == 1)
+	if ($("input[name='anonymous']:checked").val() == 1)
 	{
 		$('#anonymous2').hide(500);
 	}
