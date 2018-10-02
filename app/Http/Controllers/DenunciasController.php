@@ -20,21 +20,17 @@ class DenunciasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-        if (Auth::user()->cc_user == 1)
+    {       
+        $org_name = \Ermtool\Configuration::where('option_name','organization')->first(['option_value as o']);
+        Session::put('org',$org_name->o);
+
+        if (Session::get('languaje') == 'en')
         {
-            if (Session::get('languaje') == 'en')
-            {
-                return view('en.denuncias.home');
-            }
-            else
-            {
-                return view('denuncias.home');
-            }
+            return view('en.denuncias.home');
         }
         else
         {
-            return locked();
+            return view('denuncias.home');
         }
     }
 
@@ -148,7 +144,7 @@ class DenunciasController extends Controller
     public function registerComplaint()
     {
         $questions = \Ermtool\CcQuestion::all();
-
+        $cc_kinds = \Ermtool\CcKind::lists('name','id');
         foreach ($questions as $q)
         {
             if ($q->cc_kind_answer_id != 1) //no es respuesta de texto
@@ -166,14 +162,104 @@ class DenunciasController extends Controller
             }
         }
 
-        return view('denuncias.registro',['questions' => $questions]);
+        return view('denuncias.registro',['questions' => $questions,'cc_kinds' => $cc_kinds]);
 
     }
 
-    public function registerComplaint2()
+    public function registerComplaint2(Request $request)
     {
-        print_r($_POST);
+        global $request2;
+        $request2 = $request;
+        //print_r($_POST);
+        DB::transaction(function(){
+            if ($_POST['anonymous'] == 2) //No es anónimo
+            {
+                if (isset($_POST['email']))
+                {
+                    //Vemos si existe denunciante o se debe crear
+                    $complainant = \Ermtool\CcComplainant::where('email',$_POST['email'])->first();
 
+                    if (empty($complainant))
+                    {
+                        //Creamos denunciante
+                        $complainant = \Ermtool\CcComplainant::create([
+                            'name' => $_POST['name'] != '' ? $_POST['name'] : NULL,
+                            'surnames' => $_POST['surnames'] != '' ? $_POST['surnames'] : NULL,
+                            'telephone' => $_POST['telephone'] != '' ? $_POST['telephone'] : NULL,
+                            'email' => $_POST['email']
+                        ]);
+                    }
+
+                    $complainant_id = $complainant->id;
+                }
+                else
+                {
+                    $complainant_id = NULL;
+                }
+            }
+            else
+            {
+                $complainant_id = NULL;
+            }
+
+            $id = rand(); //Generamos id aleatoriamente
+            //Vemos si ya existe este id
+            while (!empty(\Ermtool\CcCase::find($id)))
+            {
+                $id = rand(10000,999999999); //generamos hasta que no exista
+            }
+
+            //Obtenemos status (siempre el primero será el predeterminado)
+            $cc_status = \Ermtool\CcStatus::where('cc_kind_id',$_POST['cc_kind_id'])->first();
+            //Creamos denuncia (o caso)
+            $case = \Ermtool\CcCase::create([
+                'id' => $id,
+                'cc_complainant_id' => $complainant_id,
+                'cc_kind_id' => $_POST['cc_kind_id'],
+                'password' => bcrypt($_POST['password']),
+                'cc_status_id' => $cc_status->id
+            ]);
+
+            //Guardamos cada respuesta asociada al caso
+            $cc_questions = \Ermtool\CcQuestion::all();
+
+            foreach ($cc_questions as $q)
+            {
+                if (isset($_POST['answer_'.$q->id]) && $_POST['answer_'.$q->id] != '')
+                {    
+                    \Ermtool\CcAnswer::create([
+                        'cc_case_id' => $id,
+                        'cc_question_id' => $q->id,
+                        'description' => $_POST['answer_'.$q->id],
+                    ]);
+                }
+            }
+
+            if($GLOBALS['request2']->file('evidence_doc') != NULL)
+            {
+                foreach ($GLOBALS['request2']->file('evidence_doc') as $evidence)
+                {
+                    if ($evidence != NULL)
+                    {
+                        upload_file($evidence,'canal_denuncias',$id);
+                    }
+                }                    
+            }
+
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Your case was successfully created');
+            }
+            else
+            {
+                Session::flash('message','Su caso ha sido registrado exitosamente');
+            }
+
+            global $id2;
+            $id2 = $id;
+        });
+        
+        return view('denuncias.registro2',['id' => $GLOBALS['id2']]);
     }
     /**
      * Show the form for creating a new resource.
@@ -239,5 +325,103 @@ class DenunciasController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function indexConfiguration()
+    {
+        if (Auth::user()->cc_user == 1 || Auth::user()->cc_user == 2)
+        {
+            $cc_kinds = \Ermtool\CcKind::all();
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.denuncias.configuration',['cc_kinds' => $cc_kinds]);
+            }
+            else
+            {
+                return view('denuncias.configuration',['cc_kinds' => $cc_kinds]);
+            }
+        }
+        else
+        {
+            return locked();
+        }
+    }
+
+    public function storeConfiguration()
+    {
+        //print_r($_POST);
+        DB::transaction(function(){
+
+            $cc_kinds = \Ermtool\CcKind::all();
+
+            //Recorremos todos los tipos de casos
+            foreach ($cc_kinds as $k)
+            {
+                $k->responsable_mail = $_POST['email_'.$k->id] != '' ? $_POST['email_'.$k->id] : NULL;
+
+                //Actualizamos estados asociados al tipo de caso
+                foreach ($k->ccStatus as $s)
+                {
+                    $s->description = $_POST['status_'.$k->id.'_'.$s->id] != '' ? $_POST['status_'.$k->id.'_'.$s->id] : NULL;
+
+                    $s->save();
+                }
+
+                //Vemos si se agregaron nuevos estados
+                $i = 1;
+                while (isset($_POST['new_status_'.$k->id.'_'.$i]))
+                {
+                    //Si se agregó nombre y descripción, entonces se crea
+                    if ($_POST['new_status_'.$k->id.'_'.$i] != '')
+                    {
+                        \Ermtool\CcStatus::create([
+                            'description' => $_POST['new_status_'.$k->id.'_'.$i],
+                            'cc_kind_id' => $k->id
+                        ]);
+                    }
+
+                    $i += 1;
+                }
+
+                foreach ($k->ccClassifications as $c)
+                {
+                    $c->name = $_POST['name_class_'.$k->id.'_'.$c->id] != '' ? $_POST['name_class_'.$k->id.'_'.$c->id] : NULL;
+                    $c->description = $_POST['description_class_'.$k->id.'_'.$c->id] != '' ? $_POST['description_class_'.$k->id.'_'.$c->id] : NULL;
+                    $c->save();
+                }
+
+                //Vemos si se agregaron nuevas clasificaciones
+                $i = 1;
+                while (isset($_POST['new_name_class_'.$k->id.'_'.$i]))
+                {
+                    //Si se agregó nombre y descripción, entonces se crea
+                    if ($_POST['new_name_class_'.$k->id.'_'.$i] != '' && $_POST['new_description_class_'.$k->id.'_'.$i] != '')
+                    {
+                        \Ermtool\CcClassification::create([
+                            'name' => $_POST['new_name_class_'.$k->id.'_'.$i],
+                            'description' => $_POST['new_description_class_'.$k->id.'_'.$i],
+                            'cc_kind_id' => $k->id
+                        ]);
+                    }
+
+                    $i += 1;
+                }
+
+                $k->save();
+            }
+
+            if (Session::get('languaje') == 'en')
+            {
+                Session::flash('message','Configuration was successfully updated');
+            }
+            else
+            {
+                Session::flash('message','La configuración fue actualizada correctamente');
+            }
+
+        });
+
+        return Redirect::to('denuncias');  
     }
 }

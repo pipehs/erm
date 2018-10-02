@@ -1475,8 +1475,8 @@ Route::post('importar_excel', [
 
 
 //19-03-18: ----- Sistema (Canal) de Denuncias ----- //
-Route::get('bgrc_denuncias', [
-	'as' => 'bgrc_denuncias', 'uses' => 'DenunciasController@index'
+Route::get('denuncias', [
+	'as' => 'denuncias', 'uses' => 'DenunciasController@index'
 	]);
 
 Route::get('cc_questions', [
@@ -1497,6 +1497,14 @@ Route::get('registro_denuncia', [
 
 Route::post('registro_denuncia2', [
    'as' => 'registro_denuncia2', 'uses' => 'DenunciasController@registerComplaint2'
+	]);
+
+Route::get('cc_config', [
+	'as' => 'cc_config', 'uses' => 'DenunciasController@indexConfiguration'
+	]);
+
+Route::post('cc_config_store', [
+	'as' => 'cc_config_store', 'uses' => 'DenunciasController@storeConfiguration'
 	]);
 
 Route::get('seguimiento_admin', function(){

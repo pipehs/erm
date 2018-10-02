@@ -1,4 +1,4 @@
-@extends('master')
+@extends(Auth::user() ? 'master' : 'master2')
 
 @section('title', 'Registro de denuncia')
 
@@ -35,7 +35,7 @@
 			</div>
 			<div class="box-content">
 			@if(Session::has('message'))
-				<div class="alert alert-danger alert-dismissible" role="alert">
+				<div class="alert alert-success alert-dismissible" role="alert">
 				{{ Session::get('message') }}
 				</div>
 			@endif
@@ -50,18 +50,15 @@
 				</div>
 			@endif
 
-			En esta secci&oacute;n podr&aacute; enviar y registrar una consulta, reclamo o denuncia.
-			<br><br>
-			<div class="alert alert-success alert-dismissible" role="alert">
-				Su caso ha sido registrado exitosamente
-			</div>
 
 			<div class="alert alert-info alert-dismissible" role="alert">
 				Puede dar seguimiento al caso con el siguiente id y con la contraseña ingresada anteriormente.
 				<br><br>
 
-				<b>Id: 1703181</b>
-				<br>
+				<b>Id: {{ $id }}</b>
+
+				<br><br>
+				<b>No olvide guarda este ID y su contraseña, ya que sólo con estos datos podrá consultar el estado del caso.</b>
 			</div>
 				<center>
 					<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
