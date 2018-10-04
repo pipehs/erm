@@ -18,6 +18,6 @@ class CcKind extends Model
 
     public function ccClassifications()
     {
-    	return $this->hasMany('Ermtool\ccClassification');
+    	return $this->hasMany('Ermtool\CcClassification');
     }
 }
