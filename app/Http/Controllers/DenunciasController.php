@@ -11,6 +11,7 @@ use Redirect;
 use DateTime;
 use DB;
 use Auth;
+use Crypt;
 
 class DenunciasController extends Controller
 {
@@ -97,7 +98,8 @@ class DenunciasController extends Controller
                 {
                     $question = \Ermtool\CcQuestion::create([
                         'cc_kind_answer_id' => $_POST['kind_answer_'.$i],
-                        'description' => $_POST['question_'.$i]
+                        'question' => $_POST['question_'.$i],
+                        'required' => $_POST['required_'.$i]
                     ]);
 
                     //vemos si hay alternativas
@@ -126,12 +128,12 @@ class DenunciasController extends Controller
             if (Session::get('languaje') == 'en')
             {
                 Session::flash('message','Question was successfully created');
-                return view('en.denuncias.home');
+                return Redirect::to('denuncias');
             }
             else
             {
                 Session::flash('message','Preguntas creadas satisfactoriamente');
-                return view('denuncias.home');
+                return Redirect::to('denuncias');
             }
 
         }
@@ -160,6 +162,8 @@ class DenunciasController extends Controller
                     $q->p_answers = array();
                 }
             }
+
+            $q->required2 = $q->required == 1 ? 'required' : '';
         }
 
         return view('denuncias.registro',['questions' => $questions,'cc_kinds' => $cc_kinds]);
@@ -230,7 +234,7 @@ class DenunciasController extends Controller
                     \Ermtool\CcAnswer::create([
                         'cc_case_id' => $id,
                         'cc_question_id' => $q->id,
-                        'description' => $_POST['answer_'.$q->id],
+                        'description' => Crypt::encrypt($_POST['answer_'.$q->id]),
                     ]);
                 }
             }
