@@ -223,7 +223,7 @@
 
 				@foreach ($datos as $dato)
 					<tr>
-					<td>{{$dato['Organización']}}</td>
+					<td>{{$dato['Organizaciones']}}</td>
 					<td>
 					@foreach($dato['Objetivos'] as $obj)
 						<li>{{$obj}}</li>
