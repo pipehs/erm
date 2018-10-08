@@ -1503,8 +1503,12 @@ Route::get('cc_config', [
 	'as' => 'cc_config', 'uses' => 'DenunciasController@indexConfiguration'
 	]);
 
-Route::post('cc_config_store', [
-	'as' => 'cc_config_store', 'uses' => 'DenunciasController@storeConfiguration'
+Route::get('cc_config_kinds', [
+	'as' => 'cc_config_kinds', 'uses' => 'DenunciasController@indexConfigurationKinds'
+	]);
+
+Route::post('cc_config_kinds_store', [
+	'as' => 'cc_config_kinds_store', 'uses' => 'DenunciasController@storeConfigurationKinds'
 	]);
 
 Route::get('seguimiento_admin', function(){

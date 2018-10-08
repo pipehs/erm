@@ -1,13 +1,13 @@
 @extends('master')
 
-@section('title', 'Configuración')
+@section('title', 'Configuración tipos de denuncia')
 
 @section('content')
 <!-- header menu de arbol -->
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li>{!!Html::link('configuration','Configuración')!!}</li>
+			<li>{!!Html::link('configuration','Configuración de tipos de denuncia')!!}</li>
 		</ol>
 	</div>
 </div>
@@ -17,7 +17,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-ticket"></i>
-					<span>Configuración Canal Denuncias</span>
+					<span>Configuración tipos de denuncia</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -57,7 +57,7 @@
 			
 			Modifique o Agregue los datos de configuración que desee actualizar.<br/><br/>
 
-			{!!Form::open(['route'=>'cc_config_store','method'=>'POST','class'=>'form-horizontal'])!!}
+			{!!Form::open(['route'=>'cc_config_kinds_store','method'=>'POST','class'=>'form-horizontal'])!!}
 
 			<h4><b>Responsables para cada tipo de registro</b></h4>
 
@@ -112,6 +112,24 @@
 							{!!Form::text('description_class_'.$k->id.'_'.$c->id,$c->description,['class'=>'form-control'])!!}
 						</div>
 					</div>
+
+					<div id="role">
+						<div class="form-group">
+							<label for="role_class_{{$k->id}}_{{$c->id}}" class="col-sm-4 control-label">Rol responsable {{$c->id}}</label>
+							<div class="col-sm-4">
+								@if ($cc_roles->count() == 0)
+									{!!Form::text('role_class_'.$k->id.'_'.$c->id,null,['class'=>'form-control'])!!}
+								@else
+									@if ($c->cc_role_id != NULL)
+										{!!Form::select('role_class_'.$k->id.'_'.$c->id,$cc_roles,$c->cc_role_id)!!}
+									@else
+										{!!Form::select('role_class_'.$k->id.'_'.$c->id,$cc_roles,null)!!}
+									@endif
+								@endif
+							</div>
+						</div>
+					</div>
+					<br>
 				@endforeach
 				<div style="cursor:hand" onclick="add_classification('{{$k->id}}')">
 					<button type="button" class="btn btn-primary btn-app-sm btn-circle">
@@ -142,5 +160,16 @@
 @stop
 
 @section('scripts2')
+<script type="text/javascript">
+	$(document).ready(function() {
+		roles = [];
+		@if ($cc_roles->count() > 0)
+			@foreach ($cc_roles as $id=>$name)			
+				data = {id:{{$id}}, name:'{{$name}}'}
+				roles.push(data)
+			@endforeach
+		@endif
+	});
+</script>
 {!!Html::script('assets/js/complaint_channel.js')!!}
 @stop

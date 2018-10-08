@@ -76,15 +76,15 @@
 
 			@foreach ($questions as $q)
 				<div class="form-group">
-					<label for="answer_{{$q->id}}" class="col-sm-4 control-label">{{$q->description}}</label>
+					<label for="answer_{{$q->id}}" class="col-sm-4 control-label">{{$q->question}}</label>
 					<div class="col-sm-5">
 						@if ($q->cc_kind_answer_id == 1)
-							{!!Form::textarea('answer_'.$q->id,null,['class'=>'form-control','rows'=>'8','cols'=>'4','required' => 'true'])!!}
+							{!!Form::textarea('answer_'.$q->id,null,['class'=>'form-control','rows'=>'8','cols'=>'4',$q->required2])!!}
 						@elseif ($q->cc_kind_answer_id == 2)
 							@foreach ($q->p_answers as $ans)
 								<div class="radio-inline">
 									<label>
-										<input type="radio" required="true" name="answer_{{$q->id}}" value="{{$ans->id}}"> {{ $ans->description }}
+										<input type="radio" {{$q->required2}} name="answer_{{$q->id}}" value="{{$ans->id}}"> {{ $ans->description }}
 										<i class="fa fa-circle-o"></i>
 									</label>
 								</div>
@@ -99,7 +99,7 @@
 								</div>
 							@endforeach
 						@elseif ($q->cc_kind_answer_id == 4)
-							{!!Form::date('answer_'.$q->id,null,['class'=>'form-control','required' => 'true'])!!}
+							{!!Form::date('answer_'.$q->id,null,['class'=>'form-control',$q->required2])!!}
 						@endif
 					</div>
 				</div>

@@ -57,6 +57,37 @@
 			
 			En esta sección podrá crear las preguntas y respuestas que los denunciantes deberán responder en el sistema de Denuncias. Primero que todo, ingrese las preguntas para en el siguiente paso, ingresar el tipo de respuesta para las mismas.<br/>
 
+			@if (!empty($questions))
+				<br/>
+				<p><b>Preguntas ya creadas</b></p>
+				<?php $i = 1; ?>
+				<table  class="table table-bordered table-striped table-hover table-heading" style="font-size:11px">
+					<thead>
+						<th>Pregunta</th>
+						<th>Obligatoria</th>
+						<th>Tipo de respuesta</th>
+						<th>Respuestas posibles</th>
+					</thead>
+					@foreach ($questions as $q)
+						<tr>
+							<td>{{ $q->question }}</td>
+							<td>
+								<?php $r = $q->required == 1 ? 'Si' : 'No'; ?>
+								{{ $r }}
+							</td>
+							<td>{{ \Ermtool\CcKindAnswer::where('id',$q->cc_kind_answer_id)->value('description') }}</td>
+							<td>@if ($q->ccPossibleAnswers->count() > 0)
+									@foreach ($q->ccPossibleAnswers as $a)
+										<li>{{ $a->description }}</li>
+									@endforeach
+								@else
+									Esta es una respuesta de tipo {{ \Ermtool\CcKindAnswer::where('id',$q->cc_kind_answer_id)->value('description') }} por lo que no tiene alternativas
+								@endif
+							</td>
+						</tr>
+					@endforeach
+				</table>
+			@endif
 			{!!Form::open(['route'=>'store_cc_questions1','method'=>'GET','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
 
 					<div class="form-group">
@@ -87,16 +118,13 @@
 			{!!Form::close()!!}
 
 			<center>
-   				{!! link_to('', $title = 'Volver', $attributes = ['class'=>'btn btn-danger', 'onclick' => 'history.back()'])!!}
-   			<center>
+				<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
+			<center>
 			</div>
 		</div>
 	</div>
 </div>
 
-<div id="pop1" class="popbox">
-	<p>Esta es la URL que identifica la base del sistema, y el que será tomado para el envío de las encuestas. Por ejemplo: www.b-grc.com</p>
-</div>
 @stop
 
 @section('scripts2')

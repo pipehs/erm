@@ -12,7 +12,7 @@
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="denuncias">Sistema de denuncias</a></li>
+			<li><a href="cc_config">Configuración denuncia</a></li>
 		</ol>
 	</div>
 </div>
@@ -22,7 +22,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-ticket"></i>
-					<span>Sistema de denuncias</span>
+					<span>Configuración Sistema de denuncias</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -56,18 +56,10 @@
 
 			<p>Canal de denuncia</p>
 			<center>
-			<p><button class="block" onclick="window.location.href='registro_denuncia'"><b>Registro de denuncia</button></p>
+			<p><button class="block" onclick="window.location.href='cc_questions'"><b>Configurar preguntas y respuestas</button></p>
 			<br>
-			<p><button class="block" onclick="window.location.href='seguimiento'">Seguimiento de denuncia</button></p>
+			<p><button class="block" onclick="window.location.href='cc_config_kinds'">Configurar tipos de casos</button></p>
 			<br>
-			@if (Auth::user() && Auth::user()->cc_user == 1)
-				<p><button class="block"onclick="window.location.href='seguimiento_admin'">Seguimiento Administrador</button></p>
-				<br>
-				<p><button class="block" onclick="window.location.href='reportes_denuncias'">Reportes</button></p>
-				<br>
-				<p><button class="block" onclick="window.location.href='cc_config'">Configuración</button></p>
-				<br>
-			@endif
 
 			</center>
 			</div>

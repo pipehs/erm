@@ -11,6 +11,7 @@ use Redirect;
 use DateTime;
 use DB;
 use Auth;
+use Crypt;
 
 class DenunciasController extends Controller
 {
@@ -97,7 +98,8 @@ class DenunciasController extends Controller
                 {
                     $question = \Ermtool\CcQuestion::create([
                         'cc_kind_answer_id' => $_POST['kind_answer_'.$i],
-                        'description' => $_POST['question_'.$i]
+                        'question' => $_POST['question_'.$i],
+                        'required' => $_POST['required_'.$i]
                     ]);
 
                     //vemos si hay alternativas
@@ -126,12 +128,12 @@ class DenunciasController extends Controller
             if (Session::get('languaje') == 'en')
             {
                 Session::flash('message','Question was successfully created');
-                return view('en.denuncias.home');
+                return Redirect::to('denuncias');
             }
             else
             {
                 Session::flash('message','Preguntas creadas satisfactoriamente');
-                return view('denuncias.home');
+                return Redirect::to('denuncias');
             }
 
         }
@@ -160,6 +162,8 @@ class DenunciasController extends Controller
                     $q->p_answers = array();
                 }
             }
+
+            $q->required2 = $q->required == 1 ? 'required' : '';
         }
 
         return view('denuncias.registro',['questions' => $questions,'cc_kinds' => $cc_kinds]);
@@ -230,7 +234,7 @@ class DenunciasController extends Controller
                     \Ermtool\CcAnswer::create([
                         'cc_case_id' => $id,
                         'cc_question_id' => $q->id,
-                        'description' => $_POST['answer_'.$q->id],
+                        'description' => Crypt::encrypt($_POST['answer_'.$q->id]),
                     ]);
                 }
             }
@@ -329,26 +333,59 @@ class DenunciasController extends Controller
 
     public function indexConfiguration()
     {
-        if (Auth::user()->cc_user == 1 || Auth::user()->cc_user == 2)
+        if (!Auth::guest())
         {
-            $cc_kinds = \Ermtool\CcKind::all();
-
-            if (Session::get('languaje') == 'en')
+            if (Auth::user()->cc_user == 1)
             {
-                return view('en.denuncias.configuration',['cc_kinds' => $cc_kinds]);
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.denuncias_configuracion.configuration');
+                }
+                else
+                {
+                    return view('denuncias_configuracion.configuration');
+                }
             }
             else
             {
-                return view('denuncias.configuration',['cc_kinds' => $cc_kinds]);
+                return locked();
             }
         }
         else
         {
-            return locked();
+            return Redirect::route('/');
+        }
+    }
+    public function indexConfigurationKinds()
+    {
+        if (!Auth::guest())
+        {
+            if (Auth::user()->cc_user == 1)
+            {
+                $cc_kinds = \Ermtool\CcKind::all();
+                $cc_roles = \Ermtool\CcRole::lists('name','id');
+
+                if (Session::get('languaje') == 'en')
+                {
+                    return view('en.denuncias_configuracion.configuration_kinds',['cc_kinds' => $cc_kinds, 'cc_roles' => $cc_roles]);
+                }
+                else
+                {
+                    return view('denuncias_configuracion.configuration_kinds',['cc_kinds' => $cc_kinds, 'cc_roles' => $cc_roles]);
+                }
+            }
+            else
+            {
+                return locked();
+            }
+        }
+        else
+        {
+            return Redirect::route('/');
         }
     }
 
-    public function storeConfiguration()
+    public function storeConfigurationKinds()
     {
         //print_r($_POST);
         DB::transaction(function(){
@@ -388,6 +425,27 @@ class DenunciasController extends Controller
                 {
                     $c->name = $_POST['name_class_'.$k->id.'_'.$c->id] != '' ? $_POST['name_class_'.$k->id.'_'.$c->id] : NULL;
                     $c->description = $_POST['description_class_'.$k->id.'_'.$c->id] != '' ? $_POST['description_class_'.$k->id.'_'.$c->id] : NULL;
+
+                    //Vemos si existe el rol ingresado (si es que se ingresó)
+                    if (isset($_POST['role_class_'.$k->id.'_'.$c->id]) && $_POST['role_class_'.$k->id.'_'.$c->id] != '')
+                    {
+                        $ccRole = \Ermtool\CcRole::find($_POST['role_class_'.$k->id.'_'.$c->id]);
+
+                        if (empty($ccRole)) //verificamos que no se esté ingresando nombre
+                        {   
+                            $ccRole = \Ermtool\CcRole::where('name',$_POST['role_class_'.$k->id.'_'.$c->id])->first();
+
+                            if (empty($ccRole)) //Creamos rol
+                            {
+                               $ccRole = \Ermtool\CcRole::create([
+                                    'name' => $_POST['role_class_'.$k->id.'_'.$c->id]
+                                ]); 
+                            }
+                        }
+                       
+                        $c->cc_role_id = $ccRole->id;
+                    }
+                     
                     $c->save();
                 }
 
@@ -398,10 +456,28 @@ class DenunciasController extends Controller
                     //Si se agregó nombre y descripción, entonces se crea
                     if ($_POST['new_name_class_'.$k->id.'_'.$i] != '' && $_POST['new_description_class_'.$k->id.'_'.$i] != '')
                     {
+                        //Vemos si existe el rol ingresado (si es que se ingresó)
+                        if (isset($_POST['new_role_class_'.$k->id.'_'.$i]) && $_POST['new_role_class_'.$k->id.'_'.$i] != '')
+                        {
+                            $ccRole = \Ermtool\CcRole::find($_POST['new_role_class_'.$k->id.'_'.$i]);
+
+                            if (empty($ccRole)) //verificamos que no se esté ingresando nombre
+                            {
+                                $ccRole = \Ermtool\CcRole::where('name',$_POST['new_role_class_'.$k->id.'_'.$i])->first();
+
+                                if (empty($ccRole)) //Creamos rol
+                                {
+                                    $ccRole = \Ermtool\CcRole::create([
+                                        'name' => $_POST['new_role_class_'.$k->id.'_'.$i]
+                                    ]);
+                                }
+                            }
+                        }
                         \Ermtool\CcClassification::create([
                             'name' => $_POST['new_name_class_'.$k->id.'_'.$i],
                             'description' => $_POST['new_description_class_'.$k->id.'_'.$i],
-                            'cc_kind_id' => $k->id
+                            'cc_kind_id' => $k->id,
+                            'cc_role_id' => $ccRole->id
                         ]);
                     }
 

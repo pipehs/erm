@@ -62,6 +62,23 @@
 				@foreach ($questions as $q)
 					<p><b>Pregunta {{$i}}: {{ $q }}</b>
 					<div class="form-group">
+						<label for="required" class="col-sm-4 control-label">Indique si la respuesta es obligatoria</label>
+						<div class="col-sm-5">
+							<div class="radio-inline">
+								<label>
+									<input type="radio" required="true" name="required_{{ $i }}" value="0">No
+									<i class="fa fa-circle-o"></i>
+								</label>
+							</div>
+							<div class="radio-inline">
+								<label>
+									<input type="radio" required="true" name="required_{{ $i }}" value="1">Si
+									<i class="fa fa-circle-o"></i>
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
 						{!!Form::label('tipo_respuesta *',null,['class'=>'col-sm-4 control-label'])!!}
 						<div class="col-sm-3">
 							<select id="select{{$i}}" required="true" name="kind_answer_{{ $i }}">

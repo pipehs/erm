@@ -28,6 +28,27 @@ function add_classification(kind_id)
 	new_class += '<input type="text" name="new_description_class_'+kind_id+'_'+cont2+'" class="form-control"></input>'
 	new_class += '</div></div>'
 
+	new_class += '<div class="form-group">'
+	new_class += '<label for="new_role_class_'+kind_id+'_'+cont2+'" class="col-sm-4 control-label">Rol responsable nueva clasificación '+cont2+'</label>'
+	new_class += '<div class="col-sm-4">'
+
+	if (roles.length > 0)
+	{	
+		new_class += '<select name="new_role_class_'+kind_id+'_'+cont2+'" class="form-control">'
+		//seteamos datos de cada rol
+		$(roles).each( function() {
+			new_class += '<option name="' + this.id + '">'+this.name+'</option>';
+		});
+
+		new_class += '</select>'
+	}
+	else
+	{
+		new_class += '<input type="text" name="new_role_class_'+kind_id+'_'+cont2+'" class="form-control"></input>'
+	}
+	
+	new_class += '</div></div><br>'
+
 	$("#new_classification_"+kind_id).append(new_class)
 	cont2 = cont2 + 1
 }
