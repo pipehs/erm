@@ -45,6 +45,7 @@
 						<th>Subproceso clave</th>
 						<th>Criticidad subproceso</th>
 						<th>Documentos</th>
+						<th>Documentos cargados</th>
 					</thead>
 					@foreach ($os as $o)
 						<tr>
@@ -60,6 +61,74 @@
 							</td>
 							<td>
 								<input id="file-1" type="file" class="file" name="evidence_doc_{{$o->organization_id}}[]" multiple=true data-preview-file-type="any">
+							</td>
+							<td>
+								@if (empty($o->files))
+									No se han agregado documentos.
+								@else
+									<table class="table" style="font-size: 10px;">
+									<thead>
+										<th>Nombre archivo</th>
+										<th>Fecha carga</th>
+									</thead>
+									@foreach ($o->files as $file)
+										<tr>
+											<td>
+											<?php //pequeño módulo php para ver el tipo de archivo y nombre
+												$archivo = explode('.',$file);
+												$filename = explode('/',$archivo[0]);
+												$id2 = $filename[1]; //id del elemento
+												$kind3 = $filename[0]; //por ej. evidencias_hallazgos
+												$filename = $filename[2];
+												if (Storage::exists($file)) //Comprobación de existencia (probablemente innecesaria)
+												{	
+													//obtenemos modificación en formato UNIX
+													$timestamp = Storage::lastModified($file);
+													//Restamos segundos para estar en zona horaria
+													$timestamp -= 14400;
+													//Tranformamos fecha
+													$timestamp = gmdate("Y-m-d \a \l\a\s H:i:s", $timestamp);
+												}
+											?>
+										@if (isset($archivo[1]))
+											@if ($archivo[1] == 'pdf')
+												<a href="downloadfile.{{$kind3}}.{{$id2}}.{{$filename}}.{{$archivo[1]}}"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>
+												{{ $filename }}
+											@elseif ($archivo[1] == 'doc' || $archivo[1] == 'docx')
+												<a href="downloadfile.{{$kind3}}.{{$id2}}.{{$filename}}.{{$archivo[1]}}"><img src="assets/img/word.png" width="30" height="30" /></a><br/>
+												{{ $filename }}
+											@elseif ($archivo[1] == 'xls' || $archivo[1] == 'xlsx')
+												<a href="downloadfile.{{$kind3}}.{{$id2}}.{{$filename}}.{{$archivo[1]}}"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>
+												{{ $filename }}
+											@elseif ($archivo[1] == 'ppt' || $archivo[1] == 'pptx')
+												<a href="downloadfile.{{$kind3}}.{{$id2}}.{{$filename}}.{{$archivo[1]}}"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>
+												{{ $filename }}
+											@elseif ($archivo[1] == 'png')
+												<a href="downloadfile.{{$kind3}}.{{$id2}}.{{$filename}}.{{$archivo[1]}}"><img src="assets/img/png.png" width="30" height="30" /></a><br/>
+												{{ $filename }}
+											@elseif ($archivo[1] == 'jpg' || $archivo[1] == 'jpeg')
+												<a href="downloadfile.{{$kind3}}.{{$id2}}.{{$filename}}.{{$archivo[1]}}"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>
+												{{ $filename }}
+											@else {{-- No hay extensión --}}
+												<a href="downloadfile2.{{$kind3}}.{{$id2}}.{{$filename}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+												{{ $filename }}
+											@endif
+										@else {{-- No hay extensión --}}
+											<a href="downloadfile2.{{$kind3}}.{{$id2}}.{{$filename}}"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>
+												{{ $filename }}
+										@endif
+											@foreach (Session::get('roles') as $role)
+												@if ($role == 1)
+													<img src="assets/img/btn_eliminar2.png" height="20px" width="20px" onclick="eliminar_ev({{ $o->id }},12,'{{ $filename }}')"><br/>
+													<?php break; //si es admin terminamos ciclo para no repetir menú ?>
+												@endif
+											@endforeach
+											</td>
+											<td>{{ $timestamp }}</td>
+										</tr>
+									@endforeach
+									</table>
+								@endif
 							</td>
 						</tr>
 					@endforeach
