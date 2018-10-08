@@ -10,6 +10,7 @@ use Redirect;
 use DB;
 use dateTime;
 use Auth;
+use Storage;
 
 //15-05-2017: MONOLOG
 use Monolog\Logger;
@@ -754,6 +755,8 @@ class SubprocesosController extends Controller
                 foreach ($os as $o)
                 {
                     $o->org = \Ermtool\Organization::name($o->organization_id);
+                    //ACT 08-10-18: obtenemos archivos
+                    $o->files = Storage::files('subprocesos_org/'.$o->id);
                 }
 
                 $stakeholders = \Ermtool\Stakeholder::listStakeholders(NULL);
