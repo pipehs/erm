@@ -234,7 +234,7 @@
 							<td colspan="2"><a href="agregar_evaluacion.{{$control->id}}.{{$e['eid']}}.{{ $org_id }}" class="btn btn-negro">Nueva evaluaci&oacute;n</a></td>
 						@else
 							<td>{!! link_to_route('editar_evaluacion', $title = 'Editar evaluaci&oacute;n', $parameters = $e['id'],$attributes = ['class'=>'btn btn-primary'])!!}</td>
-							<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $e['id'] }}.{{ $org_id }},'{{ $control['name'] }}','{{ $e['name'] }}')">Cerrar prueba</button></td>
+							<td><button class="btn btn-warning" onclick="cerrar_evaluacion({{ $e['id'] }},'{{ $control['name'] }}','{{ $e['name'] }}')">Cerrar prueba</button></td>
 					    @endif
 					@endif
 					

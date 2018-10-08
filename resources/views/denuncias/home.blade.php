@@ -58,7 +58,7 @@
 			<center>
 			<p><button class="block" onclick="window.location.href='registro_denuncia'"><b>Registro de denuncia</button></p>
 			<br>
-			<p><button class="block" onclick="window.location.href='seguimiento'">Seguimiento de denuncia</button></p>
+			<p><button class="block" onclick="window.location.href='seguimiento_denuncia'">Seguimiento de denuncia</button></p>
 			<br>
 			@if (Auth::user() && Auth::user()->cc_user == 1)
 				<p><button class="block"onclick="window.location.href='seguimiento_admin'">Seguimiento Administrador</button></p>

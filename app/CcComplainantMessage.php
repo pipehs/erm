@@ -9,5 +9,10 @@ use Carbon;
 
 class CcComplainantMessage extends Model
 {
-    //
+    protected $fillable = ['cc_case_id','description'];
+
+    public function cases()
+    {
+    	return $this->belongsTo('Ermtool\CcCase');
+    }
 }

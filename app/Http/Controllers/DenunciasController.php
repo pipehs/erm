@@ -12,6 +12,8 @@ use DateTime;
 use DB;
 use Auth;
 use Crypt;
+use Hash;
+use Storage;
 
 class DenunciasController extends Controller
 {
@@ -292,9 +294,171 @@ class DenunciasController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function getCase($id,$password)
     {
-        //
+        //Obtenemos caso
+        $case = \Ermtool\CcCase::find($id);
+        if (!empty($case))
+        {
+            if (Hash::check($password, $case->password))
+            {
+                $questions = \Ermtool\CcQuestion::all();
+
+                foreach ($questions as $q)
+                {
+                    //Vemos si es respuesta de texto plano o no
+                    $answer = \Ermtool\CcAnswer::where('cc_question_id',$q->id)->where('cc_case_id',$id)->value('description');
+
+                    if ($answer != null)
+                    {
+                        $answer = Crypt::decrypt($answer);
+
+                        if ($q->cc_kind_answer_id == 2 || $q->cc_kind_answer_id == 3) //radio o checkbox
+                        {
+                            $answer = \Ermtool\CcPossibleAnswer::where('id',$answer)->value('description');
+                        }
+
+                        $q->answer = $answer;
+                    }
+                    else
+                    {
+                        $q->answer = NULL;
+                    }        
+                }
+                $case->questions = $questions;
+
+                //Vemos denunciante (si es que no es anónimo)
+                if ($case->cc_complainant_id != null)
+                {
+                    $complainant = \Ermtool\CcComplainant::find($case->cc_complainant_id);
+                    $case->complainant = $complainant->name.' '.$complainant->surnames;
+                }
+                else
+                {
+                    $case->complainant = 'Anónimo';
+                }
+
+                //Estado
+                $case->status = \Ermtool\CcStatus::where('id',$case->cc_status_id)->value('description');
+                //Clasificación
+                if ($case->cc_classification_id == NULL)
+                {
+                    $case->classification = 'No se ha clasificado';
+                }
+                else
+                {
+                    $case->classification = \Ermtool\CcClassification::where('id',$case->cc_status_id)->value('name');
+                }
+
+                //Fecha ordenada
+                $case->created_at = new DateTime($case->created_at);
+                $case->created_at = date_format($case->created_at,"d-m-Y").' a las '.date_format($case->created_at,"H:i:s");
+
+                //Obtenemos mensajes asociados al caso
+                $messages = \Ermtool\CcMessage::where('cc_case_id',$case->id)->orderBy('created_at','asc')->get();
+
+                foreach ($messages as $m)
+                {
+                    if ($m->user_id != null)
+                    {
+                        $m->sender = 'Administrador';
+                    }
+                    else
+                    {
+                        $m->sender = $case->complainant;
+                    }
+
+                    $m->description = Crypt::decrypt($m->description);
+                    $m->files = Storage::files('cc_mensajes/'.$m->id);
+
+                    $m->created_at = new DateTime($m->created_at);
+                    $m->created_at = date_format($m->created_at,"d-m-Y").' a las '.date_format($m->created_at,"H:i:s");
+                }
+
+                $case->messages = $messages;
+
+                if (Session::get('languaje') == 'en')
+                {
+                    return json_encode(['case' => $case, 'response' => 0]);
+                }
+                else
+                {
+                    return json_encode(['case' => $case, 'response' => 0]);
+                } 
+            }
+            else
+            {
+                if (Session::get('languaje') == 'en')
+                {
+                    return json_encode(['response' => 99, 'response_description' => 'Incorrect password']);
+                }
+                else
+                {
+                    return json_encode(['response' => 99, 'response_description' => 'Contraseña incorrecta']);
+                }
+            }
+        }
+        else
+        {
+            if (Session::get('languaje') == 'en')
+            {
+                return json_encode(['response' => 99, 'response_description' => 'Case not found']);
+            }
+            else
+            {
+                return json_encode(['response' => 99, 'response_description' => 'Caso no encontrado']);
+            }
+        }
+    }
+
+    public function sendUserMessage(Request $request)
+    {
+        //print_r($request->file('evidence_doc'));
+        global $request2;
+        $request2 = $request;
+        global $m;
+        global $c;
+        global $f;
+        DB::transaction(function(){
+
+            //Guardamos mensaje
+            $message = \Ermtool\CcMessage::create([
+                'cc_case_id' => $_POST['case_id'],
+                'description' => Crypt::encrypt($_POST['new_message'])
+            ]);
+
+            $GLOBALS['m'] = Crypt::decrypt($message->description);
+
+            if($GLOBALS['request2']->file('evidence_doc') != NULL)
+            {
+                foreach ($GLOBALS['request2']->file('evidence_doc') as $evidencedoc)
+                {
+                    if ($evidencedoc != NULL)
+                    {
+                        upload_file($evidencedoc,'cc_mensajes',$message->id);
+                    }
+                }                    
+            }
+
+            $files = Storage::files('cc_mensajes/'.$message->id);
+
+            $GLOBALS['f'] = $files;
+
+            //Retornamos autor si es que hay
+            $case = \Ermtool\CcCase::find($_POST['case_id']);
+
+            if ($case->cc_complainant_id != null)
+            {
+                $complainant = \Ermtool\CcComplainant::find($case->cc_complainant_id);
+                $GLOBALS['c'] = $complainant->name.' '.$complainant->surnames;
+            }
+            else
+            {
+                $GLOBALS['c'] = 'Anónimo';
+            }
+        });
+
+        return json_encode(['message' => $m, 'response' => 0, 'complainant' => $c, 'files' => $f]);
     }
 
     /**
