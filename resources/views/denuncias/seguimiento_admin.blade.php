@@ -95,52 +95,36 @@
 			<thead>
 				<th>Autor<label><input type="text" placeholder="Filtrar" /></label></th>
 				<th>Tipo de caso<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Descripci&oacute;n<label><input type="text" placeholder="Filtrar" /></label></th>
+			@foreach ($questions as $q)
+				<th>{{ $q->question }}<label><input type="text" placeholder="Filtrar" /></label></th>
+			@endforeach
 				<th>Fecha caso<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Evidencia(s)<label><input type="text" placeholder="Filtrar" /></label></th>
-				<th>Investigación</th>
+				<th>Revisar</th>
+				<th>Investigar</th>
 				<th>Clasificar</th>
 				<th>Cerrar</th>
 			</thead>
 
+			@foreach ($cases as $c)
 			<tr>
-				<td>Anónimo</td>
-				<td>Denuncia</td>
-				<td>Se presentó un caso de cohecho en las oficinas administrativas</td>
-				<td>12-03-2018</td>
-				<td><a href="#"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>Foto.jpg</td>
-				<td><button class="btn btn-primary" onclick="">Agregar investigación</button></td>
-				<td><button class="btn btn-success" onclick="">Clasificar</button></td>
-				<td><a class="btn btn-danger" href="cerrar_caso">Cerrar</button></td>
-			</tr>
-
-			<tr>
-				<td>Juán Perez<br>
-				juanperez@ccu.cl</td>
-				<td>Reclamo</td>
-				<td>El día 20 de diciembre de 2017, compré una bebida de su compañia, la cual se encontraba complemtamente sin gas.</td>
-				<td>10-01-2018</td>
-				<td>Sin evidencia</td>
-				<td><button class="btn btn-primary" onclick="">Agregar investigación</button></td>
-				<td><button class="btn btn-success" onclick="">Clasificar</button></td>
-				<td><button class="btn btn-danger" onclick="cerrar()">Cerrar</button></td>
-			</tr>
-
-			<tr>
-				<td>Pedro Carmona<br>
-				pedrocarmona@ccu.cl</td>
-				<td>Consulta</td>
-				<td>Buenos días. Me gustaría saber cual es el procedimiento para poder comprar sus productos de forma mayorista, para realizar venta en mi negocio local. Adjunto envío información asociada a mi negocio. Muchas gracias.</td>
-				<td>15-12-2017</td>
+				<td>{{ $c->complainant }}</td>
+				<td>{{ $c->kind }}</td>
+				@foreach ($c->questions as $q)
 				<td>
-					<a href="#"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>Minimarket.pdf
-					<a href="#"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>Ubicación.jpg
-					<a href="#"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>Minimarket2.pdf
+					@if ($q->answer == NULL)
+						Sin respuesta
+					@else
+						{{ $q->answer }}
+					@endif
 				</td>
-				<td><button class="btn btn-primary" onclick="">Agregar investigación</button></td>
+				@endforeach
+				<td>{{ $c->created_at }}</td>
+				<td><a class="btn btn-primary" href="seguimiento_admin2.{{$c->id}}">Revisar</button></td>
+				<td><a class="btn btn-default" href="cerrar_caso">Investigar</button></td>
 				<td><button class="btn btn-success" onclick="">Clasificar</button></td>
-				<td><button class="btn btn-danger" onclick="">Cerrar</button></td>
+				<td><button class="btn btn-danger" onclick="cerrar();">Cerrar</button></td>
 			</tr>
+			@endforeach
 		</table>
 				<center>
 					<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
@@ -150,65 +134,8 @@
 		</div>
 	</div>
 </div>
-
-<div id="pop1" class="popbox">
-	<h2>Denuncia</h2>
-	<p>Una denuncia consiste en una acusación anónima o no, de alguna situación o circunstancia que usted considere haya infringido las normas de conducta o las leyes del país. Por ejemplo: Acoso por parte de un compañero de trabajo.</p><br>
-	<h2>Reclamo</h2>
-	<p>Un reclamo implica alguna situación o hecho que no sea de su agrado, aunque no constituye necesariamente una falta a las normas y leyes. Por ejemplo, compra de bebida con poca cantidad de gas o sin gas.</p><br>
-	<h2>Consulta</h2>
-	<p>Corresponde a cualquier duda o comentario que quiera realizar a través del sistema. Por ejemplo, quisiera saber cuál es el procedimiento para ser un pequeño comerciante de productos CCU.</p><br>
-</div>
 @stop
 
 @section('scripts2')
-<script>
-function cerrar()
-{
-	texto = '<div class="form-group">'
-	texto += '<label for="close_reason" class="col-sm-4 control-label">Seleccione motivo de cierre</label>'
-	texto += '<div class="col-sm-5">'
-	texto += '{!!Form::select("close_reason",["1" => "Resuelto con sanción","2"=>"Resuelto sin sanción","3"=>"No resuelto por falta de antecedentes","4"=>"No resuelto por abandono de la denuncia"], null, ["id" => "close_reason","placeholder"=>"- Seleccione -","class"=>"form-control"])!!}'
-	texto += '</div></div><br>'
 
-	texto += '<div class="form-group">'
-	texto += '<label for="close_description" class="col-sm-4 control-label">Describa motivo de cierre</label>'
-	texto += '<div class="col-sm-5">'
-	texto += '{!!Form::textarea("close_description", null, ["id"=>"description_close", "class"=>"form-control", "rows"=>"8","cols"=>"4","required" => "true"])!!}'
-	texto += '</div></div>'
-
-	texto += '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>'
-
-	swal({   title: "Cerrar caso con id: 12031801",
-		   text: texto,  
-		   showCancelButton: true,   
-		   confirmButtonColor: "#31B404",   
-		   confirmButtonText: "Cerrar",
-		   cancelButtonText: "Cancelar",
-		   html: true,
-		   customClass: 'swal-wide',    
-		   closeOnConfirm: false }, 
-		   function(){
-		   		//$.get(kind+'.bloquear.'+id, function (result) {
-		   			swal(
-		   			{   title: "",
-		   			   text: "Caso con id: 12031801 cerrado exitosamente",
-		   			   type: "success",   
-		   			   showCancelButton: false,   
-		   			   confirmButtonColor: "#31B404",   
-		   			   confirmButtonText: "Aceptar",   
-		   			   closeOnConfirm: false,
-		   			   html: true 
-		   			}, 
-		   				function()
-		   				{   
-		   			   		location.reload();
-		   			   	}
-		   			);
-
-		   		//});
-		   		 
-		});
-}
-</script>
 @stop

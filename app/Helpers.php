@@ -281,7 +281,7 @@ function dropDown8()
 //dropdown de sistema de denuncia
 function dropDown9()
 {
-	$uri = array('registro_denuncia','seguimiento_denuncia','reportes_denuncias','preguntasdenuncias','configdenuncias');
+	$uri = array('registro_denuncia','seguimiento_admin','reportes_denuncias','preguntasdenuncias','configdenuncias');
 
 	foreach ($uri as $uri)
 	{

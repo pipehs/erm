@@ -1,13 +1,13 @@
 @extends(Auth::user() ? 'master' : 'master2')
 
-@section('title', 'Seguimiento de denuncias')
+@section('title', 'Seguimiento administrador')
 
 @section('content')
 <!-- header menu de arbol -->
 <div class="row">
 	<div id="breadcrumb" class="col-md-12">
 		<ol class="breadcrumb">
-			<li><a href="seguimiento_admin">Seguimiento de denuncia</a></li>
+			<li><a href="seguimiento_admin">Seguimiento administrador</a></li>
 		</ol>
 	</div>
 </div>
@@ -17,7 +17,7 @@
 			<div class="box-header">
 				<div class="box-name">
 					<i class="fa fa-ticket"></i>
-					<span>Seguimiento de denuncia</span>
+					<span>Seguimiento administrador</span>
 				</div>
 				<div class="box-icons">
 					<a class="collapse-link">
@@ -47,33 +47,10 @@
 
 		<div id="error-response" class="alert alert-danger alert-dismissible" role="alert" style="display: none;">
 		</div>
-
-		<p>Ingrese el ID y contraseña del caso que desea revisar</p>
-
-		<div class='form-horizontal'>
-
-		<div class="form-group">
-				{!!Form::label('ID *',null,['class'=>'col-sm-4 control-label'])!!}
-				<div class="col-sm-4">
-					{!!Form::number('id',null,['id'=>'id','class'=>'form-control','required'=>'true'])!!}
-				</div>
-		</div>
-
-		<div class="form-group">
-				{!!Form::label('Contraseña',null,['class'=>'col-sm-4 control-label'])!!}
-				<div class="col-sm-4">
-					<input type="password" class="form-control" name="password" id="password" required />
-				</div>
-		</div>
-
-		<div class="form-group">
-				<center>
-					{!!Form::submit('Revisar', ['class'=>'btn btn-primary','id' => 'btnsubmit','onclick' => 'getCase(1)'])!!}
-				</center>
-		</div>
-
-		</div>
-			
+		
+		<p id="id" style="display: none;"></p>
+		<p id="password" style="display: none;"></p>
+		<p id="btnsubmit" style="display: none;"></p>
 		<div id="case">
 			<div class="row">
 				<div class="col-sm-6">
@@ -108,5 +85,12 @@
 @stop
 
 @section('scripts2')
+<script>
+	$(function(){
+		document.getElementById("id").value = "{{ $id }}";
+		document.getElementById("password").value = "X";
+		getCase(2);
+	});
+</script>
 {!!Html::script('assets/js/complaint_channel.js')!!}
 @stop

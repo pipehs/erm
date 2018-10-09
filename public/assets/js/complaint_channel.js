@@ -54,14 +54,14 @@ function add_classification(kind_id)
 }
 
 //Obtiene datos del caso
-function getCase()
+function getCase(kind) //kind = 1: Seguimiento por denunciante. 2: Seguimiento admin
 {
 	document.getElementById("btnsubmit").value = "Enviando...";
   	document.getElementById("btnsubmit").disabled = true;
 	//alert(document.getElementById("id").value);
 	//alert(document.getElementById("password").value);
 
-	$.get('get_case.'+$("#id").val()+'.'+$("#password").val(), function (result) {
+	$.get('get_case.'+$("#id").val()+'.'+$("#password").val()+'.'+kind, function (result) {
 		var datos = JSON.parse(result);
 
 		$(datos).each( function() {
@@ -120,42 +120,42 @@ function getCase()
 							archivo = file.split('.');
 							filename = archivo[0].split('/');
 							id = filename[1]; //id del elemento
-							kind = filename[0]; //por ej. evidencias_hallazgos
+							kind2 = filename[0]; //por ej. evidencias_hallazgos
 							filename = filename[2];
 							if (typeof archivo[1] !== 'undefined') //si es que tiene extensión
 							{
 								if (archivo[1] == 'pdf')
 								{
-									oldmessage += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+archivo[1]+'"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>'
+									oldmessage += '<a href="downloadfile.'+kind2+'.'+id+'.'+filename+'.'+archivo[1]+'"><img src="assets/img/pdf.png" width="30" height="30" /></a><br/>'
 								}
 								else if (archivo[1] == 'doc' || archivo[1] == 'docx' || archivo[1] == 'DOC' || archivo[1] == 'DOCX')
 								{
-									oldmessage += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+archivo[1]+'"><img src="assets/img/word.png" width="30" height="30" /></a><br/>'
+									oldmessage += '<a href="downloadfile.'+kind2+'.'+id+'.'+filename+'.'+archivo[1]+'"><img src="assets/img/word.png" width="30" height="30" /></a><br/>'
 								}
 								else if (archivo[1] == 'xls' || archivo[1] == 'xlsx' || archivo[1] == 'XLS' || archivo[1] == 'XLSX')
 								{
-									oldmessage += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+archivo[1]+'"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>'
+									oldmessage += '<a href="downloadfile.'+kind2+'.'+id+'.'+filename+'.'+archivo[1]+'"><img src="assets/img/excel.png" width="30" height="30" /></a><br/>'
 								}
 								else if (archivo[1] == 'ppt' || archivo[1] == 'pptx' || archivo[1] == 'PPT' || archivo[1] == 'PPTX')
 								{
-									oldmessage += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+archivo[1]+'"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>'
+									oldmessage += '<a href="downloadfile.'+kind2+'.'+id+'.'+filename+'.'+archivo[1]+'"><img src="assets/img/powerpoint.png" width="30" height="30" /></a><br/>'
 								}
 								else if (archivo[1] == 'jpg' || archivo[1] == 'jpeg' || archivo[1] == 'JPG' || archivo[1] == 'jpeg')
 								{
-									oldmessage += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+archivo[1]+'"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>'
+									oldmessage += '<a href="downloadfile.'+kind2+'.'+id+'.'+filename+'.'+archivo[1]+'"><img src="assets/img/jpg.png" width="30" height="30" /></a><br/>'
 								}
 								else if (archivo[1] == 'rar' || archivo[1] == 'zip' || archivo[1] == 'RAR' || archivo[1] == 'ZIP')
 								{
-									oldmessage += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+archivo[1]+'"><img src="assets/img/rar.png" width="30" height="30" /></a><br/>'
+									oldmessage += '<a href="downloadfile.'+kind2+'.'+id+'.'+filename+'.'+archivo[1]+'"><img src="assets/img/rar.png" width="30" height="30" /></a><br/>'
 								}
 								else
 								{
-									oldmessage += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'.'+archivo[1]+'""><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>'
+									oldmessage += '<a href="downloadfile.'+kind2+'.'+id+'.'+filename+'.'+archivo[1]+'""><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>'
 								}
 							}
 							else
 							{
-								oldmessage += '<a href="downloadfile.'+kind+'.'+id+'.'+filename+'"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>'
+								oldmessage += '<a href="downloadfile.'+kind2+'.'+id+'.'+filename+'"><img src="assets/img/desconocido.png" width="30" height="30" /></a><br/>'
 							}
 
 							oldmessage += filename+'<br>';
@@ -183,7 +183,7 @@ function getCase()
 				messages += '</div></div>'
 
 				messages += '<input type="hidden" name="case_id" value="'+$('#id').val()+'">';
-
+				messages += '<input type="hidden" name="kind" value="'+kind+'">';
 				messages += '<div class="form-group">';
 				messages += '<label for="btn_guardar" class="col-sm-4 control-label"></label>'
 				messages += '<div class="col-sm-8">'
@@ -201,7 +201,7 @@ $("form#messages2").submit(function(e) {
 
 	if ($('#new_message').val() == '')
 	{
-		swal('Debe ingresar un mensaje');
+		swal('Atención','Debe ingresar un mensaje','warning');
 	}
 	else
 	{
@@ -216,9 +216,15 @@ $("form#messages2").submit(function(e) {
 	            swal('Mensaje enviado','Su mensaje ha sido enviado correctamente','success');
 	            data2 = JSON.parse(data);
 	            //alert(data2.message)
-
-	            message = '<div class="alert alert-info alert-dismissible" role="alert">';
-	            message += '<p><b>Autor: '+data2.complainant+'</b></p>';
+	            if (data2.kind == 1)
+	            {
+	            	message = '<div class="alert alert-info alert-dismissible" role="alert">';
+	            }
+	            else if (data2.kind == 2)
+	            {
+	            	message = '<div class="alert alert-success alert-dismissible" role="alert">';
+	            }
+	            message += '<p><b>Autor: '+data2.sender+'</b></p>';
 	            message += '<p>'+data2.message+'</p>';
 	            message += '<p>';
 	            $(data2.files).each( function() {
@@ -275,3 +281,52 @@ $("form#messages2").submit(function(e) {
 	}
 	event.preventDefault();
 });
+
+
+function cerrar()
+{
+	texto = '<div class="form-group">'
+	texto += '<label for="close_reason" class="col-sm-4 control-label">Seleccione motivo de cierre</label>'
+	texto += '<div class="col-sm-5">'
+	texto += '{!!Form::select("close_reason",["1" => "Resuelto con sanción","2"=>"Resuelto sin sanción","3"=>"No resuelto por falta de antecedentes","4"=>"No resuelto por abandono de la denuncia"], null, ["id" => "close_reason","placeholder"=>"- Seleccione -","class"=>"form-control"])!!}'
+	texto += '</div></div><br>'
+
+	texto += '<div class="form-group">'
+	texto += '<label for="close_description" class="col-sm-4 control-label">Describa motivo de cierre</label>'
+	texto += '<div class="col-sm-5">'
+	texto += '{!!Form::textarea("close_description", null, ["id"=>"description_close", "class"=>"form-control", "rows"=>"8","cols"=>"4","required" => "true"])!!}'
+	texto += '</div></div>'
+
+	texto += '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>'
+
+	swal({   title: "Cerrar caso con id: 12031801",
+		   text: texto,  
+		   showCancelButton: true,   
+		   confirmButtonColor: "#31B404",   
+		   confirmButtonText: "Cerrar",
+		   cancelButtonText: "Cancelar",
+		   html: true,
+		   customClass: 'swal-wide',    
+		   closeOnConfirm: false }, 
+		   function(){
+		   		//$.get(kind+'.bloquear.'+id, function (result) {
+		   			swal(
+		   			{   title: "",
+		   			   text: "Caso con id: 12031801 cerrado exitosamente",
+		   			   type: "success",   
+		   			   showCancelButton: false,   
+		   			   confirmButtonColor: "#31B404",   
+		   			   confirmButtonText: "Aceptar",   
+		   			   closeOnConfirm: false,
+		   			   html: true 
+		   			}, 
+		   				function()
+		   				{   
+		   			   		location.reload();
+		   			   	}
+		   			);
+
+		   		//});
+		   		 
+		});
+}

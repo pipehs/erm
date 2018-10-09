@@ -294,38 +294,23 @@ class DenunciasController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function getCase($id,$password)
+    public function getCase($id,$password,$kind)
     {
         //Obtenemos caso
         $case = \Ermtool\CcCase::find($id);
         if (!empty($case))
         {
-            if (Hash::check($password, $case->password))
+            if ($kind == 1)
             {
-                $questions = \Ermtool\CcQuestion::all();
-
-                foreach ($questions as $q)
-                {
-                    //Vemos si es respuesta de texto plano o no
-                    $answer = \Ermtool\CcAnswer::where('cc_question_id',$q->id)->where('cc_case_id',$id)->value('description');
-
-                    if ($answer != null)
-                    {
-                        $answer = Crypt::decrypt($answer);
-
-                        if ($q->cc_kind_answer_id == 2 || $q->cc_kind_answer_id == 3) //radio o checkbox
-                        {
-                            $answer = \Ermtool\CcPossibleAnswer::where('id',$answer)->value('description');
-                        }
-
-                        $q->answer = $answer;
-                    }
-                    else
-                    {
-                        $q->answer = NULL;
-                    }        
-                }
-                $case->questions = $questions;
+                $checked = Hash::check($password, $case->password);
+            }
+            else
+            {
+                $checked = True;
+            }
+            if ($checked)
+            {
+                $case->questions = $this->getQuestionsAndAnswers($id);
 
                 //Vemos denunciante (si es que no es anónimo)
                 if ($case->cc_complainant_id != null)
@@ -361,7 +346,9 @@ class DenunciasController extends Controller
                 {
                     if ($m->user_id != null)
                     {
-                        $m->sender = 'Administrador';
+                        $user = \Ermtool\User::find($m->user_id);
+                        //$m->sender = 'Administrador';
+                        $m->sender = $user->name.' '.$user->surnames;
                     }
                     else
                     {
@@ -420,12 +407,39 @@ class DenunciasController extends Controller
         global $c;
         global $f;
         DB::transaction(function(){
+            //vemos si lo está enviando usuario o denunciante
+            if ($_POST['kind'] == 1) //denunciante
+            {
+                //Guardamos mensaje
+                $message = \Ermtool\CcMessage::create([
+                    'cc_case_id' => $_POST['case_id'],
+                    'description' => Crypt::encrypt($_POST['new_message'])
+                ]);
 
-            //Guardamos mensaje
-            $message = \Ermtool\CcMessage::create([
-                'cc_case_id' => $_POST['case_id'],
-                'description' => Crypt::encrypt($_POST['new_message'])
-            ]);
+                //Retornamos autor si es que hay
+                $case = \Ermtool\CcCase::find($_POST['case_id']);
+
+                if ($case->cc_complainant_id != null)
+                {
+                    $complainant = \Ermtool\CcComplainant::find($case->cc_complainant_id);
+                    $GLOBALS['c'] = $complainant->name.' '.$complainant->surnames;
+                }
+                else
+                {
+                    $GLOBALS['c'] = 'Anónimo';
+                }
+            }
+            else if ($_POST['kind'] == 2) //admin
+            {
+                //Guardamos mensaje
+                $message = \Ermtool\CcMessage::create([
+                    'cc_case_id' => $_POST['case_id'],
+                    'user_id' => Auth::user()->id,
+                    'description' => Crypt::encrypt($_POST['new_message'])
+                ]);
+
+                $GLOBALS['c'] = Auth::user()->name.' '.Auth::user()->surnames;
+            }
 
             $GLOBALS['m'] = Crypt::decrypt($message->description);
 
@@ -443,22 +457,72 @@ class DenunciasController extends Controller
             $files = Storage::files('cc_mensajes/'.$message->id);
 
             $GLOBALS['f'] = $files;
+        });
 
-            //Retornamos autor si es que hay
-            $case = \Ermtool\CcCase::find($_POST['case_id']);
+        return json_encode(['message' => $m, 'response' => 0, 'sender' => $c, 'files' => $f, 'kind' => $_POST['kind']]);
+    }
 
-            if ($case->cc_complainant_id != null)
+    public function indexTracking()
+    {
+        if (Auth::user()->cc_user == 1)
+        {
+            //obtenemos todos los casos
+            $cases = \Ermtool\CcCase::all();
+            $questions = \Ermtool\CcQuestion::all();
+
+            foreach ($cases as $c)
             {
-                $complainant = \Ermtool\CcComplainant::find($case->cc_complainant_id);
-                $GLOBALS['c'] = $complainant->name.' '.$complainant->surnames;
+                //Vemos si hay autor
+                if ($c->cc_complainant_id != null)
+                {
+                    $complainant = \Ermtool\CcComplainant::find($c->cc_complainant_id);
+                    $c->complainant = $complainant->name.' '.$complainant->surnames;
+                }
+                else
+                {
+                    $c->complainant = 'Anónimo';
+                }
+
+                //obtenemos preguntas y respuestas asociadas
+                $c->questions = $this->getQuestionsAndAnswers($c->id);
+
+                //obtenemos tipo
+                $c->kind = \Ermtool\CcKind::where('id',$c->cc_kind_id)->value('name');
+
+                //Fecha ordenada
+                $c->created_at = new DateTime($c->created_at);
+                $c->created_at = date_format($c->created_at,"d-m-Y").' a las '.date_format($c->created_at,"H:i:s");
+            }
+
+
+            if (Session::get('languaje') == 'en')
+            {
+                return view('en.denuncias.seguimiento_admin',['cases' => $cases,'questions' => $questions]);
             }
             else
             {
-                $GLOBALS['c'] = 'Anónimo';
+                return view('denuncias.seguimiento_admin',['cases' => $cases,'questions' => $questions]);
             }
-        });
+        }
+        else
+        {
+            return locked();
+        }
+    }
 
-        return json_encode(['message' => $m, 'response' => 0, 'complainant' => $c, 'files' => $f]);
+    public function trackingCase($id)
+    {
+        $case = \Ermtool\CcCase::find($id);
+        $password = \Ermtool\CcCase::where('id',$id)->value('password');
+
+        if (Session::get('languaje') == 'en')
+        {
+            return view('en.denuncias.seguimiento_admin2',['id' => $id,'password' => $password]);
+        }
+        else
+        {
+            return view('denuncias.seguimiento_admin2',['id' => $id,'password' => $password]);
+        }
     }
 
     /**
@@ -663,5 +727,40 @@ class DenunciasController extends Controller
         });
 
         return Redirect::to('denuncias');  
+    }
+
+    public function getQuestionsAndAnswers($case_id)
+    {
+        $questions = \Ermtool\CcQuestion::all();
+
+        foreach ($questions as $q)
+        {
+            //Vemos si es respuesta de texto plano o no
+            $answer = \Ermtool\CcAnswer::where('cc_question_id',$q->id)->where('cc_case_id',$case_id)->value('description');
+
+            if ($answer != null)
+            {
+                try
+                {
+                    $answer = Crypt::decrypt($answer);
+                }
+                catch (\Exception $e) //En caso de que no se encuentre encriptada la respuesta
+                {
+                    $answer = $answer;
+                }
+
+                if ($q->cc_kind_answer_id == 2 || $q->cc_kind_answer_id == 3) //radio o checkbox
+                {
+                    $answer = \Ermtool\CcPossibleAnswer::where('id',$answer)->value('description');
+                }
+
+                $q->answer = $answer;
+            }
+            else
+            {
+                $q->answer = NULL;
+            }        
+        }
+        return $questions;
     }
 }
