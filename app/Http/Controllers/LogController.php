@@ -252,7 +252,8 @@ class LogController extends Controller
                                     'surnames' => $_POST['surnames'],
                                     'email' => $_POST['email'],
                                     'password' => $GLOBALS['req']['password'],
-                                    'rest_id' => $GLOBALS['id2']
+                                    'rest_id' => $GLOBALS['id2'],
+                                    'cc_user' => isset($_POST['cc_user']) ? $_POST['cc_user'] : NULL
                                 ]);
                         }
                         else
@@ -263,18 +264,23 @@ class LogController extends Controller
                                     'name' => $_POST['name'],
                                     'surnames' => $_POST['surnames'],
                                     'email' => $_POST['email'],
-                                    'password' => $GLOBALS['req']['password']
+                                    'password' => $GLOBALS['req']['password'],
+                                    'cc_user' => isset($_POST['cc_user']) ? $_POST['cc_user'] : NULL
                                 ]);
                         }
-                        //agregamos en system_role_user
-                        foreach ($GLOBALS['req']['system_roles_id'] as $role)
+                        //agregamos en system_role_user (si es que se agregaron roles)
+                        if (isset($GLOBALS['req']['system_roles_id']))
                         {
-                            DB::table('system_role_user')
-                                ->insert([
-                                    'user_id' => $GLOBALS['id'],
-                                    'system_role_id' => $role,
-                                ]);
+                            foreach ($GLOBALS['req']['system_roles_id'] as $role)
+                            {
+                                DB::table('system_role_user')
+                                    ->insert([
+                                        'user_id' => $GLOBALS['id'],
+                                        'system_role_id' => $role,
+                                    ]);
+                            }
                         }
+                        
                         if (Session::get('languaje') == 'en')
                         {
                             Session::flash('message','User successfully created');
@@ -323,7 +329,7 @@ class LogController extends Controller
         {
             Session::put('languaje',$request['languaje']);
 
-            //ACT 27-04-18: Agregamos nombre de organización a la Sesión, para configuraciones especiales
+            //ACT 27-04-18: Agregamos nombre de organización a la Sesión, para envío de correos de error
             $org = \Ermtool\Configuration::where('option_name','organization')->first(['option_value']);
 
             if (!empty($org))
@@ -334,8 +340,22 @@ class LogController extends Controller
             {
                 $org_name = NULL;
             }
+
+            //ACT 10-10-18: También agregamos short_name para style.css
+            $short_name = \Ermtool\Configuration::where('option_name','short_name')->first(['option_value']);
+
+            if (!empty($short_name))
+            {
+                $short_name = $short_name->option_value;
+            }
+            else
+            {
+                $short_name = NULL;
+            }
+
             //Guardamos en variable de sesión
             Session::put('org',$org_name);
+            Session::put('short_name',$short_name);
 
             //return $request->email;
             if (Auth::attempt(['email'=>$request['email'], 'password' => $request['password']]))
@@ -519,20 +539,23 @@ class LogController extends Controller
                 $user->surnames = $_POST['surnames'];
                 $user->email = $_POST['email'];
                 $user->password = $GLOBALS['req']->password;
-                
+                $user->cc_user = isset($_POST['cc_user']) ? $_POST['cc_user'] : NULL;
                 $user->save();
 
                 //nuevamente eliminaremos los roles anteriores del stakeholder para evitar repeticiones
                 DB::table('system_role_user')->where('user_id',$GLOBALS['id1'])->delete();
                 
                 //ahora agregamos en system_role_user
-                foreach ($GLOBALS['req']['system_roles_id'] as $role)
+                if (isset($GLOBALS['req']['system_roles_id']))
                 {
-                    DB::table('system_role_user')
-                        ->insert([
-                            'user_id' => $GLOBALS['id1'],
-                            'system_role_id' => $role,
-                        ]);
+                    foreach ($GLOBALS['req']['system_roles_id'] as $role)
+                    {
+                        DB::table('system_role_user')
+                            ->insert([
+                                'user_id' => $GLOBALS['id1'],
+                                'system_role_id' => $role,
+                            ]);
+                    }
                 }
 
                 if (Session::get('languaje') == 'en')

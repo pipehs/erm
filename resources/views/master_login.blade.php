@@ -6,14 +6,6 @@
 	<meta name="description" content="Sistema de gestión de riesgos">
 	<meta name="author" content="ERM">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-
-	<style type="text/css">
-	body {
-		background-image: url('assets/img/wallpaper2.jpg') !important;
-		background-size: cover !important;
-		background-repeat: no-repeat !important;
-	}
-	</style>
  
  	{!!Html::style('assets/plugins/bootstrap/bootstrap.css')!!}
  	{!!Html::style('assets/plugins/jquery-ui/jquery-ui.min.css')!!}
@@ -51,7 +43,7 @@
 	{!!Html::script('assets/plugins/sweetalert-master/dist/sweetalert.min.js')!!}
 
 </head>
-<body>
+<body class="body-login">
 
 <br><br>
 <div class="container">

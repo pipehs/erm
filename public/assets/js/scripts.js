@@ -5,9 +5,11 @@ function validateEmail($email)
   return emailReg.test($email);
 }
 
-//Función popper
+//Función popper y wysiwig
 	$(function() 
 	{
+		// Create Wysiwig editor for textare
+		TinyMCEStart('#wysiwig_simple', null);
 		var moveLeft = 0;
 	    var moveDown = 0;
 	    $('a.popper').hover(function(e) {

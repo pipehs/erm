@@ -143,7 +143,13 @@ class ConfigurationController extends Controller
                         break;
                     case 'alert_audit_notes':
                         $alert_audit_notes = $c->option_value;
-                        break;                
+                        break; 
+                    case 'cc_intro_message':
+                        $cc_intro_message  = $c->option_value;
+                        break;
+                    case 'short_name':
+                        $short_name  = $c->option_value;
+                        break;               
                     default:
                         # code...
                         break;
@@ -161,6 +167,8 @@ class ConfigurationController extends Controller
                 'logo_height' => isset($logo_height) ? $logo_height : NULL,
                 'alert_ap' => isset($alert_ap) ? $alert_ap : NULL,
                 'alert_audit_notes' => isset($alert_audit_notes) ? $alert_audit_notes : NULL,
+                'cc_intro_message' => isset($cc_intro_message) ? $cc_intro_message : NULL,
+                'short_name' => isset($short_name) ? $short_name : NULL,
             ];
 
             return view('configuration.edit',['data' => $data]);

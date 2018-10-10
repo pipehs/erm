@@ -2,6 +2,16 @@ body {
   color: #525252;
   background: #11A11E url(../img/devoops_pattern_b10.png) 0 0 repeat;
 }
+
+.body-login {
+    background-image: url('../img/wallpaper2.jpg') !important;
+    background-size: cover !important;
+    background-repeat: no-repeat !important;
+  }
+
+.margin-top-login {
+}
+
 .body-expanded, .modal-open {
   overflow-y:hidden;
   margin-right: 15px;
