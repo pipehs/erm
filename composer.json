@@ -15,7 +15,8 @@
         "rap2hpoutre/laravel-log-viewer": "^0.10.0",
         "barryvdh/laravel-dompdf": "0.6.*",
         "phpoffice/phpword": "v0.13.*",
-        "fuitad/laravel-exchange-web-services": "^1.0"
+        "fuitad/laravel-exchange-web-services": "^1.0",
+        "genert/bbcode": "^1.1"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
