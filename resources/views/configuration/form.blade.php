@@ -41,9 +41,9 @@
 	</div>
 	<div class="col-sm-2">
 		@if (isset($data['logo']))
-			{!!Form::text('logo',$data['logo'],['id'=>'logoimage','class'=>'form-control','required'=>'true'])!!}
+			{!!Form::text('logo',$data['logo'],['id'=>'logoimage','class'=>'form-control'])!!}
 		@else
-			{!!Form::text('logo',null,['id'=>'logoimage','class'=>'form-control','required'=>'true'])!!}
+			{!!Form::text('logo',null,['id'=>'logoimage','class'=>'form-control'])!!}
 		@endif
 	</div>
 </div>
@@ -52,9 +52,9 @@
 	<label for="logo_width" class="col-sm-4 control-label">Ancho del logo (en px)<a href="#" class="popper" data-popbox="pop7">?</a></label>
 	<div class="col-sm-4">
 		@if (isset($data['logo_width']))
-			{!!Form::text('logo_width',$data['logo_width'],['id'=>'logo_width','class'=>'form-control','required'=>'true'])!!}
+			{!!Form::text('logo_width',$data['logo_width'],['id'=>'logo_width','class'=>'form-control'])!!}
 		@else
-			{!!Form::text('logo_width',null,['id'=>'logo_width','class'=>'form-control','required'=>'true'])!!}
+			{!!Form::text('logo_width',null,['id'=>'logo_width','class'=>'form-control'])!!}
 		@endif
 	</div>
 </div>
@@ -63,9 +63,20 @@
 	<label for="logo_height" class="col-sm-4 control-label">Alto del logo (en px)<a href="#" class="popper" data-popbox="pop8">?</a></label>
 	<div class="col-sm-4">
 		@if (isset($data['logo_height']))
-			{!!Form::text('logo_height',$data['logo_height'],['id'=>'logo_height','class'=>'form-control','required'=>'true'])!!}
+			{!!Form::text('logo_height',$data['logo_height'],['id'=>'logo_height','class'=>'form-control'])!!}
 		@else
-			{!!Form::text('logo_height',null,['id'=>'logo_height','class'=>'form-control','required'=>'true'])!!}
+			{!!Form::text('logo_height',null,['id'=>'logo_height','class'=>'form-control'])!!}
+		@endif
+	</div>
+</div>
+
+<div class="form-group">
+	<label for="short_name" class="col-sm-4 control-label">Nombre corto<a href="#" class="popper" data-popbox="pop12">?</a></label>
+	<div class="col-sm-4">
+		@if (isset($data['short_name']))
+			{!!Form::text('short_name',$data['short_name'],['id'=>'short_name','class'=>'form-control'])!!}
+		@else
+			{!!Form::text('short_name',null,['id'=>'short_name','class'=>'form-control'])!!}
 		@endif
 	</div>
 </div>
@@ -104,12 +115,26 @@
 </div>
 
 <div class="form-group">
-	<label for="alert_ap" class="col-sm-4 control-label">Alertas notas auditoría<a href="#" class="popper" data-popbox="pop9">?</a></label>
+	<label for="alert_ap" class="col-sm-4 control-label">Alertas notas auditoría<a href="#" class="popper" data-popbox="pop10">?</a></label>
 	<div class="col-sm-4">
 		@if (isset($data['alert_audit_notes']) && $data['alert_audit_notes'] == '1')
 			<input type="checkbox" value="1" name="alert_audit_notes" id="alert_audit_notes" data-toggle="toggle" data-on="Si" data-off="No" data-width="100" data-offstyle="danger" data-onstyle="success" checked>
 		@else
 			<input type="checkbox" value="1" name="alert_audit_notes" id="alert_audit_notes" data-toggle="toggle" data-on="Si" data-off="No" data-width="100" data-offstyle="danger" data-onstyle="success">
+		@endif
+	</div>
+</div>
+
+
+<h4 style="text-align: center; font-weight: bold;">Canal de denuncias</h4>
+
+<div class="form-group">
+	<label for="cc_intro_message" class="col-sm-4 control-label">Mensaje introductorio<a href="#" class="popper" data-popbox="pop11">?</a></label>
+	<div class="col-sm-4">
+		@if (isset($data['cc_intro_message']))
+			{!!Form::textarea('cc_intro_message',$data['cc_intro_message'],['class'=>'form-control','id' => 'wysiwig_simple'])!!}
+		@else
+			{!!Form::textarea('cc_intro_message',null,['id'=>'wysiwig_simple','class'=>'form-control'])!!}
 		@endif
 	</div>
 </div>
@@ -152,4 +177,12 @@
 
 <div id="pop10" class="popbox">
 	<p>Se enviarán alertas a quien vaya dirigida una nota de auditoría al crear al crear la misma</p>
+</div>
+
+<div id="pop11" class="popbox">
+	<p>Mensaje que se mostrará al usuario (denunciante) cuando ingrese a la ventana principal del canal de denuncias.</p>
+</div>
+
+<div id="pop12" class="popbox">
+	<p>Nombre utilizado para los atributos de estilo (style_"nombre_corto".css).</p>
 </div>

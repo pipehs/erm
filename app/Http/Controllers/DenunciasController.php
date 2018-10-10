@@ -27,13 +27,20 @@ class DenunciasController extends Controller
         $org_name = \Ermtool\Configuration::where('option_name','organization')->first(['option_value as o']);
         Session::put('org',$org_name->o);
 
+        $intro = \Ermtool\Configuration::where('option_name','cc_intro_message')->first(['option_value as o']);
+
+        if (!empty($intro))
+        {
+            $intro = explode('//', $intro->o);
+        }
+        
         if (Session::get('languaje') == 'en')
         {
-            return view('en.denuncias.home');
+            return view('en.denuncias.home',['intro' => $intro]);
         }
         else
         {
-            return view('denuncias.home');
+            return view('denuncias.home',['intro' => $intro]);
         }
     }
 

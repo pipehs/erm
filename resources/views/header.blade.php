@@ -42,10 +42,13 @@
 					<div class="col-xs-4 col-sm-8 top-panel-right">
 						<p align="right">
 						@if (!Auth::guest())
-							<b>Usuario: </b> {{ Auth::user()->name }} {{ Auth::user()->surnames }}. <b>Roles: </b> 
-							@foreach (Session::get('roles_name') as $role)
-								{{ $role }}.
-							@endforeach
+							<b>Usuario: </b> {{ Auth::user()->name }} {{ Auth::user()->surnames }}. 
+							@if (Session::get('roles_name'))
+								<b>Roles: </b> 
+								@foreach (Session::get('roles_name') as $role)
+									{{ $role }}.
+								@endforeach
+							@endif
 								<a href="logout">Cerrar Sesi&oacute;n</a>
 						</p>
 						@endif

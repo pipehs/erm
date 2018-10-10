@@ -36,8 +36,8 @@
  	{!!Html::style('assets/plugins/fullcalendar/fullcalendar.css')!!}
  	{!!Html::style('assets/plugins/xcharts/xcharts.min.css')!!}
  	
- 	@if (Session::get('org') != NULL && file_exists(public_path().'/assets/css/style_'.strtolower(Session::get('org')).'.css'))
- 		{!!Html::style('assets/css/style_'.strtolower(Session::get('org')).'.css')!!}
+ 	@if (Session::get('short_name') != NULL && file_exists(public_path().'/assets/css/style_'.strtolower(Session::get('short_name')).'.css'))
+ 		{!!Html::style('assets/css/style_'.strtolower(Session::get('short_name')).'.css')!!}
  	@else
  		{!!Html::style('assets/css/style.css')!!}
  	@endif
@@ -71,21 +71,6 @@
 	{!!Html::script('http://cdn.jsdelivr.net/webshim/1.12.4/polyfiller.js')!!}
 	{!!Html::script('assets/plugins/jquery/jquery-2.1.0.min.js')!!}
 	{!!Html::script('assets/plugins/jquery-ui/jquery-ui.min.js')!!}
-	<script>
-
-	  webshims.setOptions('forms-ext', {types: 'date'});
-		webshims.polyfill('forms forms-ext');
-		webshims.formcfg = {
-			en: {
-			    dFormat: '-',
-			    dateSigns: '-',
-			    patterns: {
-			        d: "yy-mm-dd"
-			    }
-			}
-		};
-
-	</script>
 	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 	{!!Html::script('assets/js/fileinput.min.js')!!}
 	{!!Html::script('assets/plugins/bootstrap/bootstrap.min.js')!!}

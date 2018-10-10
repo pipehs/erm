@@ -2,12 +2,21 @@
 	<ul class="nav main-menu">
 	@if (!Auth::guest())
 		@if(Session::has('roles'))
+			@if (count(Session::get('roles')) > 1 || !in_array('9',Session::get('roles')))
 			<li>
 				<a href="home" class="{{ activeMenu('home') }}">
 					<i class="fa fa-home"></i>
 					<span class="hidden-xs">Inicio</span>
 				</a>
+			</li>	
+			@else
+			<li>
+				<a href="denuncias" class="{{ activeMenu('denuncias') }}">
+					<i class="fa fa-home"></i>
+					<span class="hidden-xs">Inicio</span>
+				</a>
 			</li>
+			@endif
 		
 			<?php $cont = 0; //contador en caso de tener rol de auditor y de audit manager 
 			$verificador = 0; //Verifica que si tiene admin, no se debe mostrar nada más ?>
@@ -57,14 +66,22 @@
 					@endif
 
 				@endforeach
+
+				@foreach (Session::get('roles') as $role)
+					@if ($role == 9) <!-- Admin. canal de denuncias-->
+						@include('menu.denuncias')
+					@endif
+				@endforeach
 			@endif
 
-			@include('menu.hallazgos')
-			@include('menu.planes_accion')
-			@include('menu.reportes')
+			@if (count(Session::get('roles')) > 1 || !in_array('9',Session::get('roles')))
+				@include('menu.hallazgos')
+				@include('menu.planes_accion')
+				@include('menu.reportes')
+			@endif
 
 			@foreach (Session::get('roles') as $role)
-				@if ($role != 6) <!-- Rol distinto de display -->
+				@if ($role != 6 && $role != 9) <!-- Rol distinto de display y admin denuncias -->
 					@include('menu.documentos')
 					<?php break; ?>
 				@endif

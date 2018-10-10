@@ -53,8 +53,22 @@
 					</ul>
 				</div>
 			@endif
-
-			<p>Canal de denuncia</p>
+			<hr>
+			<div class="row">
+				<div class="col-sm-8">
+				@if (isset($intro) && !empty($intro))
+					@foreach ($intro as $i)
+						<p style="text-align: justify;">{{ $i }}</p>
+					@endforeach
+					
+				@else
+					<h4 style="font-weight: bold;">Canal de denuncia</h4>
+				@endif
+				</div>
+			</div>
+			<div class="row">
+				<hr>
+			</div>
 			<center>
 			<p><button class="block" onclick="window.location.href='registro_denuncia'"><b>Registro de denuncia</button></p>
 			<br>

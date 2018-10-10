@@ -3,7 +3,7 @@
 @section('title', 'Home')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid margin-top-login">
 	<div id="page-login" class="row">
 		<div class="col-xs-12 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3">
 			<div class="box">
