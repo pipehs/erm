@@ -14,6 +14,7 @@ use Auth;
 use Crypt;
 use Hash;
 use Storage;
+use Genert\BBCode\BBCode;
 
 class DenunciasController extends Controller
 {
@@ -28,11 +29,10 @@ class DenunciasController extends Controller
         Session::put('org',$org_name->o);
 
         $intro = \Ermtool\Configuration::where('option_name','cc_intro_message')->first(['option_value as o']);
-
-        if (!empty($intro))
-        {
-            $intro = explode('//', $intro->o);
-        }
+        
+        $BBCode = new BBCode();
+        $intro = $BBCode->stripBBCodeTags($intro->o);
+        
         
         if (Session::get('languaje') == 'en')
         {

@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eb26a8ee2189a563713e0f0a810d450a",
+    "content-hash": "ccded70ef4513abc9f6444ec4ac767fb",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -385,6 +385,51 @@
                 "laravel"
             ],
             "time": "2016-02-15T20:13:29+00:00"
+        },
+        {
+            "name": "genert/bbcode",
+            "version": "1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Genert/bbcode.git",
+                "reference": "bf20160aeb6055348b04a48c5e56f202884e55ef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Genert/bbcode/zipball/bf20160aeb6055348b04a48c5e56f202884e55ef",
+                "reference": "bf20160aeb6055348b04a48c5e56f202884e55ef",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Genert\\BBCode\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Genert Org",
+                    "email": "hi@genert.org",
+                    "homepage": "http://genert.org"
+                }
+            ],
+            "description": "BBCode parser from or to HTML.",
+            "keywords": [
+                "PSR-1",
+                "PSR-2",
+                "PSR-4",
+                "bbcode",
+                "laravel",
+                "parser"
+            ],
+            "time": "2018-08-13T19:57:59+00:00"
         },
         {
             "name": "graham-campbell/manager",
