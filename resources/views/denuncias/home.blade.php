@@ -1,7 +1,6 @@
 
 @extends(Auth::user() ? 'master' : 'master2')
 
-
 @section('title', 'Configuración de denuncia')
 
 @section('content')
