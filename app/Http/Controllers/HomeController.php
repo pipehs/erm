@@ -17,6 +17,7 @@ use Mail;
 use Storage;
 use PDF;
 use stdClass;
+use Genert\BBCode\BBCode;
 
 class HomeController extends Controller
 {
@@ -112,7 +113,12 @@ class HomeController extends Controller
 
                     if (!empty($intro))
                     {
-                        $intro = explode('//', $intro->o);
+                        $BBCode = new BBCode();
+                        $intro = $BBCode->stripBBCodeTags($intro->o);
+                    }
+                    else
+                    {
+                        $intro = NULL;
                     }
                     if (Session::get('languaje') == 'es')
                     {

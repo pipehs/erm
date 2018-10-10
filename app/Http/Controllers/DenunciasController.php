@@ -30,8 +30,15 @@ class DenunciasController extends Controller
 
         $intro = \Ermtool\Configuration::where('option_name','cc_intro_message')->first(['option_value as o']);
         
-        $BBCode = new BBCode();
-        $intro = $BBCode->stripBBCodeTags($intro->o);
+        if (!empty($intro))
+        {
+            $BBCode = new BBCode();
+            $intro = $BBCode->stripBBCodeTags($intro->o);
+        }
+        else
+        {
+            $intro = NULL;
+        }
         
         
         if (Session::get('languaje') == 'en')
