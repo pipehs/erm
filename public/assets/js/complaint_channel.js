@@ -330,3 +330,54 @@ function cerrar()
 		   		 
 		});
 }
+
+$("input[name='anonymous']").change(function(){
+	//alert($("input[name='anonymous[]']:checked").val())
+	if ($("input[name='anonymous']:checked").val() == 1)
+	{
+		$('#anonymous2').hide(500);
+	}
+	else
+	{
+		$('#anonymous2').show(500);
+	}
+});
+
+$("form#registercomplaint").submit(function(e) {
+
+	var formData = new FormData(this);
+
+	$.ajax({
+	    url: 'registro_denuncia2',
+	    type: 'POST',
+	    data: formData,
+	    success: function (data) {
+	        data2 = JSON.parse(data);
+	        //alert(data2.message)
+	       	if (data2.response == 0)
+	       	{
+	       		info = '<div class="alert alert-success alert-dismissible" role="alert">';
+	       	}
+
+	       	info += data2.response_description+'</div>';
+	       	
+	       	info += '<div class="alert alert-info alert-dismissible" role="alert">';
+	       	info += 'Puede dar seguimiento al caso con el siguiente id y con la contraseña ingresada anteriormente.<br><br>';
+	       	info += '<b>Id: '+data2.id+'</b><br><br>';
+	       	info += '<b>No olvide guarda este ID y su contraseña, ya que sólo con estos datos podrá consultar el estado del caso.</b>';
+	       	info += '</div>';
+
+	       	info += '<div style="text-align: center;">';
+	       	info += '<p><a href="denuncias" class="btn btn-danger">Volver</a></p>';
+	       	info += '</div>';
+
+	       	$('#register-form').hide();
+	       	$('#register-response').html(info);
+	    },
+	    cache: false,
+	    contentType: false,
+	    processData: false
+	});
+
+	event.preventDefault();
+});

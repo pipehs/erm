@@ -252,20 +252,17 @@ class DenunciasController extends Controller
                 }                    
             }
 
-            if (Session::get('languaje') == 'en')
-            {
-                Session::flash('message','Your case was successfully created');
-            }
-            else
-            {
-                Session::flash('message','Su caso ha sido registrado exitosamente');
-            }
-
             global $id2;
             $id2 = $id;
         });
-        
-        return view('denuncias.registro2',['id' => $GLOBALS['id2']]);
+        if (Session::get('languaje') == 'en')
+        {
+            return json_encode(['id' => $GLOBALS['id2'], 'response' => 0, 'response_description' => 'Your case was successfully created']);
+        }
+        else
+        {
+            return json_encode(['id' => $GLOBALS['id2'], 'response' => 0, 'response_description' => 'Su caso ha sido registrado exitosamente']);
+        }
     }
     /**
      * Show the form for creating a new resource.

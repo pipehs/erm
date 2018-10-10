@@ -49,9 +49,9 @@
 					</ul>
 				</div>
 			@endif
-
+	<div id="register-form">
 			En esta secci&oacute;n podr&aacute; enviar y registrar una consulta, reclamo o denuncia.
-			{!!Form::open(['route'=>'registro_denuncia2','method'=>'POST','class'=>'form-horizontal','enctype'=>'multipart/form-data'])!!}
+			{!!Form::open(['route'=>'registro_denuncia2','method'=>'POST','class'=>'form-horizontal','enctype'=>'multipart/form-data','id'=>'registercomplaint'])!!}
 
 			<div class="form-group">
 				<label for="terms" class="col-sm-4 control-label">Aceptar <a href="#">términos y condiciones</a></label>
@@ -175,16 +175,17 @@
 				</div>
 			</div>
 
-			<div class="form-group">
-				<center>
+			<div class="form-group" style="text-align: center;">
 					{!!Form::submit('Enviar', ['class'=>'btn btn-primary','id'=>'guardar'])!!}
-				</center>
 			</div>
 			{!!Form::close()!!}
-				<center>
+			
+				<div style="text-align: center;">
 					<p><a href="#" onclick="history.back()" class="btn btn-danger">Volver</a></p>
-				<center>
-
+				</div>
+	</div>
+	<div id="register-response">
+	</div>
 			</div>
 		</div>
 	</div>
@@ -219,17 +220,6 @@
 			$("#guardar").removeAttr('disabled');
 		}
 	}
-
-$("input[name='anonymous']").change(function(){
-	//alert($("input[name='anonymous[]']:checked").val())
-	if ($("input[name='anonymous']:checked").val() == 1)
-	{
-		$('#anonymous2').hide(500);
-	}
-	else
-	{
-		$('#anonymous2').show(500);
-	}
-});
 </script>
+{!!Html::script('assets/js/complaint_channel.js')!!}
 @stop
