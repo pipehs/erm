@@ -1511,9 +1511,25 @@ Route::post('cc_config_kinds_store', [
 	'as' => 'cc_config_kinds_store', 'uses' => 'DenunciasController@storeConfigurationKinds'
 	]);
 
-Route::get('seguimiento_admin', function(){
-   return View::make('denuncias.seguimiento_admin');
+Route::get('seguimiento_denuncia', function(){
+   return View::make('denuncias.seguimiento');
 });
+
+Route::get('get_case.{id}.{pass}.{kind}', [
+	'as' => 'get_case', 'uses' => 'DenunciasController@getCase']);
+
+Route::post('send_user_cc_message', [
+	'as' => 'send_user_cc_message', 'uses' => 'DenunciasController@sendUserMessage'
+	]);
+
+Route::get('seguimiento_admin', [
+   'as' => 'seguimiento_admin', 'uses' => 'DenunciasController@indexTracking'
+	]);
+
+Route::get('seguimiento_admin2.{id}', [
+   'as' => 'seguimiento_admin2', 'uses' => 'DenunciasController@TrackingCase'
+	]);
+
 
 Route::get('clasificacion', function(){
    return View::make('denuncias.clasificacion');

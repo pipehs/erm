@@ -9,7 +9,7 @@ use Carbon;
 
 class CcKind extends Model
 {
-    protected $fillable = ['name','responsable_mail','telephone','email'];
+    protected $fillable = ['name','responsable_mail'];
 
     public function ccStatus()
     {

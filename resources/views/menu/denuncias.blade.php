@@ -7,9 +7,7 @@
 		<li class="dropdown">
 			<li><a href="denuncias" class="{{ activeMenu('denuncias') }}">Home</a></li>
 
-			<li><a href="registro_denuncia" class="{{ activeMenu('registro_denuncia') }}">Registro de Denuncia</a></li>
-
-			<li><a href="seguimiento_denuncia" class="{{ activeMenu('seguimiento_denuncia') }}">Seguimiento de Denuncia</a></li>
+			<li><a href="seguimiento_admin" class="{{ activeMenu('seguimiento_admin') }}">Seguimiento de Denuncia</a></li>
 
 			<li><a href="reportes_denuncias" class="{{ activeMenu('reportes_denuncias') }}">Reportes</a></li>
 
