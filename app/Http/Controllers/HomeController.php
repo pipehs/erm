@@ -317,35 +317,36 @@ class HomeController extends Controller
             $i = 0;
             $results = [];
             $risk = new stdClass();
-
             //primero obtenemos organizaciones
             $orgs = DB::table('organizations')
                     ->where('status','=',0)
                     ->get(['id','name','description']);
-
             foreach ($orgs as $org)
             {
                 //obtenemos subprocesos
-                $subs = \Ermtool\Subprocess::getSubprocesses($org->id);
-
+                $subs = DB::table('subprocesses')
+                        ->join('organization_subprocess','organization_subprocess.subprocess_id','=','subprocesses.id')
+                        ->where('organization_subprocess.organization_id','=',$org->id)
+                        ->where('subprocesses.status','=',0)
+                        ->get(['subprocesses.id','subprocesses.name','subprocesses.description']);
                 foreach ($subs as $sub)
                 {
                     //obtenemos proceso
-                    $process = \Ermtool\Process::getProcessFromSubprocess($org->id,$sub->id);
-
+                    $process = DB::table('processes')
+                            ->join('subprocesses','subprocesses.process_id','=','processes.id')
+                            ->where('subprocesses.id','=',$sub->id)
+                            ->where('processes.status','=',0)
+                            ->select('processes.id','processes.name','processes.description')
+                            ->first();
                     //obtenemos riesgos asociados al subproceso y la organización
                     $risks = \Ermtool\Risk::getRisksFromSubprocess($org->id,$sub->id);
-
                     //por algun motivo, no se están obteniendo todos los riesgos (en bgrc de parauco)
                     //print_r($risks);
-
                     if (!empty($risks))
                     {
                         $risk_resp_mail = 'No definido';
                         foreach ($risks as $risk)
                         {
-                            //ACT 14-08-18: obtenemos hallazgos asociados directamente a riesgos
-                            $issues2 = \Ermtool\Issue::getRiskIssuesByRisk($risk->id);
                             //seteamos variables que dependen de cada riesgo
                             $causes = new stdClass();
                             $effects = new stdClass();
@@ -356,10 +357,8 @@ class HomeController extends Controller
                             $plan = new stdClass();
                             //obtenemos categoría del riesgo
                             $risk_category = \Ermtool\Risk_category::name($risk->risk_category_id);
-
                             //obtenemos categoría principal (asociada a subcategoría)
                             $ppal_category = \Ermtool\Risk_category::getPrimaryCategory($risk->risk_category_id);
-
                             if (!empty($ppal_category))
                             {
                                 $ppal_category = \Ermtool\Risk_category::name($ppal_category->id);
@@ -379,7 +378,6 @@ class HomeController extends Controller
                                 {
                                     $risk_resp_position = 'No se ha definido cargo';
                                 }
-
                                 //mail responsable
                                 $risk_resp_mail = \Ermtool\Stakeholder::getMail($risk_resp->id);
                                 $risk_resp_mail = $risk_resp_mail->mail;
@@ -387,7 +385,6 @@ class HomeController extends Controller
                                 {
                                     $risk_resp_mail = 'No definido';
                                 }
-
                                 //nombre responsable
                                 $risk_resp = \Ermtool\Stakeholder::getName($risk_resp->id);
                             }
@@ -396,20 +393,16 @@ class HomeController extends Controller
                                 $risk_resp = 'No definido';
                                 $risk_resp_position = 'No definido';
                             }
-
                             //pérdida esperada
                             if ($risk->expected_loss == NULL)
                             {
                                 $risk->expected_loss = 'No se ha definido pérdida';
                             }
-
                             //obtenemos última evaluación
                             //ACT 26-03-18: Agregamos kind (1 es para cualquier tipo de evaluación)
                             //ACT 08-05-18: Obtenemos todas las evaluaciones
                             $eval = \Ermtool\Evaluation::getEvaluations($risk->id,1);
-
                             $last_eval = \Ermtool\Evaluation::getLastEvaluation($risk->id,1);
-
                             if (!empty($last_eval) || $last_eval != NULL)
                             {
                                 $last_proba = $last_eval->avg_probability;
@@ -420,7 +413,6 @@ class HomeController extends Controller
                                 $last_proba = NULL;
                                 $last_impact = NULL;
                             }
-
                             
                             for ($j=0;$j<5;$j++)
                             {
@@ -433,9 +425,8 @@ class HomeController extends Controller
                                 }
                             }
                             //causas y efectos
-                            $causes = \Ermtool\Cause::getCausesFromRisk($risk->id);
-                            $effects = \Ermtool\Effect::getEffectsFromRisk($risk->id);
-
+                            $causes = \Ermtool\Cause::getCausesFromRisk($risk->risk_id);
+                            $effects = \Ermtool\Effect::getEffectsFromRisk($risk->risk_id);
                             //seteamos causas en caso de excel
                             if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
                             {
@@ -459,10 +450,8 @@ class HomeController extends Controller
                                             $c = $cause->name.' - '.$cause->description.', ';
                                         }
                                     }
-
                                     $causes = $c;
                                 }
-
                                 if (empty($effects))
                                 {
                                     $effects = 'No se han agregado efectos';
@@ -481,14 +470,11 @@ class HomeController extends Controller
                                             $e = $effect->name.' - '.$effect->description.', ';
                                         }
                                     }
-
                                     $effects = $e;
                                 }
                             }
-
                             //obtenemos controles asociados al riesgo
                             $controls = \Ermtool\Control::getControlsFromRisk($org->id,$risk->risk_id);
-
                             if (!empty($controls))
                             {
                                 foreach ($controls as $ctrl)
@@ -514,7 +500,6 @@ class HomeController extends Controller
                                         {
                                             $ctrl->type = 'No definido';
                                         }
-
                                         //periodicidad
                                         if ($ctrl->periodicity === 0)
                                         {
@@ -548,7 +533,6 @@ class HomeController extends Controller
                                         {
                                             $ctrl->periodicity = 'No definida';
                                         }
-
                                         //propósito
                                         if ($ctrl->purpose === 0)
                                         {
@@ -566,19 +550,16 @@ class HomeController extends Controller
                                         {
                                             $ctrl->purpose = 'No se ha definido';
                                         }
-
                                         //comentarios
                                         if ($ctrl->comments == NULL)
                                         {
                                             $ctrl->comments = 'No se han agregado comentarios';
                                         }
-
                                         //evidencia
                                         if ($ctrl->evidence == NULL)
                                         {
                                             $ctrl->evidence = 'No se ha agregado evidencia';
                                         }
-
                                         //costo esperado
                                         if ($ctrl->expected_cost == NULL)
                                         {
@@ -587,7 +568,6 @@ class HomeController extends Controller
                                     }
                                     else //se setean variables en inglés
                                     {
-
                                     }
                                     //obtenemos responsable de control
                                     $control_resp = \Ermtool\Control::getResponsable($ctrl->id,$risk->id);
@@ -596,12 +576,10 @@ class HomeController extends Controller
                                         //obtenemos correo
                                         $control_resp_mail = \Ermtool\Stakeholder::getMail($control_resp->id);
                                         $control_resp_mail = $control_resp_mail->mail;
-
                                         if ($control_resp_mail == NULL)
                                         {
                                             $control_resp_mail = 'No se ha agregado responsable';
                                         }
-
                                         //cargo responsable
                                         $control_resp_position = \Ermtool\Stakeholder::getPosition($control_resp->id);
                                         $control_resp_position = $control_resp_position->position;
@@ -609,7 +587,6 @@ class HomeController extends Controller
                                         {
                                             $control_resp_position = 'No se ha definido cargo';
                                         }
-
                                         $control_resp = \Ermtool\Stakeholder::getName($control_resp->id);
                                     }
                                     else
@@ -618,7 +595,6 @@ class HomeController extends Controller
                                         $control_resp_mail = 'No se ha agregado responsable';
                                         $control_resp_position = 'No se ha agregado responsable';
                                     }
-
                                     //seteamos riesgo residual
                                     $sev = array();
                                     $residual_risk = array();
@@ -637,7 +613,6 @@ class HomeController extends Controller
                                                         ->orderBy('created_at','desc')
                                                         ->select('result')
                                                         ->first();
-
                                                     if (!empty($cont_per[$j]))
                                                     {
                                                         $cont_per[$j] = $cont_per[$j]->result;
@@ -681,19 +656,13 @@ class HomeController extends Controller
                                         $residual_risk[4] = 'No se ha evaluado';
                                         $cont_per[$j] = NULL;
                                     }
-
                                     //Agregamos último riesgo residual
                                     if ($last_proba != NULL && $last_impact != NULL)
                                     {
                                         $last_residual_risk = ($last_proba*$last_impact) * (1-($ctrl->cont_percentage/100));
                                     }
-
                                     //obtenemos hallazgos de control
                                     $issues = \Ermtool\Issue::getIssuesFromControl($org->id,$ctrl->id);
-
-                                    $issues = array_merge($issues,$issues2);
-                                    $issues = array_unique($issues,SORT_REGULAR);
-
                                     if (!empty($issues))
                                     {
                                         foreach ($issues as $issue)
@@ -720,11 +689,9 @@ class HomeController extends Controller
                                             }
                                             else //variables en inglés
                                             {
-
                                             }
                                             //obtenemos plan(es) de acción asociado(s) al hallazgo
                                             $action_plans = \Ermtool\Action_plan::getActionPlanFromIssue2($issue->id);
-
                                             if (!empty($action_plans))
                                             {
                                                 foreach ($action_plans as $plan)
@@ -747,20 +714,16 @@ class HomeController extends Controller
                                                     }
                                                     else //variables en inglés
                                                     {
-
                                                     }
-
                                                     //responsable plan de acción
                                                     if ($plan->stakeholder_id != NULL)
                                                     {
                                                         $plan_resp = \Ermtool\Stakeholder::getName($plan->stakeholder_id);
                                                         $plan_resp_mail = \Ermtool\Stakeholder::getMail($plan->stakeholder_id);
                                                         $plan_resp_mail = $plan_resp_mail->mail;
-
                                                         //cargo
                                                         $plan_resp_position = \Ermtool\Stakeholder::getPosition($plan->stakeholder_id);
                                                         $plan_resp_position = $plan_resp_position->position;
-
                                                         if ($plan_resp_position == NULL)
                                                         {
                                                             $plan_resp_position = 'No se ha definido cargo';
@@ -777,28 +740,24 @@ class HomeController extends Controller
                                                     $max_date = DB::table('progress_percentage')
                                                                     ->where('action_plan_id','=',$plan->id)
                                                                     ->max('updated_at');
-
                                                     //obtenemos porcentaje y comentarios
                                                     $per = DB::table('progress_percentage')
                                                             ->where('action_plan_id','=',$plan->id)
                                                             ->where('updated_at','=',$max_date)
                                                             ->select('percentage','comments','updated_at')
                                                             ->first();
-
                                                     if (!empty($per))
                                                     {
                                                         $percentage = $per->percentage.'%';
                                                         $percentage_comments = $per->comments;
                                                         $percentage_date = $per->updated_at;
                                                     }
-
                                                     else
                                                     {
                                                         $percentage = 'No hay porcentaje de avance';
                                                         $percentage_comments = 'No hay porcentaje de avance';
                                                         $percentage_date = 'No hay porcentaje de avance';
                                                     }
-
                                                     if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
                                                     {
                                                         $results[$i] = [
@@ -907,7 +866,6 @@ class HomeController extends Controller
                                                             'cont_per' => $cont_per
                                                         ];
                                                     }
-
                                                     $i += 1;
                                                 }
                                             }
@@ -923,7 +881,6 @@ class HomeController extends Controller
                                                 $plan_resp = 'No hay plan de acción';
                                                 $plan_resp_mail = 'No hay plan de acción';
                                                 $plan_resp_position = 'No hay plan de acción';
-
                                                 if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
                                                 {
                                                     $results[$i] = [
@@ -1032,7 +989,6 @@ class HomeController extends Controller
                                                            'cont_per' => $cont_per
                                                     ];
                                                 }
-
                                                 $i += 1;
                                             }
                                         }
@@ -1053,7 +1009,6 @@ class HomeController extends Controller
                                         $plan_resp = 'No hay plan de acción';
                                         $plan_resp_mail = 'No hay plan de acción';
                                         $plan_resp_position = 'No hay plan de acción';
-
                                         if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
                                         {
                                             $results[$i] = [
@@ -1162,138 +1117,12 @@ class HomeController extends Controller
                                                 'cont_per' => $cont_per
                                             ];
                                         }
-
                                         $i += 1;
                                     }
                                 }
                             }
                             else
                             {
-                                //Vemos si hay hallazgo de riesgo
-                                if (!empty($issues2))
-                                {
-                                    foreach ($issues2 as $issue)
-                                    {
-                                        if (Session::get('languaje') == 'es')
-                                        {
-                                            //clasificación de hallazgo
-                                            if ($issue->classification === 0)
-                                            {
-                                                $issue->classification = 'Oportunidad de mejora';
-                                            }
-                                            else if ($issue->classification == 1)
-                                            {
-                                                $issue->classification = 'Deficiencia'; 
-                                            }
-                                            else if ($issue->classification == 2)
-                                            {
-                                                $issue->classification = 'Debilidad significativa';
-                                            }
-                                            else
-                                            {
-                                                $issue->classification = 'No se ha definido';
-                                            }
-                                        }
-                                        else //variables en inglés
-                                        {
-
-                                        }
-                                        //obtenemos plan(es) de acción asociado(s) al hallazgo
-                                        $action_plans = \Ermtool\Action_plan::getActionPlanFromIssue2($issue->id);
-
-                                        if (!empty($action_plans))
-                                        {
-                                            foreach ($action_plans as $plan)
-                                            {
-                                                if (Session::get('languaje') == 'es')
-                                                {
-                                                    //estado de plan de acción
-                                                    if ($plan->status === 0)
-                                                    {
-                                                        $plan->status = 'En progreso';
-                                                    }
-                                                    else if ($plan->status == 1)
-                                                    {
-                                                        $plan->status = 'Cerrado';
-                                                    }
-                                                    else
-                                                    {
-                                                        $plan->status = 'No se ha definido';
-                                                    }
-                                                }
-                                                else //variables en inglés
-                                                {
-
-                                                }
-
-                                                //responsable plan de acción
-                                                if ($plan->stakeholder_id != NULL)
-                                                {
-                                                    $plan_resp = \Ermtool\Stakeholder::getName($plan->stakeholder_id);
-                                                    $plan_resp_mail = \Ermtool\Stakeholder::getMail($plan->stakeholder_id);
-                                                    $plan_resp_mail = $plan_resp_mail->mail;
-
-                                                    //cargo
-                                                    $plan_resp_position = \Ermtool\Stakeholder::getPosition($plan->stakeholder_id);
-                                                    $plan_resp_position = $plan_resp_position->position;
-
-                                                    if ($plan_resp_position == NULL)
-                                                    {
-                                                        $plan_resp_position = 'No se ha definido cargo';
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    $plan_resp = 'No se ha definido responsable';
-                                                    $plan_resp_mail = 'No se ha definido responsable';
-                                                    $plan_resp_position = 'No se ha definido responsable';
-                                                }
-                                                //obtenemos porcentaje de avance del plan
-                                                //primero, obtenemos la máxima fecha de porcentaje de avance
-                                                $max_date = DB::table('progress_percentage')
-                                                                ->where('action_plan_id','=',$plan->id)
-                                                                ->max('updated_at');
-
-                                                //obtenemos porcentaje y comentarios
-                                                $per = DB::table('progress_percentage')
-                                                        ->where('action_plan_id','=',$plan->id)
-                                                        ->where('updated_at','=',$max_date)
-                                                        ->select('percentage','comments','updated_at')
-                                                        ->first();
-
-                                                if (!empty($per))
-                                                {
-                                                    $percentage = $per->percentage.'%';
-                                                    $percentage_comments = $per->comments;
-                                                    $percentage_date = $per->updated_at;
-                                                }
-
-                                                else
-                                                {
-                                                    $percentage = 'No hay porcentaje de avance';
-                                                    $percentage_comments = 'No hay porcentaje de avance';
-                                                    $percentage_date = 'No hay porcentaje de avance';
-                                                }
-                                            } 
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    $issue->name = 'No hay hallazgo';
-                                    $issue->description = 'No hay hallazgo';
-                                    $issue->classification = 'No hay hallazgo';
-                                    $issue->recommendations = 'No hay hallazgo';
-                                    $plan->description = 'No hay plan de acción';
-                                    $plan->status = 'No hay plan de acción';
-                                    $plan->final_date = 'No hay plan de acción';
-                                    $percentage = 'No hay plan de acción';
-                                    $percentage_date = 'No hay plan de acción';
-                                    $percentage_comments = 'No hay plan de acción';
-                                    $plan_resp = 'No hay plan de acción';
-                                    $plan_resp_mail = 'No hay plan de acción';
-                                    $plan_resp_position = 'No hay plan de acción';
-                                }
                                 //echo "NO HAY CONTROLES<br>";
                                 $ctrl->name = 'No hay control';
                                 $ctrl->description = 'No hay control';
@@ -1320,7 +1149,19 @@ class HomeController extends Controller
                                 $cont_per[2] = 'No hay control';
                                 $cont_per[3] = 'No hay control';
                                 $cont_per[4] = 'No hay control';
-
+                                $issue->name = 'No hay hallazgo';
+                                $issue->description = 'No hay hallazgo';
+                                $issue->classification = 'No hay hallazgo';
+                                $issue->recommendations = 'No hay hallazgo';
+                                $plan->description = 'No hay plan de acción';
+                                $plan->status = 'No hay plan de acción';
+                                $plan->final_date = 'No hay plan de acción';
+                                $percentage = 'No hay plan de acción';
+                                $percentage_date = 'No hay plan de acción';
+                                $percentage_comments = 'No hay plan de acción';
+                                $plan_resp = 'No hay plan de acción';
+                                $plan_resp_mail = 'No hay plan de acción';
+                                $plan_resp_position = 'No hay plan de acción';
                                 if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
                                 {
                                     $results[$i] = [
@@ -1423,7 +1264,6 @@ class HomeController extends Controller
                                         'cont_per' => $cont_per
                                     ];
                                 }
-
                                 $i += 1;
                             }
                         }
@@ -1459,11 +1299,9 @@ class HomeController extends Controller
                         $percentage_comments = 'No hay plan de acción';
                         $plan_resp = 'No hay plan de acción';
                         $plan_resp_mail = 'No hay plan de acción';
-
                     }*/
                 }
             }
-
             //print_r($results);
             if (strstr($_SERVER["REQUEST_URI"],'genexcelconsolidado'))
             {
@@ -1488,18 +1326,43 @@ class HomeController extends Controller
     {
         DB::transaction(function() {
             $rss = DB::table('risk_subprocess')
-                ->get(['id','risk_id']);
+                ->get(['id','risk_id','subprocess_id']);
 
             foreach ($rss as $rs)
             {
                 //Obtenemos organization_risk
                 $or = \Ermtool\OrganizationRisk::getByRisk($rs->risk_id);
 
-                DB::table('risk_subprocess')
-                    ->where('id','=',$rs->id)
-                    ->update([
-                        'organization_risk_id' => $or[0]->id
-                    ]);
+                //ACT 17-10-18: Hacemos esto para cada tupla organization_risk
+                foreach ($or as $r)
+                {
+                    //Vemos si existe en risk_subprocess para organization_risk
+                    $rs2 = DB::table('risk_subprocess')
+                        ->where('organization_risk_id','=',$r->id)
+                        ->where('subprocess_id','=',$rs->subprocess_id)
+                        ->first(['id','organization_risk_id']);
+
+                    if (empty($rs2))
+                    {
+                        DB::table('risk_subprocess')
+                            ->insert([
+                                'subprocess_id' => $rs->subprocess_id,
+                                'organization_risk_id' => $r->id
+                            ]);
+                    }
+                    else
+                    {
+                        if ($rs2->organization_risk_id == NULL)
+                        {
+                           DB::table('risk_subprocess')
+                                ->where('id','=',$rs2->id)
+                                ->update([
+                                    'organization_risk_id' => $r->id
+                                ]); 
+                        }                 
+                    }
+                }
+                
             }
         });
     }
@@ -1735,7 +1598,7 @@ class HomeController extends Controller
                 $org_risk = DB::table('organization_risk')->where('risk_id','=',$r->id)->delete();
 
                 //Obtenemos subprocesses_id a través de risk_subprocess para eliminar
-                $risk_sub = DB::table('risk_subprocess')->where('risk_id','=',$r->id)->get(['subprocess_id']);
+                $risk_sub = DB::table('risk_subprocess')->where('organization_risk_id','=',$r->id)->get(['subprocess_id']);
                 $subs = array();
                 $prcs = array();
                 foreach ($risk_sub as $rs)
@@ -1770,18 +1633,23 @@ class HomeController extends Controller
 
             //Eliminamos hallazgos de riesgos
             //Primero seleccionamos planes de acción
-            $action_plans = DB::table('action_plans')
-                        ->join('issues','issues.id','=','action_plans.id')
+            $risk_issues = DB::table('issues')
                         ->where('issues.kind','=',3)
-                        ->get(['action_plans.id']);
+                        ->get(['issues.id']);
 
-            foreach ($action_plans as $ap)
+            foreach ($risk_issues as $is)
             {
-                //Eliminamos porcentaje
-                DB::table('progress_percentage')
-                    ->where('progress_percentage.action_plan_id','=',$ap->id)
-                    ->delete();
-                
+                //Seleccionamos planes
+                $aps = \Ermtool\Action_plan::where('issue_id',$is->id)->get();
+
+                foreach ($aps as $ap)
+                {
+                    //Eliminamos porcentaje
+                    DB::table('progress_percentage')
+                        ->where('progress_percentage.action_plan_id','=',$ap->id)
+                        ->delete();
+                }
+
                 //Eliminamos plan
                 DB::table('action_plans')
                     ->where('id','=',$ap->id)

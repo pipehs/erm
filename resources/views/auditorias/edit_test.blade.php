@@ -99,7 +99,7 @@ $(document).ready(function () {
 		subprocesses = []
 		j = 0
 		@foreach ($audit_test_control as $c)
-			controls[i] = {{$c->control_id}}
+			controls[i] = {{$c->control_organization_id}}
 			i = i+1
 		@endforeach
 

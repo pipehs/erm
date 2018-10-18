@@ -3607,9 +3607,10 @@ class ControlesController extends Controller
                 //ACT 18-04-18: Guardamos control_organization_id
                 $ctrl_org = \Ermtool\ControlOrganization::getByCO($control->id,$org);
 
+
                 $evals = DB::table('control_eval_risk_temp')
                             ->where('control_organization_id','=',$ctrl_org->id)
-                            ->where('status',1)
+                            ->where('created_at','=',date($ano.'-'.$mes.'-'.$dia.' 00:00:00'))
                             ->select('result')
                             ->get();
 
@@ -3644,6 +3645,7 @@ class ControlesController extends Controller
                 $max_update = DB::table('evaluation_risk')
                             ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                             ->where('evaluation_risk.organization_risk_id','=',$risk2->id)
+                            ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-'.$dia.' 00:00:00'))
                             ->max('evaluations.updated_at');
 
                 //verificamos que haya alguna evaluación para este riesgo (sino, no se calcula el riesgo residual)

@@ -564,20 +564,21 @@ class AuditoriasController extends Controller
                             $controls = DB::table('audit_tests')
                                         ->join('audit_test_control','audit_test_control.audit_test_id','=','audit_tests.id')
                                         ->where('audit_tests.id','=',$id)
-                                        ->select('audit_test_control.control_id')
+                                        ->select('audit_test_control.control_organization_id')
                                         ->get();
 
                             if (isset($_POST['test_result_'.$id]) && isset($controls) && $controls != NULL && !empty($controls))
                             {
                                 foreach ($controls as $control)
                                 {
-                                    /*Por ahora no se usa en Coca Cola */
+                                    //Obtenemos control_id y org_id para función calcControlledRisk (ya que ésta no se ha actualizado con control_organization)
+                                    $co = \Ermtool\ControlOrganization::find($control->control_organization_id);
                                     //ACT 30-03-18: Volvemos a incorporarla
                                     if ($control->control_id != NULL)
                                     {
-                                        $result = $c->calcControlValue($control->control_id,$_POST['org_id']);
+                                        $result = $c->calcControlValue($control->control_organization_id);
 
-                                        $eval = $c->calcControlledRisk($control->control_id,$_POST['org_id']);
+                                        $eval = $c->calcControlledRisk($co->control_id,$co->organization_id);
 
                                         $result = 0;
                                     }
@@ -1454,28 +1455,6 @@ class AuditoriasController extends Controller
                     //Vemos si se especificaron subprocessos
                    $audit_test_subprocess = \Ermtool\Audit_test::getSubprocesses($test_id); 
                 }
-                
-                /*
-                if ($audit_test->control_id != NULL)
-                {
-                    $type2 = 1;
-                    $type_id = $audit_test->control_id;
-                }
-                else if ($audit_test->risk_id != NULL)
-                {
-                    $type2 = 2;
-                    $type_id = $audit_test->risk_id;
-                }
-                else if ($audit_test->subprocess_id != NULL)
-                {
-                    $type2 = 3;
-                    $type_id = $audit_test->subprocess_id;
-                }
-                else
-                {
-                    $type2 = NULL;
-                    $type_id = NULL;
-                }*/
 
                 //obtenemos evidencias de prueba (si es que existen)
                 //$evidence = getEvidences(5,$audit_test->id);
@@ -1604,9 +1583,9 @@ class AuditoriasController extends Controller
                     }
                     //si es que se ingreso tipo
                     //ACT 29-03-18: Tipo será dinámico
-                    if (isset($_POST['type']) && $_POST['type'] != '')
+                    if (isset($_POST['evaluation_test_id']) && $_POST['evaluation_test_id'] != '')
                     {
-                        $GLOBALS['audit_test']->evaluation_test_id = $_POST['type'];
+                        $GLOBALS['audit_test']->evaluation_test_id = $_POST['evaluation_test_id'];
                     }
                     else
                     {
@@ -1646,16 +1625,16 @@ class AuditoriasController extends Controller
                         //vemos si se especificaron los controles
                         if (isset($_POST['control_id']))
                         {
+                            //primero eliminamos todas las relaciones
+                            DB::table('audit_test_control')
+                                ->where('audit_test_id','=',$GLOBALS['audit_test']->id)
+                                ->delete();
+
                             foreach ($_POST['control_id'] as $c)
                             {
                                 //primero verificamos que no se encuentre vacío (ya que está enviando el último valor vacío)
                                 if ($c != NULL && $c != '')
                                 {
-                                    //primero eliminamos todas las relaciones
-                                    DB::table('audit_test_control')
-                                        ->where('audit_test_id','=',$GLOBALS['audit_test']->id)
-                                        ->delete();
-
                                     //almacenamos controles en audit_test_control
                                     //ACT 31-05-18: Se debe ingresar control_organization
                                     //Primero obtenemos org
@@ -1694,15 +1673,16 @@ class AuditoriasController extends Controller
                         //vemos si se especificaron los controles
                         if (isset($_POST['control_id']))
                         {
+                            //primero eliminamos todas las relaciones
+                            DB::table('audit_test_control')
+                                ->where('audit_test_id','=',$GLOBALS['audit_test']->id)
+                                ->delete();
+
                             foreach ($_POST['control_id'] as $c)
                             {
                                 //primero verificamos que no se encuentre vacío (ya que está enviando el último valor vacío)
                                 if ($c != NULL && $c != '')
                                 {
-
-                                    DB::table('audit_test_control')
-                                        ->where('audit_test_id','=',$GLOBALS['audit_test']->id)
-                                        ->delete();
                                     //almacenamos controles en audit_test_control
                                     //ACT 31-05-18: Se debe ingresar control_organization
                                     //Primero obtenemos org
@@ -1825,9 +1805,9 @@ class AuditoriasController extends Controller
                         $description = NULL;
                     }
                     //si es que se ingreso tipo
-                    if (isset($_POST['type']) && $_POST['type'] != '')
+                    if (isset($_POST['evaluation_test_id']) && $_POST['evaluation_test_id'] != '')
                     {
-                        $type = $_POST['type'];
+                        $type = $_POST['evaluation_test_id'];
                     }
                     else
                     {
@@ -1889,10 +1869,15 @@ class AuditoriasController extends Controller
                                 if ($c != NULL && $c != '')
                                 {
                                     //almacenamos controles en audit_test_control
+                                    $org = \Ermtool\Organization::getOrgIdByTestId($test_id);
+                                    //obtenemos control_organization
+                                    $co = \Ermtool\ControlOrganization::getByCO($c,$org);
+
                                     DB::table('audit_test_control')
                                         ->insert([
                                             'audit_test_id' => $test_id,
-                                            'control_id' => $c
+                                            'control_id' => $c,
+                                            'control_organization_id' => $co->id
                                             ]);
                                 }   
                             }
@@ -1923,10 +1908,15 @@ class AuditoriasController extends Controller
                                 {
                                     $cont += 1;
                                     //almacenamos controles en audit_test_control
+                                    $org = \Ermtool\Organization::getOrgIdByTestId($test_id);
+                                    //obtenemos control_organization
+                                    $co = \Ermtool\ControlOrganization::getByCO($c,$org);
+
                                     DB::table('audit_test_control')
                                         ->insert([
                                             'audit_test_id' => $test_id,
-                                            'control_id' => $c
+                                            'control_id' => $c,
+                                            'control_organization_id' => $co->id
                                             ]);
                                 }   
                             }

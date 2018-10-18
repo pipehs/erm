@@ -29,20 +29,7 @@
 						<div class="form-group">
 							{!!Form::label('Tipo',null,['class'=>'col-sm-4 control-label'])!!}
 							<div class="col-sm-6">
-							@if (!isset($test_selected))
-								{!!Form::select('type',$evaluation_tests,null,['id'=>'type','placeholder'=>'- Seleccione -'])!!}
-							@else
-								<select name="type">
-								<option value="">- Seleccione -</option>
-								@foreach ($evaluation_tests as $id=>$name)
-									@if ($id == $test_selected)
-										<option value="{{$id}}" selected="true">{{$name}}</option>
-									@else
-										<option value="{{$id}}">{{$name}}</option>
-									@endif
-								@endforeach
-								</select>
-							@endif
+								{!!Form::select('evaluation_test_id',$evaluation_tests,null,['id'=>'type','placeholder'=>'- Seleccione -'])!!}
 							</div>
 						</div>
 
