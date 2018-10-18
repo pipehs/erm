@@ -2470,29 +2470,15 @@ class EvaluacionRiesgosController extends Controller
         $i = 0;
         foreach ($evaluations as $evaluation)
         {
-            $proba_impacto_in = DB::table('evaluation_risk')
-                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                    ->where('evaluation_risk.organization_risk_id','=',$evaluation->risk_id)
-                    ->where('evaluations.consolidation','=',1)
-                    ->where('evaluations.type','=',1)
-                    ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
-                    ->orderBy('evaluations.updated_at','desc')
-                    ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
-                    ->first();
+            $proba_impacto_in = \Ermtool\Evaluation::getProbaImpact($evaluation->risk_id,$ano,$mes,$dia);
 
-                    //$updated_at_in = str_replace('-','',$updated_at_in);
+            //$updated_at_in = str_replace('-','',$updated_at_in);
 
 
             //ACTUALIZACIÓN 22-11-16: Obtendremos los riesgos controlados a través de la tabla controlled_risk sólo para la organización y el tipo seleccionado
-            $eval = DB::table('controlled_risk')
-                    ->join('organization_risk','organization_risk.id','=','controlled_risk.organization_risk_id')
-                    ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
-                    ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
-                    ->orderBy('controlled_risk.created_at','desc')
-                    ->select('results')
-                    ->first();
+            $eval = \Ermtool\ControlledRisk::getResults($evaluation->risk_id,$ano,$mes,$dia);
 
-                    //$updated_at_ctrl = str_replace('-','',$updated_at_ctrl);
+            //$updated_at_ctrl = str_replace('-','',$updated_at_ctrl);
 
 
             //proba controlado (si es que hay)
