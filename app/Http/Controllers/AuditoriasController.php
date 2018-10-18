@@ -574,7 +574,7 @@ class AuditoriasController extends Controller
                                     //Obtenemos control_id y org_id para función calcControlledRisk (ya que ésta no se ha actualizado con control_organization)
                                     $co = \Ermtool\ControlOrganization::find($control->control_organization_id);
                                     //ACT 30-03-18: Volvemos a incorporarla
-                                    if ($control->control_id != NULL)
+                                    if ($control->control_organization_id != NULL)
                                     {
                                         $result = $c->calcControlValue($control->control_organization_id);
 
