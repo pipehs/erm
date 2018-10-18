@@ -121,7 +121,7 @@ class Audit_test extends Model
     {
         return DB::table('audit_test_control')
                 ->where('audit_test_id','=',$test_id)
-                ->select('control_id')
+                ->select('control_organization_id')
                 ->get();
     }
 

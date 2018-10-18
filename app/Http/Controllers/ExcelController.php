@@ -2778,15 +2778,38 @@ class ExcelController extends Controller
                                                     $dia = explode(' ',$fecha[2]);
                                                     $dia = $dia[0];
 
-                                                    //Guardamos en control_eval_risk_temp valor del control (autoevaluación)
-                                                    DB::table('control_eval_risk_temp')
-                                                        ->insert([
-                                                            'result' => intval($row['de_contribucion_'.$j]),
-                                                            'control_organization_id' => $co->id,
-                                                            'auto_evaluation' => 1,
-                                                            'status' => 1,
-                                                            'created_at' => $row['fecha_'.$j]
-                                                        ]);
+                                                    //Guardamos en control_eval_risk_temp valor del control (autoevaluación), si es que ya no existe
+                                                    $cert = DB::table('control_eval_risk_temp')
+                                                        ->where('control_organization_id','=',$co->id)
+                                                        ->where('created_at','=',$row['fecha_'.$j])
+                                                        ->first(['id']);
+
+                                                    if (empty($cert))
+                                                    {
+                                                        if ($j == 0)
+                                                        {
+                                                            $cert = DB::table('control_eval_risk_temp')
+                                                                ->insertGetId([
+                                                                    'result' => intval($row['de_contribucion_'.$j]),
+                                                                    'control_organization_id' => $co->id,
+                                                                    'auto_evaluation' => 1,
+                                                                    'status' => 1,
+                                                                    'created_at' => $row['fecha_'.$j]
+                                                                ]);
+                                                        }
+                                                        else
+                                                        {
+                                                            $cert = DB::table('control_eval_risk_temp')
+                                                                ->insertGetId([
+                                                                    'result' => intval($row['de_contribucion_'.$j]),
+                                                                    'control_organization_id' => $co->id,
+                                                                    'auto_evaluation' => 1,
+                                                                    'status' => 0,
+                                                                    'created_at' => $row['fecha_'.$j]
+                                                                ]);
+                                                        }
+                                                    }
+                                                    
 
                                                     //agregamos valor residual de riesgo
                                                     $controlclass = new Controles;
@@ -2806,6 +2829,11 @@ class ExcelController extends Controller
                                                 if ($row['clasificacion_hallazgo'] != '')
                                                 {
                                                     $classification_id = \Ermtool\IssueClassification::getIssueClassificationByName($row['clasificacion_hallazgo']);
+                                                    $classification_id = $classification_id->id;
+                                                }
+                                                else
+                                                {
+                                                    $classification_id = NULL;
                                                 }
                                                 
                                                 $rec = $row['recomendaciones'] != '' ? $row['recomendaciones'] : NULL;
@@ -2815,7 +2843,7 @@ class ExcelController extends Controller
                                                     'name' => $row['hallazgo'],
                                                     'description' => $desc,
                                                     'recommendations' => $rec,
-                                                    'classification_id' => $classification_id->id,
+                                                    'classification_id' => $classification_id,
                                                     'control_id' => $control->id,
                                                     'organization_id' => $org->id
                                                 ]);
@@ -2823,10 +2851,11 @@ class ExcelController extends Controller
 
                                             if ($row['plan_de_accion'] != '')
                                             {
-                                                //$action_plan = \Ermtool\Action_plan::getActionPlanByDescription($row['plan_de_accion']);
+                                                //Vemos si existe el plan de acción para el hallazgo
+                                                $action_plan = \Ermtool\Action_plan::getActionPlanByIssueAndDescription($issue->id,$row['plan_de_accion']);
 
-                                                //if (empty($action_plan))
-                                                //{
+                                                if (empty($action_plan))
+                                                {
                                                     if ($row['estado_plan'] == 'En progreso')
                                                     {
                                                         $status = 0;
@@ -2881,7 +2910,7 @@ class ExcelController extends Controller
                                                                 'updated_at' => date($row['fecha_de_avance'])
                                                             ]);  
                                                     }
-                                                //}
+                                                }
                                             }
                                         }
 
@@ -2889,7 +2918,7 @@ class ExcelController extends Controller
                                     }
                                 }
                                    
-                            }/*
+                            }
                             else if ($_POST['kind'] == 20) //Carga Riesgos KOAndina
                             {
                                 foreach ($row as $row)
@@ -3311,8 +3340,8 @@ class ExcelController extends Controller
                                     }
                                 }
                                    
-                            }*/
-                            else if ($_POST['kind'] == 20) //Carga Riesgos KOAndina Simplificado
+                            }
+                            /*else if ($_POST['kind'] == 20) //Carga Riesgos KOAndina Simplificado
                             {
                                 //foreach ($row as $row)
                                 //{
@@ -3455,7 +3484,7 @@ class ExcelController extends Controller
                                     }
                                 //}
                                    
-                            }
+                            }*/
                             else if ($_POST['kind'] == 6) //Planilla TI KOAndina
                             {
                                 //Primero que todo, si no existe el proceso, no se agrega nada:

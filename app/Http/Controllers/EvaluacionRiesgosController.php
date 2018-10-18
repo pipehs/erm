@@ -2375,47 +2375,36 @@ class EvaluacionRiesgosController extends Controller
                 }
             }
         }     
-                //controlado
-                $control = array(); //define si un riesgo está siendo controlado o no
+        //controlado
+        $control = array(); //define si un riesgo está siendo controlado o no
+        $riesgo_temp = array();
+        $riesgos = array();
+        $i = 0;
+        $ano = date('Y');
+        $mes = date('m');
+        $dia = date('d');
+        $subs = FALSE;
 
-                $riesgo_temp = array();
-                $riesgos = array();
-                $i = 0;
+        if (isset($_GET['kind']) && $_GET['kind'] == 0) //evaluaciones de riesgos de procesos
+        {
+            //---- consulta multiples join para obtener los subprocesos evaluados relacionados a la organización ----//
+            //para riesgos inherente 
+            $evaluations = \Ermtool\Evaluation::getEvaluationRiskSubprocess($_GET['organization_id'],NULL,NULL,$subs,$ano,$mes,$dia);
 
-                $ano = date('Y');
-                $mes = date('m');
-                $dia = date('d');
+            $consolidados = \Ermtool\Evaluation::getEvaluationRiskSubprocess(NULL,NULL,NULL,$subs,$ano,$mes,$dia);  
+        }
+        else if (isset($_GET['kind']) && $_GET['kind'] == 1) //evaluaciones de riesgos de negocio
+        {
+            $evaluations = \Ermtool\Evaluation::getEvaluationObjectiveRisk($_GET['organization_id'],NULL,NULL,$subs,$ano,$mes,$dia); 
+        }
 
-                $subs = FALSE;
-
-                if (isset($_GET['kind']) && $_GET['kind'] == 0) //evaluaciones de riesgos de procesos
-                {
-                    //---- consulta multiples join para obtener los subprocesos evaluados relacionados a la organización ----//
-                    //para riesgos inherente 
-                    $evaluations = \Ermtool\Evaluation::getEvaluationRiskSubprocess($_GET['organization_id'],NULL,NULL,$subs,$ano,$mes,$dia);
-
-                    $consolidados = \Ermtool\Evaluation::getEvaluationRiskSubprocess(NULL,NULL,NULL,$subs,$ano,$mes,$dia);  
-                }
-                else if (isset($_GET['kind']) && $_GET['kind'] == 1) //evaluaciones de riesgos de negocio
-                {
-                    $evaluations = \Ermtool\Evaluation::getEvaluationObjectiveRisk($_GET['organization_id'],NULL,NULL,$subs,$ano,$mes,$dia); 
-                }
-
-                if (isset($evaluations) && $evaluations != null && !empty($evaluations))
-                {
-                    //inherente
-                    $prom_proba_in = array();
-                    $prom_criticidad_in = array();
-                    //ACT 15-01-18: Se comenta esto ya que no se utiliza variable org (ni se declara en la función desde ahora)
-                    //if ($org != 0 && $org != NULL)
-                    //{
-                    //    $riesgos = $this->getEvaluatedRisks($org,$evaluations,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,null,null,null);
-                    //}
-                    //else
-                    //{
-                        $riesgos = $this->getEvaluatedRisks($_GET['organization_id'],$evaluations,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,null,null,null);
-                    //}
-                }        
+        if (isset($evaluations) && $evaluations != null && !empty($evaluations))
+        {
+            //inherente
+            $prom_proba_in = array();
+            $prom_criticidad_in = array();
+            $riesgos = $this->getEvaluatedRisks($_GET['organization_id'],$evaluations,$ano,$mes,$dia,$prom_proba_in,$prom_criticidad_in,null,null,null);
+        }        
 
 
                 if (isset($consolidados) && $consolidados != null && !empty($consolidados))
@@ -2481,72 +2470,45 @@ class EvaluacionRiesgosController extends Controller
         $i = 0;
         foreach ($evaluations as $evaluation)
         {
-            $updated_at_in = DB::table('evaluation_risk')
+            $proba_impacto_in = DB::table('evaluation_risk')
                     ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
                     ->where('evaluation_risk.organization_risk_id','=',$evaluation->risk_id)
                     ->where('evaluations.consolidation','=',1)
                     ->where('evaluations.type','=',1)
                     ->where('evaluations.updated_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
-                    ->max('evaluations.updated_at');
+                    ->orderBy('evaluations.updated_at','desc')
+                    ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
+                    ->first();
 
                     //$updated_at_in = str_replace('-','',$updated_at_in);
 
 
             //ACTUALIZACIÓN 22-11-16: Obtendremos los riesgos controlados a través de la tabla controlled_risk sólo para la organización y el tipo seleccionado
-            $updated_at_ctrl = DB::table('controlled_risk')
+            $eval = DB::table('controlled_risk')
                     ->join('organization_risk','organization_risk.id','=','controlled_risk.organization_risk_id')
                     ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
                     ->where('controlled_risk.created_at','<=',date($ano.'-'.$mes.'-'.$dia.' 23:59:59'))
-                    ->max('controlled_risk.created_at');
+                    ->orderBy('controlled_risk.created_at','desc')
+                    ->select('results')
+                    ->first();
 
                     //$updated_at_ctrl = str_replace('-','',$updated_at_ctrl);
-                           
-
-            //obtenemos promedio de probabilidad e impacto
-            $proba_impacto_in = DB::table('evaluation_risk')
-                    ->join('evaluations','evaluations.id','=','evaluation_risk.evaluation_id')
-                    ->where('evaluations.updated_at','=',$updated_at_in)
-                    ->where('evaluation_risk.organization_risk_id','=',$evaluation->risk_id)
-                    ->select('evaluation_risk.avg_probability','evaluation_risk.avg_impact')
-                    ->first();
 
 
             //proba controlado (si es que hay)
-            if (isset($updated_at_ctrl) && $updated_at_ctrl != NULL)
+            if (!empty($eval))
             {
-                //ACTUALIZACIÓN 01-12: Obtenemos valor de riesgo controlado de controlled_risk_criteria, según la evaluación de controlled_risk
-                $eval = DB::table('controlled_risk')
-                        ->where('controlled_risk.organization_risk_id','=',$evaluation->risk_id)
-                        ->where('controlled_risk.created_at','=',$updated_at_ctrl)
-                        ->select('results')
-                        ->first();
-
                 //calculamos severidad y exposición al riesgo (dejaremos los nombres proba_ctrl para exposición, e impacto_ctrl para severidad para no modificar mucho la vista actual)
-                $impacto_ctrl = $proba_impacto_in->avg_probability * $proba_impacto_in->avg_impact;
+                $severidad = $proba_impacto_in->avg_probability * $proba_impacto_in->avg_impact;
+                $results = $eval->results;
                 //obtenemos exposición (1-X%) dividiendo el valor residual por la severidad
-                $proba_ctrl = $eval->results / $impacto_ctrl;
-            }
-
-            //guardamos proba en $prom_proba
-            $prom_proba_in[$i] = $proba_impacto_in->avg_probability;
-            $prom_criticidad_in[$i] = $proba_impacto_in->avg_impact;
-
-            //prom_proba_ctrl para controlado (si es que hay)
-            if (isset($proba_ctrl) && isset($impacto_ctrl))
-            {
-                $prom_proba_ctrl[$i] = $proba_ctrl;
-                $prom_impacto_ctrl[$i] = $impacto_ctrl;
-                $control[$i] = 1;
+                $exposicion = $eval->results / $severidad;
             }
             else
             {
-                $prom_proba_ctrl[$i] = 0;
-                $prom_impacto_ctrl[$i] = 0;
+                $exposicion = 0;
+                $results = 0;
             }
-
-            //unseteamos variable de proba_impacto_ctrl para que no se repita
-            unset($proba_ctrl);
-            unset($impacto_ctrl);
 
             //ACTUALIZACIÓN 25-07: OBTENEMOS DATOS DEL RIESGO Y LOS POSIBLES RIESGOS ASOCIADOS
             $riesgo_temp = \Ermtool\Risk::find($evaluation->risk);
@@ -2655,13 +2617,20 @@ class EvaluacionRiesgosController extends Controller
                 'risk_category_id' => $riesgo_temp->risk_category_id,
                 'risk_category' => $risk_category,
                 'comments' => $comments,
-                'exposicion' => $prom_proba_ctrl[$i] * $prom_impacto_ctrl[$i], //exposición = exposición efectiva
-                'exposicion2' => $prom_proba_ctrl[$i], //exposición2 = 1 - %Contribución
+                'exposicion' => $results, //exposición = exposición efectiva
+                'exposicion2' => $exposicion, //exposición2 = 1 - %Contribución
                 'responsable' => $stake,
                 'processes' => $processes,
             ];
 
+
+
             $i += 1;
+
+            //unseteamos variable de proba_impacto_ctrl para que no se repita
+            unset($severidad);
+            unset($exposicion);
+            unset($results);
         }
 
         return $riesgos;   

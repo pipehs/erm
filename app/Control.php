@@ -421,7 +421,7 @@ class Control extends Model
         $controls = DB::table('controls')
             ->join('control_organization_risk','control_organization_risk.control_id','=','controls.id')
             ->join('organization_risk','organization_risk.id','=','control_organization_risk.organization_risk_id')
-            ->join('risk_subprocess','risk_subprocess.risk_id','=','organization_risk.risk_id')
+            ->join('risk_subprocess','risk_subprocess.organization_risk_id','=','organization_risk.id')
             ->where('organization_risk.organization_id','=',$org)
             ->where('risk_subprocess.subprocess_id','=',$subprocess)
             ->select('controls.id','controls.name','controls.description')
