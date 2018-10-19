@@ -1,6 +1,10 @@
 <li class="dropdown">
 	<a href="#" class="dropdown-toggle">
-		<i class="fa fa-check-circle"></i>
+		@if (Session::get('org') == 'B-GRC Deloitte')
+			<i class="fa fa-plus"></i>
+		@else
+			<i class="fa fa-check-circle"></i>
+		@endif
 		<span class="hidden-xs">Gesti&oacute;n de Controles</span>
 	</a>
 	<ul class="dropdown-menu" style="{{ dropDown5() }}">

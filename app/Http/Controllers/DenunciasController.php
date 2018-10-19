@@ -29,6 +29,17 @@ class DenunciasController extends Controller
         Session::put('org',$org_name->o);
 
         $intro = \Ermtool\Configuration::where('option_name','cc_intro_message')->first(['option_value as o']);
+
+        //Logo top sidebar
+        $l = \Ermtool\Configuration::where('option_name','logo_small')->first(['option_value as logo']);
+
+        if (!empty($l))
+        {
+            $w = \Ermtool\Configuration::where('option_name','logo_width_small')->first(['option_value as o']);
+            $l->side_width = $w->o;
+            $h = \Ermtool\Configuration::where('option_name','logo_height_small')->first(['option_value as o']);
+            $l->side_height = $h->o;
+        }
         
         if (!empty($intro))
         {
@@ -43,11 +54,11 @@ class DenunciasController extends Controller
         
         if (Session::get('languaje') == 'en')
         {
-            return view('en.denuncias.home',['intro' => $intro]);
+            return view('en.denuncias.home',['intro' => $intro, 'l' => $l]);
         }
         else
         {
-            return view('denuncias.home',['intro' => $intro]);
+            return view('denuncias.home',['intro' => $intro, 'l' => $l]);
         }
     }
 

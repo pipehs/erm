@@ -82,10 +82,35 @@ class HomeController extends Controller
             }
             else
             {
-                
+                //Logo top sidebar
+                $l = \Ermtool\Configuration::where('option_name','logo_small')->first(['option_value as logo']);
+
+                if (!empty($l))
+                {
+                    $w = \Ermtool\Configuration::where('option_name','logo_width_small')->first(['option_value as o']);
+                    $l->side_width = $w->o;
+                    $h = \Ermtool\Configuration::where('option_name','logo_height_small')->first(['option_value as o']);
+                    $l->side_height = $h->o;
+                }
 
                 if (count(Session::get('roles')) > 1 || !in_array('9',Session::get('roles')))
                 {
+                    //Obtenemos mensaje bienvenida (si es que hay)
+                    $m = \Ermtool\Configuration::where('option_name','welcome_message')->value('option_value');
+                    //Pie de mensaje
+                    $d = \Ermtool\Configuration::where('option_name','welcome_description')->value('option_value');
+                    //Configuramos correctamente
+                    if ($m)
+                    {      
+                        $BBCode = new BBCode();
+                        $m = $BBCode->stripBBCodeTags($m);
+                    }
+                    if ($d)
+                    {
+                        $BBCode = new BBCode();
+                        $d = $BBCode->stripBBCodeTags($d);
+                    }
+                    
                     /* ----------  DESACTIVADO EN IMPLEMENTACIÓN ---------- */
                     //--- SISTEMA DE ALERTA ---//
                     //$planes = new PlanesAccion;
@@ -100,11 +125,11 @@ class HomeController extends Controller
 
                     if (Session::get('languaje') == 'es')
                     {
-                        return view('home',['cats' => $cats]);
+                        return view('home',['cats' => $cats, 'l' => $l,'m' => $m, 'd' => $d]);
                     }
                     else if (Session::get('languaje') == 'en')
                     {
-                        return json_en('en.home',['cats' => $cats]);
+                        return json_en('en.home',['cats' => $cats, 'l' => $l,'m' => $m,'d' => $d ]);
                     }
                 }    
                 else
@@ -122,11 +147,11 @@ class HomeController extends Controller
                     }
                     if (Session::get('languaje') == 'es')
                     {
-                        return view('denuncias.home',['intro' => $intro]);
+                        return view('denuncias.home',['intro' => $intro, 'l' => $l]);
                     }
                     else if (Session::get('languaje') == 'en')
                     {
-                        return json_en('en.denuncias.home',['intro' => $intro]);
+                        return json_en('en.denuncias.home',['intro' => $intro, 'l' => $l]);
                     }
                 }
             

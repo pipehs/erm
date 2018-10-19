@@ -10,6 +10,9 @@ function validateEmail($email)
 	{
 		// Create Wysiwig editor for textare
 		TinyMCEStart('#wysiwig_simple', null);
+		TinyMCEStart('#wysiwig_simple2', null);
+		TinyMCEStart('#wysiwig_simple3', null);
+		TinyMCEStart('#wysiwig_simple4', null);
 		var moveLeft = 0;
 	    var moveDown = 0;
 	    $('a.popper').hover(function(e) {

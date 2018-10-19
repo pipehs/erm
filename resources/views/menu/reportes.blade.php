@@ -1,6 +1,10 @@
 <li class="dropdown">
 	<a href="#" class="dropdown-toggle">
+	@if (Session::get('org') == 'B-GRC Deloitte')
+		<i class="fa fa-plus"></i>
+	@else
 		<i class="fa fa-bar-chart-o"></i>
+	@endif
 		<span class="hidden-xs">Reportes</span>
 	</a>
 	<ul class="dropdown-menu" style="{{ dropDown4() }}">

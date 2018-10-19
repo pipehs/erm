@@ -1,6 +1,10 @@
 <li class="dropdown">
 	<a href="#" class="dropdown-toggle">
-		<i class="fa fa-wrench"></i>
+		@if (Session::get('org') == 'B-GRC Deloitte')
+			<i class="fa fa-plus"></i>
+		@else
+			<i class="fa fa-wrench"></i>
+		@endif
 		<span class="hidden-xs">Administraci&oacute;n del Sistema</span>
 	</a>
 	<ul class="dropdown-menu" style="{{ dropDown8() }}">
