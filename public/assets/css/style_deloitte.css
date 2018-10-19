@@ -1,6 +1,6 @@
 body {
   color: #525252;
-  background: #005DB2 url(../img/devoops_pattern_b10.png) 0 0 repeat;
+  background: #000000 url(../img/devoops_pattern_b10.png) 0 0 repeat;
 }
 
 .body-login {
@@ -28,8 +28,7 @@ h1, .h1, h2, .h2, h3, .h3 {
 }
 #logo {
   position:relative;
-  background: #525252 url(../img/devoops_pattern_b10.png) 0 0 repeat;
-  /*background: #908C8C url(../img/devoops_pattern_b10.png) 0 0 repeat;*/
+  background: #000000 0 0 repeat;
 }
 #logo a {
   color: #fff;
@@ -56,7 +55,7 @@ h1, .h1, h2, .h2, h3, .h3 {
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
   border-radius: 0;
-  box-shadow: 0 1px 2px #272727;
+  box-shadow: 0 1px 2px #000000;
   z-index: 2000;
 }
 .body-expanded .navbar {
@@ -64,7 +63,7 @@ h1, .h1, h2, .h2, h3, .h3 {
 }
 a.show-sidebar {
   float: left;
-  color:#005DB2;
+  color:#0DD4FA;
   -webkit-transition: 0.2s;
   -moz-transition: 0.2s;
   -o-transition: 0.2s;
@@ -78,7 +77,7 @@ a.show-sidebar:hover {
   z-index: inherit;
   padding-bottom: 3000px !important;
   margin-bottom: -3000px !important;
-  background: #005DB2 url(../img/devoops_pattern_b10.png) 0 0 repeat;
+  background: #FFFFFF 0 0 repeat;
   -webkit-transition: 0.2s;
   -moz-transition: 0.2s;
   -o-transition: 0.2s;
@@ -107,7 +106,7 @@ a.show-sidebar:hover {
 }
 .nav.main-menu > li > a, .nav.msg-menu > li > a {
   text-align: center;
-  color:#f0f0f0;
+  color:#0DD4FA;
   min-height: 40px;
   -webkit-transition: 0.2s;
   -moz-transition: 0.2s;
@@ -120,19 +119,19 @@ a.show-sidebar:hover {
 .nav.main-menu > li > a:hover, .nav.main-menu > li > a:focus, .nav.main-menu > li.active > a, .nav.main-menu .open > a, .nav.main-menu .open > a:hover, .nav.main-menu .open > a:focus, .dropdown-menu > li > a:focus, .dropdown-menu > li > a:hover, .dropdown-menu > li.active > a,
 .nav.msg-menu > li > a:hover, .nav.msg-menu > li > a:focus, .nav.msg-menu > li.active > a, .nav.msg-menu .open > a, .nav.msg-menu .open > a:hover, .nav.msg-menu .open > a:focus {
   background:rgba(0, 0, 0, 0.1);
-  color:#f0f0f0;
+  color:#0DD4FA;
 }
 .nav.main-menu a.active, .nav.msg-menu a.active {
-  background:rgba(0, 0, 0, 0.2);
+  background:#000000;
 }
 .nav.main-menu a.active:hover, .nav.msg-menu a.active:hover {
-  background:rgba(0, 0, 0, 0.2);
+  background:#444444;
 }
 .nav.main-menu a.active-parent, .nav.msg-menu a.active-parent {
-  background: rgba(0, 0, 0, 0.3);
+  background: #333333;
 }
 .nav.main-menu a.active-parent:hover, .nav.msg-menu a.active-parent:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: #333333;
 }
 .nav.main-menu > li > a > i, .nav.msg-menu > li > a > i {
   font-size: 18px;
@@ -153,7 +152,7 @@ a.show-sidebar:hover {
   -moz-border-radius: 0 4px 4px 0;
   border-radius: 0 4px 4px 0;
   padding: 0;
-  background: #005DB2 url(../img/devoops_pattern_b10.png) 0 0 repeat;
+  background: #000000 url(../img/devoops_pattern_b10.png) 0 0 repeat;
   box-shadow: none;
   visibility:hidden;
 }
@@ -165,7 +164,7 @@ a.show-sidebar:hover {
 }
 .main-menu .dropdown-menu > li > a {
   padding:9px 15px 9px 40px;
-  color:#f0f0f0;
+  color:#0DD4FA;
 }
 .main-menu .dropdown-menu > li:first-child > a {
   -webkit-border-radius: 0 4px 0 0;
@@ -616,8 +615,7 @@ ul.DTTT_dropdown.dropdown-menu > li:hover > a {
 #breadcrumb {
   padding: 0;
   line-height: 40px;
-  background: #525252;
-  background: #0068BC url(../img/devoops_pattern_b10.png) 0 0 repeat;
+  background: #000000 0 0 repeat;
   margin-bottom: 20px;
 }
 .breadcrumb {
@@ -925,6 +923,7 @@ td.beauty-hover {
   background-color: #b25050;
   border-color: rgba(0, 0, 0, 0.3);
 }
+
 .progress {
   overflow: visible;
 }
@@ -2139,11 +2138,11 @@ td.beauty-hover {
   font-size: 1.25em;
 }
 .nav-search > li.active > a {
-  background: #F0F0F0;
+  background: #000000;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
-  color: #525252;
+  color: #FFFFFF;
   border-bottom: 1px solid #CECECE;
   font-weight: bold;
 }
@@ -2330,7 +2329,7 @@ td.beauty-hover {
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
     border-radius: 0;
-    background:rgba(0, 0, 0, 0.2);
+    background:#333333;
     visibility: visible;
   }
   .main-menu .dropdown-menu > li > a {

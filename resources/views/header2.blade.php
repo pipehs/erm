@@ -25,7 +25,11 @@
 	<div class="container-fluid expanded-panel">
 		<div class="row">
 			<div id="logo" class="col-xs-12 col-sm-12">
-				<a href="">B-GRC</a>
+				<a href="">B-GRC &nbsp;&nbsp; 
+				@if (isset($l) && !empty($l) && isset($l->side_width) && isset($l->side_height))
+					<img src="{{ $l->logo }}" width="{{ $l->side_width }}" height="{{ $l->side_height }}"></img>
+				@endif
+				</a>
 			</div>
 			
 		</div>

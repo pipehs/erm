@@ -11,7 +11,16 @@
 		</ol>
 	</div>
 </div>
-    <h3><b>Bienvenido al sistema B-GRC</b>  </h3>
+  @if ($m)
+    {!! $m !!}
+  @else
+    <h3><b>Bienvenido al sistema B-GRC</b></h3>
+  @endif
+
+  @if ($d)
+    <p>{!! $d !!}</p>
+  @endif
+
     <br>
 
     @if(Session::has('message'))

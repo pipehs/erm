@@ -149,7 +149,22 @@ class ConfigurationController extends Controller
                         break;
                     case 'short_name':
                         $short_name  = $c->option_value;
-                        break;               
+                        break;
+                    case 'logo_small':
+                        $logo_small = $c->option_value;
+                        break;
+                    case 'logo_width_small':
+                        $logo_width_small = $c->option_value;
+                        break;
+                    case 'logo_height_small':
+                        $logo_height_small = $c->option_value;
+                        break;
+                    case 'welcome_message':
+                        $welcome_message = $c->option_value;
+                        break;
+                    case 'welcome_description':
+                        $welcome_description = $c->option_value;
+                        break;                
                     default:
                         # code...
                         break;
@@ -169,6 +184,11 @@ class ConfigurationController extends Controller
                 'alert_audit_notes' => isset($alert_audit_notes) ? $alert_audit_notes : NULL,
                 'cc_intro_message' => isset($cc_intro_message) ? $cc_intro_message : NULL,
                 'short_name' => isset($short_name) ? $short_name : NULL,
+                'logo_small' => isset($logo_small) ? $logo_small : NULL,
+                'logo_width_small' => isset($logo_width_small) ? $logo_width_small : NULL,
+                'logo_height_small' => isset($logo_height_small) ? $logo_height_small : NULL,
+                'welcome_message' => isset($welcome_message) ? $welcome_message : NULL,
+                'welcome_description' => isset($welcome_description) ? $welcome_description : NULL
             ];
 
             return view('configuration.edit',['data' => $data]);
