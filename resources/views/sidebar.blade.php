@@ -90,21 +90,33 @@
 			
 		<li>
 			<a href="cambiopass" class="{{ activeMenu('cambiopass') }}">
+			@if (Session::get('org') == 'B-GRC Deloitte')
+				<i class="fa fa-plus"></i>
+			@else
 				<i class="fa fa-lock"></i>
+			@endif
 				<span class="hidden-xs">Cambiar contraseña</span>
 			</a>
 		</li>
 
 		<li>
 			<a href="help" class="{{ activeMenu('help') }}">
+			@if (Session::get('org') == 'B-GRC Deloitte')
+				<i class="fa fa-plus"></i>
+			@else
 				<i class="fa fa-question"></i>
+			@endif
 				<span class="hidden-xs">Ayuda</span>
 			</a>
 		</li>
 
 		<li>
 			<a href="support" class="{{ activeMenu('support') }}">
+			@if (Session::get('org') == 'B-GRC Deloitte')
+				<i class="fa fa-plus"></i>
+			@else
 				<i class="fa fa-wrench"></i>
+			@endif
 				<span class="hidden-xs">Soporte</span>
 			</a>
 		</li>
