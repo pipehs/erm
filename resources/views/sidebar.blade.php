@@ -126,7 +126,11 @@
 				@if (isset(Auth::user()->superadmin) && Auth::user()->superadmin == 1)
 					<li>
 						<a href="logs" class="{{ activeMenu('logs') }}">
+						@if (Session::get('org') == 'B-GRC Deloitte')
+							<i class="fa fa-plus"></i>
+						@else
 							<i class="fa fa-th-list"></i>
+						@endif
 							<span class="hidden-xs">Registro actividades</span>
 						</a>
 					</li>
@@ -139,7 +143,11 @@
 		@if (isset(Auth::user()->superadmin) && Auth::user()->superadmin == 1)
 			<li>
 				<a href="importador" class="{{ activeMenu('importador') }}">
+				@if (Session::get('org') == 'B-GRC Deloitte')
+					<i class="fa fa-plus"></i>
+				@else
 					<i class="fa fa-wrench"></i>
+				@endif
 					<span class="hidden-xs">Importador Excel</span>
 				</a>
 			</li>
