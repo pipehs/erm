@@ -82,17 +82,6 @@ class HomeController extends Controller
             }
             else
             {
-                //Logo top sidebar
-                $l = \Ermtool\Configuration::where('option_name','logo_small')->first(['option_value as logo']);
-
-                if (!empty($l))
-                {
-                    $w = \Ermtool\Configuration::where('option_name','logo_width_small')->first(['option_value as o']);
-                    $l->side_width = $w->o;
-                    $h = \Ermtool\Configuration::where('option_name','logo_height_small')->first(['option_value as o']);
-                    $l->side_height = $h->o;
-                }
-
                 if (count(Session::get('roles')) > 1 || !in_array('9',Session::get('roles')))
                 {
                     //Obtenemos mensaje bienvenida (si es que hay)
@@ -125,11 +114,11 @@ class HomeController extends Controller
 
                     if (Session::get('languaje') == 'es')
                     {
-                        return view('home',['cats' => $cats, 'l' => $l,'m' => $m, 'd' => $d]);
+                        return view('home',['cats' => $cats,'m' => $m, 'd' => $d]);
                     }
                     else if (Session::get('languaje') == 'en')
                     {
-                        return json_en('en.home',['cats' => $cats, 'l' => $l,'m' => $m,'d' => $d ]);
+                        return json_en('en.home',['cats' => $cats,'m' => $m,'d' => $d]);
                     }
                 }    
                 else
@@ -147,11 +136,11 @@ class HomeController extends Controller
                     }
                     if (Session::get('languaje') == 'es')
                     {
-                        return view('denuncias.home',['intro' => $intro, 'l' => $l]);
+                        return view('denuncias.home',['intro' => $intro]);
                     }
                     else if (Session::get('languaje') == 'en')
                     {
-                        return json_en('en.denuncias.home',['intro' => $intro, 'l' => $l]);
+                        return json_en('en.denuncias.home',['intro' => $intro]);
                     }
                 }
             
@@ -1358,6 +1347,20 @@ class HomeController extends Controller
                 //Obtenemos organization_risk
                 $or = \Ermtool\OrganizationRisk::getByRisk($rs->risk_id);
 
+                //Primero actualizamos generalidad de risk_subprocess
+                DB::table('risk_subprocess')
+                    ->where('id','=',$rs->id)
+                    ->update([
+                        'organization_risk_id' => $or[0]->id
+                    ]); 
+            }
+
+            //Ahora actualizamos (por si existe más de un organization_risk por riesgo)
+            foreach ($rss as $rs)
+            {
+                //Volvemos a obtener organization_risk
+                $or = \Ermtool\OrganizationRisk::getByRisk($rs->risk_id);
+
                 //ACT 17-10-18: Hacemos esto para cada tupla organization_risk
                 foreach ($or as $r)
                 {
@@ -1387,7 +1390,6 @@ class HomeController extends Controller
                         }                 
                     }
                 }
-                
             }
         });
     }
