@@ -357,6 +357,17 @@ class LogController extends Controller
             Session::put('org',$org_name);
             Session::put('short_name',$short_name);
 
+            //Logo top sidebar
+            $l = \Ermtool\Configuration::where('option_name','logo_small')->first(['option_value as logo']);
+            if (!empty($l))
+            {
+                $w = \Ermtool\Configuration::where('option_name','logo_width_small')->first(['option_value as o']);
+                $l->side_width = $w->o;
+                $h = \Ermtool\Configuration::where('option_name','logo_height_small')->first(['option_value as o']);
+                $l->side_height = $h->o;
+            }
+            Session::put('l',$l);
+
             //return $request->email;
             if (Auth::attempt(['email'=>$request['email'], 'password' => $request['password']]))
             {
