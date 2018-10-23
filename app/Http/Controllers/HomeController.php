@@ -1358,6 +1358,20 @@ class HomeController extends Controller
                 //Obtenemos organization_risk
                 $or = \Ermtool\OrganizationRisk::getByRisk($rs->risk_id);
 
+                //Primero actualizamos generalidad de risk_subprocess
+                DB::table('risk_subprocess')
+                    ->where('id','=',$rs->id)
+                    ->update([
+                        'organization_risk_id' => $or[0]->id
+                    ]); 
+            }
+
+            //Ahora actualizamos (por si existe más de un organization_risk por riesgo)
+            foreach ($rss as $rs)
+            {
+                //Volvemos a obtener organization_risk
+                $or = \Ermtool\OrganizationRisk::getByRisk($rs->risk_id);
+
                 //ACT 17-10-18: Hacemos esto para cada tupla organization_risk
                 foreach ($or as $r)
                 {
@@ -1387,7 +1401,6 @@ class HomeController extends Controller
                         }                 
                     }
                 }
-                
             }
         });
     }
